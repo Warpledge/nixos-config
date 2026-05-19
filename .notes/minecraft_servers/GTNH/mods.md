@@ -1,6 +1,6 @@
 # Added Mods
 
-Detailed write-ups for every manually added mod. For the server mod list, see [server.md](server.md).
+Detailed write-ups for every manually added mod. For the server mod list, see [server.md](\./server\.md).
 
 ---
 

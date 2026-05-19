@@ -2,7 +2,6 @@
 # DOCKER CONTAINERIZATION
 #=====================================================================#
 {
-  config,
   lib,
   pkgs,
   hostConfig,

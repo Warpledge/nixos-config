@@ -62,8 +62,8 @@
   services.gnome.gnome-keyring.enable = true; # GNOME Keyring for password storage
   programs.seahorse.enable = true; # GUI for managing keyring credentials
   programs.gnupg.agent = {
-    enable = true; # GnuPG agent for key management
-    enableSSHSupport = true; # SSH support via GPG agent
+    enable = true;
+    enableSSHSupport = true;
   };
 
   #--------------------------------------------------------------------#

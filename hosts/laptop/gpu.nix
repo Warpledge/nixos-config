@@ -10,15 +10,19 @@
   #-- Drivers & Packages
   #--------------------------------------------------------------------#
   #--- Load AMD GPU drivers
-  boot.initrd.kernelModules = ["amdgpu"];
-
-  #--- Prevent nouveau from loading
-  boot.blacklistedKernelModules = ["nouveau"];
-
-  #--- Enable redistributable firmware
-  hardware.enableRedistributableFirmware = true;
+  boot = {
+    initrd.kernelModules = ["amdgpu"];
+    blacklistedKernelModules = ["nouveau"]; # Prevent nouveau from loading
+    kernelParams = [
+      "nvidia-drm.modeset=1" # Enable direct mode setting for better Wayland support
+      "nvidia_drm.fbdev=1" # Enable framebuffer device support
+      "nvidia.NVreg_PreserveVideoMemoryAllocations=1" # Keep video memory allocations across suspend/resume
+      "nvidia.NVreg_UsePageAttributeTable=1" # Enable CPU Page Attribute Table for better memory management
+    ];
+  };
 
   hardware = {
+    enableRedistributableFirmware = true;
     graphics = {
       enable = true;
       enable32Bit = true;
@@ -44,8 +48,7 @@
         libvdpau-va-gl
       ];
     };
-  };
-  hardware.nvidia = {
+    nvidia = {
     open = true;
     package = config.boot.kernelPackages.nvidiaPackages.stable;
     modesetting.enable = true;
@@ -62,13 +65,7 @@
       amdgpuBusId = "PCI:6:0:0";
     };
   };
-
-  boot.kernelParams = [
-    "nvidia-drm.modeset=1" # Enable direct mode setting for better Wayland support
-    "nvidia_drm.fbdev=1" # Enable framebuffer device support
-    "nvidia.NVreg_PreserveVideoMemoryAllocations=1" # Keep video memory allocations across suspend/resume
-    "nvidia.NVreg_UsePageAttributeTable=1" # Enable CPU Page Attribute Table for better memory management
-  ];
+};
 
   #--------------------------------------------------------------------#
   #-- Environment & Packages
