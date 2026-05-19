@@ -20,19 +20,9 @@ My personal NixOS system flake, tracking `nixos-unstable`.
 - [Inspiration](#inspiration)
 - [License](#license)
 
-## Host Machines
-
-- **Desktop** — Ryzen 5800X3D + RX 9070 XT (AMD-only), 280Hz OLED + 144Hz secondary
-- **Laptop** — Legion Slim 5, Ryzen 7735HS + hybrid AMD 680M / RTX 4070, 1600p@165Hz
-
 ## Screenshots
 
-<details>
-<summary>Niri WM</summary>
-
 ![Niri desktop with Zed and fastfetch](./screenshots/niri-desktop.png)
-
-</details>
 
 <details>
 <summary>Hyprland WM</summary>
@@ -40,6 +30,11 @@ My personal NixOS system flake, tracking `nixos-unstable`.
 ![Hyprland desktop with Zed and fastfetch](./screenshots/Hyprland-Desktop.png)
 
 </details>
+
+## Host Machines
+
+- **Desktop** — Ryzen 5800X3D + RX 9070 XT (AMD-only), 280Hz OLED + 144Hz secondary
+- **Laptop** — Legion Slim 5, Ryzen 7735HS + hybrid AMD 680M / RTX 4070, 1600p@165Hz
 
 
 
