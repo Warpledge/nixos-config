@@ -13,6 +13,7 @@ My personal NixOS system flake, tracking `nixos-unstable`.
   - [Applications](#applications)
   - [Gaming](#gaming)
   - [System](#system)
+- [Nixy — System Management TUI](#nixy--system-management-tui)
 - [Flake Inputs](#flake-inputs)
 - [Keybinds](#keybinds)
 - [Structure](#structure)
@@ -179,6 +180,67 @@ Most components below are toggleable per host via `hostConfig` and rebuilding. "
 [niriswitcher]: https://github.com/isaksamsten/niriswitcher
 [pipewire]: https://pipewire.org
 [nix-flatpak]: https://github.com/gmodena/nix-flatpak
+
+## Nixy — System Management TUI
+
+`nixy` is a custom fzf-driven system management script (defined in [`shared/modules/home-manager/scripts/nixy.nix`](./shared/modules/home-manager/scripts/nixy.nix)). Run it with no arguments for an interactive menu, or pass a command directly.
+
+### NixOS Operations
+
+| Command | Description |
+| --- | --- |
+| `nixy rebuild` | Apply the current config (`nh os switch`) |
+| `nixy upgrade` | Update all flake inputs and rebuild |
+| `nixy flake-update` | Update flake inputs without rebuilding |
+| `nixy dryrun` | Preview what a rebuild would change |
+| `nixy gc` | Garbage collect, keeping last 5 generations |
+| `nixy optimize` | Hardlink identical files in the Nix store |
+| `nixy rollback` | Switch to a previous system generation |
+| `nixy lint` | Run `deadnix` + `statix` to check for unused args and Nix antipatterns |
+
+### System Monitoring
+
+| Command | Description |
+| --- | --- |
+| `nixy monitor` | Resource monitor (btop) |
+| `nixy disk` | Interactive disk usage (ncdu) |
+| `nixy health` | Show running and failed systemd services |
+| `nixy temps` | Temperature readout (lm_sensors) |
+
+### Network
+
+| Command | Description |
+| --- | --- |
+| `nixy network` | NetworkManager TUI (nmtui) |
+| `nixy speedtest` | Internet speed test |
+| `nixy ping` | Quick connectivity check (ping 8.8.8.8) |
+
+### Flatpak
+
+| Command | Description |
+| --- | --- |
+| `nixy flatpak-update` | Update all Flatpaks |
+| `nixy flatpak-list` | List installed Flatpak apps |
+
+### Firmware
+
+| Command | Description |
+| --- | --- |
+| `nixy firmware-check` | Check for available firmware updates (fwupd) |
+| `nixy firmware-update` | Install firmware updates |
+| `nixy firmware-devices` | List devices with firmware support |
+
+### AMD GPU
+
+| Command | Description |
+| --- | --- |
+| `nixy vulkan` | Print Vulkan capabilities (vulkaninfo) |
+
+### Android
+
+| Command | Description |
+| --- | --- |
+| `nixy debloater` | Launch Universal Android Debloater |
 
 ## Flake Inputs
 

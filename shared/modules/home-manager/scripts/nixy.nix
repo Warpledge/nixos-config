@@ -59,7 +59,7 @@
           "󰘯;Rollback Generation;nixy rollback"
           "󰉨;Lint Config;nixy lint"
 
-          "; ==== Firmware & Updates ==== ;"
+          "; ==== Firmware ==== ;"
           "󰚰;Check Firmware Updates;nixy firmware-check"
           "󰚰;Install Firmware Updates;nixy firmware-update"
           "󰚰;Firmware Devices;nixy firmware-devices"
@@ -70,19 +70,19 @@
           "󰌃;Service Status;nixy health"
           "󰌡;Temperature Monitor;nixy temps"
 
-          "; ==== Network & Connectivity ==== ;"
+          "; ==== Network ==== ;"
           "󰤨;Network Manager;nixy network"
           "󰓅;Speed Test;nixy speedtest"
           "󰍟;Connection Check;nixy ping"
 
-          "; ==== Package Management ==== ;"
+          "; ==== Flatpak ==== ;"
           "󰪮;Update Flatpaks;nixy flatpak-update"
           "󰪮;List Flatpaks;nixy flatpak-list"
 
-          "; ==== Gaming & Performance ==== ;"
+          "; ==== AMD GPU ==== ;"
           "󰖮;Vulkan Info;nixy vulkan"
 
-          "; ==== Mobile Devices ==== ;"
+          "; ==== Android ==== ;"
           "󰤱;Android Debloater;nixy debloater"
         )
 
