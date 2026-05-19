@@ -1,0 +1,21 @@
+# Nix build outputs
+result
+result-*
+
+# Direnv
+.direnv/
+.envrc.local
+
+# Editor / IDE
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Claude Code local state
+.claude/settings.local.json
+.claude/projects/
+
+# Logs and temp
+*.log
+*.tmp

@@ -1,0 +1,28 @@
+{
+  "title": "Niri DMS Keybinds",
+  "provider": "niri-dms",
+  "binds": {
+    "DMS Controls": [
+      {"key": "Mod+A", "desc": "Application Launcher (Spotlight)"},
+      {"key": "Mod+V", "desc": "Clipboard Manager"},
+      {"key": "Mod+P", "desc": "Task Manager (Process List)"},
+      {"key": "Mod+Comma", "desc": "Settings"},
+      {"key": "Mod+N", "desc": "Notepad"},
+      {"key": "Mod+K", "desc": "Power Menu"},
+      {"key": "Mod+W", "desc": "Browse Wallpapers"},
+      {"key": "Mod+Shift+N", "desc": "Toggle Night Mode"},
+      {"key": "Mod+L", "desc": "Lock Screen"},
+      {"key": "Mod+I", "desc": "Toggle Idle Inhibit"}
+    ],
+    "Audio Controls": [
+      {"key": "XF86AudioRaiseVolume", "desc": "Volume Up (+3%)"},
+      {"key": "XF86AudioLowerVolume", "desc": "Volume Down (-3%)"},
+      {"key": "XF86AudioMute", "desc": "Mute/Unmute Audio"},
+      {"key": "XF86AudioMicMute", "desc": "Mute/Unmute Microphone"}
+    ],
+    "Brightness Controls": [
+      {"key": "XF86MonBrightnessUp", "desc": "Brightness Up (+5%)"},
+      {"key": "XF86MonBrightnessDown", "desc": "Brightness Down (-5%)"}
+    ]
+  }
+}
