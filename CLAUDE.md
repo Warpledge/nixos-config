@@ -18,6 +18,9 @@ NixOS flake managing **Desktop** (Ryzen 5800X3D + RX 9070 XT, 280Hz OLED + 144Hz
 ```bash
 nix flake check         # Validate syntax (run first, fastest feedback)
 alejandra .             # Format all Nix files (v3.0.0 is the standard)
+deadnix --no-lambda-arg # Find unused function arguments in Nix files
+statix check .          # Lint for Nix antipatterns (inherit, empty patterns, etc.)
+nixy lint               # Run both deadnix and statix in one shot (wraps the above two)
 nixy rebuild            # Apply config (wraps `nh os switch`)
 nixy rebuild 2>&1 | grep -E "error|Error|failed|Failed" || echo "✓"  # token-light rebuild
 nixy upgrade            # Update flake inputs + rebuild
