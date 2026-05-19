@@ -103,6 +103,14 @@ let
       open-focused = true;
     }
 
+    #--- Wine WebView2 (embedded login panels, e.g. Morimens)
+    #--- clip-to-geometry + draw-border-with-background=false breaks rendering
+    {
+      matches = [{app-id = "msedgewebview2.exe";}];
+      clip-to-geometry = false;
+      draw-border-with-background = true;
+    }
+
     #--- Audio/Media Applications
     {
       matches = [

@@ -60,10 +60,17 @@
   #-- GNOME Keyring
   #--------------------------------------------------------------------#
   services.gnome.gnome-keyring.enable = true; # GNOME Keyring for password storage
-  programs.seahorse.enable = true; # GUI for managing keyring credentials
-  programs.gnupg.agent = {
-    enable = true;
-    enableSSHSupport = true;
+  programs = {
+    seahorse.enable = true; # GUI for managing keyring credentials
+    gnupg.agent = {
+      enable = true;
+      enableSSHSupport = true;
+    };
+    #--- Disable SSH UseRoaming vulnerability
+    ssh.extraConfig = ''
+      Host *
+        UseRoaming no
+    '';
   };
 
   #--------------------------------------------------------------------#
@@ -108,17 +115,6 @@
   #-- DBus Configuration
   #--------------------------------------------------------------------#
   services.dbus.implementation = "broker"; # Use dbus-broker
-
-  #--------------------------------------------------------------------#
-  #-- SSH Client Hardening
-  #--------------------------------------------------------------------#
-  programs.ssh = {
-    #--- Disable SSH UseRoaming vulnerability
-    extraConfig = ''
-      Host *
-        UseRoaming no
-    '';
-  };
 
   #--------------------------------------------------------------------#
   #-- Bootloader Security
