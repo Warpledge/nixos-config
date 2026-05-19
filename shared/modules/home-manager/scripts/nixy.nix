@@ -57,6 +57,7 @@
           "󰭜;Collect Garbage;nixy gc"
           "󰚀;Store Optimize;nixy optimize"
           "󰘯;Rollback Generation;nixy rollback"
+          "󰉨;Lint Config;nixy lint"
 
           "; ==== Firmware & Updates ==== ;"
           "󰚰;Check Firmware Updates;nixy firmware-check"
@@ -126,6 +127,13 @@
         # --- NixOS Operations ---
         rebuild)
           nh os switch "$FLAKE_PATH#nixosConfigurations.$HOSTNAME"
+          ;;
+        lint)
+          echo "=== deadnix: unused arguments ==="
+          ${pkgs.deadnix}/bin/deadnix --no-lambda-arg "$FLAKE_PATH" || true
+          echo ""
+          echo "=== statix: nix antipatterns ==="
+          ${pkgs.statix}/bin/statix check "$FLAKE_PATH" || true
           ;;
         upgrade)
           nh os switch --update "$FLAKE_PATH#nixosConfigurations.$HOSTNAME"
@@ -223,6 +231,7 @@
           echo ""
           echo "Commands:"
           echo "  rebuild           - Rebuild system"
+          echo "  lint              - Lint config (deadnix + statix)"
           echo "  upgrade           - Rebuild and upgrade system"
           echo "  flake-update      - Update flake inputs"
           echo "  dryrun            - Dry-run rebuild"

@@ -39,6 +39,8 @@
     resources
 
     #--- CLI
+    deadnix
+    statix
     gtrash
     ttyper
     onefetch
