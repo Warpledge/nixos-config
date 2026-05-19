@@ -60,6 +60,7 @@
   creative = {
     blender = false;
     krita = false;
+    affinity = false;
   };
 
   #--- Android Container (Waydroid)

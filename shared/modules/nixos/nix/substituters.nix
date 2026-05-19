@@ -16,7 +16,7 @@
       "https://claude-code.cachix.org" # Claude Code CLI
       "https://vicinae.cachix.org" # Community packages
       "https://ghostty.cachix.org" # Ghostty terminal
-      "https://garnix.io" # Garnix cache for affinity-nix
+      "https://cache.garnix.io" # Garnix cache for affinity-nix
       "https://attic.xuyh0120.win/lantian" # CachyOS kernel
     ];
     trusted-public-keys = [
