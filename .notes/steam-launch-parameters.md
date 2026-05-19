@@ -2,6 +2,16 @@
 
 Documentation of game-specific launch parameters for optimal performance and compatibility.
 
+## Morimens (忘卻前夜 Morimens)
+
+```
+PROTON_ENABLE_WAYLAND=0 WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS="--no-sandbox" %command%
+```
+
+**Notes:** `PROTON_ENABLE_WAYLAND=0` forces XWayland — required because Wine's native Wayland driver splits the WebView2 login child window into a separate Wayland surface that can't composite back into the Unity game window (shows as white box). XWayland handles child window compositing correctly. `--no-sandbox` keeps the Chromium renderer process stable under Wine. Also requires a niri window rule for `msedgewebview2.exe` with `clip-to-geometry = false` and `draw-border-with-background = true` (in `shared/modules/wm/niri/niri-home/core/rules.nix`).
+
+---
+
 ## Risk of Rain 2
 ```
 DXVK_ASYNC=1 DXVK_QUEUE_TIMEOUT=10000 DXVK_HUD=compiler %command%
