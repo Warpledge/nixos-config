@@ -1,6 +1,24 @@
 # Warpledge's NixOS Configuration
 
-My personal NixOS system flake.
+My personal NixOS system flake, tracking `nixos-unstable`.
+
+## Contents
+
+- [Host Machines](#host-machines)
+- [Screenshots](#screenshots)
+- [Components](#components)
+  - [Desktop Environment](#desktop-environment)
+  - [Shell & Terminal](#shell--terminal)
+  - [Development](#development)
+  - [Applications](#applications)
+  - [Gaming](#gaming)
+  - [System](#system)
+- [Flake Inputs](#flake-inputs)
+- [Keybinds](#keybinds)
+- [Structure](#structure)
+- [History](#history)
+- [Inspiration](#inspiration)
+- [License](#license)
 
 ## Host Machines
 
