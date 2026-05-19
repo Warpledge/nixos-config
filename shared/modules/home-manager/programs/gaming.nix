@@ -11,18 +11,19 @@
   #--------------------------------------------------------------------#
 
   #- Create shader cache directory (improves game startup performance)
-  home.file.".cache/mesa_shader_cache/.keep".text = "";
-  home.file.".cache/radv_builtin_shaders64/.keep".text = "";
+  home = {
+    file = {
+    ".cache/mesa_shader_cache/.keep".text = "";
+    ".cache/radv_builtin_shaders64/.keep".text = "";
+    #- Raise OpenAL source limit to prevent audio popping in sound-heavy games (e.g. tModLoader + Calamity)
+    ".alsoftrc".text = ''
+      [general]
+      sources = 512
+    '';
+    };
 
-  #- Raise OpenAL source limit to prevent audio popping in sound-heavy games (e.g. tModLoader + Calamity)
-  home.file.".alsoftrc".text = ''
-    [general]
-    sources = 512
-  '';
-
-
-  #--- Wrappers
-  home.packages = with pkgs; [
+    #--- Wrappers
+    packages = with pkgs; [
     #--- Vintage Story
     # (writeShellScriptBin "vintagestory-mesa" ''
     #   export MESA_GLTHREAD=true
@@ -77,12 +78,12 @@
     clinfo
     mesa-demos
     inxi
-  ];
+    ];
 
-  #--------------------------------------------------------------------#
-  #-- Environment Variables
-  #--------------------------------------------------------------------#
-  home.sessionVariables = {
+    #--------------------------------------------------------------------#
+    #-- Environment Variables
+    #--------------------------------------------------------------------#
+    sessionVariables = {
     #--- Mesa/AMD Graphics Optimizations
     MESA_GLTHREAD = "true"; # AMD specific OpenGL application performance boost
     mesa_glthread = "true"; # Lowercase variant for compatibility
@@ -119,5 +120,6 @@
 
     # Increase cache size for large game library
     MESA_SHADER_CACHE_MAX_SIZE = "10G";
+    };
   };
 }

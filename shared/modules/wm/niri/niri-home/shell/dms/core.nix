@@ -1,7 +1,5 @@
 {
   inputs,
-  config,
-  pkgs,
   lib,
   hostname,
   hostConfig,
@@ -25,10 +23,12 @@
     };
 
     #--- Plugins
-    plugins.amdGpuMonitor.enable = true;
-    plugins.claudeCodeUsage.enable = hostConfig.claude.enable;
-    plugins.powerUsagePlugin.enable = lib.mkIf (hostname == "laptop") true;
-    plugins.screenRecorder.enable = true;
+    plugins = {
+      amdGpuMonitor.enable = true;
+      claudeCodeUsage.enable = hostConfig.claude.enable;
+      powerUsagePlugin.enable = lib.mkIf (hostname == "laptop") true;
+      screenRecorder.enable = true;
+    };
 
     #--- Core features
     enableSystemMonitoring = true; # System monitoring widgets (dgop)

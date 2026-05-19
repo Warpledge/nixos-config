@@ -2,8 +2,6 @@
 # HYPRLAND NIXOS CONFIGURATION
 #=====================================================================#
 {
-  username,
-  inputs,
   pkgs,
   ...
 }: {

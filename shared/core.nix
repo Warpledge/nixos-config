@@ -37,7 +37,7 @@ in {
 
   #--- Nixpkgs Configuration
   nixpkgs = {
-    overlays = overlays;
+    inherit overlays;
     config = {
       allowUnfree = true;
       allowInsecure = true;

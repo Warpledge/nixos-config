@@ -34,9 +34,11 @@
       "udev.log_priority=3" # Reduce udev boot logging
     ];
     loader = {
-      systemd-boot.enable = true; # Use systemd-boot EFI bootloader
-      systemd-boot.configurationLimit = 10; # Keep last 10 entries
-      systemd-boot.consoleMode = "max"; # Use full console resolution
+      systemd-boot = {
+        enable = true; # Use systemd-boot EFI bootloader
+        configurationLimit = 10; # Keep last 10 entries
+        consoleMode = "max"; # Use full console resolution
+      };
       efi.canTouchEfiVariables = true; # Allow EFI variable modification
     };
     initrd = {

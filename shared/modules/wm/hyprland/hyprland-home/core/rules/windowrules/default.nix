@@ -1,7 +1,7 @@
 #=====================================================================#
 # WINDOW RULES (simplified format)
 #=====================================================================#
-{lib, ...}: let
+_: let
   opacity = import ./opacity.nix;
   floating = import ./floating.nix;
   pinning = import ./pinning.nix;

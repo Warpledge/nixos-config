@@ -2,7 +2,6 @@
 # WAYDROID ANDROID CONTAINER
 #=====================================================================#
 {
-  config,
   lib,
   pkgs,
   hostConfig,

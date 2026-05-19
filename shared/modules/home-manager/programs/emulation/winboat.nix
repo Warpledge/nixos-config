@@ -2,7 +2,6 @@
 # WINBOAT - WINDOWS APPLICATION RUNNER
 #=====================================================================#
 {
-  config,
   lib,
   pkgs,
   hostConfig,

@@ -87,24 +87,15 @@
 
       #--- Keybinds
       keys.normal = {
-        #--- Quick save
-        space.w = ":w";
-        space.q = ":q";
-
-        #--- Format document
-        space.f = ":format";
-
-        #--- File picker (like Telescope in nvim)
-        space.space = "file_picker";
-
-        #--- Buffer picker
-        space.b = "buffer_picker";
-
-        #--- Symbol picker (LSP)
-        space.s = "symbol_picker";
-
-        #--- Diagnostics
-        space.d = "diagnostics_picker";
+        space = {
+          w = ":w"; # Quick save
+          q = ":q"; # Quit
+          f = ":format"; # Format document
+          space = "file_picker"; # File picker (like Telescope in nvim)
+          b = "buffer_picker"; # Buffer picker
+          s = "symbol_picker"; # Symbol picker (LSP)
+          d = "diagnostics_picker"; # Diagnostics
+        };
 
         #--- Clear search highlight
         esc = ["collapse_selection" "keep_primary_selection"];

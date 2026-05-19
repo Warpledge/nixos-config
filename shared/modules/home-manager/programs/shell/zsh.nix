@@ -12,15 +12,15 @@ in {
   #--------------------------------------------------------------------#
   #-- Packages & Configuration
   #--------------------------------------------------------------------#
-  home.packages = with pkgs; [bat ripgrep tldr sesh];
-
-  home.sessionPath = ["$HOME/go/bin"];
-
-  home.sessionVariables = {
+  home = {
+    packages = with pkgs; [bat ripgrep tldr sesh];
+    sessionPath = ["$HOME/go/bin"];
+    sessionVariables = {
     SHELL = "${pkgs.zsh}/bin/zsh";
     NIXPKGS_ALLOW_UNFREE = "1";
     NIXPKGS_ALLOW_INSECURE = "1";
     CARAPACE_BRIDGES = "carapace,zsh,fish,bash";
+    };
   };
 
   programs.carapace = {
