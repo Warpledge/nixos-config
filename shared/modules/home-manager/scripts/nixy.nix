@@ -99,7 +99,7 @@
         # Display all items but make categories non-selectable
         fzf_result=$(printf "%s\n" "''${apps[@]}" | awk -F ';' '{
           if ($3 == "CATEGORY")
-            print "\033[90m" $1 " " $2 "\033[0m"
+            print "\033[1;35m" $1 " " $2 "\033[0m"
           else
             print $1 " " $2
         }' | fzf --ansi --no-mouse --color 'hl:-1:underline,hl+:-1:underline:reverse' --header-lines=1)

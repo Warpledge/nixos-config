@@ -183,6 +183,8 @@ Most components below are toggleable per host via `hostConfig` and rebuilding. "
 
 ## Nixy — System Management TUI
 
+![Nixy system management TUI](./screenshots/nixy-tui.png)
+
 `nixy` is a custom fzf-driven system management script (defined in [`shared/modules/home-manager/scripts/nixy.nix`](./shared/modules/home-manager/scripts/nixy.nix)). Run it with no arguments for an interactive menu, or pass a command directly.
 
 ### NixOS Operations
@@ -268,6 +270,8 @@ Key external sources the flake pulls from outside nixpkgs:
 ## Keybinds
 
 `Mod` = Super (Windows key). Both WMs share the same intent — only the syntax differs.
+
+>**Note:** `Mod+?` opens a keybind overlay cheatsheet in both WMs.
 
 <details>
 <summary>Niri</summary>
