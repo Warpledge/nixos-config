@@ -58,6 +58,7 @@
     #--- Creative (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.creative.blender [./creative/blender.nix]
     ++ lib.optionals hostConfig.creative.krita [./creative/krita.nix]
+    ++ lib.optionals hostConfig.creative.affinity [./creative/affinity.nix]
     #--- WinBoat (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.winboat.enable [./emulation/winboat.nix]
     #--- AI Tools (controlled by host hostConfig.nix)

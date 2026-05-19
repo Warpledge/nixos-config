@@ -54,6 +54,7 @@
     claude-code.url = "github:sadjow/claude-code-nix";
 
     #--- Applications
+    affinity-nix.url = "github:mrshmllow/affinity-nix";
     nixcord.url = "github:kaylorben/nixcord";
     spicetify-nix = {
       url = "github:gerg-l/spicetify-nix";

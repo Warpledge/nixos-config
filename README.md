@@ -77,7 +77,7 @@ Most components below are toggleable per host via `hostConfig` and rebuilding. "
 | **File Manager** | [Nautilus][nautilus] |
 | **Media Player** | [mpv][mpv], [Celluloid][celluloid] (mpv frontend), [Spotify][spotify] via [spicetify-nix][spicetify], [Grayjay][grayjay] |
 | **Screenshot / Recording** | [grim][grim] + [slurp][slurp], [gpu-screen-recorder][gpu-screen-recorder] |
-| **Creative** | [Blender][blender], [Krita][krita] |
+| **Creative** | [Blender][blender], [Krita][krita], [Affinity Suite v3][affinity-nix] (via Wine) |
 | **Chat / Productivity** | [Vesktop][vesktop] via [nixcord][nixcord] (Vencord), [Thunderbird][thunderbird], [Obsidian][obsidian], [Cohesion][cohesion] |
 | **AI Tooling** | [Claude Code][claude-code], [OpenCode][opencode], [LM Studio][lmstudio] |
 
@@ -139,6 +139,7 @@ Most components below are toggleable per host via `hostConfig` and rebuilding. "
 [gpu-screen-recorder]: https://git.dec05eba.com/gpu-screen-recorder
 [blender]: https://www.blender.org
 [krita]: https://krita.org
+[affinity-nix]: https://github.com/mrshmllow/affinity-nix
 [vesktop]: https://github.com/Vencord/Vesktop
 [nixcord]: https://github.com/KaylorBen/nixcord
 [thunderbird]: https://www.thunderbird.net
@@ -200,6 +201,7 @@ Key external sources the flake pulls from outside nixpkgs:
 | [`nix-flatpak`](https://github.com/gmodena/nix-flatpak) | Declarative Flatpak management |
 | [`alejandra`](https://github.com/kamadorueda/alejandra) (pinned 3.0.0) | Nix formatter |
 | [`claude-code`](https://github.com/sadjow/claude-code-nix) | Claude Code CLI |
+| [`affinity-nix`](https://github.com/mrshmllow/affinity-nix) | Affinity Suite v3 (Photo, Designer, Publisher) via Wine |
 
 ## Keybinds
 

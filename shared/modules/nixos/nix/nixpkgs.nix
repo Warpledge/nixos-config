@@ -22,6 +22,7 @@
     overlays = [
       inputs.nur.overlays.default # NUR (Nix User Repository)
       inputs.claude-code.overlays.default # Claude Code CLI
+      inputs.affinity-nix.overlays.default # Affinity Suite (Photo, Designer, Publisher)
     ];
   };
 }

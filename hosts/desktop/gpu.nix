@@ -31,7 +31,10 @@
 
   #--- ensures that the amdgpu kernel module is loaded in stage 1
   hardware = {
-    amdgpu.initrd.enable = true; # Load AMDGPU driver in initrd for early GPU access
+    amdgpu = {
+      initrd.enable = true; # Load AMDGPU driver in initrd for early GPU access
+      opencl.enable = true;
+    };
     enableRedistributableFirmware = true; # Enable proprietary firmware for hardware compatibility
     cpu.amd.updateMicrocode = true; # Enable AMD CPU microcode updates
   };
