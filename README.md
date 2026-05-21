@@ -43,6 +43,9 @@ My personal NixOS system flake, tracking `nixos-unstable`.
 
 Most components below are toggleable per host via `hostConfig` and rebuilding. "Active" marks the one currently selected on my machines; the others are wired up and selectable.
 
+<details>
+<summary>Categories</summary>
+
 ### Desktop Environment
 
 | | |
@@ -104,6 +107,8 @@ Most components below are toggleable per host via `hostConfig` and rebuilding. "
 | **Filesystem & Encryption** | ext4 on a [LUKS][luks]-encrypted partition, unlocked at boot |
 | **Bootloader** | [systemd-boot][systemd-boot] |
 | **Kernel** | [CachyOS kernel][cachyos-kernel] (selectable: zen / latest / xanmod / cachyos) |
+
+</details>
 
 [niri]: https://github.com/YaLTeR/niri
 [hyprland]: https://hyprland.org
@@ -187,6 +192,9 @@ Most components below are toggleable per host via `hostConfig` and rebuilding. "
 
 `nixy` is a custom fzf-driven system management script (defined in [`shared/modules/home-manager/scripts/nixy.nix`](./shared/modules/home-manager/scripts/nixy.nix)). Run it with no arguments for an interactive menu, or pass a command directly.
 
+<details>
+<summary>Commands</summary>
+
 ### NixOS Operations
 
 | Command | Description |
@@ -244,9 +252,14 @@ Most components below are toggleable per host via `hostConfig` and rebuilding. "
 | --- | --- |
 | `nixy debloater` | Launch Universal Android Debloater |
 
+</details>
+
 ## Flake Inputs
 
 Key external sources the flake pulls from outside nixpkgs:
+
+<details>
+<summary>Inputs</summary>
 
 | Input | Purpose |
 | --- | --- |
@@ -266,6 +279,8 @@ Key external sources the flake pulls from outside nixpkgs:
 | [`alejandra`](https://github.com/kamadorueda/alejandra) (pinned 3.0.0) | Nix formatter |
 | [`claude-code`](https://github.com/sadjow/claude-code-nix) | Claude Code CLI |
 | [`affinity-nix`](https://github.com/mrshmllow/affinity-nix) | Affinity Suite v3 (Photo, Designer, Publisher) via Wine |
+
+</details>
 
 ## Keybinds
 
