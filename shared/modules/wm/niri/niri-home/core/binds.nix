@@ -23,6 +23,7 @@ _: {
     "Mod+D".action.expand-column-to-available-width = {};
     "Mod+F".action.maximize-column = {};
     "Mod+Shift+F".action.fullscreen-window = {};
+    "Mod+G".action.maximize-window-to-edges = {};
     "Mod+Space".action.toggle-window-floating = {};
 
     "Mod+Alt+1".action.set-column-width = "3333%";
