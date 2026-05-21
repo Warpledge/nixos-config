@@ -86,7 +86,7 @@
         focus-ring = {
           enable = true; # displays around windows
           width = 2;
-          active.color = "#cba6f7"; # Mauve
+          active.color = "#45475a"; # Surface 1
           inactive.color = "#181825"; # Mantle
           urgent.color = "#f38ba8"; # Red
         };
