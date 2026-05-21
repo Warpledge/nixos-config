@@ -13,7 +13,7 @@ My personal NixOS system flake, tracking `nixos-unstable`.
   - [Applications](#applications)
   - [Gaming](#gaming)
   - [System](#system)
-- [Nixy — System Management TUI](#nixy--system-management-tui)
+- [Nixy — System Management TUI Script](#nixy--system-management-tui)
 - [Flake Inputs](#flake-inputs)
 - [Keybinds](#keybinds)
 - [Structure](#structure)
@@ -44,7 +44,7 @@ My personal NixOS system flake, tracking `nixos-unstable`.
 Most components below are toggleable per host via `hostConfig` and rebuilding. "Active" marks the one currently selected on my machines; the others are wired up and selectable.
 
 <details>
-<summary>Categories</summary>
+<summary>Component Details</summary>
 
 ### Desktop Environment
 
@@ -186,14 +186,14 @@ Most components below are toggleable per host via `hostConfig` and rebuilding. "
 [pipewire]: https://pipewire.org
 [nix-flatpak]: https://github.com/gmodena/nix-flatpak
 
-## Nixy — System Management TUI
+## Nixy — System Management TUI Script
 
 ![Nixy system management TUI](./screenshots/nixy-tui.png)
 
 `nixy` is a custom fzf-driven system management script (defined in [`shared/modules/home-manager/scripts/nixy.nix`](./shared/modules/home-manager/scripts/nixy.nix)). Run it with no arguments for an interactive menu, or pass a command directly.
 
 <details>
-<summary>Commands</summary>
+<summary>Script Commands</summary>
 
 ### NixOS Operations
 
@@ -259,7 +259,7 @@ Most components below are toggleable per host via `hostConfig` and rebuilding. "
 Key external sources the flake pulls from outside nixpkgs:
 
 <details>
-<summary>Inputs</summary>
+<summary>Flake Inputs</summary>
 
 | Input | Purpose |
 | --- | --- |
@@ -289,7 +289,7 @@ Key external sources the flake pulls from outside nixpkgs:
 >**Note:** `Mod+?` opens a keybind overlay cheatsheet in both WMs.
 
 <details>
-<summary>Niri</summary>
+<summary>Niri Keybinds</summary>
 
 #### Apps
 
@@ -357,9 +357,6 @@ Key external sources the flake pulls from outside nixpkgs:
 | `Mod+Shift+Print` | Full screen screenshot |
 | `Mod+Home` | Start screen recording |
 | `Mod+End` | Stop screen recording |
-| `XF86AudioPlay` | Play/Pause |
-| `XF86AudioNext/Prev` | Next/Previous track |
-| `XF86AudioStop` | Stop |
 
 #### Waydroid
 
@@ -378,7 +375,7 @@ Key external sources the flake pulls from outside nixpkgs:
 </details>
 
 <details>
-<summary>Hyprland</summary>
+<summary>Hyprland Keybinds</summary>
 
 #### Apps
 
@@ -437,9 +434,6 @@ Key external sources the flake pulls from outside nixpkgs:
 | `Print` | Area screenshot → clipboard |
 | `Super+Print` | Save screenshot |
 | `Super+Shift+Print` | Screenshot with Swappy |
-| `XF86AudioPlay` | Play/Pause |
-| `XF86AudioNext/Prev` | Next/Previous track |
-| `XF86AudioStop` | Stop |
 
 #### Waydroid
 
