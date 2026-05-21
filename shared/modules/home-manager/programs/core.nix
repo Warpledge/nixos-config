@@ -29,7 +29,6 @@
     # easyrpg-player
 
     #--- Gnome
-    file-roller
     gnome-calculator
     baobab
     gnome-text-editor
@@ -62,12 +61,6 @@
     lsof
     ps_mem
     pciutils
-
-    #--- Archives
-    zip
-    unzip
-    unrar
-    _7zz-rar
 
     #--- Dev
     go

@@ -34,6 +34,9 @@
       ./shell/zoxide.nix
       ./shell/zsh.nix
 
+      #--- Archives
+      ./archives.nix
+
       #--- Other
       ./android.nix
       ./core.nix
