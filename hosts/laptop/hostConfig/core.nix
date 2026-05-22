@@ -53,6 +53,7 @@
     mpv = true;
     spotify = true;
     grayjay = true;
+    videoTrimmer = true;
   };
 
   #--- Creative Software Selection

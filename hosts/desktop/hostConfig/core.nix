@@ -53,6 +53,7 @@
     mpv = true;
     spotify = true;
     grayjay = true;
+    videoTrimmer = true;
   };
 
   #--- Creative Software Selection
@@ -73,7 +74,7 @@
 
   #--- ClamAV Antivirus
   # Enable ClamAV daemon, freshclam auto-updater, and ClamTK GUI
-  clamav.enable = false;
+  clamav.enable = true;
 
   #--- Docker Containerization
   # Enable Docker and Docker Compose for container management
