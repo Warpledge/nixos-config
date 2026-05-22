@@ -13,7 +13,7 @@ My personal NixOS system flake, tracking `nixos-unstable`.
   - [Applications](#applications)
   - [Gaming](#gaming)
   - [System](#system)
-- [Nixy — System Management TUI Script](#nixy--system-management-tui)
+- [Nixy — System Management TUI](#nixy--system-management-tui)
 - [Flake Inputs](#flake-inputs)
 - [Keybinds](#keybinds)
 - [Structure](#structure)
