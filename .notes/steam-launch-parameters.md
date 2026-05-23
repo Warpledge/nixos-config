@@ -115,6 +115,16 @@ STEAMDECK=1 SteamOS=1 PROTON_FSR4_UPGRADE=1 ENABLE_LAYER_MESA_ANTI_LAG=1 MANGOHU
 
 ---
 
+## The Princess, the Stray Cat, and Matters of the Heart 2 (Noratoto 2)
+
+```
+LANG=ja_JP.UTF-8 DXVK_FRAME_RATE=120 %command%
+```
+
+**Notes:** KiriKiri Z engine (XP3 archives). `LANG=ja_JP.UTF-8` sets Japanese locale for the Wine process — required because KiriKiri Z does Shift-JIS string operations that crash under en-US codepage 1252. The root system issue was `VK_ICD_FILENAMES` pointing only to the 64-bit RADV ICD, causing DXVK to fail with `VK_ERROR_INCOMPATIBLE_DRIVER` in the 32-bit Wine process. Fixed permanently in `hosts/desktop/gpu.nix` to include both 64-bit and 32-bit ICD paths — so the `LANG` override is the only launch option needed now. `DXVK_FRAME_RATE=60` caps FPS via DXVK — KiriKiri Z uses DirectX so DXVK handles it; adjust the value as needed.
+
+---
+
 ## Template
 
 Use this format when adding new games:
