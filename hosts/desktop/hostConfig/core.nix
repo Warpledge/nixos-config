@@ -9,7 +9,7 @@
   # Edit these values to customize the desktop build.
 
   #--- Window Manager Selection
-  # Options: "gnome" | "hyprland" | "niri"
+  # Options: "hyprland" | "niri"
   windowManager = "niri";
 
   #--- Kernel Selection

@@ -25,8 +25,9 @@
     inputs.alejandra.defaultPackage.${pkgs.stdenv.hostPlatform.system}
     bleachbit
     gearlever
+    poppler-utils # PDF rendering library
     # localsend
-    # easyrpg-player
+    easyrpg-player
 
     #--- Gnome
     gnome-calculator
