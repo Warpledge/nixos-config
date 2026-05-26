@@ -19,7 +19,6 @@ My personal NixOS system flake.
 - [Structure](#structure)
 - [History](#history)
 - [Inspiration](#inspiration)
-- [License](#license)
 
 ## Screenshots
 
