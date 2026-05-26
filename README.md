@@ -20,7 +20,7 @@ My personal NixOS system flake.
 - [Structure](#structure)
 - [History](#history)
 - [Inspiration](#inspiration)
-
+---
 ## Overview
 
 - **Declarative system management** — entire system state (packages, services, dotfiles, theming, keybinds) is version-controlled and reproducible from a single rebuild command.
@@ -33,8 +33,8 @@ My personal NixOS system flake.
 - **App compatibility** — Android ([Waydroid][waydroid]), Windows ([WinBoat][winboat]), AppImages ([GearLever][gearlever]), unpatched binaries ([nix-ld][nix-ld]), and declarative Flatpak management ([nix-flatpak][nix-flatpak]).
 - **Dev tooling** — [Docker][docker], [tmux][tmux], [Zed][zed], [Helix][helix], and git configured with [delta][delta] diffs and [gh][gh] CLI.
 - **Optimized for gaming & productivity** — [Gamescope][gamescope], [GameMode][gamemode], [MangoHud][mangohud], keyboard-driven and GUI workflows, kernel tweaks and GPU driver optimizations.
-- **WIP** — I'm currently working on a way to get the config universally adaptable to other users to use my setup on their system as seamlessly as possible.
-
+- **WIP** — Working on making this config easily adoptable, so others can use it on their own hardware with minimal friction.
+---
 ## Screenshots
 
 ![Niri desktop with Zed and fastfetch](./screenshots/niri-desktop.png)
@@ -46,12 +46,13 @@ My personal NixOS system flake.
 
 </details>
 
+---
 ## Host Machines
 
 - **Desktop** — Ryzen 5800X3D + RX 9070 XT (AMD-only), 280Hz OLED + 144Hz secondary
 - **Laptop** — Legion Slim 5, Ryzen 7735HS + hybrid AMD 680M / RTX 4070, 1600p@165Hz
 
-
+---
 
 ## Components
 
@@ -209,6 +210,7 @@ Most components below are toggleable per host via `hostConfig` and rebuilding.
 [gh]: https://cli.github.com
 [gamescope]: https://github.com/ValveSoftware/gamescope
 
+---
 ## System Management TUI Script
 
 ![Nixy system management TUI](./screenshots/nixy-tui.png)
@@ -277,6 +279,7 @@ Most components below are toggleable per host via `hostConfig` and rebuilding.
 
 </details>
 
+---
 ## Flake Inputs
 
 Key external sources the flake pulls from outside nixpkgs:
@@ -305,6 +308,7 @@ Key external sources the flake pulls from outside nixpkgs:
 
 </details>
 
+---
 ## Keybinds
 
 `Mod` = Super (Windows key). Both WMs share the same intent — only the syntax differs.
@@ -467,6 +471,7 @@ Key external sources the flake pulls from outside nixpkgs:
 
 </details>
 
+---
 ## Structure
 
 **Layout** — top-level directories and what lives in each:
@@ -502,12 +507,14 @@ flake.nix
 
 Each host has a `hostConfig/core.nix` that controls various toggles for system components such as window manager, kernel, browsers, terminals, editors, Docker, Waydroid, from one place. Uses a boolean-based toggle system with `lib.optionals`.
 
+---
 ## History
 
 I've been on NixOS since 2022. Most of what I know I learned by trial and error and referencing other public NixOS config repos, YouTube guides, and hands-on experimentation through trial and error.
 
 This is iteration 9 of remaking the entire NixOS config from scratch.
 
+---
 ## Inspiration
 
 These are the biggest inspirations for my own config and learning NixOS.

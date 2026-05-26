@@ -12,9 +12,9 @@ result-*
 .vscode/
 .idea/
 
-# Claude Code local state
-.claude/settings.local.json
-.claude/projects/
+# Claude local state
+.claude/
+CLAUDE.md
 
 # Logs and temp
 *.log

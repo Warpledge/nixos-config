@@ -17,7 +17,7 @@
     #--- System builder function
     mkSystem = hostname: let
       hostConfig = import "${self}/hosts/${hostname}/hostConfig/core.nix";
-      username = hostConfig.username;
+      inherit (hostConfig) username;
     in {
       inherit system;
       modules = [./hosts/${hostname}/${hostname}.nix];
