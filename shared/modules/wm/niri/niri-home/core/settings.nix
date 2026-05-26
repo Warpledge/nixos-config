@@ -1,7 +1,11 @@
 #=====================================================================#
 # NIRI SETTINGS
 #=====================================================================#
-{pkgs, ...}: {
+{
+  pkgs,
+  username,
+  ...
+}: {
   #--------------------------------------------------------------------#
   #-- Packages
   #--------------------------------------------------------------------#
@@ -32,7 +36,7 @@
       #--- Startup Applications
       spawn-at-startup = [
         {command = ["bash" "-c" "wl-paste --watch cliphist store &"];} # Clipboard History
-        {command = ["xrdb" "-merge" "/home/warpledge/.Xresources"];} # Xwayland cursor theme
+        {command = ["xrdb" "-merge" "/home/${username}/.Xresources"];} # Xwayland cursor theme
       ];
 
       #--- Input Configuration

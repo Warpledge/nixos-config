@@ -19,3 +19,6 @@ result-*
 # Logs and temp
 *.log
 *.tmp
+
+# WIP / personal scratchpad
+wip/

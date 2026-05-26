@@ -4,6 +4,7 @@
 {
   lib,
   pkgs,
+  username,
   hostConfig,
   ...
 }: {
@@ -33,7 +34,7 @@
     # Add user to docker group for docker command access
     # Note: Rootless mode is preferred over group-based access for security
     users.groups.docker = {
-      members = ["warpledge"];
+      members = ["${username}"];
     };
   };
 }
