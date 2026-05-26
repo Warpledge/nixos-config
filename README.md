@@ -31,9 +31,8 @@ My personal NixOS system flake.
 - **Security & privacy** — [LUKS][luks] encryption, [AppArmor][apparmor], kernel hardening, and declaratively configured privacy-hardened [Zen][zen] Browser with tweaks from [Arkenfox][arkenfox] and [Securefox][securefox].
 - **System-wide theming** — [Catppuccin][catppuccin] Mocha Mauve applied globally via [Stylix][stylix], covering the WM, terminal, editors, browsers, and GTK/Qt apps from a single theme declaration.
 - **App compatibility** — Android ([Waydroid][waydroid]), Windows ([WinBoat][winboat]), AppImages ([GearLever][gearlever]), unpatched binaries ([nix-ld][nix-ld]), and declarative Flatpak management ([nix-flatpak][nix-flatpak]).
-- **Dev tooling** — [Docker][docker], [tmux][tmux], [Zed][zed], [Helix][helix], and git configured with [delta][delta] diffs and [gh][gh] CLI.
+- **Dev tooling** — [Docker][docker], [tmux][tmux], [Zed][zed], [Helix][helix], and git configured with [delta][delta] diffs and [gh][gh] CLI. AI tooling: [Claude Code][claude-code], [OpenCode][opencode], and [LM Studio][lmstudio].
 - **Optimized for gaming & productivity** — [Gamescope][gamescope], [GameMode][gamemode], [MangoHud][mangohud], keyboard-driven and GUI workflows, kernel tweaks and GPU driver optimizations.
-- **WIP** — Working on making this config easily adoptable, so others can use it on their own hardware with minimal friction.
 ---
 ## Screenshots
 

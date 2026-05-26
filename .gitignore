@@ -13,8 +13,7 @@ result-*
 .idea/
 
 # Claude local state
-.claude/
-CLAUDE.md
+.claude/settings.local.json
 
 # Logs and temp
 *.log
