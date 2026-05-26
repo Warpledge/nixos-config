@@ -4,8 +4,9 @@ My personal NixOS system flake.
 
 ## Contents
 
-- [Host Machines](#host-machines)
+- [Overview](#overview)
 - [Screenshots](#screenshots)
+- [Host Machines](#host-machines)
 - [Components](#components)
   - [Desktop Environment](#desktop-environment)
   - [Shell & Terminal](#shell--terminal)
@@ -13,12 +14,26 @@ My personal NixOS system flake.
   - [Applications](#applications)
   - [Gaming](#gaming)
   - [System](#system)
-- [Nixy — System Management TUI Script](#nixy--system-management-tui-script)
+- [System Management TUI Script](#system-management-tui-script)
 - [Flake Inputs](#flake-inputs)
 - [Keybinds](#keybinds)
 - [Structure](#structure)
 - [History](#history)
 - [Inspiration](#inspiration)
+
+## Overview
+
+- **Declarative system management** — entire system state (packages, services, dotfiles, theming, keybinds) is version-controlled and reproducible from a single rebuild command.
+- **Multi-host architecture** — shared module system with per-host toggle overrides, avoids duplication while keeping each host (desktop/laptop) independently configurable.
+- **Portability** — no hardcoded usernames or paths across modules; [`hostConfig/core.nix`](./hosts/desktop/hostConfig/core.nix) is the primary file per host controlling `username`, WM, kernel, browsers, and app toggles — the starting point for adopting the config.
+- **Custom tooling** — a custom [TUI management wrapper](./shared/modules/home-manager/scripts/nixy.nix) — covering rebuild, garbage collection, rollback, linting, system & network monitoring, and firmware maintenance.
+- **Flake composition** — managing 16+ external inputs with pinned versions in [`flake.nix`](./flake.nix), including upstream flakes not in nixpkgs (custom kernels, browsers, window managers, Affinity Suite via Wine, theming, etc.).
+- **Security & privacy** — [LUKS][luks] encryption, [AppArmor][apparmor], kernel hardening, and declaratively configured privacy-hardened [Zen][zen] Browser with tweaks from [Arkenfox][arkenfox] and [Securefox][securefox].
+- **System-wide theming** — [Catppuccin][catppuccin] Mocha Mauve applied globally via [Stylix][stylix], covering the WM, terminal, editors, browsers, and GTK/Qt apps from a single theme declaration.
+- **App compatibility** — Android ([Waydroid][waydroid]), Windows ([WinBoat][winboat]), AppImages ([GearLever][gearlever]), unpatched binaries ([nix-ld][nix-ld]), and declarative Flatpak management ([nix-flatpak][nix-flatpak]).
+- **Dev tooling** — [Docker][docker], [tmux][tmux], [Zed][zed], [Helix][helix], and git configured with [delta][delta] diffs and [gh][gh] CLI.
+- **Optimized for gaming & productivity** — [Gamescope][gamescope], [GameMode][gamemode], [MangoHud][mangohud], keyboard-driven and GUI workflows, kernel tweaks and GPU driver optimizations.
+- **WIP** — I'm currently working on a way to get the config universally adaptable to other users to use my setup on their system as seamlessly as possible.
 
 ## Screenshots
 
@@ -185,8 +200,16 @@ Most components below are toggleable per host via `hostConfig` and rebuilding.
 [niriswitcher]: https://github.com/isaksamsten/niriswitcher
 [pipewire]: https://pipewire.org
 [nix-flatpak]: https://github.com/gmodena/nix-flatpak
+[apparmor]: https://apparmor.net
+[arkenfox]: https://github.com/arkenfox/user.js
+[securefox]: https://github.com/yokoffing/Betterfox
+[gearlever]: https://github.com/mijorus/gearlever
+[nix-ld]: https://github.com/nix-community/nix-ld
+[delta]: https://github.com/dandavison/delta
+[gh]: https://cli.github.com
+[gamescope]: https://github.com/ValveSoftware/gamescope
 
-## Nixy — System Management TUI Script
+## System Management TUI Script
 
 ![Nixy system management TUI](./screenshots/nixy-tui.png)
 

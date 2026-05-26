@@ -8,6 +8,9 @@
   # This file contains all host-specific configuration for the desktop system.
   # Edit these values to customize the desktop build.
 
+  #--- Username
+  username = "warpledge";
+
   #--- Window Manager Selection
   # Options: "hyprland" | "niri"
   windowManager = "niri";

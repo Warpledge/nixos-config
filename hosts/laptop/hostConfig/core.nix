@@ -8,6 +8,9 @@
   # This file contains all host-specific configuration for the laptop system.
   # Edit these values to customize the laptop build.
 
+  #--- Username
+  username = "warpledge";
+
   #--- Window Manager Selection
   # Options: "hyprland" | "niri"
   windowManager = "niri";
