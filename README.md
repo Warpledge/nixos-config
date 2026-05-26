@@ -1,6 +1,6 @@
 # Warpledge's NixOS Configuration
 
-My personal NixOS system flake, tracking `nixos-unstable`.
+My personal NixOS system flake.
 
 ## Contents
 
@@ -13,7 +13,7 @@ My personal NixOS system flake, tracking `nixos-unstable`.
   - [Applications](#applications)
   - [Gaming](#gaming)
   - [System](#system)
-- [Nixy — System Management TUI](#nixy--system-management-tui)
+- [Nixy — System Management TUI Script](#nixy--system-management-tui-script)
 - [Flake Inputs](#flake-inputs)
 - [Keybinds](#keybinds)
 - [Structure](#structure)
@@ -41,7 +41,7 @@ My personal NixOS system flake, tracking `nixos-unstable`.
 
 ## Components
 
-Most components below are toggleable per host via `hostConfig` and rebuilding. "Active" marks the one currently selected on my machines; the others are wired up and selectable.
+Most components below are toggleable per host via `hostConfig` and rebuilding.
 
 <details>
 <summary>Component Details</summary>
@@ -50,7 +50,7 @@ Most components below are toggleable per host via `hostConfig` and rebuilding. "
 
 | | |
 | --- | --- |
-| **Window Manager** | [Niri][niri] (active) / [Hyprland][hyprland] |
+| **Window Manager** | [Niri][niri] / [Hyprland][hyprland] |
 | **Status Bar / Notifier / Launcher / Lock** | [DankMaterialShell][dms] (Niri + Hyprland) |
 | **Display Manager** | [tuigreet][tuigreet] via [greetd][greetd] |
 | **Color Scheme** | [Catppuccin][catppuccin] Mocha Mauve applied globally via [Stylix][stylix] + [catppuccin/nix][catppuccin-nix] |
@@ -62,14 +62,14 @@ Most components below are toggleable per host via `hostConfig` and rebuilding. "
 | | |
 | --- | --- |
 | **Shell** | [Zsh][zsh] + [Powerlevel10k][p10k] / [Starship][starship], with [atuin][atuin], [fzf][fzf], [zoxide][zoxide], [eza][eza] |
-| **Terminal Emulator** | [Kitty][kitty] (active) / [Ghostty][ghostty] |
+| **Terminal Emulator** | [Kitty][kitty] / [Ghostty][ghostty] |
 | **Multiplexer** | [tmux][tmux] |
 
 ### Development
 
 | | |
 | --- | --- |
-| **Editors / IDE** | [Zed][zed] (active), [Helix][helix], [micro][micro] (quick edits) |
+| **Editors / IDE** | [Zed][zed], [Helix][helix], [micro][micro] (quick edits) |
 | **Formatter** | [alejandra][alejandra] v3.0.0 |
 | **Rebuild Wrapper** | [`nixy`](./shared/modules/home-manager/scripts/nixy.nix) (fzf menu over [nh][nh]) |
 
@@ -89,7 +89,7 @@ Most components below are toggleable per host via `hostConfig` and rebuilding. "
 
 | | |
 | --- | --- |
-| **Launchers** | [Steam][steam] (Gamescope), [Heroic][heroic], [Prism Launcher][prismlauncher], [Faugus Launcher][faugus-launcher] |
+| **Launchers** | [Steam][steam] (Gamescope), [Heroic][heroic], [Prism Launcher][prismlauncher], [Faugus Launcher][faugus-launcher], [Lutris][lutris] |
 | **Tools** | [GameMode][gamemode], [MangoHud][mangohud], [Goverlay][goverlay], [r2modman][r2modman], [ProtonPlus][protonplus], [Satisfactory Mod Manager][smm], [AntimicroX][antimicrox], [Rusty PoB][rpob] |
 | **Streaming** | [Sunshine][sunshine] |
 
@@ -162,6 +162,7 @@ Most components below are toggleable per host via `hostConfig` and rebuilding. "
 [protonplus]: https://github.com/vysp3r/proton-plus
 [smm]: https://github.com/satisfactorymodding/SatisfactoryModManager
 [antimicrox]: https://github.com/AntiMicroX/antimicrox
+[lutris]: https://lutris.net
 [rpob]: https://pathofbuilding.community
 [celluloid]: https://celluloid-player.github.io
 [claude-code]: https://github.com/anthropics/claude-code
@@ -190,7 +191,7 @@ Most components below are toggleable per host via `hostConfig` and rebuilding. "
 
 ![Nixy system management TUI](./screenshots/nixy-tui.png)
 
-`nixy` is a custom fzf-driven system management script (defined in [`shared/modules/home-manager/scripts/nixy.nix`](./shared/modules/home-manager/scripts/nixy.nix)). Run it with no arguments for an interactive menu, or pass a command directly.
+`nixy` is a custom system management script (defined in [`shared/modules/home-manager/scripts/nixy.nix`](./shared/modules/home-manager/scripts/nixy.nix)). Can be run with no arguments for an interactive menu, or you can pass a command directly. The scripts original idea comes from [anotherhadi/nixy](https://github.com/anotherhadi/nixy) system management tui script, which I have heavily modified and extended since.
 
 <details>
 <summary>Script Commands</summary>
@@ -319,7 +320,6 @@ Key external sources the flake pulls from outside nixpkgs:
 | `Mod+S` | Cycle column width presets |
 | `Mod+D` | Expand column to available width |
 | `Mod+X` | Cycle window height presets |
-| `Mod+Shift+Z` | Reset window height |
 
 #### Focus & Movement
 
@@ -370,7 +370,7 @@ Key external sources the flake pulls from outside nixpkgs:
 | Keybind | Action |
 | --- | --- |
 | `Alt+Tab` | Window switcher (niriswitcher) |
-| `Alt+\`` | Workspace switcher (niriswitcher) |
+| `Alt+Tilde` | Workspace switcher (niriswitcher) |
 
 </details>
 
@@ -381,66 +381,67 @@ Key external sources the flake pulls from outside nixpkgs:
 
 | Keybind | Action |
 | --- | --- |
-| `Super+Return` | Terminal (Kitty) |
-| `Super+Z` | Code editor (Zed) |
-| `Super+B` | Browser (Zen) |
-| `Super+E` | File manager (Nautilus) |
-| `Super+Shift+S` | Steam |
-| `Super+Shift+D` | Discord (Vesktop) |
-| `Super+Shift+H` | Heroic |
-| `Super+Shift+G` | Lutris |
-| `Super+Shift+M` | Spotify |
+| `Mod+Return` | Terminal (Kitty) |
+| `Mod+Z` | Code editor (Zed) |
+| `Mod+B` | Browser (Zen) |
+| `Mod+E` | File manager (Nautilus) |
+| `Mod+Shift+S` | Steam |
+| `Mod+Shift+D` | Discord (Vesktop) |
+| `Mod+Shift+H` | Heroic |
+| `Mod+Shift+G` | Lutris |
+| `Mod+Shift+M` | Spotify |
+| `Mod+Shift+Y` | Grayjay |
 
 #### Window Management
 
 | Keybind | Action |
 | --- | --- |
-| `Super+Q` | Close window |
-| `Super+Space` | Toggle floating |
-| `Super+F` | Fullscreen |
-| `Super+D` | Maximize |
-| `Super+T` | Toggle opacity |
-| `Super+0` | Toggle scratchpad |
-| `Super+Shift+0` | Move to scratchpad |
+| `Mod+Q` | Close window |
+| `Mod+Space` | Toggle floating |
+| `Mod+F` | Fullscreen |
+| `Mod+D` | Maximize |
+| `Mod+T` | Toggle opacity |
+| `Mod+0` | Toggle scratchpad |
+| `Mod+Shift+0` | Move to scratchpad |
 
 #### Focus & Movement
 
 | Keybind | Action |
 | --- | --- |
-| `Super+←/→/↑/↓` | Focus window in direction |
-| `Super+Shift+←/→/↑/↓` | Move window in direction |
-| `Super+Scroll` | Scroll through workspaces |
+| `Mod+←/→/↑/↓` | Focus window in direction |
+| `Mod+Shift+←/→/↑/↓` | Move window in direction |
+| `Mod+Scroll` | Scroll through workspaces |
 
 #### Resize & Move
 
 | Keybind | Action |
 | --- | --- |
-| `Super+Ctrl+←/→/↑/↓` | Resize window ±80px |
-| `Super+Alt+←/→/↑/↓` | Move floating window ±80px |
-| `Super+LMB drag` | Move window |
-| `Super+RMB drag` | Resize window |
+| `Mod+Ctrl+←/→/↑/↓` | Resize window ±80px |
+| `Mod+Alt+←/→/↑/↓` | Move floating window ±80px |
+| `Mod+LMB drag` | Move window |
+| `Mod+RMB drag` | Resize window |
 
 #### Workspaces
 
 | Keybind | Action |
 | --- | --- |
-| `Super+1–9` | Focus workspace N |
-| `Super+Shift+1–9` | Move window to workspace N |
+| `Mod+1–9` | Focus workspace N |
+| `Mod+Shift+1–9` | Move window to workspace N |
 
 #### Media & Capture
 
 | Keybind | Action |
 | --- | --- |
 | `Print` | Area screenshot → clipboard |
-| `Super+Print` | Save screenshot |
-| `Super+Shift+Print` | Screenshot with Swappy |
+| `Mod+Print` | Save screenshot |
+| `Mod+Shift+Print` | Screenshot with Swappy |
 
 #### Waydroid
 
 | Keybind | Action |
 | --- | --- |
-| `Super+Shift+W` | Start Waydroid session |
-| `Super+Ctrl+W` | Stop Waydroid session |
+| `Mod+Shift+W` | Start Waydroid session |
+| `Mod+Ctrl+W` | Stop Waydroid session |
 
 </details>
 
@@ -451,49 +452,45 @@ Key external sources the flake pulls from outside nixpkgs:
 ```
 flake.nix
 hosts/{desktop,laptop}/
-  ├── hostConfig/core.nix    # per-host toggles
-  ├── {hostname}.nix         # host entry
-  ├── hardware-configuration.nix
-  ├── gpu.nix                # per-host GPU configuration
-  └── wm/                    # per-host WM overrides
+  ├── hostConfig/core.nix         # per-host toggles
+  ├── {hostname}.nix              # host entry
+  ├── hardware-configuration.nix  # system specific hardware configuration
+  ├── gpu.nix                     # per-host GPU configuration
+  └── wm/                         # per-host WM overrides
 shared/
-  ├── core.nix               # NixOS + home-manager wiring
+  ├── core.nix                    # NixOS + home-manager wiring
   └── modules/
-      ├── nixos/             # system modules
-      ├── home-manager/      # user modules
-      ├── theme/             # stylix, catppuccin, fonts, GTK, QT
-      └── wm/                # window managers
-.notes/                      # personal notes I share between devices
+      ├── nixos/                  # system modules
+      ├── home-manager/           # user modules
+      ├── theme/                  # stylix, catppuccin, fonts, GTK, QT
+      └── wm/                     # window managers
+.notes/                           # personal notes I share between devices
 ```
 
 **Load order** — how the flake resolves from entry point to active modules:
 
 ```
 flake.nix
-  → hosts/{hostname}/{hostname}.nix             (host entry)
-    → hosts/{hostname}/hostConfig/core.nix      (per-host toggles, passed as specialArgs)
-    → shared/core.nix                           (NixOS + home-manager integration)
-      → shared/modules/{nixos,home-manager}/    (modular configs, conditional imports)
-      → shared/modules/wm/${windowManager}/     (active WM only)
+  → hosts/{hostname}/{hostname}.nix             # Host entry
+    → hosts/{hostname}/hostConfig/core.nix      # Per-host toggles, passed as specialArgs
+    → shared/core.nix                           # NixOS + Home-Manager integration
+      → shared/modules/{nixos,home-manager}/    # Modular configs, conditional imports
+      → shared/modules/wm/${windowManager}/     # Active WM only
 ```
 
-Each host has a `hostConfig/core.nix` that controls window manager, kernel, browsers, terminals, editors, VPN, Docker, Waydroid, AI tools, and more from one place. Module `default.nix` files use `lib.optionals hostConfig.<option>` to decide what loads — so flipping a single boolean is the whole "enable/disable" workflow.
+Each host has a `hostConfig/core.nix` that controls various toggles for system components such as window manager, kernel, browsers, terminals, editors, Docker, Waydroid, from one place. Uses a boolean-based toggle system with `lib.optionals`.
 
 ## History
 
-I've been on NixOS since 2023. Most of what I know I learned by trial and error and referencing other public NixOS config repos, YouTube guides, and hands-on experimentation.
+I've been on NixOS since 2022. Most of what I know I learned by trial and error and referencing other public NixOS config repos, YouTube guides, and hands-on experimentation through trial and error.
 
-This is iteration 9 of remaking the entire NixOS config from scratch, improving on previous iterations, fixing mistakes, and refining everything to my personal preferences.
+This is iteration 9 of remaking the entire NixOS config from scratch.
 
 ## Inspiration
 
 These are the biggest inspirations for my own config and learning NixOS.
 
-- [ryan4yin/nix-config](https://github.com/ryan4yin/nix-config) - has a very useful guide I've referenced many times
-- [linuxmobile/shin](https://github.com/linuxmobile/shin) - inspired my switch to Niri WM
-- [anotherhadi/nixy](https://github.com/anotherhadi/nixy) - inspiration for the nixy system management TUI script
-- [Frost-Phoenix/nixos-config](https://github.com/Frost-Phoenix/nixos-config) - biggest inspiration to get into NixOS overall
-
-## License
-
-MIT — see [LICENSE](./LICENSE).
+- [ryan4yin/nix-config](https://github.com/ryan4yin/nix-config) 
+- [linuxmobile/shin](https://github.com/linuxmobile/shin) 
+- [anotherhadi/nixy](https://github.com/anotherhadi/nixy)
+- [Frost-Phoenix/nixos-config](https://github.com/Frost-Phoenix/nixos-config)

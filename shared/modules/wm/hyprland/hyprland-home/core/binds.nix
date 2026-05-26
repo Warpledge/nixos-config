@@ -29,6 +29,7 @@
         "SUPER SHIFT, H, exec, heroic" # Epic / GoG Launcher
         "SUPER SHIFT, G, exec, lutris" # Game Launcher
         "SUPER SHIFT, M, exec, spotify" # Spicetify
+        "SUPER SHIFT, Y, exec, grayjay"
 
         #--- Window Management
         "SUPER, Q, killactive," # Close window
