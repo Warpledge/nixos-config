@@ -125,6 +125,16 @@ LANG=ja_JP.UTF-8 DXVK_FRAME_RATE=120 %command%
 
 ---
 
+## Monochrome Mobius
+
+```
+LD_PRELOAD="" DXVK_FRAME_RATE=60 DXVK_ASYNC=1 RADV_PERFTEST=gpl mangohud %command%
+```
+
+**Notes:** `LD_PRELOAD=""` clears any preloaded libraries that may conflict. `DXVK_FRAME_RATE=60` caps FPS via DXVK. `DXVK_ASYNC=1` enables async shader compilation to reduce stutter. `RADV_PERFTEST=gpl` enables GPL (Graphics Pipeline Library) on RADV for faster pipeline compilation. `mangohud` enables the MangoHud overlay.
+
+---
+
 ## Template
 
 Use this format when adding new games:

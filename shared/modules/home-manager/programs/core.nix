@@ -53,6 +53,7 @@
     zenity
 
     #--- System Tools
+    pavucontrol
     amdgpu_top
     psmisc
     lm_sensors
