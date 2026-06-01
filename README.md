@@ -23,27 +23,26 @@ My personal NixOS system flake.
 ---
 ## Overview
 
-- **Declarative system management** — entire system state (packages, services, dotfiles, theming, keybinds) is version-controlled and reproducible from a single rebuild command.
-- **Multi-host architecture** — shared module system with per-host toggle overrides, avoids duplication while keeping each host (desktop/laptop) independently configurable.
-- **Portability** — no hardcoded usernames or paths across modules; [`hostConfig/core.nix`](./hosts/desktop/hostConfig/core.nix) is the primary file per host controlling `username`, WM, kernel, browsers, and app toggles — the starting point for adopting the config.
-- **Custom tooling** — a custom [TUI management wrapper](./shared/modules/home-manager/scripts/nixy.nix) — covering rebuild, garbage collection, rollback, linting, system & network monitoring, and firmware maintenance.
-- **Flake composition** — managing 16+ external inputs with pinned versions in [`flake.nix`](./flake.nix), including upstream flakes not in nixpkgs (custom kernels, browsers, window managers, Affinity Suite via Wine, theming, etc.).
-- **Security & privacy** — [LUKS][luks] encryption, [AppArmor][apparmor], kernel hardening, and declaratively configured privacy-hardened [Zen][zen] Browser with tweaks from [Arkenfox][arkenfox] and [Securefox][securefox].
-- **System-wide theming** — [Catppuccin][catppuccin] Mocha Mauve applied globally via [Stylix][stylix], covering the WM, terminal, editors, browsers, and GTK/Qt apps from a single theme declaration.
-- **App compatibility** — Android ([Waydroid][waydroid]), Windows ([WinBoat][winboat]), AppImages ([GearLever][gearlever]), unpatched binaries ([nix-ld][nix-ld]), and declarative Flatpak management ([nix-flatpak][nix-flatpak]).
-- **Dev tooling** — [Docker][docker], [tmux][tmux], [Zed][zed], [Helix][helix], and git configured with [delta][delta] diffs and [gh][gh] CLI. AI tooling: [Claude Code][claude-code], [OpenCode][opencode], and [LM Studio][lmstudio].
-- **Optimized for gaming & productivity** — [Gamescope][gamescope], [GameMode][gamemode], [MangoHud][mangohud], keyboard-driven and GUI workflows, kernel tweaks and GPU driver optimizations.
+- **Declarative system management** — everything (packages, services, dotfiles, theming, keybinds) lives in git and rebuilds from one command.
+- **Multi-host architecture** — shared module system with per-host toggle overrides; desktop and laptop stay in sync without duplicating config.
+- **Portable by design** — no hardcoded usernames or paths; [`hostConfig/core.nix`](./hosts/desktop/hostConfig/core.nix) is the one file to change per host — WM, kernel, browsers, and app toggles all in one place.
+- **Custom tooling** — [`nixy`](./shared/modules/home-manager/scripts/nixy.nix), an fzf-driven TUI wrapping rebuild, garbage collection, rollback, linting, system & network monitoring, and firmware updates.
+- **Flake composition** — 16+ external inputs pinned in [`flake.nix`](./flake.nix), pulling in things nixpkgs doesn't ship (custom kernels, browsers, window managers, Affinity Suite via Wine, theming, etc.).
+- **Security & privacy** — [LUKS][luks] encryption, [AppArmor][apparmor], kernel hardening, and a privacy-hardened [Zen][zen] Browser with [Arkenfox][arkenfox] and [Securefox][securefox] tweaks.
+- **System-wide theming** — [Catppuccin][catppuccin] Mocha Mauve everywhere via [Stylix][stylix] — WM, terminal, editors, browsers, and GTK/Qt apps all from one declaration.
+- **App compatibility** — Android ([Waydroid][waydroid]), Windows apps ([WinBoat][winboat]), AppImages ([GearLever][gearlever]), unpatched binaries ([nix-ld][nix-ld]), and declarative Flatpak management ([nix-flatpak][nix-flatpak]).
+- **Dev tooling** — [Docker][docker], [tmux][tmux], [Zed][zed], [Helix][helix], git with [delta][delta] diffs and [gh][gh] CLI, plus [Claude Code][claude-code], [OpenCode][opencode], and [LM Studio][lmstudio] for AI workflows.
+- **Gaming & productivity** — [Gamescope][gamescope], [GameMode][gamemode], [MangoHud][mangohud], kernel tweaks, GPU driver optimizations, and keyboard-driven desktop workflows.
 ---
 ## Screenshots
 
+**Niri WM**
+
 ![Niri desktop with Zed and fastfetch](./screenshots/niri-desktop.png)
 
-<details>
-<summary>Hyprland WM</summary>
+**Hyprland WM**
 
 ![Hyprland desktop with Zed and fastfetch](./screenshots/Hyprland-Desktop.png)
-
-</details>
 
 ---
 ## Host Machines
@@ -58,7 +57,7 @@ My personal NixOS system flake.
 Most components below are toggleable per host via `hostConfig` and rebuilding.
 
 <details>
-<summary>Component Details</summary>
+<summary>Component Details — click to expand</summary>
 
 ### Desktop Environment
 
@@ -214,10 +213,10 @@ Most components below are toggleable per host via `hostConfig` and rebuilding.
 
 ![Nixy system management TUI](./screenshots/nixy-tui.png)
 
-`nixy` is a custom system management script (defined in [`shared/modules/home-manager/scripts/nixy.nix`](./shared/modules/home-manager/scripts/nixy.nix)). Can be run with no arguments for an interactive menu, or you can pass a command directly. The scripts original idea comes from [anotherhadi/nixy](https://github.com/anotherhadi/nixy) system management tui script, which I have heavily modified and extended since.
+`nixy` is a custom system management script (defined in [`shared/modules/home-manager/scripts/nixy.nix`](./shared/modules/home-manager/scripts/nixy.nix)). Can be run with no arguments for an interactive menu, or you can pass a command directly. The script's original idea comes from [anotherhadi/nixy](https://github.com/anotherhadi/nixy) TUI script, which I've since heavily modified and extended.
 
 <details>
-<summary>Script Commands</summary>
+<summary>Script Commands — click to expand</summary>
 
 ### NixOS Operations
 
@@ -284,7 +283,7 @@ Most components below are toggleable per host via `hostConfig` and rebuilding.
 Key external sources the flake pulls from outside nixpkgs:
 
 <details>
-<summary>Flake Inputs</summary>
+<summary>Flake Inputs — click to expand</summary>
 
 | Input | Purpose |
 | --- | --- |
@@ -315,7 +314,7 @@ Key external sources the flake pulls from outside nixpkgs:
 >**Note:** `Mod+?` opens a keybind overlay cheatsheet in both WMs.
 
 <details>
-<summary>Niri Keybinds</summary>
+<summary>Niri Keybinds — click to expand</summary>
 
 #### Apps
 
@@ -400,7 +399,7 @@ Key external sources the flake pulls from outside nixpkgs:
 </details>
 
 <details>
-<summary>Hyprland Keybinds</summary>
+<summary>Hyprland Keybinds — click to expand</summary>
 
 #### Apps
 
@@ -504,12 +503,12 @@ flake.nix
       → shared/modules/wm/${windowManager}/     # Active WM only
 ```
 
-Each host has a `hostConfig/core.nix` that controls various toggles for system components such as window manager, kernel, browsers, terminals, editors, Docker, Waydroid, from one place. Uses a boolean-based toggle system with `lib.optionals`.
+Each host's `hostConfig/core.nix` controls toggles for the WM, kernel, browsers, terminals, editors, and services — all from one place, using `lib.optionals`.
 
 ---
 ## History
 
-I've been on NixOS since 2022. Most of what I know I learned by trial and error and referencing other public NixOS config repos, YouTube guides, and hands-on experimentation through trial and error.
+I've been on NixOS since 2022. Most of what I know came from trial and error, other public NixOS configs, YouTube guides, and hands-on experimentation.
 
 This is iteration 9 of remaking the entire NixOS config from scratch.
 
