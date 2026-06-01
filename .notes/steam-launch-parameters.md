@@ -133,6 +133,11 @@ LD_PRELOAD="" DXVK_FRAME_RATE=60 DXVK_ASYNC=1 RADV_PERFTEST=gpl mangohud %comman
 
 **Notes:** `LD_PRELOAD=""` clears any preloaded libraries that may conflict. `DXVK_FRAME_RATE=60` caps FPS via DXVK. `DXVK_ASYNC=1` enables async shader compilation to reduce stutter. `RADV_PERFTEST=gpl` enables GPL (Graphics Pipeline Library) on RADV for faster pipeline compilation. `mangohud` enables the MangoHud overlay.
 
+- Set deadzone to 12% on right joystick through steam input settings to fix camera jittering. 
+- Cap fps to 60 is a MUST because FPS tied to physics simulation.
+- `LD_PRELOAD=""` to kill broken steam overlay. Use Mangohud overlay instead for fps display.
+- `RADV_PERFTEST=gpl` to fix RDNA4 GPU random freezes during gameplay. (I think this fixes it, needs more testing.)
+
 ---
 
 ## Template
