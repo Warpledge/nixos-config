@@ -38,6 +38,7 @@
         firefox.enable = false;
         floorp.enable = false;
         librewolf.enable = false;
+        zen-browser.enable = false;
 
         dank-material-shell.enable = false;
         gnome.image.enable = false; # let GNOME Settings own the wallpaper

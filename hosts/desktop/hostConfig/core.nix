@@ -77,12 +77,12 @@
 
   #--- ClamAV Antivirus
   # Enable ClamAV daemon, freshclam auto-updater, and ClamTK GUI
-  clamav.enable = true;
+  clamav.enable = false;
 
   #--- Docker Containerization
   # Enable Docker and Docker Compose for container management
   docker = {
-    enable = true;
+    enable = false;
   };
 
   #--- WinBoat Windows Runner
@@ -93,7 +93,7 @@
 
   #--- Sunshine Game Streaming
   # Stream games to Moonlight clients (Android, iOS, PC)
-  sunshine.enable = true;
+  sunshine.enable = false;
 
   #--- AI Tools
   claude = {enable = true;};
