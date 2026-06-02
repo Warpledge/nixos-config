@@ -72,6 +72,7 @@
     targets = {
       chromium.enable = false;
       plymouth.enable = false;
+      kmscon.enable = false;
 
       qt.enable = false;
       gtk.enable = true;
