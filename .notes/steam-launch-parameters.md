@@ -115,31 +115,6 @@ STEAMDECK=1 SteamOS=1 PROTON_FSR4_UPGRADE=1 ENABLE_LAYER_MESA_ANTI_LAG=1 MANGOHU
 
 ---
 
-## The Princess, the Stray Cat, and Matters of the Heart 2 (Noratoto 2)
-
-```
-LANG=ja_JP.UTF-8 DXVK_FRAME_RATE=120 %command%
-```
-
-**Notes:** KiriKiri Z engine (XP3 archives). `LANG=ja_JP.UTF-8` sets Japanese locale for the Wine process — required because KiriKiri Z does Shift-JIS string operations that crash under en-US codepage 1252. The root system issue was `VK_ICD_FILENAMES` pointing only to the 64-bit RADV ICD, causing DXVK to fail with `VK_ERROR_INCOMPATIBLE_DRIVER` in the 32-bit Wine process. Fixed permanently in `hosts/desktop/gpu.nix` to include both 64-bit and 32-bit ICD paths — so the `LANG` override is the only launch option needed now. `DXVK_FRAME_RATE=60` caps FPS via DXVK — KiriKiri Z uses DirectX so DXVK handles it; adjust the value as needed.
-
----
-
-## Monochrome Mobius
-
-```
-LD_PRELOAD="" DXVK_FRAME_RATE=60 DXVK_ASYNC=1 RADV_PERFTEST=gpl mangohud %command%
-```
-
-**Notes:** `LD_PRELOAD=""` clears any preloaded libraries that may conflict. `DXVK_FRAME_RATE=60` caps FPS via DXVK. `DXVK_ASYNC=1` enables async shader compilation to reduce stutter. `RADV_PERFTEST=gpl` enables GPL (Graphics Pipeline Library) on RADV for faster pipeline compilation. `mangohud` enables the MangoHud overlay.
-
-- Set deadzone to 12% on right joystick through steam input settings to fix camera jittering. 
-- Cap fps to 60 is a MUST because FPS tied to physics simulation.
-- `LD_PRELOAD=""` to kill broken steam overlay. Use Mangohud overlay instead for fps display.
-- `RADV_PERFTEST=gpl` to fix RDNA4 GPU random freezes during gameplay. (I think this fixes it, needs more testing.)
-
----
-
 ## Template
 
 Use this format when adding new games:
