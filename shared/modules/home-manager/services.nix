@@ -29,6 +29,16 @@
   };
 
   #--------------------------------------------------------------------#
+  #-- Break gpg-agent SSH ordering cycle
+  #--------------------------------------------------------------------#
+  #--- home-manager's set-SSH_AUTH_SOCK.service implicitly gets
+  #--- After=basic.target (DefaultDependencies) while also being
+  #--- Before=gpg-agent-ssh.socket (a sockets.target dependency of
+  #--- basic.target) -- a structural ordering cycle. It doesn't actually
+  #--- need to wait on basic.target, so drop that default dependency.
+  systemd.user.services.set-SSH_AUTH_SOCK.Unit.DefaultDependencies = false;
+
+  #--------------------------------------------------------------------#
   #-- Polkit Agent
   #--------------------------------------------------------------------#
   systemd.user.services.polkit-gnome-authentication-agent-1 = {

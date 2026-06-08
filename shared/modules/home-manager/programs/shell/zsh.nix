@@ -14,7 +14,7 @@ in {
   #--------------------------------------------------------------------#
   home = {
     packages = with pkgs; [bat ripgrep tldr sesh];
-    sessionPath = ["$HOME/go/bin"];
+    sessionPath = ["$HOME/go/bin" "$HOME/.local/bin"];
     sessionVariables = {
     SHELL = "${pkgs.zsh}/bin/zsh";
     NIXPKGS_ALLOW_UNFREE = "1";

@@ -22,6 +22,7 @@
 
       #--- Media
       ./media/screen-capture.nix
+      ./media/qr-scanner.nix
 
       #--- Shell
       ./shell/p10k/p10k.nix
