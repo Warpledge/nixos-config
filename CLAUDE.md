@@ -48,7 +48,7 @@ flake.nix
 
 The authoritative list of toggles is **`hosts/{hostname}/hostConfig/core.nix`** — read it directly, don't trust this file to stay in sync. Current shape (desktop and laptop are kept symmetrical):
 
-- `windowManager` — `"hyprland" | "niri"`
+- `windowManager` — `"hyprland" | "niri" | "gnome"`
 - `kernel` — `"zen" | "latest" | "xanmod" | "cachyos"`
 - Service toggles: `mullvad.enable`, `clamav.enable`, `docker.enable`, `winboat.enable`, `sunshine.enable`, `waydroid.{enable,magisk,nftables}`
 - Attribute-set toggles: `browsers.{zen,mullvad,helium}`, `terminals.{kitty,ghostty}`, `editors.{helix,zed}`, `fileBrowsers.{nautilus}`, `media.{mpv,spotify,grayjay}`, `creative.{blender,krita}`

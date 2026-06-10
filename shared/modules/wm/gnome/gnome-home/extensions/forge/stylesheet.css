@@ -1,0 +1,140 @@
+.tiled {
+  color: rgb(203, 166, 247);
+  opacity: 1;
+  border-width: 2px;
+}
+
+.split {
+  color: rgb(250, 179, 135);
+  opacity: 1;
+  border-width: 2px;
+}
+
+.stacked {
+  color: rgb(249, 226, 175);
+  opacity: 1;
+  border-width: 2px;
+}
+
+.tabbed {
+  color: rgb(137, 180, 250);
+  opacity: 1;
+  border-width: 2px;
+}
+
+.floated {
+  color: rgb(245, 194, 231);
+  border-width: 2px;
+  opacity: 1;
+}
+
+.window-tiled-border {
+  border-width: 2px;
+  border-color: rgb(203, 166, 247);
+  border-style: solid;
+  border-radius: 14px;
+}
+
+.window-split-border {
+  border-width: 2px;
+  border-color: rgb(250, 179, 135);
+  border-style: solid;
+  border-radius: 14px;
+}
+
+.window-split-horizontal {
+  border-left-width: 0;
+  border-top-width: 0;
+  border-bottom-width: 0;
+}
+
+.window-split-vertical {
+  border-left-width: 0;
+  border-top-width: 0;
+  border-right-width: 0;
+}
+
+.window-stacked-border {
+  border-width: 2px;
+  border-color: rgb(249, 226, 175);
+  border-style: solid;
+  border-radius: 14px;
+}
+
+.window-tabbed-border {
+  border-width: 2px;
+  border-color: rgb(137, 180, 250);
+  border-style: solid;
+  border-radius: 14px;
+}
+
+.window-tabbed-bg {
+  border-radius: 8px;
+}
+
+.window-tabbed-tab {
+  background-color: rgba(30, 30, 46, 1);
+  border-color: rgba(137, 180, 250, 0.6);
+  border-width: 1px;
+  border-radius: 8px;
+  color: rgb(205, 214, 244);
+  margin: 1px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+.window-tabbed-tab-active {
+  background-color: rgb(137, 180, 250);
+  color: rgb(30, 30, 46);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+.window-tabbed-tab-close {
+  padding: 3px;
+  margin: 4px;
+  border-radius: 16px;
+  width: 16px;
+  background-color: rgb(243, 139, 168);
+}
+
+.window-tabbed-tab-icon {
+  margin: 3px;
+}
+
+.window-floated-border {
+  border-width: 2px;
+  border-color: rgb(245, 194, 231);
+  border-style: solid;
+  border-radius: 14px;
+}
+
+.window-tilepreview-tiled {
+  border-width: 1px;
+  border-color: rgba(203, 166, 247, 0.3);
+  border-style: solid;
+  border-radius: 14px;
+  background-color: rgba(203, 166, 247, 0.2);
+}
+
+.window-tilepreview-stacked {
+  border-width: 1px;
+  border-color: rgba(249, 226, 175, 0.3);
+  border-style: solid;
+  border-radius: 14px;
+  background-color: rgba(249, 226, 175, 0.2);
+}
+
+.window-tilepreview-swap {
+  border-width: 1px;
+  border-color: rgba(166, 227, 161, 0.4);
+  border-style: solid;
+  border-radius: 14px;
+  background-color: rgba(166, 227, 161, 0.4);
+}
+
+.window-tilepreview-tabbed {
+  border-width: 1px;
+  border-color: rgba(137, 180, 250, 0.3);
+  border-style: solid;
+  border-radius: 14px;
+  background-color: rgba(137, 180, 250, 0.2);
+}

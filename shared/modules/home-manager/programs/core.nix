@@ -28,6 +28,7 @@
     poppler-utils # PDF rendering library
     # localsend
     easyrpg-player
+    psutils
 
     #--- Gnome
     gnome-calculator

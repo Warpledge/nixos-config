@@ -12,7 +12,7 @@
   username = "warpledge";
 
   #--- Window Manager Selection
-  # Options: "hyprland" | "niri"
+  # Options: "hyprland" | "niri" | "gnome"
   windowManager = "niri";
 
   #--- Kernel Selection

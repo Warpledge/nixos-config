@@ -44,6 +44,10 @@ My personal NixOS system flake.
 
 ![Hyprland desktop with Zed and fastfetch](./screenshots/Hyprland-Desktop.png)
 
+**GNOME WM**
+
+![GNOME desktop](./screenshots/Gnome-Desktop.png)
+
 ---
 ## Host Machines
 
@@ -63,12 +67,13 @@ Most components below are toggleable per host via `hostConfig` and rebuilding.
 
 | | |
 | --- | --- |
-| **Window Manager** | [Niri][niri] / [Hyprland][hyprland] |
-| **Status Bar / Notifier / Launcher / Lock** | [DankMaterialShell][dms] (Niri + Hyprland) |
-| **Display Manager** | [tuigreet][tuigreet] via [greetd][greetd] |
+| **Window Manager** | [Niri][niri] / [Hyprland][hyprland] / [GNOME][gnome] |
+| **Status Bar / Notifier / Launcher / Lock** | [DankMaterialShell][dms] (Niri + Hyprland) / GNOME Shell + extensions (GNOME) |
+| **Display Manager** | [tuigreet][tuigreet] via [greetd][greetd] (Niri/Hyprland) / [GDM][gdm] (GNOME) |
 | **Color Scheme** | [Catppuccin][catppuccin] Mocha Mauve applied globally via [Stylix][stylix] + [catppuccin/nix][catppuccin-nix] |
 | **Fonts** | [JetBrains Mono Nerd Font][nerd-fonts], Monaspace, Nerd Fonts Symbols |
 | **Window Switcher** | [niriswitcher][niriswitcher] (Niri only) |
+| **GNOME Extensions** | [Dash to Panel][dash-to-panel], [Blur my Shell][blur-my-shell], [AppIndicator][appindicator], [Astra Monitor][astra-monitor], [Caffeine][caffeine], [Auto Move Windows][auto-move-windows], [GNOME UI Tune][gnome-ui-tune], [Space Bar][space-bar], [Date Menu Formatter][date-menu-formatter] |
 
 ### Shell & Terminal
 
@@ -125,6 +130,17 @@ Most components below are toggleable per host via `hostConfig` and rebuilding.
 
 [niri]: https://github.com/YaLTeR/niri
 [hyprland]: https://hyprland.org
+[gnome]: https://www.gnome.org
+[gdm]: https://wiki.gnome.org/Projects/GDM
+[dash-to-panel]: https://github.com/home-sweet-gnome/dash-to-panel
+[blur-my-shell]: https://github.com/aunetx/blur-my-shell
+[appindicator]: https://github.com/ubuntu/gnome-shell-extension-appindicator
+[astra-monitor]: https://github.com/AstraExt/astra-monitor
+[caffeine]: https://github.com/eonpatapon/gnome-shell-extension-caffeine
+[auto-move-windows]: https://gitlab.gnome.org/GNOME/gnome-shell-extensions
+[gnome-ui-tune]: https://github.com/somepaulo/gnome-ui-tune
+[space-bar]: https://github.com/luchrioh/space-bar
+[date-menu-formatter]: https://github.com/marcinjakubowski/date-menu-formatter
 [dms]: https://github.com/AvengeMedia/DankMaterialShell
 [tuigreet]: https://github.com/apognu/tuigreet
 [greetd]: https://git.sr.ht/~kennylevinsen/greetd

@@ -12,8 +12,8 @@
   username = "warpledge";
 
   #--- Window Manager Selection
-  # Options: "hyprland" | "niri"
-  windowManager = "niri";
+  # Options: "hyprland" | "niri" | "gnome"
+  windowManager = "gnome";
 
   #--- Kernel Selection
   # Options: "zen" | "latest" | "xanmod" | "cachyos"
