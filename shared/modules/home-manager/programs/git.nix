@@ -15,7 +15,7 @@
     settings = {
       user = {
         name = "${username}";
-        email = "null";
+        email = "168894871+Warpledge@users.noreply.github.com";
       };
       init.defaultBranch = "main";
       pull.rebase = true;
