@@ -15,6 +15,7 @@
     catppuccin = lib.mkForce {
       #--- Global Settings
       enable = true; # apply automatically globally
+      autoEnable = true; # auto-enroll all ports (matches prior implicit behavior)
       flavor = "mocha";
       accent = "mauve";
 
@@ -32,6 +33,7 @@
   #--------------------------------------------------------------------#
   catppuccin = lib.mkForce {
     enable = true; # apply automatically globally
+    autoEnable = true; # auto-enroll all ports (matches prior implicit behavior)
     flavor = "mocha";
     accent = "mauve";
   };

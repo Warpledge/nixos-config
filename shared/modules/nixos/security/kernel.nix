@@ -134,7 +134,6 @@
       "qnx4" # QNX4/QNX6 filesystem
       "qnx6" # QNX6 filesystem
       "sysv" # System V filesystem variants
-      "udf" # Universal Disk Format
       "firewire-core" # Prevent DMA attacks via FireWire
       "thunderbolt" # Prevent DMA attacks via Thunderbolt
       "esp4" # CVE-2026-46300: LPE via XFRM ESP-in-TCP (no IPsec in use)

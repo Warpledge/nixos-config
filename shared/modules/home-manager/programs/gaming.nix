@@ -73,6 +73,7 @@
     corefonts
     alsa-lib
     libGL
+    mdf2iso # Convert .mdf/.mds disc images to .iso for mounting
 
     #--- Performance Monitoring
     clinfo
