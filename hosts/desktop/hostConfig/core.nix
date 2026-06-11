@@ -13,7 +13,7 @@
 
   #--- Window Manager Selection
   # Options: "hyprland" | "niri" | "gnome"
-  windowManager = "gnome";
+  windowManager = "niri";
 
   #--- Kernel Selection
   # Options: "zen" | "latest" | "xanmod" | "cachyos"
