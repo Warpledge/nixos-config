@@ -2,12 +2,19 @@
 # GAMING CORE CONFIGURATION
 #=====================================================================#
 {
-  imports = [
-    ./esync.nix
-    ./gamemode.nix
-    ./java.nix
-    ./steam.nix
-  ];
+  lib,
+  hostConfig,
+  ...
+}: {
+  imports =
+    [
+      ./esync.nix
+      ./gamemode.nix
+      ./java.nix
+    ]
+    #--- Game Launchers (controlled by hostConfig)
+    ++ lib.optionals hostConfig.gameLaunchers.steam [./steam.nix]
+    ++ lib.optionals hostConfig.gameLaunchers.twintail [./twintail.nix];
 
   #--------------------------------------------------------------------#
   #-- Kernel Sysctls

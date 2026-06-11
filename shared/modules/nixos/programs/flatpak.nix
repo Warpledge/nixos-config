@@ -22,8 +22,6 @@
     enable = true; # Enable Flatpak support
     packages = [
       # "com.github.tchx84.Flatseal" # Flatpak permissions manager GUI
-      "io.github.brunofin.Cohesion" # Notion alternative
-      "app.twintaillauncher.ttl"
     ];
     overrides = {
       global = {

@@ -69,5 +69,12 @@
     #--- AI Tools (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.claude.enable [./ai/claude.nix]
     ++ lib.optionals hostConfig.opencode.enable [./ai/opencode.nix]
-    ++ lib.optionals hostConfig.lmstudio.enable [./ai/lmstudio.nix];
+    ++ lib.optionals hostConfig.lmstudio.enable [./ai/lmstudio.nix]
+    #--- Japanese VN / Game Support (controlled by host hostConfig.nix)
+    ++ lib.optionals hostConfig.japanese.vn [./japanese-vn.nix]
+    #--- Game Launchers (controlled by host hostConfig.nix)
+    ++ lib.optionals hostConfig.gameLaunchers.heroic [./launchers/heroic.nix]
+    ++ lib.optionals hostConfig.gameLaunchers.prismlauncher [./launchers/prismlauncher.nix]
+    ++ lib.optionals hostConfig.gameLaunchers.lutris [./launchers/lutris.nix]
+    ++ lib.optionals hostConfig.gameLaunchers.faugus [./launchers/faugus.nix];
 }

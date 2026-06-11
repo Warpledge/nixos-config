@@ -4,6 +4,8 @@
 {
   pkgs,
   username,
+  lib,
+  hostConfig,
   ...
 }: {
   #--------------------------------------------------------------------#
@@ -34,10 +36,13 @@
       };
 
       #--- Startup Applications
-      spawn-at-startup = [
-        {command = ["bash" "-c" "wl-paste --watch cliphist store &"];} # Clipboard History
-        {command = ["xrdb" "-merge" "/home/${username}/.Xresources"];} # Xwayland cursor theme
-      ];
+      spawn-at-startup =
+        [
+          {command = ["bash" "-c" "wl-paste --watch cliphist store &"];} # Clipboard History
+          {command = ["xrdb" "-merge" "/home/${username}/.Xresources"];} # Xwayland cursor theme
+        ]
+        #--- Japanese input method daemon (controlled by hostConfig)
+        ++ lib.optional hostConfig.japanese.ime {command = ["fcitx5" "-d" "-r"];};
 
       #--- Input Configuration
       input = {

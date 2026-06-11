@@ -95,8 +95,31 @@
   # Stream games to Moonlight clients (Android, iOS, PC)
   sunshine.enable = false;
 
+  #--- Game Launchers
+  # Enable the game launchers you want installed
+  gameLaunchers = {
+    steam = true; # NixOS programs.steam + GE-Proton
+    heroic = true; # Epic / GOG / Amazon
+    prismlauncher = true; # Minecraft
+    lutris = true; # Wine launcher
+    faugus = true; # UMU/Proton launcher
+    twintail = true; # Gacha game launcher (Flatpak)
+  };
+
+  #--- Cohesion Notes (Flatpak)
+  # Self-hostable Notion alternative
+  cohesion.enable = true;
+
   #--- AI Tools
   claude = {enable = true;};
   opencode = {enable = true;};
   lmstudio = {enable = false;};
+
+  #--- Japanese Language & Game Support
+  # ime: fcitx5 + Mozc input method for typing hiragana/katakana/kanji
+  # vn:  raw JP visual novel / game tooling (jp-run locale launcher, extractors)
+  japanese = {
+    ime = true;
+    vn = true;
+  };
 }

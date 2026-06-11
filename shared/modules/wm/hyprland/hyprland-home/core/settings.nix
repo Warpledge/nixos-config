@@ -3,6 +3,7 @@
 #=====================================================================#
 {
   lib,
+  hostConfig,
   ...
 }: {
   #--------------------------------------------------------------------#
@@ -27,13 +28,16 @@
   wayland.windowManager.hyprland = {
     settings = {
       #--- Autostart
-      exec-once = [
-        #--- Authentication agents
-        "gnome-keyring-daemon --start --components=secrets"
+      exec-once =
+        [
+          #--- Authentication agents
+          "gnome-keyring-daemon --start --components=secrets"
 
-        #--- System tray and services
-        "nm-applet"
-      ];
+          #--- System tray and services
+          "nm-applet"
+        ]
+        #--- Japanese input method daemon (controlled by hostConfig)
+        ++ lib.optional hostConfig.japanese.ime "fcitx5 -d -r";
 
       cursor = {
         no_warps = true;

@@ -55,5 +55,9 @@
     #--- ClamAV Antivirus (controlled by hostConfig)
     ++ lib.optionals hostConfig.clamav.enable [./services/clamav.nix]
     #--- Sunshine Game Streaming (controlled by hostConfig)
-    ++ lib.optionals hostConfig.sunshine.enable [./services/sunshine.nix];
+    ++ lib.optionals hostConfig.sunshine.enable [./services/sunshine.nix]
+    #--- Japanese Input Method (controlled by hostConfig)
+    ++ lib.optionals hostConfig.japanese.ime [./system/japanese-ime.nix]
+    #--- Cohesion Notes (Flatpak, controlled by hostConfig)
+    ++ lib.optionals hostConfig.cohesion.enable [./programs/cohesion.nix];
 }
