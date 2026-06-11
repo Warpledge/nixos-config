@@ -15,6 +15,16 @@
       enable = true;
       style.name = "kvantum";
       platformTheme.name = "qt6ct";
+
+      #--- Icon Theme for Qt Apps (Quickshell/DMS, etc.)
+      # Without this, QIcon::fromTheme() only sees the "hicolor" fallback,
+      # so XDG icon names that aren't in hicolor (e.g. fcitx5's
+      # "input-keyboard") render as broken icons in the DMS tray menu.
+      qt6ctSettings = {
+        Appearance = {
+          icon_theme = "Papirus-Dark";
+        };
+      };
     };
 
     #--- Install qt6ct for Qt theming
