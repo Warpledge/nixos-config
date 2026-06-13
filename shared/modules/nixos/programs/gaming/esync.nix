@@ -8,9 +8,9 @@
   systemd.settings.Manager = {
     DefaultLimitNOFILE = "1048576:1048576"; # System-wide FD limit (for Esync/Fsync)
   };
-  systemd.user.extraConfig = ''
-    DefaultLimitNOFILE=1048576:1048576 # User systemd FD limit
-  '';
+  systemd.user.settings.Manager = {
+    DefaultLimitNOFILE = "1048576:1048576"; # User systemd FD limit (for Esync/Fsync)
+  };
 
   #--------------------------------------------------------------------#
   #-- NTSync Device Permissions

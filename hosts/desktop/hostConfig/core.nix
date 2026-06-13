@@ -101,9 +101,9 @@
     steam = true; # NixOS programs.steam + GE-Proton
     heroic = true; # Epic / GOG / Amazon
     prismlauncher = true; # Minecraft
-    lutris = true; # Wine launcher
+    lutris = false; # Wine launcher
     faugus = true; # UMU/Proton launcher
-    twintail = true; # Gacha game launcher (Flatpak)
+    twintail = false; # Gacha game launcher (Flatpak)
   };
 
   #--- Cohesion Notes (Flatpak)
