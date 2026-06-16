@@ -20,16 +20,17 @@ nix flake check         # Validate syntax (run first, fastest feedback)
 alejandra .             # Format all Nix files (v3.0.0 is the standard)
 deadnix --no-lambda-arg # Find unused function arguments in Nix files
 statix check .          # Lint for Nix antipatterns (inherit, empty patterns, etc.)
-nixy lint               # Run both deadnix and statix in one shot (wraps the above two)
-nixy rebuild            # Apply config (wraps `nh os switch`)
-nixy rebuild 2>&1 | grep -E "error|Error|failed|Failed" || echo "✓"  # token-light rebuild
-nixy upgrade            # Update flake inputs + rebuild
-nixy dryrun             # Rebuild without applying
-nixy gc                 # GC, keep last 5 generations
+nixm lint               # Run both deadnix and statix in one shot (wraps the above two)
+nixm rebuild            # Apply config (wraps `nh os switch`)
+nixm rebuild 2>&1 | grep -E "error|Error|failed|Failed" || echo "✓"  # token-light rebuild
+nixm upgrade            # Update flake inputs + rebuild
+nixm dryrun             # Rebuild without applying
+nixm gc                 # GC, keep last 5 generations
 nix flake lock --update-input <name>   # Bump a single input
+run <pkg> [args]        # Ad-hoc launch a nixpkgs package without installing it (zsh function)
 ```
 
-`nixy` is an fzf-driven menu defined in `shared/modules/home-manager/scripts/nixy.nix`.
+`nixm` is an fzf-driven menu defined in `shared/modules/home-manager/scripts/nixm.nix`.
 
 ## Architecture
 
@@ -142,11 +143,11 @@ imports = [ ./modules/wm/${hostConfig.windowManager} ];
 1. Add the toggle to **both** host configs (keep them symmetrical)
 2. Create the module in the right subdir (`shared/modules/home-manager/programs/...`)
 3. Add the conditional import in that subdir's `default.nix`
-4. `git add` new files → `nix flake check` → `nixy rebuild`
+4. `git add` new files → `nix flake check` → `nixm rebuild`
 
 **Add a system service:** same flow, but `shared/modules/nixos/services/<name>.nix` and import in `shared/modules/nixos/default.nix`.
 
-**Switch WM:** change `windowManager` in the host's hostConfig → `nixy rebuild`.
+**Switch WM:** change `windowManager` in the host's hostConfig → `nixm rebuild`.
 
 **Customize WM:** edit `shared/modules/wm/{wm}/{wm}-home/...` for shared behavior, or `hosts/{hostname}/wm/{wm}.nix` for per-host overrides (monitors, GPU env vars).
 
@@ -215,7 +216,7 @@ When reformatting an existing file: add headers, normalize spacing, convert inli
 
 ```bash
 nix flake check                  # Syntax (fastest)
-nixy rebuild --show-trace        # Full trace
+nixm rebuild --show-trace        # Full trace
 journalctl -xeu <service>        # Service logs
 journalctl -b -p err             # Errors this boot
 ```

@@ -8,7 +8,7 @@
       "Bash(nix build:*)",
       "Bash(nix eval:*)",
       "Bash(nix-store -q:*)",
-      "Bash(nixy:*)",
+      "Bash(nixm:*)",
       "Bash(journalctl:*)",
       "Bash(systemctl:*)",
       "Bash(lspci:*)",

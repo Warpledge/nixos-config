@@ -8,7 +8,7 @@
   #--- Nushell is the primary shell for this configuration
   #--- Uses carapace for completion instead of p10k/starship
   #--- p10k and starship are configured in zsh.nix for legacy shell support
-  #--- (zsh is still used by nixy.nix script and some other legacy tools)
+  #--- (zsh is still used by nixm.nix script and some other legacy tools)
 
   programs = {
     carapace.enable = true;

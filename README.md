@@ -15,6 +15,7 @@ My personal NixOS system flake.
   - [Gaming](#gaming)
   - [System](#system)
 - [System Management TUI Script](#system-management-tui-script)
+- [Shell Shortcuts](#shell-shortcuts)
 - [Flake Inputs](#flake-inputs)
 - [Keybinds](#keybinds)
 - [Structure](#structure)
@@ -23,16 +24,18 @@ My personal NixOS system flake.
 ---
 ## Overview
 
-- **Declarative system management** — everything (packages, services, dotfiles, theming, keybinds) lives in git and rebuilds from one command.
-- **Multi-host architecture** — shared module system with per-host toggle overrides; desktop and laptop stay in sync without duplicating config.
-- **Portable by design** — no hardcoded usernames or paths; [`hostConfig/core.nix`](./hosts/desktop/hostConfig/core.nix) is the one file to change per host — WM, kernel, browsers, and app toggles all in one place.
-- **Custom tooling** — [`nixy`](./shared/modules/home-manager/scripts/nixy.nix), an fzf-driven TUI wrapping rebuild, garbage collection, rollback, linting, system & network monitoring, and firmware updates.
-- **Flake composition** — 16+ external inputs pinned in [`flake.nix`](./flake.nix), pulling in things nixpkgs doesn't ship (custom kernels, browsers, window managers, Affinity Suite via Wine, theming, etc.).
-- **Security & privacy** — [LUKS][luks] encryption, [AppArmor][apparmor], kernel hardening, and a privacy-hardened [Zen][zen] Browser with [Arkenfox][arkenfox] and [Securefox][securefox] tweaks.
-- **System-wide theming** — [Catppuccin][catppuccin] Mocha Mauve everywhere via [Stylix][stylix] — WM, terminal, editors, browsers, and GTK/Qt apps all from one declaration.
-- **App compatibility** — Android ([Waydroid][waydroid]), Windows apps ([WinBoat][winboat]), AppImages ([GearLever][gearlever]), unpatched binaries ([nix-ld][nix-ld]), and declarative Flatpak management ([nix-flatpak][nix-flatpak]).
-- **Dev tooling** — [Docker][docker], [tmux][tmux], [Zed][zed], [Helix][helix], git with [delta][delta] diffs and [gh][gh] CLI, plus [Claude Code][claude-code], [OpenCode][opencode], and [LM Studio][lmstudio] for AI workflows.
-- **Gaming & productivity** — [Gamescope][gamescope], [GameMode][gamemode], [MangoHud][mangohud], kernel tweaks, GPU driver optimizations, and keyboard-driven desktop workflows.
+NixOS is a Linux distribution where the whole system (apps, settings, themes, even keyboard shortcuts) is written out in config files instead of being configured by hand. Building from those files gives you the same system every time, and each build is kept, so if an update breaks something you can boot straight back into the previous one. This repo is that setup for both my machines, a desktop and a laptop, built from one shared set of files.
+
+Some of the highlights:
+
+- **One config, two machines:** both run off the same files. Each machine has its own settings file ([`hostConfig/core.nix`](./hosts/desktop/hostConfig/core.nix)) where I flip features on and off.
+- **Easy undo:** if an update breaks something, I roll back to the last version that worked and reboot. No hunting through hidden folders to fix it.
+- **One look everywhere:** the whole system shares the same theme ([Catppuccin][catppuccin] Mocha Mauve, set once with [Stylix][stylix]), from the terminal to the browser to regular GTK and Qt apps.
+- **Private by default:** full-disk encryption ([LUKS][luks]), [AppArmor][apparmor], a hardened kernel, and a locked-down [Zen][zen] browser using [Arkenfox][arkenfox] and [Securefox][securefox].
+- **Runs the awkward stuff:** Android apps ([Waydroid][waydroid]), Windows apps ([WinBoat][winboat]), [AppImages][gearlever], Flatpaks ([nix-flatpak][nix-flatpak]), and the normal Linux programs Nix usually won't run ([nix-ld][nix-ld]).
+- **Dev setup:** [Docker][docker], [tmux][tmux], [Zed][zed] and [Helix][helix], git with nicer diffs ([delta][delta]) and the [gh][gh] CLI, plus a few modern AI tools ([Claude Code][claude-code], [OpenCode][opencode], [LM Studio][lmstudio]).
+- **Built for gaming:** [Steam][steam] with Gamescope support, [GameMode][gamemode] and [MangoHud][mangohud], backed by a few kernel and GPU tweaks to keep things smooth.
+- **One menu to run common commands:** I built [`nixm`](./shared/modules/home-manager/scripts/nixm.nix) (short for "nix menu") to put rebuilds, cleanup, rollbacks, and updates behind a single menu, instead of commands I have to remember.
 ---
 ## Screenshots
 
@@ -51,17 +54,14 @@ My personal NixOS system flake.
 ---
 ## Host Machines
 
-- **Desktop** — Ryzen 5800X3D + RX 9070 XT (AMD-only), 280Hz OLED + 144Hz secondary
-- **Laptop** — Legion Slim 5, Ryzen 7735HS + hybrid AMD 680M / RTX 4070, 1600p@165Hz
+- **Desktop:** Ryzen 5800X3D + RX 9070 XT (AMD-only), 280Hz OLED + 144Hz secondary
+- **Laptop:** Legion Slim 5, Ryzen 7735HS + hybrid AMD 680M / RTX 4070, 1600p@165Hz
 
 ---
 
 ## Components
 
-Most components below are toggleable per host via `hostConfig` and rebuilding.
-
-<details>
-<summary>Component Details — click to expand</summary>
+Most of what's below can be turned on or off per machine from its `hostConfig` file toggles.
 
 ### Desktop Environment
 
@@ -81,7 +81,8 @@ Most components below are toggleable per host via `hostConfig` and rebuilding.
 | --- | --- |
 | **Shell** | [Zsh][zsh] + [Powerlevel10k][p10k] / [Starship][starship], with [atuin][atuin], [fzf][fzf], [zoxide][zoxide], [eza][eza] |
 | **Terminal Emulator** | [Kitty][kitty] / [Ghostty][ghostty] |
-| **Multiplexer** | [tmux][tmux] |
+| **Terminal Multiplexer** | [tmux][tmux] (run many terminals in one window) |
+| **Quick Run** | `run <pkg>`: try a package one time without installing it (`nix run` wrapper) |
 
 ### Development
 
@@ -89,7 +90,7 @@ Most components below are toggleable per host via `hostConfig` and rebuilding.
 | --- | --- |
 | **Editors / IDE** | [Zed][zed], [Helix][helix], [micro][micro] (quick edits) |
 | **Formatter** | [alejandra][alejandra] v3.0.0 |
-| **Rebuild Wrapper** | [`nixy`](./shared/modules/home-manager/scripts/nixy.nix) (fzf menu over [nh][nh]) |
+| **Rebuild Wrapper** | [`nixm`](./shared/modules/home-manager/scripts/nixm.nix) (fzf menu over [nh][nh]) |
 
 ### Applications
 
@@ -118,15 +119,13 @@ Most components below are toggleable per host via `hostConfig` and rebuilding.
 | **Audio** | [PipeWire][pipewire] (ALSA + PulseAudio compat) |
 | **Containers / VMs** | [Docker][docker], [Waydroid][waydroid] (Android), [WinBoat][winboat] (Windows apps) |
 | **Flatpak** | [nix-flatpak][nix-flatpak] (declarative Flatpak management) |
-| **Networking** | [Mullvad][mullvad] (WireGuard + quantum resistance), [systemd-resolved][resolved] + [NetworkManager][networkmanager] (iwd) |
+| **Networking** | [Mullvad][mullvad] (encrypted VPN, WireGuard), [systemd-resolved][resolved] + [NetworkManager][networkmanager] (iwd) |
 | **Antivirus** | [ClamAV][clamav] (toggleable) |
-| **Keymap Daemon** | [keyd][keyd] |
+| **Key Remapping** | [keyd][keyd] |
 | **Secrets / Keyring** | [GNOME Keyring][gnome-keyring] |
 | **Filesystem & Encryption** | ext4 on a [LUKS][luks]-encrypted partition, unlocked at boot |
 | **Bootloader** | [systemd-boot][systemd-boot] |
 | **Kernel** | [CachyOS kernel][cachyos-kernel] (selectable: zen / latest / xanmod / cachyos) |
-
-</details>
 
 [niri]: https://github.com/YaLTeR/niri
 [hyprland]: https://hyprland.org
@@ -227,79 +226,136 @@ Most components below are toggleable per host via `hostConfig` and rebuilding.
 ---
 ## System Management TUI Script
 
-![Nixy system management TUI](./screenshots/nixy-tui.png)
+![nixm system management TUI](./screenshots/nixm-tui.png)
 
-`nixy` is a custom system management script (defined in [`shared/modules/home-manager/scripts/nixy.nix`](./shared/modules/home-manager/scripts/nixy.nix)). Can be run with no arguments for an interactive menu, or you can pass a command directly. The script's original idea comes from [anotherhadi/nixy](https://github.com/anotherhadi/nixy) TUI script, which I've since heavily modified and extended.
-
-<details>
-<summary>Script Commands — click to expand</summary>
+`nixm` is the script I use to manage the system day to day (it lives in [`shared/modules/home-manager/scripts/nixm.nix`](./shared/modules/home-manager/scripts/nixm.nix)). Run it on its own and you get the menu below; pass it a command and it skips straight to that. It started from a script in [anotherhadi's NixOS config](https://github.com/anotherhadi/nixy), but I've reworked and extended it a lot since.
 
 ### NixOS Operations
 
 | Command | Description |
 | --- | --- |
-| `nixy rebuild` | Apply the current config (`nh os switch`) |
-| `nixy upgrade` | Update all flake inputs and rebuild |
-| `nixy flake-update` | Update flake inputs without rebuilding |
-| `nixy dryrun` | Preview what a rebuild would change |
-| `nixy gc` | Garbage collect, keeping last 5 generations |
-| `nixy optimize` | Hardlink identical files in the Nix store |
-| `nixy rollback` | Switch to a previous system generation |
-| `nixy lint` | Run `deadnix` + `statix` to check for unused args and Nix antipatterns |
+| `nixm rebuild` | Apply the current config (`nh os switch`) |
+| `nixm upgrade` | Update all flake inputs and rebuild |
+| `nixm flake-update` | Update flake inputs without rebuilding |
+| `nixm dryrun` | Preview what a rebuild would change |
+| `nixm gc` | Garbage collect, keeping last 5 generations |
+| `nixm optimize` | Hardlink identical files in the Nix store |
+| `nixm rollback` | Switch to a previous system generation |
+| `nixm lint` | Run `deadnix` + `statix` to check for unused args and Nix antipatterns |
 
 ### System Monitoring
 
 | Command | Description |
 | --- | --- |
-| `nixy monitor` | Resource monitor (btop) |
-| `nixy disk` | Interactive disk usage (ncdu) |
-| `nixy health` | Show running and failed systemd services |
-| `nixy temps` | Temperature readout (lm_sensors) |
+| `nixm monitor` | Resource monitor (btop) |
+| `nixm disk` | Interactive disk usage (ncdu) |
+| `nixm health` | Show running and failed systemd services |
+| `nixm temps` | Temperature readout (lm_sensors) |
 
 ### Network
 
 | Command | Description |
 | --- | --- |
-| `nixy network` | NetworkManager TUI (nmtui) |
-| `nixy speedtest` | Internet speed test |
-| `nixy ping` | Quick connectivity check (ping 8.8.8.8) |
+| `nixm network` | NetworkManager TUI (nmtui) |
+| `nixm speedtest` | Internet speed test |
+| `nixm ping` | Quick connectivity check (ping 8.8.8.8) |
 
 ### Flatpak
 
 | Command | Description |
 | --- | --- |
-| `nixy flatpak-update` | Update all Flatpaks |
-| `nixy flatpak-list` | List installed Flatpak apps |
+| `nixm flatpak-update` | Update all Flatpaks |
+| `nixm flatpak-list` | List installed Flatpak apps |
 
 ### Firmware
 
 | Command | Description |
 | --- | --- |
-| `nixy firmware-check` | Check for available firmware updates (fwupd) |
-| `nixy firmware-update` | Install firmware updates |
-| `nixy firmware-devices` | List devices with firmware support |
+| `nixm firmware-check` | Check for available firmware updates (fwupd) |
+| `nixm firmware-update` | Install firmware updates |
+| `nixm firmware-devices` | List devices with firmware support |
 
 ### AMD GPU
 
 | Command | Description |
 | --- | --- |
-| `nixy vulkan` | Print Vulkan capabilities (vulkaninfo) |
+| `nixm vulkan` | Print Vulkan capabilities (vulkaninfo) |
 
 ### Android
 
 | Command | Description |
 | --- | --- |
-| `nixy debloater` | Launch Universal Android Debloater |
+| `nixm debloater` | Launch Universal Android Debloater |
 
-</details>
+---
+## Shell Shortcuts
+
+Short commands I use in place of longer ones, all set up in [`zsh.nix`](./shared/modules/home-manager/programs/shell/zsh.nix). The ones marked _(fn)_ take an argument.
+
+### Editors & Files
+
+| Shortcut | Runs |
+| --- | --- |
+| `v` / `vi` / `vim` | `nvim` |
+| `nano` | `micro` |
+| `zed` | `zeditor` |
+| `cat` | `bat` |
+| `ls` / `l` / `ll` | `eza` (icons, listing variants) |
+| `tree` | `eza --tree` |
+| `y` | `yazi` file manager |
+| `fm` _(fn)_ | open `yazi`, then `cd` to where you left it |
+| `fcd` _(fn)_ | fuzzy-find a directory and `cd` into it |
+| `open <file>` | `xdg-open` |
+| `icat <img>` | preview an image in Kitty |
+
+### Navigation
+
+| Shortcut | Runs |
+| --- | --- |
+| `cd` | `z` (zoxide smart jump) |
+| `temp` | `cd /tmp` |
+| `cdnix` | open `~/nixos-config` in Zed |
+
+### Git
+
+| Shortcut | Runs |
+| --- | --- |
+| `g` | `lazygit` |
+| `ga` | `git add` |
+| `gc` / `gcm` | `git commit` / `git commit -m` |
+| `gcu` | `git add . && git commit -m 'Update'` |
+| `gp` / `gpl` | `git push` / `git pull` |
+| `gs` / `gd` | `git status` / `git diff` |
+| `gco` / `gcb` | `git checkout` / `git checkout -b` |
+| `gbr` | `git branch` |
+
+### Nix
+
+| Shortcut | Runs |
+| --- | --- |
+| `run <pkg>` _(fn)_ | try a package once without installing it (`nix run nixpkgs#<pkg>`) |
+| `cleanup` | garbage-collect generations older than 1 day |
+| `listgen` | list system generations |
+| `bloat` | show current system closure size |
+
+### System & Misc
+
+| Shortcut | Runs |
+| --- | --- |
+| `c` / `e` | `clear` / `exit` |
+| `grep` | `rg` (ripgrep) |
+| `us` / `rs` | `systemctl --user` / `sudo systemctl` |
+| `cleanram` | drop filesystem caches |
+| `trimall` | `fstrim` all mounts |
+| `fetch` | `fastfetch` |
+| `notes` / `note` | open notes in nvim |
+| `anime` | `ani-cli` |
+| `f` | `figlet` |
 
 ---
 ## Flake Inputs
 
-Key external sources the flake pulls from outside nixpkgs:
-
-<details>
-<summary>Flake Inputs — click to expand</summary>
+The main things this config pulls in from outside the standard NixOS package set:
 
 | Input | Purpose |
 | --- | --- |
@@ -320,17 +376,15 @@ Key external sources the flake pulls from outside nixpkgs:
 | [`claude-code`](https://github.com/sadjow/claude-code-nix) | Claude Code CLI |
 | [`affinity-nix`](https://github.com/mrshmllow/affinity-nix) | Affinity Suite v3 (Photo, Designer, Publisher) via Wine |
 
-</details>
-
 ---
 ## Keybinds
 
-`Mod` = Super (Windows key). Both WMs share the same intent — only the syntax differs.
+`Mod` is the Super (Windows) key. Both window managers do the same things; only the way the binds are written differs.
 
 >**Note:** `Mod+?` opens a keybind overlay cheatsheet in both WMs.
 
 <details>
-<summary>Niri Keybinds — click to expand</summary>
+<summary>Niri Keybinds (click to expand)</summary>
 
 #### Apps
 
@@ -415,7 +469,7 @@ Key external sources the flake pulls from outside nixpkgs:
 </details>
 
 <details>
-<summary>Hyprland Keybinds — click to expand</summary>
+<summary>Hyprland Keybinds (click to expand)</summary>
 
 #### Apps
 
@@ -488,7 +542,7 @@ Key external sources the flake pulls from outside nixpkgs:
 ---
 ## Structure
 
-**Layout** — top-level directories and what lives in each:
+**Layout:** top-level directories and what lives in each:
 
 ```
 flake.nix
@@ -508,18 +562,18 @@ shared/
 .notes/                           # personal notes I share between devices
 ```
 
-**Load order** — how the flake resolves from entry point to active modules:
+**How it loads:** the flake picks a machine, reads that machine's on/off switches, then pulls in only the modules those switches enable:
 
 ```
 flake.nix
-  → hosts/{hostname}/{hostname}.nix             # Host entry
-    → hosts/{hostname}/hostConfig/core.nix      # Per-host toggles, passed as specialArgs
-    → shared/core.nix                           # NixOS + Home-Manager integration
-      → shared/modules/{nixos,home-manager}/    # Modular configs, conditional imports
-      → shared/modules/wm/${windowManager}/     # Active WM only
+  → hosts/{hostname}/{hostname}.nix             # Pick the machine
+    → hosts/{hostname}/hostConfig/core.nix      # Read its on/off switches
+    → shared/core.nix                           # Wire up system + user config
+      → shared/modules/{nixos,home-manager}/    # Load only the enabled modules
+      → shared/modules/wm/${windowManager}/     # Load only the active window manager
 ```
 
-Each host's `hostConfig/core.nix` controls toggles for the WM, kernel, browsers, terminals, editors, and services — all from one place, using `lib.optionals`.
+Each host's `hostConfig/core.nix` is the single place that turns features on or off: window manager, kernel, browsers, terminals, editors, and services.
 
 ---
 ## History

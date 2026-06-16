@@ -4,7 +4,7 @@
 {lib, ...}: {
   imports = [
     #--- Scripts
-    ./scripts/nixy.nix
+    ./scripts/nixm.nix
     ./scripts/gaming
 
     #--- Other

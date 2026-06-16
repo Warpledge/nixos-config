@@ -1,7 +1,7 @@
 #=====================================================================#
-# NIXY - NIXES SYSTEM MANAGEMENT SCRIPT
+# NIXM - NIX MENU SYSTEM MANAGEMENT SCRIPT
 #=====================================================================#
-#- Nixy is a comprehensive system management script for NixOS.
+#- Nixm is a comprehensive system management script for NixOS.
 #- Provides a GUI menu for NixOS operations (rebuild, upgrade, garbage collection),
 #- system monitoring, diagnostics, and maintenance tasks.
 #-
@@ -9,35 +9,35 @@
 #- Modified to fit this system configuration.
 #-
 #- Commands:
-#- - `nixy` - Interactive UI wizard to manage the system.
-#- - `nixy rebuild` - Rebuild the system configuration.
-#- - `nixy upgrade` - Rebuild and upgrade the system.
-#- - `nixy flake-update` - Update flake inputs.
-#- - `nixy dryrun` - Dry-run rebuild (preview changes).
-#- - `nixy gc` - Garbage collection and cleanup.
-#- - `nixy optimize` - Optimize Nix store (hardlinking).
-#- - `nixy rollback` - Rollback to previous generation.
-#- - `nixy monitor` - System resource monitoring (btop).
-#- - `nixy disk` - Interactive disk usage analysis (ncdu).
-#- - `nixy health` - View running and failed services.
-#- - `nixy temps` - Temperature monitoring (sensors).
-#- - `nixy network` - Network management interface (nmtui).
-#- - `nixy speedtest` - Internet speed test.
-#- - `nixy ping` - Connection check (ping 8.8.8.8).
-#- - `nixy flatpak-update` - Update all Flatpaks.
-#- - `nixy flatpak-list` - List installed Flatpaks.
-#- - `nixy firmware-check` - Check for firmware updates.
-#- - `nixy firmware-update` - Install firmware updates.
-#- - `nixy firmware-devices` - List firmware-updatable devices.
-#- - `nixy vulkan` - Display Vulkan capabilities info.
-#- - `nixy debloater` - Launch Android Debloater Next Gen.
+#- - `nixm` - Interactive UI wizard to manage the system.
+#- - `nixm rebuild` - Rebuild the system configuration.
+#- - `nixm upgrade` - Rebuild and upgrade the system.
+#- - `nixm flake-update` - Update flake inputs.
+#- - `nixm dryrun` - Dry-run rebuild (preview changes).
+#- - `nixm gc` - Garbage collection and cleanup.
+#- - `nixm optimize` - Optimize Nix store (hardlinking).
+#- - `nixm rollback` - Rollback to previous generation.
+#- - `nixm monitor` - System resource monitoring (btop).
+#- - `nixm disk` - Interactive disk usage analysis (ncdu).
+#- - `nixm health` - View running and failed services.
+#- - `nixm temps` - Temperature monitoring (sensors).
+#- - `nixm network` - Network management interface (nmtui).
+#- - `nixm speedtest` - Internet speed test.
+#- - `nixm ping` - Connection check (ping 8.8.8.8).
+#- - `nixm flatpak-update` - Update all Flatpaks.
+#- - `nixm flatpak-list` - List installed Flatpaks.
+#- - `nixm firmware-check` - Check for firmware updates.
+#- - `nixm firmware-update` - Install firmware updates.
+#- - `nixm firmware-devices` - List firmware-updatable devices.
+#- - `nixm vulkan` - Display Vulkan capabilities info.
+#- - `nixm debloater` - Launch Android Debloater Next Gen.
 {
   pkgs,
   username,
   ...
 }: let
-  nixy =
-    pkgs.writeShellScriptBin "nixy"
+  nixm =
+    pkgs.writeShellScriptBin "nixm"
     # bash
     ''
       function exec() {
@@ -50,40 +50,40 @@
         # "icon;name;command"[]
         apps=(
           ";󱄅 ==== NixOS Operations ==== 󱄅;"
-          "󰑓;Rebuild System;nixy rebuild"
-          "󰦗;Upgrade System;nixy upgrade"
-          "󰏢;Flake Update;nixy flake-update"
-          "󰚀;Dry-run Rebuild;nixy dryrun"
-          "󰭜;Collect Garbage;nixy gc"
-          "󰚀;Store Optimize;nixy optimize"
-          "󰘯;Rollback Generation;nixy rollback"
-          "󰉨;Lint Config;nixy lint"
+          "󰑓;Rebuild System;nixm rebuild"
+          "󰦗;Upgrade System;nixm upgrade"
+          "󰏢;Flake Update;nixm flake-update"
+          "󰚀;Dry-run Rebuild;nixm dryrun"
+          "󰭜;Collect Garbage;nixm gc"
+          "󰚀;Store Optimize;nixm optimize"
+          "󰘯;Rollback Generation;nixm rollback"
+          "󰉨;Lint Config;nixm lint"
 
           "; ==== Firmware ==== ;"
-          "󰚰;Check Firmware Updates;nixy firmware-check"
-          "󰚰;Install Firmware Updates;nixy firmware-update"
-          "󰚰;Firmware Devices;nixy firmware-devices"
+          "󰚰;Check Firmware Updates;nixm firmware-check"
+          "󰚰;Install Firmware Updates;nixm firmware-update"
+          "󰚰;Firmware Devices;nixm firmware-devices"
 
           "; ==== System Monitoring ==== ;"
-          "󰊡;Resource Monitor;nixy monitor"
-          "󰉋;Disk Usage;nixy disk"
-          "󰌃;Service Status;nixy health"
-          "󰌡;Temperature Monitor;nixy temps"
+          "󰊡;Resource Monitor;nixm monitor"
+          "󰉋;Disk Usage;nixm disk"
+          "󰌃;Service Status;nixm health"
+          "󰌡;Temperature Monitor;nixm temps"
 
           "; ==== Network ==== ;"
-          "󰤨;Network Manager;nixy network"
-          "󰓅;Speed Test;nixy speedtest"
-          "󰍟;Connection Check;nixy ping"
+          "󰤨;Network Manager;nixm network"
+          "󰓅;Speed Test;nixm speedtest"
+          "󰍟;Connection Check;nixm ping"
 
           "; ==== Flatpak ==== ;"
-          "󰪮;Update Flatpaks;nixy flatpak-update"
-          "󰪮;List Flatpaks;nixy flatpak-list"
+          "󰪮;Update Flatpaks;nixm flatpak-update"
+          "󰪮;List Flatpaks;nixm flatpak-list"
 
           "; ==== AMD GPU ==== ;"
-          "󰖮;Vulkan Info;nixy vulkan"
+          "󰖮;Vulkan Info;nixm vulkan"
 
           "; ==== Android ==== ;"
-          "󰤱;Android Debloater;nixy debloater"
+          "󰤱;Android Debloater;nixm debloater"
         )
 
         # Apply default icons if empty and mark categories:
@@ -227,7 +227,7 @@
         *)
           echo "Unknown argument: $1"
           echo ""
-          echo "Usage: nixy [command]"
+          echo "Usage: nixm [command]"
           echo ""
           echo "Commands:"
           echo "  rebuild           - Rebuild system"
@@ -256,10 +256,10 @@
       esac
     '';
 in {
-  home.packages = [nixy];
+  home.packages = [nixm];
 
   programs.zsh.shellAliases = {
-    #--- Shorthand alias for nixy script
-    n = "nixy";
+    #--- Shorthand alias for nixm script
+    n = "nixm";
   };
 }

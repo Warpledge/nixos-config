@@ -216,6 +216,11 @@ in {
         dir=$(fd --type d | fzf) && cd "$dir"
       }
 
+      # Ad-hoc run a nixpkgs package without installing it: `run <pkg> [args]`
+      function run() {
+        nix run "nixpkgs#$1" -- "''${@:2}"
+      }
+
       # Open yazi and cd to the directory it exits in
       function fm() {
         local tmp
