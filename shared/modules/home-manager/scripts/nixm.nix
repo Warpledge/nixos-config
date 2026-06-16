@@ -1,36 +1,13 @@
 #=====================================================================#
 # NIXM - NIX MENU SYSTEM MANAGEMENT SCRIPT
 #=====================================================================#
-#- Nixm is a comprehensive system management script for NixOS.
-#- Provides a GUI menu for NixOS operations (rebuild, upgrade, garbage collection),
-#- system monitoring, diagnostics, and maintenance tasks.
+#- A menu-driven helper for NixOS upkeep: rebuilds, upgrades, garbage
+#- collection, monitoring, diagnostics, and firmware/maintenance tasks.
 #-
-#- Credits: Original script from https://github.com/anotherhadi/nixy
-#- Modified to fit this system configuration.
+#- Run `nixm` for the interactive menu, or `nixm <command>` to skip
+#- straight to one. An unknown command prints the full list.
 #-
-#- Commands:
-#- - `nixm` - Interactive UI wizard to manage the system.
-#- - `nixm rebuild` - Rebuild the system configuration.
-#- - `nixm upgrade` - Rebuild and upgrade the system.
-#- - `nixm flake-update` - Update flake inputs.
-#- - `nixm dryrun` - Dry-run rebuild (preview changes).
-#- - `nixm gc` - Garbage collection and cleanup.
-#- - `nixm optimize` - Optimize Nix store (hardlinking).
-#- - `nixm rollback` - Rollback to previous generation.
-#- - `nixm monitor` - System resource monitoring (btop).
-#- - `nixm disk` - Interactive disk usage analysis (ncdu).
-#- - `nixm health` - View running and failed services.
-#- - `nixm temps` - Temperature monitoring (sensors).
-#- - `nixm network` - Network management interface (nmtui).
-#- - `nixm speedtest` - Internet speed test.
-#- - `nixm ping` - Connection check (ping 8.8.8.8).
-#- - `nixm flatpak-update` - Update all Flatpaks.
-#- - `nixm flatpak-list` - List installed Flatpaks.
-#- - `nixm firmware-check` - Check for firmware updates.
-#- - `nixm firmware-update` - Install firmware updates.
-#- - `nixm firmware-devices` - List firmware-updatable devices.
-#- - `nixm vulkan` - Display Vulkan capabilities info.
-#- - `nixm debloater` - Launch Android Debloater Next Gen.
+#- Credits: original script from https://github.com/anotherhadi/nixy
 {
   pkgs,
   username,

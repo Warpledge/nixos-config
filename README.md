@@ -31,9 +31,9 @@ Some of the highlights:
 - **One config, two machines:** both run off the same files. Each machine has its own settings file ([`hostConfig/core.nix`](./hosts/desktop/hostConfig/core.nix)) where I flip features on and off.
 - **Easy undo:** if an update breaks something, I roll back to the last version that worked and reboot. No hunting through hidden folders to fix it.
 - **One look everywhere:** the whole system shares the same theme ([Catppuccin][catppuccin] Mocha Mauve, set once with [Stylix][stylix]), from the terminal to the browser to regular GTK and Qt apps.
-- **Private by default:** full-disk encryption ([LUKS][luks]), [AppArmor][apparmor], a hardened kernel, and a locked-down [Zen][zen] browser using [Arkenfox][arkenfox] and [Securefox][securefox].
+- **Private by default:** full-disk encryption ([LUKS][luks]), [AppArmor][apparmor], a hardened kernel, and a locked-down [Zen][zen] browser using [Arkenfox][arkenfox] and [Securefox][securefox] tweaks.
 - **Runs the awkward stuff:** Android apps ([Waydroid][waydroid]), Windows apps ([WinBoat][winboat]), [AppImages][gearlever], Flatpaks ([nix-flatpak][nix-flatpak]), and the normal Linux programs Nix usually won't run ([nix-ld][nix-ld]).
-- **Dev setup:** [Docker][docker], [tmux][tmux], [Zed][zed] and [Helix][helix], git with nicer diffs ([delta][delta]) and the [gh][gh] CLI, plus a few modern AI tools ([Claude Code][claude-code], [OpenCode][opencode], [LM Studio][lmstudio]).
+- **Dev setup:** [Docker][docker], [tmux][tmux], [Zed][zed] and [Helix][helix], git with nicer diffs ([delta][delta]) and the [gh][gh] CLI.
 - **Built for gaming:** [Steam][steam] with Gamescope support, [GameMode][gamemode] and [MangoHud][mangohud], backed by a few kernel and GPU tweaks to keep things smooth.
 - **One menu to run common commands:** I built [`nixm`](./shared/modules/home-manager/scripts/nixm.nix) (short for "nix menu") to put rebuilds, cleanup, rollbacks, and updates behind a single menu, instead of commands I have to remember.
 ---
