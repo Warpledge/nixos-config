@@ -21,7 +21,6 @@
   #-- Boot Configuration
   #--------------------------------------------------------------------#
   boot = {
-    bootspec.enable = true; # Enable boot spec for reproducible boots
     tmp.cleanOnBoot = true; # Wipe /tmp on boot
     tmp.useTmpfs = true; # Store /tmp in RAM
     supportedFilesystems = ["ntfs"]; # Support NTFS (windows) filesystems
