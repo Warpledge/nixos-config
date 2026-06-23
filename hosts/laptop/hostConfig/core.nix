@@ -67,6 +67,13 @@
     affinity = false;
   };
 
+  #--- Locally Installed Packages
+  # Prebuilt third-party bundles that aren't in nixpkgs; each is a
+  # wrapper around an app kept under ~/.local/opt/ (out of the repo)
+  local = {
+    katanaFxFloorBoard = false; # Boss Katana MK2 amp patch editor
+  };
+
   #--- Android Container (Waydroid)
   # Run Android apps through Waydroid container
   waydroid = {
