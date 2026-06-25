@@ -38,7 +38,7 @@
     solaar
     upower
     dmidecode # Install dmidecode to identify the laptop model
-  ];
+];
 
   #--- Power Management
   boot.kernelModules = ["battery" "ac"];
@@ -57,26 +57,22 @@
     tlp = {
       enable = true;
       settings = {
-        # CPU scaling driver - uses AMD's native power scaling
-        CPU_SCALING_GOVERNOR_ON_AC = "amd-pstate";
-        CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
-        CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
-        CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
+        # Legion platform profile — controls Fn+Q LED (balanced=white, low-power=blue)
+        PLATFORM_PROFILE_ON_AC = "balanced";
+        PLATFORM_PROFILE_ON_BAT = "low-power";
 
-        # Turbo boost - enabled on AC for server performance, disabled on battery
-        CPU_BOOST_ON_AC = 1;
-        CPU_BOOST_ON_BAT = 0;
+        # Aggressive PCIe link power states on battery (covers RTX 4070 PCI slot)
+        PCIE_ASPM_ON_BAT = "powersupersave";
 
-        # GPU power saving (AMD 680M + RTX 4070 hybrid)
-        RADEON_DPM_PERF_LEVEL_ON_AC = "performance";
-        RADEON_DPM_PERF_LEVEL_ON_BAT = "low";
+        # Runtime power management for all PCI devices on battery
+        RUNTIME_PM_ON_BAT = "auto";
 
-        # Thermal thresholds - max performance on AC for server stability
-        CPU_MAX_PERF_ON_AC = 100;
-        CPU_MAX_PERF_ON_BAT = 75;
+        # WiFi power saving on battery
+        WIFI_PWR_ON_BAT = "on";
 
-        # Disable turbo throttling for consistent server performance
-        SCHED_POWERSAVE = 0;
+        # Audio codec power saving
+        SOUND_POWER_SAVE_ON_BAT = 1;
+        SOUND_POWER_SAVE_CONTROLLER = "Y";
       };
     };
 

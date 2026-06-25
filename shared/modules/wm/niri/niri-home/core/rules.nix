@@ -90,6 +90,16 @@ let
       };
     }
 
+    #--- Guitar Pro 8 Fretboard panel
+    {
+      matches = [
+        {title = "Fretboard - Guitar Pro 8";}
+      ];
+      open-floating = true;
+      default-column-width = {fixed = 1687;};
+      default-window-height = {fixed = 222;};
+    }
+
     #--- Wine installers and dialogs
     {
       matches = [
