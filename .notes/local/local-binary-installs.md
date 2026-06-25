@@ -68,7 +68,7 @@ so usually only the dynamic loader (nix-ld) and a couple of env vars are missing
   Get the Linux build for Katana MK2 Firmware 2.
 - **Env needed:** `ALSA_CONFIG_PATH` → nixpkgs `alsa-lib`'s `share/alsa/alsa.conf`
   (without it, RtMidi can't open the ALSA sequencer and the app crashes).
-- **Hosts:** desktop `true`, laptop `false`.
+- **Hosts:** desktop `true`, laptop `true`.
 - **Usage:** set the amp's USB to **KATANA CTRL** MIDI mode, then in the app go
   **Tools → Preferences → Midi/USB** and select the KATANA device for input and
   output. Debug from a terminal with `katana-fxfloorboard`; `aconnect -l`

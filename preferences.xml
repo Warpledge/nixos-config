@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Preferences of the Katana-MK2-FxFloorBoard application. -->
+<Preferences>
+	<General>
+		<Application version="20260108"/>
+		<Donate url="false"/>
+		<Files dir=""/>
+		<Help url="help/help.html"/>
+		<Loader active="true"/>
+		<Start count="1"/>
+	</General>
+	<Language>
+		<Locale select="0"/>
+	</Language>
+	<Midi>
+		<Bluetooth2 device=""/>
+		<Bluetooth device="WIDI Uhost E6:15:9D:99:67:9F"/>
+		<BulkFinish patch="4"/>
+		<BulkStart patch="1"/>
+		<DBug bool="false"/>
+		<Delay set="1"/>
+		<Device bool="true"/>
+		<Katana model="1"/>
+		<Midi delay="1"/>
+		<MidiIn2 name="" device="0"/>
+		<MidiIn name="KATANA CTRL" device="2"/>
+		<MidiOut name="KATANA CTRL" device="3"/>
+		<Source device="0"/>
+		<TxCh set="1"/>
+	</Midi>
+	<Scheme>
+		<Colour select="0"/>
+		<Style select="1"/>
+	</Scheme>
+	<Window>
+		<AutoScale bool="true"/>
+		<Collapsed width="1491" bool="true"/>
+		<Font ratio="0.94"/>
+		<Position y="-26" x="0"/>
+		<Restore window="true" sidepanel="true"/>
+		<Scale ratio="0.94"/>
+		<Single bool="true"/>
+		<Size width="1232" height="1501" minheight="760" minwidth="1055"/>
+		<Splash bool="true"/>
+	</Window>
+</Preferences>
