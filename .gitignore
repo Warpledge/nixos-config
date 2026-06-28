@@ -13,7 +13,8 @@ result-*
 .idea/
 
 # Claude local state
-.claude/settings.local.json
+.claude/
+CLAUDE.md
 
 # Logs and temp
 *.log
@@ -25,3 +26,4 @@ wip/
 # BOSS Katana FloorBoard runtime artifacts (app writes these to CWD)
 /assign.kat
 /preferences.xml
+/license.txt

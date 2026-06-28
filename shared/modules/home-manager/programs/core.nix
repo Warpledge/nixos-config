@@ -9,12 +9,6 @@
   #--------------------------------------------------------------------#
   #-- Packages
   #--------------------------------------------------------------------#
-  #- Packages module: Single-purpose utilities, GNOME applications, and dependencies
-  #- Full applications with extensive configuration should have their own modules in programs/
-  #- Examples: Browsers have programs/browsers/, Editors have programs/editors/, etc.
-  #- This module consolidates lightweight tools and development dependencies
-  #- Organized by category: Apps, Utils, AI, GNOME, CLI, System Tools, Archives, Dev, Fun
-
   home.packages = with pkgs; [
     #--- Apps
     thunderbird

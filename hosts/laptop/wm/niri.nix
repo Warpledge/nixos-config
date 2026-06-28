@@ -20,36 +20,7 @@
 
     programs.niri.settings = {
       #--- Monitors
-      outputs = {
-        #--- Primary display (2560x1600@165Hz)
-        "eDP-1" = {
-          mode = {
-            width = 2560;
-            height = 1600;
-            refresh = 165.0;
-          };
-          position = {
-            x = 0;
-            y = 0;
-          };
-          scale = 1.1;
-        };
-
-        #--- Alternative primary display (2560x1600@165Hz)
-        "eDP-2" = {
-          mode = {
-            width = 2560;
-            height = 1600;
-            refresh = 165.0;
-          };
-          position = {
-            x = 0;
-            y = 0;
-          };
-          scale = 1.1;
-        };
-      };
-
+      # Defined in shared/modules/wm/niri/niri-home/core/monitors.nix
       #--- Autostart (Laptop-Specific)
       spawn-at-startup = [
         #--- Solaar - Logitech device manager

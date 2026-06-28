@@ -2,5 +2,5 @@
 # PRISM LAUNCHER (MINECRAFT)
 #=====================================================================#
 {pkgs, ...}: {
-  home.packages = [pkgs.prismlauncher]; # Open-source, multi-instance Minecraft launcher
+  home.packages = [pkgs.prismlauncher]; # multi-instance Minecraft launcher
 }

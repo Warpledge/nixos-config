@@ -1,13 +1,12 @@
 #=====================================================================#
 # NIXM - NIX MENU SYSTEM MANAGEMENT SCRIPT
 #=====================================================================#
-#- A menu-driven helper for NixOS upkeep: rebuilds, upgrades, garbage
-#- collection, monitoring, diagnostics, and firmware/maintenance tasks.
+#- A menu-driven helper for NixOS upkeep
 #-
 #- Run `nixm` for the interactive menu, or `nixm <command>` to skip
 #- straight to one. An unknown command prints the full list.
 #-
-#- Credits: original script from https://github.com/anotherhadi/nixy
+#- Credits: original pre-modified script from https://github.com/anotherhadi/nixy
 {
   pkgs,
   username,

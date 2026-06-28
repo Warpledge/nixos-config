@@ -1,12 +1,7 @@
 #=====================================================================#
 # NIRI MONITOR CONFIGURATION
 #=====================================================================#
-{
-  hostname,
-  lib,
-  ...
-}:
-let
+{hostname, ...}: let
   #--- Desktop monitors
   desktopMonitors = {
     #--- Main monitor - Dell AW2725D OLED (2560x1440@279.961Hz)
@@ -38,14 +33,34 @@ let
     };
   };
 
-  #--- Laptop monitor (defaults, can be overridden by host-specific config)
+  #--- Laptop monitors - Legion Slim 5 internal panel (2560x1600@165Hz)
   laptopMonitors = {
+    #--- Primary display
     "eDP-1" = {
       mode = {
-        width = lib.mkDefault 2560;
-        height = lib.mkDefault 1600;
-        refresh = lib.mkDefault 165.0;
+        width = 2560;
+        height = 1600;
+        refresh = 165.0;
       };
+      position = {
+        x = 0;
+        y = 0;
+      };
+      scale = 1.1;
+    };
+
+    #--- Alternative primary display (appears as eDP-2 on some boots)
+    "eDP-2" = {
+      mode = {
+        width = 2560;
+        height = 1600;
+        refresh = 165.0;
+      };
+      position = {
+        x = 0;
+        y = 0;
+      };
+      scale = 1.1;
     };
   };
 

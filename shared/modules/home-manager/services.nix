@@ -31,11 +31,8 @@
   #--------------------------------------------------------------------#
   #-- Break gpg-agent SSH ordering cycle
   #--------------------------------------------------------------------#
-  #--- home-manager's set-SSH_AUTH_SOCK.service implicitly gets
-  #--- After=basic.target (DefaultDependencies) while also being
-  #--- Before=gpg-agent-ssh.socket (a sockets.target dependency of
-  #--- basic.target) -- a structural ordering cycle. It doesn't actually
-  #--- need to wait on basic.target, so drop that default dependency.
+  #--- Drop default deps to break a startup ordering cycle: the service
+  #--- runs both after and before basic.target. It doesn't need basic.target.
   systemd.user.services.set-SSH_AUTH_SOCK.Unit.DefaultDependencies = false;
 
   #--------------------------------------------------------------------#

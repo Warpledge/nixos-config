@@ -2,8 +2,7 @@
 # KATANA MK2 FXFLOORBOARD CONFIGURATION
 #=====================================================================#
 #- Patch editor for the Boss Katana MK2 amp (Colin Willcocks' tool).
-#- Not in nixpkgs; this wraps the prebuilt Linux bundle that lives at
-#- ~/.local/opt/katana-fxfloorboard/ (kept out of the public repo).
+#- Not in nixpkgs; this wraps the prebuilt Linux bundle.
 #-
 #- The bundle ships its own libraries (RUNPATH -> ./lib) and runs via
 #- nix-ld; the only thing it needs from us is ALSA_CONFIG_PATH so the

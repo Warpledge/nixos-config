@@ -5,9 +5,6 @@
 #- and stability settings before each launch. Survives tModLoader updates
 #- since the file is re-patched on every launch via Steam pre-launch.
 #-
-#- Steam launch option:
-#-   /etc/profiles/per-user/warpledge/bin/tml-prelaunch gamemoderun gamescope -W 2560 -H 1440 -r 280 -f -- %command%
-#-
 #- Patches applied:
 #-   DEFAULT_STACK_SIZE: 51200000           (512MB stack, prevents overflow)
 #-   System.GC.Server: true                 (multi-core GC)
