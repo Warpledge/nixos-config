@@ -21,3 +21,7 @@ result-*
 
 # WIP / personal scratchpad
 wip/
+
+# BOSS Katana FloorBoard runtime artifacts (app writes these to CWD)
+/assign.kat
+/preferences.xml
