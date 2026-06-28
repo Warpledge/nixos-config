@@ -27,7 +27,7 @@
   browsers = {
     zen = true;
     mullvad = true;
-    helium = false;
+    helium = true;
   };
 
   #--- Terminal Selection
