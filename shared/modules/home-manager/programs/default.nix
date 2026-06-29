@@ -45,6 +45,8 @@
       ./gaming.nix
       ./git.nix
     ]
+    #--- File Browsers (controlled by host hostConfig.nix)
+    ++ lib.optionals hostConfig.fileBrowsers.yazi [./file-browsers/yazi.nix]
     #--- Browsers (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.browsers.zen [./browsers/zen]
     ++ lib.optionals hostConfig.browsers.mullvad [./browsers/mullvad]

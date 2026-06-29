@@ -118,4 +118,18 @@
       MESA_SHADER_CACHE_MAX_SIZE = "10G";
     };
   };
+
+  #--------------------------------------------------------------------#
+  #-- MangoHud Overlay
+  #--------------------------------------------------------------------#
+  #--- FPS-only overlay, top-right corner (stylix target disabled in theme/stylix.nix)
+  #--- font_file references the themed JetBrainsMono Nerd Font (Mono cut → fixed-width digits)
+  xdg.configFile."MangoHud/MangoHud.conf".text = ''
+    fps_only
+    position=top-right
+    font_size=16
+    background_alpha=0
+    text_color=00FF00
+    font_file=${config.stylix.fonts.monospace.package}/share/fonts/truetype/NerdFonts/JetBrainsMono/JetBrainsMonoNerdFontMono-Regular.ttf
+  '';
 }

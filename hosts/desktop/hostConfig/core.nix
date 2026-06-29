@@ -48,6 +48,7 @@
   # Enable the file browsers you want installed
   fileBrowsers = {
     nautilus = true;
+    yazi = true;
   };
 
   #--- Media Selection

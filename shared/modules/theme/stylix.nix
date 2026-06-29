@@ -35,6 +35,7 @@
         helix.enable = false;
         micro.enable = false;
         starship.enable = false;
+        yazi.enable = false; # themed by Catppuccin port
         firefox.enable = false;
         floorp.enable = false;
         librewolf.enable = false;

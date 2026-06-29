@@ -17,7 +17,7 @@
       "https://vicinae.cachix.org" # Community packages
       "https://ghostty.cachix.org" # Ghostty terminal
       "https://cache.garnix.io" # Garnix cache for affinity-nix
-      "https://attic.xuyh0120.win/lantian" # CachyOS kernel
+      # "https://attic.xuyh0120.win/lantian" # CachyOS kernel — temporarily disabled (server unreachable 2026-06-29)
     ];
     trusted-public-keys = [
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
