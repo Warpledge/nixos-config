@@ -223,7 +223,7 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 
 ![nixm system management TUI](./screenshots/nixm-tui.png)
 
-`nixm` is the script I use to manage the system day to day (it lives in [`shared/modules/home-manager/scripts/nixm.nix`](./shared/modules/home-manager/scripts/nixm.nix)). Run it on its own and you get the menu below; pass it a command and run them directly. It started from a script in [anotherhadi's NixOS config](https://github.com/anotherhadi/nixy), but I've reworked and extended it a lot since.
+`nixm` is the script I use to manage the system day to day (it lives in [`shared/modules/home-manager/scripts/nixm.nix`](./shared/modules/home-manager/scripts/nixm.nix)). Run it on its own and you get a TUI (terminal UI) to select commands; or pass an option as a direct command. It started from a script in [anotherhadi's NixOS config](https://github.com/anotherhadi/nixy), but I've reworked and extended it a lot since.
 
 ### NixOS Operations
 
