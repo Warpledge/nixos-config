@@ -1,7 +1,11 @@
 #=====================================================================#
 # DATE MENU FORMATTER EXTENSION
 #=====================================================================#
-{pkgs, lib, ...}: let
+{
+  pkgs,
+  lib,
+  ...
+}: let
   inherit (lib.gvariant) mkInt32;
 in {
   home.packages = with pkgs.gnomeExtensions; [

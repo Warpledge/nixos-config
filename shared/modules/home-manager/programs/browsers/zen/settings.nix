@@ -281,5 +281,4 @@
   #--- Other
   "content.notify.interval" = 100000;
   "dom.battery.enabled" = false;
-
 }

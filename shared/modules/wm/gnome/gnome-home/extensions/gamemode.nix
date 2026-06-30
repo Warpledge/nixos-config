@@ -1,7 +1,11 @@
 #=====================================================================#
 # GAMEMODE SHELL EXTENSION
 #=====================================================================#
-{pkgs, lib, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   home.packages = with pkgs.gnomeExtensions; [
     gamemode-shell-extension
   ];

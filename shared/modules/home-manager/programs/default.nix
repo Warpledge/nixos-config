@@ -76,6 +76,8 @@
     ++ lib.optionals hostConfig.lmstudio.enable [./ai/lmstudio.nix]
     #--- Japanese VN / Game Support (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.japanese.vn [./japanese-vn.nix]
+    #--- Discord Rich Presence / Game Detection (controlled by host hostConfig.nix)
+    ++ lib.optionals hostConfig.discord.arrpc.enable [./chat-clients/arrpc.nix]
     #--- Game Launchers (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.gameLaunchers.heroic [./launchers/heroic.nix]
     ++ lib.optionals hostConfig.gameLaunchers.prismlauncher [./launchers/prismlauncher.nix]

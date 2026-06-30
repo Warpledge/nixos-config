@@ -11,10 +11,14 @@
   #-- Kernel Selection (controlled by hostConfig.kernel)
   #--------------------------------------------------------------------#
   boot.kernelPackages =
-    if hostConfig.kernel == "zen" then pkgs.linuxPackages_zen
-    else if hostConfig.kernel == "latest" then pkgs.linuxPackages_latest
-    else if hostConfig.kernel == "xanmod" then pkgs.linuxPackages_xanmod
-    else if hostConfig.kernel == "cachyos" then pkgs.cachyosKernels.linuxPackages-cachyos-latest
+    if hostConfig.kernel == "zen"
+    then pkgs.linuxPackages_zen
+    else if hostConfig.kernel == "latest"
+    then pkgs.linuxPackages_latest
+    else if hostConfig.kernel == "xanmod"
+    then pkgs.linuxPackages_xanmod
+    else if hostConfig.kernel == "cachyos"
+    then pkgs.cachyosKernels.linuxPackages-cachyos-latest
     else pkgs.linuxPackages_zen; # Default fallback
 
   #--------------------------------------------------------------------#

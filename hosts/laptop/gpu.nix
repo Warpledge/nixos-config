@@ -49,23 +49,23 @@
       ];
     };
     nvidia = {
-    open = true;
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
-    modesetting.enable = true;
-    powerManagement.enable = true;
-    powerManagement.finegrained = true;
-    nvidiaSettings = false;
-    prime = {
-      #--- GPU switching offload - AMD iGPU for display, NVIDIA for compute
-      offload.enable = true;
-      offload.enableOffloadCmd = true;
-      #--- NVIDIA GeForce RTX 4070 Max-Q
-      nvidiaBusId = "PCI:1:0:0";
-      #--- AMD Radeon 680M (integrated)
-      amdgpuBusId = "PCI:6:0:0";
+      open = true;
+      package = config.boot.kernelPackages.nvidiaPackages.stable;
+      modesetting.enable = true;
+      powerManagement.enable = true;
+      powerManagement.finegrained = true;
+      nvidiaSettings = false;
+      prime = {
+        #--- GPU switching offload - AMD iGPU for display, NVIDIA for compute
+        offload.enable = true;
+        offload.enableOffloadCmd = true;
+        #--- NVIDIA GeForce RTX 4070 Max-Q
+        nvidiaBusId = "PCI:1:0:0";
+        #--- AMD Radeon 680M (integrated)
+        amdgpuBusId = "PCI:6:0:0";
+      };
     };
   };
-};
 
   #--------------------------------------------------------------------#
   #-- Environment & Packages

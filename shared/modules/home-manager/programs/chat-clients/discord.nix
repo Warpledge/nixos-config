@@ -31,6 +31,7 @@
         unlockedAvatarZoom.enable = true;
         viewIcons.enable = true;
         volumeBooster.enable = true;
+        webRichPresence.enable = true; # WebRichPresence (arRPC): read game presence from standalone arRPC service
         youtubeAdblock.enable = true;
         messageClickActions = {
           enable = true;

@@ -20,7 +20,6 @@
   #--- Blur: System utilities
   "match:namespace hyprlock, blur on ignorezero on"
 
-
   #--- Blur: Noctalia Shell
   # quickshell (background, full-screen container) intentionally no blur — specific quickshell:* components have their own rules
   # "match:namespace ^quickshell$, blur on ignorealpha 0.85"

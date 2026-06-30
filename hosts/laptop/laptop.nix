@@ -38,7 +38,7 @@
     solaar
     upower
     dmidecode # Install dmidecode to identify the laptop model
-];
+  ];
 
   #--- Power Management
   boot.kernelModules = ["battery" "ac"];

@@ -8,8 +8,7 @@
   lib,
   hostConfig,
   ...
-}:
-let
+}: let
   #--- Apply CachyOS kernel overlay if using cachyos kernel
   overlays =
     if hostConfig.kernel == "cachyos"

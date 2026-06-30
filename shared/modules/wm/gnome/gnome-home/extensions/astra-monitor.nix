@@ -1,7 +1,11 @@
 #=====================================================================#
 # ASTRA MONITOR EXTENSION
 #=====================================================================#
-{pkgs, lib, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   home.packages = with pkgs.gnomeExtensions; [
     astra-monitor
   ];

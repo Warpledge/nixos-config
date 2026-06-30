@@ -29,7 +29,6 @@
       # core-apps.enable = false; # core base apps
       localsearch.enable = false; # file trackers
     };
-
   };
 
   #--------------------------------------------------------------------#

@@ -22,9 +22,9 @@
     #-- GPG Auth Agent
     #--------------------------------------------------------------------#
     gpg-agent = {
-    enable = true;
-    enableSshSupport = true;
-    pinentry.package = pkgs.pinentry-gnome3;
+      enable = true;
+      enableSshSupport = true;
+      pinentry.package = pkgs.pinentry-gnome3;
     };
   };
 

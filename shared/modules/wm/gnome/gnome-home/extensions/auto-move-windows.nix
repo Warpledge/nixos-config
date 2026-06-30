@@ -1,7 +1,11 @@
 #=====================================================================#
 # AUTO MOVE WINDOWS EXTENSION
 #=====================================================================#
-{pkgs, lib, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   home.packages = with pkgs.gnomeExtensions; [
     auto-move-windows
   ];

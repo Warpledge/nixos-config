@@ -1,8 +1,7 @@
 #=====================================================================#
 # LAYER RULES (simplified format)
 #=====================================================================#
-_:
-let
+_: let
   animations = import ./animations.nix;
   blur = import ./blur.nix;
 

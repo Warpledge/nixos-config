@@ -1,7 +1,11 @@
 #=====================================================================#
 # GNOME UI TUNE EXTENSION
 #=====================================================================#
-{pkgs, lib, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   home.packages = with pkgs.gnomeExtensions; [
     gnome-40-ui-improvements
   ];

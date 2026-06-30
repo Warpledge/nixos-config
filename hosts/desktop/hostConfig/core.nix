@@ -118,6 +118,10 @@
   # Self-hostable Notion alternative
   cohesion.enable = true;
 
+  #--- Discord Rich Presence (arRPC)
+  # Standalone arRPC server for Steam/Proton game detection in Vesktop
+  discord.arrpc.enable = true;
+
   #--- AI Tools
   claude = {enable = true;};
   opencode = {enable = true;};
