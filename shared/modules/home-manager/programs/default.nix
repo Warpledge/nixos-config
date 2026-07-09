@@ -68,6 +68,7 @@
     ++ lib.optionals hostConfig.creative.affinity [./creative/affinity.nix]
     #--- Local Packages (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.local.katanaFxFloorBoard [./local/katana-fxfloorboard.nix]
+    ++ lib.optionals hostConfig.local.relinkModOrganizer [./local/relink-mod-organizer.nix]
     #--- WinBoat (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.winboat.enable [./emulation/winboat.nix]
     #--- AI Tools (controlled by host hostConfig.nix)

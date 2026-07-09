@@ -20,6 +20,7 @@
       accent = "mauve";
 
       gtk.icon.enable = false;
+      cursors.enable = false; # keep stylix Bibata-Modern-Ice cursor (avoids pointerCursor conflict)
       kvantum = {
         enable = true;
         apply = true; # Auto-apply theme via kvantum.kvconfig
