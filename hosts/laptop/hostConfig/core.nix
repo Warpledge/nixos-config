@@ -73,7 +73,7 @@
   # wrapper around an app kept under ~/.local/opt/ (out of the repo)
   local = {
     katanaFxFloorBoard = true; # Boss Katana MK2 amp patch editor
-    relinkModOrganizer = true; # Granblue Relink GUI mod manager
+    granblueRelinkMods = true; # GBFR mod tools: RelinkModOrganizer (data mods) + Reloaded-II (code/hook mods)
   };
 
   #--- Android Container (Waydroid)

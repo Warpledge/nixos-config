@@ -57,6 +57,10 @@
         };
       };
     };
+
+    #--- Cursor
+    # Explicit enable; relying on home.pointerCursor's implicit enable is deprecated.
+    home.pointerCursor.enable = true;
   };
   #--------------------------------------------------------------------#
   #-- System Theme
