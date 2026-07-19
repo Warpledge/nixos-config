@@ -68,6 +68,12 @@
     affinity = false;
   };
 
+  #--- Finance Software Selection
+  # Enable the personal finance applications you want installed
+  finance = {
+    homebank = true; # Lightweight personal accounting (labeled transactions + running balance)
+  };
+
   #--- Locally Installed Packages
   # Prebuilt third-party bundles that aren't in nixpkgs; each is a
   # wrapper around an app kept under ~/.local/opt/ (out of the repo)

@@ -66,6 +66,8 @@
     ++ lib.optionals hostConfig.creative.blender [./creative/blender.nix]
     ++ lib.optionals hostConfig.creative.krita [./creative/krita.nix]
     ++ lib.optionals hostConfig.creative.affinity [./creative/affinity.nix]
+    #--- Finance (controlled by host hostConfig.nix)
+    ++ lib.optionals hostConfig.finance.homebank [./finance/homebank.nix]
     #--- Local Packages (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.local.katanaFxFloorBoard [./local/katana-fxfloorboard.nix]
     ++ lib.optionals hostConfig.local.granblueRelinkMods [./local/relink-mod-organizer.nix ./local/reloaded-ii-gbfr.nix]
