@@ -14,7 +14,6 @@ result-*
 
 # Claude local state
 .claude/
-CLAUDE.md
 
 # Logs and temp
 *.log

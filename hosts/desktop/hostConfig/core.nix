@@ -58,6 +58,7 @@
     spotify = true;
     grayjay = true;
     videoTrimmer = true;
+    qrScanner = false; # cobang broken: python-zbar fails to build upstream
   };
 
   #--- Creative Software Selection

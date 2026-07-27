@@ -26,15 +26,14 @@
       inputs.claude-code.overlays.default # Claude Code CLI
       inputs.affinity-nix.overlays.default # Affinity Suite (Photo, Designer, Publisher)
 
-      #--- AppArmor 5.0.0 reload fix (upstream regression)
-      # apparmor 5.0.0 moved rc.apparmor.functions from apparmor-parser to
-      # apparmor-init, but aa-remove-unknown still resolves it against the
-      # parser output, breaking `apparmor.service` reload during activation.
-      # apparmor-parser is only used to locate that file, so point it at
-      # apparmor-init. Remove once fixed in nixpkgs.
+      #--- niri libdisplay-info version pin (upstream regression)
+      # nixpkgs bumped libdisplay-info to 0.4.0, but niri's vendored Rust
+      # deps require < 0.4.0. Pin niri to the same libdisplay-info_0_2
+      # fallback already used by weston/cosmic-comp for this reason.
+      # Remove once niri's Cargo deps are updated upstream.
       (_final: prev: {
-        apparmor-utils = prev.apparmor-utils.override {
-          apparmor-parser = prev.apparmor-init;
+        niri = prev.niri.override {
+          libdisplay-info = prev.libdisplay-info_0_2;
         };
       })
     ];

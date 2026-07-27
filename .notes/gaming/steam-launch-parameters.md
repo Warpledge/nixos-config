@@ -89,11 +89,20 @@ PROTON_FSR4_RDNA3_UPGRADE=1 PROTON_FSR4_INDICATOR=1 PROTON_ENABLE_WAYLAND=1 game
 
 ## Arknights Endfield
 
+**Launched via Heroic (Epic Games Store) using umu-run/Proton, not native Steam.** Environment variables are set per-game in Heroic → Game Settings → Advanced → Environment Variables (not a `%command%` launch string).
+
 ```
-PROTON_USE_NTSYNC=1 PROTON_ENABLE_WAYLAND=1 gamemoderun %command%
+PROTON_USE_NTSYNC=1
+STEAMOS=1
+STEAMDECK=1
+WEBKIT_DISABLE_COMPOSITING_MODE=1
+PROTON_ENABLE_WAYLAND=0
+WINEDLLOVERRIDES=winewayland.drv=
 ```
 
-**Notes:** `PROTON_USE_NTSYNC=1` enables NT sync primitives via the `ntsync` kernel module (loaded in `security/kernel.nix`). Fixes 5-20 min freezes introduced in the 1.2 patch. Requires GE-Proton (set in Steam compatibility settings). Do not enable in-game Reflex — crashes on AMD.
+**Notes:** `PROTON_USE_NTSYNC=1` enables NT sync primitives via the `ntsync` kernel module (loaded in `security/kernel.nix`). Fixes 5-20 min freezes introduced in the 1.2 patch. `STEAMOS=1`/`STEAMDECK=1` force Steam Deck identity, needed for some Proton compatibility paths. `WEBKIT_DISABLE_COMPOSITING_MODE=1` avoids rendering issues in the CEF/WebView login screen. `PROTON_ENABLE_WAYLAND=0` + `WINEDLLOVERRIDES=winewayland.drv=` force XWayland instead of Wine's native Wayland driver — fixes a fatal crash (`xdg_wm_base#N: error 4: wrong configure serial`, `waylanddrv:wayland_read_events_thread Failed to read events from the compositor, terminating process`) where Niri kills the wine process outright when the native Wayland driver acks a stale configure serial while the main game window is setting up its D3D resources. The Heroic per-game "Enable Wine Wayland" checkbox did not reliably force this off, hence the explicit env vars. Requires GE-Proton or equivalent (set in compatibility tool settings). Do not enable in-game Reflex — crashes on AMD.
+
+Separately, the game's kernel-mode anti-cheat driver (Tencent "Anti-Cheat Expert", `ace-base.sys`) fails to load under Wine (`unimplemented function ntoskrnl.exe.PsGetProcessExitStatus`). This doesn't appear to be fatal to launching/playing, but the anti-cheat isn't actually running correctly as a result.
 
 ---
 

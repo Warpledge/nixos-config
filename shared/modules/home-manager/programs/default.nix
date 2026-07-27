@@ -22,7 +22,6 @@
 
       #--- Media
       ./media/screen-capture.nix
-      ./media/qr-scanner.nix
 
       #--- Shell
       ./shell/p10k/p10k.nix
@@ -59,6 +58,7 @@
     ++ lib.optionals hostConfig.media.spotify [./media/spotify.nix]
     ++ lib.optionals hostConfig.media.grayjay [./media/grayjay.nix]
     ++ lib.optionals hostConfig.media.videoTrimmer [./media/video-trimmer.nix]
+    ++ lib.optionals hostConfig.media.qrScanner [./media/qr-scanner.nix]
     #--- Terminals (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.terminals.kitty [./terminals/kitty.nix]
     ++ lib.optionals hostConfig.terminals.ghostty [./terminals/ghostty.nix]
