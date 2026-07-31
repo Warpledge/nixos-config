@@ -96,7 +96,7 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | **Media Player** | [mpv][mpv], [Celluloid][celluloid] (mpv frontend), [Spotify][spotify] via [spicetify-nix][spicetify], [Grayjay][grayjay] |
 | **Screenshot / Recording** | [grim][grim] + [slurp][slurp], [gpu-screen-recorder][gpu-screen-recorder] |
 | **Creative** | [Blender][blender], [Krita][krita], [Affinity Suite v3][affinity-nix] (via Wine) |
-| **Chat / Productivity** | [Vesktop][vesktop] via [nixcord][nixcord] (Vencord), [Thunderbird][thunderbird], [Obsidian][obsidian], [Cohesion][cohesion] |
+| **Chat / Productivity** | [Vesktop][vesktop] via [nixcord][nixcord] (Vencord), [Thunderbird][thunderbird], [Obsidian][obsidian] |
 | **AI Tooling** | [Claude Code][claude-code], [OpenCode][opencode], [LM Studio][lmstudio] |
 
 ### Gaming
@@ -173,7 +173,6 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 [nixcord]: https://github.com/KaylorBen/nixcord
 [thunderbird]: https://www.thunderbird.net
 [obsidian]: https://obsidian.md
-[cohesion]: https://github.com/brunofin/cohesion
 [steam]: https://store.steampowered.com
 [heroic]: https://heroicgameslauncher.com
 [prismlauncher]: https://prismlauncher.org

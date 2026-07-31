@@ -27,7 +27,7 @@
   browsers = {
     zen = true;
     mullvad = true;
-    helium = true;
+    helium = false;
   };
 
   #--- Terminal Selection
@@ -80,7 +80,7 @@
   # wrapper around an app kept under ~/.local/opt/ (out of the repo)
   local = {
     katanaFxFloorBoard = true; # Boss Katana MK2 amp patch editor
-    granblueRelinkMods = true; # GBFR mod tools: RelinkModOrganizer (data mods) + Reloaded-II (code/hook mods)
+    granblueRelinkMods = false; # GBFR mod tools: RelinkModOrganizer (data mods) + Reloaded-II (code/hook mods)
   };
 
   #--- Android Container (Waydroid)
@@ -115,31 +115,27 @@
   # Enable the game launchers you want installed
   gameLaunchers = {
     steam = true; # NixOS programs.steam + GE-Proton
-    heroic = true; # Epic / GOG / Amazon
+    heroic = false; # Epic / GOG / Amazon
     prismlauncher = true; # Minecraft
     lutris = false; # Wine launcher
-    faugus = true; # UMU/Proton launcher
+    faugus = false; # UMU/Proton launcher
     twintail = false; # Gacha game launcher (Flatpak)
   };
 
-  #--- Cohesion Notes (Flatpak)
-  # Self-hostable Notion alternative
-  cohesion.enable = true;
-
   #--- Discord Rich Presence (arRPC)
   # Standalone arRPC server for Steam/Proton game detection in Vesktop
-  discord.arrpc.enable = true;
+  discord.arrpc.enable = false;
 
   #--- AI Tools
   claude = {enable = true;};
-  opencode = {enable = true;};
+  opencode = {enable = false;};
   lmstudio = {enable = false;};
 
   #--- Japanese Language & Game Support
   # ime: fcitx5 + Mozc input method for typing hiragana/katakana/kanji
   # vn:  raw JP visual novel / game tooling (jp-run locale launcher, extractors)
   japanese = {
-    ime = true;
-    vn = true;
+    ime = false;
+    vn = false;
   };
 }

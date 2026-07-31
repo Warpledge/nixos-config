@@ -8,7 +8,6 @@ let
       matches = [
         {app-id = "org.gnome.seahorse.Application";}
         {app-id = "bitwarden";}
-        {app-id = "cohesion";}
         {app-id = "Mullvad VPN";}
         {app-id = "Mullvad Browser";}
       ];

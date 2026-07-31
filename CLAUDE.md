@@ -52,7 +52,7 @@ The authoritative list of toggles is **`hosts/{hostname}/hostConfig/core.nix`** 
 - `username` — read by `flake.nix` itself (`inherit (hostConfig) username`), not just by modules
 - `windowManager` — `"hyprland" | "niri" | "gnome"`
 - `kernel` — `"zen" | "latest" | "xanmod" | "cachyos"`
-- Service toggles: `mullvad.enable`, `clamav.enable`, `docker.enable`, `winboat.enable`, `sunshine.enable`, `cohesion.enable`, `discord.arrpc.enable`, `waydroid.{enable,magisk,nftables}`
+- Service toggles: `mullvad.enable`, `clamav.enable`, `docker.enable`, `winboat.enable`, `sunshine.enable`, `discord.arrpc.enable`, `waydroid.{enable,magisk,nftables}`
 - Attribute-set toggles: `browsers.{zen,mullvad,helium}`, `terminals.{kitty,ghostty}`, `editors.{helix,zed}`, `fileBrowsers.{nautilus,yazi}`, `media.{mpv,spotify,grayjay,videoTrimmer,qrScanner}`, `creative.{blender,krita,affinity}`, `finance.{homebank}`, `gameLaunchers.{steam,heroic,prismlauncher,lutris,faugus,twintail}`, `japanese.{ime,vn}`
 - `local.{katanaFxFloorBoard,granblueRelinkMods}` — wrappers around prebuilt bundles under `~/.local/opt/` (kept out of git); see `.notes/local/local-binary-installs.md`
 - AI tools: `claude.enable`, `opencode.enable`, `lmstudio.enable`

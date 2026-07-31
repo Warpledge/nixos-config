@@ -25,17 +25,6 @@
       inputs.nur.overlays.default # NUR (Nix User Repository)
       inputs.claude-code.overlays.default # Claude Code CLI
       inputs.affinity-nix.overlays.default # Affinity Suite (Photo, Designer, Publisher)
-
-      #--- niri libdisplay-info version pin (upstream regression)
-      # nixpkgs bumped libdisplay-info to 0.4.0, but niri's vendored Rust
-      # deps require < 0.4.0. Pin niri to the same libdisplay-info_0_2
-      # fallback already used by weston/cosmic-comp for this reason.
-      # Remove once niri's Cargo deps are updated upstream.
-      (_final: prev: {
-        niri = prev.niri.override {
-          libdisplay-info = prev.libdisplay-info_0_2;
-        };
-      })
     ];
   };
 }

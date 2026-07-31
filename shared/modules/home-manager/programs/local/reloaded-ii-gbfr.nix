@@ -14,10 +14,7 @@
 #- The bundle lives on the Linux side at
 #- ~/Desktop/Reloaded-II - Granblue Fantasy Relink/ (created by the
 #- Setup-Linux.exe installer, kept out of the repo like other local apps).
-{
-  pkgs,
-  ...
-}: let
+{pkgs, ...}: let
   #-- Windows exe launched inside the GBFR Proton prefix
   appId = "881020";
   exePath = "$HOME/Desktop/Reloaded-II - Granblue Fantasy Relink/Reloaded-II.exe";

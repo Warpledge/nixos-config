@@ -57,7 +57,5 @@
     #--- Sunshine Game Streaming (controlled by hostConfig)
     ++ lib.optionals hostConfig.sunshine.enable [./services/sunshine.nix]
     #--- Japanese Input Method (controlled by hostConfig)
-    ++ lib.optionals hostConfig.japanese.ime [./system/japanese-ime.nix]
-    #--- Cohesion Notes (Flatpak, controlled by hostConfig)
-    ++ lib.optionals hostConfig.cohesion.enable [./programs/cohesion.nix];
+    ++ lib.optionals hostConfig.japanese.ime [./system/japanese-ime.nix];
 }

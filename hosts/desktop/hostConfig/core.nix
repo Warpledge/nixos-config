@@ -27,7 +27,7 @@
   browsers = {
     zen = true;
     mullvad = true;
-    helium = true;
+    helium = false;
   };
 
   #--- Terminal Selection
@@ -79,8 +79,8 @@
   # Prebuilt third-party bundles that aren't in nixpkgs; each is a
   # wrapper around an app kept under ~/.local/opt/ (out of the repo)
   local = {
-    katanaFxFloorBoard = true; # Boss Katana MK2 amp patch editor
-    granblueRelinkMods = true; # GBFR mod tools: RelinkModOrganizer (data mods) + Reloaded-II (code/hook mods)
+    katanaFxFloorBoard = false; # Boss Katana MK2 amp patch editor
+    granblueRelinkMods = false; # RelinkModOrganizer + Reloaded-II
   };
 
   #--- Android Container (Waydroid)
@@ -93,7 +93,7 @@
 
   #--- ClamAV Antivirus
   # Enable ClamAV daemon, freshclam auto-updater, and ClamTK GUI
-  clamav.enable = true;
+  clamav.enable = false;
 
   #--- Docker Containerization
   # Enable Docker and Docker Compose for container management
@@ -118,13 +118,9 @@
     heroic = true; # Epic / GOG / Amazon
     prismlauncher = true; # Minecraft
     lutris = false; # Wine launcher
-    faugus = true; # UMU/Proton launcher
-    twintail = false; # Gacha game launcher (Flatpak)
+    faugus = false; # UMU/Proton launcher
+    twintail = true; # Gacha game launcher (Flatpak)
   };
-
-  #--- Cohesion Notes (Flatpak)
-  # Self-hostable Notion alternative
-  cohesion.enable = true;
 
   #--- Discord Rich Presence (arRPC)
   # Standalone arRPC server for Steam/Proton game detection in Vesktop
@@ -132,14 +128,14 @@
 
   #--- AI Tools
   claude = {enable = true;};
-  opencode = {enable = true;};
+  opencode = {enable = false;};
   lmstudio = {enable = false;};
 
   #--- Japanese Language & Game Support
   # ime: fcitx5 + Mozc input method for typing hiragana/katakana/kanji
   # vn:  raw JP visual novel / game tooling (jp-run locale launcher, extractors)
   japanese = {
-    ime = true;
-    vn = true;
+    ime = false;
+    vn = false;
   };
 }
