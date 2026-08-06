@@ -62,13 +62,14 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 
 | | |
 | --- | --- |
-| **Window Manager** | [Niri][niri] / [Hyprland][hyprland] / [GNOME][gnome] |
-| **Status Bar / Notifier / Launcher / Lock** | [DankMaterialShell][dms] (Niri + Hyprland) / GNOME Shell + extensions (GNOME) |
-| **Display Manager** | [tuigreet][tuigreet] via [greetd][greetd] (Niri/Hyprland) / [GDM][gdm] (GNOME) |
+| **Window Manager** | [Niri][niri] / [Hyprland][hyprland] / [GNOME][gnome] / [COSMIC][cosmic] |
+| **Status Bar / Notifier / Launcher / Lock** | [DankMaterialShell][dms] (Niri + Hyprland) / GNOME Shell + extensions (GNOME) / COSMIC Panel + applets (COSMIC) |
+| **Display Manager** | [tuigreet][tuigreet] via [greetd][greetd] (Niri/Hyprland) / [GDM][gdm] (GNOME) / [cosmic-greeter][cosmic-greeter] (COSMIC) |
 | **Color Scheme** | [Catppuccin][catppuccin] Mocha Mauve applied globally via [Stylix][stylix] + [catppuccin/nix][catppuccin-nix] |
 | **Fonts** | [JetBrains Mono Nerd Font][nerd-fonts], Monaspace, Nerd Fonts Symbols |
 | **Window Switcher** | [niriswitcher][niriswitcher] (Niri only) |
 | **GNOME Extensions** | [Dash to Panel][dash-to-panel], [Blur my Shell][blur-my-shell], [AppIndicator][appindicator], [Astra Monitor][astra-monitor], [Caffeine][caffeine], [Auto Move Windows][auto-move-windows], [GNOME UI Tune][gnome-ui-tune], [Space Bar][space-bar], [Date Menu Formatter][date-menu-formatter] |
+| **COSMIC Applets** | [Minimon][minimon] (CPU/RAM/GPU/temps/net/disk in the bar), [Privacy Indicator][cosmic-privacy], [Caffeine][cosmic-caffeine], plus [Tweaks][cosmic-tweaks] |
 
 ### Shell & Terminal
 
@@ -125,6 +126,12 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 [niri]: https://github.com/YaLTeR/niri
 [hyprland]: https://hyprland.org
 [gnome]: https://www.gnome.org
+[cosmic]: https://github.com/pop-os/cosmic-epoch
+[cosmic-greeter]: https://github.com/pop-os/cosmic-greeter
+[minimon]: https://github.com/cosmic-utils/minimon-applet
+[cosmic-privacy]: https://github.com/D-Brox/cosmic-ext-applet-privacy-indicator
+[cosmic-caffeine]: https://github.com/tropicbliss/cosmic-ext-applet-caffeine
+[cosmic-tweaks]: https://github.com/cosmic-utils/tweaks
 [gdm]: https://wiki.gnome.org/Projects/GDM
 [dash-to-panel]: https://github.com/home-sweet-gnome/dash-to-panel
 [blur-my-shell]: https://github.com/aunetx/blur-my-shell

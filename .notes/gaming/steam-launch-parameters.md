@@ -109,18 +109,40 @@ Separately, the game's kernel-mode anti-cheat driver (Tencent "Anti-Cheat Expert
 ## Wuthering Waves
 
 ```
-STEAMDECK=1 SteamOS=1 PROTON_FSR4_UPGRADE=1 ENABLE_LAYER_MESA_ANTI_LAG=1 MANGOHUD=1 gamemoderun %command% -dx11 -SkipSplash -EngineIni=Engine.ini; pkill -f "WutheringWaves"; pkill -f "CrashReportClient"
+STEAMDECK=1 SteamOS=1 PROTON_ENABLE_WAYLAND=0 WINEDLLOVERRIDES=winewayland.drv= PROTON_FSR4_UPGRADE=1 ENABLE_LAYER_MESA_ANTI_LAG=1 VKD3D_CONFIG=dxr11 MANGOHUD=1 gamemoderun %command% -SkipSplash -dx12
 ```
 
 **Notes:**
 - `STEAMDECK=1 SteamOS=1` — Forces Steam Deck/SteamOS identity, needed for Proton compatibility
+- `PROTON_ENABLE_WAYLAND=0` + `WINEDLLOVERRIDES=winewayland.drv=` — **Required, or you cannot log in.** Forces XWayland instead of Wine's native Wayland driver. See the login section below
 - `PROTON_FSR4_UPGRADE=1` — Upgrades FSR upscaling to FSR 4; optimized for RDNA 4 (RX 9070 XT)
 - `ENABLE_LAYER_MESA_ANTI_LAG=1` — Mesa Anti-Lag Vulkan layer: throttles CPU to stay in sync with GPU when GPU-bound, reducing frame queue depth and input latency. Safe to keep; no-ops when CPU is the bottleneck
+- `VKD3D_CONFIG=dxr11` — Exposes DXR 1.1 raytracing to the game through VKD3D-Proton; required for the in-game RT options to work under Proton
 - `MANGOHUD=1` — Enables MangoHud FPS overlay
-- `; pkill -f "WutheringWaves"; pkill -f "CrashReportClient"` — Runs after game exits/crashes; force-kills any lingering Kuro launcher or crash reporter processes that would otherwise hang Steam indefinitely
-- `-dx11` — Forces DirectX 11 rendering; fixes crashes on GE-Proton with this GPU/driver stack (DX12 crashes on launch)
 - `-SkipSplash` — Skips intro splash screens
-- `-EngineIni=Engine.ini` — Loads custom UE5 engine config overrides from `~/.local/share/Steam/steamapps/common/Wuthering Waves/Client/Saved/Config/WindowsNoEditor/Engine.ini`. **Note:** `r.RayTracing.LoadConfig` must be `1` when RT is enabled in-game, `0` when disabled — mismatch causes crash at 75% load
+- `-dx12` — Forces DirectX 12 rendering; needed for raytracing. Previously `-dx11` was required because DX12 crashed on launch with GE-Proton on this GPU/driver stack — if that regresses, fall back to `-dx11` and drop `VKD3D_CONFIG=dxr11`
+- **Do not add `-EngineIni=Engine.ini`.** Older AlteriaX configs needed it, current ones do not, and leaving it in stops the config from applying properly
+
+**Previously used, currently dropped:**
+- `; pkill -f "WutheringWaves"; pkill -f "CrashReportClient"` — ran after exit/crash to force-kill lingering Kuro launcher or crash reporter processes that would otherwise hang Steam indefinitely. Re-add if Steam starts showing the game as still running after quitting
+
+### Graphics config (AlteriaX WuWa-Configs)
+
+Source: https://github.com/AlteriaX/WuWa-Configs
+
+Installed to `~/.local/share/Steam/steamapps/common/Wuthering Waves/Client/Saved/Config/WindowsNoEditor/`:
+
+- `Engine.ini` — **Config 1** (the tier for RX 9070 XT / 7900 XTX / RTX 4080+). Increases foliage draw distance, shadow resolution, AO quality, SSR roughness, volumetric light sampling. Costs some FPS versus default because of the foliage distance increase
+- `DeviceProfiles.ini` — unlocks the Ultra quality preset and 120 FPS option on GPUs the game doesn't whitelist (5800X3D is fast enough for 120)
+- `Input.ini` — disables mouse smoothing and FoV scaling
+
+**Gotchas:**
+- `r.RayTracing.LoadConfig` in `Engine.ini` must be `1` when RT is enabled in-game, `0` when disabled — mismatch causes a crash at 75% load. Config 1 ships with `1`
+- `Client/Config/UserEngine.ini` must not exist, it overrides `Engine.ini`. Not present on this install
+- Comments inside `Engine.ini` are stripped on first launch, that's normal. Keep the repo clone around to re-read them
+- Game patches do not reset these files, so no reinstall needed per update. Re-pull if something breaks
+- Missing character shadows or blurry textures after a config change: switch graphics preset away and back, then re-customize
+- Depth of Field and Vignette are left enabled by default, uncomment `r.DepthOfFieldQuality=0` and `r.Tonemapper.Quality=1` in `Engine.ini` to kill them
 
 ---
 

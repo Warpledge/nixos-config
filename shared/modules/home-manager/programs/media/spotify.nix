@@ -20,18 +20,17 @@ in {
     enable = true;
     theme = lib.mkForce spicePkgs.themes.catppuccin;
     colorScheme = lib.mkForce "mocha";
-    # theme = lib.mkForce spicePkgs.themes.lucid;
 
     #--- https://github.com/Gerg-L/spicetify-nix/tree/master/docs
     enabledExtensions = with spicePkgs.extensions; [
-      autoSkipVideo
-      playlistIcons
-      popupLyrics
-      hidePodcasts
+      # autoSkipVideo
+      # playlistIcons
+      # popupLyrics
+      # hidePodcasts
       adblock
-      loopyLoop
-      seekSong
-      goToSong
+      # loopyLoop
+      # seekSong
+      # goToSong
       betterGenres
       playingSource
     ];

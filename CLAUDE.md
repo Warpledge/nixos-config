@@ -50,7 +50,7 @@ flake.nix
 The authoritative list of toggles is **`hosts/{hostname}/hostConfig/core.nix`** — read it directly, don't trust this file to stay in sync. Current shape (desktop and laptop are kept symmetrical):
 
 - `username` — read by `flake.nix` itself (`inherit (hostConfig) username`), not just by modules
-- `windowManager` — `"hyprland" | "niri" | "gnome"`
+- `windowManager` — `"hyprland" | "niri" | "gnome" | "cosmic"`
 - `kernel` — `"zen" | "latest" | "xanmod" | "cachyos"`
 - Service toggles: `mullvad.enable`, `clamav.enable`, `docker.enable`, `winboat.enable`, `sunshine.enable`, `discord.arrpc.enable`, `waydroid.{enable,magisk,nftables}`
 - Attribute-set toggles: `browsers.{zen,mullvad,helium}`, `terminals.{kitty,ghostty}`, `editors.{helix,zed}`, `fileBrowsers.{nautilus,yazi}`, `media.{mpv,spotify,grayjay,videoTrimmer,qrScanner}`, `creative.{blender,krita,affinity}`, `finance.{homebank}`, `gameLaunchers.{steam,heroic,prismlauncher,lutris,faugus,twintail}`, `japanese.{ime,vn}`

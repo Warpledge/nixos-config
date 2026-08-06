@@ -78,6 +78,7 @@
       chromium.enable = false;
       plymouth.enable = false;
       kmscon.enable = false;
+      regreet.enable = false;
 
       qt.enable = false;
       gtk.enable = true;
