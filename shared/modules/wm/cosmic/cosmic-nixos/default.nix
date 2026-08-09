@@ -18,9 +18,8 @@
     #--------------------------------------------------------------------#
     #-- Display Manager
     #--------------------------------------------------------------------#
-    # cosmic-greeter is a greetd session, so the gdm/greetd unmask activation
-    # script in shared/modules/nixos/system/xserver.nix already covers
-    # switching to and from this WM.
+    # cosmic-greeter is a greetd session, already covered by the unmask
+    # activation script in shared/modules/nixos/system/xserver.nix.
     displayManager = {
       cosmic-greeter.enable = true;
 
@@ -42,10 +41,9 @@
   #--------------------------------------------------------------------#
   #-- Excluded Base Packages
   #--------------------------------------------------------------------#
-  # Only non-core packages are listed here. Excluding anything from the
-  # module's `corePkgs` list (cosmic-comp, cosmic-files, cosmic-panel,
-  # cosmic-settings, ...) makes the session fail to initialize and trips a
-  # build warning, so leave those alone even when a replacement is installed.
+  # Non-core packages only — excluding anything from the module's `corePkgs`
+  # list (cosmic-comp, cosmic-files, cosmic-panel, cosmic-settings, ...)
+  # breaks session startup.
   environment.cosmic.excludePackages = with pkgs; [
     cosmic-edit # superseded by editors.zed
     cosmic-player # superseded by media.mpv / celluloid
@@ -55,8 +53,6 @@
   #--------------------------------------------------------------------#
   #-- XDG Portal Configuration
   #--------------------------------------------------------------------#
-  # Intentionally left to the upstream COSMIC module, which sets
-  # xdg-desktop-portal-cosmic + -gtk and the matching configPackages.
-  # shared/modules/nixos/system/wayland.nix only uses lib.mkDefault, so the
+  # Left to the upstream COSMIC module; wayland.nix uses mkDefault so the
   # COSMIC portals win without an override here.
 }

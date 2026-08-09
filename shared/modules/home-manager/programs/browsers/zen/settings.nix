@@ -278,6 +278,16 @@
   #--- Language
   "intl.accept_languages" = "en-US, en";
 
+  #--- Translations (on-device models — page text never leaves the machine, unlike TWP)
+  # alwaysTranslateLanguages is a comma-separated BCP-47 list; ja pages translate on load
+  # ai.control.translations pinned available — browser.ai.control.default above is "blocked"
+  "browser.translations.enable" = true;
+  "browser.translations.select.enable" = true;
+  "browser.translations.automaticallyPopup" = true;
+  "browser.translations.alwaysTranslateLanguages" = "ja";
+  "browser.translations.mostRecentTargetLanguages" = "en";
+  "browser.ai.control.translations" = "available";
+
   #--- Other
   "content.notify.interval" = 100000;
   "dom.battery.enabled" = false;

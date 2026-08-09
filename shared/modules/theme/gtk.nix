@@ -6,7 +6,7 @@
   username,
   ...
 }: {
-  home-manager.users.${username} = {config, ...}: {
+  home-manager.users.${username} = _: {
     #--------------------------------------------------------------------#
     #-- Icon Theme (for Quickshell & other apps)
     #--------------------------------------------------------------------#

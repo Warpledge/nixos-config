@@ -5,19 +5,13 @@
   #--------------------------------------------------------------------#
   #-- Third-Party Panel Applets
   #--------------------------------------------------------------------#
+  # Settings are GUI-managed, not declared. minimon in the panel uses the
+  # component ID io.github.cosmic_utils.minimon-applet-panel and persists
+  # full structs per sensor, so a partial declaration would reset the rest.
   home.packages = with pkgs; [
-    #--- io.github.cosmic_utils.minimon-applet
-    # CPU / memory / GPU / VRAM / CPU+GPU temperature / network / disk, with
-    # ring, line, heat and stacked-bar chart styles.
-    cosmic-ext-applet-minimon
-
-    #--- dev.DBrox.CosmicPrivacyIndicator
-    # DMS showPrivacyButton equivalent (mic / camera / screen share)
-    cosmic-ext-applet-privacy-indicator
-
-    #--- net.tropicbliss.CosmicExtAppletCaffeine
-    # DMS idleInhibitor control-center tile equivalent
-    cosmic-ext-applet-caffeine
+    cosmic-ext-applet-minimon # CPU / memory / GPU / temps / network / disk
+    cosmic-ext-applet-privacy-indicator # Mic / camera / screen share
+    cosmic-ext-applet-caffeine # Idle inhibitor
 
     #--------------------------------------------------------------------#
     #-- Desktop Tooling

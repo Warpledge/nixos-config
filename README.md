@@ -70,6 +70,7 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | **Window Switcher** | [niriswitcher][niriswitcher] (Niri only) |
 | **GNOME Extensions** | [Dash to Panel][dash-to-panel], [Blur my Shell][blur-my-shell], [AppIndicator][appindicator], [Astra Monitor][astra-monitor], [Caffeine][caffeine], [Auto Move Windows][auto-move-windows], [GNOME UI Tune][gnome-ui-tune], [Space Bar][space-bar], [Date Menu Formatter][date-menu-formatter] |
 | **COSMIC Applets** | [Minimon][minimon] (CPU/RAM/GPU/temps/net/disk in the bar), [Privacy Indicator][cosmic-privacy], [Caffeine][cosmic-caffeine], plus [Tweaks][cosmic-tweaks] |
+| **COSMIC Config** | [cosmic-manager][cosmic-manager] keeps the panel layout, keybinds and compositor settings declarative, so a fresh machine comes up already set up |
 
 ### Shell & Terminal
 
@@ -132,6 +133,7 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 [cosmic-privacy]: https://github.com/D-Brox/cosmic-ext-applet-privacy-indicator
 [cosmic-caffeine]: https://github.com/tropicbliss/cosmic-ext-applet-caffeine
 [cosmic-tweaks]: https://github.com/cosmic-utils/tweaks
+[cosmic-manager]: https://github.com/HeitorAugustoLN/cosmic-manager
 [gdm]: https://wiki.gnome.org/Projects/GDM
 [dash-to-panel]: https://github.com/home-sweet-gnome/dash-to-panel
 [blur-my-shell]: https://github.com/aunetx/blur-my-shell
@@ -358,6 +360,7 @@ The main things this config pulls in from outside the standard NixOS package set
 | [`home-manager`](https://github.com/nix-community/home-manager) | User environment management |
 | [`nur`](https://github.com/nix-community/NUR) | NixOS User Repository |
 | [`niri`](https://github.com/sodiboo/niri-flake) (sodiboo/niri-flake) | Niri WM |
+| [`cosmic-manager`](https://github.com/HeitorAugustoLN/cosmic-manager) | Declarative COSMIC panels, keybinds and settings |
 | [`dms`](https://github.com/AvengeMedia/DankMaterialShell) (AvengeMedia, stable) | DankMaterialShell |
 | [`stylix`](https://github.com/nix-community/stylix) | System-wide theming |
 | [`catppuccin`](https://github.com/catppuccin/nix) | Catppuccin theme module |

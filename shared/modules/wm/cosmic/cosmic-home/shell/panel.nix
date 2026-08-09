@@ -1,69 +1,91 @@
 #=====================================================================#
 # COSMIC PANEL LAYOUT
 #=====================================================================#
-{lib, ...}: let
-  #--------------------------------------------------------------------#
-  #-- RON Helper
-  #--------------------------------------------------------------------#
-  # cosmic-config stores one file per key under
-  # ~/.config/cosmic/<component>/v1/<key>, each holding a bare RON value.
-  # Only the two plugin lists are declared here, so every other panel key
-  # (size, anchor, opacity, autohide, ...) stays a plain mutable file that
-  # Settings can still write.
-  ronList = plugins: "[" + lib.concatMapStringsSep ", " (p: ''"${p}"'') plugins + "]";
-
+_: let
   #--------------------------------------------------------------------#
   #-- Applet Layout
   #--------------------------------------------------------------------#
-  #--- Left
+  # Rearrange in Settings -> Desktop -> Panel, then copy the IDs back from
+  # ~/.config/cosmic/com.system76.CosmicPanel.Panel/v1/plugins_* or the next
+  # rebuild reverts it.
+  #--- Start segment
   leftPlugins = [
-    "com.system76.CosmicPanelWorkspacesButton" # DMS showWorkspaceSwitcher
-    "com.system76.CosmicPanelAppButton" # App library
-    "com.system76.CosmicPanelLauncherButton" # DMS showLauncherButton (Mod+A spotlight)
+    "com.system76.CosmicAppletTiling"
+    "net.tropicbliss.CosmicExtAppletCaffeine"
+    "com.system76.CosmicAppletTime"
+    "com.system76.CosmicAppletWorkspaces"
   ];
 
-  #--- Center
+  #--- Center segment
   centerPlugins = [
-    "com.system76.CosmicAppletTime" # DMS showClock
+    "com.system76.CosmicAppList"
   ];
 
-  #--- Right
-  # Ordered so the monitoring readouts sit left of the status cluster, which
-  # is roughly where DMS puts them.
+  #--- End segment
   rightPlugins = [
-    "io.github.cosmic_utils.minimon-applet" # DMS CPU/mem/GPU/temp widgets
-    "dev.DBrox.CosmicPrivacyIndicator" # DMS showPrivacyButton
-    "net.tropicbliss.CosmicExtAppletCaffeine" # DMS idle inhibitor
-    "com.system76.CosmicAppletInputSources" # Keyboard layout / IME
-    "com.system76.CosmicAppletA11y" # Accessibility
-    "com.system76.CosmicAppletStatusArea" # DMS showSystemTray
-    "com.system76.CosmicAppletTiling" # Tiling toggle (no DMS equivalent)
-    "com.system76.CosmicAppletAudio" # DMS controlCenterShowAudioIcon
-    "com.system76.CosmicAppletBluetooth" # DMS controlCenterShowBluetoothIcon
-    "com.system76.CosmicAppletNetwork" # DMS controlCenterShowNetworkIcon + VPN
-    "com.system76.CosmicAppletBattery" # DMS showBattery
-    "com.system76.CosmicAppletNotifications" # DMS showNotificationButton
-    "com.system76.CosmicAppletPower" # DMS powermenu
+    "com.system76.CosmicAppletStatusArea"
+    "io.github.cosmic_utils.minimon-applet"
+    "com.system76.CosmicAppletAudio"
+    "com.system76.CosmicAppletBattery"
+    "com.system76.CosmicAppletNetwork"
+    "com.system76.CosmicAppletBluetooth"
+    "com.system76.CosmicAppletNotifications"
+    "com.system76.CosmicAppletPower"
   ];
 in {
   #--------------------------------------------------------------------#
-  #-- Declarative Panel Plugin Lists
+  #-- Declarative Panels
   #--------------------------------------------------------------------#
-  # force is needed because COSMIC writes real files into this directory on
-  # first launch; without it activation would only rename them to *.bak.
-  #
-  # Trade-off: these two keys become read-only store symlinks, so the applet
-  # add/remove/reorder controls in Settings -> Desktop -> Panel stop saving.
-  # Edit the lists above instead.
-  xdg.configFile = {
-    "cosmic/com.system76.CosmicPanel.Panel/v1/plugins_wings" = {
-      force = true;
-      text = "Some((${ronList leftPlugins},${ronList rightPlugins}))";
-    };
+  # This list is authoritative over which panels exist: only "Panel" is
+  # declared, so COSMIC's default Dock is removed.
+  wayland.desktopManager.cosmic.panels = [
+    {
+      name = "Panel";
 
-    "cosmic/com.system76.CosmicPanel.Panel/v1/plugins_center" = {
-      force = true;
-      text = "Some(${ronList centerPlugins})";
-    };
-  };
+      #--------------------------------------------------------------------#
+      #-- Placement
+      #--------------------------------------------------------------------#
+      anchor = {
+        __type = "enum";
+        variant = "Top";
+      };
+      anchor_gap = false;
+      margin = 0; # must be 0 when anchor_gap is false
+      expand_to_edges = true;
+      size = {
+        __type = "enum";
+        variant = "S";
+      };
+      output = {
+        __type = "enum";
+        variant = "All";
+      };
+
+      #--------------------------------------------------------------------#
+      #-- Appearance
+      #--------------------------------------------------------------------#
+      # autohide is intentionally undeclared: cosmic-manager emits None but
+      # COSMIC 1.5 expects the enum Never, which is already the Panel default.
+      background = {
+        __type = "enum";
+        variant = "ThemeDefault";
+      };
+      opacity = 0.8;
+
+      #--------------------------------------------------------------------#
+      #-- Applets
+      #--------------------------------------------------------------------#
+      plugins_wings = {
+        __type = "optional";
+        value = {
+          __type = "tuple";
+          value = [leftPlugins rightPlugins];
+        };
+      };
+      plugins_center = {
+        __type = "optional";
+        value = centerPlugins;
+      };
+    }
+  ];
 }
