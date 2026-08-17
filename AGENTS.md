@@ -34,6 +34,25 @@ home-manager, Niri WM, Stylix theming (Catppuccin Mocha).
 **Do not guess documentation URLs.** Fetching the web for upstream docs is a
 last resort; if two fetches fail, stop and use a local source instead.
 
+**Filter at the source — never dump a large output into the conversation.**
+Man pages, store listings, and long files must be piped through `grep`/`sed`
+to extract only the relevant section:
+
+```bash
+# good: a few lines
+nix-shell -p zathura --run 'man zathurarc' 2>/dev/null | col -b | grep -A3 'recolor'
+
+# bad: thousands of lines, blows the context window
+nix-shell -p zathura --run 'man zathurarc'
+```
+
+Same for searching the store — target the path you want, do not list a
+directory:
+
+```bash
+find /nix/store -maxdepth 4 -path '*modules/programs/zathura.nix' | head -1
+```
+
 ## Architecture
 
 `hostConfig` (from `hosts/<host>/hostConfig/core.nix`) is threaded through
