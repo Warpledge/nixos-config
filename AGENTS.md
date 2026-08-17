@@ -84,6 +84,14 @@ in both files with the same value unless told otherwise.
 5. Add it to the matching list under **Components** in `README.md`, including
    the link reference definition at the bottom of that file
 
+   **`README.md` is ~23 KB — never read it in full.** Locate the two regions
+   you need with grep, then edit those lines directly:
+
+   ```bash
+   grep -n '^| \*\*' README.md          # the Components table rows
+   grep -n '^\[.*\]: http' README.md    # the link-reference block
+   ```
+
 ## Formatting
 
 Every module opens with a banner. **Copy it byte-for-byte from a neighbouring
