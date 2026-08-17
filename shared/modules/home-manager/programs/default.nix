@@ -66,6 +66,7 @@
     ++ lib.optionals hostConfig.creative.blender [./creative/blender.nix]
     ++ lib.optionals hostConfig.creative.krita [./creative/krita.nix]
     ++ lib.optionals hostConfig.creative.affinity [./creative/affinity.nix]
+    ++ lib.optionals hostConfig.creative.reaper [./creative/reaper.nix]
     #--- Finance (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.finance.homebank [./finance/homebank.nix]
     #--- Local Packages (controlled by host hostConfig.nix)
@@ -73,6 +74,8 @@
     ++ lib.optionals hostConfig.local.granblueRelinkMods [./local/relink-mod-organizer.nix ./local/reloaded-ii-gbfr.nix]
     #--- WinBoat (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.winboat.enable [./emulation/winboat.nix]
+    #--- Android Screen Mirroring (controlled by host hostConfig.nix)
+    ++ lib.optionals hostConfig.scrcpy.enable [./scrcpy.nix]
     #--- AI Tools (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.claude.enable [./ai/claude.nix]
     ++ lib.optionals hostConfig.opencode.enable [./ai/opencode.nix]
@@ -81,6 +84,8 @@
     ++ lib.optionals hostConfig.japanese.vn [./japanese-vn.nix]
     #--- Discord Rich Presence / Game Detection (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.discord.arrpc.enable [./chat-clients/arrpc.nix]
+    #--- Chat Clients (controlled by host hostConfig.nix)
+    ++ lib.optionals hostConfig.ferdium.enable [./chat-clients/ferdium.nix]
     #--- Game Launchers (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.gameLaunchers.heroic [./launchers/heroic.nix]
     ++ lib.optionals hostConfig.gameLaunchers.prismlauncher [./launchers/prismlauncher.nix]

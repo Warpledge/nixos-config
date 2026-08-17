@@ -27,7 +27,7 @@
   browsers = {
     zen = true;
     mullvad = true;
-    helium = false;
+    helium = true;
   };
 
   #--- Terminal Selection
@@ -67,6 +67,7 @@
     blender = false;
     krita = false;
     affinity = false;
+    reaper = true; # DAW; ships SWS/S&M + ReaPack, JACK routed through PipeWire
   };
 
   #--- Finance Software Selection
@@ -90,6 +91,11 @@
     magisk = false; # Install Magisk for rooting
     nftables = false; # Use nftables instead of iptables
   };
+
+  #--- Android Screen Mirroring (scrcpy)
+  # Mirror/control an Android device over USB or wifi; nothing is installed
+  # on the device, so it works on de-Googled phones/tablets
+  scrcpy.enable = true;
 
   #--- ClamAV Antivirus
   # Enable ClamAV daemon, freshclam auto-updater, and ClamTK GUI
@@ -126,10 +132,14 @@
   # Standalone arRPC server for Steam/Proton game detection in Vesktop
   discord.arrpc.enable = true;
 
+  #--- Ferdium Messenger Aggregator
+  # All web messengers in one window (services configured in-app)
+  ferdium.enable = true;
+
   #--- AI Tools
   claude = {enable = true;};
-  opencode = {enable = false;};
-  lmstudio = {enable = false;};
+  opencode = {enable = true;};
+  lmstudio = {enable = true;};
 
   #--- Japanese Language & Game Support
   # ime: fcitx5 + Mozc input method for typing hiragana/katakana/kanji

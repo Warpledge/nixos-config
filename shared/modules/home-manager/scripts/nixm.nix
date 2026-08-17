@@ -120,7 +120,7 @@
           ;;
         dryrun)
           echo "Running dry-run rebuild (no changes will be made)..."
-          nh os switch --dry-run "$FLAKE_PATH#nixosConfigurations.$HOSTNAME"
+          nh os switch --dry "$FLAKE_PATH#nixosConfigurations.$HOSTNAME"
           ;;
         gc)
           nh clean all --keep 5

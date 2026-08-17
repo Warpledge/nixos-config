@@ -9,11 +9,17 @@
   hostConfig,
   ...
 }: let
+  #--- Drop dwarfs from gearlever's runtime PATH
+  # dwarfs 0.14.0 fails to build (bundled folly/fbthrift vs gcc 15 + fmt 12).
+  # Only cost is DwarFS-compressed AppImages; drop this once dwarfs builds again.
+  gearleverOverlay = _: prev: {
+    gearlever = prev.gearlever.override {dwarfs = prev.emptyDirectory;};
+  };
+
   #--- Apply CachyOS kernel overlay if using cachyos kernel
   overlays =
-    if hostConfig.kernel == "cachyos"
-    then [inputs.cachyos-kernel.overlays.pinned]
-    else [];
+    [gearleverOverlay]
+    ++ lib.optional (hostConfig.kernel == "cachyos") inputs.cachyos-kernel.overlays.pinned;
 in {
   #--------------------------------------------------------------------#
   #-- NixOS Module ---> /modules/nixos

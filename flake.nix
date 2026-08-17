@@ -74,9 +74,7 @@
       url = "github:sodiboo/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    #--- COSMIC declarative configuration (home-manager modules)
-    # nixpkgs only exposes services.desktopManager.cosmic.enable and friends;
-    # this provides the panel/shortcut/compositor option surface.
+    #--- Cosmic Manager
     cosmic-manager = {
       url = "github:HeitorAugustoLN/cosmic-manager";
       inputs.nixpkgs.follows = "nixpkgs";

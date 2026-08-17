@@ -97,9 +97,10 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | **File Manager** | [Nautilus][nautilus] |
 | **Media Player** | [mpv][mpv], [Celluloid][celluloid] (mpv frontend), [Spotify][spotify] via [spicetify-nix][spicetify], [Grayjay][grayjay] |
 | **Screenshot / Recording** | [grim][grim] + [slurp][slurp], [gpu-screen-recorder][gpu-screen-recorder] |
-| **Creative** | [Blender][blender], [Krita][krita], [Affinity Suite v3][affinity-nix] (via Wine) |
-| **Chat / Productivity** | [Vesktop][vesktop] via [nixcord][nixcord] (Vencord), [Thunderbird][thunderbird], [Obsidian][obsidian] |
+| **Creative** | [Blender][blender], [Krita][krita], [Affinity Suite v3][affinity-nix] (via Wine), [Reaper][reaper] (DAW, with [SWS][sws] and [ReaPack][reapack]) |
+| **Chat / Productivity** | [Vesktop][vesktop] via [nixcord][nixcord] (Vencord), [Ferdium][ferdium] (all your web messengers in one window), [Thunderbird][thunderbird], [Obsidian][obsidian] |
 | **AI Tooling** | [Claude Code][claude-code], [OpenCode][opencode], [LM Studio][lmstudio] |
+| **Android** | [scrcpy][scrcpy] (mirror and control a device over USB or wifi, nothing to install on the phone) |
 
 ### Gaming
 
@@ -178,10 +179,15 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 [blender]: https://www.blender.org
 [krita]: https://krita.org
 [affinity-nix]: https://github.com/mrshmllow/affinity-nix
+[reaper]: https://www.reaper.fm
+[sws]: https://www.sws-extension.org
+[reapack]: https://reapack.com
 [vesktop]: https://github.com/Vencord/Vesktop
 [nixcord]: https://github.com/KaylorBen/nixcord
+[ferdium]: https://ferdium.org
 [thunderbird]: https://www.thunderbird.net
 [obsidian]: https://obsidian.md
+[scrcpy]: https://github.com/Genymobile/scrcpy
 [steam]: https://store.steampowered.com
 [heroic]: https://heroicgameslauncher.com
 [prismlauncher]: https://prismlauncher.org
