@@ -53,6 +53,30 @@ directory:
 find /nix/store -maxdepth 4 -path '*modules/programs/zathura.nix' | head -1
 ```
 
+**Cache expensive output instead of re-running it.** If you need several
+different sections of the same document, dump it once and grep the file:
+
+```bash
+nix-shell -p zathura --run 'man zathurarc' 2>/dev/null | col -b > /tmp/zathurarc.txt
+grep -A3 'recolor' /tmp/zathurarc.txt
+grep -A3 'selection-clipboard' /tmp/zathurarc.txt
+```
+
+**Stop once you have the answer.** A package's own man page is authoritative
+for its config syntax. Once you have it, do not go on to read the nixpkgs
+derivation, `nix derivation` output, or the package's build inputs — those
+describe how it is built, not how it is configured.
+
+**Do check for a home-manager module** before falling back to
+`home.packages`. Many programs have one, and it is the better module. One
+command answers it:
+
+```bash
+find /nix/store -maxdepth 4 -path '*/modules/programs/<pkg>.nix' | head -1
+```
+
+If that returns a path, read it and use `programs.<pkg>` instead.
+
 ## Architecture
 
 `hostConfig` (from `hosts/<host>/hostConfig/core.nix`) is threaded through
@@ -73,7 +97,9 @@ in both files with the same value unless told otherwise.
 ## Adding an application
 
 1. Add the toggle to **both** host configs, in the group it belongs to
-2. Create the module under `shared/modules/home-manager/programs/<group>/`
+2. Create the module under `shared/modules/home-manager/programs/<group>/`.
+   Check for a home-manager module first (see above) — prefer
+   `programs.<pkg>.enable` over `home.packages = [pkgs.<pkg>]`
 3. Add the conditional import to `programs/default.nix`:
    ```nix
    ++ lib.optionals hostConfig.media.foo [./media/foo.nix]
