@@ -67,6 +67,7 @@
     ++ lib.optionals hostConfig.creative.krita [./creative/krita.nix]
     ++ lib.optionals hostConfig.creative.affinity [./creative/affinity.nix]
     ++ lib.optionals hostConfig.creative.reaper [./creative/reaper.nix]
+    ++ lib.optionals hostConfig.creative.guitar [./creative/guitar.nix]
     #--- Finance (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.finance.homebank [./finance/homebank.nix]
     #--- Local Packages (controlled by host hostConfig.nix)

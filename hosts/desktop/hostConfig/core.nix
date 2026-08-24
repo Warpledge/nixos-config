@@ -68,6 +68,7 @@
     krita = false;
     affinity = false;
     reaper = true; # DAW; ships SWS/S&M + ReaPack, JACK routed through PipeWire
+    guitar = true; # Amp sims (NeuralRack/Guitarix) + cab IRs; Katana DI capture
   };
 
   #--- Finance Software Selection
@@ -80,7 +81,7 @@
   # Prebuilt third-party bundles that aren't in nixpkgs; each is a
   # wrapper around an app kept under ~/.local/opt/ (out of the repo)
   local = {
-    katanaFxFloorBoard = false; # Boss Katana MK2 amp patch editor
+    katanaFxFloorBoard = true; # Boss Katana MK2 amp patch editor
     granblueRelinkMods = false; # RelinkModOrganizer + Reloaded-II
   };
 

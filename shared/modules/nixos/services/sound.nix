@@ -12,6 +12,24 @@
   #--------------------------------------------------------------------#
   security.rtkit.enable = true; # Enable RTKit for PipeWire real-time scheduling
 
+  #--- RTKit only covers clients that ask it over D-Bus. Audio apps that call
+  #--- sched_setscheduler directly need a non-zero RLIMIT_RTPRIO, which
+  #--- defaults to 0. Applied at login, so it needs a fresh session.
+  security.pam.loginLimits = [
+    {
+      domain = "@audio";
+      item = "rtprio";
+      type = "-";
+      value = "95";
+    }
+    {
+      domain = "@audio";
+      item = "memlock";
+      type = "-";
+      value = "unlimited";
+    }
+  ];
+
   #--------------------------------------------------------------------#
   #-- ALSA Configuration
   #--------------------------------------------------------------------#

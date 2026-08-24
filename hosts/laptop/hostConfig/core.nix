@@ -68,6 +68,7 @@
     krita = false;
     affinity = false;
     reaper = true; # DAW; ships SWS/S&M + ReaPack, JACK routed through PipeWire
+    guitar = true; # Amp sims (NeuralRack/Guitarix) + cab IRs; Katana DI capture
   };
 
   #--- Finance Software Selection
