@@ -83,11 +83,6 @@
       networking.nftables = lib.mkIf hostConfig.waydroid.nftables {
         enable = true;
       };
-
-      #--------------------------------------------------------------------#
-      #-- User Namespace Settings
-      #--------------------------------------------------------------------#
-      security.unprivilegedUsernsClone = true;
     })
   ];
 }
