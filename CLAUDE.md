@@ -55,16 +55,17 @@ The authoritative list of toggles is **`hosts/{hostname}/hostConfig/core.nix`** 
 - `windowManager` — `"hyprland" | "niri" | "gnome" | "cosmic"`
 - `kernel` — `"zen" | "latest" | "xanmod" | "cachyos"`
 - Service toggles: `mullvad.enable`, `clamav.enable`, `docker.enable`, `winboat.enable`, `sunshine.enable`, `discord.arrpc.enable`, `waydroid.{enable,magisk,nftables}`
-- Attribute-set toggles: `browsers.{zen,mullvad,helium}`, `terminals.{kitty,ghostty}`, `editors.{helix,zed}`, `fileBrowsers.{nautilus,yazi}`, `media.{mpv,spotify,grayjay,videoTrimmer,qrScanner}`, `creative.{blender,krita,affinity}`, `finance.{homebank}`, `gameLaunchers.{steam,heroic,prismlauncher,lutris,faugus,twintail}`, `japanese.{ime,vn}`
-- `local.{katanaFxFloorBoard,granblueRelinkMods}` — wrappers around prebuilt bundles under `~/.local/opt/` (kept out of git); see `.notes/local/local-binary-installs.md`
+- Attribute-set toggles: `browsers.{zen,mullvad,helium}`, `terminals.{kitty,ghostty}`, `editors.{helix,zed}`, `fileBrowsers.{nautilus,yazi}`, `media.{mpv,spotify,grayjay,videoTrimmer,qrScanner}`, `creative.{blender,krita,affinity,reaper,guitar}`, `finance.{homebank}`, `gameLaunchers.{steam,heroic,prismlauncher,lutris,faugus,twintail}`, `japanese.{ime,vn}`
+- `local.{granblueRelinkMods}` — wrappers around prebuilt bundles under `~/.local/opt/` (kept out of git); see `.notes/local/local-binary-installs.md`
 - AI tools: `claude.enable`, `opencode.enable`, `lmstudio.enable`
 
-Desktop and laptop should stay byte-identical apart from the header comment and a short list of deliberate differences. As of 2026-08-09 those are: `waydroid.enable`, `gameLaunchers.heroic`, `gameLaunchers.twintail`, `discord.arrpc.enable` (all true on desktop, false on laptop) and `local.katanaFxFloorBoard` (true on laptop only). Verify with `diff hosts/desktop/hostConfig/core.nix hosts/laptop/hostConfig/core.nix` before assuming.
+Desktop and laptop should stay byte-identical apart from the header comment and a short list of deliberate differences. As of 2026-08-24 those are `waydroid.enable`, `gameLaunchers.heroic`, `gameLaunchers.twintail` and `discord.arrpc.enable`, all true on desktop and false on laptop. Verify with `diff hosts/desktop/hostConfig/core.nix hosts/laptop/hostConfig/core.nix` before assuming.
 
 Gotchas — grep the option name before assuming which file owns it:
 
 - `fileBrowsers.nautilus` is a **dead toggle**: `nautilus.nix` is imported unconditionally in `programs/default.nix`. Only `fileBrowsers.yazi` is actually read.
 - `gameLaunchers.steam` / `.twintail` are wired in `shared/modules/nixos/programs/gaming/core.nix`; `heroic`, `prismlauncher`, `lutris`, `faugus` are wired in `home-manager/programs/default.nix`.
+- The Katana patch editor is a `~/.local/opt` bundle but does **not** live in `programs/local/` — it moved into `creative/guitar.nix` with the rest of the amp rig, so it has no `local.*` toggle of its own and rides on `creative.guitar`.
 - `docker.enable` does **not** use a conditional import — `nixos/default.nix` imports `programs/docker.nix` unconditionally and the module wraps its whole body in `config = lib.mkIf hostConfig.docker.enable {...}`. Both patterns exist in the repo; prefer the conditional import for new modules.
 
 ### hostConfig Decision Tree

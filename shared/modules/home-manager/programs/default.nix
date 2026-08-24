@@ -71,7 +71,6 @@
     #--- Finance (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.finance.homebank [./finance/homebank.nix]
     #--- Local Packages (controlled by host hostConfig.nix)
-    ++ lib.optionals hostConfig.local.katanaFxFloorBoard [./local/katana-fxfloorboard.nix]
     ++ lib.optionals hostConfig.local.granblueRelinkMods [./local/relink-mod-organizer.nix ./local/reloaded-ii-gbfr.nix]
     #--- WinBoat (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.winboat.enable [./emulation/winboat.nix]

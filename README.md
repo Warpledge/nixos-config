@@ -98,6 +98,7 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | **Media Player** | [mpv][mpv], [Celluloid][celluloid] (mpv frontend), [Spotify][spotify] via [spicetify-nix][spicetify], [Grayjay][grayjay] |
 | **Screenshot / Recording** | [grim][grim] + [slurp][slurp], [gpu-screen-recorder][gpu-screen-recorder] |
 | **Creative** | [Blender][blender], [Krita][krita], [Affinity Suite v3][affinity-nix] (via Wine), [Reaper][reaper] (DAW, with [SWS][sws] and [ReaPack][reapack]) |
+| **Guitar** | [NeuralRack][neuralrack] and [Ratatouille][ratatouille] (load NAM/AIDA-X amp captures), [Guitarix][guitarix] (modular amp rig), [ir.lv2][ir-lv2] for cabinet IRs, [qpwgraph][qpwgraph] for patching, plus [FxFloorBoard][katana-fxfloorboard] to edit patches on the Boss Katana itself |
 | **Chat / Productivity** | [Vesktop][vesktop] via [nixcord][nixcord] (Vencord), [Ferdium][ferdium] (all your web messengers in one window), [Thunderbird][thunderbird], [Obsidian][obsidian] |
 | **AI Tooling** | [Claude Code][claude-code], [OpenCode][opencode], [LM Studio][lmstudio] |
 | **Android** | [scrcpy][scrcpy] (mirror and control a device over USB or wifi, nothing to install on the phone) |
@@ -182,6 +183,12 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 [reaper]: https://www.reaper.fm
 [sws]: https://www.sws-extension.org
 [reapack]: https://reapack.com
+[neuralrack]: https://github.com/brummer10/NeuralRack
+[ratatouille]: https://github.com/brummer10/Ratatouille.lv2
+[guitarix]: https://guitarix.org
+[ir-lv2]: https://github.com/tomszilagyi/ir.lv2
+[qpwgraph]: https://gitlab.freedesktop.org/rncbc/qpwgraph
+[katana-fxfloorboard]: https://github.com/gumtown/Katana-MK2-FxFloorBoard
 [vesktop]: https://github.com/Vencord/Vesktop
 [nixcord]: https://github.com/KaylorBen/nixcord
 [ferdium]: https://ferdium.org

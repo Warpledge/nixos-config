@@ -43,6 +43,19 @@
           --set-default PIPEWIRE_LATENCY 128/48000
       '';
   });
+
+  #--- Patch editor for the amp itself (Colin Willcocks' tool), not in nixpkgs.
+  #--- Prebuilt bundle under ~/.local/opt, kept out of git and restored by hand;
+  #--- see .notes/local/local-binary-installs.md. It ships its own libs
+  #--- (RUNPATH -> ./lib) and runs via nix-ld, so the only thing it needs is
+  #--- ALSA_CONFIG_PATH for RtMidi to reach the amp over the ALSA sequencer.
+  katanaDir = "$HOME/.local/opt/katana-fxfloorboard";
+  katana-fxfloorboard =
+    pkgs.writeShellScriptBin "katana-fxfloorboard"
+    ''
+      export ALSA_CONFIG_PATH="${pkgs.alsa-lib}/share/alsa/alsa.conf"
+      exec "${katanaDir}/Katana-MK2-FxFloorBoard" "$@"
+    '';
 in {
   #--------------------------------------------------------------------#
   #-- Amp Sim and Plugin Packages
@@ -67,7 +80,23 @@ in {
 
     #--- Patchbay for wiring DI -> plugin -> monitoring
     qpwgraph
+
+    #--- Amp patch editor (prebuilt bundle, see above)
+    katana-fxfloorboard
   ];
+
+  #--------------------------------------------------------------------#
+  #-- Desktop Entry
+  #--------------------------------------------------------------------#
+
+  xdg.desktopEntries.katana-fxfloorboard = {
+    name = "Katana MK2 FxFloorBoard";
+    comment = "Patch editor for the Boss Katana MK2 amp";
+    exec = "katana-fxfloorboard";
+    icon = "audio-card";
+    terminal = false;
+    categories = ["Audio" "AudioVideo" "Music"];
+  };
 
   #--------------------------------------------------------------------#
   #-- Plugin Discovery
