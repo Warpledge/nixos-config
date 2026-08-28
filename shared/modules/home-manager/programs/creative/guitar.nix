@@ -3,9 +3,41 @@
 #=====================================================================#
 {
   pkgs,
+  lib,
   config,
   ...
 }: let
+  #--- Neuralrack never auto-connects: connectPorts() only replays [Connection]
+  #--- lines from ~/.config/neuralrack.conf, so a fresh profile comes up with an
+  #--- unwired node and no sound. Wire the graph here instead of depending on a
+  #--- file the app rewrites on exit. Endpoints are resolved at runtime so both
+  #--- hosts share this. `in` is a MIDI port; the audio input is `in_0`.
+  neuralrack-autolink = pkgs.writeShellScript "neuralrack-autolink" ''
+    export PATH=${lib.makeBinPath [pkgs.pipewire pkgs.wireplumber pkgs.gnugrep pkgs.gnused pkgs.coreutils]}
+
+    #--- Ports register a moment after the JACK client opens.
+    for _ in $(seq 100); do
+      pw-link -i 2>/dev/null | grep -qx 'neuralrack:in_0' && break
+      sleep 0.1
+    done
+
+    di=$(pw-link -o 2>/dev/null |
+      grep -m1 -E '^alsa_input\..*KATANA.*Line4__source:capture_FL$')
+    sink=$(wpctl inspect @DEFAULT_AUDIO_SINK@ 2>/dev/null |
+      sed -n 's/.*node\.name = "\([^"]*\)".*/\1/p')
+
+    #--- Re-linking an already-connected pair errors; the app replays its own
+    #--- saved connections too, so treat every link as best-effort.
+    if [ -n "$di" ]; then
+      pw-link "$di" neuralrack:in_0 || true
+    fi
+
+    if [ -n "$sink" ]; then
+      pw-link neuralrack:out_0 "$sink:playback_FL" || true
+      pw-link neuralrack:out_1 "$sink:playback_FR" || true
+    fi
+  '';
+
   #--- Upstream links against libjack2; with no JACK server answering it falls
   #--- back to ALSA at a fixed 256 frame period, which no graph setting can
   #--- reach. PipeWire's libjack makes it a real JACK client, so it follows the
@@ -23,7 +55,8 @@
       + ''
         wrapProgram $out/bin/Neuralrack \
           --prefix LD_LIBRARY_PATH : ${pkgs.pipewire.jack}/lib \
-          --set-default PIPEWIRE_LATENCY 128/48000
+          --set-default PIPEWIRE_LATENCY 128/48000 \
+          --run ${lib.escapeShellArg "${neuralrack-autolink} &"}
       '';
   });
 

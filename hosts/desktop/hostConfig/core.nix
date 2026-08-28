@@ -61,12 +61,17 @@
     qrScanner = false; # cobang broken: python-zbar fails to build upstream
   };
 
-  #--- Creative Software Selection
-  # Enable the creative applications you want installed
-  creative = {
+  #--- Graphics Software Selection
+  # Enable the graphic design applications you want installed
+  graphics = {
     blender = false;
     krita = false;
     affinity = false;
+  };
+
+  #--- Audio Software Selection
+  # Enable the music and audio applications you want installed
+  audio = {
     reaper = true; # DAW; ships SWS/S&M + ReaPack, JACK routed through PipeWire
     guitar = true; # Amp sims (NeuralRack/Guitarix) + cab IRs; Katana DI capture
   };
@@ -125,7 +130,7 @@
     prismlauncher = true; # Minecraft
     lutris = false; # Wine launcher
     faugus = false; # UMU/Proton launcher
-    twintail = true; # Gacha game launcher (Flatpak)
+    twintail = false; # Gacha game launcher (Flatpak)
   };
 
   #--- Discord Rich Presence (arRPC)
@@ -134,7 +139,7 @@
 
   #--- Ferdium Messenger Aggregator
   # All web messengers in one window (services configured in-app)
-  ferdium.enable = true;
+  ferdium.enable = false;
 
   #--- AI Tools
   claude = {enable = true;};

@@ -31,7 +31,7 @@ git so only the binary bundle needs restoring.
 - **Wrapper:** the exception to the pattern above. It lives in
   `home-manager/programs/creative/guitar.nix` with the rest of the amp rig
   rather than in `programs/local/`, so it has no `local.*` toggle and is
-  installed whenever `creative.guitar` is on.
+  installed whenever `audio.guitar` is on.
 - **Runtime:** bundle ships its own libs (RUNPATH points at `./lib`); wrapper
   only sets `ALSA_CONFIG_PATH` so RtMidi/ALSA can reach the amp.
 - **Restore:** unpack the Linux bundle into the folder, keep the `lib/` dir next

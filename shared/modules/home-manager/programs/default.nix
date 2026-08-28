@@ -62,12 +62,13 @@
     #--- Terminals (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.terminals.kitty [./terminals/kitty.nix]
     ++ lib.optionals hostConfig.terminals.ghostty [./terminals/ghostty.nix]
-    #--- Creative (controlled by host hostConfig.nix)
-    ++ lib.optionals hostConfig.creative.blender [./creative/blender.nix]
-    ++ lib.optionals hostConfig.creative.krita [./creative/krita.nix]
-    ++ lib.optionals hostConfig.creative.affinity [./creative/affinity.nix]
-    ++ lib.optionals hostConfig.creative.reaper [./creative/reaper.nix]
-    ++ lib.optionals hostConfig.creative.guitar [./creative/guitar.nix]
+    #--- Graphics (controlled by host hostConfig.nix)
+    ++ lib.optionals hostConfig.graphics.blender [./creative/blender.nix]
+    ++ lib.optionals hostConfig.graphics.krita [./creative/krita.nix]
+    ++ lib.optionals hostConfig.graphics.affinity [./creative/affinity.nix]
+    #--- Audio (controlled by host hostConfig.nix)
+    ++ lib.optionals hostConfig.audio.reaper [./creative/reaper.nix]
+    ++ lib.optionals hostConfig.audio.guitar [./creative/guitar.nix]
     #--- Finance (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.finance.homebank [./finance/homebank.nix]
     #--- Local Packages (controlled by host hostConfig.nix)
