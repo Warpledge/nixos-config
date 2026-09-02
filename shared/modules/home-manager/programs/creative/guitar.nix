@@ -77,6 +77,88 @@
       '';
   });
 
+  #--- Official TONE3000 NAM player: browses the site's capture/IR library from
+  #--- inside the plugin. Not in nixpkgs; prebuilt release, so autoPatchelf it.
+  #--- The GUI is a JUCE WebView, and JUCE dlopens WebKitGTK/GTK3/libcurl by
+  #--- soname at runtime rather than linking them. dlopen resolves through the
+  #--- RUNPATH of the calling object, so appendRunpaths covers the plugins too
+  #--- (they load into a DAW and cannot be wrapped). Missing WebKitGTK renders
+  #--- the whole window black; missing libcurl kills tone downloads.
+  tone3000 = pkgs.stdenv.mkDerivation (finalAttrs: {
+    pname = "tone3000";
+    version = "0.0.2";
+
+    #--- The linux release asset is a zip that contains a single tarball.
+    src = pkgs.fetchurl {
+      url = "https://github.com/tone-3000/tone3000-plugin/releases/download/v${finalAttrs.version}/TONE3000-v${finalAttrs.version}-linux-x64.zip";
+      hash = "sha256-+t5UNOeKDP7+t7E5h81UnhaffByvBYTuvBzhSX2sY20=";
+    };
+
+    nativeBuildInputs = with pkgs; [unzip autoPatchelfHook copyDesktopItems];
+
+    buildInputs = with pkgs; [
+      alsa-lib
+      fontconfig
+      freetype
+      stdenv.cc.cc.lib
+      libx11
+    ];
+
+    #--- getLib, not "${p}/lib": curl and glib default to their `bin` output,
+    #--- which has no lib dir, and a dead runpath entry fails silently.
+    appendRunpaths =
+      (map (p: "${lib.getLib p}/lib") (with pkgs; [
+        webkitgtk_4_1
+        libsoup_3
+        glib
+        gtk3
+        curl
+        libGL
+        libxcursor
+        libxext
+        libxinerama
+        libxrandr
+        libxscrnsaver
+      ]))
+      ++ ["/run/opengl-driver/lib"];
+
+    unpackPhase = ''
+      runHook preUnpack
+      unzip -q "$src"
+      tar -xzf TONE3000-*-linux-x64.tar.gz
+      cd TONE3000-*-linux-x64
+      runHook postUnpack
+    '';
+
+    #--- install.sh is for FHS distros; place the formats by hand instead so
+    #--- LV2_PATH/CLAP_PATH/VST3_PATH below pick them up out of the profile.
+    installPhase = ''
+      runHook preInstall
+
+      mkdir -p $out/lib/lv2 $out/lib/clap $out/lib/vst3 $out/share/tone3000/presets
+      install -Dm755 TONE3000 $out/bin/TONE3000
+      install -Dm644 TONE3000.clap $out/lib/clap/TONE3000.clap
+      cp -r TONE3000.lv2 $out/lib/lv2/
+      cp -r TONE3000.vst3 $out/lib/vst3/
+      cp factory-presets/*.t3kpreset $out/share/tone3000/presets/
+      install -Dm644 tone3000.png $out/share/icons/hicolor/512x512/apps/tone3000.png
+
+      runHook postInstall
+    '';
+
+    desktopItems = [
+      (pkgs.makeDesktopItem {
+        name = "tone3000";
+        exec = "TONE3000";
+        icon = "tone3000";
+        desktopName = "TONE3000";
+        comment = "Play NAM captures and IRs from the TONE3000 library";
+        categories = ["AudioVideo" "Audio" "Music"];
+        startupWMClass = "TONE3000";
+      })
+    ];
+  });
+
   #--- Patch editor for the amp itself (Colin Willcocks' tool), not in nixpkgs.
   #--- Prebuilt bundle under ~/.local/opt, kept out of git and restored by hand;
   #--- see .notes/local/local-binary-installs.md. It ships its own libs
@@ -99,6 +181,10 @@ in {
     #--- Ships a standalone binary plus LV2/CLAP/VST2/VST3.
     neuralrack
     neural-amp-modeler-lv2
+
+    #--- Official NAM player with built-in access to the TONE3000 tone
+    #--- library. Standalone binary plus LV2/CLAP/VST3.
+    tone3000
 
     #--- Blends two NAM/AIDA-X profiles for roughly one profile's CPU cost.
     ratatouille-lv2
@@ -130,6 +216,14 @@ in {
     terminal = false;
     categories = ["Audio" "AudioVideo" "Music"];
   };
+
+  #--------------------------------------------------------------------#
+  #-- TONE3000 Factory Presets
+  #--------------------------------------------------------------------#
+  # Shipped presets are read from the config dir. Only Factory is linked so
+  # the user's own presets in the writable parent are left alone.
+
+  xdg.configFile."TONE3000/Presets/Factory".source = "${tone3000}/share/tone3000/presets";
 
   #--------------------------------------------------------------------#
   #-- Plugin Discovery

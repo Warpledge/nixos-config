@@ -45,6 +45,7 @@
     tldr
     figlet
     ani-cli
+    yt-dlp
     zenity
 
     #--- System Tools

@@ -20,6 +20,11 @@
     };
   };
 
+  #--- GIO TLS backend: without glib-networking GIO falls back to
+  #--- GDummyTlsBackend and every libsoup/WebKitGTK app fails HTTPS. gvfs and
+  #--- dconf above contribute the other GIO_EXTRA_MODULES entries.
+  environment.sessionVariables.GIO_EXTRA_MODULES = ["${pkgs.glib-networking}/lib/gio/modules"];
+
   #--- Documentation
   documentation = {
     enable = true; # Keep man pages
