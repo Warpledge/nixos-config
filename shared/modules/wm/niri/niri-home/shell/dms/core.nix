@@ -17,10 +17,12 @@
   programs.dank-material-shell = {
     enable = true;
 
-    #--- Niri-specific configuration
-    niri = {
-      enableSpawn = true; # Auto-start DMS with niri
-    };
+    #--- Startup
+    # Under systemd, not niri spawn-at-startup: `dms restart` and the power menu's
+    # restart only relaunch the shell when dms.service is active — otherwise they
+    # signal the process and nothing brings it back.
+    systemd.enable = true;
+    niri.enableSpawn = false;
 
     #--- Plugins
     plugins = {
@@ -58,7 +60,16 @@
     "Mod+I".action.spawn = dms "inhibit toggle"; # Toggle idle inhibit
     "Mod+slash".action.spawn = dms "keybinds toggle niri"; # Show Keybind Cheatsheet
     "Mod+Insert".action.spawn = dms "screenRecorder toggleRecording"; # Screen Recorder
-    "Mod+R".action.spawn = ["systemctl" "--user" "restart" "dms.service"]; # Restart DMS
+    "Mod+R".action.spawn = ["dms" "restart"]; # Restart DMS
+
+    #--- Screenshots
+    # dms screenshot is a standalone CLI, not an ipc call; saves to
+    # $XDG_PICTURES_DIR/Screenshots and copies to the clipboard.
+    "Print".action.spawn = ["dms" "screenshot" "region"]; # Region Select
+    "Mod+Print".action.spawn = ["dms" "screenshot" "window"]; # Focused Window
+    "Mod+Shift+Print".action.spawn = ["dms" "screenshot" "full"]; # Focused Output
+    "Ctrl+Print".action.spawn = ["dms" "screenshot" "all"]; # All Outputs
+    "Mod+Ctrl+Print".action.spawn = ["dms" "screenshot" "scroll"]; # Scrolling Capture
 
     #--- Audio controls
     "XF86AudioRaiseVolume".action.spawn = dms "audio increment 3"; # Volume Up
@@ -76,6 +87,9 @@
   #--------------------------------------------------------------------#
   home.file = {
     #--- DMS Main Settings
+    # Read-only store symlink: anything DMS rewrites at runtime must be baked
+    # into settings.json, or the save fails on every start. Connected frame mode
+    # is one such rewriter — it forces squareCorners and shadowIntensity off.
     ".config/DankMaterialShell/settings.json" = {
       text = builtins.toJSON (lib.importJSON ./settings.json);
     };

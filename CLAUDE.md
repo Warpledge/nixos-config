@@ -314,6 +314,7 @@ Game-specific notes live under `.notes/gaming/`:
 - `gaming/tmodloader-debugging.md` — tModLoader paths and log locations
 - `gaming/steam-launch-parameters.md` — per-game Steam launch flags; documents the `tml-prelaunch` script (`shared/modules/home-manager/scripts/gaming/tml-prelaunch.nix`)
 - `gaming/launcher-env-variables.md` — common env vars + wrappers for Heroic/Lutris/Faugus/umu/Steam (JP locale, Proton WineD3D, XWayland wrapper, RPG Maker, perf wrappers)
+- `gaming/steam-client-menu-bug.md` — Steam build 1788400362 dismisses its own menus on niri; `steam-nested` (labwc) workaround and the causes already ruled out
 - `gaming/minecraft_servers/{GTNH,TerraFirmaGreg-Modern}/` — each pack has `index.md` listing its sub-files (server setup, mods, config tweaks, etc.). **Update the relevant sub-file when that pack's config, mods, or settings change.** The matching declarative modules live at `hosts/laptop/minecraft-servers/{gtnh-server,tfg-server}.nix` (add a new server by creating a `.nix` there and importing it in that dir's `default.nix`).
 
 Android device notes live under `.notes/android/`:

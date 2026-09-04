@@ -99,6 +99,16 @@ let
       default-window-height = {fixed = 222;};
     }
 
+    #--- TONE3000 (JUCE standalone): fixed-size UI that letterboxes when tiled.
+    #--- No size set, so the client keeps its own preferred geometry.
+    {
+      matches = [
+        {app-id = "^TONE3000$";}
+      ];
+      open-floating = true;
+      open-focused = true;
+    }
+
     #--- Wine installers and dialogs
     {
       matches = [

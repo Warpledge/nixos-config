@@ -89,6 +89,10 @@
       url = "github:AvengeMedia/dms-plugin-registry";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    dank-greeter = {
+      url = "github:AvengeMedia/dank-greeter";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     #--- Kernels
     cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";

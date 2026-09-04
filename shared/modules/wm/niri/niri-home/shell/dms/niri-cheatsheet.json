@@ -14,6 +14,13 @@
       {"key": "Mod+L", "desc": "Lock Screen"},
       {"key": "Mod+I", "desc": "Toggle Idle Inhibit"}
     ],
+    "Screenshots": [
+      {"key": "Print", "desc": "Region Select"},
+      {"key": "Mod+Print", "desc": "Focused Window"},
+      {"key": "Mod+Shift+Print", "desc": "Focused Output"},
+      {"key": "Ctrl+Print", "desc": "All Outputs"},
+      {"key": "Mod+Ctrl+Print", "desc": "Scrolling Capture"}
+    ],
     "Audio Controls": [
       {"key": "XF86AudioRaiseVolume", "desc": "Volume Up (+3%)"},
       {"key": "XF86AudioLowerVolume", "desc": "Volume Down (-3%)"},

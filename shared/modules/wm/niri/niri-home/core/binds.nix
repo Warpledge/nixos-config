@@ -12,10 +12,8 @@ _: {
     "XF86AudioPrev".action.spawn = ["playerctl" "previous"];
     "XF86AudioNext".action.spawn = ["playerctl" "next"];
 
-    #--- Screenshot Controls
-    "Mod+Shift+Print".action.screenshot-screen = {write-to-disk = true;};
-    "Mod+Print".action.screenshot-window = {write-to-disk = true;};
-    "Print".action.screenshot = {show-pointer = false;};
+    #--- Applications
+    # Screenshot binds live with the other DMS commands in shell/dms/core.nix
     "Mod+Return".action.spawn = ["kitty"];
 
     "Mod+Q".action.close-window = {};
@@ -86,7 +84,8 @@ _: {
     "Mod+Shift+9".action.move-column-to-workspace = 9;
 
     #--- Apps
-    "Mod+Shift+S".action.spawn = ["steam"];
+    # Nested labwc — the plain client's menus die on niri, see .notes/gaming/steam-client-menu-bug.md
+    "Mod+Shift+S".action.spawn = ["steam-nested"];
     "Mod+Shift+D".action.spawn = ["vesktop"];
     "Mod+Shift+H".action.spawn = ["heroic"];
     "Mod+Shift+G".action.spawn = ["lutris"];

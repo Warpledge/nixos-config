@@ -4,9 +4,12 @@
 {
   pkgs,
   lib,
+  inputs,
   username,
   ...
 }: {
+  imports = [inputs.dank-greeter.nixosModules.default];
+
   #--------------------------------------------------------------------#
   #-- Window Manager
   #--------------------------------------------------------------------#
@@ -19,13 +22,26 @@
     displayManager.sessionPackages = [pkgs.niri];
     greetd = {
       enable = true;
-      settings = {
-        default_session = {
-          command = "${lib.getExe pkgs.tuigreet} --time --asterisks --remember --cmd niri-session";
-          user = "greeter";
-        };
-      };
+      # command is set by programs.dms-greeter (mkDefault) below
+      settings.default_session.user = "greeter";
     };
+  };
+
+  #--- DMS Greeter
+  # Theme, wallpaper and settings are copied out of configHome into
+  # /var/lib/dms-greeter on each greetd start, so they lag one restart.
+  programs.dms-greeter = {
+    enable = true;
+    compositor.name = "niri";
+    configHome = "/home/${username}";
+  };
+
+  #--- The module's preStart chowns `*`, which skips dotfiles, so dirs left by an
+  #--- older greeter install (different uid) lock the greeter out of its own cache
+  #--- and it exits before creating a session.
+  systemd.tmpfiles.settings."11-dms-greeter-own"."/var/lib/dms-greeter".Z = {
+    user = "greeter";
+    group = "greeter";
   };
 
   #--------------------------------------------------------------------#

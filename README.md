@@ -64,7 +64,7 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | --- | --- |
 | **Window Manager** | [Niri][niri] / [Hyprland][hyprland] / [GNOME][gnome] / [COSMIC][cosmic] |
 | **Status Bar / Notifier / Launcher / Lock** | [DankMaterialShell][dms] (Niri + Hyprland) / GNOME Shell + extensions (GNOME) / COSMIC Panel + applets (COSMIC) |
-| **Display Manager** | [tuigreet][tuigreet] via [greetd][greetd] (Niri/Hyprland) / [GDM][gdm] (GNOME) / [cosmic-greeter][cosmic-greeter] (COSMIC) |
+| **Display Manager** | [dms-greeter][dms-greeter] via [greetd][greetd] (Niri) / [tuigreet][tuigreet] via greetd (Hyprland) / [GDM][gdm] (GNOME) / [cosmic-greeter][cosmic-greeter] (COSMIC) |
 | **Color Scheme** | [Catppuccin][catppuccin] Mocha Mauve applied globally via [Stylix][stylix] + [catppuccin/nix][catppuccin-nix] |
 | **Fonts** | [JetBrains Mono Nerd Font][nerd-fonts], Monaspace, Nerd Fonts Symbols |
 | **Window Switcher** | [niriswitcher][niriswitcher] (Niri only) |
@@ -96,7 +96,7 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | **Browsers** | [Zen][zen] / [Mullvad Browser][mullvad-browser] / [Helium][helium] |
 | **File Manager** | [Nautilus][nautilus] |
 | **Media Player** | [mpv][mpv], [Celluloid][celluloid] (mpv frontend), [Spotify][spotify] via [spicetify-nix][spicetify], [Grayjay][grayjay] |
-| **Screenshot / Recording** | [grim][grim] + [slurp][slurp], [gpu-screen-recorder][gpu-screen-recorder] |
+| **Screenshot / Recording** | [dms screenshot][dms] (Niri), [grim][grim] + [slurp][slurp] (Hyprland), [gpu-screen-recorder][gpu-screen-recorder] |
 | **Graphics** | [Blender][blender], [Krita][krita], [Affinity Suite v3][affinity-nix] (via Wine) |
 | **Audio** | [Reaper][reaper] (DAW, with [SWS][sws] and [ReaPack][reapack]) |
 | **Guitar** | [TONE3000][tone3000] (official NAM player, browses its capture and IR library in-app), [NeuralRack][neuralrack] and [Ratatouille][ratatouille] (load NAM/AIDA-X amp captures), [Guitarix][guitarix] (modular amp rig), [ir.lv2][ir-lv2] for cabinet IRs, [qpwgraph][qpwgraph] for patching, plus [FxFloorBoard][katana-fxfloorboard] to edit patches on the Boss Katana itself |
@@ -148,6 +148,7 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 [space-bar]: https://github.com/luchrioh/space-bar
 [date-menu-formatter]: https://github.com/marcinjakubowski/date-menu-formatter
 [dms]: https://github.com/AvengeMedia/DankMaterialShell
+[dms-greeter]: https://github.com/AvengeMedia/dank-greeter
 [tuigreet]: https://github.com/apognu/tuigreet
 [greetd]: https://git.sr.ht/~kennylevinsen/greetd
 [catppuccin]: https://github.com/catppuccin/catppuccin
@@ -406,7 +407,7 @@ The main things this config pulls in from outside the standard NixOS package set
 | `Mod+Z` | Code editor (Zed) |
 | `Mod+B` | Browser (Zen) |
 | `Mod+E` | File manager (Nautilus) |
-| `Mod+Shift+S` | Steam |
+| `Mod+Shift+S` | Steam (nested labwc, see [note](.notes/gaming/steam-client-menu-bug.md)) |
 | `Mod+Shift+D` | Discord (Vesktop) |
 | `Mod+Shift+H` | Heroic |
 | `Mod+Shift+G` | Lutris |
@@ -458,9 +459,11 @@ The main things this config pulls in from outside the standard NixOS package set
 
 | Keybind | Action |
 | --- | --- |
-| `Print` | Area screenshot |
-| `Mod+Print` | Window screenshot |
-| `Mod+Shift+Print` | Full screen screenshot |
+| `Print` | Region screenshot (DMS) |
+| `Mod+Print` | Focused window screenshot |
+| `Mod+Shift+Print` | Focused output screenshot |
+| `Ctrl+Print` | All outputs screenshot |
+| `Mod+Ctrl+Print` | Scrolling capture |
 | `Mod+Home` | Start screen recording |
 | `Mod+End` | Stop screen recording |
 
