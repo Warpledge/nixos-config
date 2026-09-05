@@ -84,8 +84,7 @@ _: {
     "Mod+Shift+9".action.move-column-to-workspace = 9;
 
     #--- Apps
-    # Nested labwc — the plain client's menus die on niri, see .notes/gaming/steam-client-menu-bug.md
-    "Mod+Shift+S".action.spawn = ["steam-nested"];
+    "Mod+Shift+S".action.spawn = ["steam"];
     "Mod+Shift+D".action.spawn = ["vesktop"];
     "Mod+Shift+H".action.spawn = ["heroic"];
     "Mod+Shift+G".action.spawn = ["lutris"];

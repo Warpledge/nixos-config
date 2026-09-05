@@ -5,7 +5,5 @@
   imports = [
     #--- tModLoader
     ./tml-prelaunch.nix
-    #--- Steam
-    ./steam-nested.nix
   ];
 }

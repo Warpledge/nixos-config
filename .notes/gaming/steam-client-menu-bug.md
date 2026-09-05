@@ -5,17 +5,13 @@ client dismisses its own menus instantly on niri: the `Steam` / `View` / `Friend
 `Games` / `Help` dropdowns and store right-click menus flash and disappear. Build
 `1788291500` was fine.
 
-## Workaround
+## Workaround (removed 2026-09-05)
 
-```bash
-steam-nested          # steam inside a nested labwc compositor
-```
-
-`shared/modules/home-manager/scripts/gaming/steam-nested.nix`. Steam must not already
-be running — the script refuses rather than raising the outer window.
-
-Use **labwc**, not gamescope. gamescope exports `GAMESCOPE_WAYLAND_DISPLAY`, so Steam
-starts in Big Picture and hangs on "Switch to Desktop".
+Running the client inside a nested **labwc** compositor (`labwc -t "Steam" -S "steam"`)
+restored the menus, but the nested window brought its own problems and the wrapper was
+dropped. Use **labwc**, not gamescope, if it is ever revived: gamescope exports
+`GAMESCOPE_WAYLAND_DISPLAY`, so Steam starts in Big Picture and hangs on
+"Switch to Desktop".
 
 ## What it is not
 

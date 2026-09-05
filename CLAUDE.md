@@ -207,6 +207,8 @@ GNOME defines no keybinds of its own beyond dconf — it is a light-weight fallb
 
 **DMS** (DankMaterialShell): Niri and Hyprland only. Declarative config lives at `shared/modules/wm/{wm}/{wm}-home/shell/dms/` — Hyprland has `core.nix` + `settings.json`; Niri additionally has `clsettings.json` and `niri-cheatsheet.json`. The DMS keybind helper differs per WM (string interpolation for Hyprland, list concat for Niri).
 
+DMS runs as a systemd user service (`systemd.enable`, `niri.enableSpawn = false`), so it inherits the **systemd user manager** environment — `shared/modules/home-manager/variables.nix` — not niri's `programs.niri.settings.environment` block. It launches every app with `systemd-run --user --scope`, so those session variables, and not niri's, govern anything started from the spotlight. Keep the two sets compatible: `QT_QPA_PLATFORM` and `GDK_BACKEND` must keep their X11 fallbacks (`wayland;xcb`, `wayland,x11`) or X11-only apps die instantly from the launcher while still working from a terminal — a Qt app with no wayland plugin aborts in ~50 ms, a JUCE/GTK one exits with "cannot open display". Diagnose by diffing `tr '\0' '\n' < /proc/$(pgrep -x .quickshell-wra)/environ` against `env`, then replaying with `env -i "${DMS_ENV[@]}" <app>`. A rebuild alone does not fix a bad value: the running manager keeps the old import, so `systemctl --user set-environment` then restart `dms.service`, or log out.
+
 **cosmic-manager** (COSMIC): nixpkgs ships no home-manager options for COSMIC, so the `wayland.desktopManager.cosmic.*` surface comes from the `cosmic-manager` flake input, imported in `cosmic-home/default.nix`. Two things make it behave unlike the rest of the repo:
 
 - **It does not symlink.** It renders the options to a JSON manifest and runs `cosmic-ctl apply` from a HM activation script, so `~/.config/cosmic/<component>/v1/<key>` stays a real writable file and COSMIC Settings keeps working. Declared keys are rewritten each activation; undeclared keys are never touched. Do **not** go back to `xdg.configFile` + `force = true` for COSMIC — that is what made the Settings GUI read-only before.
@@ -314,7 +316,7 @@ Game-specific notes live under `.notes/gaming/`:
 - `gaming/tmodloader-debugging.md` — tModLoader paths and log locations
 - `gaming/steam-launch-parameters.md` — per-game Steam launch flags; documents the `tml-prelaunch` script (`shared/modules/home-manager/scripts/gaming/tml-prelaunch.nix`)
 - `gaming/launcher-env-variables.md` — common env vars + wrappers for Heroic/Lutris/Faugus/umu/Steam (JP locale, Proton WineD3D, XWayland wrapper, RPG Maker, perf wrappers)
-- `gaming/steam-client-menu-bug.md` — Steam build 1788400362 dismisses its own menus on niri; `steam-nested` (labwc) workaround and the causes already ruled out
+- `gaming/steam-client-menu-bug.md` — Steam build 1788400362 dismisses its own menus on niri; the labwc nested-client workaround (removed 2026-09-05) and the causes already ruled out
 - `gaming/minecraft_servers/{GTNH,TerraFirmaGreg-Modern}/` — each pack has `index.md` listing its sub-files (server setup, mods, config tweaks, etc.). **Update the relevant sub-file when that pack's config, mods, or settings change.** The matching declarative modules live at `hosts/laptop/minecraft-servers/{gtnh-server,tfg-server}.nix` (add a new server by creating a `.nix` there and importing it in that dir's `default.nix`).
 
 Android device notes live under `.notes/android/`:

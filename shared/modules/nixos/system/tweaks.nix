@@ -15,9 +15,9 @@
   #--------------------------------------------------------------------#
   #-- Journald Logging Configuration
   #--------------------------------------------------------------------#
-  services.journald.extraConfig = ''
-    SystemMaxUse=500M # Maximum journal size on disk
-    SystemKeepFree=1G # Always keep 1GB free space
-    MaxRetentionSec=7day # Keep logs for 7 days
-  '';
+  services.journald.settings.Journal = {
+    SystemMaxUse = "500M"; # Maximum journal size on disk
+    SystemKeepFree = "1G"; # Always keep 1GB free space
+    MaxRetentionSec = "7day"; # Keep logs for 7 days
+  };
 }

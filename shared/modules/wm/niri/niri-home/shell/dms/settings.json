@@ -459,7 +459,7 @@
       "gothCornerRadiusOverride": false,
       "gothCornerRadiusValue": 12,
       "gothCornersEnabled": false,
-      "hoverPopouts": true,
+      "hoverPopouts": false,
       "hoverPopoutDelay": 150,
       "iconScale": 1,
       "id": "default",
