@@ -13,7 +13,7 @@
 
     #--- Qt configuration
     QT_AUTO_SCREEN_SCALE_FACTOR = "1"; # Disable Qt auto-scaling
-    QT_QPA_PLATFORM = "wayland"; # Use Wayland, fallback to X11
+    QT_QPA_PLATFORM = "wayland;xcb"; # Fallback matters: a Qt app with no wayland plugin aborts without it
     QT_WAYLAND_DISABLE_WINDOWDECORATION = "1"; # Disable Qt window decorations
 
     #--- Wayland application support
@@ -25,7 +25,7 @@
     #--- Graphics and rendering
     SDL_VIDEODRIVER = "wayland"; # Use Wayland for SDL applications
     CLUTTER_BACKEND = "wayland"; # Use Wayland for Clutter toolkit
-    GDK_BACKEND = "wayland"; # GTK apps prefer Wayland
+    GDK_BACKEND = "wayland,x11"; # X11-only GTK/JUCE apps cannot start without the fallback
 
     #--- WLR backend (for Niri and other wlroots compositors)
     WLR_BACKEND = "vulkan"; # Use Vulkan backend
