@@ -76,4 +76,12 @@
       pkgs.xdg-desktop-portal-gnome
     ];
   };
+
+  #--- Strip GDK_BACKEND from the GNOME portal
+  # It exposes Settings only when GDK_BACKEND is set, which kills FileChooser
+  # and ScreenCast; variables.nix keeps the X11 fallback for everything else.
+  systemd.user.services.xdg-desktop-portal-gnome = {
+    overrideStrategy = "asDropin";
+    serviceConfig.UnsetEnvironment = "GDK_BACKEND";
+  };
 }
