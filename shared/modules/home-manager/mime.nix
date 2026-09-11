@@ -22,6 +22,7 @@ with lib; let
     terminal = ["kitty.desktop"];
     archive = ["org.gnome.FileRoller.desktop"];
     discord = ["discord.desktop"];
+    freetube = ["freetube.desktop"];
   };
 
   mimeMap = {
@@ -89,6 +90,7 @@ with lib; let
       "application/x-bzip2"
     ];
     discord = ["x-scheme-handler/discord"];
+    freetube = ["x-scheme-handler/freetube"];
   };
 
   associations = with lists;
