@@ -66,7 +66,7 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | **Status Bar / Notifier / Launcher / Lock** | [DankMaterialShell][dms] (Niri + Hyprland) / GNOME Shell + extensions (GNOME) / COSMIC Panel + applets (COSMIC) |
 | **Display Manager** | [dms-greeter][dms-greeter] via [greetd][greetd] (Niri) / [tuigreet][tuigreet] via greetd (Hyprland) / [GDM][gdm] (GNOME) / [cosmic-greeter][cosmic-greeter] (COSMIC) |
 | **Color Scheme** | [Catppuccin][catppuccin] Mocha Mauve applied globally via [Stylix][stylix] + [catppuccin/nix][catppuccin-nix] |
-| **Fonts** | [JetBrains Mono Nerd Font][nerd-fonts], Monaspace, Nerd Fonts Symbols |
+| **Fonts** | [JetBrains Mono Nerd Font][nerd-fonts], Monaspace, Roboto, Nerd Fonts Symbols |
 | **Window Switcher** | [niriswitcher][niriswitcher] (Niri only) |
 | **GNOME Extensions** | [Dash to Panel][dash-to-panel], [Blur my Shell][blur-my-shell], [AppIndicator][appindicator], [Astra Monitor][astra-monitor], [Caffeine][caffeine], [Auto Move Windows][auto-move-windows], [GNOME UI Tune][gnome-ui-tune], [Space Bar][space-bar], [Date Menu Formatter][date-menu-formatter] |
 | **COSMIC Applets** | [Minimon][minimon] (CPU/RAM/GPU/temps/net/disk in the bar), [Privacy Indicator][cosmic-privacy], [Caffeine][cosmic-caffeine], plus [Tweaks][cosmic-tweaks] |
@@ -95,7 +95,7 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | --- | --- |
 | **Browsers** | [Zen][zen] / [Mullvad Browser][mullvad-browser] / [Helium][helium] |
 | **File Manager** | [Nautilus][nautilus] |
-| **Media Player** | [mpv][mpv], [Celluloid][celluloid] (mpv frontend), [Spotify][spotify] via [spicetify-nix][spicetify], [Grayjay][grayjay] |
+| **Media Player** | [mpv][mpv], [Celluloid][celluloid] (mpv frontend), [Spotify][spotify] via [spicetify-nix][spicetify], [FreeTube][freetube] |
 | **Screenshot / Recording** | [dms screenshot][dms] (Niri), [grim][grim] + [slurp][slurp] (Hyprland), [gpu-screen-recorder][gpu-screen-recorder] |
 | **Graphics** | [Blender][blender], [Krita][krita], [Affinity Suite v3][affinity-nix] (via Wine) |
 | **Audio** | [Reaper][reaper] (DAW, with [SWS][sws] and [ReaPack][reapack]) |
@@ -175,7 +175,7 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 [mpv]: https://mpv.io
 [spotify]: https://www.spotify.com
 [spicetify]: https://github.com/Gerg-L/spicetify-nix
-[grayjay]: https://grayjay.app
+[freetube]: https://freetubeapp.io
 [grim]: https://sr.ht/~emersion/grim
 [slurp]: https://github.com/emersion/slurp
 [gpu-screen-recorder]: https://git.dec05eba.com/gpu-screen-recorder
@@ -300,6 +300,12 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | --- | --- |
 | `nixm vulkan` | Print Vulkan capabilities (vulkaninfo) |
 
+### FreeTube
+
+| Command | Description |
+| --- | --- |
+| `nixm freetube-sync` | Pull your current FreeTube subscriptions into `subscriptions.nix` (asks before writing) |
+
 ### Android
 
 | Command | Description |
@@ -412,7 +418,7 @@ The main things this config pulls in from outside the standard NixOS package set
 | `Mod+Shift+H` | Heroic |
 | `Mod+Shift+G` | Lutris |
 | `Mod+Shift+M` | Spotify |
-| `Mod+Shift+Y` | Grayjay |
+| `Mod+Shift+Y` | FreeTube |
 
 #### Window Management
 
@@ -499,7 +505,7 @@ The main things this config pulls in from outside the standard NixOS package set
 | `Mod+Shift+H` | Heroic |
 | `Mod+Shift+G` | Lutris |
 | `Mod+Shift+M` | Spotify |
-| `Mod+Shift+Y` | Grayjay |
+| `Mod+Shift+Y` | FreeTube |
 
 #### Window Management
 

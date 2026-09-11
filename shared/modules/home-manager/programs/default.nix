@@ -56,7 +56,7 @@
     #--- Media (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.media.mpv [./media/mpv.nix]
     ++ lib.optionals hostConfig.media.spotify [./media/spotify.nix]
-    ++ lib.optionals hostConfig.media.grayjay [./media/grayjay.nix]
+    ++ lib.optionals hostConfig.media.freetube [./media/freetube]
     ++ lib.optionals hostConfig.media.videoTrimmer [./media/video-trimmer.nix]
     ++ lib.optionals hostConfig.media.qrScanner [./media/qr-scanner.nix]
     #--- Terminals (controlled by host hostConfig.nix)

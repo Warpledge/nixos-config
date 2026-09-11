@@ -134,7 +134,11 @@
             saturation 1.2
         }
 
+        // Catch-all: every window gets the wallpaper blur behind it.
+        // Excluded app-ids opt out entirely (Steam renders its own opaque chrome).
         window-rule {
+            exclude app-id="^steam$"
+
             background-effect {
                 blur true
                 xray true

@@ -89,6 +89,14 @@ let
       };
     }
 
+    #--- Steam secondary windows (Friends List, Settings, game properties)
+    #--- Main library window stays tiled; no position set, so niri centers them.
+    {
+      matches = [{app-id = "^steam$";}];
+      excludes = [{title = "^Steam$";}];
+      open-floating = true;
+    }
+
     #--- Guitar Pro 8 Fretboard panel
     {
       matches = [
@@ -268,6 +276,19 @@ let
         y = 32;
         relative-to = "bottom-right";
       };
+    }
+
+    #--------------------------------------------------------------------#
+    #-- XWAYLAND RESIZE FILL --#
+    #--------------------------------------------------------------------#
+
+    #--- XWayland has no synchronized-resize handshake, so an interactive
+    #--- resize exposes frame area the client has not repainted yet. Drawing
+    #--- the border as a solid rect fills it instead of showing the backdrop.
+    #--- Must stay after the global styling rule, which sets this false for all.
+    {
+      matches = [{app-id = "^steam$";}];
+      draw-border-with-background = true;
     }
   ];
 in {

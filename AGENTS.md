@@ -125,10 +125,10 @@ module in the same directory** — note the trailing `#` closing both rule lines
 
 ```nix
 #=====================================================================#
-# GRAYJAY
+# VIDEO TRIMMER
 #=====================================================================#
 {pkgs, ...}: {
-  home.packages = [pkgs.grayjay];
+  home.packages = [pkgs.video-trimmer];
 }
 ```
 

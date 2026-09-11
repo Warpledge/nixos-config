@@ -102,7 +102,7 @@ in {
       (spawn "Super+Shift+D" "Discord" "vesktop")
       (spawn "Super+Shift+H" "Heroic" "heroic")
       (spawn "Super+Shift+G" "Lutris" "lutris")
-      (spawn "Super+Shift+Y" "Grayjay" "Grayjay")
+      (spawn "Super+Shift+Y" "FreeTube" "freetube")
       (spawn "Super+Shift+M" "Spotify" "spotify")
 
       #--------------------------------------------------------------------#

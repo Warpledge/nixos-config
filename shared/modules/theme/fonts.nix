@@ -12,6 +12,9 @@
       nerd-fonts.monaspace # Modern monospace with texture healing
       nerd-fonts.symbols-only
 
+      #--- UI fonts
+      roboto
+
       #--- icon fonts
       material-symbols
 

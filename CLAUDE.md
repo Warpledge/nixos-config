@@ -28,6 +28,7 @@ nixm flake-update       # Update flake inputs only (no rebuild)
 nixm dryrun             # Rebuild without applying
 nixm gc                 # GC, keep last 5 generations
 nixm rollback           # Roll back to the previous generation
+nixm freetube-sync      # Capture FreeTube subscriptions into subscriptions.nix (y/N prompt)
 nix flake lock --update-input <name>   # Bump a single input
 run <pkg> [args]        # Ad-hoc launch a nixpkgs package without installing it (zsh function)
 ```
@@ -55,7 +56,7 @@ The authoritative list of toggles is **`hosts/{hostname}/hostConfig/core.nix`** 
 - `windowManager` — `"hyprland" | "niri" | "gnome" | "cosmic"`
 - `kernel` — `"zen" | "latest" | "xanmod" | "cachyos"`
 - Service toggles: `mullvad.enable`, `clamav.enable`, `docker.enable`, `winboat.enable`, `sunshine.enable`, `discord.arrpc.enable`, `waydroid.{enable,magisk,nftables}`
-- Attribute-set toggles: `browsers.{zen,mullvad,helium}`, `terminals.{kitty,ghostty}`, `editors.{helix,zed}`, `fileBrowsers.{nautilus,yazi}`, `media.{mpv,spotify,grayjay,videoTrimmer,qrScanner}`, `graphics.{blender,krita,affinity}`, `audio.{reaper,guitar}`, `finance.{homebank}`, `gameLaunchers.{steam,heroic,prismlauncher,lutris,faugus,twintail}`, `japanese.{ime,vn}`
+- Attribute-set toggles: `browsers.{zen,mullvad,helium}`, `terminals.{kitty,ghostty}`, `editors.{helix,zed}`, `fileBrowsers.{nautilus,yazi}`, `media.{mpv,spotify,freetube,videoTrimmer,qrScanner}`, `graphics.{blender,krita,affinity}`, `audio.{reaper,guitar}`, `finance.{homebank}`, `gameLaunchers.{steam,heroic,prismlauncher,lutris,faugus,twintail}`, `japanese.{ime,vn}`
 - `local.{granblueRelinkMods}` — wrappers around prebuilt bundles under `~/.local/opt/` (kept out of git); see `.notes/local/local-binary-installs.md`
 - AI tools: `claude.enable`, `opencode.enable`, `lmstudio.enable`
 
@@ -145,6 +146,7 @@ Does this need to be configurable per-host?
 - `shared/modules/home-manager/` — user: `programs/` (browsers, terminals, editors, ai, shell, chat-clients, emulation, fetch, file-browsers, creative, media, finance, launchers, local, plus `android.nix`, `archives.nix`, `gaming.nix`, `git.nix`, `japanese-vn.nix`), services, scripts, mime, variables
   - `programs/local/` — wrappers for non-nixpkgs prebuilt bundles living in `~/.local/opt/`; the payload is intentionally not in the repo
   - `default.nix` carries a `clearStaleBackups` activation hook that deletes `*.bak` under `~/.config`, `~/.local/{share,state}` before `checkLinkTargets`. This is why HM activation never fails on leftover backups — don't remove it when debugging a "file exists" error; find the real conflicting file instead.
+  - `programs/media/freetube/` — `settings.nix` (mirrored from the app), `blocked-channels.nix` (~1k channel ids in categorised `let` lists) and `subscriptions.nix`. Three things bite here. The home-manager module copies `hm_settings.db` over `settings.db` **only when the declared content changes**, and FreeTube rewrites that file from memory when it exits — so close FreeTube before rebuilding, or the copy is clobbered and stays clobbered until the module changes again. Blocklist entries are emitted with a `preferredName` and a placeholder `icon`, because FreeTube re-resolves every entry missing either one, at one API call each. Subscriptions are seed-only — a `home.activation` script guarded by `[[ ! -e ]]`, so the app owns them and rebuilds never overwrite; `nixm freetube-sync` recaptures them into the module behind a y/N prompt.
 - `shared/modules/wm/{hyprland,niri,gnome,cosmic}/` — each has `<wm>-nixos/` and `<wm>-home/`. Only Hyprland and Niri integrate DankMaterialShell (DMS); GNOME uses `gnome-home/extensions/` + `dconf.nix`, COSMIC uses `cosmic-home/shell/{panel,applets}.nix`
 - `shared/modules/theme/` — stylix, catppuccin, fonts
 - `hosts/{hostname}/` — `gpu.nix`, `hardware-configuration.nix`, `{hostname}.nix`, `hostConfig/core.nix`, `wm/<wm>.nix` (per-WM host overrides: monitors, GPU env vars, autostart)

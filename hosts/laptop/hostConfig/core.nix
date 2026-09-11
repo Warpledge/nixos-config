@@ -56,7 +56,7 @@
   media = {
     mpv = true;
     spotify = true;
-    grayjay = true;
+    freetube = true;
     videoTrimmer = true;
     qrScanner = false; # cobang broken: python-zbar fails to build upstream
   };

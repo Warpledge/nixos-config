@@ -88,7 +88,7 @@ _: {
     "Mod+Shift+D".action.spawn = ["vesktop"];
     "Mod+Shift+H".action.spawn = ["heroic"];
     "Mod+Shift+G".action.spawn = ["lutris"];
-    "Mod+Shift+Y".action.spawn = ["Grayjay"];
+    "Mod+Shift+Y".action.spawn = ["freetube"];
     "Mod+Z".action.spawn = ["zeditor"];
     "Mod+B".action.spawn = ["zen-beta"];
     "Mod+E".action.spawn = ["nautilus"];

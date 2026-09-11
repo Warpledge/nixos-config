@@ -58,6 +58,9 @@
           "; ==== AMD GPU ==== ;"
           "󰖮;Vulkan Info;nixm vulkan"
 
+          "; ==== FreeTube ==== ;"
+          "󰗃;Sync Subscriptions to Nix;nixm freetube-sync"
+
           "; ==== Android ==== ;"
           "󰤱;Android Debloater;nixm debloater"
         )
@@ -135,6 +138,67 @@
           read -p "Enter generation number to rollback to: " gen
           sudo nix-env --switch-generation "$gen" -p /nix/var/nix/profiles/system
           sudo /nix/var/nix/profiles/system/bin/switch-to-configuration switch
+          ;;
+
+        # --- FreeTube ---
+        freetube-sync)
+          MODULE="$FLAKE_PATH/shared/modules/home-manager/programs/media/freetube/subscriptions.nix"
+          DB="$HOME/.config/FreeTube/profiles.db"
+
+          if pgrep -x freetube >/dev/null 2>&1; then
+            echo "FreeTube is running. Close it first so profiles.db is flushed to disk."
+            exit 1
+          fi
+          [[ -f "$DB" ]] || { echo "No profiles.db found at $DB"; exit 1; }
+          [[ -f "$MODULE" ]] || { echo "No module found at $MODULE"; exit 1; }
+          ${pkgs.jq}/bin/jq --exit-status . "$DB" >/dev/null 2>&1 || { echo "profiles.db is not valid JSON - refusing to sync."; exit 1; }
+
+          LIVE_IDS=$(mktemp) && DECL_IDS=$(mktemp)
+          ${pkgs.jq}/bin/jq -rs '.[0].subscriptions[].id' "$DB" | sort > "$LIVE_IDS"
+          grep -oE '"UC[A-Za-z0-9_-]{22}"' "$MODULE" | tr -d '"' | sort > "$DECL_IDS"
+          added=$(comm -13 "$DECL_IDS" "$LIVE_IDS" | wc -l)
+          removed=$(comm -23 "$DECL_IDS" "$LIVE_IDS" | wc -l)
+
+          echo "Sync FreeTube subscriptions INTO the Nix module."
+          echo ""
+          echo "  module:   $MODULE"
+          echo "  declared: $(wc -l < "$DECL_IDS")   live: $(wc -l < "$LIVE_IDS")"
+          echo "  changes:  +$added to add, -$removed to remove"
+          echo ""
+          echo "This rewrites the declared list in the module to match FreeTube."
+          echo "It does NOT modify your FreeTube subscriptions - profiles.db is"
+          echo "only read. The module list is overwritten and cannot be undone"
+          echo "except through git."
+          echo ""
+
+          if [[ "$added" == "0" && "$removed" == "0" ]]; then
+            echo "Module already matches FreeTube. Nothing to do."
+            rm -f "$LIVE_IDS" "$DECL_IDS"
+            exit 0
+          fi
+
+          read -p "Proceed? [y/N] " reply
+          case "$reply" in
+            [yY] | [yY][eE][sS]) ;;
+            *)
+              echo "Aborted. Nothing was written."
+              rm -f "$LIVE_IDS" "$DECL_IDS"
+              exit 0
+              ;;
+          esac
+
+          BODY=$(mktemp)
+          ${pkgs.jq}/bin/jq -rs '.[0].subscriptions | sort_by(.name|ascii_downcase) | .[] | "    (sub \"\(.id)\" \"\(.name)\" \"\(.thumbnail)\")"' "$DB" > "$BODY"
+          awk -v bodyfile="$BODY" '
+            /^  subscriptions = \[$/ { print; while ((getline line < bodyfile) > 0) print line; inlist=1; next }
+            inlist && /^  \];$/      { print; inlist=0; next }
+            inlist                   { next }
+            { print }
+          ' "$MODULE" > "$MODULE.new" && mv "$MODULE.new" "$MODULE"
+          ${pkgs.alejandra}/bin/alejandra --quiet "$MODULE"
+          echo "Wrote $(grep -c '(sub ' "$MODULE") subscriptions to the module."
+          echo "Run 'nix flake check' then commit when ready."
+          rm -f "$BODY" "$LIVE_IDS" "$DECL_IDS"
           ;;
 
         # --- System Monitoring ---
