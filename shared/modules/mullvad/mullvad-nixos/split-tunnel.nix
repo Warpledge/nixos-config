@@ -33,7 +33,7 @@
 
   #--- Owned by the home-manager counterpart; listed so a typo here still
   #--- fails loudly instead of being silently wrapped by neither module.
-  hmTargets = ["heroic" "prismlauncher" "claude" "opencode"];
+  hmTargets = ["heroic" "prismlauncher" "claude" "opencode" "vesktop" "spotify" "freetube"];
 
   mine = lib.filter (n: targets ? ${n}) wanted;
   unknown = lib.subtractLists (lib.attrNames targets ++ hmTargets) wanted;

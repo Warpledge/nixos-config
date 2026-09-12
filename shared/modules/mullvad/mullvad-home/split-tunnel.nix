@@ -12,6 +12,7 @@
 #- mullvad-exclusions net_cls cgroup and children inherit, so wrapping a
 #- launcher also covers every game it spawns.
 {
+  config,
   lib,
   pkgs,
   hostConfig,
@@ -34,6 +35,18 @@
     }
     // lib.optionalAttrs hostConfig.opencode.enable {
       opencode = "${pkgs.opencode}/bin/opencode";
+    }
+    // lib.optionalAttrs hostConfig.media.freetube {
+      freetube = "${pkgs.freetube}/bin/freetube";
+    }
+    // lib.optionalAttrs hostConfig.media.spotify {
+      # spicetify-nix builds its own Spotify; pkgs.spotify is the wrong one
+      spotify = "${config.programs.spicetify.spicedSpotify}/bin/spotify";
+    }
+    # chat-clients/discord.nix is imported unconditionally, so no toggle to gate on.
+    # nixcord builds its own Vesktop; pkgs.vesktop is a different derivation.
+    // {
+      vesktop = "${config.programs.nixcord.finalPackage.vesktop}/bin/vesktop";
     };
 
   mine = lib.filter (n: targets ? ${n}) wanted;

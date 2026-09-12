@@ -12,6 +12,24 @@
     enable = true;
     discord.enable = false; # disable default Discord, use Vesktop instead
     vesktop.enable = true;
+
+    #--- Written wholesale to ~/.config/vesktop/settings.json (a copy, not a
+    #--- merge), so every key must be declared or it is dropped.
+    #--- arRPC stays false: the standalone arrpc service owns port 1337.
+    vesktop.settings = {
+      discordBranch = "stable";
+      minimizeToTray = true;
+      arRPC = false;
+      hardwareVideoAcceleration = true;
+      disableSmoothScroll = false;
+      customTitleBar = false;
+      staticTitle = false;
+      enableMenu = false;
+      tray = true;
+      splashColor = "rgb(239, 239, 241)";
+      splashBackground = "rgb(30, 30, 46)";
+      spellCheckLanguages = ["en-US" "en"];
+    };
     config = {
       frameless = true; # set some Vencord options
       plugins = {

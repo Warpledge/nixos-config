@@ -403,7 +403,9 @@
           SERIAL=$(adb_target) || exit 1
           RAW=$(adb_get "$SERIAL" always_on_vpn_lockdown_whitelist)
 
-          INST=$(mktemp) && THIRD=$(mktemp) && TMP=$(mktemp)
+          INST=$(mktemp) && THIRD=$(mktemp) && TMP=$(mktemp) && CUR=$(mktemp)
+          # already-allowlisted entries are filtered out of the suggestions below
+          printf '%s\n' "$RAW" | tr ',' '\n' | grep -v '^$' | sort > "$CUR"
           ${pkgs.android-tools}/bin/adb -s "$SERIAL" shell 'pm list packages --user 0' </dev/null \
             | tr -d '\r' | sed 's/^package://' | sort > "$INST"
           ${pkgs.android-tools}/bin/adb -s "$SERIAL" shell 'pm list packages --user 0 -3' </dev/null \
@@ -417,8 +419,8 @@
             echo ""
             [[ -n "$RAW" ]] && printf '%s\n' "$RAW" | tr ',' '\n'
             echo ""
-            echo "# ---- installed third-party packages, uncomment to add ----"
-            sed 's/^/# /' "$THIRD"
+            echo "# ---- not yet allowlisted, uncomment to add ----"
+            comm -23 "$THIRD" "$CUR" | sed 's/^/# /'
           } > "$TMP"
 
           # $EDITOR may carry flags, so test the command word alone; :- only
@@ -435,14 +437,14 @@
           fi
           if [[ -z "$ED" ]] || ! command -v "''${ED%% *}" >/dev/null 2>&1; then
             echo "No usable editor found. Set \$EDITOR." >&2
-            rm -f "$INST" "$THIRD" "$TMP"
+            rm -f "$INST" "$THIRD" "$TMP" "$CUR"
             exit 1
           fi
 
           # An editor that dies must not look like "no edits were made"
           if ! $ED "$TMP"; then
             echo "Editor exited non-zero - nothing was changed." >&2
-            rm -f "$INST" "$THIRD" "$TMP"
+            rm -f "$INST" "$THIRD" "$TMP" "$CUR"
             exit 1
           fi
 
@@ -451,7 +453,7 @@
 
           if [[ "$NEW" == "$OLD" ]]; then
             echo "No change."
-            rm -f "$INST" "$THIRD" "$TMP"
+            rm -f "$INST" "$THIRD" "$TMP" "$CUR"
             exit 0
           fi
 
@@ -477,7 +479,7 @@
             [yY] | [yY][eE][sS]) ;;
             *)
               echo "Aborted. Nothing was written."
-              rm -f "$INST" "$THIRD" "$TMP"
+              rm -f "$INST" "$THIRD" "$TMP" "$CUR"
               exit 0
               ;;
           esac
@@ -492,10 +494,10 @@
             echo "Written and verified."
           else
             echo "Readback did not match what was written - check the device."
-            rm -f "$INST" "$THIRD" "$TMP"
+            rm -f "$INST" "$THIRD" "$TMP" "$CUR"
             exit 1
           fi
-          rm -f "$INST" "$THIRD" "$TMP"
+          rm -f "$INST" "$THIRD" "$TMP" "$CUR"
 
           echo ""
           echo "The firewall only re-reads this at boot."
