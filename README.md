@@ -119,7 +119,7 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | **Audio** | [PipeWire][pipewire] (ALSA + PulseAudio compat) |
 | **Containers / VMs** | [Docker][docker], [Waydroid][waydroid] (Android), [WinBoat][winboat] (Windows apps) |
 | **Flatpak** | [nix-flatpak][nix-flatpak] (declarative Flatpak management) |
-| **Networking** | [Mullvad][mullvad] (encrypted VPN, WireGuard), [systemd-resolved][resolved] + [NetworkManager][networkmanager] (iwd) |
+| **Networking** | [Mullvad][mullvad] (encrypted VPN, WireGuard, multihop, DAITA, kill switch, DNS blocking, per app split tunnel), [systemd-resolved][resolved] + [NetworkManager][networkmanager] (iwd) |
 | **Antivirus** | [ClamAV][clamav] (toggleable) |
 | **Key Remapping** | [keyd][keyd] |
 | **Secrets / Keyring** | [GNOME Keyring][gnome-keyring] |
@@ -294,22 +294,20 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | `nixm firmware-update` | Install firmware updates |
 | `nixm firmware-devices` | List devices with firmware support |
 
-### AMD GPU
-
-| Command | Description |
-| --- | --- |
-| `nixm vulkan` | Print Vulkan capabilities (vulkaninfo) |
-
-### FreeTube
+### Tools
 
 | Command | Description |
 | --- | --- |
 | `nixm freetube-sync` | Pull your current FreeTube subscriptions into `subscriptions.nix` (asks before writing) |
+| `nixm vulkan` | Print Vulkan capabilities (vulkaninfo) |
 
 ### Android
 
 | Command | Description |
 | --- | --- |
+| `nixm adb-devices` | List attached adb devices |
+| `nixm vpn-list` | Show the VPN lockdown allowlist on a connected phone or tablet |
+| `nixm vpn-edit` | Edit that allowlist in `$EDITOR`, applies after the device reboots |
 | `nixm debloater` | Launch Universal Android Debloater |
 
 ---
@@ -592,6 +590,7 @@ flake.nix
     → shared/core.nix                           # Wire up system + user config
       → shared/modules/{nixos,home-manager}/    # Load only the enabled modules
       → shared/modules/wm/${windowManager}/     # Load only the active window manager
+      → shared/modules/mullvad/                 # VPN daemon, tray app, split tunnel
 ```
 
 Each host's `hostConfig/core.nix` is the single place that turns features on or off: window manager, kernel, browsers, terminals, editors, and services.
