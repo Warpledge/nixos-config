@@ -28,11 +28,12 @@
     (sub "UCupQd0e1leK4-Mj1wSfnkoQ" "al jokes" "https://yt3.googleusercontent.com/93ns_GxAFCbk_u_lNAeTDJP5pBQuBD-Ccc3X9Gux5SU_EN49XzB4SJ9hDPS20vK3GzJHwonlKg=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCcCtwWZlbENdsCnF2Nzjivg" "AlkaizerSenpai" "https://yt3.googleusercontent.com/ytc/AIdro_mqMuNaekpxL38C3qzOxr7t_a-QUVBSp-lRRElOU35YVQ=s176-c-k-c0x00ffffff-no-rj")
     (sub "UC6jUsIEZ2F875OB2Be84cpA" "Ampersand" "https://yt3.googleusercontent.com/e_Iqax0Nciq9_37f8TYhsy6qC_qvoxWCtzD1ZdbR1ZGiVgmO0cyDcn219Y8K4foElht8m9Z19g=s176-c-k-c0x00ffffff-no-rj")
-    (sub "UCR0J2NYGuC8epsa1O4DMmXQ" "Arknights Official - Yostar" "https://yt3.googleusercontent.com/ytc/AIdro_kS7_YzlYPQz0ba4-q4meB6exa5_aHcFUVlpLZ-5HfT-g=s176-c-k-c0x00ffffff-no-rj-mo")
+    (sub "UCR0J2NYGuC8epsa1O4DMmXQ" "Arknights Official - Yostar" "https://yt3.googleusercontent.com/ytc/AIdro_kS7_YzlYPQz0ba4-q4meB6exa5_aHcFUVlpLZ-5HfT-g=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCowPaVRBzg8CE6K4CB6LJfw" "Arknights: Endfield" "https://yt3.googleusercontent.com/OuleuixkEAEEJawVB6v4UzEDk_O83SlbMpngrpI1eLw2Pd0o0vElaCAcoXmhdrPM1D8PpbuFVQ=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCIQ-5XCjglwZ9OYVaESUqjw" "Avantgarde Music" "https://yt3.googleusercontent.com/ytc/AIdro_kRQYfUyRY0suDVAvrNpyPT1cLXYQhh75pJTAt7bPlEZg=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCv6GlCIlfC9hLW8shg4cRyw" "AverageGregTechPlayer" "https://yt3.googleusercontent.com/ZoaytrhzBtlU3uZkRsc_jCmgHhaYyksgIZbfQf-vm9oAh199wzcKJ9uoemzfp0rr4Wiy5H9c=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCcybVOrBgpzUxm-mlBT0WTA" "Bacon_" "https://yt3.googleusercontent.com/ytc/AIdro_lA0nn0joCndTNUA6mxmtJadkXxHTBqAlm78leRCVqr5Q=s176-c-k-c0x00ffffff-no-rj")
+    (sub "UCO4rvxZ-bJ6uGDeSkMCmzEg" "Bay Area Buggs" "https://yt3.googleusercontent.com/ytc/AIdro_kuXNVNDCc9eo0GH_AXQcDfAGPJuph3Mny_EcLfsUHzCkc=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCYGDiVemmhY_Q1M-hKp4fvw" "big boss" "https://yt3.googleusercontent.com/ytc/AIdro_m4kIuiEKXY-kFWf7h3u1DWdu081Kv9VynucwjeK3pOtWg=s176-c-k-c0x00ffffff-no-rj")
     (sub "UC2Z5-gCZU3rqLvmBGCOdTQg" "Bionicfactory1" "https://yt3.googleusercontent.com/ZKej02-G71SZ55PeJOXl98DwnbR_aXzAy2mAGvqOrUevJTkZCCgcjbVXTPVsFmHIJjP0EWPK7vA=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCzCWehBejA23yEz3zp7jlcg" "Black Metal Promotion" "https://yt3.googleusercontent.com/ytc/AIdro_kjUgTst6YXNAsQ4XCyhoovZqMUq9QV_IPmv9_Jjj_8buo=s176-c-k-c0x00ffffff-no-rj")
@@ -43,6 +44,7 @@
     (sub "UC3mI3dDFrZ5PHFPx1H0TCvQ" "Bradley Hall" "https://yt3.googleusercontent.com/b7lzIz89hAYo-Y_TTfNdyJjzy6irSEX8gLS36rU3eBIvH2YbEy1Sm5hYp_XqWLcpaynV6I6pOw=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCuyLvQnJxIFVXAp7yY4QTcA" "brome" "https://yt3.googleusercontent.com/BXUKcNrX4p0ufIXZ2UN8riY0VCaWxDLurBCZFXotPg2o4VOAUxhlafxTw74oOD8-PV4CZzknyYI=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCk6mN7s3Orj0LbmHdzVg05A" "Bub Games" "https://yt3.googleusercontent.com/ytc/AIdro_n0e1dmQZtZsf35bOfkuVy5XYRxb90Lyu3aTUzZn_bgg5I=s176-c-k-c0x00ffffff-no-rj")
+    (sub "UC63anZxfVGHUEmfBAf5w7pw" "CaseOh" "https://yt3.googleusercontent.com/7mlVOsLDpAug3yTZs4Z_mUgmkB91vvB6KmGAF7YpXXt4g_ThSpMr6s6AgEo4T_AZh_zI32hcAQ=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCEIGk89dDLYACKrneSMfdQQ" "CaseOh Moments" "https://yt3.googleusercontent.com/6PDCoShHynWRQ5I70ecvJtxaqVj866lmhZmwey7fUYLdCJglAYzquOzEWRaozQbMqcyS1N35=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCSDUsSu7t8WxByRYZz1jaYA" "Cemetery Riffs" "https://yt3.googleusercontent.com/lnPMHCTspCoEB06beFecyyWK2p34UmGKJOlMiwiIfl6R7E7xKYAPH6rC0iOHekj49Q5yhgrshg=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCZjh3L41c2n9vu1yaV9TX0g" "ChadCat" "https://yt3.googleusercontent.com/RVRwKXz0n7ej4tyaqps3fQj1Ly1bcmu-GbvAEWputTJsQXiax7rsJY8akqMF0tzeMpYUcu_oEA=s176-c-k-c0x00ffffff-no-rj")
@@ -62,8 +64,10 @@
     (sub "UC-TmKEwMYER5DdoEMoF-hsw" "DonutOperatorTV Clips" "https://yt3.googleusercontent.com/GGfKgMda3kX7NU3l5NuxhuHK6JDFBDRkB4PnZZoBPUZ3LL9JFIYPFzJDcxWY92Kq1KUx416Y=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCo0-VCHchPIG3JtJlIQnFew" "DoshDoshington" "https://yt3.googleusercontent.com/ytc/AIdro_nAY1rUirI0vhI82HYgyeR5KTtF8wOG8htuOBokKVoN4g=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCrsIHfOar07vEPXP1Ng9T8g" "EiZEN" "https://yt3.googleusercontent.com/PWyMjAMuycuzXJhDtPQkGV7cFScop8d4shgle9UQA3EOhspbVwGhhwyMpt95BOxDAH7y5veX8tw=s176-c-k-c0x00ffffff-no-rj")
+    (sub "UCqFftuISNP9zT2TFkHnDNJg" "Exiled Again" "https://yt3.googleusercontent.com/k3mdrpzZgmWctRoUgwu0qujGRaR5rBGnxZGd4UovP4zMIwIBxAu0c8YMOFi47-vd_gjffpKyxos=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCvIzz-SZdAyOBfwSFB-yIAw" "Farvann" "https://yt3.googleusercontent.com/ytc/AIdro_lCMLq86Pa322yKrzZe_4ceUvb20GU7Lf7nOcyRHSc-Lb4=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCsBjURrPoezykLs9EqgamOA" "Fireship" "https://yt3.googleusercontent.com/3fPNbkf_xPyCleq77ZhcxyeorY97NtMHVNUbaAON_RBDH9ydL4hJkjxC8x_4mpuopkB8oI7Ct6Y=s176-c-k-c0x00ffffff-no-rj")
+    (sub "UCF_moAPM1xuo7ET3o0bVJPg" "FLEEKAZOID" "https://yt3.googleusercontent.com/WaphYqyV3RySugnm00L888x8co5dPJD5vB_4OGhdmGJyazFQD_Z_U3ZjONIPViWYNYtejDPZvQ=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCjmigXcFhjldwmVBpdLoARg" "FrostByte262" "https://yt3.googleusercontent.com/0xOPPOI3wUVQZsauIMe24xuCuyZaMsidIWiLTWdWmkHzGcGhKvQWGb6ANzkGXV5bF6GtQOe5=s176-c-k-c0x00ffffff-no-rj")
     (sub "UChIs72whgZI9w6d6FhwGGHA" "Gamers Nexus" "https://yt3.googleusercontent.com/ytc/AIdro_n50Rj8oqwUnusv4I6_DllKflZrSdSxmXhYvpHs0hOEj5o=s176-c-k-c0x00ffffff-no-rj")
     (sub "UC0poNmhV59dDVE6o3gxy5lA" "GitGudWO" "https://yt3.googleusercontent.com/UxkjhEPUFmSGsFQ5SayWm1md1lVVEAAHrBqb7zVRPGJK8r5qkWPzy8WaXtL5W5pWaQ789uRMj4w=s176-c-k-c0x00ffffff-no-rj")
@@ -87,12 +91,14 @@
     (sub "UCWwuijyo4x78iXup5hOvkbw" "KyoStinV" "https://yt3.googleusercontent.com/yeBCzRTWlea7CA8ve6ho6vERiWKR_bEewt8eMN8BJmS6Dr4yjuh0JzAiBxhj2225bSwwZpNUVw=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCeA2_nawteB3Bn-sF9CBGxg" "Lappy" "https://yt3.googleusercontent.com/OzqwtITDk_fY-z1AdPXep3709y1H8BVTUZ3AHFGZTPcWWmwap_aBBVHNvY_pPqwqmBjse-Muew=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCto7D1L-MiRoOziCXK9uT5Q" "Let's Game It Out" "https://yt3.googleusercontent.com/ytc/AIdro_nRBG_p61vExRtIGDam4OcTadOi1xwsoZX9sImEJk9f76Y=s176-c-k-c0x00ffffff-no-rj")
+    (sub "UCXuqSBlHAE6Xw-yeJA0Tunw" "Linus Tech Tips" "https://yt3.googleusercontent.com/gnvYLhXy8FAlPXZ2RTrkrgj-5kyt0vdE2FUGVOiKGdEZIa-wN5A-7nwZBlWJLzUMmoh1NWAU=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCQDZ2iQNBgu5NPHyuki7MfA" "LosPlug" "https://yt3.googleusercontent.com/ytc/AIdro_l7oBWBvrmBDn-tfVLc3aZhD5xr-u4yr74OZu3gaIQbS0s=s176-c-k-c0x00ffffff-no-rj")
     (sub "UC_9ChMcegQVpwQootbKC0_w" "Lucille Karma" "https://yt3.googleusercontent.com/4gpEKuAglyHMJj65tmuLq-Br94NjDWV0B5jzo3HmChEt3QETZvag7Fcl1SKOyTsFemiBbtYvxHM=s176-c-k-c0x00ffffff-no-rj")
     (sub "UC3Afj8DuNUu2PV74fJGw-Fw" "Luka Big Pants" "https://yt3.googleusercontent.com/3iaz-urrtQUYnDAnDfFs8HBtLllZEq4O9bZsi_EDvMi4x2WtwZgoED6e3UPR3IAn9V1k1nW1=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCPdaxSov0mgwh77JvjQO2jQ" "Man Carrying Thing" "https://yt3.googleusercontent.com/ytc/AIdro_mf8csHJOlVVH4ZA0BGZdLkxIXMgMEDYtD-KCxSdXuwfOY=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCcnci5vbpLJ-rh_V9yXwawg" "martincitopants" "https://yt3.googleusercontent.com/ytc/AIdro_lI_QS1D1VToF3xOnXjN41QcdEIyxTCJJOMo3Zq939Wxu4=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCZi0oII2ua_I-fEnHdg3U2A" "martincitopantsLIVE" "https://yt3.googleusercontent.com/ytc/AIdro_l11yQO33rxQetZUIxU5kHT7l8m4g1O7FyMzf3-ZxC_Cg=s176-c-k-c0x00ffffff-no-rj")
+    (sub "UCnaP100kTBB_WGM9IiF73yw" "Mathilification" "https://yt3.googleusercontent.com/ytc/AIdro_lMwVC_ujemMSfTOYJ4IDD7w0itzsS8BRgNKIYZWXlsDw=s176-c-k-c0x00ffffff-no-rj")
     (sub "UC8dVW9u_aNeGVl1WQnNh6yg" "Matt & Justus" "https://yt3.googleusercontent.com/np40bMwYwcTYWhNH3UvXN0yFMYTzReVlL9XstvloE8CT0RovYRpzWraTx3x1MN884OGeMfZH=s176-c-k-c0x00ffffff-no-rj")
     (sub "UC7YOGHUfC1Tb6E4pudI9STA" "Mental Outlaw" "https://yt3.googleusercontent.com/ytc/AIdro_n6dUcc6YbkWa540dbaWzbLi44bq0h-hGNEop2BhOQ6uHY=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCeYvzUfpNSGnzasUjNKIA_w" "Mike Clum" "https://yt3.googleusercontent.com/qa1Sa2VAhJwINnZ-1SF566Iq4m-LNX3ld3vU_0mzkfdKQfadnwZp7Sc3Hm-jsppj-AMXSMz0JnA=s176-c-k-c0x00ffffff-no-rj")
@@ -103,7 +109,7 @@
     (sub "UCEQ7KR9enYdQsB6kcMnw0NA" "Mortismal Gaming" "https://yt3.googleusercontent.com/ytc/AIdro_n4ZPhOeF8KQ0OPuzkUdjTlnveQk9FPX0cxELz_bo6Dlrs=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCSdma21fnJzgmPodhC9SJ3g" "NakeyJakey" "https://yt3.googleusercontent.com/9NnqCwNtNncyW1oJnAgdK58p4NC6MaSLe8bMmBtuw0p4Kzl3hkRp00Ckd1xaK6GBID9iKe3Oqg=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCiZk_rAHUPJSWwNSAGgV90g" "natedoggbruh" "https://yt3.googleusercontent.com/FlGU89-FaCaMbHN3_yhPfxc2TkfgO4Q1_34rLBc2C9W5TTIEVEGsFXUIhXeD9fLj9ZByEWJwDQ=s176-c-k-c0x00ffffff-no-rj")
-    (sub "UCXEKwWflysXu312NmIP_dlw" "NERDULT" "https://yt3.googleusercontent.com/OtRJWkKUE4u6uwgG1BFAY72QicN25CParSGZKkAdLGbg5yM_U8sFZDF5_gzIhJ--5t1E11w-Lg=s176-c-k-c0x00ffffff-no-rj")
+    (sub "UCXEKwWflysXu312NmIP_dlw" "NERDULT" "https://yt3.googleusercontent.com/OtRJWkKUE4u6uwgG1BFAY72QicN25CParSGZKkAdLGbg5yM_U8sFZDF5_gzIhJ--5t1E11w-Lg=s160-c-k-c0x00ffffff-no-rj")
     (sub "UCxaaULLk6UCnRl5VKRc7G0A" "No Text To Speech" "https://yt3.googleusercontent.com/Xi5LgenvgPeaKTrJXRkjpX4uEwS-wvjt5ibhFpyj6TcYNKrAc79HHPx0Qe6LydpiPlb7v90eeQ=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCYlG2eHhMFUtts34csJoONQ" "No_Tables" "https://yt3.googleusercontent.com/D39KV1h2PGPi93a9Z6rowe3bGX5M_jtaaGa-Ia7y8cJnyrkvbetcB0KhIOz4fpeu4WRYs2Gm=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCVYz-US5ya2gdSdrrrVEY5w" "NoEvDia" "https://yt3.googleusercontent.com/ytc/AIdro_kURGPYaN4i3eu0fHzRFR7ftzHMhYxDUzXzsT0tyQRzGA=s176-c-k-c0x00ffffff-no-rj")
@@ -115,6 +121,7 @@
     (sub "UCS1WNeajP1iZT-A5PPCXuZg" "P1nero" "https://yt3.googleusercontent.com/bAttwDM9SwnqbZBFoI05Rs6zHu2JDQ03eGMp7aDSLBj5RULPGS91_YEBoPi0OcRuKVawDRmK=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCA7X5unt1JrIiVReQDUbl_A" "Path of Exile" "https://yt3.googleusercontent.com/WgBOlwF86_fOwcnPZEaVUtviC5w8cCZcL-j7tNH-cahbXkzxZRjl5dD8oHpLO4dIxeP9wbUR=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCJyjyHhZTXVLKqbS_WCFIFg" "Peeb" "https://yt3.googleusercontent.com/FRYvyA8XW1AJyeOyiR7RgpYAzMXxwPwgosG3eqkWFD48fbIZqw3rgXh2FsMpsSDIpdZtZRpy=s176-c-k-c0x00ffffff-no-rj")
+    (sub "UC-lHJZR3Gqxm24_Vd_AJ5Yw" "PewDiePie" "https://yt3.googleusercontent.com/vik8mAiwHQbXiFyKfZ3__p55_VBdGvwxPpuPJBBwdbF0PjJxikXhrP-C3nLQAMAxGNd_-xQCIg=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCgv2_w0HveLN_JgFGTqwmTw" "Pohx" "https://yt3.googleusercontent.com/TsBNUfnNs6kQ09MN6ebtIHSpubHf2144HzkvT9VK3GGFeB87eTuqP-0TfdxGpmV2YxKX0xGKPg=s176-c-k-c0x00ffffff-no-rj")
     (sub "UChXUVpagGMeq_AbBkog58hg" "Prox Chat" "https://yt3.googleusercontent.com/mZ-JfiS7ms41jw4_INfQzj_GNvo2g2pR0uPZjizSOpS3eYIyUs_n0wXDUr7mQ34eq6faAgpMGQ=s176-c-k-c0x00ffffff-no-rj")
     (sub "UC8nLGHIUs-Ker0rMulvSBhQ" "ProximityChat" "https://yt3.googleusercontent.com/EQaC7yL3NMJH-KnBrjlydKwHFYEyWDySzDIdkrTjVvzZsb9T5x3X6DImjypiFWqxoLgTN42Jrw=s176-c-k-c0x00ffffff-no-rj")
@@ -136,12 +143,12 @@
     (sub "UCifRgVk-GEo1_vvf8x53t6A" "Soup" "https://yt3.googleusercontent.com/ytc/AIdro_nl_M75_ug0WYCElVcUgcMWLgnE5O9KzxisdSXEWsJLVrk=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCD6VugMZKRhSyzWEWA9W2fg" "SsethTzeentach" "https://yt3.googleusercontent.com/ytc/AIdro_mXTTQsKU9iBZi4PNaOSXTnnJy-OOwhBARSnfx4DesbyLw=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCP0_k4INXrwPS6HhIyYqsTg" "Steven He" "https://yt3.googleusercontent.com/U_MyXuN0wLO7V8izDMdyWkshweE-no-AGb4qK9pfbF3hkWmxmG2JBfurkDQp-tpV05mmDFla=s176-c-k-c0x00ffffff-no-rj")
-    (sub "UCPVrjrtyssy19hwxsItXRCw" "Storn " "https://yt3.googleusercontent.com/8pQQ7CZVGa_iSG-dlmhwy4UUEdI6QY-Sr662pxaFnN-qSn18zj4MU8LYbthnVbQ_6WMDW_W5rA=s160-c-k-c0x00ffffff-no-rj")
+    (sub "UCPVrjrtyssy19hwxsItXRCw" "Storn " "https://yt3.googleusercontent.com/8pQQ7CZVGa_iSG-dlmhwy4UUEdI6QY-Sr662pxaFnN-qSn18zj4MU8LYbthnVbQ_6WMDW_W5rA=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCopDaG5xA51mvgtv1Jzq-VA" "Sujikan" "https://yt3.googleusercontent.com/ytc/AIdro_lkHHHoMlA1P28JnSYLnhJ1Rw9lcsDt5ij-9h6Y-W2MT54=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCoplJSyTWXGKgMIu0KvwhkQ" "SUPAH" "https://yt3.googleusercontent.com/MMcH5MqPBO5CzRvTNLeKjHOghsjMgjY6pqMVMCHbcJaBuYJl3FlctRmMKvK3tuMWHZifpoACEg=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCKyIN3WgOtdp-35rpgbFINA" "Taylor Danley" "https://yt3.googleusercontent.com/ytc/AIdro_l8vKMkd7fgLfOdAih1lb6Fu_3tW9ahcFQ73aw88YNDthw=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCs6KfncB4OV6Vug4o_bzijg" "Techlore" "https://yt3.googleusercontent.com/9Ovy87xCh2rwb8orKSW1vbiQzgztPpLZW4lN16Wp9eDXzlERdQwind5qZpMNVZOcXP0bkW4pWQ=s176-c-k-c0x00ffffff-no-rj")
-    (sub "UCPnSoX7NkOBcOX0Gfw_yjAw" "Tectone" "https://yt3.ggpht.com/5rw8sIhFpVH8DrVIvLThKGc_29yJu1r4JsBy_akPoMYRkANhH3tUmj1JjVv-dZBmyIMAaD4dDA=s176-c-k-c0x00ffffff-no-rj")
+    (sub "UCPnSoX7NkOBcOX0Gfw_yjAw" "Tectone" "https://yt3.googleusercontent.com/5rw8sIhFpVH8DrVIvLThKGc_29yJu1r4JsBy_akPoMYRkANhH3tUmj1JjVv-dZBmyIMAaD4dDA=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCgOU3lzWDgTP77TzpzvvcPQ" "Terrastorian" "https://yt3.googleusercontent.com/qSn15r_t1Lr2Z0A1kOlCpwF3tkmUEYjtXKoEBE9rOdkB4wH11GumP0KZXBFCn_pYJSlv3qpR=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCqUiYDmHUhzWlfRLIh5UndQ" "thatTomson" "https://yt3.googleusercontent.com/p_-wbUao5PUwwSGhB78_iQGyM7zvLzUtvkCXvd2fbmN1djfjIV-VuNLFrdD2Bnjr21z7LrROR64=s176-c-k-c0x00ffffff-no-rj")
     (sub "UCgo1RgtW6Q5MQ7dtmd_HUzg" "The August Hail" "https://yt3.googleusercontent.com/UXpHqPOB804f8psB9go2gTUS1G82jxzFmR0lQP66mNslW2xgDl18N3Q0XbsJLE3IbnnAOnT1eA=s176-c-k-c0x00ffffff-no-rj")
@@ -166,15 +173,331 @@
     (sub "UC70Q84V4Cbf-wFWprkoW8Eg" "zimery" "https://yt3.googleusercontent.com/TLLnVtdkRbhtWa0o6xL1wiHyXXi8J94-qM6oHPb0Rdgqw87aO_-QlTjwHWXDMDGNoYPRA5klyFE=s176-c-k-c0x00ffffff-no-rj")
   ];
 
-  profile = {
-    _id = "allChannels";
-    name = "All Channels";
-    bgColor = "#268bd2";
-    textColor = "#FFFFFF";
-    inherit subscriptions;
+  #--------------------------------------------------------------------#
+  #-- Profiles
+  #--------------------------------------------------------------------#
+  # FreeTube profiles are subscription groups: switching profile filters
+  # the Subscriptions feed to that subset. "All Channels" is the master
+  # profile and must contain every subscription - the app derives the
+  # subscribed set from it. Extra profiles are subsets; pick channels by
+  # id and the name and thumbnail come from the list above.
+  #
+  # profiles.db is NeDB: one JSON document per line, one per profile.
+
+  pick = ids: builtins.filter (c: builtins.elem c.id ids) subscriptions;
+
+  mkProfile = _id: name: bgColor: textColor: subs: {
+    inherit _id name bgColor textColor;
+    subscriptions = subs;
   };
 
-  profilesDb = pkgs.writeText "hm_profiles.db" (builtins.toJSON profile + "\n");
+  profiles = [
+    (mkProfile "allChannels" "All Channels" "#000000" "#FFFFFF" subscriptions)
+
+    #--- C - All (Comedy) (20)
+    (mkProfile "gYHlSeCIkdrKMqSm" "C - All (Comedy)" "#FFD600" "#000000" (pick [
+      "UCupQd0e1leK4-Mj1wSfnkoQ" # al jokes
+      "UCcybVOrBgpzUxm-mlBT0WTA" # Bacon_
+      "UCxbOjzYaOGbZFYKP3DR4gBA" # Dallas Soup
+      "UCY-PrcA-mjq3OhgsAH9C52A" # Dan Dingle
+      "UCyWDmyZRjrGHeKF-ofFsT5Q" # Internet Comment Etiquette with Erik
+      "UCR1D15p_vdP3HkrH8wgjQRw" # Internet Historian
+      "UC78mJyZPMa_OG08KLHjhODw" # Jaden Williams
+      "UC3Lmytq3AlvcJ-34If_jDyw" # Jehtt
+      "UCdJdEguB1F1CiYe7OEi3SBg" # JonTronShow
+      "UC3Afj8DuNUu2PV74fJGw-Fw" # Luka Big Pants
+      "UCPdaxSov0mgwh77JvjQO2jQ" # Man Carrying Thing
+      "UC8dVW9u_aNeGVl1WQnNh6yg" # Matt & Justus
+      "UClUc_jq1BuEczLm0asOeNcw" # Mirabeau Studios
+      "UCEpHkpv4_CgZIEadjjOv4jA" # Misfit Minds
+      "UCXEKwWflysXu312NmIP_dlw" # NERDULT
+      "UCifRgVk-GEo1_vvf8x53t6A" # Soup
+      "UCP0_k4INXrwPS6HhIyYqsTg" # Steven He
+      "UC3_ig57nX0zLhNwMFdu-t_A" # Thechrisbarnett
+      "UCchBatdUMZoMfJ3rIzgV84g" # Viva La Dirt League
+      "UCfJxmjbygyA5KEdzzZv6Pbw" # Wizards with Guns
+    ]))
+
+    #--- G - ARPG (10)
+    (mkProfile "WaYKJH2yTnv3TJhC" "G - ARPG" "#64DD17" "#000000" (pick [
+      "UCcCtwWZlbENdsCnF2Nzjivg" # AlkaizerSenpai
+      "UC6dKynwWVCYOcyllwU8aAaA" # Chris Wilson
+      "UCAYJSYhkQOiICxDZkzVMl5w" # Darth Microtransaction
+      "UCqFftuISNP9zT2TFkHnDNJg" # Exiled Again
+      "UCnaP100kTBB_WGM9IiF73yw" # Mathilification
+      "UCA7X5unt1JrIiVReQDUbl_A" # Path of Exile
+      "UCgv2_w0HveLN_JgFGTqwmTw" # Pohx
+      "UC6gvWsFgrOKX28ZrVCjjYJw" # RaizQT
+      "UCdOnAU7RhWpjiQmy-HNkCvg" # RektbyProtoss
+      "UC4mLMb49hqk4y9lVFtfanlg" # ZiggyD Gaming
+    ]))
+
+    #--- G - All (Gaming) (76)
+    (mkProfile "cBcykUEKTk1wWGO3" "G - All (Gaming)" "#64DD17" "#000000" (pick [
+      "UCpExd_4igz7vIC0hgeY-uNg" # AdityaG
+      "UCcCtwWZlbENdsCnF2Nzjivg" # AlkaizerSenpai
+      "UCR0J2NYGuC8epsa1O4DMmXQ" # Arknights Official - Yostar
+      "UCowPaVRBzg8CE6K4CB6LJfw" # Arknights: Endfield
+      "UCv6GlCIlfC9hLW8shg4cRyw" # AverageGregTechPlayer
+      "UCcybVOrBgpzUxm-mlBT0WTA" # Bacon_
+      "UCO4rvxZ-bJ6uGDeSkMCmzEg" # Bay Area Buggs
+      "UCYGDiVemmhY_Q1M-hKp4fvw" # big boss
+      "UC2Z5-gCZU3rqLvmBGCOdTQg" # Bionicfactory1
+      "UCMksEtt1yyGOZTf0YBI7LDA" # Blake
+      "UCNreGFHM0T2WRkuVXmu459A" # Bombshell
+      "UCuyLvQnJxIFVXAp7yY4QTcA" # brome
+      "UCk6mN7s3Orj0LbmHdzVg05A" # Bub Games
+      "UC63anZxfVGHUEmfBAf5w7pw" # CaseOh
+      "UC6dKynwWVCYOcyllwU8aAaA" # Chris Wilson
+      "UCId_okLITilJmxba3jhV9Gg" # coolmanvan
+      "UCP_eG7JBgRWNlNIOLYS6GZA" # crin
+      "UCAYJSYhkQOiICxDZkzVMl5w" # Darth Microtransaction
+      "UCo0-VCHchPIG3JtJlIQnFew" # DoshDoshington
+      "UCrsIHfOar07vEPXP1Ng9T8g" # EiZEN
+      "UCqFftuISNP9zT2TFkHnDNJg" # Exiled Again
+      "UCF_moAPM1xuo7ET3o0bVJPg" # FLEEKAZOID
+      "UCjmigXcFhjldwmVBpdLoARg" # FrostByte262
+      "UC0poNmhV59dDVE6o3gxy5lA" # GitGudWO
+      "UCZ8f38Vn2jq950NQiS5Qx4Q" # gupp
+      "UCNnaNSEzrD5pwDj5sKfklyQ" # HamCorp
+      "UCJzyqivEVGq4NVOdpd8HLGg" # Hecuba
+      "UCvwFAruyd5WGqi9qUoB91_g" # IGoByLotsOfNames
+      "UCt8CJiye87FMbEwt0npPMuQ" # Indie Games Hub
+      "UCapAxx_bMPdOEl2SQxg2HAw" # Kharax82
+      "UCjdQaSJCYS4o2eG93MvIwqg" # Kilian Experience
+      "UCYKqSTaebCjNrQSPZ3_uHcw" # kukkikaze
+      "UCWwuijyo4x78iXup5hOvkbw" # KyoStinV
+      "UCeA2_nawteB3Bn-sF9CBGxg" # Lappy
+      "UCto7D1L-MiRoOziCXK9uT5Q" # Let's Game It Out
+      "UC_9ChMcegQVpwQootbKC0_w" # Lucille Karma
+      "UCcnci5vbpLJ-rh_V9yXwawg" # martincitopants
+      "UCZi0oII2ua_I-fEnHdg3U2A" # martincitopantsLIVE
+      "UCnaP100kTBB_WGM9IiF73yw" # Mathilification
+      "UC84PVGjO0Q5rgzKXM5aAtvQ" # MitchManix
+      "UCEQ7KR9enYdQsB6kcMnw0NA" # Mortismal Gaming
+      "UCSdma21fnJzgmPodhC9SJ3g" # NakeyJakey
+      "UCiZk_rAHUPJSWwNSAGgV90g" # natedoggbruh
+      "UCYlG2eHhMFUtts34csJoONQ" # No_Tables
+      "UCEmRB6NQH8u6zdFvcWGXsIw" # Nycro
+      "UCEF1bP6o_oFxLLZGZB_SRNw" # OkSynoh
+      "UCS1WNeajP1iZT-A5PPCXuZg" # P1nero
+      "UCA7X5unt1JrIiVReQDUbl_A" # Path of Exile
+      "UCgv2_w0HveLN_JgFGTqwmTw" # Pohx
+      "UChXUVpagGMeq_AbBkog58hg" # Prox Chat
+      "UC8nLGHIUs-Ker0rMulvSBhQ" # ProximityChat
+      "UC7WSom2KTVSX9jyBBWF6Stw" # RadicalFishGames
+      "UC6gvWsFgrOKX28ZrVCjjYJw" # RaizQT
+      "UCdOnAU7RhWpjiQmy-HNkCvg" # RektbyProtoss
+      "UCjdgz_dVC_V-74m_DbvuPEA" # Renne
+      "UCWLHMlyCAhFK_nZqri-qqeQ" # Richard Grimm
+      "UCOH3QdgesKmo5JXup5jBpnw" # RiverV
+      "UCqweW5IIPrMeZ1o_mMc4RNg" # Royal Moon
+      "UCy9L0ITuHozyqAxW26KPvKg" # Rurikhan
+      "UCGUHXiYaayAaBowPgOjMRVg" # Sampsa
+      "UCOdeQk4PK3vC7XGkZgr7JAQ" # SmugSlav
+      "UCD6VugMZKRhSyzWEWA9W2fg" # SsethTzeentach
+      "UCPVrjrtyssy19hwxsItXRCw" # Storn
+      "UCopDaG5xA51mvgtv1Jzq-VA" # Sujikan
+      "UCoplJSyTWXGKgMIu0KvwhkQ" # SUPAH
+      "UCgOU3lzWDgTP77TzpzvvcPQ" # Terrastorian
+      "UCqUiYDmHUhzWlfRLIh5UndQ" # thatTomson
+      "UCgo1RgtW6Q5MQ7dtmd_HUzg" # The August Hail
+      "UCpWEeICUoxrhkjTID4j7-tw" # Threefold
+      "UC5CgpWVCeidRpkGGZnsAxfQ" # Verveine
+      "UCsvn_Po0SmunchJYOWpOxMg" # videogamedunkey
+      "UCDAUhy3xxELJ5k6V2x2TZZA" # Wicked Wizard
+      "UC-NfY72l3Tn-c2qg0iHDUlQ" # WickedWiz
+      "UCKcOaIOHUttWdSUx15WQjJw" # Yardis
+      "UC4mLMb49hqk4y9lVFtfanlg" # ZiggyD Gaming
+      "UC70Q84V4Cbf-wFWprkoW8Eg" # zimery
+    ]))
+
+    #--- G - Creative (18)
+    (mkProfile "lIs3saIXRChaj1Fg" "G - Creative" "#64DD17" "#000000" (pick [
+      "UCpExd_4igz7vIC0hgeY-uNg" # AdityaG
+      "UCv6GlCIlfC9hLW8shg4cRyw" # AverageGregTechPlayer
+      "UCo0-VCHchPIG3JtJlIQnFew" # DoshDoshington
+      "UCNnaNSEzrD5pwDj5sKfklyQ" # HamCorp
+      "UCJzyqivEVGq4NVOdpd8HLGg" # Hecuba
+      "UCvwFAruyd5WGqi9qUoB91_g" # IGoByLotsOfNames
+      "UCapAxx_bMPdOEl2SQxg2HAw" # Kharax82
+      "UCto7D1L-MiRoOziCXK9uT5Q" # Let's Game It Out
+      "UC_9ChMcegQVpwQootbKC0_w" # Lucille Karma
+      "UCcnci5vbpLJ-rh_V9yXwawg" # martincitopants
+      "UCZi0oII2ua_I-fEnHdg3U2A" # martincitopantsLIVE
+      "UCEmRB6NQH8u6zdFvcWGXsIw" # Nycro
+      "UCS1WNeajP1iZT-A5PPCXuZg" # P1nero
+      "UC7WSom2KTVSX9jyBBWF6Stw" # RadicalFishGames
+      "UCqweW5IIPrMeZ1o_mMc4RNg" # Royal Moon
+      "UCpWEeICUoxrhkjTID4j7-tw" # Threefold
+      "UC5CgpWVCeidRpkGGZnsAxfQ" # Verveine
+      "UCKcOaIOHUttWdSUx15WQjJw" # Yardis
+    ]))
+
+    #--- G - Gacha (17)
+    (mkProfile "k25DYVUllkTYstmj" "G - Gacha" "#64DD17" "#000000" (pick [
+      "UCR0J2NYGuC8epsa1O4DMmXQ" # Arknights Official - Yostar
+      "UCowPaVRBzg8CE6K4CB6LJfw" # Arknights: Endfield
+      "UC2Z5-gCZU3rqLvmBGCOdTQg" # Bionicfactory1
+      "UCrsIHfOar07vEPXP1Ng9T8g" # EiZEN
+      "UCjmigXcFhjldwmVBpdLoARg" # FrostByte262
+      "UCYKqSTaebCjNrQSPZ3_uHcw" # kukkikaze
+      "UCWwuijyo4x78iXup5hOvkbw" # KyoStinV
+      "UCeA2_nawteB3Bn-sF9CBGxg" # Lappy
+      "UCYlG2eHhMFUtts34csJoONQ" # No_Tables
+      "UCEF1bP6o_oFxLLZGZB_SRNw" # OkSynoh
+      "UCOH3QdgesKmo5JXup5jBpnw" # RiverV
+      "UCOdeQk4PK3vC7XGkZgr7JAQ" # SmugSlav
+      "UCPVrjrtyssy19hwxsItXRCw" # Storn
+      "UCopDaG5xA51mvgtv1Jzq-VA" # Sujikan
+      "UCoplJSyTWXGKgMIu0KvwhkQ" # SUPAH
+      "UCgOU3lzWDgTP77TzpzvvcPQ" # Terrastorian
+      "UCqUiYDmHUhzWlfRLIh5UndQ" # thatTomson
+    ]))
+
+    #--- G - Review (2)
+    (mkProfile "QYn1hZN8pwqXGETV" "G - Review" "#64DD17" "#000000" (pick [
+      "UCEQ7KR9enYdQsB6kcMnw0NA" # Mortismal Gaming
+      "UCsvn_Po0SmunchJYOWpOxMg" # videogamedunkey
+    ]))
+
+    #--- G - Trolling (8)
+    (mkProfile "KAF94dGrWDEJvvr8" "G - Trolling" "#64DD17" "#000000" (pick [
+      "UCO4rvxZ-bJ6uGDeSkMCmzEg" # Bay Area Buggs
+      "UCMksEtt1yyGOZTf0YBI7LDA" # Blake
+      "UCk6mN7s3Orj0LbmHdzVg05A" # Bub Games
+      "UCId_okLITilJmxba3jhV9Gg" # coolmanvan
+      "UCZ8f38Vn2jq950NQiS5Qx4Q" # gupp
+      "UChXUVpagGMeq_AbBkog58hg" # Prox Chat
+      "UC8nLGHIUs-Ker0rMulvSBhQ" # ProximityChat
+      "UC70Q84V4Cbf-wFWprkoW8Eg" # zimery
+    ]))
+
+    #--- M - All (Music) (23)
+    (mkProfile "HFpqOe1qL7dSihw6" "M - All (Music)" "#0091EA" "#FFFFFF" (pick [
+      "UC3unJShm6iXtw9QgDnb9KPg" # 66Samus
+      "UCIQ-5XCjglwZ9OYVaESUqjw" # Avantgarde Music
+      "UCzCWehBejA23yEz3zp7jlcg" # Black Metal Promotion
+      "UC3mI3dDFrZ5PHFPx1H0TCvQ" # Bradley Hall
+      "UCSDUsSu7t8WxByRYZz1jaYA" # Cemetery Riffs
+      "UCgeE4uJZqmsQBURNPKs9Haw" # Chainbrain
+      "UCAi_uNeDWRXj8C8yw358gWw" # CharlesBerthoud
+      "UCV3_xcWQ1J55f1kehK4-TOw" # Dean Lamb
+      "UChSPFhlKhvjpvBhO1gyDhVQ" # Debemur Morti Productions
+      "UCvIzz-SZdAyOBfwSFB-yIAw" # Farvann
+      "UCfJWiiMCyIhUokO69TlF5Ag" # Guillaume Vrac
+      "UCVMPToqu3B8JvoceelWxTyQ" # Imperial Circus Dead Decadence Official
+      "UCFfydLsSi1cN547lVC6ewUw" # Jordan & Tommy Bonnevialle
+      "UCVYz-US5ya2gdSdrrrVEY5w" # NoEvDia
+      "UCYaYZQE2pymOZ0k3iaRdgcw" # OdiumNostrum
+      "UCcv_d_n6xibI7YYeXDEX9mg" # Ola Englund 2
+      "UCWLHMlyCAhFK_nZqri-qqeQ" # Richard Grimm
+      "UC5TaZWeRgdN7klKM60Hj6rQ" # Season of Mist
+      "UC3tw4ZlRfkTkQ_r51RqG9aA" # Shadow Mantra Steve
+      "UCKyIN3WgOtdp-35rpgbFINA" # Taylor Danley
+      "UCPKgIhTC3BdkAwMw6s-GEug" # TheDooo
+      "UCiToMxeQlTpY4WfPv2WGllQ" # TheSuffocater
+      "UC0ZGpaIfJX8xJ_gHI9Zqaww" # Wyattxhim
+    ]))
+
+    #--- M - Guitar (14)
+    (mkProfile "AQq2nT7FgH1j5pIp" "M - Guitar" "#0091EA" "#FFFFFF" (pick [
+      "UC3unJShm6iXtw9QgDnb9KPg" # 66Samus
+      "UC3mI3dDFrZ5PHFPx1H0TCvQ" # Bradley Hall
+      "UCSDUsSu7t8WxByRYZz1jaYA" # Cemetery Riffs
+      "UCgeE4uJZqmsQBURNPKs9Haw" # Chainbrain
+      "UCAi_uNeDWRXj8C8yw358gWw" # CharlesBerthoud
+      "UCV3_xcWQ1J55f1kehK4-TOw" # Dean Lamb
+      "UCvIzz-SZdAyOBfwSFB-yIAw" # Farvann
+      "UCfJWiiMCyIhUokO69TlF5Ag" # Guillaume Vrac
+      "UCFfydLsSi1cN547lVC6ewUw" # Jordan & Tommy Bonnevialle
+      "UCcv_d_n6xibI7YYeXDEX9mg" # Ola Englund 2
+      "UCWLHMlyCAhFK_nZqri-qqeQ" # Richard Grimm
+      "UC3tw4ZlRfkTkQ_r51RqG9aA" # Shadow Mantra Steve
+      "UCKyIN3WgOtdp-35rpgbFINA" # Taylor Danley
+      "UCiToMxeQlTpY4WfPv2WGllQ" # TheSuffocater
+    ]))
+
+    #--- M - Songs (7)
+    (mkProfile "WSEnkxSfhRG6ceXY" "M - Songs" "#0091EA" "#FFFFFF" (pick [
+      "UCIQ-5XCjglwZ9OYVaESUqjw" # Avantgarde Music
+      "UCzCWehBejA23yEz3zp7jlcg" # Black Metal Promotion
+      "UChSPFhlKhvjpvBhO1gyDhVQ" # Debemur Morti Productions
+      "UCVMPToqu3B8JvoceelWxTyQ" # Imperial Circus Dead Decadence Official
+      "UCVYz-US5ya2gdSdrrrVEY5w" # NoEvDia
+      "UCYaYZQE2pymOZ0k3iaRdgcw" # OdiumNostrum
+      "UC5TaZWeRgdN7klKM60Hj6rQ" # Season of Mist
+    ]))
+
+    #--- T - All (Tech) (15)
+    (mkProfile "Wjyh5rRXnIPGWRTY" "T - All (Tech)" "#8f3f71" "#FFFFFF" (pick [
+      "UCIgnGlGkVRhd4qNFcEwLL4A" # AI Search
+      "UC6jUsIEZ2F875OB2Be84cpA" # Ampersand
+      "UCZXW8E1__d5tZb-wLFOt8TQ" # Bog
+      "UCg6gPGh8HU2U01vaFCAsvmQ" # Chris Titus Tech
+      "UCP_eG7JBgRWNlNIOLYS6GZA" # crin
+      "UCsBjURrPoezykLs9EqgamOA" # Fireship
+      "UChIs72whgZI9w6d6FhwGGHA" # Gamers Nexus
+      "UCXuqSBlHAE6Xw-yeJA0Tunw" # Linus Tech Tips
+      "UC7YOGHUfC1Tb6E4pudI9STA" # Mental Outlaw
+      "UCxaaULLk6UCnRl5VKRc7G0A" # No Text To Speech
+      "UCUP5UhD6cMfpN4vxW3FYJLQ" # Sam Bent
+      "UCs6KfncB4OV6Vug4o_bzijg" # Techlore
+      "UC5UAwBUum7CPN5buc-_N1Fw" # The Linux Experiment
+      "UCUyeluBRhGPCW4rPe_UvBZQ" # The PrimeTime
+      "UC_zBdZ0_H_jn41FDRG7q4Tw" # Vimjoyer
+    ]))
+
+    #--- V - All (Variety) (18)
+    (mkProfile "ioDtsEL8HPrGtITn" "V - All (Variety)" "#8839ef" "#FFFFFF" (pick [
+      "UCQOjhHT7NdXF1TiZE5lzxBw" # Bladed Angel
+      "UCEIGk89dDLYACKrneSMfdQQ" # CaseOh Moments
+      "UCZjh3L41c2n9vu1yaV9TX0g" # ChadCat
+      "UCUOKq4-XMOzHIAGdunZROqQ" # DerangedDoomer
+      "UCWL2Fx4hs7xtKOx8-lbMw2w" # DonutOperatorTV
+      "UC-TmKEwMYER5DdoEMoF-hsw" # DonutOperatorTV Clips
+      "UCwwRzW41YdhO2O0klNkttUA" # JD Delay
+      "UCQDZ2iQNBgu5NPHyuki7MfA" # LosPlug
+      "UCeYvzUfpNSGnzasUjNKIA_w" # Mike Clum
+      "UCr1kbyiJzl-x5YYDxhYJuPw" # MoreCaseOh
+      "UC6Mjg5R5QOJYjrio1JmP8Fg" # oompaville
+      "UCJyjyHhZTXVLKqbS_WCFIFg" # Peeb
+      "UC-lHJZR3Gqxm24_Vd_AJ5Yw" # PewDiePie
+      "UCuobtuGxJny9V5lX5a1ieuw" # Sergeant Steve
+      "UCkoujZQZatbqy4KGcgjpVxQ" # Shawn Ryan Show
+      "UCPnSoX7NkOBcOX0Gfw_yjAw" # Tectone
+      "UC28n0tlcNSa1iPe5mettocg" # voidzilla
+      "UCZIuYUzkmEXgSSXzReOmeLw" # WestJett
+    ]))
+
+    #--- V - Bodycam (4)
+    (mkProfile "RBYMdf26qmbPwbfI" "V - Bodycam" "#8839ef" "#FFFFFF" (pick [
+      "UCWL2Fx4hs7xtKOx8-lbMw2w" # DonutOperatorTV
+      "UC-TmKEwMYER5DdoEMoF-hsw" # DonutOperatorTV Clips
+      "UCQDZ2iQNBgu5NPHyuki7MfA" # LosPlug
+      "UCuobtuGxJny9V5lX5a1ieuw" # Sergeant Steve
+    ]))
+
+    #--- V - Essay (13)
+    (mkProfile "ja5n8xZVKXBNrQK7" "V - Essay" "#8839ef" "#FFFFFF" (pick [
+      "UCYGDiVemmhY_Q1M-hKp4fvw" # big boss
+      "UCQOjhHT7NdXF1TiZE5lzxBw" # Bladed Angel
+      "UCUOKq4-XMOzHIAGdunZROqQ" # DerangedDoomer
+      "UCF_moAPM1xuo7ET3o0bVJPg" # FLEEKAZOID
+      "UCR1D15p_vdP3HkrH8wgjQRw" # Internet Historian
+      "UCeYvzUfpNSGnzasUjNKIA_w" # Mike Clum
+      "UC84PVGjO0Q5rgzKXM5aAtvQ" # MitchManix
+      "UCSdma21fnJzgmPodhC9SJ3g" # NakeyJakey
+      "UC6Mjg5R5QOJYjrio1JmP8Fg" # oompaville
+      "UCJyjyHhZTXVLKqbS_WCFIFg" # Peeb
+      "UCjdgz_dVC_V-74m_DbvuPEA" # Renne
+      "UCkoujZQZatbqy4KGcgjpVxQ" # Shawn Ryan Show
+      "UC28n0tlcNSa1iPe5mettocg" # voidzilla
+    ]))
+  ];
+  profilesDb =
+    pkgs.writeText "hm_profiles.db"
+    (lib.concatMapStrings (p: builtins.toJSON p + "\n") profiles);
 in {
   #--------------------------------------------------------------------#
   #-- Seed

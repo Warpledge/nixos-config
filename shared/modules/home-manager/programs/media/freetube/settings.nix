@@ -58,6 +58,7 @@
     hideActiveSubscriptions = false;
     hidePlaylists = false;
     hideChannelHome = true;
+    hideChannelCommunity = true;
     hideChannelShorts = true;
     hideLiveChat = false;
     showFamilyFriendlyOnly = false;

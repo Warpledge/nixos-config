@@ -24,18 +24,21 @@ in {
   #--------------------------------------------------------------------#
   #-- NixOS Module ---> /modules/nixos
   #--------------------------------------------------------------------#
-  imports = [
-    #--- System Inputs
-    inputs.home-manager.nixosModules.home-manager
-    inputs.stylix.nixosModules.stylix
-    inputs.catppuccin.nixosModules.catppuccin
+  imports =
+    [
+      #--- System Inputs
+      inputs.home-manager.nixosModules.home-manager
+      inputs.stylix.nixosModules.stylix
+      inputs.catppuccin.nixosModules.catppuccin
 
-    #--- System Modules
-    ./modules/nixos
-    ./modules/theme
-    #--- Desktop Environment (controlled by hostConfig)
-    ./modules/wm/${hostConfig.windowManager}/${hostConfig.windowManager}-nixos
-  ];
+      #--- System Modules
+      ./modules/nixos
+      ./modules/theme
+      #--- Desktop Environment (controlled by hostConfig)
+      ./modules/wm/${hostConfig.windowManager}/${hostConfig.windowManager}-nixos
+    ]
+    #--- Mullvad VPN (controlled by hostConfig)
+    ++ lib.optionals hostConfig.mullvad.enable [./modules/mullvad/mullvad-nixos];
 
   #--- DO NOT CHANGE
   system.stateVersion = "25.11";
@@ -58,12 +61,15 @@ in {
     backupFileExtension = "bak";
     extraSpecialArgs = {inherit hostname inputs username hostConfig;};
     users.${username} = {
-      imports = [
-        #--- Home System
-        ./modules/home-manager
-        #--- Home Desktop (controlled by hostConfig.nix)
-        ./modules/wm/${hostConfig.windowManager}/${hostConfig.windowManager}-home
-      ];
+      imports =
+        [
+          #--- Home System
+          ./modules/home-manager
+          #--- Home Desktop (controlled by hostConfig.nix)
+          ./modules/wm/${hostConfig.windowManager}/${hostConfig.windowManager}-home
+        ]
+        #--- Mullvad VPN (controlled by hostConfig)
+        ++ lib.optionals hostConfig.mullvad.enable [./modules/mullvad/mullvad-home];
       home = {
         username = lib.mkDefault "${username}";
         homeDirectory = "/home/${username}";

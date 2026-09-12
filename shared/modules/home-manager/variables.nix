@@ -33,8 +33,8 @@
 
     #--- Development and tools
     DIRENV_LOG_FORMAT = ""; # Disable direnv logging format
-    EDITOR = "zed --wait"; # Default editor (for git, /memory, etc.)
-    VISUAL = "zed --wait"; # Visual editor
+    EDITOR = "zeditor --wait"; # Default editor (for git, /memory, etc.); binary is zeditor, not zed
+    VISUAL = "zeditor --wait"; # Visual editor
 
     #--- Gaming
     GAMESCOPE_DISABLE_VULKAN_RENDERDOC_CAPTURE = "1"; # Disable RenderDoc capture in Gamescope
