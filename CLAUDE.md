@@ -8,10 +8,14 @@ NixOS flake managing **Desktop** (Ryzen 5800X3D + RX 9070 XT, 280Hz OLED + 144Hz
 
 ## Critical Rules
 
-1. **Wait for user approval** after file edits before running rebuild commands. User handles all git operations.
+1. **Never run `nixm rebuild` or `nixos-rebuild`.** Stop and ask instead. Validation you SHOULD run yourself before reporting done: `alejandra .` → `git add <new files>` → `nix flake check`. The user handles all git operations.
 2. **`git add` new files before `nix flake check`** — the flake won't see untracked files.
 3. **Use surgical edits** (exact `old_string` → `new_string`), never rewrite whole files.
 4. **Public repo:** no passwords, API keys, tokens, or secrets.
+5. **Stylix owns theming.** Never set colors, fonts, or wallpaper in a module — enable the program's theming target and let Stylix supply the palette. Hardcoded values conflict with or silently override the theme.
+6. **Set only what was asked for.** No extra options, defaults, or "nice to have" settings beyond the request.
+
+`AGENTS.md` at the repo root is a second, shorter ruleset for other agents (opencode reads it *instead of* `CLAUDE.md`). The two must not contradict each other — when a rule here changes, check whether `AGENTS.md` says the same.
 
 ## Commands
 
@@ -58,12 +62,12 @@ The authoritative list of toggles is **`hosts/{hostname}/hostConfig/core.nix`** 
 - `username` — read by `flake.nix` itself (`inherit (hostConfig) username`), not just by modules
 - `windowManager` — `"hyprland" | "niri" | "gnome" | "cosmic"`
 - `kernel` — `"zen" | "latest" | "xanmod" | "cachyos"`
-- Service toggles: `mullvad.enable` (plus `mullvad.splitTunnel`, a list of command names routed around the VPN), `clamav.enable`, `docker.enable`, `winboat.enable`, `sunshine.enable`, `discord.arrpc.enable`, `waydroid.{enable,magisk,nftables}`
+- Service toggles: `mullvad.enable` (plus `mullvad.splitTunnel`, a list of command names routed around the VPN), `clamav.enable`, `docker.enable`, `winboat.enable`, `sunshine.enable`, `discord.arrpc.enable`, `scrcpy.enable`, `ferdium.enable`, `waydroid.{enable,magisk,nftables}`
 - Attribute-set toggles: `browsers.{zen,mullvad,helium}`, `terminals.{kitty,ghostty}`, `editors.{helix,zed}`, `fileBrowsers.{nautilus,yazi}`, `media.{mpv,spotify,freetube,videoTrimmer,qrScanner}`, `graphics.{blender,krita,affinity}`, `audio.{reaper,guitar}`, `finance.{homebank}`, `gameLaunchers.{steam,heroic,prismlauncher,lutris,faugus,twintail}`, `japanese.{ime,vn}`
 - `local.{granblueRelinkMods}` — wrappers around prebuilt bundles under `~/.local/opt/` (kept out of git); see `.notes/local/local-binary-installs.md`
 - AI tools: `claude.enable`, `opencode.enable`, `lmstudio.enable`
 
-Desktop and laptop should stay byte-identical apart from the header comment and a short list of deliberate differences. As of 2026-08-24 those are `waydroid.enable`, `gameLaunchers.heroic`, `gameLaunchers.twintail` and `discord.arrpc.enable`, all true on desktop and false on laptop. Verify with `diff hosts/desktop/hostConfig/core.nix hosts/laptop/hostConfig/core.nix` before assuming.
+Desktop and laptop should stay byte-identical apart from the header comment and a short list of deliberate differences. As of 2026-09-12 those are `waydroid.enable`, `gameLaunchers.heroic` and `discord.arrpc.enable`, all true on desktop and false on laptop (plus a longer trailing comment on `local.granblueRelinkMods` in the laptop file). Verify with `diff hosts/desktop/hostConfig/core.nix hosts/laptop/hostConfig/core.nix` before assuming.
 
 Gotchas — grep the option name before assuming which file owns it:
 
@@ -71,55 +75,8 @@ Gotchas — grep the option name before assuming which file owns it:
 - `gameLaunchers.steam` / `.twintail` are wired in `shared/modules/nixos/programs/gaming/core.nix`; `heroic`, `prismlauncher`, `lutris`, `faugus` are wired in `home-manager/programs/default.nix`.
 - The Katana patch editor is a `~/.local/opt` bundle but does **not** live in `programs/local/` — it moved into `creative/guitar.nix` with the rest of the amp rig, so it has no `local.*` toggle of its own and rides on `audio.guitar`.
 - `docker.enable` does **not** use a conditional import — `nixos/default.nix` imports `programs/docker.nix` unconditionally and the module wraps its whole body in `config = lib.mkIf hostConfig.docker.enable {...}`. Both patterns exist in the repo; prefer the conditional import for new modules.
-
-### hostConfig Decision Tree
-
-```
-Does this need to be configurable per-host?
-├─ NO → Don't use hostConfig, just put it in the module directly
-└─ YES
-   ├─ Is it mutually exclusive (only one choice makes sense)?
-   │  └─ YES → Enum
-   │         Example: windowManager, kernel
-   │
-   ├─ Can you have multiple items at once?
-   │  └─ YES → Attribute Set
-   │         Example: browsers (install Zen + Brave simultaneously)
-   │
-   └─ Single feature on/off?
-      └─ YES → Boolean with .enable
-             Example: mullvad.enable, clamav.enable
-```
-
-### hostConfig Best Practices
-
-1. **Default to current behavior** — when adding a new option, default to the state that matches the current config
-2. **Use `or` for nested attrs** — `hostConfig.feature.sub or false` when accessing attrs that might not exist
-3. **Group related options** — use `browsers = {...}` instead of `zenBrowser = true; braveBrowser = true`
-4. **Document valid enum values** — add a comment in hostConfig listing all valid strings
-5. **Keep imports clean** — all conditionals in `default.nix`, avoid scattering `mkIf` throughout modules
-6. **Sync across hosts** — add to both `hosts/desktop/hostConfig/core.nix` and `hosts/laptop/hostConfig/core.nix`
-
-### hostConfig Troubleshooting
-
-| Problem | Cause | Solution |
-|---------|-------|----------|
-| `attribute not found` | Option missing from a host config file | Add to both `hosts/*/hostConfig/core.nix` |
-| Module not loading when enabled | Wrong option name or path in conditional import | Check `default.nix` — verify `hostConfig.option` matches exactly |
-| Works on desktop but not laptop | Different values per host | Check each `hosts/*/hostConfig/core.nix` |
-| `nix flake check` fails | Syntax error in hostConfig file | Check for missing semicolons, unmatched braces |
-| Option has no effect | Inline conditional instead of conditional import | Module loading → `lib.optionals`; config logic → `if/then/else` |
-| Can't access nested attr | Accessing without checking existence | Use `hostConfig.feature.sub or default_value` |
-
-### hostConfig Validation Checklist
-
-- [ ] Option added to **both** host `hostConfig/core.nix` files
-- [ ] Conditional import placed in the relevant `default.nix`
-- [ ] Option path in conditional matches definition exactly
-- [ ] Tested with option enabled on at least one host
-- [ ] `nix flake check` passes
-- [ ] Formatted with `alejandra .`
-- [ ] Enum values documented in a comment
+- Module *loading* goes through `lib.optionals` in a `default.nix`; config *logic* inside a module uses `if/then/else`. Mixing them up is why an option looks wired but has no effect.
+- Reach nested attrs that may not exist with `hostConfig.feature.sub or false`, never a bare path.
 
 ### Conditional import patterns
 
@@ -149,7 +106,7 @@ Does this need to be configurable per-host?
 - `shared/modules/home-manager/` — user: `programs/` (browsers, terminals, editors, ai, shell, chat-clients, emulation, fetch, file-browsers, creative, media, finance, launchers, local, plus `android.nix`, `archives.nix`, `gaming.nix`, `git.nix`, `japanese-vn.nix`), services, scripts, mime, variables
   - `programs/local/` — wrappers for non-nixpkgs prebuilt bundles living in `~/.local/opt/`; the payload is intentionally not in the repo
   - `default.nix` carries a `clearStaleBackups` activation hook that deletes `*.bak` under `~/.config`, `~/.local/{share,state}` before `checkLinkTargets`. This is why HM activation never fails on leftover backups — don't remove it when debugging a "file exists" error; find the real conflicting file instead.
-  - `programs/media/freetube/` — `settings.nix` (mirrored from the app), `blocked-channels.nix` (~1k channel ids in one flat, deliberately unordered list) and `subscriptions.nix`. Three things bite here. The home-manager module copies `hm_settings.db` over `settings.db` **only when the declared content changes**, and FreeTube rewrites that file from memory when it exits — so close FreeTube before rebuilding, or the copy is clobbered and stays clobbered until the module changes again. Blocklist entries are emitted with a `preferredName` and a placeholder `icon`, because FreeTube re-resolves every entry missing either one, at one API call each. Subscriptions are seed-only — a `home.activation` script guarded by `[[ ! -e ]]`, so the app owns them and rebuilds never overwrite; `nixm freetube-sync` recaptures them into the module behind a y/N prompt.
+  - `programs/media/freetube/` — `settings.nix` (mirrored from the app), `blocked-channels.nix` (~2k channel ids in one flat list, sorted by lowercased name under `LC_ALL=C`) and `subscriptions.nix` (master list + FreeTube profiles, which are subscription groups). Three things bite here. The home-manager module copies `hm_settings.db` over `settings.db` **only when the declared content changes**, and FreeTube rewrites that file from memory when it exits — so close FreeTube before rebuilding, or the copy is clobbered and stays clobbered until the module changes again. Blocklist entries are emitted with a `preferredName` and a placeholder `icon`, because FreeTube re-resolves every entry missing either one, at one API call each. Ownership differs per file: settings and the blocklist are **mirrored** (module wins, a rebuild copies them in), while subscriptions and profiles are **seed-only** — a `home.activation` script guarded by `[[ ! -e ]]` writes `profiles.db` once, so the app owns them and rebuilds never overwrite. `nixm freetube-sync` recaptures subscriptions behind a y/N prompt, but not profiles.
 - `shared/modules/wm/{hyprland,niri,gnome,cosmic}/` — each has `<wm>-nixos/` and `<wm>-home/`. Only Hyprland and Niri integrate DankMaterialShell (DMS); GNOME uses `gnome-home/extensions/` + `dconf.nix`, COSMIC uses `cosmic-home/shell/{panel,applets}.nix`
 - `shared/modules/theme/` — stylix, catppuccin, fonts
 - `shared/modules/mullvad/` — `mullvad-nixos/` (daemon settings + system-package split tunnel) and `mullvad-home/` (tray app + home-package split tunnel). Imported from `shared/core.nix` like the WM, gated on `hostConfig.mullvad.enable`
@@ -173,13 +130,43 @@ Does this need to be configurable per-host?
 **Add an application:**
 1. Add the toggle to **both** host configs (keep them symmetrical)
 2. Create the module in the right subdir (`shared/modules/home-manager/programs/...`)
-3. Add the conditional import in that subdir's `default.nix`
-4. `git add` new files → `nix flake check` → `nixm rebuild`
-5. Add it to the matching `### ` list under **Components** in `README.md` (and `## Structure` if a new directory was created) — the README is the public-facing doc and drifts easily
+3. Add the conditional import to `shared/modules/home-manager/programs/default.nix` — the only router under `programs/`. The nested `default.nix` files (`browsers/{zen,mullvad,helium}/`, `media/freetube/`) are multi-file module bundles, not routers
+4. `alejandra .` → `git add` new files → `nix flake check` (do not rebuild; hand it back)
+5. Add it to the matching `### ` list under **Components** in `README.md` (and `## Structure` if a new directory was created), plus its link-reference definition at the bottom — the README is the public-facing doc and drifts easily.
+
+   **`README.md` is ~25 KB — never read it in full.** Grep the two regions you need, then edit those lines directly:
+
+   ```bash
+   grep -n '^| \*\*' README.md          # Components table rows
+   grep -n '^\[.*\]: http' README.md    # link-reference block
+   ```
+
+**Update FreeTube state** (blocklist, settings, subscriptions, profiles) — asked for as
+"I blocked more" / "I added subscriptions" / "sync freetube":
+
+1. **Close FreeTube first.** Both `~/.config/FreeTube/settings.db` and `profiles.db` are
+   rewritten from memory on exit, so a capture taken while it runs is stale, and a rebuild
+   while it runs gets clobbered.
+2. **Both files are NeDB append-logs** — later lines supersede earlier ones with the same
+   `_id`. Always reduce before reading:
+   `jq -rs 'reduce .[] as $x ({}; .[$x._id] = $x.value)' settings.db`
+   `jq -rs 'reduce .[] as $p ({}; .[$p._id] = $p)' profiles.db`
+   The blocklist lives inside settings as `channelsHidden`, a JSON **string** needing `fromjson`.
+3. **Blocklist** — diff live ids against `(mk "…"` in the module, emit new ones as
+   `(mk "UC…" "Name")`, then re-sort the whole list by lowercased name under `LC_ALL=C`.
+4. **Subscriptions and profiles** — regenerate both blocks wholesale from `profiles.db`.
+   Groups use `pick [ids]` so names and thumbnails come from the master list.
+5. **Validate**: entry count, no duplicate ids, id set unchanged except the intended delta,
+   and every entry still has a non-empty `preferredName` + `icon`.
+6. `alejandra .` → `nix flake check`, then hand back for the rebuild — app still closed.
+
+Profiles are seed-only, so a rebuild will **not** push module-side group changes into the
+app. To apply those: `install -Dm644 ~/.config/FreeTube/hm_profiles.db ~/.config/FreeTube/profiles.db`
+with the app closed, after the rebuild has refreshed the store file.
 
 **Add a system service:** same flow, but `shared/modules/nixos/services/<name>.nix` and import in `shared/modules/nixos/default.nix`.
 
-**Switch WM:** change `windowManager` in the host's hostConfig → `nixm rebuild`.
+**Switch WM:** change `windowManager` in the host's hostConfig, then hand back for the rebuild.
 
 **Customize WM:** edit `shared/modules/wm/{wm}/{wm}-home/...` for shared behavior, or `hosts/{hostname}/wm/{wm}.nix` for per-host overrides (monitors, GPU env vars).
 
@@ -294,13 +281,12 @@ This applies to generated scripts and inline strings too, not just Nix attribute
 
 ```bash
 nix flake check                  # Syntax (fastest)
-nixm rebuild --show-trace        # Full trace
+nixm rebuild --show-trace        # Full trace (ask the user to run this)
 journalctl -xeu <service>        # Service logs
 journalctl -b -p err             # Errors this boot
 ```
 
 Common errors:
-- `flake.nix is not available` / file ignored → `git add` it
 - `infinite recursion` → circular import or self-referencing conditional
 - `attribute missing` → option not declared in the active host's hostConfig
 - Slow / hung → check `df -h`; try `nix build --offline`
@@ -309,10 +295,28 @@ Common errors:
 
 **Laptop GPU:** `lspci | grep -i vga`, `env | grep -E 'DRI|VDPAU|LIBVA|VK'`. Configs: `hosts/laptop/gpu.nix` and `hosts/laptop/wm/{hyprland,niri}.nix`. Verify offload with `nvidia-offload glxinfo | grep "OpenGL renderer"`.
 
-## MCP Servers
+## Looking things up
 
-- **nixos-mcp** — package/option search and version history (use over `nix search` or scraping `search.nixos.org`).
-- **context7** — current library documentation (prefer over web search for SDK/API questions).
+**Never write a package homepage, description, or option name from memory.**
+
+| Need | Use |
+| --- | --- |
+| Package metadata | `nix eval --raw nixpkgs#<pkg>.meta.homepage` |
+| nixpkgs packages / NixOS + home-manager options | the **nixos-mcp** tool (over `nix search` or scraping `search.nixos.org`) |
+| Library / SDK / API docs | the **context7** tool (over web search) |
+| An app's own config syntax | `nix-shell -p <pkg> --run 'man <name>'` |
+
+**Check for a home-manager module before falling back to `home.packages`.** Many programs have one and it is the better module:
+
+```bash
+find /nix/store -maxdepth 4 -path '*/modules/programs/<pkg>.nix' | head -1
+```
+
+If that returns a path, read it and use `programs.<pkg>` instead.
+
+**Filter at the source.** Man pages, store listings, and long files go through `grep`/`sed` — never dump one into the conversation. Target the path you want rather than listing a directory, and if you need several sections of the same document, dump it once to a file and grep that.
+
+**Stop once you have the answer.** A package's own man page is authoritative for its config syntax; don't go on to read the nixpkgs derivation or build inputs, which describe how it is built, not how it is configured. Don't guess documentation URLs — if two web fetches fail, fall back to a local source.
 
 ## Reference Notes (`.notes/`)
 

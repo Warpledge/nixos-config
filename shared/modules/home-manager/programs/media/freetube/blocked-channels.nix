@@ -1,4 +1,4 @@
-{...}: let
+_: let
   #=====================================================================#
   # FREETUBE BLOCKED CHANNELS
   #=====================================================================#
@@ -414,7 +414,6 @@ in {
       (mk "UCIIIY75JEQaYGZtJWKj7jnw" "Crimson")
       (mk "UCx6B1qITFfLp_q3MeO--zWQ" "Crispy's Tavern: Tales and Tea")
       (mk "UCaUBaWPGZes2YV_yCXmrh-w" "CriticalDino")
-      (mk "UCkMYIobGh0XQ2yfIRNMM4Yg" "Critically Moist×")
       (mk "UCsuqAjJtlUP1XxnXeXjSpxg" "Critikal Chronicles")
       (mk "UCHlo32FvGRPDk4U14VUyfYg" "critikal compilations")
       (mk "UC2zltmk6R7vWBFprd_2PsQw" "Critikal Files")
@@ -435,7 +434,6 @@ in {
       (mk "UCHZ_SKrb-xmso0xyB8kt9rQ" "Daily Dose of Asmongold")
       (mk "UCW46hm2zWvhalt8XySF4nkg" "Daily Dose of Christ")
       (mk "UCdC0An4ZPNr_YiFiYoVbwaw" "Daily Dose Of Internet")
-      (mk "UC-OpnZjXQmKVW0YbwspLx_w" "Daily Dose Of Penguinz0")
       (mk "UCZTu831eAXKZd-5w5onpiag" "Daily Dose Of SANITY")
       (mk "UCxk22we-ARqLaxwJK44r9Dg" "Daily Dose of Sodapoppin")
       (mk "UC0A9YrHgD5hZ2JXQrxRPHsw" "Daily Dose Of Wisdom")
@@ -1142,17 +1140,6 @@ in {
       (mk "UCJ3H1_urmGlE8MQgouf4UqQ" "Modulus")
       (mk "UCjK0F1DopxQ5U0sCwOlXwOg" "Mogul Mail")
       (mk "UCxzBNg3op3TPQ-mAaComtJg" "Mogul Man Archive")
-      (mk "UCNvyFEUmN0I7dfU2v5w8VKw" "Moist Archives")
-      (mk "UCf40DmOtXxpqnIxZZoBaCWg" "Moist Central")
-      (mk "UC4EQHfzIbkL_Skit_iKt1aA" "Moist Charlie Clips")
-      (mk "UC10fXKuxtNThPPNjFD7EiMw" "Moist Chronicle")
-      (mk "UCiOPyc6yDwdxt1GSCGvleVg" "Moist Chronicles")
-      (mk "UCxDlb0D8xqDaBcJ6_veDxdQ" "Moist Clips")
-      (mk "UCywQo8dAiw4gMAiDJ4SgJBg" "Moist CrITiKaL Clips")
-      (mk "UCizbFzQmJNuHt8vPpYKQv7Q" "Moist Moments 💧")
-      (mk "UC6fDyn-nibcuJGcUG58LNTA" "Moist Sleep")
-      (mk "UCxfr3b8IuHSzu22UHnAvHWg" "MoistCr1TiKaL Gaming")
-      (mk "UCGARqhmwgqk85suUY6kXXbA" "Moistcr1tikal Reacts To")
       (mk "UC7LFxhDKKpFrP3EONkOg_SA" "Mojo")
       (mk "UCzC-UXOUfSMTA0k6UeQD8dQ" "momem")
       (mk "UCkz4JI3-zlbt2xHvxBs4xmA" "MonsterTipper")
@@ -1323,7 +1310,6 @@ in {
       (mk "UC6ZFN9Tx6xh-skXCuRHCDpQ" "PBS NewsHour")
       (mk "UCO8fQqYM_EeHxiGYONWt-fg" "Peachy")
       (mk "UCL_S6BdUIyRbASIWecU0ksA" "Peepo Clips")
-      (mk "UCq6VFHwMzcMXbuKyG7SQYIg" "penguinz0")
       (mk "UCIJ0lLcABPdYGp7pRMGccAQ" "People Are Awesome")
       (mk "UCpg9hTxmeuuglMYUz1MRiog" "Personal Development Clips")
       (mk "UCm8YgDXpUL-VR7kZhjHXRDQ" "Pexto")

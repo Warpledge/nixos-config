@@ -8,6 +8,7 @@ home-manager, Niri WM, Stylix theming (Catppuccin Mocha).
 1. **Never run `nixm rebuild` or `nixos-rebuild`.** Stop and ask instead.
    Validation you SHOULD run yourself before reporting done:
    `alejandra .` then `git add <new files>` then `nix flake check`.
+   The user handles all git operations.
 2. **`git add` new files before `nix flake check`** — the flake ignores
    untracked files and the check fails with "file is not available".
 3. **Stylix owns all theming.** Never set colors, fonts, or wallpaper in a
@@ -82,8 +83,10 @@ If that returns a path, read it and use `programs.<pkg>` instead.
 `hostConfig` (from `hosts/<host>/hostConfig/core.nix`) is threaded through
 `specialArgs`, so every module can read it. Conditional imports in
 `shared/modules/home-manager/programs/default.nix` decide what actually loads —
-subdirectories under `programs/` are flat `.nix` files with **no `default.nix`
-of their own**.
+it is the only router under `programs/`. Most subdirectories are flat `.nix`
+files, but `browsers/{zen,mullvad,helium}/` and `media/freetube/` each have a
+`default.nix` of their own — those are multi-file module bundles, not routers,
+so a new toggle's import still goes in `programs/default.nix`.
 
 | Scope | Path |
 | --- | --- |
@@ -110,7 +113,7 @@ in both files with the same value unless told otherwise.
 5. Add it to the matching list under **Components** in `README.md`, including
    the link reference definition at the bottom of that file
 
-   **`README.md` is ~23 KB — never read it in full.** Locate the two regions
+   **`README.md` is ~25 KB — never read it in full.** Locate the two regions
    you need with grep, then edit those lines directly:
 
    ```bash
