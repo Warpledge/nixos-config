@@ -21,6 +21,7 @@
 
   #--- Mullvad VPN
   mullvad.enable = true;
+  mullvad.splitTunnel = ["steam" "heroic" "prismlauncher" "claude" "opencode"]; # Apps always routed around the VPN (see network/mullvad-split-tunnel.nix)
 
   #--- Browser Selection
   # Enable the browsers you want installed

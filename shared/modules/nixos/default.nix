@@ -48,8 +48,6 @@
       ./system/xserver.nix
       ./system/zram.nix
     ]
-    #--- VPN (controlled by hostConfig)
-    ++ lib.optionals hostConfig.mullvad.enable [./network/mullvad.nix]
     #--- Waydroid Android Container (controlled by hostConfig)
     ++ lib.optionals hostConfig.waydroid.enable [./programs/waydroid.nix]
     #--- ClamAV Antivirus (controlled by hostConfig)

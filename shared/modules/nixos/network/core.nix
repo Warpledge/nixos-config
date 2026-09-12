@@ -109,11 +109,10 @@
     enable = true; # Enable systemd-resolved for DNS
     settings.Resolve = {
       DNSOverTLS = "opportunistic"; # Encrypt DNS queries when possible
-      FallbackDNS = [
-        "1.1.1.1#cloudflare-dns.com" # Cloudflare DNS (fallback)
-        "8.8.8.8#dns.google" # Google DNS (fallback)
-        "8.8.4.4#dns.google" # Google DNS secondary (fallback)
-      ];
+      # Empty assignment disables systemd-resolved's compiled-in fallbacks.
+      # Without this a Mullvad resolver failure silently falls back to
+      # Cloudflare/Google, bypassing the DNS content blocking.
+      FallbackDNS = [""];
     };
   };
 

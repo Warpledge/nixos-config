@@ -29,6 +29,8 @@ nixm dryrun             # Rebuild without applying
 nixm gc                 # GC, keep last 5 generations
 nixm rollback           # Roll back to the previous generation
 nixm freetube-sync      # Capture FreeTube subscriptions into subscriptions.nix (y/N prompt)
+nixm vpn-list           # Show the Android VPN lockdown allowlist on an adb device
+nixm vpn-edit           # Edit that allowlist in $EDITOR (applies on device reboot)
 nix flake lock --update-input <name>   # Bump a single input
 run <pkg> [args]        # Ad-hoc launch a nixpkgs package without installing it (zsh function)
 ```
@@ -44,6 +46,7 @@ flake.nix
     → shared/core.nix                        (NixOS + home-manager wiring)
       → shared/modules/{nixos,home-manager}/ (modular configs)
       → shared/modules/wm/${windowManager}/  (active WM only)
+      → shared/modules/mullvad/            (both trees, if mullvad.enable)
 ```
 
 `hostConfig` from each host's `hostConfig/core.nix` is threaded through `specialArgs`, so every module can read it. Conditional imports in each subdir's `default.nix` decide what loads.
@@ -55,7 +58,7 @@ The authoritative list of toggles is **`hosts/{hostname}/hostConfig/core.nix`** 
 - `username` — read by `flake.nix` itself (`inherit (hostConfig) username`), not just by modules
 - `windowManager` — `"hyprland" | "niri" | "gnome" | "cosmic"`
 - `kernel` — `"zen" | "latest" | "xanmod" | "cachyos"`
-- Service toggles: `mullvad.enable`, `clamav.enable`, `docker.enable`, `winboat.enable`, `sunshine.enable`, `discord.arrpc.enable`, `waydroid.{enable,magisk,nftables}`
+- Service toggles: `mullvad.enable` (plus `mullvad.splitTunnel`, a list of command names routed around the VPN), `clamav.enable`, `docker.enable`, `winboat.enable`, `sunshine.enable`, `discord.arrpc.enable`, `waydroid.{enable,magisk,nftables}`
 - Attribute-set toggles: `browsers.{zen,mullvad,helium}`, `terminals.{kitty,ghostty}`, `editors.{helix,zed}`, `fileBrowsers.{nautilus,yazi}`, `media.{mpv,spotify,freetube,videoTrimmer,qrScanner}`, `graphics.{blender,krita,affinity}`, `audio.{reaper,guitar}`, `finance.{homebank}`, `gameLaunchers.{steam,heroic,prismlauncher,lutris,faugus,twintail}`, `japanese.{ime,vn}`
 - `local.{granblueRelinkMods}` — wrappers around prebuilt bundles under `~/.local/opt/` (kept out of git); see `.notes/local/local-binary-installs.md`
 - AI tools: `claude.enable`, `opencode.enable`, `lmstudio.enable`
@@ -122,7 +125,7 @@ Does this need to be configurable per-host?
 
 ```nix
 # Single boolean
-++ lib.optionals hostConfig.mullvad.enable [./network/mullvad.nix]
+++ lib.optionals hostConfig.clamav.enable [./services/clamav.nix]
 
 # Attribute-set item
 ++ lib.optionals hostConfig.browsers.zen [./browsers/zen]
@@ -149,6 +152,7 @@ Does this need to be configurable per-host?
   - `programs/media/freetube/` — `settings.nix` (mirrored from the app), `blocked-channels.nix` (~1k channel ids in one flat, deliberately unordered list) and `subscriptions.nix`. Three things bite here. The home-manager module copies `hm_settings.db` over `settings.db` **only when the declared content changes**, and FreeTube rewrites that file from memory when it exits — so close FreeTube before rebuilding, or the copy is clobbered and stays clobbered until the module changes again. Blocklist entries are emitted with a `preferredName` and a placeholder `icon`, because FreeTube re-resolves every entry missing either one, at one API call each. Subscriptions are seed-only — a `home.activation` script guarded by `[[ ! -e ]]`, so the app owns them and rebuilds never overwrite; `nixm freetube-sync` recaptures them into the module behind a y/N prompt.
 - `shared/modules/wm/{hyprland,niri,gnome,cosmic}/` — each has `<wm>-nixos/` and `<wm>-home/`. Only Hyprland and Niri integrate DankMaterialShell (DMS); GNOME uses `gnome-home/extensions/` + `dconf.nix`, COSMIC uses `cosmic-home/shell/{panel,applets}.nix`
 - `shared/modules/theme/` — stylix, catppuccin, fonts
+- `shared/modules/mullvad/` — `mullvad-nixos/` (daemon settings + system-package split tunnel) and `mullvad-home/` (tray app + home-package split tunnel). Imported from `shared/core.nix` like the WM, gated on `hostConfig.mullvad.enable`
 - `hosts/{hostname}/` — `gpu.nix`, `hardware-configuration.nix`, `{hostname}.nix`, `hostConfig/core.nix`, `wm/<wm>.nix` (per-WM host overrides: monitors, GPU env vars, autostart)
 - `hosts/laptop/` also has `swapfile.nix` and `minecraft-servers/` (GTNH + TerraFirmaGreg server definitions). `minecraft-servers/` is a **home-manager** module injected from `laptop.nix` via `home-manager.users.${username}.imports`, not a NixOS module — the only place in the repo that reaches into HM from a host entry file.
 
@@ -161,6 +165,7 @@ Does this need to be configurable per-host?
 | Per-host hardware/entry | `hosts/{hostname}/` |
 | Per-host toggle | `hosts/{hostname}/hostConfig/core.nix` |
 | WM internals | `shared/modules/wm/{wm}/` |
+| Mullvad VPN | `shared/modules/mullvad/{mullvad-nixos,mullvad-home}/` |
 | Per-host WM overrides | `hosts/{hostname}/wm/{wm}.nix` (only `hyprland.nix` / `niri.nix` exist; GNOME and COSMIC have no host overrides) |
 
 ## Workflows
@@ -252,7 +257,7 @@ These are only imported when the WM is active, e.g. `lib.optional (hostConfig.wi
 - DNS: systemd-resolved + NetworkManager (DNSStubListener disabled so port 53 is free)
 - WiFi: iwd, IPv6 privacy, random MAC
 - Firewall: TCP 22 (port reserved, `services.openssh` off), 80, 443, 25566 (Minecraft), 7777 (Terraria), 5555 (ADB); UDP 27000–27036 range (Steam). Defined in `shared/modules/nixos/network/core.nix`.
-- Mullvad: `hostConfig.mullvad.enable` (WireGuard + quantum resistance), `network/mullvad.nix`
+- Mullvad: `hostConfig.mullvad.enable` (WireGuard + quantum resistance), `shared/modules/mullvad/` — split across `mullvad-nixos/` (daemon settings, split tunnel) and `mullvad-home/` (tray app). Settings are applied with the `mullvad` CLI from a oneshot unit, not by templating `settings.json`, which the daemon rewrites. Relay and entry selection are deliberately unmanaged so exits can be switched by hand. `hostConfig.mullvad.splitTunnel` names apps routed around the VPN; the NixOS half wraps system packages, the home half wraps `home.packages` ones — the home profile outranks `/run/current-system/sw/bin` in PATH, so a NixOS wrapper for an HM package is silently shadowed.
 - `network/blockers.nix` — hosts-level blocklists, always imported
 
 ## Security
@@ -328,6 +333,7 @@ Game-specific notes live under `.notes/gaming/`:
 Android device notes live under `.notes/android/`:
 
 - `android/debloat/Lenovo-Idea-Tab-Pro/` — `index.md` (full redo procedure: never-remove list, install-replacements-first ordering, PMS flush, reboot test, privacy settings) + `removal-list.txt` (the 131 verified-safe packages). **A ZUI OTA restores every stock package, so this gets redone after each system update.**
+- `android/vpn-lockdown-allowlist.md` — how to keep Mullvad split tunnelling working with "Block connections without VPN" on. The `always_on_vpn_lockdown_whitelist` secure setting is adb-writable and needs no device owner, but only takes effect on reboot; `nixm vpn-list` / `nixm vpn-edit` wrap it.
 
 Local (non-nixpkgs) binary installs live under `.notes/local/`:
 
