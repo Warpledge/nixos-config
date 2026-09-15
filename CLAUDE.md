@@ -141,6 +141,15 @@ Gotchas — grep the option name before assuming which file owns it:
    grep -n '^\[.*\]: http' README.md    # link-reference block
    ```
 
+   **Never add a `---` horizontal rule to `README.md`.** Zed's markdown preview
+   pairs `---` lines across the whole file like front-matter delimiters, so every
+   odd-numbered rule opens a raw block and the section after it renders as an
+   unformatted code block (headings dead, so ToC anchors break; images shown as
+   literal text). The file is still valid CommonMark and GitHub renders it fine,
+   which makes this expensive to diagnose. Section breaks come from the `##`
+   heading alone; GitHub already draws a rule under every H2. Verify markdown
+   changes with `nix run nixpkgs#pulldown-cmark -- < README.md`, not the preview pane.
+
 **Update FreeTube state** (blocklist, settings, subscriptions, profiles) — asked for as
 "I blocked more" / "I added subscriptions" / "sync freetube":
 

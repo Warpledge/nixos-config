@@ -1,12 +1,16 @@
 # Warpledge's NixOS Configuration
 
-My personal NixOS system flake.
+The NixOS flake behind my desktop and laptop, both daily driven since 2022.
+
+Everything here is shaped around these two machines and how I use them, so it's not really meant to be cloned and run. It's more of a reference: a look at how a whole setup fits together, and somewhere to borrow an idea or a module from.
 
 ## Contents
 
+- [Host Machines](#host-machines)
 - [Overview](#overview)
 - [Screenshots](#screenshots)
-- [Host Machines](#host-machines)
+- [Theming](#theming)
+- [System Management TUI Script](#system-management-tui-script)
 - [Components](#components)
   - [Desktop Environment](#desktop-environment)
   - [Shell & Terminal](#shell--terminal)
@@ -14,45 +18,121 @@ My personal NixOS system flake.
   - [Applications](#applications)
   - [Gaming](#gaming)
   - [System](#system)
-- [System Management TUI Script](#system-management-tui-script)
-- [Shell Shortcuts](#shell-shortcuts)
+  - [Security & Privacy](#security--privacy)
 - [Flake Inputs](#flake-inputs)
+- [Shell Shortcuts](#shell-shortcuts)
 - [Keybinds](#keybinds)
 - [Structure](#structure)
-- [History](#history)
 - [Inspiration](#inspiration)
----
+
+## Host Machines
+
+- **Desktop:** Ryzen 5800X3D + RX 9070 XT (AMD-only), 280Hz OLED + 144Hz secondary
+- **Laptop:** Legion Slim 5, Ryzen 7735HS + hybrid AMD 680M / RTX 4070, 1600p@165Hz
+
 ## Overview
 
-- **Manages personal Desktop and Laptop:** both run off the same files. Each machine has its own settings file ([`hostConfig/core.nix`](./hosts/desktop/hostConfig/core.nix)) where I flip features on and off.
-- **Universal theme:** the whole system shares the same theme ([Catppuccin][catppuccin] Mocha Mauve, set once with [Stylix][stylix]).
-- **Private by default:** full-disk encryption ([LUKS][luks]), [AppArmor][apparmor], hardening kernel tweaks, and a privacy-focused [Zen][zen] browser using [Arkenfox][arkenfox] and [Securefox][securefox] tweaks.
+- **One config, two machines:** both build from the same files. Each one has its own settings file ([`hostConfig/core.nix`](./hosts/desktop/hostConfig/core.nix)) where I flip features on and off, so they only differ where I want them to.
+- **The same theme everywhere:** [Catppuccin][catppuccin] Mocha Mauve, set once with [Stylix][stylix] and handed down to everything that can take it, with [catppuccin/nix][catppuccin-nix] alongside it covering the apps that have a proper Catppuccin port of their own.
+- **Private by default:** full-disk encryption ([LUKS][luks]), [AppArmor][apparmor], a hardened kernel, an always-on [Mullvad][mullvad] VPN, and [Zen][zen] locked down with [Arkenfox][arkenfox] and [Securefox][securefox].
 - **Runs the awkward stuff:** Android apps ([Waydroid][waydroid]), Windows apps ([WinBoat][winboat]), [AppImages][gearlever], Flatpaks ([nix-flatpak][nix-flatpak]), and the normal Linux programs Nix usually won't run ([nix-ld][nix-ld]).
-- **Dev tools:** [Docker][docker], [tmux][tmux], [Zed][zed] and [Helix][helix], git with nicer diffs ([delta][delta]) and the [gh][gh] CLI.
-- **Customized for gaming:** [Steam][steam], Gamescope, [GameMode][gamemode] and [MangoHud][mangohud], with custom kernel and GPU tweaks.
-- **Custom TUI Script:** I built [`nixm`](./shared/modules/home-manager/scripts/nixm.nix) (short for "nix menu") to put commonly used nix commands like rebuilds, cleanup, rollbacks, updates, and other miscellaneous commands behind a TUI menu.
----
+- **The tools I actually work in:** [Docker][docker], [tmux][tmux], [Zed][zed] and [Helix][helix], git with nicer diffs ([delta][delta]) and the [gh][gh] CLI.
+- **Built for gaming:** [Steam][steam] and Gamescope, [GameMode][gamemode] and [MangoHud][mangohud], plus kernel and GPU tweaks per machine.
+- **Nix commands behind a menu:** [`nixm`](./shared/modules/home-manager/scripts/nixm.nix) (short for "nix menu") puts rebuilds, cleanup, rollbacks and updates one keypress away, so I'm not looking commands up.
+
 ## Screenshots
 
 **Niri WM** (main window manager I use)
 
 ![Niri desktop with Zed and fastfetch](./screenshots/niri-desktop.png)
 
-**Hyprland WM** (what I used before switching to Niri)
+**Hyprland WM** (previous window manager)
 
 ![Hyprland desktop with Zed and fastfetch](./screenshots/Hyprland-Desktop.png)
 
-**GNOME WM** (rarely used)
+## Theming
 
-![GNOME desktop](./screenshots/Gnome-Desktop.png)
+[Stylix][stylix] owns the look of the whole system. The palette is set once (Catppuccin Mocha Mauve, dark) and every app that supports it picks up the same colors, fonts and cursor from that one place.
 
----
-## Host Machines
+- **Modules do not pick their own colors.** A module turns on its Stylix target and Stylix supplies the palette, so there are no hardcoded hex values scattered around to drift out of sync.
+- **[catppuccin/nix][catppuccin-nix] fills the gaps.** It runs alongside Stylix on the same flavor and accent, and picks up apps that have a proper first-party Catppuccin port, which beats a base16 approximation. Yazi and Kvantum (so Qt apps match) come from it; Stylix handles the rest.
+- **Targets get switched off to keep the two from fighting.** Whichever one does a given app better wins and the other stands down: Stylix keeps the cursor and GTK icons, Catppuccin takes Kvantum and Yazi, and a few apps (Zed, Spotify through spicetify) are left off in both because they theme themselves.
 
-- **Desktop:** Ryzen 5800X3D + RX 9070 XT (AMD-only), 280Hz OLED + 144Hz secondary
-- **Laptop:** Legion Slim 5, Ryzen 7735HS + hybrid AMD 680M / RTX 4070, 1600p@165Hz
+## System Management TUI Script
 
----
+![nixm top level menu](./screenshots/nixm-tui-main.png)
+
+The top level is a set of categories. Pick one and it opens into its own menu of sub-commands, so you never have to remember the command names:
+
+![nixm NixOS submenu](./screenshots/nixm-tui-nixos.png)
+
+`nixm` is the script I use to manage the system day to day (it lives in [`shared/modules/home-manager/scripts/nixm.nix`](./shared/modules/home-manager/scripts/nixm.nix)). Run it on its own and you get a TUI (terminal UI) to select commands; or pass an option as a direct command. It started from a script in [anotherhadi's NixOS config](https://github.com/anotherhadi/nixy), but I've reworked and extended it a lot since.
+
+<details>
+<summary>📋 All nixm commands</summary>
+
+#### NixOS Operations
+
+| Command | Description |
+| --- | --- |
+| `nixm rebuild` | Apply the current config (`nh os switch`) |
+| `nixm upgrade` | Update all flake inputs and rebuild |
+| `nixm flake-update` | Update flake inputs without rebuilding |
+| `nixm dryrun` | Preview what a rebuild would change |
+| `nixm gc` | Garbage collect, keeping last 5 generations |
+| `nixm optimize` | Hardlink identical files in the Nix store |
+| `nixm rollback` | Switch to a previous system generation |
+| `nixm lint` | Run `deadnix` + `statix` to check for unused args and Nix antipatterns |
+
+#### System Monitoring
+
+| Command | Description |
+| --- | --- |
+| `nixm monitor` | Resource monitor (btop) |
+| `nixm disk` | Interactive disk usage (ncdu) |
+| `nixm health` | Show running and failed systemd services |
+| `nixm temps` | Temperature readout (lm_sensors) |
+
+#### Network
+
+| Command | Description |
+| --- | --- |
+| `nixm network` | NetworkManager TUI (nmtui) |
+| `nixm speedtest` | Internet speed test |
+| `nixm ping` | Quick connectivity check (ping 8.8.8.8) |
+
+#### Flatpak
+
+| Command | Description |
+| --- | --- |
+| `nixm flatpak-update` | Update all Flatpaks |
+| `nixm flatpak-list` | List installed Flatpak apps |
+
+#### Firmware
+
+| Command | Description |
+| --- | --- |
+| `nixm firmware-check` | Check for available firmware updates (fwupd) |
+| `nixm firmware-update` | Install firmware updates |
+| `nixm firmware-devices` | List devices with firmware support |
+
+#### Tools
+
+| Command | Description |
+| --- | --- |
+| `nixm freetube-sync` | Pull your current FreeTube subscriptions into `subscriptions.nix` (asks before writing) |
+| `nixm vulkan` | Print Vulkan capabilities (vulkaninfo) |
+
+#### Android
+
+| Command | Description |
+| --- | --- |
+| `nixm adb-devices` | List attached adb devices |
+| `nixm vpn-list` | Show the VPN lockdown allowlist on a connected phone or tablet |
+| `nixm vpn-edit` | Edit that allowlist in `$EDITOR`, applies after the device reboots |
+| `nixm debloater` | Launch Universal Android Debloater |
+
+</details>
 
 ## Components
 
@@ -60,9 +140,12 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 
 ### Desktop Environment
 
+<details>
+<summary>🖥️ Desktop Environment</summary>
+
 | | |
 | --- | --- |
-| **Window Manager** | [Niri][niri] / [Hyprland][hyprland] / [GNOME][gnome] / [COSMIC][cosmic] |
+| **Window Manager** | [Niri][niri] / [Hyprland][hyprland] / [GNOME][gnome] / [COSMIC][cosmic] (WIP, not daily driven yet) |
 | **Status Bar / Notifier / Launcher / Lock** | [DankMaterialShell][dms] (Niri + Hyprland) / GNOME Shell + extensions (GNOME) / COSMIC Panel + applets (COSMIC) |
 | **Display Manager** | [dms-greeter][dms-greeter] via [greetd][greetd] (Niri) / [tuigreet][tuigreet] via greetd (Hyprland) / [GDM][gdm] (GNOME) / [cosmic-greeter][cosmic-greeter] (COSMIC) |
 | **Color Scheme** | [Catppuccin][catppuccin] Mocha Mauve applied globally via [Stylix][stylix] + [catppuccin/nix][catppuccin-nix] |
@@ -70,9 +153,13 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | **Window Switcher** | [niriswitcher][niriswitcher] (Niri only) |
 | **GNOME Extensions** | [Dash to Panel][dash-to-panel], [Blur my Shell][blur-my-shell], [AppIndicator][appindicator], [Astra Monitor][astra-monitor], [Caffeine][caffeine], [Auto Move Windows][auto-move-windows], [GNOME UI Tune][gnome-ui-tune], [Space Bar][space-bar], [Date Menu Formatter][date-menu-formatter] |
 | **COSMIC Applets** | [Minimon][minimon] (CPU/RAM/GPU/temps/net/disk in the bar), [Privacy Indicator][cosmic-privacy], [Caffeine][cosmic-caffeine], plus [Tweaks][cosmic-tweaks] |
-| **COSMIC Config** | [cosmic-manager][cosmic-manager] keeps the panel layout, keybinds and compositor settings declarative, so a fresh machine comes up already set up |
+| **COSMIC Config** | **WIP.** [cosmic-manager][cosmic-manager] keeps the panel layout, keybinds and compositor settings declarative, so a fresh machine comes up already set up. Still being built out, so it is not in rotation with Niri and Hyprland yet |
+</details>
 
 ### Shell & Terminal
+
+<details>
+<summary>💻 Shell & Terminal</summary>
 
 | | |
 | --- | --- |
@@ -80,52 +167,95 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | **Terminal Emulator** | [Kitty][kitty] / [Ghostty][ghostty] |
 | **Terminal Multiplexer** | [tmux][tmux] (run many terminals in one window) |
 | **Quick Run** | `run <pkg>`: try a package one time without installing it (`nix run` wrapper) |
+</details>
 
 ### Development
+
+<details>
+<summary>🛠️ Development</summary>
 
 | | |
 | --- | --- |
 | **Editors / IDE** | [Zed][zed], [Helix][helix], [micro][micro] (quick edits) |
 | **Formatter** | [alejandra][alejandra] v3.0.0 |
 | **Rebuild Wrapper** | [`nixm`](./shared/modules/home-manager/scripts/nixm.nix) (fzf menu over [nh][nh]) |
+</details>
 
 ### Applications
+
+<details>
+<summary>📦 Applications</summary>
 
 | | |
 | --- | --- |
 | **Browsers** | [Zen][zen] / [Mullvad Browser][mullvad-browser] / [Helium][helium] |
-| **File Manager** | [Nautilus][nautilus] |
+| **File Manager** | [Nautilus][nautilus], [Yazi][yazi] (terminal file manager) |
 | **Media Player** | [mpv][mpv], [Celluloid][celluloid] (mpv frontend), [Spotify][spotify] via [spicetify-nix][spicetify], [FreeTube][freetube] |
 | **Screenshot / Recording** | [dms screenshot][dms] (Niri), [grim][grim] + [slurp][slurp] (Hyprland), [gpu-screen-recorder][gpu-screen-recorder] |
 | **Graphics** | [Blender][blender], [Krita][krita], [Affinity Suite v3][affinity-nix] (via Wine) |
 | **Audio** | [Reaper][reaper] (DAW, with [SWS][sws] and [ReaPack][reapack]) |
 | **Guitar** | [TONE3000][tone3000] (official NAM player, browses its capture and IR library in-app), [NeuralRack][neuralrack] and [Ratatouille][ratatouille] (load NAM/AIDA-X amp captures), [Guitarix][guitarix] (modular amp rig), [ir.lv2][ir-lv2] for cabinet IRs, [qpwgraph][qpwgraph] for patching, plus [FxFloorBoard][katana-fxfloorboard] to edit patches on the Boss Katana itself |
-| **Chat / Productivity** | [Vesktop][vesktop] via [nixcord][nixcord] (Vencord), [Ferdium][ferdium] (all your web messengers in one window), [Thunderbird][thunderbird], [Obsidian][obsidian] |
+| **Chat / Productivity** | [Vesktop][vesktop] via [nixcord][nixcord] (Vencord, with [arRPC][arrpc] running alongside it so Steam and Proton games show up as rich presence), [Ferdium][ferdium] (all your web messengers in one window), [Thunderbird][thunderbird], [Obsidian][obsidian] |
 | **AI Tooling** | [Claude Code][claude-code], [OpenCode][opencode], [LM Studio][lmstudio] |
 | **Android** | [scrcpy][scrcpy] (mirror and control a device over USB or wifi, nothing to install on the phone) |
+| **Video Trimming** | [Video Trimmer][video-trimmer] (cut a clip out of a video without re-encoding it) |
+| **QR Codes** | [CoBang][cobang] (scan a QR code off the webcam or a screenshot) |
+| **Finance** | [HomeBank][homebank] (personal accounting with labeled transactions and a running balance) |
+| **Japanese** | [fcitx5][fcitx5] + [Mozc][mozc] for typing hiragana, katakana and kanji, plus [innoextract][innoextract], [cabextract][cabextract] and [mdf2iso][mdf2iso] for unpacking raw Japanese visual novels |
+</details>
 
 ### Gaming
 
+<details>
+<summary>🎮 Gaming</summary>
+
 | | |
 | --- | --- |
-| **Launchers** | [Steam][steam] (Gamescope), [Heroic][heroic], [Prism Launcher][prismlauncher], [Faugus Launcher][faugus-launcher], [Lutris][lutris] |
+| **Launchers** | [Steam][steam] (Gamescope), [Heroic][heroic], [Prism Launcher][prismlauncher], [Faugus Launcher][faugus-launcher], [Lutris][lutris], [Twintail][twintail] (gacha games, Flatpak) |
 | **Tools** | [GameMode][gamemode], [MangoHud][mangohud], [Goverlay][goverlay], [r2modman][r2modman], [ProtonPlus][protonplus], [Satisfactory Mod Manager][smm], [AntimicroX][antimicrox], [Rusty PoB][rpob] |
+| **Granblue Relink Mods** | [RelinkModOrganizer][rmo] for data mods and [Reloaded-II][reloaded-ii] for code mods, both prebuilt bundles kept in `~/.local/opt/` instead of nixpkgs |
 | **Streaming** | [Sunshine][sunshine] |
+</details>
 
 ### System
+
+<details>
+<summary>⚙️ System</summary>
 
 | | |
 | --- | --- |
 | **Audio** | [PipeWire][pipewire] (ALSA + PulseAudio compat) |
 | **Containers / VMs** | [Docker][docker], [Waydroid][waydroid] (Android), [WinBoat][winboat] (Windows apps) |
 | **Flatpak** | [nix-flatpak][nix-flatpak] (declarative Flatpak management) |
-| **Networking** | [Mullvad][mullvad] (encrypted VPN, WireGuard, multihop, DAITA, kill switch, DNS blocking, per app split tunnel), [systemd-resolved][resolved] + [NetworkManager][networkmanager] (iwd) |
-| **Antivirus** | [ClamAV][clamav] (toggleable) |
+| **Networking** | [systemd-resolved][resolved] + [NetworkManager][networkmanager] (iwd), with [Mullvad][mullvad] covered below |
 | **Key Remapping** | [keyd][keyd] |
-| **Secrets / Keyring** | [GNOME Keyring][gnome-keyring] |
-| **Filesystem & Encryption** | ext4 on a [LUKS][luks]-encrypted partition, unlocked at boot |
 | **Bootloader** | [systemd-boot][systemd-boot] |
 | **Kernel** | [CachyOS kernel][cachyos-kernel] (selectable: zen / latest / xanmod / cachyos) |
+</details>
+
+### Security & Privacy
+
+<details>
+<summary>🔒 Security & Privacy</summary>
+
+| | |
+| --- | --- |
+| **Disk** | ext4 on a [LUKS][luks]-encrypted partition, unlocked at boot |
+| **Access Control** | [AppArmor][apparmor], page table isolation, protected kernel image, core dumps switched off |
+| **Kernel Hardening** | `lockdown=integrity`, slab merging off, page poisoning, randomized page allocator and kernel stack, magic SysRq disabled |
+| **Network Hardening** | Reverse path filtering, ICMP redirects rejected, source routing off, SYN cookies, TIME-WAIT assassination protection |
+| **Auditing** | [auditd][auditd], with a daily timer to keep the log from growing forever |
+| **Hosts Blocklists** | [StevenBlack][stevenblack] (fake news and gambling), [shady-hosts][shady-hosts] and [MetaMask's crypto phishing list][eth-phishing], each pinned to a commit so a rebuild cannot pull in something unreviewed |
+| **Browser** | [Zen][zen] with [Arkenfox][arkenfox] and [Securefox][securefox] tweaks, plus [Mullvad Browser][mullvad-browser] |
+| **Secrets** | [GNOME Keyring][gnome-keyring] |
+| **Antivirus** | [ClamAV][clamav] (toggleable) |
+
+**On the VPN setup.** This part is recent and I am still tuning it. The goal is to stop thinking about the VPN at all: it connects on boot and stays up, a kill switch drops everything if the tunnel goes down, and traffic is blocked even before the network comes up. On top of WireGuard it runs quantum resistant tunnels and [DAITA][daita] (direct only), and does its own DNS blocking for ads, trackers, malware, gambling and social media.
+
+The catch with always-on is that a handful of apps do not behave well behind a VPN. Rather than switching the whole thing off whenever that happens, those apps are routed around the tunnel one by one. `mullvad.splitTunnel` in each host config names them (right now Steam, Heroic, Prism Launcher, Vesktop, Spotify, FreeTube, Ferdium, Claude Code and OpenCode) and each one gets a wrapper that launches it through `mullvad-exclude`. Everything else stays on the VPN.
+
+Settings are applied with the `mullvad` CLI from a oneshot systemd unit instead of by writing its `settings.json`, since the daemon rewrites that file itself. Relay and exit location are left unmanaged on purpose, so exits can still be switched by hand.
+</details>
 
 [niri]: https://github.com/YaLTeR/niri
 [hyprland]: https://hyprland.org
@@ -198,6 +328,16 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 [thunderbird]: https://www.thunderbird.net
 [obsidian]: https://obsidian.md
 [scrcpy]: https://github.com/Genymobile/scrcpy
+[yazi]: https://github.com/sxyazi/yazi
+[arrpc]: https://arrpc.openasar.dev
+[video-trimmer]: https://gitlab.gnome.org/YaLTeR/video-trimmer
+[cobang]: https://github.com/hongquan/CoBang
+[homebank]: https://www.gethomebank.org
+[fcitx5]: https://github.com/fcitx/fcitx5
+[mozc]: https://github.com/fcitx/mozc
+[innoextract]: https://constexpr.org/innoextract
+[cabextract]: https://www.cabextract.org.uk
+[mdf2iso]: https://salsa.debian.org/debian/mdf2iso
 [steam]: https://store.steampowered.com
 [heroic]: https://heroicgameslauncher.com
 [prismlauncher]: https://prismlauncher.org
@@ -211,6 +351,9 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 [antimicrox]: https://github.com/AntiMicroX/antimicrox
 [lutris]: https://lutris.net
 [rpob]: https://pathofbuilding.community
+[twintail]: https://flathub.org/apps/app.twintaillauncher.ttl
+[rmo]: https://github.com/RokyZevon/RelinkModOrganizer
+[reloaded-ii]: https://github.com/Reloaded-Project/Reloaded-II
 [celluloid]: https://celluloid-player.github.io
 [claude-code]: https://github.com/anthropics/claude-code
 [opencode]: https://github.com/opencode-ai/opencode
@@ -234,6 +377,11 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 [pipewire]: https://pipewire.org
 [nix-flatpak]: https://github.com/gmodena/nix-flatpak
 [apparmor]: https://apparmor.net
+[auditd]: https://github.com/linux-audit/audit-userspace
+[stevenblack]: https://github.com/StevenBlack/hosts
+[shady-hosts]: https://github.com/shreyasminocha/shady-hosts
+[eth-phishing]: https://github.com/MetaMask/eth-phishing-detect
+[daita]: https://mullvad.net/en/vpn/daita
 [arkenfox]: https://github.com/arkenfox/user.js
 [securefox]: https://github.com/yokoffing/Betterfox
 [gearlever]: https://github.com/mijorus/gearlever
@@ -242,134 +390,6 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 [gh]: https://cli.github.com
 [gamescope]: https://github.com/ValveSoftware/gamescope
 
----
-## System Management TUI Script
-
-![nixm system management TUI](./screenshots/nixm-tui.png)
-
-`nixm` is the script I use to manage the system day to day (it lives in [`shared/modules/home-manager/scripts/nixm.nix`](./shared/modules/home-manager/scripts/nixm.nix)). Run it on its own and you get a TUI (terminal UI) to select commands; or pass an option as a direct command. It started from a script in [anotherhadi's NixOS config](https://github.com/anotherhadi/nixy), but I've reworked and extended it a lot since.
-
-### NixOS Operations
-
-| Command | Description |
-| --- | --- |
-| `nixm rebuild` | Apply the current config (`nh os switch`) |
-| `nixm upgrade` | Update all flake inputs and rebuild |
-| `nixm flake-update` | Update flake inputs without rebuilding |
-| `nixm dryrun` | Preview what a rebuild would change |
-| `nixm gc` | Garbage collect, keeping last 5 generations |
-| `nixm optimize` | Hardlink identical files in the Nix store |
-| `nixm rollback` | Switch to a previous system generation |
-| `nixm lint` | Run `deadnix` + `statix` to check for unused args and Nix antipatterns |
-
-### System Monitoring
-
-| Command | Description |
-| --- | --- |
-| `nixm monitor` | Resource monitor (btop) |
-| `nixm disk` | Interactive disk usage (ncdu) |
-| `nixm health` | Show running and failed systemd services |
-| `nixm temps` | Temperature readout (lm_sensors) |
-
-### Network
-
-| Command | Description |
-| --- | --- |
-| `nixm network` | NetworkManager TUI (nmtui) |
-| `nixm speedtest` | Internet speed test |
-| `nixm ping` | Quick connectivity check (ping 8.8.8.8) |
-
-### Flatpak
-
-| Command | Description |
-| --- | --- |
-| `nixm flatpak-update` | Update all Flatpaks |
-| `nixm flatpak-list` | List installed Flatpak apps |
-
-### Firmware
-
-| Command | Description |
-| --- | --- |
-| `nixm firmware-check` | Check for available firmware updates (fwupd) |
-| `nixm firmware-update` | Install firmware updates |
-| `nixm firmware-devices` | List devices with firmware support |
-
-### Tools
-
-| Command | Description |
-| --- | --- |
-| `nixm freetube-sync` | Pull your current FreeTube subscriptions into `subscriptions.nix` (asks before writing) |
-| `nixm vulkan` | Print Vulkan capabilities (vulkaninfo) |
-
-### Android
-
-| Command | Description |
-| --- | --- |
-| `nixm adb-devices` | List attached adb devices |
-| `nixm vpn-list` | Show the VPN lockdown allowlist on a connected phone or tablet |
-| `nixm vpn-edit` | Edit that allowlist in `$EDITOR`, applies after the device reboots |
-| `nixm debloater` | Launch Universal Android Debloater |
-
----
-## Shell Shortcuts
-
-Short commands I use in place of longer ones, all set up in [`zsh.nix`](./shared/modules/home-manager/programs/shell/zsh.nix). The ones marked _(fn)_ take an argument.
-
-### Editors & Files
-
-| Shortcut | Runs |
-| --- | --- |
-| `v` / `vi` / `vim` | `nvim` |
-| `nano` | `micro` |
-| `zed` | `zeditor` |
-| `cat` | `bat` |
-| `ls` / `l` / `ll` | `eza` |
-| `tree` | `eza --tree` |
-| `y` | `yazi` |
-| `open <file>` | `xdg-open` |
-
-### Navigation
-
-| Shortcut | Runs |
-| --- | --- |
-| `temp` | `cd /tmp` |
-| `cdnix` | open `~/nixos-config` in Zed |
-
-### Git
-
-| Shortcut | Runs |
-| --- | --- |
-| `g` | `lazygit` |
-| `ga` | `git add` |
-| `gc` / `gcm` | `git commit` / `git commit -m` |
-| `gcu` | `git add . && git commit -m 'Update'` |
-| `gp` / `gpl` | `git push` / `git pull` |
-| `gs` / `gd` | `git status` / `git diff` |
-| `gco` / `gcb` | `git checkout` / `git checkout -b` |
-| `gbr` | `git branch` |
-
-### Nix
-
-| Shortcut | Runs |
-| --- | --- |
-| `run <pkg>` _(fn)_ | try a package once without installing it (`nix run nixpkgs#<pkg>`) |
-| `cleanup` | garbage-collect generations older than 1 day |
-| `listgen` | list system generations |
-| `bloat` | show current system closure size |
-
-### System & Misc
-
-| Shortcut | Runs |
-| --- | --- |
-| `c` / `e` | `clear` / `exit` |
-| `grep` | `rg` (ripgrep) |
-| `us` / `rs` | `systemctl --user` / `sudo systemctl` |
-| `cleanram` | drop filesystem caches |
-| `fetch` | `fastfetch` |
-| `anime` | `ani-cli` |
-| `f` | `figlet` |
-
----
 ## Flake Inputs
 
 The main things this config pulls in from outside the standard NixOS package set:
@@ -382,6 +402,8 @@ The main things this config pulls in from outside the standard NixOS package set
 | [`niri`](https://github.com/sodiboo/niri-flake) (sodiboo/niri-flake) | Niri WM |
 | [`cosmic-manager`](https://github.com/HeitorAugustoLN/cosmic-manager) | Declarative COSMIC panels, keybinds and settings |
 | [`dms`](https://github.com/AvengeMedia/DankMaterialShell) (AvengeMedia, stable) | DankMaterialShell |
+| [`dms-plugin-registry`](https://github.com/AvengeMedia/dms-plugin-registry) | DankMaterialShell plugins (Claude Code usage, power usage, screen recorder) |
+| [`dank-greeter`](https://github.com/AvengeMedia/dank-greeter) | Login screen that matches DankMaterialShell |
 | [`stylix`](https://github.com/nix-community/stylix) | System-wide theming |
 | [`catppuccin`](https://github.com/catppuccin/nix) | Catppuccin theme module |
 | [`nixcord`](https://github.com/kaylorben/nixcord) | Vesktop / Vencord |
@@ -390,18 +412,81 @@ The main things this config pulls in from outside the standard NixOS package set
 | [`helium`](https://github.com/schembriaiden/helium-browser-nix-flake) | Helium Browser |
 | [`cachyos-kernel`](https://github.com/xddxdd/nix-cachyos-kernel) | CachyOS kernel |
 | [`nix-flatpak`](https://github.com/gmodena/nix-flatpak) | Declarative Flatpak management |
+| [`claude-code`](https://github.com/sadjow/claude-code-nix) | Claude Code, packaged so it updates without waiting on nixpkgs |
 | [`alejandra`](https://github.com/kamadorueda/alejandra) (pinned 3.0.0) | Nix formatter |
 | [`affinity-nix`](https://github.com/mrshmllow/affinity-nix) | Affinity Suite v3 (Photo, Designer, Publisher) via Wine |
 
----
+## Shell Shortcuts
+
+Short commands I use in place of longer ones, all set up in [`zsh.nix`](./shared/modules/home-manager/programs/shell/zsh.nix). The ones marked _(fn)_ take an argument.
+
+<details>
+<summary>⚡ All shell shortcuts</summary>
+
+#### Editors & Files
+
+| Shortcut | Runs |
+| --- | --- |
+| `v` / `vi` / `vim` | `nvim` |
+| `nano` | `micro` |
+| `zed` | `zeditor` |
+| `cat` | `bat` |
+| `ls` / `l` / `ll` | `eza` |
+| `tree` | `eza --tree` |
+| `y` | `yazi` |
+| `open <file>` | `xdg-open` |
+
+#### Navigation
+
+| Shortcut | Runs |
+| --- | --- |
+| `temp` | `cd /tmp` |
+| `cdnix` | open `~/nixos-config` in Zed |
+
+#### Git
+
+| Shortcut | Runs |
+| --- | --- |
+| `g` | `lazygit` |
+| `ga` | `git add` |
+| `gc` / `gcm` | `git commit` / `git commit -m` |
+| `gcu` | `git add . && git commit -m 'Update'` |
+| `gp` / `gpl` | `git push` / `git pull` |
+| `gs` / `gd` | `git status` / `git diff` |
+| `gco` / `gcb` | `git checkout` / `git checkout -b` |
+| `gbr` | `git branch` |
+
+#### Nix
+
+| Shortcut | Runs |
+| --- | --- |
+| `run <pkg>` _(fn)_ | try a package once without installing it (`nix run nixpkgs#<pkg>`) |
+| `cleanup` | garbage-collect generations older than 1 day |
+| `listgen` | list system generations |
+| `bloat` | show current system closure size |
+
+#### System & Misc
+
+| Shortcut | Runs |
+| --- | --- |
+| `c` / `e` | `clear` / `exit` |
+| `grep` | `rg` (ripgrep) |
+| `us` / `rs` | `systemctl --user` / `sudo systemctl` |
+| `cleanram` | drop filesystem caches |
+| `fetch` | `fastfetch` |
+| `anime` | `ani-cli` |
+| `f` | `figlet` |
+
+</details>
+
 ## Keybinds
 
 `Mod` is the Super (Windows) key. All window managers are setup for a seemless keyboard centric workflow.
 
->**Note:** `Mod+?` opens a keybind overlay cheatsheet in both WMs.
+>**Note:** `Mod+/` opens a keybind overlay cheatsheet in both WMs.
 
 <details>
-<summary>Niri Keybinds (click to expand)</summary>
+<summary>⌨️ Niri Keybinds</summary>
 
 #### Apps
 
@@ -418,6 +503,23 @@ The main things this config pulls in from outside the standard NixOS package set
 | `Mod+Shift+M` | Spotify |
 | `Mod+Shift+Y` | FreeTube |
 
+#### Shell (DankMaterialShell)
+
+| Keybind | Action |
+| --- | --- |
+| `Mod+A` | App launcher (spotlight) |
+| `Mod+V` | Clipboard history |
+| `Mod+P` | Task manager |
+| `Mod+N` | Notepad |
+| `Mod+Comma` | DMS settings |
+| `Mod+K` | Power menu |
+| `Mod+L` | Lock screen |
+| `Mod+I` | Toggle idle inhibit (keep the screen awake) |
+| `Mod+W` | Browse wallpapers |
+| `Mod+Shift+N` | Toggle night mode |
+| `Mod+/` | Keybind cheatsheet |
+| `Mod+R` | Restart DMS |
+
 #### Window Management
 
 | Keybind | Action |
@@ -431,6 +533,8 @@ The main things this config pulls in from outside the standard NixOS package set
 | `Mod+S` | Cycle column width presets |
 | `Mod+D` | Expand column to available width |
 | `Mod+X` | Cycle window height presets |
+| `Mod+Shift+Z` | Reset window height |
+| `Mod+G` | Maximize window to screen edges |
 
 #### Focus & Movement
 
@@ -470,6 +574,11 @@ The main things this config pulls in from outside the standard NixOS package set
 | `Mod+Ctrl+Print` | Scrolling capture |
 | `Mod+Home` | Start screen recording |
 | `Mod+End` | Stop screen recording |
+| `Mod+Insert` | Toggle the DMS screen recorder |
+| `Volume Up/Down/Mute` | Volume, routed through DMS so the on-screen indicator shows |
+| `Mic Mute` | Mute the microphone |
+| `Brightness Up/Down` | Screen brightness |
+| `Play/Pause`, `Stop`, `Prev`, `Next` | Media controls (playerctl) |
 
 #### Waydroid
 
@@ -488,7 +597,7 @@ The main things this config pulls in from outside the standard NixOS package set
 </details>
 
 <details>
-<summary>Hyprland Keybinds (click to expand)</summary>
+<summary>⌨️ Hyprland Keybinds</summary>
 
 #### Apps
 
@@ -558,7 +667,6 @@ The main things this config pulls in from outside the standard NixOS package set
 
 </details>
 
----
 ## Structure
 
 **Layout:** top-level directories and what lives in each:
@@ -595,14 +703,6 @@ flake.nix
 
 Each host's `hostConfig/core.nix` is the single place that turns features on or off: window manager, kernel, browsers, terminals, editors, and services.
 
----
-## History
-
-I've been on NixOS since 2022. Most of what I know came from trial and error, other public NixOS configs for references, YouTube guides, and hands-on experimentation.
-
-This is iteration 9 of remaking the entire NixOS config from scratch, prior repos are private this is the first one I have made public.
-
----
 ## Inspiration
 
 These are the biggest inspirations for my own config and learning NixOS.

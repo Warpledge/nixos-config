@@ -121,6 +121,12 @@ in both files with the same value unless told otherwise.
    grep -n '^\[.*\]: http' README.md    # the link-reference block
    ```
 
+   **Never add a `---` horizontal rule to `README.md`.** Zed's markdown preview
+   pairs `---` lines across the file like front-matter delimiters, so the section
+   after every odd-numbered rule renders as a raw code block. The file stays valid
+   CommonMark and GitHub renders it fine, so the preview pane is not a reliable
+   check. Section breaks come from the `##` heading alone.
+
 ## Formatting
 
 Every module opens with a banner. **Copy it byte-for-byte from a neighbouring
