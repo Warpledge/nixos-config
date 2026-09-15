@@ -33,7 +33,7 @@
 
   #--- Owned by the home-manager counterpart; listed so a typo here still
   #--- fails loudly instead of being silently wrapped by neither module.
-  hmTargets = ["heroic" "prismlauncher" "claude" "opencode" "vesktop" "spotify" "freetube"];
+  hmTargets = ["heroic" "prismlauncher" "claude" "opencode" "vesktop" "spotify" "freetube" "ferdium"];
 
   mine = lib.filter (n: targets ? ${n}) wanted;
   unknown = lib.subtractLists (lib.attrNames targets ++ hmTargets) wanted;
@@ -43,7 +43,10 @@
   wrapperFor = name:
     lib.hiPrio (pkgs.writeShellScriptBin name ''
       real=${lib.escapeShellArg targets.${name}}
-      if [ -x /run/wrappers/bin/mullvad-exclude ]; then
+      # Steam sets no_new_privs on the processes it launches, which neuters the
+      # setuid helper; children inherit the cgroup anyway, so skip the second hop.
+      if [ -x /run/wrappers/bin/mullvad-exclude ] &&
+        [[ $(</proc/self/cgroup) != *":net_cls:/mullvad-exclusions"* ]]; then
         exec /run/wrappers/bin/mullvad-exclude "$real" "$@"
       fi
       exec "$real" "$@"

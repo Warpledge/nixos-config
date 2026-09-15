@@ -21,7 +21,7 @@
 
   #--- Mullvad VPN
   mullvad.enable = true;
-  mullvad.splitTunnel = ["steam" "heroic" "prismlauncher" "claude" "opencode" "vesktop" "spotify" "freetube"]; # Apps always routed around the VPN (see shared/modules/mullvad/)
+  mullvad.splitTunnel = ["steam" "heroic" "prismlauncher" "claude" "opencode" "vesktop" "spotify" "freetube" "ferdium"]; # Apps always routed around the VPN (see shared/modules/mullvad/)
 
   #--- Browser Selection
   # Enable the browsers you want installed
@@ -140,7 +140,7 @@
 
   #--- Ferdium Messenger Aggregator
   # All web messengers in one window (services configured in-app)
-  ferdium.enable = false;
+  ferdium.enable = true;
 
   #--- AI Tools
   claude = {enable = true;};

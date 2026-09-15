@@ -68,6 +68,7 @@ let
       matches = [
         {app-id = "zen-beta";}
         {app-id = "helium";}
+        {app-id = "freetube";}
       ];
       default-column-width = {proportion = 1.0;};
     }
@@ -115,6 +116,14 @@ let
       ];
       open-floating = true;
       open-focused = true;
+    }
+
+    #--- Calculator
+    {
+      matches = [
+        {app-id = "org.gnome.Calculator";}
+      ];
+      open-floating = true;
     }
 
     #--- Wine installers and dialogs

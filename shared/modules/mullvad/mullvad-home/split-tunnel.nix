@@ -43,6 +43,10 @@
       # spicetify-nix builds its own Spotify; pkgs.spotify is the wrong one
       spotify = "${config.programs.spicetify.spicedSpotify}/bin/spotify";
     }
+    // lib.optionalAttrs hostConfig.ferdium.enable {
+      # RateYourMusic and similar sites reject Mullvad exit IPs
+      ferdium = "${pkgs.ferdium}/bin/ferdium";
+    }
     # chat-clients/discord.nix is imported unconditionally, so no toggle to gate on.
     # nixcord builds its own Vesktop; pkgs.vesktop is a different derivation.
     // {
@@ -56,7 +60,10 @@
   wrapperFor = name:
     lib.hiPrio (pkgs.writeShellScriptBin name ''
       real=${lib.escapeShellArg targets.${name}}
-      if [ -x /run/wrappers/bin/mullvad-exclude ]; then
+      # Steam sets no_new_privs on the processes it launches, which neuters the
+      # setuid helper; children inherit the cgroup anyway, so skip the second hop.
+      if [ -x /run/wrappers/bin/mullvad-exclude ] &&
+        [[ $(</proc/self/cgroup) != *":net_cls:/mullvad-exclusions"* ]]; then
         exec /run/wrappers/bin/mullvad-exclude "$real" "$@"
       fi
       exec "$real" "$@"

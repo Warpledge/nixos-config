@@ -44,7 +44,7 @@ _: {
     autoplayVideos = false;
     playNextVideo = false;
     defaultViewingMode = "theatre";
-    defaultQuality = "1440";
+    defaultQuality = "1080"; # 1440 sends the player into a refresh error loop
     videoPlaybackRateMouseScroll = true;
 
     #--------------------------------------------------------------------#
