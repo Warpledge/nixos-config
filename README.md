@@ -4,26 +4,25 @@ The NixOS configuration behind my desktop and laptop, both daily driven since 20
 
 Everything here is shaped around these two machines and how I use them, so it's not really meant to be cloned and run. It's more of a reference: a look at how a whole setup fits together, and somewhere to borrow an idea or a module from.
 
-New to NixOS? The short version: the entire operating system is written down in text files instead of being set up by hand. Installing a program or changing a setting means editing a file and rebuilding, the same files give you the same machine every time, and if an update breaks something you pick the previous version from the boot menu and you're back where you were.
+New to NixOS? The short version: the entire operating system is written down in text files instead of being set up by hand. Installing a program, changing a setting, even swapping the whole desktop for a different one, is an edit and a rebuild rather than a series of clicks you'll have forgotten about in six months.
+
+That is what makes this more than a backup of my dotfiles. The exact version of every package is pinned in a lock file, so these files don't describe roughly the same setup, they rebuild the same one. If a drive dies or I wipe a machine, I install NixOS, point it at this repo, and it comes back with the same apps, keybinds, theme and settings as before. Adding another machine is a new folder under `hosts/` rather than starting over, which is how the desktop and laptop stay in sync while still differing where the hardware forces it.
+
+Rebuilding is not destructive either. Each one is added alongside the last instead of replacing it, so an update that breaks something is undone by picking the previous entry at the boot menu.
 
 ## Contents
 
-- [Host Machines](#host-machines)
 - [Overview](#overview)
+- [Host Machines](#host-machines)
 - [Screenshots](#screenshots)
 - [Theming](#theming)
 - [System Management TUI Script](#system-management-tui-script)
 - [Components](#components)
-- [Flake Inputs](#flake-inputs)
 - [Shell Shortcuts](#shell-shortcuts)
 - [Keybinds](#keybinds)
 - [Structure](#structure)
+- [Flake Inputs](#flake-inputs)
 - [Inspiration](#inspiration)
-
-## Host Machines
-
-- **Desktop:** Ryzen 5800X3D + RX 9070 XT (AMD-only), 280Hz OLED + 144Hz secondary
-- **Laptop:** Legion Slim 5, Ryzen 7735HS + hybrid AMD 680M / RTX 4070, 1600p@165Hz
 
 ## Overview
 
@@ -34,6 +33,11 @@ New to NixOS? The short version: the entire operating system is written down in 
 - **The tools I actually work in:** [Docker][docker], [tmux][tmux], [Zed][zed] and [Helix][helix], git with nicer diffs ([delta][delta]) and the [gh][gh] CLI.
 - **Built for gaming:** [Steam][steam] and Gamescope, [GameMode][gamemode] and [MangoHud][mangohud], plus kernel and GPU tweaks per machine.
 - **Nix commands behind a menu:** [`nixm`](./shared/modules/home-manager/scripts/nixm.nix) (short for "nix menu") puts rebuilds, cleanup, rollbacks and updates one keypress away, so I'm not looking commands up.
+
+## Host Machines
+
+- **Desktop:** Ryzen 5800X3D + RX 9070 XT (AMD-only), 280Hz OLED + 144Hz secondary
+- **Laptop:** Legion Slim 5, Ryzen 7735HS + hybrid AMD 680M / RTX 4070, 1600p@165Hz
 
 ## Screenshots
 
@@ -373,32 +377,6 @@ The settings above are applied by running Mullvad's own command line tool at boo
 [gh]: https://cli.github.com
 [gamescope]: https://github.com/ValveSoftware/gamescope
 
-## Flake Inputs
-
-The main things this config pulls in from outside the standard NixOS package set:
-
-| Input | Purpose |
-| --- | --- |
-| [`nixpkgs`](https://github.com/NixOS/nixpkgs) (`nixos-unstable`) | Main package set |
-| [`home-manager`](https://github.com/nix-community/home-manager) | User environment management |
-| [`nur`](https://github.com/nix-community/NUR) | NixOS User Repository |
-| [`niri`](https://github.com/sodiboo/niri-flake) (sodiboo/niri-flake) | Niri WM |
-| [`cosmic-manager`](https://github.com/HeitorAugustoLN/cosmic-manager) | Declarative COSMIC panels, keybinds and settings |
-| [`dms`](https://github.com/AvengeMedia/DankMaterialShell) (AvengeMedia, stable) | DankMaterialShell |
-| [`dms-plugin-registry`](https://github.com/AvengeMedia/dms-plugin-registry) | DankMaterialShell plugins (Claude Code usage, power usage, screen recorder) |
-| [`dank-greeter`](https://github.com/AvengeMedia/dank-greeter) | Login screen that matches DankMaterialShell |
-| [`stylix`](https://github.com/nix-community/stylix) | System-wide theming |
-| [`catppuccin`](https://github.com/catppuccin/nix) | Catppuccin theme module |
-| [`nixcord`](https://github.com/kaylorben/nixcord) | Vesktop / Vencord |
-| [`spicetify-nix`](https://github.com/gerg-l/spicetify-nix) | Spotify theming |
-| [`zen-browser`](https://github.com/0xc000022070/zen-browser-flake) | Zen Browser |
-| [`helium`](https://github.com/schembriaiden/helium-browser-nix-flake) | Helium Browser |
-| [`cachyos-kernel`](https://github.com/xddxdd/nix-cachyos-kernel) | CachyOS kernel |
-| [`nix-flatpak`](https://github.com/gmodena/nix-flatpak) | Declarative Flatpak management |
-| [`claude-code`](https://github.com/sadjow/claude-code-nix) | Claude Code, packaged so it updates without waiting on nixpkgs |
-| [`alejandra`](https://github.com/kamadorueda/alejandra) (pinned 3.0.0) | Nix formatter |
-| [`affinity-nix`](https://github.com/mrshmllow/affinity-nix) | Affinity Suite v3 (Photo, Designer, Publisher) via Wine |
-
 ## Shell Shortcuts
 
 Short commands I use in place of longer ones, all set up in [`zsh.nix`](./shared/modules/home-manager/programs/shell/zsh.nix). The ones marked _(fn)_ take an argument.
@@ -685,6 +663,32 @@ flake.nix
 ```
 
 Each host's `hostConfig/core.nix` is the single place that turns features on or off: window manager, kernel, browsers, terminals, editors, and services.
+
+## Flake Inputs
+
+The main things this config pulls in from outside the standard NixOS package set:
+
+| Input | Purpose |
+| --- | --- |
+| [`nixpkgs`](https://github.com/NixOS/nixpkgs) (`nixos-unstable`) | Main package set |
+| [`home-manager`](https://github.com/nix-community/home-manager) | User environment management |
+| [`nur`](https://github.com/nix-community/NUR) | NixOS User Repository |
+| [`niri`](https://github.com/sodiboo/niri-flake) (sodiboo/niri-flake) | Niri WM |
+| [`cosmic-manager`](https://github.com/HeitorAugustoLN/cosmic-manager) | Declarative COSMIC panels, keybinds and settings |
+| [`dms`](https://github.com/AvengeMedia/DankMaterialShell) (AvengeMedia, stable) | DankMaterialShell |
+| [`dms-plugin-registry`](https://github.com/AvengeMedia/dms-plugin-registry) | DankMaterialShell plugins (Claude Code usage, power usage, screen recorder) |
+| [`dank-greeter`](https://github.com/AvengeMedia/dank-greeter) | Login screen that matches DankMaterialShell |
+| [`stylix`](https://github.com/nix-community/stylix) | System-wide theming |
+| [`catppuccin`](https://github.com/catppuccin/nix) | Catppuccin theme module |
+| [`nixcord`](https://github.com/kaylorben/nixcord) | Vesktop / Vencord |
+| [`spicetify-nix`](https://github.com/gerg-l/spicetify-nix) | Spotify theming |
+| [`zen-browser`](https://github.com/0xc000022070/zen-browser-flake) | Zen Browser |
+| [`helium`](https://github.com/schembriaiden/helium-browser-nix-flake) | Helium Browser |
+| [`cachyos-kernel`](https://github.com/xddxdd/nix-cachyos-kernel) | CachyOS kernel |
+| [`nix-flatpak`](https://github.com/gmodena/nix-flatpak) | Declarative Flatpak management |
+| [`claude-code`](https://github.com/sadjow/claude-code-nix) | Claude Code, packaged so it updates without waiting on nixpkgs |
+| [`alejandra`](https://github.com/kamadorueda/alejandra) (pinned 3.0.0) | Nix formatter |
+| [`affinity-nix`](https://github.com/mrshmllow/affinity-nix) | Affinity Suite v3 (Photo, Designer, Publisher) via Wine |
 
 ## Inspiration
 
