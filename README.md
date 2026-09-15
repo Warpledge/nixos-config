@@ -14,13 +14,6 @@ New to NixOS? The short version: the entire operating system is written down in 
 - [Theming](#theming)
 - [System Management TUI Script](#system-management-tui-script)
 - [Components](#components)
-  - [Desktop Environment](#desktop-environment)
-  - [Shell & Terminal](#shell--terminal)
-  - [Development](#development)
-  - [Applications](#applications)
-  - [Gaming](#gaming)
-  - [System](#system)
-  - [Security & Privacy](#security--privacy)
 - [Flake Inputs](#flake-inputs)
 - [Shell Shortcuts](#shell-shortcuts)
 - [Keybinds](#keybinds)
@@ -142,8 +135,6 @@ The top level is a set of categories. Pick one and it opens into its own menu of
 
 Most of what's below can be turned on or off per machine from its `hostConfig` file toggles.
 
-### Desktop Environment
-
 <details>
 <summary>🖥️ Desktop Environment</summary>
 
@@ -160,8 +151,6 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | **COSMIC Config** | **WIP.** [cosmic-manager][cosmic-manager] keeps the panel layout, keybinds and compositor settings declarative, so a fresh machine comes up already set up. Still being built out, so it is not in rotation with Niri and Hyprland yet |
 </details>
 
-### Shell & Terminal
-
 <details>
 <summary>💻 Shell & Terminal</summary>
 
@@ -173,8 +162,6 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | **Quick Run** | `run <pkg>`: try a package one time without installing it (`nix run` wrapper) |
 </details>
 
-### Development
-
 <details>
 <summary>🛠️ Development</summary>
 
@@ -184,8 +171,6 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | **Formatter** | [alejandra][alejandra] v3.0.0 |
 | **Rebuild Wrapper** | [`nixm`](./shared/modules/home-manager/scripts/nixm.nix) (fzf menu over [nh][nh]) |
 </details>
-
-### Applications
 
 <details>
 <summary>📦 Applications</summary>
@@ -208,8 +193,6 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | **Japanese** | [fcitx5][fcitx5] + [Mozc][mozc] for typing hiragana, katakana and kanji, plus [innoextract][innoextract], [cabextract][cabextract] and [mdf2iso][mdf2iso] for unpacking raw Japanese visual novels |
 </details>
 
-### Gaming
-
 <details>
 <summary>🎮 Gaming</summary>
 
@@ -220,8 +203,6 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | **Granblue Relink Mods** | [RelinkModOrganizer][rmo] for data mods and [Reloaded-II][reloaded-ii] for code mods, both prebuilt bundles kept in `~/.local/opt/` instead of nixpkgs |
 | **Streaming** | [Sunshine][sunshine] |
 </details>
-
-### System
 
 <details>
 <summary>⚙️ System</summary>
@@ -236,8 +217,6 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | **Bootloader** | [systemd-boot][systemd-boot] |
 | **Kernel** | [CachyOS kernel][cachyos-kernel] (selectable: zen / latest / xanmod / cachyos) |
 </details>
-
-### Security & Privacy
 
 <details>
 <summary>🔒 Security & Privacy</summary>
