@@ -1,8 +1,10 @@
 # Warpledge's NixOS Configuration
 
-The NixOS flake behind my desktop and laptop, both daily driven since 2022.
+The NixOS configuration behind my desktop and laptop, both daily driven since 2022.
 
 Everything here is shaped around these two machines and how I use them, so it's not really meant to be cloned and run. It's more of a reference: a look at how a whole setup fits together, and somewhere to borrow an idea or a module from.
+
+New to NixOS? The short version: the entire operating system is written down in text files instead of being set up by hand. Installing a program or changing a setting means editing a file and rebuilding, the same files give you the same machine every time, and if an update breaks something you pick the previous version from the boot menu and you're back where you were.
 
 ## Contents
 
@@ -52,11 +54,13 @@ Everything here is shaped around these two machines and how I use them, so it's 
 
 ## Theming
 
-[Stylix][stylix] owns the look of the whole system. The palette is set once (Catppuccin Mocha Mauve, dark) and every app that supports it picks up the same colors, fonts and cursor from that one place.
+Everything on the system uses one color scheme: [Catppuccin][catppuccin] Mocha Mauve, a dark theme with purple highlights. I pick it in one place and it spreads out from there, so the terminal, the file manager, the text editor and everything else match without me theming each app by hand.
 
-- **Modules do not pick their own colors.** A module turns on its Stylix target and Stylix supplies the palette, so there are no hardcoded hex values scattered around to drift out of sync.
-- **[catppuccin/nix][catppuccin-nix] fills the gaps.** It runs alongside Stylix on the same flavor and accent, and picks up apps that have a proper first-party Catppuccin port, which beats a base16 approximation. Yazi and Kvantum (so Qt apps match) come from it; Stylix handles the rest.
-- **Targets get switched off to keep the two from fighting.** Whichever one does a given app better wins and the other stands down: Stylix keeps the cursor and GTK icons, Catppuccin takes Kvantum and Yazi, and a few apps (Zed, Spotify through spicetify) are left off in both because they theme themselves.
+Two tools split the job:
+
+- **[Stylix][stylix] does most of it.** It takes the color scheme, the fonts and the mouse cursor and pushes them into every app that will accept them. No app carries its own copy of the colors, so nothing is left behind out of date when the theme changes.
+- **[catppuccin/nix][catppuccin-nix] covers the rest.** Some apps have an official Catppuccin theme written by the Catppuccin project, which fits better than a close-enough version generated from the color scheme. Those apps get the official one and Stylix handles the others.
+- **Each one is told where to stay out of the way.** Both tools would happily theme the same app and end up fighting over it, so whichever does a given app better is the one left switched on. A few apps, like the code editor and Spotify, are left to theme themselves.
 
 ## System Management TUI Script
 
@@ -241,20 +245,20 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | | |
 | --- | --- |
 | **Disk** | ext4 on a [LUKS][luks]-encrypted partition, unlocked at boot |
-| **Access Control** | [AppArmor][apparmor], page table isolation, protected kernel image, core dumps switched off |
-| **Kernel Hardening** | `lockdown=integrity`, slab merging off, page poisoning, randomized page allocator and kernel stack, magic SysRq disabled |
-| **Network Hardening** | Reverse path filtering, ICMP redirects rejected, source routing off, SYN cookies, TIME-WAIT assassination protection |
+| **Access Control** | [AppArmor][apparmor] fences each program into only the files it actually needs, so one compromised app cannot wander the rest of the system. Crash dumps are switched off so a crash cannot spill memory contents to disk |
+| **Kernel Hardening** | Boot settings that make the system harder to attack: the core of the OS refuses to be modified while running, memory is placed unpredictably so an attacker cannot count on where things are, and freed memory is wiped instead of left lying around |
+| **Network Hardening** | The usual anti-spoofing settings: packets claiming to come from an address they cannot have come from get dropped, requests to reroute traffic are ignored, and the machine stays up under a basic flood attack |
 | **Auditing** | [auditd][auditd], with a daily timer to keep the log from growing forever |
 | **Hosts Blocklists** | [StevenBlack][stevenblack] (fake news and gambling), [shady-hosts][shady-hosts] and [MetaMask's crypto phishing list][eth-phishing], each pinned to a commit so a rebuild cannot pull in something unreviewed |
 | **Browser** | [Zen][zen] with [Arkenfox][arkenfox] and [Securefox][securefox] tweaks, plus [Mullvad Browser][mullvad-browser] |
 | **Secrets** | [GNOME Keyring][gnome-keyring] |
 | **Antivirus** | [ClamAV][clamav] (toggleable) |
 
-**On the VPN setup.** This part is recent and I am still tuning it. The goal is to stop thinking about the VPN at all: it connects on boot and stays up, a kill switch drops everything if the tunnel goes down, and traffic is blocked even before the network comes up. On top of WireGuard it runs quantum resistant tunnels and [DAITA][daita] (direct only), and does its own DNS blocking for ads, trackers, malware, gambling and social media.
+**On the VPN setup.** This part is recent and I am still tuning it. The goal is to stop thinking about the VPN at all: it connects on boot and stays up, a kill switch drops everything if the tunnel goes down, and traffic is blocked even before the network comes up. It also turns on [DAITA][daita], Mullvad's Defense Against AI-guided Traffic Analysis, which guards against the machine learning models that can work out which sites you are on from traffic patterns alone. On top of that it blocks ads, trackers, malware, gambling and social media before those requests ever leave the machine.
 
 The catch with always-on is that a handful of apps do not behave well behind a VPN. Rather than switching the whole thing off whenever that happens, those apps are routed around the tunnel one by one. `mullvad.splitTunnel` in each host config names them (right now Steam, Heroic, Prism Launcher, Vesktop, Spotify, FreeTube, Ferdium, Claude Code and OpenCode) and each one gets a wrapper that launches it through `mullvad-exclude`. Everything else stays on the VPN.
 
-Settings are applied with the `mullvad` CLI from a oneshot systemd unit instead of by writing its `settings.json`, since the daemon rewrites that file itself. Relay and exit location are left unmanaged on purpose, so exits can still be switched by hand.
+The settings above are applied by running Mullvad's own command line tool at boot rather than by editing its config file, because the app rewrites that file itself and would undo the changes. Which country I connect through is deliberately left alone, so I can still switch it by hand.
 </details>
 
 [niri]: https://github.com/YaLTeR/niri
