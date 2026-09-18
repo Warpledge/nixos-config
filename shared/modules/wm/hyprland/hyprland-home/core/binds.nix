@@ -19,10 +19,6 @@
         "SUPER, B, exec, zen-beta" # Web Browser
         "SUPER, E, exec, nautilus" # Files
 
-        #--- Waydroid
-        "SUPER SHIFT, W, exec, waydroid session start && waydroid" # Start Waydroid
-        "SUPER CTRL, W, exec, waydroid session stop" # Stop Waydroid
-
         #--- Gaming & XWayland Apps
         "SUPER SHIFT, S, exec, steam"
         "SUPER SHIFT, D, exec, vesktop" # Nixcord

@@ -29,7 +29,7 @@ Rebuilding is not destructive either. Each one is added alongside the last inste
 - **One config, two machines:** both build from the same files. Each one has its own settings file ([`hostConfig/core.nix`](./hosts/desktop/hostConfig/core.nix)) where I flip features on and off, so they only differ where I want them to.
 - **The same theme everywhere:** [Catppuccin][catppuccin] Mocha Mauve, set once with [Stylix][stylix] and handed down to everything that can take it, with [catppuccin/nix][catppuccin-nix] alongside it covering the apps that have a proper Catppuccin port of their own.
 - **Private by default:** full-disk encryption ([LUKS][luks]), [AppArmor][apparmor], a hardened kernel, an always-on [Mullvad][mullvad] VPN, and [Zen][zen] locked down with [Arkenfox][arkenfox] and [Securefox][securefox].
-- **Runs the awkward stuff:** Android apps ([Waydroid][waydroid]), Windows apps ([WinBoat][winboat]), [AppImages][gearlever], Flatpaks ([nix-flatpak][nix-flatpak]), and the normal Linux programs Nix usually won't run ([nix-ld][nix-ld]).
+- **Runs the awkward stuff:** Windows apps ([WinBoat][winboat]), [AppImages][gearlever], Flatpaks ([nix-flatpak][nix-flatpak]), and the normal Linux programs Nix usually won't run ([nix-ld][nix-ld]).
 - **The tools I actually work in:** [Docker][docker], [tmux][tmux], [Zed][zed] and [Helix][helix], git with nicer diffs ([delta][delta]) and the [gh][gh] CLI.
 - **Built for gaming:** [Steam][steam] and Gamescope, [GameMode][gamemode] and [MangoHud][mangohud], plus kernel and GPU tweaks per machine.
 - **Nix commands behind a menu:** [`nixm`](./shared/modules/home-manager/scripts/nixm.nix) (short for "nix menu") puts rebuilds, cleanup, rollbacks and updates one keypress away, so I'm not looking commands up.
@@ -41,13 +41,9 @@ Rebuilding is not destructive either. Each one is added alongside the last inste
 
 ## Screenshots
 
-**Niri WM** (main window manager I use)
+**Niri WM**
 
 ![Niri desktop with Zed and fastfetch](./screenshots/niri-desktop.png)
-
-**Hyprland WM** (previous window manager)
-
-![Hyprland desktop with Zed and fastfetch](./screenshots/Hyprland-Desktop.png)
 
 ## Theming
 
@@ -192,7 +188,6 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | **AI Tooling** | [Claude Code][claude-code], [OpenCode][opencode], [LM Studio][lmstudio] |
 | **Android** | [scrcpy][scrcpy] (mirror and control a device over USB or wifi, nothing to install on the phone) |
 | **Video Trimming** | [Video Trimmer][video-trimmer] (cut a clip out of a video without re-encoding it) |
-| **QR Codes** | [CoBang][cobang] (scan a QR code off the webcam or a screenshot) |
 | **Finance** | [HomeBank][homebank] (personal accounting with labeled transactions and a running balance) |
 | **Japanese** | [fcitx5][fcitx5] + [Mozc][mozc] for typing hiragana, katakana and kanji, plus [innoextract][innoextract], [cabextract][cabextract] and [mdf2iso][mdf2iso] for unpacking raw Japanese visual novels |
 </details>
@@ -205,7 +200,6 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | **Launchers** | [Steam][steam] (Gamescope), [Heroic][heroic], [Prism Launcher][prismlauncher], [Faugus Launcher][faugus-launcher], [Lutris][lutris], [Twintail][twintail] (gacha games, Flatpak) |
 | **Tools** | [GameMode][gamemode], [MangoHud][mangohud], [Goverlay][goverlay], [r2modman][r2modman], [ProtonPlus][protonplus], [Satisfactory Mod Manager][smm], [AntimicroX][antimicrox], [Rusty PoB][rpob] |
 | **Granblue Relink Mods** | [RelinkModOrganizer][rmo] for data mods and [Reloaded-II][reloaded-ii] for code mods, both prebuilt bundles kept in `~/.local/opt/` instead of nixpkgs |
-| **Streaming** | [Sunshine][sunshine] |
 </details>
 
 <details>
@@ -214,7 +208,7 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | | |
 | --- | --- |
 | **Audio** | [PipeWire][pipewire] (ALSA + PulseAudio compat) |
-| **Containers / VMs** | [Docker][docker], [Waydroid][waydroid] (Android), [WinBoat][winboat] (Windows apps) |
+| **Containers / VMs** | [Docker][docker], [WinBoat][winboat] (Windows apps) |
 | **Flatpak** | [nix-flatpak][nix-flatpak] (declarative Flatpak management) |
 | **Networking** | [systemd-resolved][resolved] + [NetworkManager][networkmanager] (iwd), with [Mullvad][mullvad] covered below |
 | **Key Remapping** | [keyd][keyd] |
@@ -237,11 +231,6 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | **Secrets** | [GNOME Keyring][gnome-keyring] |
 | **Antivirus** | [ClamAV][clamav] (toggleable) |
 
-**On the VPN setup.** This part is recent and I am still tuning it. The goal is to stop thinking about the VPN at all: it connects on boot and stays up, a kill switch drops everything if the tunnel goes down, and traffic is blocked even before the network comes up. It also turns on [DAITA][daita], Mullvad's Defense Against AI-guided Traffic Analysis, which guards against the machine learning models that can work out which sites you are on from traffic patterns alone. On top of that it blocks ads, trackers, malware, gambling and social media before those requests ever leave the machine.
-
-The catch with always-on is that a handful of apps do not behave well behind a VPN. Rather than switching the whole thing off whenever that happens, those apps are routed around the tunnel one by one. `mullvad.splitTunnel` in each host config names them (right now Steam, Heroic, Prism Launcher, Vesktop, Spotify, FreeTube, Ferdium, Claude Code and OpenCode) and each one gets a wrapper that launches it through `mullvad-exclude`. Everything else stays on the VPN.
-
-The settings above are applied by running Mullvad's own command line tool at boot rather than by editing its config file, because the app rewrites that file itself and would undo the changes. Which country I connect through is deliberately left alone, so I can still switch it by hand.
 </details>
 
 [niri]: https://github.com/YaLTeR/niri
@@ -318,7 +307,6 @@ The settings above are applied by running Mullvad's own command line tool at boo
 [yazi]: https://github.com/sxyazi/yazi
 [arrpc]: https://arrpc.openasar.dev
 [video-trimmer]: https://gitlab.gnome.org/YaLTeR/video-trimmer
-[cobang]: https://github.com/hongquan/CoBang
 [homebank]: https://www.gethomebank.org
 [fcitx5]: https://github.com/fcitx/fcitx5
 [mozc]: https://github.com/fcitx/mozc
@@ -346,12 +334,10 @@ The settings above are applied by running Mullvad's own command line tool at boo
 [opencode]: https://github.com/opencode-ai/opencode
 [lmstudio]: https://lmstudio.ai
 [docker]: https://www.docker.com
-[waydroid]: https://waydro.id
 [winboat]: https://github.com/TibixDev/winboat
 [mullvad]: https://mullvad.net
 [resolved]: https://www.freedesktop.org/software/systemd/man/systemd-resolved.html
 [networkmanager]: https://networkmanager.dev
-[sunshine]: https://github.com/LizardByte/Sunshine
 [clamav]: https://www.clamav.net
 [keyd]: https://github.com/rvaiya/keyd
 [gnome-keyring]: https://wiki.gnome.org/Projects/GnomeKeyring
@@ -541,13 +527,6 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./shared
 | `Brightness Up/Down` | Screen brightness |
 | `Play/Pause`, `Stop`, `Prev`, `Next` | Media controls (playerctl) |
 
-#### Waydroid
-
-| Keybind | Action |
-| --- | --- |
-| `Mod+Shift+W` | Start Waydroid session |
-| `Mod+Ctrl+W` | Stop Waydroid session |
-
 #### Window Switcher
 
 | Keybind | Action |
@@ -618,13 +597,6 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./shared
 | `Print` | Area screenshot → clipboard |
 | `Mod+Print` | Save screenshot |
 | `Mod+Shift+Print` | Screenshot with Swappy |
-
-#### Waydroid
-
-| Keybind | Action |
-| --- | --- |
-| `Mod+Shift+W` | Start Waydroid session |
-| `Mod+Ctrl+W` | Stop Waydroid session |
 
 </details>
 

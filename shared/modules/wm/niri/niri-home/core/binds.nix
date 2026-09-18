@@ -94,10 +94,6 @@ _: {
     "Mod+E".action.spawn = ["nautilus"];
     "Mod+Shift+M".action.spawn = ["spotify"];
 
-    #--- Waydroid
-    "Mod+Shift+W".action.spawn = ["waydroid" "session" "start"]; # Start Waydroid
-    "Mod+Ctrl+W".action.spawn = ["waydroid" "session" "stop"]; # Stop Waydroid
-
     #--- Screen Recording
     "Mod+Home".action.spawn = ["sh" "-c" "mkdir -p ~/Videos && notify-send -i media-record 'Recording Started' 'Saving to ~/Videos' && gpu-screen-recorder -w screen -f 30 -k h264 -q medium -a $(pactl get-default-sink).monitor -o ~/Videos/clip-$(date +%Y%m%d-%H%M%S).mp4"];
     "Mod+End".action.spawn = ["sh" "-c" "pkill -INT -f gpu-screen-recorder && notify-send -i media-playback-stop 'Recording Stopped' 'Clip saved to ~/Videos'"];

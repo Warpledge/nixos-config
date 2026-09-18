@@ -106,12 +106,6 @@ in {
       (spawn "Super+Shift+M" "Spotify" "spotify")
 
       #--------------------------------------------------------------------#
-      #-- Waydroid
-      #--------------------------------------------------------------------#
-      (spawn "Super+Shift+W" "Start Waydroid" "waydroid session start")
-      (spawn "Super+Ctrl+W" "Stop Waydroid" "waydroid session stop")
-
-      #--------------------------------------------------------------------#
       #-- Media & Capture
       #--------------------------------------------------------------------#
       # Play/pause, next, prev, volume and mute are already bound upstream.

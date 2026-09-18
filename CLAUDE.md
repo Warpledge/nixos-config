@@ -34,7 +34,7 @@ nixm gc                 # GC, keep last 5 generations
 nixm rollback           # Roll back to the previous generation
 nixm freetube-sync      # Capture FreeTube subscriptions into subscriptions.nix (y/N prompt)
 nixm vpn-list           # Show the Android VPN lockdown allowlist on an adb device
-nixm vpn-edit           # Edit that allowlist in $EDITOR (applies on device reboot)
+nixm vpn-edit           # Edit that allowlist in $EDITOR (adb-writable, no device owner; applies on reboot)
 nix flake lock --update-input <name>   # Bump a single input
 run <pkg> [args]        # Ad-hoc launch a nixpkgs package without installing it (zsh function)
 ```
@@ -62,12 +62,12 @@ The authoritative list of toggles is **`hosts/{hostname}/hostConfig/core.nix`** 
 - `username` — read by `flake.nix` itself (`inherit (hostConfig) username`), not just by modules
 - `windowManager` — `"hyprland" | "niri" | "gnome" | "cosmic"`
 - `kernel` — `"zen" | "latest" | "xanmod" | "cachyos"`
-- Service toggles: `mullvad.enable` (plus `mullvad.splitTunnel`, a list of command names routed around the VPN), `clamav.enable`, `docker.enable`, `winboat.enable`, `sunshine.enable`, `discord.arrpc.enable`, `scrcpy.enable`, `ferdium.enable`, `waydroid.{enable,magisk,nftables}`
-- Attribute-set toggles: `browsers.{zen,mullvad,helium}`, `terminals.{kitty,ghostty}`, `editors.{helix,zed}`, `fileBrowsers.{nautilus,yazi}`, `media.{mpv,spotify,freetube,videoTrimmer,qrScanner}`, `graphics.{blender,krita,affinity}`, `audio.{reaper,guitar}`, `finance.{homebank}`, `gameLaunchers.{steam,heroic,prismlauncher,lutris,faugus,twintail}`, `japanese.{ime,vn}`
+- Service toggles: `mullvad.enable` (plus `mullvad.splitTunnel`, a list of command names routed around the VPN), `clamav.enable`, `docker.enable`, `winboat.enable`, `discord.arrpc.enable`, `scrcpy.enable`, `ferdium.enable`
+- Attribute-set toggles: `browsers.{zen,mullvad,helium}`, `terminals.{kitty,ghostty}`, `editors.{helix,zed}`, `fileBrowsers.{nautilus,yazi}`, `media.{mpv,spotify,freetube,videoTrimmer}`, `graphics.{blender,krita,affinity}`, `audio.{reaper,guitar}`, `finance.{homebank}`, `gameLaunchers.{steam,heroic,prismlauncher,lutris,faugus,twintail}`, `japanese.{ime,vn}`
 - `local.{granblueRelinkMods}` — wrappers around prebuilt bundles under `~/.local/opt/` (kept out of git); see `.notes/local/local-binary-installs.md`
 - AI tools: `claude.enable`, `opencode.enable`, `lmstudio.enable`
 
-Desktop and laptop should stay byte-identical apart from the header comment and a short list of deliberate differences. As of 2026-09-12 those are `waydroid.enable`, `gameLaunchers.heroic` and `discord.arrpc.enable`, all true on desktop and false on laptop (plus a longer trailing comment on `local.granblueRelinkMods` in the laptop file). Verify with `diff hosts/desktop/hostConfig/core.nix hosts/laptop/hostConfig/core.nix` before assuming.
+Desktop and laptop should stay byte-identical apart from the header comment and a short list of deliberate differences. As of 2026-09-17 those are `gameLaunchers.heroic` and `discord.arrpc.enable`, both true on desktop and false on laptop (plus a longer trailing comment on `local.granblueRelinkMods` in the laptop file). Verify with `diff hosts/desktop/hostConfig/core.nix hosts/laptop/hostConfig/core.nix` before assuming.
 
 Gotchas — grep the option name before assuming which file owns it:
 
@@ -201,7 +201,7 @@ A string like `"dms ipc call spotlight"` in Niri only runs `dms` and drops the r
 
 COSMIC is the opposite of Niri: `Spawn` is a **single string** run through `/bin/sh -c`, so arguments and shell syntax belong inline and must *not* be split into a list (`shared/modules/wm/cosmic/cosmic-home/core/binds.nix`):
 ```nix
-{key = "Super+Shift+W"; action = arg "Spawn" "waydroid session start";}   # one string
+{key = "XF86AudioStop"; action = arg "Spawn" "playerctl pause";}          # one string
 {key = "Super+F";       action = plain "Maximize";}                       # nullary enum
 {key = "Super+Tab";     action = enumArg "System" "WorkspaceOverview";}   # nested enum
 ```
@@ -346,7 +346,6 @@ Game-specific notes live under `.notes/gaming/`:
 Android device notes live under `.notes/android/`:
 
 - `android/debloat/Lenovo-Idea-Tab-Pro/` — `index.md` (full redo procedure: never-remove list, install-replacements-first ordering, PMS flush, reboot test, privacy settings) + `removal-list.txt` (the 131 verified-safe packages). **A ZUI OTA restores every stock package, so this gets redone after each system update.**
-- `android/vpn-lockdown-allowlist.md` — how to keep Mullvad split tunnelling working with "Block connections without VPN" on. The `always_on_vpn_lockdown_whitelist` secure setting is adb-writable and needs no device owner, but only takes effect on reboot; `nixm vpn-list` / `nixm vpn-edit` wrap it.
 
 Local (non-nixpkgs) binary installs live under `.notes/local/`:
 

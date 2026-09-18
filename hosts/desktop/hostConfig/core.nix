@@ -59,7 +59,6 @@
     spotify = true;
     freetube = true;
     videoTrimmer = true;
-    qrScanner = false; # cobang broken: python-zbar fails to build upstream
   };
 
   #--- Graphics Software Selection
@@ -90,14 +89,6 @@
     granblueRelinkMods = false; # RelinkModOrganizer + Reloaded-II
   };
 
-  #--- Android Container (Waydroid)
-  # Run Android apps through Waydroid container
-  waydroid = {
-    enable = true;
-    magisk = false; # Install Magisk for rooting
-    nftables = false; # Use nftables instead of iptables
-  };
-
   #--- Android Screen Mirroring (scrcpy)
   # Mirror/control an Android device over USB or wifi; nothing is installed
   # on the device, so it works on de-Googled phones/tablets
@@ -118,10 +109,6 @@
   winboat = {
     enable = false;
   };
-
-  #--- Sunshine Game Streaming
-  # Stream games to Moonlight clients (Android, iOS, PC)
-  sunshine.enable = false;
 
   #--- Game Launchers
   # Enable the game launchers you want installed

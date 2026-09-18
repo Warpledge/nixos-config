@@ -9,9 +9,8 @@ _: let
   workspaces = import ./workspaces.nix;
   browser = import ./browser.nix;
   system = import ./system.nix;
-  waydroid = import ./waydroid.nix;
 
-  allRules = opacity ++ floating ++ pinning ++ gaming ++ workspaces ++ browser ++ system ++ waydroid;
+  allRules = opacity ++ floating ++ pinning ++ gaming ++ workspaces ++ browser ++ system;
 in {
   wayland.windowManager.hyprland.settings.windowrule = allRules;
 }

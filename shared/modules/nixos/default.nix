@@ -48,12 +48,8 @@
       ./system/xserver.nix
       ./system/zram.nix
     ]
-    #--- Waydroid Android Container (controlled by hostConfig)
-    ++ lib.optionals hostConfig.waydroid.enable [./programs/waydroid.nix]
     #--- ClamAV Antivirus (controlled by hostConfig)
     ++ lib.optionals hostConfig.clamav.enable [./services/clamav.nix]
-    #--- Sunshine Game Streaming (controlled by hostConfig)
-    ++ lib.optionals hostConfig.sunshine.enable [./services/sunshine.nix]
     #--- Japanese Input Method (controlled by hostConfig)
     ++ lib.optionals hostConfig.japanese.ime [./system/japanese-ime.nix];
 }

@@ -23,7 +23,6 @@
         "interface-name:docker*" # Don't manage Docker interfaces
         "interface-name:virbr*" # Don't manage libvirt bridges
         "interface-name:vboxnet*" # Don't manage VirtualBox interfaces
-        "interface-name:waydroid*" # Don't manage Waydroid interfaces
       ];
       wifi = {
         backend = "iwd"; # iwd backend (more secure than wpa_supplicant)
