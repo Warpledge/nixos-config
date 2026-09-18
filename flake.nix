@@ -11,15 +11,11 @@
     nixpkgs,
     ...
   }: let
-    #--- System variables
-    system = "x86_64-linux";
-
     #--- System builder function
     mkSystem = hostname: let
       hostConfig = import "${self}/hosts/${hostname}/hostConfig/core.nix";
       inherit (hostConfig) username;
     in {
-      inherit system;
       modules = [./hosts/${hostname}/${hostname}.nix];
       specialArgs = {
         inherit self inputs username hostname hostConfig;
@@ -31,6 +27,9 @@
       desktop = nixpkgs.lib.nixosSystem (mkSystem "desktop");
       laptop = nixpkgs.lib.nixosSystem (mkSystem "laptop");
     };
+
+    #--- Formatter (nix fmt)
+    formatter.x86_64-linux = inputs.alejandra.defaultPackage.x86_64-linux; # `nix fmt .` - 3.0.0 reads stdin when given no path
   };
 
   #--------------------------------------------------------------------#
@@ -49,13 +48,16 @@
     };
 
     #--- System Utilities & Tools
-    alejandra.url = "github:kamadorueda/alejandra/3.0.0";
-    nix-flatpak.url = "github:gmodena/nix-flatpak";
-    claude-code.url = "github:sadjow/claude-code-nix";
+    alejandra.url = "github:kamadorueda/alejandra/3.0.0"; # own nixpkgs: 3.0.0 vendors a mimalloc that GCC 15 rejects
+    nix-flatpak.url = "github:gmodena/nix-flatpak"; # no nixpkgs input to follow (modules only)
+    claude-code.url = "github:sadjow/claude-code-nix"; # own nixpkgs: following ours misses claude-code.cachix.org
 
     #--- Applications
-    affinity-nix.url = "github:mrshmllow/affinity-nix";
-    nixcord.url = "github:kaylorben/nixcord";
+    affinity-nix.url = "github:mrshmllow/affinity-nix"; # own nixpkgs: following ours misses cache.forall.systems
+    nixcord = {
+      url = "github:kaylorben/nixcord";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     spicetify-nix = {
       url = "github:gerg-l/spicetify-nix";
       inputs.nixpkgs.follows = "nixpkgs";

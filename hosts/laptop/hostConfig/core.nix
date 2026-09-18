@@ -41,7 +41,7 @@
   #--- Editor Selection
   # Enable the editors you want installed
   editors = {
-    helix = false;
+    helix = true;
     zed = true;
   };
 

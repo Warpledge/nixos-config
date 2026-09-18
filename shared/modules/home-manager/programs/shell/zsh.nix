@@ -248,9 +248,9 @@ in {
     '';
 
     shellAliases = {
-      vim = "nvim";
-      vi = "nvim";
-      v = "nvim";
+      vim = "hx";
+      vi = "hx";
+      v = "hx";
       c = "clear";
       clera = "clear";
       celar = "clear";
@@ -265,7 +265,7 @@ in {
 
       wireguard-import = "nmcli connection import type wireguard file";
 
-      notes = "nvim ~/nextcloud/Notes/index.md --cmd 'cd ~/nextcloud/Notes' -c ':Telescope find_files'";
+      notes = "cd ~/nextcloud/Notes && hx index.md"; # cd first so Helix's space-f picker scopes to the notes dir
       note = "notes";
 
       y = "yazi";
@@ -292,7 +292,7 @@ in {
       gbr = "git branch";
 
       #--- Nix
-      cleanup = "sudo nix-collect-garbage --delete-older-than 1d";
+      cleanup = "nh clean all --keep 5"; # keeps the last 5 generations so rollbacks survive
       listgen = "sudo nix-env -p /nix/var/nix/profiles/system --list-generations";
       nixremove = "nix-store --gc";
       bloat = "nix path-info -Sh /run/current-system";

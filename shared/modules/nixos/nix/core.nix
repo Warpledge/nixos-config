@@ -18,9 +18,6 @@
   #--------------------------------------------------------------------#
   nix = {
     nixPath = ["nixpkgs=${inputs.nixpkgs}"]; # Flake-based nixpkgs
-    extraOptions = ''
-      warn-dirty = false # Don't warn about dirty flakes
-    '';
     channel.enable = false; # Disable nix-channel (we use flakes)
     daemonCPUSchedPolicy = "batch"; # Low CPU priority for daemon
     daemonIOSchedClass = "idle"; # Idle IO priority for daemon
@@ -34,11 +31,10 @@
     #-- Nix Settings
     #--------------------------------------------------------------------#
     settings = {
-      auto-optimise-store = true; # Automatically optimize symlinks
+      warn-dirty = false; # Don't warn about dirty flakes
       min-free = "${toString (5 * 1024 * 1024 * 1024)}"; # Trigger GC at 5GB free
       max-free = "${toString (10 * 1024 * 1024 * 1024)}"; # Free up to 10GB
-      allowed-users = ["root" "@wheel" "nix-builder"]; # Who can use nix
-      trusted-users = ["root" "@wheel" "nix-builder"]; # Who can manage store
+      trusted-users = ["root"]; # Who can manage store; no remote builders to trust
       max-jobs = "auto"; # Parallel build jobs (auto-detect)
       cores = 0; # Use all CPU cores
       sandbox = true; # Build in sandboxed environments

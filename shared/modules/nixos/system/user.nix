@@ -26,10 +26,4 @@
       "kvm" # Kernel virtual machine access
     ];
   };
-
-  #--------------------------------------------------------------------#
-  #-- Nix Permissions
-  #--------------------------------------------------------------------#
-  #--- Allow user to interact with nix daemon
-  nix.settings.allowed-users = ["${username}"];
 }

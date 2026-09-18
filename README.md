@@ -28,7 +28,7 @@ Rebuilding is not destructive either. Each one is added alongside the last inste
 
 - **One config, two machines:** both build from the same files. Each one has its own settings file ([`hostConfig/core.nix`](./hosts/desktop/hostConfig/core.nix)) where I flip features on and off, so they only differ where I want them to.
 - **The same theme everywhere:** [Catppuccin][catppuccin] Mocha Mauve, set once with [Stylix][stylix] and handed down to everything that can take it, with [catppuccin/nix][catppuccin-nix] alongside it covering the apps that have a proper Catppuccin port of their own.
-- **Private by default:** full-disk encryption ([LUKS][luks]), [AppArmor][apparmor], a hardened kernel, an always-on [Mullvad][mullvad] VPN, and [Zen][zen] locked down with [Arkenfox][arkenfox] and [Securefox][securefox].
+- **Private by default:** full-disk encryption ([LUKS][luks]), [AppArmor][apparmor], kernel hardening settings, an always-on [Mullvad][mullvad] VPN, and [Zen][zen] locked down with [Arkenfox][arkenfox] and [Securefox][securefox].
 - **Runs the awkward stuff:** Windows apps ([WinBoat][winboat]), [AppImages][gearlever], Flatpaks ([nix-flatpak][nix-flatpak]), and the normal Linux programs Nix usually won't run ([nix-ld][nix-ld]).
 - **The tools I actually work in:** [Docker][docker], [tmux][tmux], [Zed][zed] and [Helix][helix], git with nicer diffs ([delta][delta]) and the [gh][gh] CLI.
 - **Built for gaming:** [Steam][steam] and Gamescope, [GameMode][gamemode] and [MangoHud][mangohud], plus kernel and GPU tweaks per machine.
@@ -156,8 +156,8 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 
 | | |
 | --- | --- |
-| **Shell** | [Zsh][zsh] + [Powerlevel10k][p10k] / [Starship][starship], with [atuin][atuin], [fzf][fzf], [zoxide][zoxide], [eza][eza] |
-| **Terminal Emulator** | [Kitty][kitty] / [Ghostty][ghostty] |
+| **Shell** | [Zsh][zsh] with the [Starship][starship] prompt ([Powerlevel10k][p10k] is installed too, but Starship loads last and wins), plus [atuin][atuin], [fzf][fzf], [zoxide][zoxide], [eza][eza] |
+| **Terminal Emulator** | [Kitty][kitty] / [Ghostty][ghostty] (off by default) |
 | **Terminal Multiplexer** | [tmux][tmux] (run many terminals in one window) |
 | **Quick Run** | `run <pkg>`: try a package one time without installing it (`nix run` wrapper) |
 </details>
@@ -181,7 +181,7 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | **File Manager** | [Nautilus][nautilus], [Yazi][yazi] (terminal file manager) |
 | **Media Player** | [mpv][mpv], [Celluloid][celluloid] (mpv frontend), [Spotify][spotify] via [spicetify-nix][spicetify], [FreeTube][freetube] |
 | **Screenshot / Recording** | [dms screenshot][dms] (Niri), [grim][grim] + [slurp][slurp] (Hyprland), [gpu-screen-recorder][gpu-screen-recorder] |
-| **Graphics** | [Blender][blender], [Krita][krita], [Affinity Suite v3][affinity-nix] (via Wine) |
+| **Graphics** | [Blender][blender], [Krita][krita], [Affinity Suite v3][affinity-nix] (via Wine), all off by default |
 | **Audio** | [Reaper][reaper] (DAW, with [SWS][sws] and [ReaPack][reapack]) |
 | **Guitar** | [TONE3000][tone3000] (official NAM player, browses its capture and IR library in-app), [NeuralRack][neuralrack] and [Ratatouille][ratatouille] (load NAM/AIDA-X amp captures), [Guitarix][guitarix] (modular amp rig), [ir.lv2][ir-lv2] for cabinet IRs, [qpwgraph][qpwgraph] for patching, plus [FxFloorBoard][katana-fxfloorboard] to edit patches on the Boss Katana itself |
 | **Chat / Productivity** | [Vesktop][vesktop] via [nixcord][nixcord] (Vencord, with [arRPC][arrpc] running alongside it so Steam and Proton games show up as rich presence), [Ferdium][ferdium] (all your web messengers in one window), [Thunderbird][thunderbird], [Obsidian][obsidian] |
@@ -189,7 +189,7 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | **Android** | [scrcpy][scrcpy] (mirror and control a device over USB or wifi, nothing to install on the phone) |
 | **Video Trimming** | [Video Trimmer][video-trimmer] (cut a clip out of a video without re-encoding it) |
 | **Finance** | [HomeBank][homebank] (personal accounting with labeled transactions and a running balance) |
-| **Japanese** | [fcitx5][fcitx5] + [Mozc][mozc] for typing hiragana, katakana and kanji, plus [innoextract][innoextract], [cabextract][cabextract] and [mdf2iso][mdf2iso] for unpacking raw Japanese visual novels |
+| **Japanese** | [fcitx5][fcitx5] + [Mozc][mozc] for typing hiragana, katakana and kanji, plus [innoextract][innoextract], [cabextract][cabextract] and [mdf2iso][mdf2iso] for unpacking raw Japanese visual novels (off by default) |
 </details>
 
 <details>
@@ -197,9 +197,9 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 
 | | |
 | --- | --- |
-| **Launchers** | [Steam][steam] (Gamescope), [Heroic][heroic], [Prism Launcher][prismlauncher], [Faugus Launcher][faugus-launcher], [Lutris][lutris], [Twintail][twintail] (gacha games, Flatpak) |
+| **Launchers** | [Steam][steam] (Gamescope), [Heroic][heroic], [Prism Launcher][prismlauncher], [Faugus Launcher][faugus-launcher], [Lutris][lutris] and [Twintail][twintail] (gacha games, Flatpak), those three off by default |
 | **Tools** | [GameMode][gamemode], [MangoHud][mangohud], [Goverlay][goverlay], [r2modman][r2modman], [ProtonPlus][protonplus], [Satisfactory Mod Manager][smm], [AntimicroX][antimicrox], [Rusty PoB][rpob] |
-| **Granblue Relink Mods** | [RelinkModOrganizer][rmo] for data mods and [Reloaded-II][reloaded-ii] for code mods, both prebuilt bundles kept in `~/.local/opt/` instead of nixpkgs |
+| **Granblue Relink Mods** | [RelinkModOrganizer][rmo] for data mods and [Reloaded-II][reloaded-ii] for code mods, both prebuilt bundles kept in `~/.local/opt/` instead of nixpkgs (off by default) |
 </details>
 
 <details>
@@ -208,7 +208,7 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | | |
 | --- | --- |
 | **Audio** | [PipeWire][pipewire] (ALSA + PulseAudio compat) |
-| **Containers / VMs** | [Docker][docker], [WinBoat][winboat] (Windows apps) |
+| **Containers / VMs** | [Docker][docker], [WinBoat][winboat] (Windows apps), both off by default |
 | **Flatpak** | [nix-flatpak][nix-flatpak] (declarative Flatpak management) |
 | **Networking** | [systemd-resolved][resolved] + [NetworkManager][networkmanager] (iwd), with [Mullvad][mullvad] covered below |
 | **Key Remapping** | [keyd][keyd] |
@@ -229,7 +229,7 @@ Most of what's below can be turned on or off per machine from its `hostConfig` f
 | **Hosts Blocklists** | [StevenBlack][stevenblack] (fake news and gambling), [shady-hosts][shady-hosts] and [MetaMask's crypto phishing list][eth-phishing], each pinned to a commit so a rebuild cannot pull in something unreviewed |
 | **Browser** | [Zen][zen] with [Arkenfox][arkenfox] and [Securefox][securefox] tweaks, plus [Mullvad Browser][mullvad-browser] |
 | **Secrets** | [GNOME Keyring][gnome-keyring] |
-| **Antivirus** | [ClamAV][clamav] (toggleable) |
+| **Antivirus** | [ClamAV][clamav] (off by default) |
 
 </details>
 
@@ -374,7 +374,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./shared
 
 | Shortcut | Runs |
 | --- | --- |
-| `v` / `vi` / `vim` | `nvim` |
+| `v` / `vi` / `vim` | `hx` ([Helix][helix]) |
 | `nano` | `micro` |
 | `zed` | `zeditor` |
 | `cat` | `bat` |
@@ -408,7 +408,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./shared
 | Shortcut | Runs |
 | --- | --- |
 | `run <pkg>` _(fn)_ | try a package once without installing it (`nix run nixpkgs#<pkg>`) |
-| `cleanup` | garbage-collect generations older than 1 day |
+| `cleanup` | garbage-collect, keeping the last 5 generations |
 | `listgen` | list system generations |
 | `bloat` | show current system closure size |
 
@@ -428,7 +428,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./shared
 
 ## Keybinds
 
-`Mod` is the Super (Windows) key. All window managers are setup for a seemless keyboard centric workflow.
+`Mod` is the Super (Windows) key. All window managers are set up for a seamless keyboard centric workflow.
 
 >**Note:** `Mod+/` opens a keybind overlay cheatsheet in both WMs.
 
