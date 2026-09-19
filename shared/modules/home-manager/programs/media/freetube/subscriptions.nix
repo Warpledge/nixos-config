@@ -7,15 +7,11 @@
   #=====================================================================#
   # FREETUBE SUBSCRIPTIONS
   #=====================================================================#
-  # programs.freetube only manages settings.db, so profiles.db is written
-  # the same way home-manager writes that: from a store file, leaving the
-  # live file writable so the app keeps working.
-  #
-  # Seed-only: profiles.db is written just once, when it does not exist
-  # (fresh install, new machine). After that the app owns it, so
-  # subscribing and unsubscribing in the GUI survives every rebuild.
-  # The list here is a snapshot - recapture it when you want the repo
-  # to match reality again.
+  # profiles.db is seed-only: home-manager writes it from a store file just
+  # once, when it does not exist, and the app owns it after that, so GUI
+  # subscribing survives every rebuild. programs.freetube manages
+  # settings.db only. The list below is a snapshot; recapture it when the
+  # repo should match the app again.
   sub = id: name: thumbnail: {inherit id name thumbnail;};
 
   #--------------------------------------------------------------------#

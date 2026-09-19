@@ -12,13 +12,13 @@
   #--------------------------------------------------------------------#
   networking = {
     hostName = "${hostname}";
-    useDHCP = false; # Don't use DHCP globally
-    useNetworkd = true; # Use systemd-networkd
-    usePredictableInterfaceNames = true; # Use stable interface names
+    useDHCP = false;
+    useNetworkd = true;
+    usePredictableInterfaceNames = true;
     networkmanager = {
-      enable = true; # Enable NetworkManager
+      enable = true;
       plugins = [];
-      dns = "systemd-resolved"; # Use systemd-resolved for DNS
+      dns = "systemd-resolved";
       unmanaged = [
         "interface-name:docker*" # Don't manage Docker interfaces
         "interface-name:virbr*" # Don't manage libvirt bridges
@@ -26,11 +26,11 @@
       ];
       wifi = {
         backend = "iwd"; # iwd backend (more secure than wpa_supplicant)
-        macAddress = "random"; # Randomize MAC address
-        powersave = true; # Enable WiFi power saving
-        scanRandMacAddress = true; # Randomize MAC during scans
+        macAddress = "random";
+        powersave = true;
+        scanRandMacAddress = true;
       };
-      ethernet.macAddress = "stable"; # Keep stable Ethernet MAC
+      ethernet.macAddress = "stable";
       connectionConfig = {
         "ipv6.ip6-privacy" = 2; # Enable IPv6 privacy extensions
       };
@@ -40,7 +40,7 @@
     #-- Firewall Configuration
     #--------------------------------------------------------------------#
     firewall = {
-      enable = true; # Enable UFW-style firewall
+      enable = true;
       allowedTCPPorts = [
         22 # SSH (disabled in services.openssh, but port reserved)
         80 # HTTP
@@ -79,12 +79,12 @@
   services.openssh = {
     enable = false; # SSH disabled (GitHub uses HTTPS)
     settings = {
-      PasswordAuthentication = false; # No password auth
-      PermitRootLogin = "no"; # No root login
-      KbdInteractiveAuthentication = false; # No interactive auth
-      X11Forwarding = false; # No X11 forwarding
+      PasswordAuthentication = false;
+      PermitRootLogin = "no";
+      KbdInteractiveAuthentication = false;
+      X11Forwarding = false;
     };
-    openFirewall = false; # Don't open firewall for SSH
+    openFirewall = false;
   };
 
   #--------------------------------------------------------------------#
@@ -99,13 +99,13 @@
   ];
   hardware.wirelessRegulatoryDatabase = true; # Wireless regulatory info
   systemd.services.NetworkManager-wait-online.serviceConfig.ExecStart = ["" "${pkgs.networkmanager}/bin/nm-online -q"]; # Don't wait for network
-  systemd.network.config.networkConfig.IPv6PrivacyExtensions = "kernel"; # IPv6 privacy extensions
+  systemd.network.config.networkConfig.IPv6PrivacyExtensions = "kernel"; # "kernel" leaves the sysctl value in place
 
   #--------------------------------------------------------------------#
   #-- DNS Configuration (systemd-resolved)
   #--------------------------------------------------------------------#
   services.resolved = lib.mkDefault {
-    enable = true; # Enable systemd-resolved for DNS
+    enable = true;
     settings.Resolve = {
       DNSOverTLS = "opportunistic"; # Encrypt DNS queries when possible
       # Empty assignment disables systemd-resolved's compiled-in fallbacks.

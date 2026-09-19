@@ -20,6 +20,10 @@ home-manager, Niri WM, Stylix theming (Catppuccin Mocha).
 5. **Surgical edits only.** Never rewrite a whole file. Never delete existing
    content, including commented-out code and disabled options.
 6. **Public repo.** No passwords, API keys, tokens, or secrets.
+7. **No agent attribution in commits.** If asked to write a commit message
+   or PR description, it carries no `Co-Authored-By:` trailer, no "Generated
+   with" line, and no mention of Claude or any agent. The user is the sole
+   author of every commit.
 
 ## Looking things up
 
@@ -110,7 +114,10 @@ in both files with the same value unless told otherwise.
    The conditional belongs in `default.nix`. Do **not** wrap the module body
    in `lib.mkIf` instead.
 4. `alejandra .`, `git add` the new file, `nix flake check`
-5. Add it to the matching list under **Components** in `README.md`, including
+5. Give any prose the task wrote or edited a cut-only revision pass before
+   handing back: remove words, add none. No new information, no new claims.
+   See **Writing style**.
+6. Add it to the matching list under **Components** in `README.md`, including
    the link reference definition at the bottom of that file
 
    **`README.md` is ~25 KB — never read it in full.** Locate the two regions
@@ -146,6 +153,33 @@ Only take the arguments you use: a module that sets no packages does not need
 
 Comments are short and explain *why*, not *what*. No session narrative, no
 restating the code, no listing alternatives that were not chosen.
+
+## Writing style
+
+For replies, `README.md`, `.notes/` and commit messages. Code comments are
+covered under **Formatting** above.
+
+- Lead with the answer. No "Great question", no exclamation marks, no closing
+  line praising the work, no restating the request first.
+- Say it once and directly. Not "it's not X, it's Y", not "not just X, but Y".
+- Write full sentences, and vary their length. No fragments for emphasis, no
+  run of clipped sentences.
+- Don't rate the thing you are describing. "Stylix sets the palette", not
+  "Stylix ensures a consistent look across every application".
+- Cut a sentence that adds no information, and any list padded to three.
+- Pet words: delve, robust, seamless, leverage, crucial, ensure, streamline,
+  elegant, powerful, utilize, showcase, landscape, essentially, furthermore,
+  tapestry, testament, pivotal, foster, enhance, cutting-edge, world-class.
+  Same for any word used twice in a short passage.
+- Use contractions and plain words.
+- No em dashes inside a sentence in `README.md` or `.notes/`; use a colon, a
+  comma, parentheses, or two sentences. A dash separating a label from its
+  description in a list (`` `path/` — what it holds ``) is structure and stays.
+- In `.notes/`, give absolute dates and versions (not "recently"), name the
+  condition behind a "sometimes", and cite where a claim came from.
+
+Prose only. Code blocks, command output, quotes and table cells are left
+alone.
 
 ## Working efficiently
 

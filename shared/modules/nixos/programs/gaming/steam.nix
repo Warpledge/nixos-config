@@ -7,10 +7,10 @@
   #--------------------------------------------------------------------#
   programs = {
     steam = {
-      enable = true; # Enable Steam
-      gamescopeSession.enable = true; # Enable Gamescope session (Wayland compositor)
-      remotePlay.openFirewall = true; # Allow Steam Remote Play through firewall
-      dedicatedServer.openFirewall = false; # Don't open firewall for dedicated servers
+      enable = true;
+      gamescopeSession.enable = true;
+      remotePlay.openFirewall = true;
+      dedicatedServer.openFirewall = false;
       extest.enable = true; # Enable Wayland input support (critical)
       protontricks.enable = true; # Protontricks for Proton prefix management
       extraCompatPackages = [
@@ -31,7 +31,7 @@
         keyutils # Kernel key utilities
         libc #r2modman (Tisk of Rain 2)
       ];
-      localNetworkGameTransfers.openFirewall = true; # Allow local file transfers
+      localNetworkGameTransfers.openFirewall = true;
     };
   };
 

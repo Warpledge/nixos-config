@@ -3,7 +3,7 @@
 Instance: `GT_New_Horizons_2.8.4_Modified` (Prism Launcher)
 Path: `~/.local/share/PrismLauncher/instances/GT_New_Horizons_2.8.4_Modified/.minecraft/`
 
-> **Claude:** Keep these files up to date whenever the modpack changes — config edits, mods added/removed. Update the relevant sub-file without being asked.
+> **Claude:** Keep these files up to date whenever the modpack changes: config edits, mods added/removed. Update the relevant sub-file without being asked.
 
 ---
 

@@ -13,8 +13,8 @@
   #-- XDG Portal Configuration
   #--------------------------------------------------------------------#
   xdg.portal = {
-    enable = true; # Enable XDG portal for desktop integration
-    xdgOpenUsePortal = true; # Use portal for xdg-open operations
+    enable = true;
+    xdgOpenUsePortal = true;
     extraPortals = lib.mkDefault [
       pkgs.xdg-desktop-portal-gtk # GTK file picker and dialogs
     ];

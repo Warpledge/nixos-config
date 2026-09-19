@@ -6,17 +6,14 @@
 #- toggle them, hit "Mod it" and it patches data.i for you.
 #- Not in nixpkgs; this wraps the prebuilt single-file Linux build.
 #-
-#- It's a self-contained .NET single-file app (runtime bundled), so it
-#- needs no external dotnet. But it's an Avalonia GUI: it extracts its
-#- bundled libSkiaSharp at runtime, which dlopens fontconfig/freetype/
-#- GL/X11. nix-ld resolves the ELF interpreter; we supply those GUI
-#- libs via LD_LIBRARY_PATH. Invariant globalization avoids needing ICU.
+#- Self-contained .NET single-file app, so no external dotnet is needed,
+#- but the bundled Avalonia/Skia stack dlopens fontconfig, freetype, GL
+#- and X11 at runtime: nix-ld resolves the ELF interpreter and
+#- LD_LIBRARY_PATH supplies those libs. Invariant globalization avoids ICU.
 #-
-#- Two more things are needed to actually get a window on this setup
-#- (Niri/Wayland -> XWayland, AMD + mesa): the NixOS GL driver dir
-#- (/run/opengl-driver/lib), and LIBGL_ALWAYS_SOFTWARE=1. With hardware
-#- GLX the Avalonia window never maps (confirmed: 0 windows after 10s);
-#- software rendering is fine for a config UI. Skia itself still inits.
+#- The window also needs /run/opengl-driver/lib and LIBGL_ALWAYS_SOFTWARE=1
+#- under Niri/XWayland on AMD; with hardware GLX the Avalonia window never
+#- maps. Software rendering is fine for a config UI.
 {
   pkgs,
   lib,

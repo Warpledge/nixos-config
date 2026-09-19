@@ -36,12 +36,12 @@
   #-- Gamescope Compositor
   #--------------------------------------------------------------------#
   programs.gamescope = {
-    enable = true; # Gamescope Wayland compositor for Steam games
-    capSysNice = false; # Don't require CAP_SYS_NICE
+    enable = true;
+    capSysNice = false;
     args = [
       "--rt" # Realtime scheduling support
       "--expose-wayland" # Expose Wayland socket for native games
-      "--force-grab-cursor" # Force cursor grabbing
+      "--force-grab-cursor"
     ];
   };
 }

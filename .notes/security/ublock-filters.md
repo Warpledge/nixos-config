@@ -8,7 +8,7 @@ uBlock Origin → Dashboard (gear icon) → **My Filters** tab → paste → **A
 
 ## YouTube Filters
 
-Replaces TubeMod. Keep SponsorBlock and Return YouTube Dislike — those can't be replaced.
+Replaces TubeMod. Keep SponsorBlock and Return YouTube Dislike (those can't be replaced).
 
 ```
 ! ============================================================

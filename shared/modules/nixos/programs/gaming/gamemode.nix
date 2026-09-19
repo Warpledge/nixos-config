@@ -14,12 +14,12 @@
   #-- GameMode Settings
   #--------------------------------------------------------------------#
   programs.gamemode = {
-    enable = true; # Enable GameMode service
+    enable = true;
     enableRenice = true; # Allow nice priority changes (CAP_SYS_NICE)
     settings = {
       general = {
         renice = 15; # Boost game process priority (+15)
-        desiredgov = "performance"; # Use performance CPU governor
+        desiredgov = "performance";
         inhibit_screensaver = 1; # Disable screensaver during gaming
       };
       gpu = {
@@ -28,8 +28,8 @@
         amd_performance_level = "high"; # AMD GPU higher clock level
       };
       custom = {
-        start = "${pkgs.libnotify}/bin/notify-send 'GameMode' 'Optimizations activated'"; # Notify on start
-        end = "${pkgs.libnotify}/bin/notify-send 'GameMode' 'Optimizations deactivated'"; # Notify on stop
+        start = "${pkgs.libnotify}/bin/notify-send 'GameMode' 'Optimizations activated'";
+        end = "${pkgs.libnotify}/bin/notify-send 'GameMode' 'Optimizations deactivated'";
       };
     };
   };

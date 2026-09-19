@@ -2,13 +2,10 @@ _: let
   #=====================================================================#
   # FREETUBE BLOCKED CHANNELS
   #=====================================================================#
-  # One flat list, deliberately unordered. Matching is by id, so the
-  # label is cosmetic - it only shows on the Distraction Free settings
-  # page and stops FreeTube re-resolving each entry over the API.
-  #
-  # The icon is a 1x1 transparent GIF for the same reason; browsing
-  # thumbnails come from the API and are unaffected. Grab a new id from a
-  # channel page's "externalId" field, not the first "channelId" match.
+  # One flat list, sorted by lowercased name under LC_ALL=C and matched by
+  # id. The label is cosmetic and the icon is a 1x1 transparent GIF: both
+  # exist to stop FreeTube re-resolving every entry over the API. Grab a new
+  # id from a channel page's "externalId" field, not the first "channelId".
   blankIcon = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
 
   mk = id: label: {

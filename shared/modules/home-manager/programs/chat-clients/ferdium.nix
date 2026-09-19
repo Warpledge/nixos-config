@@ -74,9 +74,6 @@ in {
   #--------------------------------------------------------------------#
   #-- Ferdium Package
   #--------------------------------------------------------------------#
-  # Electron shell that stacks web messengers (Discord, Matrix, WhatsApp,
-  # Slack, ...) into one window with per-service workspaces and a unified
-  # unread count. Accounts and logins are added in-app.
   # The nixpkgs wrapper already adds the Wayland ozone flags when
   # NIXOS_OZONE_WL is set (home-manager/variables.nix).
 
@@ -87,11 +84,10 @@ in {
   #--------------------------------------------------------------------#
   #-- Service Seed
   #--------------------------------------------------------------------#
-  # Services live as rows in server.sqlite, the bundled local server's DB,
-  # which Ferdium owns and rewrites as you edit things in the UI. So this
-  # is seed-only: each row is inserted once and never updated, and in-app
-  # changes always win. To re-seed one, delete it in the UI first.
-  # Ferdium must be closed - it writes the DB on exit.
+  # Services are rows in server.sqlite, which Ferdium owns and rewrites from
+  # the UI, so this is seed-only: each row is inserted once, never updated,
+  # and in-app changes win. To re-seed one, delete it in the UI first, with
+  # Ferdium closed - it writes the DB on exit.
 
   home.activation.ferdiumSeedServices = lib.hm.dag.entryAfter ["writeBoundary"] ''
     db="${config.xdg.configHome}/Ferdium/server.sqlite"

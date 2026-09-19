@@ -10,7 +10,7 @@
   #-- Java Runtime Environment
   #--------------------------------------------------------------------#
   programs.java = {
-    enable = true; # Enable Java support
+    enable = true;
     package = pkgs.jdk25; # Java 25 — required for GTNH 2.8.x
     binfmt = lib.mkForce false; # Disable binfmt support (security concern)
   };

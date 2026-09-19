@@ -6,7 +6,7 @@
   #-- Power Management
   #--------------------------------------------------------------------#
   powerManagement = {
-    enable = true; # Enable power management services
+    enable = true;
     powerDownCommands = ''
       loginctl lock-sessions
       sleep 1

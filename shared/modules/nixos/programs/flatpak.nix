@@ -12,14 +12,14 @@
   #-- Flatpak Package
   #--------------------------------------------------------------------#
   environment.systemPackages = with pkgs; [
-    flatpak # Flatpak runtime and package manager
+    flatpak
   ];
 
   #--------------------------------------------------------------------#
   #-- Flatpak Service Configuration
   #--------------------------------------------------------------------#
   services.flatpak = {
-    enable = true; # Enable Flatpak support
+    enable = true;
     packages = [
       # "com.github.tchx84.Flatseal" # Flatpak permissions manager GUI
     ];

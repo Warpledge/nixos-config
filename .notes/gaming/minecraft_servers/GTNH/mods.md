@@ -21,20 +21,20 @@ Detailed write-ups for every manually added mod. For the server mod list, see [s
 
 **What it adds:**
 - 217+ multiblocks spanning endgame power gen, ore processing, magic/tech integration, and automation
-- **AssemblerMatrix** — AE2-integrated autocrafting multiblock. Built at LuV/IV tier. Regular CrafterCasings give 2048 parallel per casing (autocrafting jobs, not GT processing). SingularityCrafterCasings give INT.MAX parallel but require UIV-tier Infinity frames + SpaceTime fluid — properly gated
+- **AssemblerMatrix** — AE2-integrated autocrafting multiblock. Built at LuV/IV tier. Regular CrafterCasings give 2048 parallel per casing (autocrafting jobs, not GT processing). SingularityCrafterCasings give INT.MAX parallel but require UIV-tier Infinity frames + SpaceTime fluid, so it stays properly gated
 - **ReAvaritia** — bundled Avaritia content (Infinity gear, Neutron Collector, Extreme Anvil, Soul Farmland). Legitimate crafting path requires Infinity Ingots, neutronium, crystal matrix, etc.
 - Magic/tech integration: Blood Magic, Thaumcraft, Botania, Twilight Forest automation multiblocks
 - Power generation: Real Artificial Star (extreme EU/t, requires UEV/UIV fuel rods)
 
 **Mixins on existing GTNH machines:**
-- **Integrated Ore Factory** (`enableIntegratedOreFactoryChange=true`): Changes parallel to `65,536 × tier`, adds ExoticEnergy hatch support, and adds 6 ore processing modes including chemical bath. Throughput still gated by lubricant (1L/parallel) and distilled water (10L/parallel). This is a buff to a vanilla GTNH machine — disable with `B:enableIntegratedOreFactoryChange=false` if unwanted
+- **Integrated Ore Factory** (`enableIntegratedOreFactoryChange=true`): Changes parallel to `65,536 × tier`, adds ExoticEnergy hatch support, and adds 6 ore processing modes including chemical bath. Throughput still gated by lubricant (1L/parallel) and distilled water (10L/parallel). This is a buff to a vanilla GTNH machine; disable with `B:enableIntegratedOreFactoryChange=false` if unwanted
 - **Overpowered mixin folder** (misleading name): Just adds output chance bonus when overvolting machines (`(tier - baseTier) × 2.5%`). Minor QoL, not power creep
 
-**Balance verdict:** Legitimate endgame expansion mod. Recipes follow normal GTNH tier gating — LuV/IV for mid-tier machines, UIV/Infinity materials for the highest-end content. Safe to run alongside vanilla GTNH progression.
+**Balance verdict:** Legitimate endgame expansion mod. Recipes follow normal GTNH tier gating: LuV/IV for mid-tier machines, UIV/Infinity materials for the highest-end content. Safe to run alongside vanilla GTNH progression.
 
 **Known quirks:**
-- Villager trades: all 5 vanilla villager types get trades for what appear to be Infinity Sword + full Infinity armor. Items are non-functional cardboard replicas via the GTNL Stick disguise system — cosmetic joke, not a real exploit. Disabled via `B:enableStickItem=false`
-- `enableSomethingRecipe`: adds a Creative Maintenance Hatch recipe using HV materials — minor, not a concern
+- Villager trades: all 5 vanilla villager types get trades for what appear to be Infinity Sword + full Infinity armor. Items are non-functional cardboard replicas via the GTNL Stick disguise system: a cosmetic joke, not a real exploit. Disabled via `B:enableStickItem=false`
+- `enableSomethingRecipe`: adds a Creative Maintenance Hatch recipe using HV materials; minor, not a concern
 
 ---
 
@@ -58,7 +58,7 @@ Detailed write-ups for every manually added mod. For the server mod list, see [s
 
 ## GTNHRates — Rates & QoL Overhaul *(replaces GTNH-CutCorners)*
 - **Repo:** https://github.com/Sladki/GTNHRates
-- GT machine energy/time discount, resource yield multipliers (crops, ores, bees, fluids), hammer prospecting improvements, singleblock miner stacking, NEI QoL — almost all values configurable on the fly
+- GT machine energy/time discount, resource yield multipliers (crops, ores, bees, fluids), hammer prospecting improvements, singleblock miner stacking, NEI QoL; almost all values configurable on the fly
 - **Config:** `config/gtnhrates.cfg`
 
 | Setting | Value | Default | Note |
@@ -81,7 +81,7 @@ Detailed write-ups for every manually added mod. For the server mod list, see [s
 ## Simple Storage (EZStorage) — Early-Game Storage Network
 - **Repo:** https://github.com/LITW-Refined/EZStorage
 - **Modrinth:** https://modrinth.com/mod/ezstorage
-- Connect chests/drawers to a network block and access everything from one terminal — Tom's Storage equivalent for 1.7.10
+- Connect chests/drawers to a network block and access everything from one terminal (Tom's Storage equivalent for 1.7.10)
 - No channels or complex setup; scales with vanilla chests and Storage Drawers
 - Pre-AE alternative — AE2 unlocks at EV tier (Titanium), Simple Storage bridges Steam Age through HV
 - **Portable Storage Terminal range:** 16 blocks (hardcoded, not configurable)
@@ -171,14 +171,14 @@ Detailed write-ups for every manually added mod. For the server mod list, see [s
   - Enable Cloud Rendering: `False`
   - Cave Culling: `True`
   - Distance Generator Mode: `6. Features`
-  - No. of Threads: `4` (default 8 — leave headroom for GTNH)
-  - Runtime % for Threads: `0.5` (default 1.0 — prevents DH competing with GT world gen)
+  - No. of Threads: `4` (default 8, leave headroom for GTNH)
+  - Runtime % for Threads: `0.5` (default 1.0, prevents DH competing with GT world gen)
 
 ---
 
 ## BoxPlusPlus — Production Line Encapsulator *(LuV-tier content)*
 - **Repo:** https://github.com/RealSilverMoon/BoxPlusPlus
-- Single GT multiblock that encapsulates entire multi-machine production lines internally — define up to 99 "processes" (each an NEI recipe from a real multiblock), set per-process parallelism, and the Box collapses them into one unified final recipe. Primary purpose: eliminate cross-machine logistics (pipes, AE2 item movement) for massive TPS savings in dense late-game bases
+- Single GT multiblock that encapsulates entire multi-machine production lines internally: define up to 99 "processes" (each an NEI recipe from a real multiblock), set per-process parallelism, and the Box collapses them into one unified final recipe. Primary purpose: eliminate cross-machine logistics (pipes, AE2 item movement) for massive TPS savings in dense late-game bases
 - **Structure:** Core + up to 3 concentric rings. Ring count scales capability:
 
 | Rings | Max Parallel/Process | Max Processes | Overclocking |
@@ -211,7 +211,7 @@ Detailed write-ups for every manually added mod. For the server mod list, see [s
 
 ## SharedProspecting `v2.0.4` — Team Prospecting Data Sync
 - **Repo:** https://github.com/Lyfts/SharedProspecting
-- Automatically syncs VisualProspecting ore data between ServerUtilities team members — no configuration needed, just install on client and server
+- Automatically syncs VisualProspecting ore data between ServerUtilities team members; no configuration needed, just install on client and server
 - **Dependency:** GTNHLib v0.5.14+
 
 ---

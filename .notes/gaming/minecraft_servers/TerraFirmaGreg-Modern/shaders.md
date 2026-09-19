@@ -6,7 +6,7 @@
 
 **Location:** `~/.local/share/PrismLauncher/instances/TerraFirmaGreg-Modern/minecraft/shaderpacks/Eclipse-Shader-Unstable/`
 
-Load as the **extracted folder**, not the zip — the zip cannot be edited and Iris will use whichever is selected in shader settings.
+Load as the **extracted folder**, not the zip: the zip cannot be edited, and Iris will use whichever is selected in shader settings.
 
 Reload shaders in-game: `F3+R`
 

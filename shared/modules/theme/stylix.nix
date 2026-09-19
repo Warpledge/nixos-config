@@ -44,7 +44,7 @@
         dank-material-shell.enable = false;
         gnome.image.enable = false; # let GNOME Settings own the wallpaper
 
-        vscode.profileNames = ["default"]; # needed for vscode
+        vscode.profileNames = ["default"];
         zen-browser.profileNames = ["default"];
         firefox.profileNames = ["default"];
         floorp.profileNames = ["default"];

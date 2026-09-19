@@ -69,15 +69,14 @@
           max-scroll-amount = "90%";
         };
         warp-mouse-to-focus.enable = false; # automatically move cursor to focused window
-        workspace-auto-back-and-forth = true; # automatic workspace switching behavior
+        workspace-auto-back-and-forth = true; # re-pressing the active workspace's key returns to the previous one
       };
 
       #--- Screenshot Configuration
       screenshot-path = "~/Pictures/Screenshots/Screenshot-from-%Y-%m-%d-%H-%M-%S.png";
 
       #--- Monitor Configuration (Host-Specific)
-      # Monitor configuration moved to hosts/{desktop,laptop}/niri/default.nix
-      # to allow per-device customization
+      # Per-host, in hosts/{desktop,laptop}/wm/niri.nix
 
       #--- UI & Appearance
       overview = {

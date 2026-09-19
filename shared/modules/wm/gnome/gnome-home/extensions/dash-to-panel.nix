@@ -20,9 +20,8 @@ in {
     #-- Dash to Panel
     #--------------------------------------------------------------------#
     "org/gnome/shell/extensions/dash-to-panel" = {
-      # Even when we are not using multiple panels on multiple monitors,
-      # the extension still creates them in the config, so we set the same
-      # configuration for each (up to 2 monitors).
+      # The extension writes per-monitor entries even with one monitor, so
+      # every value is set for both (up to 2 monitors).
       panel-positions = builtins.toJSON (lib.genAttrs ["0" "1"] (x: "TOP"));
       panel-sizes = builtins.toJSON (lib.genAttrs ["0" "1"] (x: 32));
       panel-element-positions = builtins.toJSON (lib.genAttrs ["0" "1"] (x: [

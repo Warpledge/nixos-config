@@ -20,11 +20,11 @@
       LC_TIME = "en_US.UTF-8";
     };
     supportedLocales = [
-      "en_US.UTF-8/UTF-8" # English US locale
+      "en_US.UTF-8/UTF-8"
       "ja_JP.UTF-8/UTF-8" # Japanese locale for CJK support
     ];
   };
 
   #--- Console Settings
-  console.keyMap = "us"; # US keyboard layout on console
+  console.keyMap = "us";
 }

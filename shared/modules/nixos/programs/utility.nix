@@ -16,7 +16,7 @@
     fstrim.enable = true; # SSD TRIM optimization
     udisks2.enable = true; # Disk management
     gnome = {
-      gnome-keyring.enable = true; # GNOME Keyring for password storage
+      gnome-keyring.enable = true;
     };
   };
 
@@ -27,12 +27,12 @@
 
   #--- Documentation
   documentation = {
-    enable = true; # Keep man pages
+    enable = true;
     doc.enable = false; # Disable other docs (faster build)
-    man.enable = true; # Enable man pages
-    dev.enable = false; # Disable development docs
-    info.enable = false; # Disable info docs
-    nixos.enable = false; # Disable NixOS docs
+    man.enable = true;
+    dev.enable = false;
+    info.enable = false;
+    nixos.enable = false;
   };
 
   #--------------------------------------------------------------------#

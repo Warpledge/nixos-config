@@ -25,7 +25,7 @@
   #-- Boot Configuration
   #--------------------------------------------------------------------#
   boot = {
-    tmp.cleanOnBoot = true; # Wipe /tmp on boot
+    tmp.cleanOnBoot = true;
     tmp.useTmpfs = true; # Store /tmp in RAM
     supportedFilesystems = ["ntfs"]; # Support NTFS (windows) filesystems
     consoleLogLevel = 0; # Suppress kernel boot messages
@@ -38,11 +38,11 @@
     ];
     loader = {
       systemd-boot = {
-        enable = true; # Use systemd-boot EFI bootloader
+        enable = true;
         configurationLimit = 10; # Keep last 10 entries
         consoleMode = "max"; # Use full console resolution
       };
-      efi.canTouchEfiVariables = true; # Allow EFI variable modification
+      efi.canTouchEfiVariables = true;
     };
     initrd = {
       systemd.enable = true; # Use systemd in initrd

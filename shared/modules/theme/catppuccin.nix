@@ -14,8 +14,8 @@
     imports = [inputs.catppuccin.homeModules.catppuccin];
     catppuccin = lib.mkForce {
       #--- Global Settings
-      enable = true; # apply automatically globally
-      autoEnable = true; # auto-enroll all ports (matches prior implicit behavior)
+      enable = true;
+      autoEnable = true; # auto-enroll all ports
       flavor = "mocha";
       accent = "mauve";
 
@@ -33,8 +33,8 @@
   #-- System Theme
   #--------------------------------------------------------------------#
   catppuccin = lib.mkForce {
-    enable = true; # apply automatically globally
-    autoEnable = true; # auto-enroll all ports (matches prior implicit behavior)
+    enable = true;
+    autoEnable = true; # auto-enroll all ports
     flavor = "mocha";
     accent = "mauve";
   };

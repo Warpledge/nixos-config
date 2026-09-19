@@ -2,13 +2,13 @@
 
 The NixOS configuration behind my desktop and laptop, both daily driven since 2022.
 
-Everything here is shaped around these two machines and how I use them, so it's not really meant to be cloned and run. It's more of a reference: a look at how a whole setup fits together, and somewhere to borrow an idea or a module from.
+Everything here is shaped around these two machines and how I use them, so cloning the repo and running it won't get you far. It works better as a reference: a look at how a whole setup fits together, and somewhere to borrow an idea or a module from.
 
 New to NixOS? The short version: the entire operating system is written down in text files instead of being set up by hand. Installing a program, changing a setting, even swapping the whole desktop for a different one, is an edit and a rebuild rather than a series of clicks you'll have forgotten about in six months.
 
-That is what makes this more than a backup of my dotfiles. The exact version of every package is pinned in a lock file, so these files don't describe roughly the same setup, they rebuild the same one. If a drive dies or I wipe a machine, I install NixOS, point it at this repo, and it comes back with the same apps, keybinds, theme and settings as before. Adding another machine is a new folder under `hosts/` rather than starting over, which is how the desktop and laptop stay in sync while still differing where the hardware forces it.
+That's what separates this from a dotfiles backup. Every package version is pinned in a lock file, so a rebuild lands on the exact versions I had before. If a drive dies or I wipe a machine, I install NixOS, point it at this repo, and it comes back with the same apps, keybinds, theme and settings as it had. Adding another machine means a new folder under `hosts/`, which is how the desktop and laptop stay in sync while still differing where the hardware forces it.
 
-Rebuilding is not destructive either. Each one is added alongside the last instead of replacing it, so an update that breaks something is undone by picking the previous entry at the boot menu.
+Rebuilds stack up rather than overwrite each other: the old one stays on disk and in the boot menu, so when an update breaks something I reboot into the previous entry and I'm back where I was.
 
 ## Contents
 
@@ -51,9 +51,10 @@ Everything on the system uses one color scheme: [Catppuccin][catppuccin] Mocha M
 
 Two tools split the job:
 
-- **[Stylix][stylix] does most of it.** It takes the color scheme, the fonts and the mouse cursor and pushes them into every app that will accept them. No app carries its own copy of the colors, so nothing is left behind out of date when the theme changes.
-- **[catppuccin/nix][catppuccin-nix] covers the rest.** Some apps have an official Catppuccin theme written by the Catppuccin project, which fits better than a close-enough version generated from the color scheme. Those apps get the official one and Stylix handles the others.
-- **Each one is told where to stay out of the way.** Both tools would happily theme the same app and end up fighting over it, so whichever does a given app better is the one left switched on. A few apps, like the code editor and Spotify, are left to theme themselves.
+- **[Stylix][stylix] does most of it.** It takes the color scheme, the fonts and the mouse cursor and pushes them into every program that will accept them. Nothing keeps a private copy of the colors, so nothing goes stale when I change the theme.
+- **[catppuccin/nix][catppuccin-nix] covers the rest.** Some programs have an official Catppuccin port written by the Catppuccin project, and that fits better than a close-enough palette generated from the color scheme.
+
+Both tools would happily theme the same app and fight over it, so for each one I keep whichever does the better job and switch the other off. A couple, like the code editor and Spotify, I leave to theme themselves.
 
 ## System Management TUI Script
 
@@ -63,7 +64,7 @@ The top level is a set of categories. Pick one and it opens into its own menu of
 
 ![nixm NixOS submenu](./screenshots/nixm-tui-nixos.png)
 
-`nixm` is the script I use to manage the system day to day (it lives in [`shared/modules/home-manager/scripts/nixm.nix`](./shared/modules/home-manager/scripts/nixm.nix)). Run it on its own and you get a TUI (terminal UI) to select commands; or pass an option as a direct command. It started from a script in [anotherhadi's NixOS config](https://github.com/anotherhadi/nixy), but I've reworked and extended it a lot since.
+`nixm` is the script I use to manage the system day to day (it lives in [`shared/modules/home-manager/scripts/nixm.nix`](./shared/modules/home-manager/scripts/nixm.nix)). Run it on its own for a TUI (terminal UI) menu, or pass a subcommand to jump straight to it. It started out as a script from [anotherhadi's NixOS config](https://github.com/anotherhadi/nixy), and I've reworked and extended it a lot since.
 
 <details>
 <summary>📋 All nixm commands</summary>
@@ -133,7 +134,7 @@ The top level is a set of categories. Pick one and it opens into its own menu of
 
 ## Components
 
-Most of what's below can be turned on or off per machine from its `hostConfig` file toggles.
+Most of what's below is optional per machine, set in its `hostConfig` file.
 
 <details>
 <summary>🖥️ Desktop Environment</summary>
@@ -428,7 +429,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./shared
 
 ## Keybinds
 
-`Mod` is the Super (Windows) key. All window managers are set up for a seamless keyboard centric workflow.
+`Mod` is the Super (Windows) key. Every window manager here is set up to be driven from the keyboard, so I barely reach for the mouse.
 
 >**Note:** `Mod+/` opens a keybind overlay cheatsheet in both WMs.
 
@@ -622,7 +623,7 @@ shared/
 .notes/                           # personal notes I share between devices
 ```
 
-**How it loads:** the flake picks a machine, reads that machine's on/off switches, then pulls in only the modules those switches enable:
+**How it loads:** the flake picks a machine, reads that host's toggles, and loads only the modules they enable:
 
 ```
 flake.nix
@@ -634,7 +635,7 @@ flake.nix
       → shared/modules/mullvad/                 # VPN daemon, tray app, split tunnel
 ```
 
-Each host's `hostConfig/core.nix` is the single place that turns features on or off: window manager, kernel, browsers, terminals, editors, and services.
+That one file per host decides the window manager and the kernel, which browsers, terminals and editors get installed, and which services run.
 
 ## Flake Inputs
 
@@ -664,9 +665,9 @@ The main things this config pulls in from outside the standard NixOS package set
 
 ## Inspiration
 
-These are the biggest inspirations for my own config and learning NixOS.
+The configs I learned the most from.
 
-- [ryan4yin/nix-config](https://github.com/ryan4yin/nix-config) 
-- [linuxmobile/shin](https://github.com/linuxmobile/shin) 
+- [ryan4yin/nix-config](https://github.com/ryan4yin/nix-config)
+- [linuxmobile/shin](https://github.com/linuxmobile/shin)
 - [anotherhadi/nixy](https://github.com/anotherhadi/nixy)
 - [Frost-Phoenix/nixos-config](https://github.com/Frost-Phoenix/nixos-config)

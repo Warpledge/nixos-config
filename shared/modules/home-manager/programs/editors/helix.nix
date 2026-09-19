@@ -169,7 +169,7 @@
   #-- Additional Packages
   #--------------------------------------------------------------------#
   home.packages = with pkgs; [
-    # LSP servers (already installed from zed.nix, but listed for clarity)
+    # LSP servers, installed in zed.nix
     # nixd
     # typescript-language-server
     # rust-analyzer

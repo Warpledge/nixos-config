@@ -1,6 +1,6 @@
 # Steam Game Launch Parameters
 
-Documentation of game-specific launch parameters for optimal performance and compatibility.
+Game-specific launch parameters, and why each one is set.
 
 ## Morimens (忘卻前夜 Morimens)
 
@@ -8,7 +8,7 @@ Documentation of game-specific launch parameters for optimal performance and com
 PROTON_ENABLE_WAYLAND=0 WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS="--no-sandbox" %command%
 ```
 
-**Notes:** `PROTON_ENABLE_WAYLAND=0` forces XWayland — required because Wine's native Wayland driver splits the WebView2 login child window into a separate Wayland surface that can't composite back into the Unity game window (shows as white box). XWayland handles child window compositing correctly. `--no-sandbox` keeps the Chromium renderer process stable under Wine. Also requires a niri window rule for `msedgewebview2.exe` with `clip-to-geometry = false` and `draw-border-with-background = true` (in `shared/modules/wm/niri/niri-home/core/rules.nix`).
+**Notes:** `PROTON_ENABLE_WAYLAND=0` forces XWayland, required because Wine's native Wayland driver splits the WebView2 login child window into a separate Wayland surface that can't composite back into the Unity game window (shows as white box). XWayland handles child window compositing correctly. `--no-sandbox` keeps the Chromium renderer process stable under Wine. Also requires a niri window rule for `msedgewebview2.exe` with `clip-to-geometry = false` and `draw-border-with-background = true` (in `shared/modules/wm/niri/niri-home/core/rules.nix`).
 
 ---
 
@@ -100,7 +100,7 @@ PROTON_ENABLE_WAYLAND=0
 WINEDLLOVERRIDES=winewayland.drv=
 ```
 
-**Notes:** `PROTON_USE_NTSYNC=1` enables NT sync primitives via the `ntsync` kernel module (loaded in `security/kernel.nix`). Fixes 5-20 min freezes introduced in the 1.2 patch. `STEAMOS=1`/`STEAMDECK=1` force Steam Deck identity, needed for some Proton compatibility paths. `WEBKIT_DISABLE_COMPOSITING_MODE=1` avoids rendering issues in the CEF/WebView login screen. `PROTON_ENABLE_WAYLAND=0` + `WINEDLLOVERRIDES=winewayland.drv=` force XWayland instead of Wine's native Wayland driver — fixes a fatal crash (`xdg_wm_base#N: error 4: wrong configure serial`, `waylanddrv:wayland_read_events_thread Failed to read events from the compositor, terminating process`) where Niri kills the wine process outright when the native Wayland driver acks a stale configure serial while the main game window is setting up its D3D resources. The Heroic per-game "Enable Wine Wayland" checkbox did not reliably force this off, hence the explicit env vars. Requires GE-Proton or equivalent (set in compatibility tool settings). Do not enable in-game Reflex — crashes on AMD.
+**Notes:** `PROTON_USE_NTSYNC=1` enables NT sync primitives via the `ntsync` kernel module (loaded in `security/kernel.nix`). Fixes 5-20 min freezes introduced in the 1.2 patch. `STEAMOS=1`/`STEAMDECK=1` force Steam Deck identity, needed for some Proton compatibility paths. `WEBKIT_DISABLE_COMPOSITING_MODE=1` avoids rendering issues in the CEF/WebView login screen. `PROTON_ENABLE_WAYLAND=0` + `WINEDLLOVERRIDES=winewayland.drv=` force XWayland instead of Wine's native Wayland driver, which fixes a fatal crash (`xdg_wm_base#N: error 4: wrong configure serial`, `waylanddrv:wayland_read_events_thread Failed to read events from the compositor, terminating process`) where Niri kills the wine process outright when the native Wayland driver acks a stale configure serial while the main game window is setting up its D3D resources. The Heroic per-game "Enable Wine Wayland" checkbox did not reliably force this off, hence the explicit env vars. Requires GE-Proton or equivalent (set in compatibility tool settings). Do not enable in-game Reflex: it crashes on AMD.
 
 Separately, the game's kernel-mode anti-cheat driver (Tencent "Anti-Cheat Expert", `ace-base.sys`) fails to load under Wine (`unimplemented function ntoskrnl.exe.PsGetProcessExitStatus`). This doesn't appear to be fatal to launching/playing, but the anti-cheat isn't actually running correctly as a result.
 
@@ -120,10 +120,10 @@ STEAMDECK=1 SteamOS=1 PROTON_ENABLE_WAYLAND=0 WINEDLLOVERRIDES=winewayland.drv= 
 - `VKD3D_CONFIG=dxr11` — Exposes DXR 1.1 raytracing to the game through VKD3D-Proton; required for the in-game RT options to work under Proton
 - `MANGOHUD=1` — Enables MangoHud FPS overlay
 - `-SkipSplash` — Skips intro splash screens
-- `-dx12` — Forces DirectX 12 rendering; needed for raytracing. Previously `-dx11` was required because DX12 crashed on launch with GE-Proton on this GPU/driver stack — if that regresses, fall back to `-dx11` and drop `VKD3D_CONFIG=dxr11`
+- `-dx12` — Forces DirectX 12 rendering; needed for raytracing. Previously `-dx11` was required because DX12 crashed on launch with GE-Proton on this GPU/driver stack; if that regresses, fall back to `-dx11` and drop `VKD3D_CONFIG=dxr11`
 - **Do not add `-EngineIni=Engine.ini`.** Older AlteriaX configs needed it, current ones do not, and leaving it in stops the config from applying properly
 
-**Previously used, currently dropped:**
+**Previously used, dropped:**
 - `; pkill -f "WutheringWaves"; pkill -f "CrashReportClient"` — ran after exit/crash to force-kill lingering Kuro launcher or crash reporter processes that would otherwise hang Steam indefinitely. Re-add if Steam starts showing the game as still running after quitting
 
 ### Graphics config (AlteriaX WuWa-Configs)
@@ -137,7 +137,7 @@ Installed to `~/.local/share/Steam/steamapps/common/Wuthering Waves/Client/Saved
 - `Input.ini` — disables mouse smoothing and FoV scaling
 
 **Gotchas:**
-- `r.RayTracing.LoadConfig` in `Engine.ini` must be `1` when RT is enabled in-game, `0` when disabled — mismatch causes a crash at 75% load. Config 1 ships with `1`
+- `r.RayTracing.LoadConfig` in `Engine.ini` must be `1` when RT is enabled in-game, `0` when disabled; a mismatch causes a crash at 75% load. Config 1 ships with `1`
 - `Client/Config/UserEngine.ini` must not exist, it overrides `Engine.ini`. Not present on this install
 - Comments inside `Engine.ini` are stripped on first launch, that's normal. Keep the repo clone around to re-read them
 - Game patches do not reset these files, so no reinstall needed per update. Re-pull if something breaks

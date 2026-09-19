@@ -11,7 +11,7 @@
   #--------------------------------------------------------------------#
   security = {
     forcePageTableIsolation = true; # Mitigate Meltdown CPU vulnerability
-    protectKernelImage = true; # Prevent kernel image modification
+    protectKernelImage = true;
     apparmor = {
       enable = true; # Mandatory access control framework
       killUnconfinedConfinables = false; # Don't kill unconfined processes
@@ -33,11 +33,11 @@
   #--------------------------------------------------------------------#
   security.pam.services = {
     greetd = {
-      enableGnomeKeyring = true; # Enable keyring for greeter
+      enableGnomeKeyring = true;
     };
     login = {}; # Login service
     gdm = {
-      enableGnomeKeyring = true; # Enable keyring for GDM login
+      enableGnomeKeyring = true;
     };
     sddm = {}; # Simple Desktop Display Manager
     hyprlock = {}; # Hyprland screen locker
@@ -49,7 +49,7 @@
   #--------------------------------------------------------------------#
   #-- Sudo Configuration
   #--------------------------------------------------------------------#
-  security.sudo.enable = true; # Enable sudo command
+  security.sudo.enable = true;
 
   #--------------------------------------------------------------------#
   #-- Services Configuration
@@ -59,7 +59,7 @@
   #--------------------------------------------------------------------#
   #-- GNOME Keyring
   #--------------------------------------------------------------------#
-  services.gnome.gnome-keyring.enable = true; # GNOME Keyring for password storage
+  services.gnome.gnome-keyring.enable = true;
   services.gnome.gcr-ssh-agent.enable = false; # disabled: conflicts with gpg-agent's SSH support (cyclic gpg-agent-ssh.socket dependency)
   programs = {
     seahorse.enable = true; # GUI for managing keyring credentials
@@ -80,13 +80,13 @@
   services.fail2ban = {
     enable = true; # Enable intrusion prevention
     ignoreIP = [
-      "127.0.0.1" # Localhost
-      "127.0.0.1/8" # Localhost subnet
-      "::1" # IPv6 localhost
+      "127.0.0.1"
+      "127.0.0.1/8"
+      "::1"
     ];
-    bantime = "12h"; # Ban duration
+    bantime = "12h";
     bantime-increment = {
-      enable = true; # Enable escalating ban times
+      enable = true;
       multipliers = "1 2 4 8 16 32 64"; # Exponential multipliers
       maxtime = "168h"; # 1 week maximum ban
     };
@@ -96,7 +96,7 @@
         port = 22
       '';
     };
-    maxretry = 3; # Ban after 3 failed attempts
+    maxretry = 3;
   };
 
   #--------------------------------------------------------------------#
@@ -115,7 +115,7 @@
   #--------------------------------------------------------------------#
   #-- DBus Configuration
   #--------------------------------------------------------------------#
-  services.dbus.implementation = "broker"; # Use dbus-broker
+  services.dbus.implementation = "broker";
 
   #--------------------------------------------------------------------#
   #-- Bootloader Security

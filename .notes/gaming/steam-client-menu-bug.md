@@ -12,7 +12,7 @@ menu, immediately reverts to the main window, and Steam dismisses the menu on th
 focus-out.
 
 Upstream: [#489](https://github.com/Supreeeme/xwayland-satellite/issues/489),
-[#468](https://github.com/Supreeeme/xwayland-satellite/issues/468) — fixed by
+[#468](https://github.com/Supreeeme/xwayland-satellite/issues/468), fixed by
 [PR #494](https://github.com/Supreeeme/xwayland-satellite/pull/494), merged
 2026-09-09 as `add2795`. The fix never focuses override-redirect windows and routes
 `WM_TAKE_FOCUS` for the rest (`src/server/mod.rs`, `should_focus`).
@@ -54,7 +54,7 @@ its own problems. Use labwc, not gamescope, if it is ever revived: gamescope exp
 ## Diagnostics
 
 `niri msg event-stream` during a menu click shows focus moving to the Steam window and
-no window opening -- the menus map as override-redirect surfaces niri never manages,
+no window opening: the menus map as override-redirect surfaces niri never manages,
 so no niri window rule can target them.
 
 Client build and update history: `~/.local/share/Steam/logs/bootstrap_log.txt`.

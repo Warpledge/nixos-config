@@ -87,7 +87,7 @@
       #--- Wine/Proton optimizations
       DXVK_HUD = "compiler"; # Show shader compilation (can disable by removing this)
       DXVK_ASYNC = "1"; # Enable async shader compilation to reduce stutters
-      DXVK_STATE_CACHE_PATH = "$HOME/.cache/dxvk"; # Centralized DXVK cache
+      DXVK_STATE_CACHE_PATH = "$HOME/.cache/dxvk";
       STAGING_SHARED_MEMORY = "1"; # Wine staging shared memory
       WINE_LARGE_ADDRESS_AWARE = "1"; # Enable 4GB+ memory for 32-bit games
 

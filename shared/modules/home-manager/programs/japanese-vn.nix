@@ -5,11 +5,9 @@
   #--------------------------------------------------------------------#
   #-- Tooling
   #--------------------------------------------------------------------#
-  # Support for raw (untranslated) Japanese games — visual novels from
-  # DLSite / DMM GAMES and similar.
-  #
-  # VN-specific reference guide. Reference: https://learnjapanese.moe/vn-linux/
-  #
+  # Raw (untranslated) Japanese games: visual novels from DLSite, DMM GAMES
+  # and similar. Reference: https://learnjapanese.moe/vn-linux/
+
   home.packages = with pkgs; [
     #--- Installer & archive extraction
     # DLSite/DMM downloads are commonly Inno Setup installers or disc images.

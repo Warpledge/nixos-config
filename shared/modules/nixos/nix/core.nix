@@ -18,32 +18,32 @@
   #--------------------------------------------------------------------#
   nix = {
     nixPath = ["nixpkgs=${inputs.nixpkgs}"]; # Flake-based nixpkgs
-    channel.enable = false; # Disable nix-channel (we use flakes)
+    channel.enable = false; # flakes only
     daemonCPUSchedPolicy = "batch"; # Low CPU priority for daemon
     daemonIOSchedClass = "idle"; # Idle IO priority for daemon
     daemonIOSchedPriority = 7; # Lowest IO priority level
     optimise = {
-      automatic = true; # Auto-optimize nix store
-      dates = ["04:00"]; # Run at 4 AM daily
+      automatic = true;
+      dates = ["04:00"];
     };
 
     #--------------------------------------------------------------------#
     #-- Nix Settings
     #--------------------------------------------------------------------#
     settings = {
-      warn-dirty = false; # Don't warn about dirty flakes
+      warn-dirty = false;
       min-free = "${toString (5 * 1024 * 1024 * 1024)}"; # Trigger GC at 5GB free
       max-free = "${toString (10 * 1024 * 1024 * 1024)}"; # Free up to 10GB
       trusted-users = ["root"]; # Who can manage store; no remote builders to trust
-      max-jobs = "auto"; # Parallel build jobs (auto-detect)
+      max-jobs = "auto";
       cores = 0; # Use all CPU cores
-      sandbox = true; # Build in sandboxed environments
+      sandbox = true;
       sandbox-fallback = false; # Fail if sandbox not available
-      system-features = ["nixos-test" "kvm" "recursive-nix" "big-parallel"]; # Supported features
+      system-features = ["nixos-test" "kvm" "recursive-nix" "big-parallel"];
       connect-timeout = 5; # Cache connection timeout (seconds)
       http-connections = 50; # Max parallel TCP connections
       log-lines = 30; # Show 30 lines for failed builds
-      experimental-features = ["nix-command" "flakes"]; # Enable flakes
+      experimental-features = ["nix-command" "flakes"];
       keep-derivations = true; # Keep .drv files (for direnv)
       keep-outputs = true; # Keep build outputs (for direnv)
       builders-use-substitutes = true; # Use binary cache

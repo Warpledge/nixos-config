@@ -8,7 +8,7 @@ Euphoria Patches computes emissives automatically via iPBR+ (texture color analy
 
 ## File 1 — Block ID Registration
 
-**IMPORTANT:** Edit ONLY the root file — the fragment files do NOT take effect until auto-merged:
+**IMPORTANT:** Edit ONLY the root file. The fragment files do NOT take effect until auto-merged:
 - **Root (what Angelica reads):** `shaderpacks/ComplementaryReimagined_r5.7.1 + EuphoriaPatches_1.8.6/shaders/block.properties`
 - Fragment (do not edit): `shaders/blockProperties/1.7.10/block.properties`
 
@@ -23,18 +23,18 @@ anothermod:blockname
 
 ### Key Material IDs (from terrainIPBR.glsl)
 
-- `block.10104` — Polished Andesite: moderate reflection `pow2(color.g)` — GT machines, CarpentersBlocks, ForgeMicroblock catch-all
-- `block.10264` — Iron block: strong reflection `pow2(pow2(color.r))` + Fresnel — GT casings, chisel metal, Railcraft
-- `block.10248` — Netherite block: very high reflection `min1(pow2(color.r * 2.0))` — Ztones laveBlock, iszmBlock
+- `block.10104` — Polished Andesite: moderate reflection `pow2(color.g)`, used by GT machines, CarpentersBlocks, ForgeMicroblock catch-all
+- `block.10264` — Iron block: strong reflection `pow2(pow2(color.r))` + Fresnel, used by GT casings, chisel metal, Railcraft
+- `block.10248` — Netherite block: very high reflection `min1(pow2(color.r * 2.0))`, used by Ztones laveBlock, iszmBlock
 - `block.21XXX` — Modded light sources: `emission = pow2(luminance) * 5.0` (texture-brightness-based, no light level dependency)
   - `block.21000` — White: GT casings5, chisel:hexPlating, greenscreen, ForgeMicroblock:microblock, ForgeMultipart:block
   - `block.21004` — Red: ExtraUtilities color_blockRedstone, BiomesOPlenty hell_blood
   - `block.21008` — Yellow: BiomesOPlenty honey
   - `block.21012` — Green: BiomesOPlenty poison
 - `block.31XXX` — Translucents with colored light tinting
-- `block.20000` — Disables Parallax Occlusion Mapping — `ArchitectureCraft:shape`
+- `block.20000` — Disables Parallax Occlusion Mapping for `ArchitectureCraft:shape`
 
-**Bloom setting:** In-game only — Options → Video Settings → Shaders → Camera Settings → `BLOOM_STRENGTH` slider. Not a file setting.
+**Bloom setting:** In-game only, under Options → Video Settings → Shaders → Camera Settings → `BLOOM_STRENGTH` slider. Not a file setting.
 
 **Emission formula** (terrainIPBR.glsl, block.21XXX range):
 ```glsl
@@ -44,12 +44,12 @@ emission = pow2(lum) * 5.0;  // Only bright textures glow; dark blocks unaffecte
 ```
 
 Block names come from WAILA (hover over block in-game), format is `modid:blockname`. Use `modid:blockname:0,1,2` for specific metadata variants.
-- ForgeMicroblock shapes (Post, Strip, Cover, etc.) all share `ForgeMicroblock:microblock` — no per-shape override needed
+- ForgeMicroblock shapes (Post, Strip, Cover, etc.) all share `ForgeMicroblock:microblock`, so no per-shape override needed
 - Ztones laveBlock microblocks: glowing white because laveBlock is bright + ForgeMicroblock in block.21000
 
-**Cross-reference:** ComplimentaryNeon's `block.properties` (inside `ComplementaryNeon.zip`) has GTNH block IDs already mapped with comments — use it as a reference for which blocks to add and what reflection tier they should be.
+**Cross-reference:** ComplimentaryNeon's `block.properties` (inside `ComplementaryNeon.zip`) has GTNH block IDs already mapped with comments, so use it as a reference for which blocks to add and what reflection tier they should be.
 
-### Currently Added Blocks
+### Added Blocks
 
 **Reflections:**
 - `Ztones:tile.laveBlock:0` through `:15`, `Ztones:tile.bittBlock:0` through `:14` → `block.10260` (custom fixed smoothness: 0.75 regardless of texture color — needed because netherite formula uses color.r which gives near-zero for non-red color variants)

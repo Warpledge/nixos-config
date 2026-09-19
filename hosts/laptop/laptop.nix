@@ -37,7 +37,7 @@
   environment.systemPackages = with pkgs; [
     solaar
     upower
-    dmidecode # Install dmidecode to identify the laptop model
+    dmidecode # identify the laptop model
   ];
 
   #--- Power Management

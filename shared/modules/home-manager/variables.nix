@@ -12,32 +12,32 @@
     XDG_SESSION_TYPE = "wayland";
 
     #--- Qt configuration
-    QT_AUTO_SCREEN_SCALE_FACTOR = "1"; # Disable Qt auto-scaling
+    QT_AUTO_SCREEN_SCALE_FACTOR = "1"; # Qt scales UIs from the monitor's reported DPI
     QT_QPA_PLATFORM = "wayland;xcb"; # Fallback matters: a Qt app with no wayland plugin aborts without it
-    QT_WAYLAND_DISABLE_WINDOWDECORATION = "1"; # Disable Qt window decorations
+    QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
 
     #--- Wayland application support
     MOZ_ENABLE_WAYLAND = "1"; # Enable Wayland in Firefox
-    ANKI_WAYLAND = "1"; # Enable Wayland in Anki
+    ANKI_WAYLAND = "1";
     NIXOS_OZONE_WL = "1"; # Enable Wayland for Ozone-based apps (Chrome, VSCode, etc.)
     ELECTRON_OZONE_PLATFORM_HINT = "wayland"; # Force Wayland for Electron apps
 
     #--- Graphics and rendering
-    SDL_VIDEODRIVER = "wayland"; # Use Wayland for SDL applications
+    SDL_VIDEODRIVER = "wayland";
     CLUTTER_BACKEND = "wayland"; # Use Wayland for Clutter toolkit
     GDK_BACKEND = "wayland,x11"; # X11-only GTK/JUCE apps cannot start without the fallback
 
     #--- WLR backend (for Niri and other wlroots compositors)
-    WLR_BACKEND = "vulkan"; # Use Vulkan backend
-    WLR_RENDERER = "vulkan"; # Use Vulkan renderer
+    WLR_BACKEND = "vulkan";
+    WLR_RENDERER = "vulkan";
 
     #--- Development and tools
     DIRENV_LOG_FORMAT = ""; # Disable direnv logging format
     EDITOR = "zeditor --wait"; # Default editor (for git, /memory, etc.); binary is zeditor, not zed
-    VISUAL = "zeditor --wait"; # Visual editor
+    VISUAL = "zeditor --wait";
 
     #--- Gaming
-    GAMESCOPE_DISABLE_VULKAN_RENDERDOC_CAPTURE = "1"; # Disable RenderDoc capture in Gamescope
+    GAMESCOPE_DISABLE_VULKAN_RENDERDOC_CAPTURE = "1";
 
     #--- Proton
     PROTON_USE_NTSYNC = "1";

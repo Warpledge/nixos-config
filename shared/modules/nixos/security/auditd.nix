@@ -7,7 +7,7 @@
   #-- Audit Daemon Configuration
   #--------------------------------------------------------------------#
   security = {
-    auditd.enable = true; # Enable system auditing daemon
+    auditd.enable = true;
     audit = {
       enable = false; # Disable audit subsystem due to rule syntax issues
       backlogLimit = 8192; # Maximum audit event backlog
@@ -26,8 +26,8 @@
       description = "Periodically clean audit log";
       wantedBy = ["timers.target"];
       timerConfig = {
-        OnCalendar = "daily"; # Run daily cleanup
-        Persistent = true; # Persist state across reboots
+        OnCalendar = "daily";
+        Persistent = true; # Run on next boot if the machine was off at the scheduled time
       };
     };
 

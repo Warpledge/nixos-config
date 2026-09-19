@@ -6,7 +6,7 @@
   home-manager.users.${username} = {
     home.sessionVariables = {
       #--- Qt Theme Session Variables
-      QT_STYLE_OVERRIDE = "kvantum"; # Use Kvantum for Qt theme
+      QT_STYLE_OVERRIDE = "kvantum";
       QT_QPA_PLATFORMTHEME = "qt6ct";
       QT_QPA_ICON_THEME_SEARCH_PATHS = "/run/current-system/sw/share/icons:\${HOME}/.icons";
     };

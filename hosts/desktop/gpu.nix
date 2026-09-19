@@ -36,7 +36,7 @@
       opencl.enable = true;
     };
     enableRedistributableFirmware = true; # Enable proprietary firmware for hardware compatibility
-    cpu.amd.updateMicrocode = true; # Enable AMD CPU microcode updates
+    cpu.amd.updateMicrocode = true;
   };
 
   #--------------------------------------------------------------------#
@@ -51,7 +51,7 @@
     VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/radeon_icd.x86_64.json:/run/opengl-driver-32/share/vulkan/icd.d/radeon_icd.i686.json";
 
     #--- RDNA 3 specific tweaks
-    DISABLE_LAYER_AMD_SWITCHABLE_GRAPHICS_1 = "1"; # Disable AMD switchable graphics layer
+    DISABLE_LAYER_AMD_SWITCHABLE_GRAPHICS_1 = "1";
 
     #--- Force PCIe 4.0 x16 (make sure your motherboard supports it)
     RADV_FORCE_VRS = "2x2"; # Variable rate shading for better perf

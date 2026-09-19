@@ -23,10 +23,10 @@
   #--------------------------------------------------------------------#
   networking = {
     stevenblack = {
-      enable = true; # Enable Steven Black host blocklist
+      enable = true;
       block = [
-        "fakenews" # Block fake news sites
-        "gambling" # Block gambling sites
+        "fakenews"
+        "gambling"
       ];
     };
   };

@@ -5,7 +5,7 @@ Instance: `TerraFirmaGreg-Modern` (Prism Launcher)
 Path: `~/.local/share/PrismLauncher/instances/TerraFirmaGreg-Modern/minecraft/`
 Loader: Forge 1.20.1
 
-> **Claude:** Keep these files up to date whenever the modpack changes — config edits, mods added/removed, server settings changed. Update the relevant sub-file without being asked.
+> **Claude:** Keep these files up to date whenever the modpack changes: config edits, mods added/removed, server settings changed. Update the relevant sub-file without being asked.
 
 ---
 

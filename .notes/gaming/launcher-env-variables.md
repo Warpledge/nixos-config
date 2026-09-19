@@ -30,7 +30,7 @@ LC_ALL=ja_JP.UTF-8
 `ja_JP.UTF-8` locale is already enabled system-wide in
 `shared/modules/nixos/system/locale.nix`, so these just need to be set on the
 game's process. Proton-GE inherits them and feeds the correct codepage to the
-game. Set per-game, not globally — you don't want every title in a JP locale.
+game. Set per-game, not globally: you don't want every title in a JP locale.
 
 ---
 
@@ -40,7 +40,7 @@ game. Set per-game, not globally — you don't want every title in a JP locale.
 PROTON_USE_WINED3D=1
 ```
 **What it does:** Replaces DXVK/VKD3D (Vulkan) with WineD3D (OpenGL) for
-Direct3D translation. Slower but more compatible — use for old games that
+Direct3D translation. Slower but more compatible, so use it for old games that
 crash, render black/white, or have broken effects under DXVK. Common for older
 RPG Maker (RGSS / Direct3D8) and DirectDraw-era VNs.
 
@@ -51,7 +51,7 @@ PROTON_NO_D3D11=1
 PROTON_NO_D3D12=1
 ```
 **What it does:** Disable a specific Direct3D version so the game falls back to
-an older renderer. Occasionally needed for games that misdetect capabilities.
+an older renderer. Needed for games that misdetect capabilities.
 
 ```
 PROTON_ENABLE_NVAPI=1
@@ -97,9 +97,9 @@ Prefer `PROTON_ENABLE_WAYLAND=0` over the wrapper for pure-Proton games; use the
 
 ## RPG Maker games
 
-RPG Maker comes in two very different runtimes — identify which before tweaking.
+RPG Maker comes in two different runtimes, so identify which before tweaking.
 
-### RPG Maker 2000/2003, XP, VX, VX Ace (RGSS — old, Windows-only)
+### RPG Maker 2000/2003, XP, VX, VX Ace (RGSS, old and Windows-only)
 Use a JP locale + WineD3D; these use DirectDraw / Direct3D8 which DXVK handles
 poorly, and most raw releases are Shift-JIS.
 ```
@@ -111,10 +111,10 @@ LC_ALL=ja_JP.UTF-8
 ```
 PROTON_USE_WINED3D=1
 ```
-**Notes:** If text boxes are blank, the game's bundled RTP fonts may be missing —
+**Notes:** If text boxes are blank, the game's bundled RTP fonts may be missing:
 the `ipafont` / `kochi-substitute` fonts in `theme/fonts.nix` cover most cases.
 
-### RPG Maker MV / MZ (NW.js — Chromium-based)
+### RPG Maker MV / MZ (NW.js, Chromium-based)
 These are basically packaged web apps. If they hang on a black screen or crash
 on the GPU process, disable the sandbox / GPU as **launch arguments** (not env):
 ```
@@ -123,8 +123,8 @@ on the GPU process, disable the sandbox / GPU as **launch arguments** (not env):
 ```
 --in-process-gpu
 ```
-**Notes:** Many MV/MZ games ship a native Linux build — prefer that over Proton
-when available. Locale env vars are usually unnecessary (UTF-8 native).
+**Notes:** Many MV/MZ games ship a native Linux build, so prefer that over Proton
+when available. Locale env vars are unnecessary (UTF-8 native).
 
 ---
 
@@ -175,7 +175,7 @@ tweaks); `mangohud` overlays FPS/frametime/temps. Both packaged in `gaming.nix`.
 PROTON_LOG=1
 ```
 **What it does:** Writes a `steam-<appid>.log` (Steam) or Proton log to `$HOME`
-for diagnosing Wine/DXVK errors. Disable when done — it's noisy and slows launch.
+for diagnosing Wine/DXVK errors. Disable when done: it's noisy and slows launch.
 
 ```
 WINEDEBUG=-all

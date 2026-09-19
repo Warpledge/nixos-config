@@ -35,7 +35,7 @@ https://gitlab.com/curben/urlhaus-filter/-/raw/master/urlhaus-filter-online.txt
 
 ## HaGeZi Safe Variants
 
-**About HaGeZi:** Personal blocklist with multiple safety tiers. Choose based on your tolerance for occasional breakage.
+**About HaGeZi:** Personal blocklist with multiple safety tiers. Pick a tier by how much breakage you are willing to put up with.
 
 ### HaGeZi Light
 
@@ -51,7 +51,7 @@ https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/light.txt
 
 ### HaGeZi Normal
 
-**Best for:** Most users seeking good protection without significant restrictions
+**Best for:** Most setups: broad blocking, little breakage
 - Adds affiliate domains and phishing to Light
 - **Entries:** 264,594 domains
 - **Blocking Type:** Relaxed/Balanced
@@ -63,7 +63,7 @@ https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/normal.txt
 
 ### HaGeZi Pro
 
-**Best for:** Problem-free ad-blocking with solid privacy
+**Best for:** Ad and tracker blocking that does not break sites
 - Adds cryptojacking, scams, error trackers
 - **Entries:** 344,249 domains
 - **Blocking Type:** Balanced
@@ -76,11 +76,11 @@ https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/pro.txt
 
 ## HaGeZi Specialized Additions
 
-**Note:** These are separate from the mainline variants and provide additional specialized blocking not fully covered by HaGeZi Pro/Light/Normal.
+**Note:** These are separate from the mainline variants and block things Pro, Light and Normal leave alone.
 
 ### HaGeZi Specialized - Safe Tier
 
-**Best for:** Adding protection without breakage risk
+**Best for:** More blocking with no breakage risk
 
 #### HaGeZi Fake
 
@@ -118,14 +118,14 @@ https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/social.txt
 
 ### HaGeZi Specialized - Moderate Tier
 
-**Best for:** Enhanced protection with occasional breakage possible
+**Best for:** More blocking, some breakage
 
 #### HaGeZi Most Abused TLDs
 
 **Best for:** Blocking scam/spam domains before major lists catch them
 **Blocks:** Top-level domains with poor reputation
 - Multiple format variants for different adblockers
-- Rare breakage but significantly improves security
+- Rarely breaks sites
 
 ```
 https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/spam-tlds.txt
@@ -195,7 +195,7 @@ https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/doh-vpn-proxy-b
 
 **HaGeZi Pro + All Specialized Enhancements**
 
-This combines HaGeZi Pro (comprehensive ad/tracking/malware/phishing blocking) with all specialized lists except social & proxy bypass:
+This combines HaGeZi Pro (broad ad/tracking/malware/phishing blocking) with all specialized lists except social & proxy bypass:
 
 ```
 https://easylist.to/easylist/fanboy-annoyance.txt
@@ -240,7 +240,7 @@ https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/urlshortener.tx
 3. Click "Apply changes"
 4. Refresh Twitch
 
-**Important:** This is an ongoing arms race with Twitch. Keep scripts updated and expect occasional breakages as Twitch changes ad delivery methods. See [TwitchAdSolutions](https://github.com/pixeltris/TwitchAdSolutions) for the latest working solutions.
+**Important:** Twitch keeps changing its ad delivery to defeat these scripts, so expect the filter to stop working. When it does, pull an updated script from [TwitchAdSolutions](https://github.com/pixeltris/TwitchAdSolutions) and repoint `userResourceLocation` at it.
 
 ## How to Use in uBlock Origin
 

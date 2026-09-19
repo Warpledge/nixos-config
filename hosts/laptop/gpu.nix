@@ -12,7 +12,7 @@
   #--- Load AMD GPU drivers
   boot = {
     initrd.kernelModules = ["amdgpu"];
-    blacklistedKernelModules = ["nouveau"]; # Prevent nouveau from loading
+    blacklistedKernelModules = ["nouveau"];
     kernelParams = [
       "nvidia-drm.modeset=1" # Enable direct mode setting for better Wayland support
       "nvidia_drm.fbdev=1" # Enable framebuffer device support

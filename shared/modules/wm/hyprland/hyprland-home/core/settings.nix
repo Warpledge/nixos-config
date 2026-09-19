@@ -59,7 +59,7 @@
         gaps_out = 8;
         border_size = 2;
 
-        "col.inactive_border" = lib.mkForce "rgb(1e1e2e)"; # Fully transparent
+        "col.inactive_border" = lib.mkForce "rgb(1e1e2e)"; # Base
         "col.active_border" = lib.mkForce "rgb(cba6f7)"; # Mauve
 
         snap = {

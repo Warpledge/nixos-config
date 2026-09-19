@@ -17,8 +17,8 @@ in {
     sudo = {
       enable = true; # Enable traditional sudo
       keepTerminfo = true; # Fix sudo in modern terminal emulators
-      wheelNeedsPassword = mkDefault false; # Wheel group can sudo without password
-      execWheelOnly = mkForce true; # Only wheel group can execute sudo
+      wheelNeedsPassword = mkDefault false;
+      execWheelOnly = mkForce true;
       extraConfig = ''
         Defaults lecture = never # Don't show sudo lecture on first use
         Defaults pwfeedback # Show password input feedback (asterisks)
@@ -83,7 +83,7 @@ in {
         sudoCommands = map mkSudoRule sudoRules;
       in [
         {
-          groups = ["wheel"]; # Allow wheel group
+          groups = ["wheel"];
           commands = sudoCommands; # These commands without password
         }
       ];

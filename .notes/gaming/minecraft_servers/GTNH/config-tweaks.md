@@ -44,7 +44,7 @@ All set to `false` (default: `true`):
 - `B:machineWireFire=false` — No wire burnout cascade on explosion
 
 ### GregTech Client — `config/GregTech/Client.cfg`
-- `B:wailaAverageNS=true` — Shows average tick time (ns) per machine in WAILA tooltip (default: `false`). Note: NHUtilities mixin attempts to force this on but GT's config file overrides it — must be set here directly.
+- `B:wailaAverageNS=true` — Shows average tick time (ns) per machine in WAILA tooltip (default: `false`). Note: NHUtilities mixin attempts to force this on but GT's config file overrides it, so it must be set here directly.
 
 ---
 
@@ -131,7 +131,7 @@ Enabled commands (under `commands` section, default `false` → `true`):
 - `B:tpa=true` — `/tpa <player>` teleport request, `/tpaccept` to accept
 - `B:back=true` — `/back` teleport to last death or teleport location
 
-Ranks disabled (`B:enabled=false`) — not needed for solo/two-player, defaults to admin permissions.
+Ranks disabled (`B:enabled=false`): not needed for solo/two-player, defaults to admin permissions.
 
 ### Server Utilities Ranks — `serverutilities/server/ranks.txt`
 Applied to all three ranks (`player`, `vip`, `admin`). Original values noted for reversion:
@@ -208,7 +208,7 @@ Halved all death/degrade RNG from bee machines. Original values noted for revers
 ## Added Mod Configs
 
 ### GTNotLeisure (GTNL) — `config/GTNotLeisure/GTNotLeisure.cfg`
-- `B:enableStickItem=false` — Disables the GTNL "Stick" fake item and its associated villager trades (default: `true`). When enabled, GTNL registers trades for all 5 vanilla villager types that appear to give Avaritia Infinity gear, but the items are non-functional cardboard replicas (GTNL Stick disguise system). Disabled to avoid confusing fake gear appearing in villager UIs — not a real progression exploit.
+- `B:enableStickItem=false` — Disables the GTNL "Stick" fake item and its associated villager trades (default: `true`). When enabled, GTNL registers trades for all 5 vanilla villager types that appear to give Avaritia Infinity gear, but the items are non-functional cardboard replicas (GTNL Stick disguise system). Disabled to avoid confusing fake gear appearing in villager UIs, not a real progression exploit.
 
 ### GTNHRates — `config/gtnhrates.cfg`
 See [mods.md](mods.md#gtnhrates) for full table.
