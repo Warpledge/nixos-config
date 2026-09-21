@@ -74,7 +74,7 @@
   # Enable the music and audio applications you want installed
   audio = {
     reaper = true; # DAW; ships SWS/S&M + ReaPack, JACK routed through PipeWire
-    guitar = true; # Amp sims (NeuralRack/Guitarix) + cab IRs; Katana DI capture
+    guitar = true; # Amp sims (TONE3000/Guitarix) + cab IRs; Katana DI capture
   };
 
   #--- Finance Software Selection
