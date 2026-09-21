@@ -365,7 +365,7 @@
   "dockShowOverflowBadge": true,
   "notificationOverlayEnabled": true,
   "notificationPopupShadowEnabled": true,
-  "notificationPopupPrivacyMode": true,
+  "notificationPopupPrivacyMode": false,
   "modalDarkenBackground": true,
   "lockScreenShowPowerActions": true,
   "lockScreenShowSystemIcons": true,

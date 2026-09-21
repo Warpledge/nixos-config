@@ -18,6 +18,8 @@ NixOS flake managing **Desktop** (Ryzen 5800X3D + RX 9070 XT, 280Hz OLED + 144Hz
 
 `AGENTS.md` at the repo root is a second, shorter ruleset for other agents (opencode reads it *instead of* `CLAUDE.md`). The two must not contradict each other: when a rule here changes, check whether `AGENTS.md` says the same.
 
+`.claude/` is gitignored, so this repo's Claude settings stay local and are never committed. So are `assign.kat`, `preferences.xml` and `license.txt` at the root: the BOSS Katana FloorBoard app writes them into whatever directory it starts in, and they're runtime artifacts rather than strays to clean up.
+
 ## Commands
 
 ```bash
@@ -99,20 +101,20 @@ Gotchas. Grep the option name before assuming which file owns it:
 ++ (lib.optional (hostConfig.windowManager == "niri") ./wm/niri.nix)
 ```
 
-`shared/core.nix` is also where the CachyOS kernel overlay is conditionally applied (`hostConfig.kernel == "cachyos"` → `inputs.cachyos-kernel.overlays.pinned`), where `nixpkgs.config.allowUnfree` is set, and where `home-manager.backupFileExtension = "bak"` is set. Both `system.stateVersion` and `home.stateVersion` are pinned to `25.11`, marked DO NOT CHANGE.
+`shared/core.nix` is also where the overlay list is assembled, where `nixpkgs.config` sets `allowUnfree` and `android_sdk.accept_license`, and where `home-manager.backupFileExtension = "bak"` is set. Two overlays live in that list: `gearleverOverlay` unconditionally, which overrides gearlever's `dwarfs` to `emptyDirectory` because dwarfs 0.14.0 doesn't build against GCC 15 (drop it once it does), and the CachyOS kernel one when `hostConfig.kernel == "cachyos"` (`inputs.cachyos-kernel.overlays.pinned`). A new overlay is appended to the same list. Both `system.stateVersion` and `home.stateVersion` are pinned to `25.11`, marked DO NOT CHANGE.
 
 ### Module layout
 
-- `shared/modules/nixos/` — system: `network/`, `nix/`, `security/`, `services/`, `programs/` (incl. `gaming/`, `flatpak.nix`), `system/` (bootloader, locale, user, wayland, zram, japanese-ime)
-- `shared/modules/home-manager/` — user: `programs/` (browsers, terminals, editors, ai, shell, chat-clients, emulation, fetch, file-browsers, creative, media, finance, launchers, local, plus `android.nix`, `archives.nix`, `gaming.nix`, `git.nix`, `japanese-vn.nix`), services, scripts, mime, variables
+- `shared/modules/nixos/` — system: `network/` (core, blockers), `nix/` (core, nh, nixpkgs, substituters), `security/` (auditd, core, kernel, sudo), `services/` (adb, gnome-services, keyd, power, runners, sound, clamav), `programs/` (`gaming/`, `docker.nix`, `flatpak.nix`, `utility.nix`), `system/` (bootloader, locale, shell, tweaks, user, wayland, xserver, zram, japanese-ime)
+- `shared/modules/home-manager/` — user: `programs/` (browsers, terminals, editors, ai, shell, chat-clients, emulation, fetch, file-browsers, creative, media, finance, launchers, local, plus `android.nix`, `archives.nix`, `core.nix`, `gaming.nix`, `git.nix`, `japanese-vn.nix`, `scrcpy.nix`) and `scripts/`. `mime.nix`, `services.nix` and `variables.nix` are single files at that level, not directories
   - `programs/local/` — wrappers for non-nixpkgs prebuilt bundles living in `~/.local/opt/`; the payload is intentionally not in the repo
   - `default.nix` carries a `clearStaleBackups` activation hook that deletes `*.bak` under `~/.config`, `~/.local/{share,state}` before `checkLinkTargets`. This is why HM activation never fails on leftover backups. Don't remove it when debugging a "file exists" error; find the real conflicting file instead.
   - `programs/media/freetube/` — `settings.nix` (mirrored from the app), `blocked-channels.nix` (~2k channel ids in one flat list, sorted by lowercased name under `LC_ALL=C`) and `subscriptions.nix` (master list + FreeTube profiles, which are subscription groups). Three things bite here. The home-manager module copies `hm_settings.db` over `settings.db` **only when the declared content changes**, and FreeTube rewrites that file from memory when it exits, so close FreeTube before rebuilding, or the copy is clobbered and stays clobbered until the module changes again. Blocklist entries are emitted with a `preferredName` and a placeholder `icon`, because FreeTube re-resolves every entry missing either one, at one API call each. Ownership differs per file: settings and the blocklist are **mirrored** (module wins, a rebuild copies them in), while subscriptions and profiles are **seed-only**: a `home.activation` script guarded by `[[ ! -e ]]` writes `profiles.db` once, so the app owns them and rebuilds never overwrite. `nixm freetube-sync` recaptures subscriptions behind a y/N prompt, but not profiles.
 - `shared/modules/wm/{hyprland,niri,gnome,cosmic}/` — each has `<wm>-nixos/` and `<wm>-home/`. Only Hyprland and Niri integrate DankMaterialShell (DMS); GNOME uses `gnome-home/extensions/` + `dconf.nix`, COSMIC uses `cosmic-home/shell/{panel,applets}.nix`
-- `shared/modules/theme/` — stylix, catppuccin, fonts
+- `shared/modules/theme/` — stylix, catppuccin, fonts, plus `gtk.nix` and `qt.nix`, the toolkit theming targets rule 5 routes through
 - `shared/modules/mullvad/` — `mullvad-nixos/` (daemon settings + system-package split tunnel) and `mullvad-home/` (tray app + home-package split tunnel). Imported from `shared/core.nix` like the WM, gated on `hostConfig.mullvad.enable`
 - `hosts/{hostname}/` — `gpu.nix`, `hardware-configuration.nix`, `{hostname}.nix`, `hostConfig/core.nix`, `wm/<wm>.nix` (per-WM host overrides: monitors, GPU env vars, autostart)
-- `hosts/laptop/` also has `swapfile.nix` and `minecraft-servers/` (GTNH + TerraFirmaGreg server definitions). `minecraft-servers/` is a **home-manager** module injected from `laptop.nix` via `home-manager.users.${username}.imports`, not a NixOS module, and the only place in the repo that reaches into HM from a host entry file.
+- `hosts/laptop/` also has `swapfile.nix` and `minecraft-servers/` (GTNH + TerraFirmaGreg server definitions, plus `mcservers.nix`, an fzf picker over them). `minecraft-servers/` is a **home-manager** module injected from `laptop.nix` via `home-manager.users.${username}.imports`, not a NixOS module, and the only place in the repo that reaches into HM from a host entry file.
 
 ### Where to place things
 
@@ -134,7 +136,7 @@ Gotchas. Grep the option name before assuming which file owns it:
 3. Add the conditional import to `shared/modules/home-manager/programs/default.nix`, the only router under `programs/`. The nested `default.nix` files (`browsers/{zen,mullvad,helium}/`, `media/freetube/`) are multi-file module bundles, not routers
 4. `alejandra .` → `git add` new files → `nix flake check` (do not rebuild; hand it back)
 5. Give any prose the task wrote or edited a cut-only revision pass before handing back: remove words, add none. No new information, no new claims, no rephrasing that smuggles either in. See **Writing Style**.
-6. Add it to the matching `### ` list under **Components** in `README.md` (and `## Structure` if a new directory was created), plus its link-reference definition at the bottom: the README is the public-facing doc and drifts easily.
+6. Add it to the matching `<details>` table under **Components** in `README.md` (and `## Structure` if a new directory was created), plus its link-reference definition at the bottom: the README is the public-facing doc and drifts easily.
 
    **`README.md` is ~25 KB. Never read it in full.** Grep the two regions you need, then edit those lines directly:
 
@@ -412,7 +414,7 @@ Game-specific notes live under `.notes/gaming/`:
 - `gaming/steam-launch-parameters.md` — per-game Steam launch flags; documents the `tml-prelaunch` script (`shared/modules/home-manager/scripts/gaming/tml-prelaunch.nix`)
 - `gaming/launcher-env-variables.md` — common env vars + wrappers for Heroic/Lutris/Faugus/umu/Steam (JP locale, Proton WineD3D, XWayland wrapper, RPG Maker, perf wrappers)
 - `gaming/steam-client-menu-bug.md` — Steam's menus self-dismiss on niri because xwayland-satellite 0.8.2 focuses override-redirect windows; `niri-home/core/xwayland.nix` pins past it to upstream `add2795` (PR #494). Drop the pin once nixpkgs ships that commit
-- `gaming/minecraft_servers/{GTNH,TerraFirmaGreg-Modern}/` — each pack has `index.md` listing its sub-files (server setup, mods, config tweaks, etc.). **Update the relevant sub-file when that pack's config, mods, or settings change.** The matching declarative modules live at `hosts/laptop/minecraft-servers/{gtnh-server,tfg-server}.nix` (add a new server by creating a `.nix` there and importing it in that dir's `default.nix`).
+- `gaming/minecraft_servers/{GTNH,TerraFirmaGreg-Modern}/` — each pack has `index.md` listing its sub-files (server setup, mods, config tweaks, etc.). **Update the relevant sub-file when that pack's config, mods, or settings change.** The matching declarative modules live at `hosts/laptop/minecraft-servers/{gtnh-server,tfg-server}.nix` (add a new server by creating a `.nix` there, importing it in that dir's `default.nix`, and adding a line to the hardcoded pack list in `mcservers.nix`, the fzf picker that names each pack with its version and dispatches to that server's command).
 
 Android device notes live under `.notes/android/`:
 
@@ -421,3 +423,7 @@ Android device notes live under `.notes/android/`:
 Local (non-nixpkgs) binary installs live under `.notes/local/`:
 
 - `local/local-binary-installs.md` — the `~/.local/opt` + `hostConfig.local` pattern for prebuilt third-party bundles kept out of git; restore steps for fresh installs / the laptop. **Add an entry here for each new local app.**
+
+Music listening notes live under `.notes/music/`:
+
+- `music/five-star-albums.md` — the 148 albums rated 10/10 on RateYourMusic as of the 2026-09-20 export, as a checklist for adding to Passport by hand. Generated by filtering the RYM export for `rating == 10`; the CSVs themselves stay in `~/Downloads`, out of the repo.

@@ -190,6 +190,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | **Android** | [scrcpy][scrcpy] (mirror and control a device over USB or wifi, nothing to install on the phone) |
 | **Video Trimming** | [Video Trimmer][video-trimmer] (cut a clip out of a video without re-encoding it) |
 | **Finance** | [HomeBank][homebank] (personal accounting with labeled transactions and a running balance) |
+| **Collection Tracking** | [Tonkatsu Box][tonkatsu-box] (games, film, anime, manga, visual novels, books and music in one local database, imports from Steam and AniList; a prebuilt bundle kept in `~/.local/opt/` instead of nixpkgs) |
 | **Japanese** | [fcitx5][fcitx5] + [Mozc][mozc] for typing hiragana, katakana and kanji, plus [innoextract][innoextract], [cabextract][cabextract] and [mdf2iso][mdf2iso] for unpacking raw Japanese visual novels (off by default) |
 </details>
 
@@ -293,6 +294,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [sws]: https://www.sws-extension.org
 [reapack]: https://reapack.com
 [tone3000]: https://www.tone3000.com/plugin
+[tonkatsu-box]: https://github.com/hacan359/tonkatsu_box
 [neuralrack]: https://github.com/brummer10/NeuralRack
 [ratatouille]: https://github.com/brummer10/Ratatouille.lv2
 [guitarix]: https://guitarix.org

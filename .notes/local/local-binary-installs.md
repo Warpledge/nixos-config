@@ -81,3 +81,51 @@ If RMO ever breaks, GBFRDataTools is the underlying CLI it wraps
 build). The manual path is: copy a mod's `GBFR/data/*` into `<game>/data/`, back
 up `data.i` to `orig_data.i`, then `GBFRDataTools add-external-files -i
 "<game>/data.i" --overwrite` (needs `dotnet-runtime_9` via `DOTNET_ROOT`).
+
+## tonkatsu-box
+
+- **What:** Tonkatsu Box (hacan359), a local-first collection manager for
+  games, movies, TV, anime, manga, visual novels, books and audio. MIT, Flutter
+  desktop build. Catalogs include IGDB, TMDB, VNDB, AniList, MangaDex,
+  MusicBrainz.
+- **Command:** `tonkatsu-box` (also a desktop entry).
+- **Location:** `~/.local/opt/tonkatsu-box/`
+- **Runtime:** the bundle's RUNPATH is `$ORIGIN/lib`, so its own Flutter
+  plugins resolve themselves. The wrapper only adds the GTK3 stack the engine
+  links against (gtk3, glib, pango, cairo, atk, gdk-pixbuf, harfbuzz, libepoxy,
+  fontconfig, zlib, libstdc++) plus `/run/opengl-driver/lib` for Flutter's
+  Impeller GL backend. `lib/libdartjni.so` wants `libjvm.so` and is never
+  loaded on desktop, so it needs no JDK.
+- **Restore:** download `tonkatsu-box-v<version>-linux.tar.gz` from
+  <https://github.com/hacan359/tonkatsu_box/releases>, extract so `tonkatsu_box`
+  lands directly in the folder next to `lib/` and `data/`, `chmod +x` it.
+  Installed as v0.44.0 on 2026-09-20.
+
+### Steam library import
+
+Settings -> Import -> Steam Library. Needs a Steam Web API key from
+<https://steamcommunity.com/dev/apikey>, a 64-bit SteamID, and a public game
+library. There is no OpenID browser login, which is what a Mullvad exit gets
+blocked on: Steam refused a browser sign-in over `us-chi-wg-202` on 2026-09-20
+because DataPacket netblocks register as GB. Fetching the API key still needs
+one signed-in page load, so do it from the Steam client's own browser, which is
+already authenticated and rides the real IP via `mullvad.splitTunnel`.
+
+### Device-to-device sync
+
+Settings -> Database -> Network Sync -> Nearby devices. One-way **full
+replacement**, not a merge: the receiving device's database is overwritten, so
+pick one master device. Manual on both ends, both on the same Wi-Fi. "Also
+transfer settings" carries API keys and logins across. It keeps a one-step
+safety copy before overwriting (Settings -> Database -> Backup restores it, and
+restoring twice undoes the restore); use Backup All Data for a real archive.
+Per upstream docs an active VPN hides the devices from each other, so Mullvad's
+LAN sharing has to stay on at both ends.
+
+### Sharing
+
+No public profiles. Collections export as `.xcoll` (ids only, metadata
+re-fetched on import) or `.xcollx` (board layouts plus embedded covers,
+offline). Tier lists and mood grids export as PNG. Community collections live
+at <https://github.com/hacan359/tonkatsu-collections> and are browsable in-app
+under Settings -> Import -> Browse Online Collections.
