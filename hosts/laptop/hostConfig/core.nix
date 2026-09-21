@@ -59,6 +59,7 @@
     spotify = true;
     freetube = true;
     videoTrimmer = true;
+    mangayomi = true; # Manga, novel and anime reader (AppImage, ahead of nixpkgs)
   };
 
   #--- Graphics Software Selection

@@ -66,11 +66,11 @@ The authoritative list of toggles is **`hosts/{hostname}/hostConfig/core.nix`**.
 - `windowManager` — `"hyprland" | "niri" | "gnome" | "cosmic"`
 - `kernel` — `"zen" | "latest" | "xanmod" | "cachyos"`
 - Service toggles: `mullvad.enable` (plus `mullvad.splitTunnel`, a list of command names routed around the VPN), `clamav.enable`, `docker.enable`, `winboat.enable`, `discord.arrpc.enable`, `scrcpy.enable`, `ferdium.enable`
-- Attribute-set toggles: `browsers.{zen,mullvad,helium}`, `terminals.{kitty,ghostty}`, `editors.{helix,zed}`, `fileBrowsers.{nautilus,yazi}`, `media.{mpv,spotify,freetube,videoTrimmer}`, `graphics.{blender,krita,affinity}`, `audio.{reaper,guitar}`, `finance.{homebank}`, `gameLaunchers.{steam,heroic,prismlauncher,lutris,faugus,twintail}`, `japanese.{ime,vn}`
+- Attribute-set toggles: `browsers.{zen,mullvad,helium}`, `terminals.{kitty,ghostty}`, `editors.{helix,zed}`, `fileBrowsers.{nautilus,yazi}`, `media.{mpv,spotify,freetube,videoTrimmer,mangayomi}`, `graphics.{blender,krita,affinity}`, `audio.{reaper,guitar}`, `finance.{homebank}`, `gameLaunchers.{steam,heroic,prismlauncher,lutris,faugus,twintail}`, `japanese.{ime,vn}`
 - `local.{granblueRelinkMods}` — wrappers around prebuilt bundles under `~/.local/opt/` (kept out of git); see `.notes/local/local-binary-installs.md`
 - AI tools: `claude.enable`, `opencode.enable`, `lmstudio.enable`
 
-Desktop and laptop should stay byte-identical apart from the header comment and a short list of deliberate differences. As of 2026-09-17 those are `gameLaunchers.heroic` and `discord.arrpc.enable`, both true on desktop and false on laptop (plus a longer trailing comment on `local.granblueRelinkMods` in the laptop file). Verify with `diff hosts/desktop/hostConfig/core.nix hosts/laptop/hostConfig/core.nix` before assuming.
+Desktop and laptop should stay byte-identical apart from the header comment and a short list of deliberate differences. As of 2026-09-21 those are `gameLaunchers.heroic` and `discord.arrpc.enable`, both true on desktop and false on laptop (plus a longer trailing comment on `local.granblueRelinkMods` in the laptop file). Verify with `diff hosts/desktop/hostConfig/core.nix hosts/laptop/hostConfig/core.nix` before assuming.
 
 Gotchas. Grep the option name before assuming which file owns it:
 
@@ -423,6 +423,7 @@ Android device notes live under `.notes/android/`:
 Local (non-nixpkgs) binary installs live under `.notes/local/`:
 
 - `local/local-binary-installs.md` — the `~/.local/opt` + `hostConfig.local` pattern for prebuilt third-party bundles kept out of git; restore steps for fresh installs / the laptop. **Add an entry here for each new local app.**
+- `local/appimage-wraps.md` — the `appimageTools.wrapType2` pattern for upstream AppImages (Mangayomi). Hash-pinned into the store, so nothing to restore by hand; covers the per-app `Exec`/icon fixups, a non-executable `AppRun`, how to get a new hash when `nix store prefetch-file` hits the daemon's DNS timeout, and building one module without a rebuild.
 
 Music listening notes live under `.notes/music/`:
 
