@@ -114,11 +114,18 @@ The top level is a set of categories. Pick one and it opens into its own menu of
 | `nixm firmware-update` | Install firmware updates |
 | `nixm firmware-devices` | List devices with firmware support |
 
+#### FreeTube
+
+Each run drops a `YYYY-MM-DD_HH-MM-SS` folder into `~/Backups/FreeTube` holding all three files, and the 10 most recent runs are kept. The files use FreeTube's own Export format, so its Settings → Data Settings → Import reads them straight back. Close FreeTube first: it rewrites its databases on exit.
+
+| Command | Description |
+| --- | --- |
+| `nixm freetube-backup` | Export subscriptions, playlists and watch history to a new dated folder |
+
 #### Tools
 
 | Command | Description |
 | --- | --- |
-| `nixm freetube-sync` | Pull your current FreeTube subscriptions into `subscriptions.nix` (asks before writing) |
 | `nixm vulkan` | Print Vulkan capabilities (vulkaninfo) |
 
 #### Android

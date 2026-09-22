@@ -23,6 +23,7 @@ with lib; let
     archive = ["org.gnome.FileRoller.desktop"];
     discord = ["discord.desktop"];
     freetube = ["freetube.desktop"];
+    webLinks = ["youtube-dispatch.desktop"];
   };
 
   mimeMap = {
@@ -61,9 +62,12 @@ with lib; let
     browser = [
       "text/html"
       "x-scheme-handler/about"
+      "x-scheme-handler/unknown"
+    ];
+    #--- routed through youtube-dispatch so YouTube links reach FreeTube
+    webLinks = [
       "x-scheme-handler/http"
       "x-scheme-handler/https"
-      "x-scheme-handler/unknown"
     ];
     office = [
       "application/vnd.oasis.opendocument.text"

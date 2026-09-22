@@ -73,6 +73,16 @@ let
       default-column-width = {proportion = 1.0;};
     }
 
+    #--- Open Unfocused
+    #--- Keeps youtube-dispatch link handoffs in the background; each one is a
+    #--- new window (openDeepLinksInNewWindow). Outranks the activation token.
+    {
+      matches = [
+        {app-id = "freetube";}
+      ];
+      open-focused = false;
+    }
+
     #--- Floating Rules
     #--- ProtonUp-Qt (Wine/Proton Installer)
     {

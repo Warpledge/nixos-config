@@ -55,6 +55,61 @@
         printf '%s' "$v"
       }
 
+      #--- FreeTube rewrites its databases from memory on exit, so a backup
+      #--- taken while it runs is stale.
+      #--- pgrep -f matches any command line mentioning the path, this
+      #--- script's own included, so drop self and parent from the result.
+      function ft_closed() {
+        local pids
+        mapfile -t pids < <(pgrep -f 'freetube/resources/app.asar' 2>/dev/null \
+          | grep -vx -e "$$" -e "$PPID")
+        if [[ ''${#pids[@]} -gt 0 ]]; then
+          echo "FreeTube is running. Close it first so its databases are flushed to disk." >&2
+          return 1
+        fi
+      }
+
+      #--- Writes one JSON document per line, which is the format FreeTube's
+      #--- own Export writes and Import reads. The source files are NeDB
+      #--- append-logs, so later lines supersede earlier ones by _id.
+      function ft_export() {
+        local src="$HOME/.config/FreeTube/$1.db" out="$FT_DEST/$2" label=$3 tmp
+        if [[ ! -f "$src" ]]; then
+          echo "  $label: no database at $src, skipped" >&2
+          return 1
+        fi
+        tmp=$(mktemp)
+        if ! ${pkgs.jq}/bin/jq -cs 'reduce .[] as $d ({}; .[$d._id] = $d)
+              | .[] | select(has("$$deleted") | not)' "$src" > "$tmp"; then
+          echo "  $label: unreadable, leaving the existing backup alone" >&2
+          rm -f "$tmp"
+          return 1
+        fi
+        if [[ ! -s "$tmp" ]]; then
+          echo "  $label: export came out empty, leaving the existing backup alone" >&2
+          rm -f "$tmp"
+          return 1
+        fi
+        install -Dm644 "$tmp" "$out"
+        rm -f "$tmp"
+        echo "  $label: $(wc -l < "$out") records"
+      }
+
+      #--- Keeps the newest FT_KEEP dated folders. The glob doubles as the
+      #--- guard: only names in stamp form are candidates, and the stamp
+      #--- sorts lexicographically, so oldest come first.
+      function ft_prune() {
+        local dirs old
+        shopt -s nullglob
+        dirs=("$FT_BACKUP_DIR"/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]_[0-9][0-9]-[0-9][0-9]-[0-9][0-9])
+        shopt -u nullglob
+        [[ ''${#dirs[@]} -gt $FT_KEEP ]] || return 0
+        for old in "''${dirs[@]:0:$(( ''${#dirs[@]} - FT_KEEP ))}"; do
+          rm -rf "$old"
+          echo "  pruned $(basename "$old")"
+        done
+      }
+
       #-------------------------------------------------------------------#
 
       #-- Palette
@@ -69,6 +124,8 @@
       C_FLA="''${E}[38;2;${rgb "base0A"}m"
       C_TLS="''${E}[38;2;${rgb "base0E"}m"
       C_WRN="''${E}[38;2;${rgb "base08"}m"
+      #--- Same slot as C_WRN, kept separate because it means brand, not danger
+      C_FTB="''${E}[38;2;${rgb "base08"}m"
       C_AND="''${E}[38;2;${rgb "base07"}m"
       C_DIM="''${E}[38;2;${rgb "base03"}m"
 
@@ -86,12 +143,13 @@
 
       MENU_MAIN=(
         "@menu:nixos|''${C_NIX}󱄅 NixOS''${R} ''${C_DIM}▸''${R}"
-        "@menu:firmware|''${C_FRM}󰚰 Firmware''${R} ''${C_DIM}▸''${R}"
-        "@menu:monitor|''${C_MON}󰊡 Monitoring''${R} ''${C_DIM}▸''${R}"
-        "@menu:network|''${C_NET}󰤨 Network''${R} ''${C_DIM}▸''${R}"
+        "@menu:freetube|''${C_FTB}󰗃 FreeTube''${R} ''${C_DIM}▸''${R}"
         "@menu:flatpak|''${C_FLA}󰪮 Flatpak''${R} ''${C_DIM}▸''${R}"
-        "@menu:android|''${C_AND}󰀲 Android''${R} ''${C_DIM}▸''${R}"
+        "@menu:firmware|''${C_FRM}󰚰 Firmware''${R} ''${C_DIM}▸''${R}"
         "@menu:tools|''${C_TLS}󰘳 Tools''${R} ''${C_DIM}▸''${R}"
+        "@menu:network|''${C_NET}󰤨 Network''${R} ''${C_DIM}▸''${R}"
+        "@menu:monitor|''${C_MON}󰊡 Monitoring''${R} ''${C_DIM}▸''${R}"
+        "@menu:android|''${C_AND}󰀲 Android''${R} ''${C_DIM}▸''${R}"
       )
 
       MENU_NIXOS=(
@@ -129,8 +187,11 @@
         "nixm flatpak-list|''${C_FLA}󰪮''${R} List Flatpaks"
       )
 
+      MENU_FREETUBE=(
+        "nixm freetube-backup|''${C_FTB}󰆓''${R} Back Up Everything"
+      )
+
       MENU_TOOLS=(
-        "nixm freetube-sync|''${C_TLS}󰗃''${R} FreeTube Sync to Nix"
         "nixm vulkan|''${C_TLS}󰖮''${R} Vulkan Info"
       )
 
@@ -163,11 +224,12 @@
           case $level in
             main)     cmd=$(pick "nixm> "     "''${MENU_MAIN[@]}") ;;
             nixos)    cmd=$(pick "nixos> "    "''${MENU_NIXOS[@]}" "$BACK") ;;
-            firmware) cmd=$(pick "firmware> " "''${MENU_FIRMWARE[@]}" "$BACK") ;;
-            monitor)  cmd=$(pick "monitor> "  "''${MENU_MONITOR[@]}" "$BACK") ;;
-            network)  cmd=$(pick "network> "  "''${MENU_NETWORK[@]}" "$BACK") ;;
+            freetube) cmd=$(pick "freetube> " "''${MENU_FREETUBE[@]}" "$BACK") ;;
             flatpak)  cmd=$(pick "flatpak> "  "''${MENU_FLATPAK[@]}" "$BACK") ;;
+            firmware) cmd=$(pick "firmware> " "''${MENU_FIRMWARE[@]}" "$BACK") ;;
             tools)    cmd=$(pick "tools> "    "''${MENU_TOOLS[@]}" "$BACK") ;;
+            network)  cmd=$(pick "network> "  "''${MENU_NETWORK[@]}" "$BACK") ;;
+            monitor)  cmd=$(pick "monitor> "  "''${MENU_MONITOR[@]}" "$BACK") ;;
             android)  cmd=$(pick "android> "  "''${MENU_ANDROID[@]}" "$BACK") ;;
           esac
 
@@ -191,6 +253,11 @@
       # Get current hostname to determine which system to rebuild
       HOSTNAME=$(hostname)
       FLAKE_PATH="/home/${username}/nixos-config"
+
+      #--- Kept outside the repo: subscriptions, playlists and history are
+      #--- personal data and this flake is public. Point a sync tool here.
+      FT_BACKUP_DIR="$HOME/Backups/FreeTube"
+      FT_KEEP=10
 
       case $1 in
         # --- NixOS Operations ---
@@ -231,65 +298,25 @@
           ;;
 
         # --- FreeTube ---
-        freetube-sync)
-          MODULE="$FLAKE_PATH/shared/modules/home-manager/programs/media/freetube/subscriptions.nix"
-          DB="$HOME/.config/FreeTube/profiles.db"
-
-          if pgrep -x freetube >/dev/null 2>&1; then
-            echo "FreeTube is running. Close it first so profiles.db is flushed to disk."
+        #--- One dated folder per run. Filenames inside match FreeTube's own
+        #--- Export, so its Import accepts them unchanged.
+        freetube-backup)
+          ft_closed || exit 1
+          FT_DEST="$FT_BACKUP_DIR/$(date +%Y-%m-%d_%H-%M-%S)"
+          mkdir -p "$FT_DEST"
+          echo "Backing up FreeTube to $FT_DEST"
+          ft_export profiles  freetube-subscriptions.db  "subscriptions"
+          ft_export playlists freetube-playlists.db      "playlists"
+          ft_export history   freetube-watch-history.db  "watch history"
+          #--- rmdir only succeeds on an empty dir, so a run that exported
+          #--- nothing leaves no folder behind and does not count as a backup
+          if rmdir "$FT_DEST" 2>/dev/null; then
+            echo "Nothing was exported." >&2
             exit 1
           fi
-          [[ -f "$DB" ]] || { echo "No profiles.db found at $DB"; exit 1; }
-          [[ -f "$MODULE" ]] || { echo "No module found at $MODULE"; exit 1; }
-          ${pkgs.jq}/bin/jq --exit-status . "$DB" >/dev/null 2>&1 || { echo "profiles.db is not valid JSON - refusing to sync."; exit 1; }
-
-          LIVE_IDS=$(mktemp) && DECL_IDS=$(mktemp)
-          ${pkgs.jq}/bin/jq -rs '.[0].subscriptions[].id' "$DB" | sort > "$LIVE_IDS"
-          grep -oE '"UC[A-Za-z0-9_-]{22}"' "$MODULE" | tr -d '"' | sort > "$DECL_IDS"
-          added=$(comm -13 "$DECL_IDS" "$LIVE_IDS" | wc -l)
-          removed=$(comm -23 "$DECL_IDS" "$LIVE_IDS" | wc -l)
-
-          echo "Sync FreeTube subscriptions INTO the Nix module."
-          echo ""
-          echo "  module:   $MODULE"
-          echo "  declared: $(wc -l < "$DECL_IDS")   live: $(wc -l < "$LIVE_IDS")"
-          echo "  changes:  +$added to add, -$removed to remove"
-          echo ""
-          echo "This rewrites the declared list in the module to match FreeTube."
-          echo "It does NOT modify your FreeTube subscriptions - profiles.db is"
-          echo "only read. The module list is overwritten and cannot be undone"
-          echo "except through git."
-          echo ""
-
-          if [[ "$added" == "0" && "$removed" == "0" ]]; then
-            echo "Module already matches FreeTube. Nothing to do."
-            rm -f "$LIVE_IDS" "$DECL_IDS"
-            exit 0
-          fi
-
-          read -p "Proceed? [y/N] " reply
-          case "$reply" in
-            [yY] | [yY][eE][sS]) ;;
-            *)
-              echo "Aborted. Nothing was written."
-              rm -f "$LIVE_IDS" "$DECL_IDS"
-              exit 0
-              ;;
-          esac
-
-          BODY=$(mktemp)
-          ${pkgs.jq}/bin/jq -rs '.[0].subscriptions | sort_by(.name|ascii_downcase) | .[] | "    (sub \"\(.id)\" \"\(.name)\" \"\(.thumbnail)\")"' "$DB" > "$BODY"
-          awk -v bodyfile="$BODY" '
-            /^  subscriptions = \[$/ { print; while ((getline line < bodyfile) > 0) print line; inlist=1; next }
-            inlist && /^  \];$/      { print; inlist=0; next }
-            inlist                   { next }
-            { print }
-          ' "$MODULE" > "$MODULE.new" && mv "$MODULE.new" "$MODULE"
-          ${pkgs.alejandra}/bin/alejandra --quiet "$MODULE"
-          echo "Wrote $(grep -c '(sub ' "$MODULE") subscriptions to the module."
-          echo "Run 'nix flake check' then commit when ready."
-          rm -f "$BODY" "$LIVE_IDS" "$DECL_IDS"
+          ft_prune
           ;;
+
 
         # --- System Monitoring ---
         monitor)
@@ -547,8 +574,12 @@
           echo "  flatpak-update    - Update Flatpaks"
           echo "  flatpak-list      - List installed Flatpaks"
           echo ""
+          echo "FreeTube (app must be closed):"
+          echo "  freetube-backup   - Export subscriptions, playlists and history"
+          echo "                      to a dated folder in ~/Backups/FreeTube,"
+          echo "                      keeping the 10 most recent"
+          echo ""
           echo "Tools:"
-          echo "  freetube-sync     - Sync FreeTube subscriptions into Nix"
           echo "  vulkan            - Vulkan capabilities"
           echo ""
           echo "Android:"

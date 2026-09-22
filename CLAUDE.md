@@ -35,7 +35,7 @@ nixm flake-update       # Update flake inputs only (no rebuild)
 nixm dryrun             # Rebuild without applying
 nixm gc                 # GC, keep last 5 generations
 nixm rollback           # Roll back to the previous generation
-nixm freetube-sync      # Capture FreeTube subscriptions into subscriptions.nix (y/N prompt)
+nixm freetube-backup    # Export FreeTube subs, playlists and history to a dated ~/Backups/FreeTube folder
 nixm vpn-list           # Show the Android VPN lockdown allowlist on an adb device
 nixm vpn-edit           # Edit that allowlist in $EDITOR (adb-writable, no device owner; applies on reboot)
 nix flake lock --update-input <name>   # Bump a single input
@@ -109,7 +109,7 @@ Gotchas. Grep the option name before assuming which file owns it:
 - `shared/modules/home-manager/` — user: `programs/` (browsers, terminals, editors, ai, shell, chat-clients, emulation, fetch, file-browsers, creative, media, finance, launchers, local, plus `android.nix`, `archives.nix`, `core.nix`, `gaming.nix`, `git.nix`, `japanese-vn.nix`, `scrcpy.nix`) and `scripts/`. `mime.nix`, `services.nix` and `variables.nix` are single files at that level, not directories
   - `programs/local/` — wrappers for non-nixpkgs prebuilt bundles living in `~/.local/opt/`; the payload is intentionally not in the repo
   - `default.nix` carries a `clearStaleBackups` activation hook that deletes `*.bak` under `~/.config`, `~/.local/{share,state}` before `checkLinkTargets`. This is why HM activation never fails on leftover backups. Don't remove it when debugging a "file exists" error; find the real conflicting file instead.
-  - `programs/media/freetube/` — `settings.nix` (mirrored from the app), `blocked-channels.nix` (~2k channel ids in one flat list, sorted by lowercased name under `LC_ALL=C`) and `subscriptions.nix` (master list + FreeTube profiles, which are subscription groups). Three things bite here. The home-manager module copies `hm_settings.db` over `settings.db` **only when the declared content changes**, and FreeTube rewrites that file from memory when it exits, so close FreeTube before rebuilding, or the copy is clobbered and stays clobbered until the module changes again. Blocklist entries are emitted with a `preferredName` and a placeholder `icon`, because FreeTube re-resolves every entry missing either one, at one API call each. Ownership differs per file: settings and the blocklist are **mirrored** (module wins, a rebuild copies them in), while subscriptions and profiles are **seed-only**: a `home.activation` script guarded by `[[ ! -e ]]` writes `profiles.db` once, so the app owns them and rebuilds never overwrite. `nixm freetube-sync` recaptures subscriptions behind a y/N prompt, but not profiles.
+  - `programs/media/freetube/` — `settings.nix` (mirrored from the app) and `blocked-channels.nix` (~2k channel ids in one flat list, sorted by lowercased name under `LC_ALL=C`). Both are **mirrored**: the home-manager module copies `hm_settings.db` over `settings.db` **only when the declared content changes**, and FreeTube rewrites that file from memory when it exits, so close FreeTube before rebuilding, or the copy is clobbered and stays clobbered until the module changes again. Blocklist entries are emitted with a `preferredName` and a placeholder `icon`, because FreeTube re-resolves every entry missing either one, at one API call each. Subscriptions, profiles, playlists and history are **not** in the repo: they are personal data and this flake is public. `nixm freetube-backup` exports them to a dated folder under `~/Backups/FreeTube` instead, in FreeTube's own Export format so its Import reads them back.
 - `shared/modules/wm/{hyprland,niri,gnome,cosmic}/` — each has `<wm>-nixos/` and `<wm>-home/`. Only Hyprland and Niri integrate DankMaterialShell (DMS); GNOME uses `gnome-home/extensions/` + `dconf.nix`, COSMIC uses `cosmic-home/shell/{panel,applets}.nix`
 - `shared/modules/theme/` — stylix, catppuccin, fonts, plus `gtk.nix` and `qt.nix`, the toolkit theming targets rule 5 routes through
 - `shared/modules/mullvad/` — `mullvad-nixos/` (daemon settings + system-package split tunnel) and `mullvad-home/` (tray app + home-package split tunnel). Imported from `shared/core.nix` like the WM, gated on `hostConfig.mullvad.enable`
@@ -154,28 +154,30 @@ Gotchas. Grep the option name before assuming which file owns it:
    heading alone; GitHub already draws a rule under every H2. Verify markdown
    changes with `nix run nixpkgs#pulldown-cmark -- < README.md`, not the preview pane.
 
-**Update FreeTube state** (blocklist, settings, subscriptions, profiles), asked for as
-"I blocked more" / "I added subscriptions" / "sync freetube":
+**Update FreeTube state** (blocklist or settings), asked for as "I blocked more" /
+"sync freetube":
 
-1. **Close FreeTube first.** Both `~/.config/FreeTube/settings.db` and `profiles.db` are
-   rewritten from memory on exit, so a capture taken while it runs is stale, and a rebuild
-   while it runs gets clobbered.
-2. **Both files are NeDB append-logs** — later lines supersede earlier ones with the same
-   `_id`. Always reduce before reading:
+1. **Close FreeTube first.** `~/.config/FreeTube/settings.db` is rewritten from memory on
+   exit, so a capture taken while it runs is stale, and a rebuild while it runs gets
+   clobbered.
+2. **It is a NeDB append-log** — later lines supersede earlier ones with the same `_id`.
+   Always reduce before reading:
    `jq -rs 'reduce .[] as $x ({}; .[$x._id] = $x.value)' settings.db`
-   `jq -rs 'reduce .[] as $p ({}; .[$p._id] = $p)' profiles.db`
    The blocklist lives inside settings as `channelsHidden`, a JSON **string** needing `fromjson`.
 3. **Blocklist** — diff live ids against `(mk "…"` in the module, emit new ones as
    `(mk "UC…" "Name")`, then re-sort the whole list by lowercased name under `LC_ALL=C`.
-4. **Subscriptions and profiles** — regenerate both blocks wholesale from `profiles.db`.
-   Groups use `pick [ids]` so names and thumbnails come from the master list.
-5. **Validate**: entry count, no duplicate ids, id set unchanged except the intended delta,
+4. **Validate**: entry count, no duplicate ids, id set unchanged except the intended delta,
    and every entry still has a non-empty `preferredName` + `icon`.
-6. `alejandra .` → `nix flake check`, then hand back for the rebuild, with the app still closed.
+5. `alejandra .` → `nix flake check`, then hand back for the rebuild, with the app still closed.
 
-Profiles are seed-only, so a rebuild will **not** push module-side group changes into the
-app. To apply those: `install -Dm644 ~/.config/FreeTube/hm_profiles.db ~/.config/FreeTube/profiles.db`
-with the app closed, after the rebuild has refreshed the store file.
+Subscriptions, profiles, playlists and history are **not** declarative. `nixm freetube-backup`
+writes them to `~/Backups/FreeTube/<YYYY-MM-DD_HH-MM-SS>/` as
+`freetube-{subscriptions,playlists,watch-history}.db`, one JSON document per line, which is what
+FreeTube's own Export writes and its Import reads. The 10 newest folders are kept; `ft_prune`
+only matches names in stamp form, so anything else under that directory is left alone. A run
+that exports nothing removes its own folder and exits 1, so it never displaces a real backup.
+Restoring goes through the app's Settings → Data Settings → Import, not by copying files
+into place.
 
 **Add a system service:** same flow, but `shared/modules/nixos/services/<name>.nix` and import in `shared/modules/nixos/default.nix`.
 
