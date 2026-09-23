@@ -35,6 +35,7 @@
         helix.enable = false;
         micro.enable = false;
         starship.enable = false;
+        rofi.enable = false; # rofi is not installed; the target defines a renamed HM option
         yazi.enable = false; # themed by Catppuccin port
         firefox.enable = false;
         floorp.enable = false;

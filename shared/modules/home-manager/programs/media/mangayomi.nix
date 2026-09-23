@@ -18,7 +18,7 @@
   };
 
   #-- Unpacked only to lift out the icon and desktop entry
-  contents = pkgs.appimageTools.extractType2 {inherit pname version src;};
+  contents = pkgs.appimageTools.extract {inherit pname version src;};
 
   mangayomi = pkgs.appimageTools.wrapType2 {
     inherit pname version src;
