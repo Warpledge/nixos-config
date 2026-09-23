@@ -32,7 +32,7 @@ Rebuilds stack up rather than overwrite each other: the old one stays on disk an
 - **Runs the awkward stuff:** Windows apps ([WinBoat][winboat]), [AppImages](./.notes/local/appimage-wraps.md), Flatpaks ([nix-flatpak][nix-flatpak]), and the normal Linux programs Nix usually won't run ([nix-ld][nix-ld]).
 - **The tools I actually work in:** [Docker][docker], [tmux][tmux], [Zed][zed] and [Helix][helix], git with nicer diffs ([delta][delta]) and the [gh][gh] CLI.
 - **Built for gaming:** [Steam][steam] and Gamescope, [GameMode][gamemode] and [MangoHud][mangohud], plus kernel and GPU tweaks per machine.
-- **Nix commands behind a menu:** [`nixm`](./shared/modules/home-manager/scripts/nixm.nix) (short for "nix menu") puts rebuilds, cleanup, rollbacks and updates one keypress away, so I'm not looking commands up.
+- **Nix commands behind a menu:** [`nixm`](./shared/modules/home-manager/nixm.nix) (short for "nix menu") puts rebuilds, cleanup, rollbacks and updates one keypress away, so I'm not looking commands up.
 
 ## Host Machines
 
@@ -64,7 +64,7 @@ The top level is a set of categories. Pick one and it opens into its own menu of
 
 ![nixm NixOS submenu](./screenshots/nixm-tui-nixos.png)
 
-`nixm` is the script I use to manage the system day to day (it lives in [`shared/modules/home-manager/scripts/nixm.nix`](./shared/modules/home-manager/scripts/nixm.nix)). Run it on its own for a TUI (terminal UI) menu, or pass a subcommand to jump straight to it. It started out as a script from [anotherhadi's NixOS config](https://github.com/anotherhadi/nixy), and I've reworked and extended it a lot since.
+`nixm` is the script I use to manage the system day to day (it lives in [`shared/modules/home-manager/nixm.nix`](./shared/modules/home-manager/nixm.nix)). Run it on its own for a TUI (terminal UI) menu, or pass a subcommand to jump straight to it. It started out as a script from [anotherhadi's NixOS config](https://github.com/anotherhadi/nixy), and I've reworked and extended it a lot since.
 
 <details>
 <summary>📋 All nixm commands</summary>
@@ -177,7 +177,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | --- | --- |
 | **Editors / IDE** | [Zed][zed], [Helix][helix], [micro][micro] (quick edits) |
 | **Formatter** | [alejandra][alejandra] v3.0.0 |
-| **Rebuild Wrapper** | [`nixm`](./shared/modules/home-manager/scripts/nixm.nix) (fzf menu over [nh][nh]) |
+| **Rebuild Wrapper** | [`nixm`](./shared/modules/home-manager/nixm.nix) (fzf menu over [nh][nh]) |
 </details>
 
 <details>

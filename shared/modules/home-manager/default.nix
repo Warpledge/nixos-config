@@ -3,12 +3,10 @@
 #=====================================================================#
 {lib, ...}: {
   imports = [
-    #--- Scripts
-    ./scripts/nixm.nix
-
     #--- Other
     ./programs
     ./mime.nix
+    ./nixm.nix
     ./services.nix
     ./variables.nix
   ];
