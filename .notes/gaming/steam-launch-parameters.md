@@ -33,7 +33,7 @@ tml-prelaunch && DOTNET_DefaultStackSize=51200000 gamemoderun %command%
 - `DOTNET_DefaultStackSize=51200000` — redundant env var fallback, kept for safety
 
 **Pre-launch script:** declaratively managed in nixos-config
-- `shared/modules/home-manager/scripts/gaming/tml-prelaunch.nix`
+- `shared/modules/home-manager/programs/gaming/tml-prelaunch.nix`
 - Uses `${pkgs.jq}/bin/jq` (nix store path, no PATH dependency)
 - Merges settings into existing JSON, preserving all other tModLoader properties
 - Idempotent — no-ops if file is missing

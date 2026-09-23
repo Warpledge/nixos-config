@@ -29,7 +29,7 @@ Rebuilds stack up rather than overwrite each other: the old one stays on disk an
 - **One config, two machines:** both build from the same files. Each one has its own settings file ([`hostConfig/core.nix`](./hosts/desktop/hostConfig/core.nix)) where I flip features on and off, so they only differ where I want them to.
 - **The same theme everywhere:** [Catppuccin][catppuccin] Mocha Mauve, set once with [Stylix][stylix] and handed down to everything that can take it, with [catppuccin/nix][catppuccin-nix] alongside it covering the apps that have a proper Catppuccin port of their own.
 - **Private by default:** full-disk encryption ([LUKS][luks]), [AppArmor][apparmor], kernel hardening settings, an always-on [Mullvad][mullvad] VPN, and [Zen][zen] locked down with [Arkenfox][arkenfox] and [Securefox][securefox].
-- **Runs the awkward stuff:** Windows apps ([WinBoat][winboat]), [AppImages][gearlever], Flatpaks ([nix-flatpak][nix-flatpak]), and the normal Linux programs Nix usually won't run ([nix-ld][nix-ld]).
+- **Runs the awkward stuff:** Windows apps ([WinBoat][winboat]), [AppImages](./.notes/local/appimage-wraps.md), Flatpaks ([nix-flatpak][nix-flatpak]), and the normal Linux programs Nix usually won't run ([nix-ld][nix-ld]).
 - **The tools I actually work in:** [Docker][docker], [tmux][tmux], [Zed][zed] and [Helix][helix], git with nicer diffs ([delta][delta]) and the [gh][gh] CLI.
 - **Built for gaming:** [Steam][steam] and Gamescope, [GameMode][gamemode] and [MangoHud][mangohud], plus kernel and GPU tweaks per machine.
 - **Nix commands behind a menu:** [`nixm`](./shared/modules/home-manager/scripts/nixm.nix) (short for "nix menu") puts rebuilds, cleanup, rollbacks and updates one keypress away, so I'm not looking commands up.
@@ -188,10 +188,12 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | **Browsers** | [Zen][zen] / [Mullvad Browser][mullvad-browser] / [Helium][helium] |
 | **File Manager** | [Nautilus][nautilus], [Yazi][yazi] (terminal file manager) |
 | **Media Player** | [mpv][mpv], [Celluloid][celluloid] (mpv frontend), [Spotify][spotify] via [spicetify-nix][spicetify], [FreeTube][freetube] |
+| **Twitch** | [Streamlink Twitch GUI][streamlink-twitch-gui] browses Twitch and hands the stream to [Streamlink][streamlink], which plays it in mpv, so there are no ads and the follow list stays local with no Twitch account attached; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs |
 | **Screenshot / Recording** | [dms screenshot][dms] (Niri), [grim][grim] + [slurp][slurp] (Hyprland), [gpu-screen-recorder][gpu-screen-recorder] |
 | **Graphics** | [Blender][blender], [Krita][krita], [Affinity Suite v3][affinity-nix] (via Wine), all off by default |
 | **Audio** | [Reaper][reaper] (DAW, with [SWS][sws] and [ReaPack][reapack]) |
 | **Guitar** | [TONE3000][tone3000] (official NAM player, browses its capture and IR library in-app), [Guitarix][guitarix] (modular amp rig), [ir.lv2][ir-lv2] for cabinet IRs, [qpwgraph][qpwgraph] for patching, plus [FxFloorBoard][katana-fxfloorboard] to edit patches on the Boss Katana itself |
+| **Rhythm Game** | [feedBack][feedback] plays Guitar Pro tabs through its own audio engine, with VST hosting and amp modeling, so the Katana DI feed doubles as the game input; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs |
 | **Chat / Productivity** | [Vesktop][vesktop] via [nixcord][nixcord] (Vencord, with [arRPC][arrpc] running alongside it so Steam and Proton games show up as rich presence), [Ferdium][ferdium] (all your web messengers in one window), [Thunderbird][thunderbird], [Obsidian][obsidian] |
 | **AI Tooling** | [Claude Code][claude-code], [OpenCode][opencode], [LM Studio][lmstudio] |
 | **Android** | [scrcpy][scrcpy] (mirror and control a device over USB or wifi, nothing to install on the phone) |
@@ -317,6 +319,9 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [arrpc]: https://arrpc.openasar.dev
 [video-trimmer]: https://gitlab.gnome.org/YaLTeR/video-trimmer
 [mangayomi]: https://github.com/kodjodevf/mangayomi
+[streamlink-twitch-gui]: https://github.com/streamlink/streamlink-twitch-gui
+[feedback]: https://github.com/got-feedBack/feedBack-desktop
+[streamlink]: https://streamlink.github.io/
 [homebank]: https://www.gethomebank.org
 [fcitx5]: https://github.com/fcitx/fcitx5
 [mozc]: https://github.com/fcitx/mozc
@@ -367,7 +372,6 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [daita]: https://mullvad.net/en/vpn/daita
 [arkenfox]: https://github.com/arkenfox/user.js
 [securefox]: https://github.com/yokoffing/Betterfox
-[gearlever]: https://github.com/mijorus/gearlever
 [nix-ld]: https://github.com/nix-community/nix-ld
 [delta]: https://github.com/dandavison/delta
 [gh]: https://cli.github.com

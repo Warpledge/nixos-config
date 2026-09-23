@@ -10,19 +10,17 @@
   #-- Packages
   #--------------------------------------------------------------------#
   home.packages = with pkgs; [
-    #--- Apps
-    thunderbird
-    obsidian
-    faugus-launcher
-
     #--- Utils
     inputs.alejandra.defaultPackage.${pkgs.stdenv.hostPlatform.system}
-    bleachbit
-    gearlever
     poppler-utils # PDF rendering library
     # localsend
-    easyrpg-player
-    psutils
+
+    #--- Archives
+    file-roller
+    zip
+    unzip
+    unrar
+    _7zz-rar
 
     #--- Gnome
     gnome-calculator

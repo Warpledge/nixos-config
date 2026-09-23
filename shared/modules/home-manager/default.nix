@@ -5,8 +5,6 @@
   imports = [
     #--- Scripts
     ./scripts/nixm.nix
-    ./scripts/youtube-dispatch.nix
-    ./scripts/gaming
 
     #--- Other
     ./programs

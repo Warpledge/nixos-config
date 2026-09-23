@@ -21,7 +21,7 @@
 
   #--- Mullvad VPN
   mullvad.enable = true;
-  mullvad.splitTunnel = ["steam" "heroic" "prismlauncher" "claude" "opencode" "vesktop" "spotify" "ferdium"]; # Apps always routed around the VPN (see shared/modules/mullvad/)
+  mullvad.splitTunnel = ["steam" "heroic" "prismlauncher" "claude" "opencode" "vesktop" "spotify" "freetube" "ferdium"]; # Apps always routed around the VPN (see shared/modules/mullvad/)
 
   #--- Browser Selection
   # Enable the browsers you want installed
@@ -29,6 +29,7 @@
     zen = true;
     mullvad = true;
     helium = true;
+    ferdium = true; # All web messengers in one window (services configured in-app)
   };
 
   #--- Terminal Selection
@@ -60,6 +61,7 @@
     freetube = true;
     videoTrimmer = true;
     mangayomi = true; # Manga, novel and anime reader (AppImage, ahead of nixpkgs)
+    streamlinkTwitchGui = true; # Twitch browser; streams play in mpv via streamlink (AppImage)
   };
 
   #--- Graphics Software Selection
@@ -75,11 +77,14 @@
   audio = {
     reaper = true; # DAW; ships SWS/S&M + ReaPack, JACK routed through PipeWire
     guitar = true; # Amp sims (TONE3000/Guitarix) + cab IRs; Katana DI capture
+    feedback = true; # Guitar rhythm game, reads Guitar Pro tabs (AppImage)
   };
 
-  #--- Finance Software Selection
-  # Enable the personal finance applications you want installed
-  finance = {
+  #--- Office Software Selection
+  # Enable the office and document applications you want installed
+  office = {
+    thunderbird = true; # Mail client
+    obsidian = true; # Markdown note vaults
     homebank = true; # Lightweight personal accounting (labeled transactions + running balance)
   };
 
@@ -95,6 +100,12 @@
   # Mirror/control an Android device over USB or wifi; nothing is installed
   # on the device, so it works on de-Googled phones/tablets
   scrcpy.enable = true;
+
+  #--- Security Software Selection
+  # Enable the security and privacy applications you want installed
+  security = {
+    bleachbit = true; # Disk cleaner for caches, logs and browser leftovers
+  };
 
   #--- ClamAV Antivirus
   # Enable ClamAV daemon, freshclam auto-updater, and ClamTK GUI
@@ -121,15 +132,12 @@
     lutris = false; # Wine launcher
     faugus = false; # UMU/Proton launcher
     twintail = false; # Gacha game launcher (Flatpak)
+    easyrpg = true; # RPG Maker 2000/2003 game interpreter
   };
 
   #--- Discord Rich Presence (arRPC)
   # Standalone arRPC server for Steam/Proton game detection in Vesktop
   discord.arrpc.enable = false;
-
-  #--- Ferdium Messenger Aggregator
-  # All web messengers in one window (services configured in-app)
-  ferdium.enable = true;
 
   #--- AI Tools
   claude = {enable = true;};

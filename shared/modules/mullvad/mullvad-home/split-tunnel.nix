@@ -43,11 +43,11 @@
       # spicetify-nix builds its own Spotify; pkgs.spotify is the wrong one
       spotify = "${config.programs.spicetify.spicedSpotify}/bin/spotify";
     }
-    // lib.optionalAttrs hostConfig.ferdium.enable {
+    // lib.optionalAttrs hostConfig.browsers.ferdium {
       # RateYourMusic and similar sites reject Mullvad exit IPs
       ferdium = "${pkgs.ferdium}/bin/ferdium";
     }
-    # chat-clients/discord.nix is imported unconditionally, so no toggle to gate on.
+    # discord/discord.nix is imported unconditionally, so no toggle to gate on.
     # nixcord builds its own Vesktop; pkgs.vesktop is a different derivation.
     // {
       vesktop = "${config.programs.nixcord.finalPackage.vesktop}/bin/vesktop";

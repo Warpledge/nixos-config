@@ -29,7 +29,7 @@ git so only the binary bundle needs restoring.
 - **Command:** `katana-fxfloorboard` (also a desktop entry).
 - **Location:** `~/.local/opt/katana-fxfloorboard/`
 - **Wrapper:** the exception to the pattern above. It lives in
-  `home-manager/programs/creative/guitar.nix` with the rest of the amp rig
+  `home-manager/programs/audio/guitar.nix` with the rest of the amp rig
   rather than in `programs/local/`, so it has no `local.*` toggle and is
   installed whenever `audio.guitar` is on.
 - **Runtime:** bundle ships its own libs (RUNPATH points at `./lib`); wrapper

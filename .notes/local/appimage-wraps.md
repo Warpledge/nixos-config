@@ -8,11 +8,13 @@ restore step.
 
 | App | Module | Version | Why not nixpkgs |
 | --- | --- | --- | --- |
+| fee[dB]ack | `home-manager/programs/gaming/feedback.nix` | 0.3.0-unstable-2026-07-23 | not in nixpkgs; upstream ships only AppImages |
 | Mangayomi | `home-manager/programs/media/mangayomi.nix` | 0.9.6 | nixpkgs had 0.8.0 on 2026-09-20; upstream tagged 0.9.6 on 2026-09-19 |
+| Streamlink Twitch GUI | `home-manager/programs/media/streamlink-twitch-gui.nix` | 2.5.3 | not in nixpkgs under any name, checked 2026-09-22 |
 
 ## The pattern
 
-`appimageTools.wrapType2` runs the AppImage; `appimageTools.extractType2`
+`appimageTools.wrapType2` runs the AppImage; `appimageTools.extract`
 unpacks the same `src` alongside it only so the desktop entry and icon can be
 installed. Both take the same `pname`, `version` and `src`, so they stay in
 step.
@@ -21,7 +23,7 @@ Two things differ per app and are worth checking when adding another:
 
 - **The desktop entry's `Exec`.** Mangayomi ships `Exec=/usr/bin/mangayomi`,
   which has to be rewritten to the bare command the wrapper puts on PATH. Others
-  ship a bare command already and need no rewrite.
+  ship a bare command already and need no rewrite, as Streamlink Twitch GUI does.
 - **The icon name.** Some AppImages ship a generic `logo.png` with `Icon=logo`,
   which wants renaming plus a matching `substituteInPlace` so it cannot collide
   with another app's icon. Mangayomi's is already `mangayomi.png`.
@@ -80,6 +82,12 @@ in builtins.head m.home.packages'
 
 Then check `bin/`, `share/applications/*.desktop` and
 `share/icons/hicolor/512x512/apps/` in the result.
+
+A rolling release tag is a different case. fee[dB]ack publishes every build to
+the same `nightly` tag under the same filename, so the pinned URL stays valid
+while its contents change underneath it. The fetch then fails with a hash
+mismatch on the next rebuild, which is the cue to bump the date in `version`
+and paste the `got:` hash in, not a sign anything is broken.
 
 ## In-app updaters
 
