@@ -86,6 +86,7 @@
         "fs.protected_regular" = 2; # Protect regular files from untrusted writers
         "fs.suid_dumpable" = 0; # Disable core dumps for setuid programs
         "net.core.bpf_jit_harden" = 2; # Harden BPF JIT compiler
+        "kernel.unprivileged_bpf_disabled" = 1; # No BPF for unprivileged users (LPE surface)
         "kernel.core_uses_pid" = 1; # Append PID to core filenames
         "kernel.randomize_va_space" = 2; # Full ASLR
         "vm.mmap_rnd_bits" = 32; # ASLR entropy for mmap

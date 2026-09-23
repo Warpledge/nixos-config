@@ -268,6 +268,10 @@ These are only imported when the WM is active, e.g. `lib.optional (hostConfig.wi
 
 LUKS, kernel hardening, AppArmor, GNOME Keyring, auditd. Mullvad VPN as above. Wheel needs a password for sudo, so `nixm rebuild` prompts once; the NOPASSWD list in `security/sudo.nix` covers systemctl, poweroff, reboot and the nix commands.
 
+Audit tooling is `lynis` (configuration) and `sbomnix`/`vulnxscan` (CVE scanning against the real closure, via osv.dev). **Do not go back to `vulnix`**: it only knows NVD's legacy JSON 1.1 feeds, which return 403 since their retirement, so every run ends in a `ConnectionError` traceback. Verified 2026-09-23, when the NVD API 2.0 answered 200 from the same machine.
+
+**AppArmor is enabled but confines nothing.** `security.apparmor.enable = true` loads the LSM (it is in `/sys/kernel/security/lsm`) and starts the service, but ships no policies, so `apparmor/profiles` is empty and lynis reports `MAC framework [ NONE ]`. Upstream `apparmor-profiles` mostly target `/usr/bin` paths that do not exist here; confining anything means writing store-path-aware profiles per application.
+
 `hostConfig.ssh.enable` gates `nixos/services/ssh.nix`, which owns both sshd and fail2ban: key-only auth, no root login, no forwarding, ed25519 host key, and the fail2ban sshd jail. An assertion refuses to build when the toggle is on and `authorizedKeys.keys` in that module is empty, since password and keyboard-interactive auth are both off and there would be no way in.
 
 ## Writing Style
