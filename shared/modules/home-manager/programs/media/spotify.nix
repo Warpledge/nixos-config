@@ -31,7 +31,7 @@ in {
       # loopyLoop
       # seekSong
       # goToSong
-      betterGenres
+      # betterGenres — dropped from spicetify-nix upstream, 2026-09-23
       playingSource
     ];
   };
