@@ -2,11 +2,7 @@
 # SUDO CONFIGURATION
 #=====================================================================#
 #--- Original Code by NotAShelf - https://github.com/notashelf/nyx
-{
-  pkgs,
-  lib,
-  ...
-}: let
+{lib, ...}: let
   inherit (lib) mkForce mkDefault;
 in {
   #--------------------------------------------------------------------#
@@ -26,58 +22,18 @@ in {
         Defaults timestamp_timeout = 300 # Cache password for 5 minutes
       '';
       extraRules = let
-        sudoRules = with pkgs; [
-          {
-            package = coreutils;
-            command = "sync";
-          } # Sync filesystems
-          {
-            package = gnused;
-            command = "sed";
-          } # Sed text processing
-          {
-            package = hdparm;
-            command = "hdparm";
-          } # HDD/SSD optimization
-          {
-            package = nix;
-            command = "nix-collect-garbage";
-          } # Garbage collection
-          {
-            package = nix;
-            command = "nix-store";
-          } # Nix store operations
-          {
-            package = nixos-rebuild;
-            command = "nixos-rebuild";
-          } # System rebuild
-          {
-            package = nvme-cli;
-            command = "nvme";
-          } # NVMe management
-          {
-            package = systemd;
-            command = "poweroff";
-          } # Power off system
-          {
-            package = systemd;
-            command = "reboot";
-          } # Reboot system
-          {
-            package = systemd;
-            command = "shutdown";
-          } # Shutdown system
-          {
-            package = systemd;
-            command = "systemctl";
-          } # Systemd control
-          {
-            package = util-linux;
-            command = "dmesg";
-          } # Kernel messages
+        # Only commands that cannot be turned into a root shell; sed, systemctl,
+        # nixos-rebuild and the nix tools all can, so they need the password
+        sudoRules = [
+          "sync" # Sync filesystems
+          "poweroff" # Power off system
+          "reboot" # Reboot system
+          "shutdown" # Shutdown system
+          "dmesg" # Kernel messages
         ];
-        mkSudoRule = rule: {
-          command = "${rule.package}/bin/${rule.command}";
+        # sudo matches the path a bare command resolves to, not its store path
+        mkSudoRule = command: {
+          command = "/run/current-system/sw/bin/${command}";
           options = ["NOPASSWD"];
         };
         sudoCommands = map mkSudoRule sudoRules;

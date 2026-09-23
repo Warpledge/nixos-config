@@ -9,7 +9,7 @@ restore step.
 | App | Module | Version | Why not nixpkgs |
 | --- | --- | --- | --- |
 | fee[dB]ack | `home-manager/programs/gaming/feedback.nix` | 0.3.0-unstable-2026-07-23 | not in nixpkgs; upstream ships only AppImages |
-| Mangayomi | `home-manager/programs/media/mangayomi.nix` | 0.9.6 | nixpkgs had 0.8.0 on 2026-09-20; upstream tagged 0.9.6 on 2026-09-19 |
+| Mangayomi | `home-manager/programs/media/mangayomi.nix` | 0.9.7 | nixpkgs had 0.9.2 on 2026-09-23; upstream tagged 0.9.7 on 2026-09-22 |
 | Streamlink Twitch GUI | `home-manager/programs/media/streamlink-twitch-gui.nix` | 2.5.3 | not in nixpkgs under any name, checked 2026-09-22 |
 
 ## The pattern
@@ -122,6 +122,6 @@ alone: `steamwebhelper` already holds 8080 on the desktop.
 ## Going back to nixpkgs
 
 Mangayomi is in nixpkgs and updated roughly monthly (0.7.0 in March 2026, 0.7.2
-in July, 0.8.0 on 2026-08-29). Once it reaches 0.9.6 or later, the module can go
-back to a one-line `home.packages = [pkgs.mangayomi];` and the version bumps
-stop being yours.
+in July, 0.8.0 on 2026-08-29, 0.9.2 by 2026-09-23). Once it reaches the version
+pinned in the module, the module can go back to a one-line
+`home.packages = [pkgs.mangayomi];` and the version bumps stop being yours.

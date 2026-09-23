@@ -46,7 +46,7 @@
   # breaks session startup.
   environment.cosmic.excludePackages = with pkgs; [
     cosmic-edit # superseded by editors.zed
-    cosmic-player # superseded by media.mpv / celluloid
+    cosmic-player # superseded by media.mpv
     cosmic-term # superseded by terminals.kitty
   ];
 

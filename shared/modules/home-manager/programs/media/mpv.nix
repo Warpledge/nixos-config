@@ -9,7 +9,10 @@
   programs.mpv = {
     enable = true;
     defaultProfiles = ["gpu-hq"];
-    scripts = [pkgs.mpvScripts.mpris];
+    scripts = with pkgs.mpvScripts; [
+      mpris
+      uosc # Replaces the stock OSC, hence osc = "no" below
+    ];
     config = {
       volume = 100;
       volume-max = 200;

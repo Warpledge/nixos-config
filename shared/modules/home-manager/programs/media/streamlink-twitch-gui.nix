@@ -7,7 +7,11 @@
 #-
 #- Not in nixpkgs, so this is the upstream AppImage (v2.5.3, tagged
 #- 2024-11-04). Switch to pkgs.streamlink-twitch-gui if it ever lands.
-{pkgs, ...}: let
+{
+  config,
+  pkgs,
+  ...
+}: let
   pname = "streamlink-twitch-gui";
   version = "2.5.3";
 
@@ -22,12 +26,16 @@
   streamlink-twitch-gui = pkgs.appimageTools.wrapType2 {
     inherit pname version src;
 
-    #--- Both players are spawned from inside the FHS env, not from PATH
-    extraPkgs = pkgs:
-      with pkgs; [
-        mpv
-        streamlink
-      ];
+    #--- Both players are spawned from inside the FHS env, not from PATH;
+    #--- the home-manager mpv carries the scripts (uosc) plain mpv lacks
+    extraPkgs = pkgs: [
+      (
+        if config.programs.mpv.enable
+        then config.programs.mpv.finalPackage
+        else pkgs.mpv
+      )
+      pkgs.streamlink
+    ];
 
     #--- Desktop entry already carries bare Exec and Icon names
     extraInstallCommands = ''
@@ -49,4 +57,14 @@ in {
   #-- Package
   #--------------------------------------------------------------------#
   home.packages = [streamlink-twitch-gui];
+
+  #--------------------------------------------------------------------#
+  #-- Streamlink Config
+  #--------------------------------------------------------------------#
+  #- Read by the GUI's streamlink when its player preset is "default"
+  programs.streamlink = {
+    enable = true;
+    package = null; # The GUI bundles its own streamlink
+    settings.player = "mpv";
+  };
 }

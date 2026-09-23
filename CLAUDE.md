@@ -74,7 +74,7 @@ Desktop and laptop should stay byte-identical apart from the header comment and 
 
 Gotchas. Grep the option name before assuming which file owns it:
 
-- **`boot.kernelModules` silently swallows kernel parameters.** modprobe cannot resolve them, `systemd-modules-load.service` logs `Failed to find module '<param>'` and still exits 0, so the hardening looks applied and is not. Eleven params sat there until 2026-09-23. Check with `grep <param> /proc/cmdline`, not by reading the module.
+- **`boot.kernelModules` silently swallows kernel parameters.** modprobe cannot resolve them, `systemd-modules-load.service` logs `Failed to find module '<param>'` and still exits 0, so the hardening looks applied and is not. Eleven params sat there until 2026-09-22. Check with `grep <param> /proc/cmdline`, not by reading the module.
 - `audio.feedback` is the one toggle that does not match its folder: fee[dB]ack lives in `programs/gaming/` as a game, but shares the Katana rig with `audio.guitar`.
 - `gameLaunchers.steam` / `.twintail` are wired in `shared/modules/nixos/gaming/default.nix`; `heroic`, `prismlauncher`, `lutris`, `faugus`, `easyrpg` are wired in `home-manager/programs/default.nix`.
 - The Katana patch editor is a `~/.local/opt` bundle but does **not** live in `programs/local/`; it moved into `audio/guitar.nix` with the rest of the amp rig, so it has no `local.*` toggle of its own and rides on `audio.guitar`.
@@ -106,7 +106,7 @@ Gotchas. Grep the option name before assuming which file owns it:
 
 ### Module layout
 
-- `shared/modules/nixos/` — system: `gaming/` (default, esync, gamemode, gamescope, java, kernel, steam, twintail), `network/` (core, blockers), `nix/` (core, nh, nixpkgs, substituters), `security/` (auditd, core, kernel, keyring, sudo), `services/` (adb, desktop, docker, flatpak, keyd, power, runners, sound, clamav, ssh), `system/` (bootloader, display-manager, documentation, input, locale, packages, shell, tweaks, user, wayland, zram, japanese-ime)
+- `shared/modules/nixos/` — system: `gaming/` (default, esync, gamemode, gamescope, java, kernel, steam, twintail), `network/` (core, blockers), `nix/` (core, nh, nixpkgs, substituters), `security/` (apparmor/, auditd, core, kernel, keyring, sudo), `services/` (adb, desktop, docker, flatpak, keyd, power, runners, sound, clamav, ssh), `system/` (bootloader, display-manager, documentation, input, locale, packages, shell, tweaks, user, wayland, zram, japanese-ime)
 - `shared/modules/home-manager/` — user: `programs/` (browsers, terminals, editors, ai, shell, emulation, fetch, file-browsers, graphics, audio, media, office, security, launchers, local, gaming, android, discord, plus `core.nix`, `git.nix`). `mime.nix`, `nixm.nix`, `services.nix` and `variables.nix` are single files at that level, not directories
   - `programs/local/` — wrappers for non-nixpkgs prebuilt bundles living in `~/.local/opt/`; the payload is intentionally not in the repo
   - AppImage wraps (`appimageTools`) sit in the folder for what the app is, not how it is packaged: `gaming/feedback.nix`, `media/{mangayomi,streamlink-twitch-gui}.nix`. The payload is hash-pinned into the store, so unlike `programs/local/` nothing lives outside git (see `.notes/local/appimage-wraps.md`)
@@ -220,26 +220,9 @@ GNOME defines no keybinds of its own beyond dconf. It is a light-weight fallback
 
 DMS runs as a systemd user service (`systemd.enable`, `niri.enableSpawn = false`), so it inherits the **systemd user manager** environment (`shared/modules/home-manager/variables.nix`), not niri's `programs.niri.settings.environment` block. It launches every app with `systemd-run --user --scope`, so those session variables, and not niri's, govern anything started from the spotlight. Keep the two sets compatible: `QT_QPA_PLATFORM` and `GDK_BACKEND` must keep their X11 fallbacks (`wayland;xcb`, `wayland,x11`) or X11-only apps die instantly from the launcher while still working from a terminal: a Qt app with no wayland plugin aborts in ~50 ms, a JUCE/GTK one exits with "cannot open display". Diagnose by diffing `tr '\0' '\n' < /proc/$(pgrep -x .quickshell-wra)/environ` against `env`, then replaying with `env -i "${DMS_ENV[@]}" <app>`. A rebuild alone does not fix a bad value: the running manager keeps the old import, so `systemctl --user set-environment` then restart `dms.service`, or log out.
 
-**XDG portals** (Niri): `xdg-desktop-portal-gnome` exposes **only** `org.freedesktop.impl.portal.Settings` (instead of its usual 15 interfaces) whenever `GDK_BACKEND` is set in its environment, at any value, including the `wayland,x11` fallback above. It logs `GDK backend forced via env var` then `Non-compatible display server, exposing settings only.`, and every interface routed to it dies: FileChooser (a browser's "Save image as" opens no dialog at all) and ScreenCast (screen sharing). Not version-specific: 49.0 and 50.0 both. `niri-nixos/default.nix` strips the variable with a systemd user drop-in (`overrideStrategy = "asDropin"`, `serviceConfig.UnsetEnvironment`); do **not** "fix" it by dropping the X11 fallback from `variables.nix`, which breaks X11-only apps as described above.
+**XDG portals** (Niri): `niri-nixos/default.nix` strips `GDK_BACKEND` from `xdg-desktop-portal-gnome`, and `niri-home/core/portals.nix` adds the gtk backend back. Read `.notes/wm/niri-xdg-portals.md` before touching either, and never "fix" a portal by dropping the X11 fallback from `variables.nix`.
 
-There is no runtime fallback between backends: xdg-desktop-portal picks one from the `.portal` file's `Interfaces=` list, and `gnome.portal` advertises FileChooser regardless of what the process actually exports, so `default=gnome;gtk` never reaches gtk. Separately, niri-flake's **home** module sets `xdg.portal.extraPortals = [xdg-desktop-portal-gnome]`, which repoints `NIX_XDG_DESKTOP_PORTAL_DIR` at `/etc/profiles/per-user/$USER/share/xdg-desktop-portal/portals` holding only `gnome.portal`, so the system-wide backends go invisible and the `Access`, `Notification` and `Secret` routes in `niri-portals.conf` cannot resolve. `niri-home/core/portals.nix` adds gtk back; `Secret` is still unrouted because `gnome-keyring` would pull the whole package into the user profile. Check health with `busctl --user introspect org.freedesktop.impl.portal.desktop.gnome /org/freedesktop/portal/desktop | grep -c ^org.freedesktop.impl`: 1 is broken, 15 is healthy.
-
-**cosmic-manager** (COSMIC): nixpkgs ships no home-manager options for COSMIC, so the `wayland.desktopManager.cosmic.*` surface comes from the `cosmic-manager` flake input, imported in `cosmic-home/default.nix`. Two things make it behave unlike the rest of the repo:
-
-- **It does not symlink.** It renders the options to a JSON manifest and runs `cosmic-ctl apply` from a HM activation script, so `~/.config/cosmic/<component>/v1/<key>` stays a real writable file and COSMIC Settings keeps working. Declared keys are rewritten each activation; undeclared keys are never touched. Do **not** go back to `xdg.configFile` + `force = true` for COSMIC: that is what made the Settings GUI read-only before.
-- **Never put `$` in a COSMIC `Spawn` string.** cosmic-manager serializes RON with `lib.strings.escapeNixString`, which emits `\$`. RON only accepts `\' \" \\ \n \r \t \0 \x \u`, so the `ron` parser rejects the whole file and **every** custom shortcut silently dies. Put command substitutions in a `writeShellScriptBin` and spawn that instead; `core/binds.nix` does this for the screen-recorder binds. Re-test if the input is ever bumped.
-
-`panels` is authoritative over `com.system76.CosmicPanel/v1/entries`: a panel omitted from the list is deleted. Only `Panel` is declared, so COSMIC's default Dock is removed, which mirrors the DMS bar, which runs with `showDock = false`. `name` and `margin` are the only non-nullable panel options, so a placeholder panel still needs both.
-
-**Third-party applets** (minimon, privacy indicator, caffeine) have no typed cosmic-manager module: they are plain cosmic-config components reachable through the generic `wayland.desktopManager.cosmic.configFile."<app-id>"` escape hatch. A Rust struct deriving `CosmicConfigEntry` writes **one file per field**, and a struct marked `#[serde(default)]` accepts a **partial** value. Three traps, all hit in practice:
-
-- **The component ID can depend on where the applet is hosted.** minimon in the panel reads `io.github.cosmic_utils.minimon-applet-panel`; the un-suffixed `io.github.cosmic_utils.minimon-applet` is the dock/standalone instance. Declaring the wrong one writes a config dir nothing reads and fails silently. Always check `ls -d ~/.config/cosmic/*<applet>*` before declaring.
-- **Partial structs reset what they omit.** Fine for a struct you fully own, destructive for one tuned in a GUI: minimon persists ~3.7 KB per sensor including all colour fields. To capture GUI-tuned state, commit the RON and feed it back with `{__type = "raw"; value = builtins.readFile ./file.ron;}` rather than transcribing fields.
-- **Hardware-keyed maps never port.** minimon's `gpus` is keyed per GPU, so it cannot be shared between desktop and laptop.
-
-When a schema is undocumented, tune it once in the GUI and run `cosmic-ctl backup <out.json>` to dump the exact RON rather than guessing.
-
-The COSMIC panel is a deliberate port of the DMS "Main Bar" in `niri-home/shell/dms/settings.json` (`barConfigs[0]`): widget order, anchor, opacity and output all trace back to it, and `shell/panel.nix` annotates each applet with the DMS widget it stands in for. **Rearranging either bar means updating the other.** Verify an applet ID before adding it: `ls $(nix build --no-link --print-out-paths nixpkgs#cosmic-applets)/share/applications`.
+**COSMIC** config goes through the `cosmic-manager` flake input (`cosmic-home/default.nix`), which applies it with `cosmic-ctl` instead of symlinking. Never go back to `xdg.configFile` + `force = true`, and never put `$` in a `Spawn` string. Read `.notes/wm/cosmic-manager.md` before editing COSMIC panels, applets or binds.
 
 **Hyprland-only directories:** `core/animations.nix`, `core/variables.nix`, `core/rules/{windowrules,layerrules}/`, `scripts/`.
 **Niri-only directories:** `core/monitors.nix`, `core/rules.nix`, `core/xwayland.nix`, `addons/`.
@@ -266,11 +249,11 @@ These are only imported when the WM is active, e.g. `lib.optional (hostConfig.wi
 
 ## Security
 
-LUKS, kernel hardening, AppArmor, GNOME Keyring, auditd. Mullvad VPN as above. Wheel needs a password for sudo, so `nixm rebuild` prompts once; the NOPASSWD list in `security/sudo.nix` covers systemctl, poweroff, reboot and the nix commands.
+LUKS, kernel hardening, AppArmor, GNOME Keyring, auditd. Mullvad VPN as above. Wheel needs a password for sudo, so `nixm rebuild` prompts once; the NOPASSWD list in `security/sudo.nix` covers only sync, poweroff, reboot, shutdown and dmesg. Keep it to commands that cannot be turned into a root shell (sed, systemctl and nixos-rebuild all can).
 
-Audit tooling is `lynis` (configuration) and `sbomnix`/`vulnxscan` (CVE scanning against the real closure, via osv.dev). **Do not go back to `vulnix`**: it only knows NVD's legacy JSON 1.1 feeds, which return 403 since their retirement, so every run ends in a `ConnectionError` traceback. Verified 2026-09-23, when the NVD API 2.0 answered 200 from the same machine.
+Audit tooling is `lynis` (configuration) and `sbomnix`/`vulnxscan` (CVE scanning against the real closure, via osv.dev). **Do not go back to `vulnix`**: it only knows NVD's legacy JSON 1.1 feeds, which return 403 since their retirement, so every run ends in a `ConnectionError` traceback. Verified 2026-09-22, when the NVD API 2.0 answered 200 from the same machine.
 
-**AppArmor is enabled but confines nothing.** `security.apparmor.enable = true` loads the LSM (it is in `/sys/kernel/security/lsm`) and starts the service, but ships no policies, so `apparmor/profiles` is empty and lynis reports `MAC framework [ NONE ]`. Upstream `apparmor-profiles` mostly target `/usr/bin` paths that do not exist here; confining anything means writing store-path-aware profiles per application.
+**AppArmor profiles** live in `shared/modules/nixos/security/apparmor/`, one module per app (gated on that app's hostConfig toggle), all in `complain` mode. Attach them by store-path glob (`/nix/store/*-mpv-*/bin/mpv`), never to a binary Nix builds also run (unzip, tar). `nix flake check` does not parse profiles, so test-compile them before handing back: build `.#nixosConfigurations.<host>.config.environment.etc."apparmor.d".source`, then run `apparmor_parser -Q -K -I <that dir> -I <apparmor-profiles>/etc/apparmor.d <file>` on each profile (no root needed). Log reading, the enforce procedure and known gaps are in `.notes/security/apparmor.md`.
 
 `hostConfig.ssh.enable` gates `nixos/services/ssh.nix`, which owns both sshd and fail2ban: key-only auth, no root login, no forwarding, ed25519 host key, and the fail2ban sshd jail. An assertion refuses to build when the toggle is on and `authorizedKeys.keys` in that module is empty, since password and keyboard-interactive auth are both off and there would be no way in.
 
@@ -417,6 +400,7 @@ Security/privacy notes live under `.notes/security/`:
 - `security/blocklists.md` — uBlock Origin and AdGuard Home filter lists
 - `security/ublock-filters.md` — custom uBlock cosmetic filters (paste into uBlock → My Filters)
 - `security/android-quic-vpn-leak.md` — QUIC VPN bypass (CVE, May 2026): mitigation via `adb shell device_config put tethering close_quic_connection -1`; re-apply after Android updates
+- `security/apparmor.md` — the per-app AppArmor profiles: what each attaches to, reading `apparmor="ALLOWED"` log lines, moving a profile to enforce, and what breaks first when you do
 
 Game-specific notes live under `.notes/gaming/`:
 
@@ -435,6 +419,7 @@ Local (non-nixpkgs) binary installs live under `.notes/local/`:
 - `local/local-binary-installs.md` — the `~/.local/opt` + `hostConfig.local` pattern for prebuilt third-party bundles kept out of git; restore steps for fresh installs / the laptop. **Add an entry here for each new local app.**
 - `local/appimage-wraps.md` — the `appimageTools.wrapType2` pattern for upstream AppImages (Mangayomi). Hash-pinned into the store, so nothing to restore by hand; covers the per-app `Exec`/icon fixups, a non-executable `AppRun`, how to get a new hash when `nix store prefetch-file` hits the daemon's DNS timeout, and building one module without a rebuild.
 
-Music listening notes live under `.notes/music/`:
+Window manager notes live under `.notes/wm/`:
 
-- `music/five-star-albums.md` — the 148 albums rated 10/10 on RateYourMusic as of the 2026-09-20 export, as a checklist for adding to Passport by hand. Generated by filtering the RYM export for `rating == 10`; the CSVs themselves stay in `~/Downloads`, out of the repo.
+- `wm/niri-xdg-portals.md` — why `xdg-desktop-portal-gnome` drops to Settings-only when `GDK_BACKEND` is set, how niri-flake hides the system portal backends, and the `busctl` health check
+- `wm/cosmic-manager.md` — how cosmic-manager applies config, the `$`-in-`Spawn` RON trap, panel/applet config traps, and the DMS bar the COSMIC panel mirrors

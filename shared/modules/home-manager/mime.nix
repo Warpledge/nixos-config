@@ -14,8 +14,8 @@ with lib; let
     browser = ["zen-beta.desktop"];
     text = ["dev.zed.Zed.desktop"];
     image = ["org.gnome.Loupe.desktop"];
-    audio = ["io.github.celluloid_player.Celluloid.desktop"];
-    video = ["io.github.celluloid_player.Celluloid.desktop"];
+    audio = ["mpv.desktop"];
+    video = ["mpv.desktop"];
     directory = ["org.gnome.Nautilus.desktop"];
     office = ["libreoffice.desktop"];
     pdf = ["org.gnome.Evince.desktop"];

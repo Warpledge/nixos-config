@@ -22,6 +22,7 @@
       ./nix/substituters.nix
 
       #--- Security & Hardening
+      ./security/apparmor
       ./security/auditd.nix
       ./security/core.nix
       ./security/kernel.nix

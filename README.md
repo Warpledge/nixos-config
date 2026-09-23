@@ -187,7 +187,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | --- | --- |
 | **Browsers** | [Zen][zen] / [Mullvad Browser][mullvad-browser] / [Helium][helium] |
 | **File Manager** | [Nautilus][nautilus], [Yazi][yazi] (terminal file manager) |
-| **Media Player** | [mpv][mpv], [Celluloid][celluloid] (mpv frontend), [Spotify][spotify] via [spicetify-nix][spicetify], [FreeTube][freetube] |
+| **Media Player** | [mpv][mpv], [Spotify][spotify] via [spicetify-nix][spicetify], [FreeTube][freetube] |
 | **Twitch** | [Streamlink Twitch GUI][streamlink-twitch-gui] browses Twitch and hands the stream to [Streamlink][streamlink], which plays it in mpv, so there are no ads and the follow list stays local with no Twitch account attached; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs |
 | **Screenshot / Recording** | [dms screenshot][dms] (Niri), [grim][grim] + [slurp][slurp] (Hyprland), [gpu-screen-recorder][gpu-screen-recorder] |
 | **Graphics** | [Blender][blender], [Krita][krita], [Affinity Suite v3][affinity-nix] (via Wine), all off by default |
@@ -234,7 +234,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | | |
 | --- | --- |
 | **Disk** | ext4 on a [LUKS][luks]-encrypted partition, unlocked at boot |
-| **Access Control** | [AppArmor][apparmor] fences each program into only the files it actually needs, so one compromised app cannot wander the rest of the system. Crash dumps are switched off so a crash cannot spill memory contents to disk |
+| **Access Control** | [AppArmor][apparmor] profiles for the apps that open untrusted files or run third-party code (mpv, yt-dlp, streamlink, Evince, File Roller, unrar, Obsidian, Mangayomi, Prism Launcher), limiting each to the files it needs. They run in log-only mode for now. Crash dumps are switched off so a crash cannot spill memory contents to disk |
 | **Kernel Hardening** | Boot settings that make the system harder to attack: the core of the OS refuses to be modified while running, memory is placed unpredictably so an attacker cannot count on where things are, and freed memory is wiped instead of left lying around |
 | **Network Hardening** | The usual anti-spoofing settings: packets claiming to come from an address they cannot have come from get dropped, requests to reroute traffic are ignored, and the machine stays up under a basic flood attack |
 | **Auditing** | [auditd][auditd], with a daily timer to keep the log from growing forever |
@@ -344,7 +344,6 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [twintail]: https://flathub.org/apps/app.twintaillauncher.ttl
 [rmo]: https://github.com/RokyZevon/RelinkModOrganizer
 [reloaded-ii]: https://github.com/Reloaded-Project/Reloaded-II
-[celluloid]: https://celluloid-player.github.io
 [claude-code]: https://github.com/anthropics/claude-code
 [opencode]: https://github.com/opencode-ai/opencode
 [lmstudio]: https://lmstudio.ai

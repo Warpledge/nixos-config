@@ -10,11 +10,11 @@
 #- that drops the version bumps below back onto someone else.
 {pkgs, ...}: let
   pname = "mangayomi";
-  version = "0.9.6";
+  version = "0.9.7";
 
   src = pkgs.fetchurl {
     url = "https://github.com/kodjodevf/mangayomi/releases/download/v${version}/Mangayomi-v${version}-linux.AppImage";
-    hash = "sha256-X/9JG9LhjvSENeA+mXgdWRSqeQpVf728zeAX0FrloTg=";
+    hash = "sha256-42ukBEhFevqsZ+YVyjJpzHL1jm9gLjo5jHSuyJ0sydw=";
   };
 
   #-- Unpacked only to lift out the icon and desktop entry

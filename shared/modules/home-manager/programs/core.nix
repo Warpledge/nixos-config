@@ -26,7 +26,6 @@
     gnome-calculator
     baobab
     gnome-text-editor
-    (celluloid.override {youtubeSupport = true;})
     loupe
     evince
     resources

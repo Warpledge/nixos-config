@@ -50,7 +50,6 @@
   "match:class ^(zenity)$, float on"
   "match:class ^(org.gnome.Loupe)$, float on"
   "match:class ^(io.github.alainm23.planify)$, float on"
-  "match:class ^(io.github.celluloid_player.Celluloid)$, float on"
   "match:class ^(Audacious)$, float on"
   "match:class ^(.sameboy-wrapped)$, float on"
   "match:title ^(Transmission)$, float on"
@@ -78,5 +77,4 @@
   "match:class ^(nm-connection-editor)$, size 45% 45%"
   "match:title ^(Volume Control)$, size 700 450"
   "match:class ^(io.github.alainm23.planify)$, size 900 700"
-  "match:class ^(io.github.celluloid_player.Celluloid)$, size 1280 720"
 ]
