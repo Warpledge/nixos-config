@@ -59,7 +59,6 @@
   #--------------------------------------------------------------------#
   #-- GNOME Keyring
   #--------------------------------------------------------------------#
-  services.gnome.gnome-keyring.enable = true;
   services.gnome.gcr-ssh-agent.enable = false; # disabled: conflicts with gpg-agent's SSH support (cyclic gpg-agent-ssh.socket dependency)
   programs = {
     seahorse.enable = true; # GUI for managing keyring credentials
@@ -72,31 +71,6 @@
       Host *
         UseRoaming no
     '';
-  };
-
-  #--------------------------------------------------------------------#
-  #-- Fail2ban Intrusion Prevention
-  #--------------------------------------------------------------------#
-  services.fail2ban = {
-    enable = true; # Enable intrusion prevention
-    ignoreIP = [
-      "127.0.0.1"
-      "127.0.0.1/8"
-      "::1"
-    ];
-    bantime = "12h";
-    bantime-increment = {
-      enable = true;
-      multipliers = "1 2 4 8 16 32 64"; # Exponential multipliers
-      maxtime = "168h"; # 1 week maximum ban
-    };
-    jails = {
-      ssh = ''
-        enabled = false
-        port = 22
-      '';
-    };
-    maxretry = 3;
   };
 
   #--------------------------------------------------------------------#

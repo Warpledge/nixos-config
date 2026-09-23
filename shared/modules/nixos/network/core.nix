@@ -74,25 +74,12 @@
   };
 
   #--------------------------------------------------------------------#
-  #-- SSH Hardening
-  #--------------------------------------------------------------------#
-  services.openssh = {
-    enable = false; # SSH disabled (GitHub uses HTTPS)
-    settings = {
-      PasswordAuthentication = false;
-      PermitRootLogin = "no";
-      KbdInteractiveAuthentication = false;
-      X11Forwarding = false;
-    };
-    openFirewall = false;
-  };
-
-  #--------------------------------------------------------------------#
   #-- System Integration
   #--------------------------------------------------------------------#
   boot.kernelModules = ["af_packet"]; # Packet capturing/injection support
   environment.systemPackages = with pkgs; [
     networkmanagerapplet # NetworkManager GUI applet
+    bind.dnsutils # DNS utilities
     mtr # Network diagnostics tool
     tcpdump # Packet analyzer
     traceroute # Network trace tool
@@ -108,6 +95,7 @@
     enable = true;
     settings.Resolve = {
       DNSOverTLS = "opportunistic"; # Encrypt DNS queries when possible
+      LLMNR = "false"; # Name-resolution protocol Linux does not need; spoofable on any shared network
       # Empty assignment disables systemd-resolved's compiled-in fallbacks.
       # Without this a Mullvad resolver failure silently falls back to
       # Cloudflare/Google, bypassing the DNS content blocking.

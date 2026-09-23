@@ -17,12 +17,12 @@ in {
     sudo = {
       enable = true; # Enable traditional sudo
       keepTerminfo = true; # Fix sudo in modern terminal emulators
-      wheelNeedsPassword = mkDefault false;
+      wheelNeedsPassword = mkDefault true;
       execWheelOnly = mkForce true;
       extraConfig = ''
         Defaults lecture = never # Don't show sudo lecture on first use
         Defaults pwfeedback # Show password input feedback (asterisks)
-        Defaults env_keep += "EDITOR PATH DISPLAY" # Keep these env vars as root
+        Defaults env_keep += "EDITOR DISPLAY" # PATH deliberately excluded: keeping it defeats secure_path
         Defaults timestamp_timeout = 300 # Cache password for 5 minutes
       '';
       extraRules = let

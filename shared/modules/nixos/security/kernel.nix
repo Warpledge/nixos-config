@@ -13,17 +13,27 @@
       "i2c-dev" # I2C device interface for userspace
       "efivarfs" # EFI variable filesystem
       "tcp_bbr" # BBR congestion control (network performance)
-      "nvme_core.default_ps_max_latency_us=0" # NVMe max performance (no power saving)
+    ];
+
+    #--------------------------------------------------------------------#
+    #-- Kernel Parameters
+    #--------------------------------------------------------------------#
+    #- These sat in kernelModules until 2026-09-23, where modprobe could not
+    #- resolve them and dropped them silently.
+    kernelParams = [
       "randomize_kstack_offset=on" # Randomize kernel stack (exploit mitigation)
       "vsyscall=none" # Disable legacy syscall interface
       "slab_nomerge" # Disable slab merging (heap attack hardening)
-      "lockdown=integrity" # Kernel lockdown mode
       "page_poison=1" # Poison freed memory (use-after-free detection)
       "page_alloc.shuffle=1" # Randomize page allocator
-      "sysrq_always_enabled=0" # Disable magic SysRq key
-      "rootflags=noatime" # Disable file access time updates
-      "lsm=landlock,lockdown,yama,integrity,apparmor,bpf,tomoyo,selinux" # Enable LSMs
-      "fbcon=nodefer" # Show kernel messages immediately
+
+      #--- Held back: never active, and each changes behaviour on first boot
+      # "lockdown=integrity" # Blocks unsigned module loads, which kills v4l2loopback
+      # "lsm=landlock,lockdown,yama,integrity,apparmor,bpf,tomoyo,selinux" # Overrides the LSM set NixOS derives from security.apparmor
+      # "sysrq_always_enabled=0" # kernel.sysrq = 0 below already does this
+      # "rootflags=noatime" # Mount option; belongs in hardware-configuration.nix
+      # "nvme_core.default_ps_max_latency_us=0" # Disables NVMe power saving, costs laptop battery
+      # "fbcon=nodefer" # Cosmetic, not security
     ];
     #--------------------------------------------------------------------#
     #-- Kernel Sysctls Configuration

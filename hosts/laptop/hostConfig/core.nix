@@ -107,6 +107,11 @@
     bleachbit = true; # Disk cleaner for caches, logs and browser leftovers
   };
 
+  #--- SSH Server
+  # Key-only openssh + fail2ban. Add a public key in
+  # shared/modules/nixos/services/ssh.nix before enabling, or there is no way in.
+  ssh.enable = false;
+
   #--- ClamAV Antivirus
   # Enable ClamAV daemon, freshclam auto-updater, and ClamTK GUI
   clamav.enable = false;

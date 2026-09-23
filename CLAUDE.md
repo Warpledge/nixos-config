@@ -42,7 +42,7 @@ nix flake lock --update-input <name>   # Bump a single input
 run <pkg> [args]        # Ad-hoc launch a nixpkgs package without installing it (zsh function)
 ```
 
-`nixm` is an fzf-driven menu defined in `shared/modules/home-manager/scripts/nixm.nix` (aliased to `n`). Run `nixm <bogus>` to print the full subcommand list.
+`nixm` is an fzf-driven menu defined in `shared/modules/home-manager/nixm.nix` (aliased to `n`). Run `nixm <bogus>` to print the full subcommand list.
 
 ## Architecture
 
@@ -65,7 +65,7 @@ The authoritative list of toggles is **`hosts/{hostname}/hostConfig/core.nix`**.
 - `username` — read by `flake.nix` itself (`inherit (hostConfig) username`), not just by modules
 - `windowManager` — `"hyprland" | "niri" | "gnome" | "cosmic"`
 - `kernel` — `"zen" | "latest" | "xanmod" | "cachyos"`
-- Service toggles: `mullvad.enable` (plus `mullvad.splitTunnel`, a list of command names routed around the VPN), `clamav.enable`, `docker.enable`, `winboat.enable`, `discord.arrpc.enable`, `scrcpy.enable`
+- Service toggles: `mullvad.enable` (plus `mullvad.splitTunnel`, a list of command names routed around the VPN), `clamav.enable`, `docker.enable`, `winboat.enable`, `discord.arrpc.enable`, `scrcpy.enable`, `ssh.enable`
 - Attribute-set toggles: `browsers.{zen,mullvad,helium,ferdium}`, `terminals.{kitty,ghostty}`, `editors.{helix,zed}`, `fileBrowsers.{nautilus,yazi}`, `media.{mpv,spotify,freetube,videoTrimmer,mangayomi,streamlinkTwitchGui}`, `graphics.{blender,krita,affinity}`, `audio.{reaper,guitar,feedback}`, `office.{thunderbird,obsidian,homebank}`, `security.{bleachbit}`, `gameLaunchers.{steam,heroic,prismlauncher,lutris,faugus,twintail,easyrpg}`, `japanese.{ime,vn}`
 - `local.{granblueRelinkMods}` — wrappers around prebuilt bundles under `~/.local/opt/` (kept out of git); see `.notes/local/local-binary-installs.md`
 - AI tools: `claude.enable`, `opencode.enable`, `lmstudio.enable`
@@ -74,10 +74,11 @@ Desktop and laptop should stay byte-identical apart from the header comment and 
 
 Gotchas. Grep the option name before assuming which file owns it:
 
+- **`boot.kernelModules` silently swallows kernel parameters.** modprobe cannot resolve them, `systemd-modules-load.service` logs `Failed to find module '<param>'` and still exits 0, so the hardening looks applied and is not. Eleven params sat there until 2026-09-23. Check with `grep <param> /proc/cmdline`, not by reading the module.
 - `audio.feedback` is the one toggle that does not match its folder: fee[dB]ack lives in `programs/gaming/` as a game, but shares the Katana rig with `audio.guitar`.
-- `gameLaunchers.steam` / `.twintail` are wired in `shared/modules/nixos/programs/gaming/core.nix`; `heroic`, `prismlauncher`, `lutris`, `faugus`, `easyrpg` are wired in `home-manager/programs/default.nix`.
+- `gameLaunchers.steam` / `.twintail` are wired in `shared/modules/nixos/gaming/default.nix`; `heroic`, `prismlauncher`, `lutris`, `faugus`, `easyrpg` are wired in `home-manager/programs/default.nix`.
 - The Katana patch editor is a `~/.local/opt` bundle but does **not** live in `programs/local/`; it moved into `audio/guitar.nix` with the rest of the amp rig, so it has no `local.*` toggle of its own and rides on `audio.guitar`.
-- `docker.enable` does **not** use a conditional import: `nixos/default.nix` imports `programs/docker.nix` unconditionally and the module wraps its whole body in `config = lib.mkIf hostConfig.docker.enable {...}`. Both patterns exist in the repo; prefer the conditional import for new modules.
+- The AI modules and `emulation/winboat.nix` are conditionally imported **and** wrap their body in `config = lib.mkIf hostConfig.<toggle> {...}`, so the inner guard never fires on its own. New modules take the conditional import alone.
 - Module *loading* goes through `lib.optionals` in a `default.nix`; config *logic* inside a module uses `if/then/else`. Mixing them up is why an option looks wired but has no effect.
 - Reach nested attrs that may not exist with `hostConfig.feature.sub or false`, never a bare path.
 
@@ -105,8 +106,8 @@ Gotchas. Grep the option name before assuming which file owns it:
 
 ### Module layout
 
-- `shared/modules/nixos/` — system: `network/` (core, blockers), `nix/` (core, nh, nixpkgs, substituters), `security/` (auditd, core, kernel, sudo), `services/` (adb, gnome-services, keyd, power, runners, sound, clamav), `programs/` (`gaming/`, `docker.nix`, `flatpak.nix`, `utility.nix`), `system/` (bootloader, locale, shell, tweaks, user, wayland, xserver, zram, japanese-ime)
-- `shared/modules/home-manager/` — user: `programs/` (browsers, terminals, editors, ai, shell, emulation, fetch, file-browsers, graphics, audio, media, office, security, launchers, local, gaming, android, discord, plus `core.nix`, `git.nix`) and `scripts/`. `mime.nix`, `services.nix` and `variables.nix` are single files at that level, not directories
+- `shared/modules/nixos/` — system: `gaming/` (default, esync, gamemode, gamescope, java, kernel, steam, twintail), `network/` (core, blockers), `nix/` (core, nh, nixpkgs, substituters), `security/` (auditd, core, kernel, keyring, sudo), `services/` (adb, desktop, docker, flatpak, keyd, power, runners, sound, clamav, ssh), `system/` (bootloader, display-manager, documentation, input, locale, packages, shell, tweaks, user, wayland, zram, japanese-ime)
+- `shared/modules/home-manager/` — user: `programs/` (browsers, terminals, editors, ai, shell, emulation, fetch, file-browsers, graphics, audio, media, office, security, launchers, local, gaming, android, discord, plus `core.nix`, `git.nix`). `mime.nix`, `nixm.nix`, `services.nix` and `variables.nix` are single files at that level, not directories
   - `programs/local/` — wrappers for non-nixpkgs prebuilt bundles living in `~/.local/opt/`; the payload is intentionally not in the repo
   - AppImage wraps (`appimageTools`) sit in the folder for what the app is, not how it is packaged: `gaming/feedback.nix`, `media/{mangayomi,streamlink-twitch-gui}.nix`. The payload is hash-pinned into the store, so unlike `programs/local/` nothing lives outside git (see `.notes/local/appimage-wraps.md`)
   - `default.nix` carries a `clearStaleBackups` activation hook that deletes `*.bak` under `~/.config`, `~/.local/{share,state}` before `checkLinkTargets`. This is why HM activation never fails on leftover backups. Don't remove it when debugging a "file exists" error; find the real conflicting file instead.
@@ -259,13 +260,15 @@ These are only imported when the WM is active, e.g. `lib.optional (hostConfig.wi
 
 - DNS: systemd-resolved + NetworkManager (DNSStubListener disabled so port 53 is free)
 - WiFi: iwd, IPv6 privacy, random MAC
-- Firewall: TCP 22 (port reserved, `services.openssh` off), 80, 443, 25566 (Minecraft), 7777 (Terraria), 5555 (ADB); UDP 27000–27036 range (Steam). Defined in `shared/modules/nixos/network/core.nix`.
+- Firewall: TCP 22 (open; sshd only runs when `hostConfig.ssh.enable` is set), 80, 443, 25566 (Minecraft), 7777 (Terraria), 5555 (ADB); UDP 27000–27036 range (Steam). Defined in `shared/modules/nixos/network/core.nix`.
 - Mullvad: `hostConfig.mullvad.enable` (WireGuard + quantum resistance), `shared/modules/mullvad/`, split across `mullvad-nixos/` (daemon settings, split tunnel) and `mullvad-home/` (tray app). Settings are applied with the `mullvad` CLI from a oneshot unit, not by templating `settings.json`, which the daemon rewrites. Relay and entry selection are deliberately unmanaged so exits can be switched by hand. `hostConfig.mullvad.splitTunnel` names apps routed around the VPN; the NixOS half wraps system packages, the home half wraps `home.packages` ones, and the home profile outranks `/run/current-system/sw/bin` in PATH, so a NixOS wrapper for an HM package is silently shadowed.
 - `network/blockers.nix` — hosts-level blocklists, always imported
 
 ## Security
 
-LUKS, kernel hardening, AppArmor, GNOME Keyring, auditd. Mullvad VPN as above.
+LUKS, kernel hardening, AppArmor, GNOME Keyring, auditd. Mullvad VPN as above. Wheel needs a password for sudo, so `nixm rebuild` prompts once; the NOPASSWD list in `security/sudo.nix` covers systemctl, poweroff, reboot and the nix commands.
+
+`hostConfig.ssh.enable` gates `nixos/services/ssh.nix`, which owns both sshd and fail2ban: key-only auth, no root login, no forwarding, ed25519 host key, and the fail2ban sshd jail. An assertion refuses to build when the toggle is on and `authorizedKeys.keys` in that module is empty, since password and keyboard-interactive auth are both off and there would be no way in.
 
 ## Writing Style
 

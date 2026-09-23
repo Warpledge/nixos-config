@@ -1,21 +1,7 @@
 #=====================================================================#
-# GAMING CORE CONFIGURATION
+# GAMING KERNEL TUNING
 #=====================================================================#
 {
-  lib,
-  hostConfig,
-  ...
-}: {
-  imports =
-    [
-      ./esync.nix
-      ./gamemode.nix
-      ./java.nix
-    ]
-    #--- Game Launchers (controlled by hostConfig)
-    ++ lib.optionals hostConfig.gameLaunchers.steam [./steam.nix]
-    ++ lib.optionals hostConfig.gameLaunchers.twintail [./twintail.nix];
-
   #--------------------------------------------------------------------#
   #-- Kernel Sysctls
   #--------------------------------------------------------------------#
@@ -31,17 +17,4 @@
     "threadirqs" # Run IRQ handlers in threads (lower latency)
     "nowatchdog" # Disable watchdog (lower overhead)
   ];
-
-  #--------------------------------------------------------------------#
-  #-- Gamescope Compositor
-  #--------------------------------------------------------------------#
-  programs.gamescope = {
-    enable = true;
-    capSysNice = false;
-    args = [
-      "--rt" # Realtime scheduling support
-      "--expose-wayland" # Expose Wayland socket for native games
-      "--force-grab-cursor"
-    ];
-  };
 }

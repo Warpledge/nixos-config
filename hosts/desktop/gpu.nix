@@ -80,7 +80,6 @@
       "iommu=pt" # Passthrough mode for better performance
 
       #--- Gaming Performance Optimizations
-      "mitigations=off" # Disable CPU vulnerability mitigations for performance
       "transparent_hugepage=always" # Enable transparent huge pages
       "hugepagesz=1G" # 1GB huge pages for modern games
       "split_lock_detect=off" # Disable split lock detection

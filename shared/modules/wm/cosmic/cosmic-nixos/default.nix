@@ -19,7 +19,7 @@
     #-- Display Manager
     #--------------------------------------------------------------------#
     # cosmic-greeter is a greetd session, already covered by the unmask
-    # activation script in shared/modules/nixos/system/xserver.nix.
+    # activation script in shared/modules/nixos/system/display-manager.nix.
     displayManager = {
       cosmic-greeter.enable = true;
 

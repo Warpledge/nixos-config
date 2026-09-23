@@ -8,6 +8,9 @@
 }: {
   imports =
     [
+      #--- Gaming
+      ./gaming
+
       #--- Network
       ./network/blockers.nix
       ./network/core.nix
@@ -18,21 +21,16 @@
       ./nix/nixpkgs.nix
       ./nix/substituters.nix
 
-      #--- Program Installation & Configuration
-      ./programs/docker.nix
-      ./programs/gaming/core.nix
-      ./programs/flatpak.nix
-      ./programs/utility.nix
-
       #--- Security & Hardening
       ./security/auditd.nix
       ./security/core.nix
       ./security/kernel.nix
+      ./security/keyring.nix
       ./security/sudo.nix
 
       #--- System Services
       ./services/adb.nix
-      ./services/gnome-services.nix
+      ./services/desktop.nix
       ./services/keyd.nix
       ./services/power.nix
       ./services/runners.nix
@@ -40,16 +38,25 @@
 
       #--- System Configuration
       ./system/bootloader.nix
+      ./system/display-manager.nix
+      ./system/documentation.nix
+      ./system/input.nix
       ./system/locale.nix
+      ./system/packages.nix
       ./system/shell.nix
       ./system/tweaks.nix
       ./system/user.nix
       ./system/wayland.nix
-      ./system/xserver.nix
       ./system/zram.nix
     ]
     #--- ClamAV Antivirus (controlled by hostConfig)
     ++ lib.optionals hostConfig.clamav.enable [./services/clamav.nix]
+    #--- Docker (controlled by hostConfig)
+    ++ lib.optionals hostConfig.docker.enable [./services/docker.nix]
+    #--- Flatpak (controlled by hostConfig; twintail is the only declared flatpak)
+    ++ lib.optionals hostConfig.gameLaunchers.twintail [./services/flatpak.nix]
+    #--- SSH Server (controlled by hostConfig)
+    ++ lib.optionals hostConfig.ssh.enable [./services/ssh.nix]
     #--- Japanese Input Method (controlled by hostConfig)
     ++ lib.optionals hostConfig.japanese.ime [./system/japanese-ime.nix];
 }

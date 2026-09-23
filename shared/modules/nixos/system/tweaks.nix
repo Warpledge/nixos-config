@@ -1,5 +1,5 @@
 #=====================================================================#
-# SYSTEM TWEAKS (KERNEL PARAMETERS, JOURNALD)
+# SYSTEM TWEAKS (KERNEL PARAMETERS, SYSTEMD, JOURNALD)
 #=====================================================================#
 {
   #--------------------------------------------------------------------#
@@ -10,6 +10,13 @@
     "vm.swappiness" = 10; # Prefer RAM over swap (10 = low swap usage)
     "vm.vfs_cache_pressure" = 50; # Reduce inode/dentry cache pressure
     "kernel.nmi_watchdog" = 0; # Disable NMI watchdog (reduces CPU overhead)
+  };
+
+  #--------------------------------------------------------------------#
+  #-- Systemd Shutdown Timeout
+  #--------------------------------------------------------------------#
+  systemd.settings.Manager = {
+    DefaultTimeoutStopSec = "10s";
   };
 
   #--------------------------------------------------------------------#
