@@ -58,7 +58,6 @@
     ++ lib.optionals hostConfig.media.spotify [./media/spotify.nix]
     ++ lib.optionals hostConfig.media.freetube [./media/freetube]
     ++ lib.optionals hostConfig.media.videoTrimmer [./media/video-trimmer.nix]
-    ++ lib.optionals hostConfig.media.mangayomi [./media/mangayomi.nix]
     ++ lib.optionals hostConfig.media.streamlinkTwitchGui [./media/streamlink-twitch-gui.nix]
     ++ lib.optionals hostConfig.suwayomi.enable [./media/suwayomi.nix]
     #--- Terminals (controlled by host hostConfig.nix)

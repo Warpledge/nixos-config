@@ -60,7 +60,6 @@
     spotify = true;
     freetube = true;
     videoTrimmer = true;
-    mangayomi = true; # Manga, novel and anime reader (AppImage, ahead of nixpkgs)
     moku = true; # Manga, light novel and anime app (Flatpak)
     streamlinkTwitchGui = true; # Twitch browser; streams play in mpv via streamlink (AppImage)
   };

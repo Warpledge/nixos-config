@@ -200,7 +200,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | **AI Tooling** | [Claude Code][claude-code], [OpenCode][opencode], [LM Studio][lmstudio] |
 | **Android** | [scrcpy][scrcpy] (mirror and control a device over USB or wifi, nothing to install on the phone) |
 | **Video Trimming** | [Video Trimmer][video-trimmer] (cut a clip out of a video without re-encoding it) |
-| **Manga / Anime Reader** | [Mangayomi][mangayomi] (manga, novels and anime from extension repos), the upstream AppImage wrapped with `appimageTools` rather than the nixpkgs build, which runs a release or two behind. [Suwayomi][suwayomi] is a local manga reader, opened from the launcher as a [Helium][helium] app window (`localhost:4567`). [Moku][moku] covers manga, light novels and anime (the release Flatpak bundle, through nix-flatpak), with a local [FlareSolverr][flaresolverr] for Cloudflare-protected sources |
+| **Manga / Anime Reader** | [Suwayomi][suwayomi] is a local manga reader, opened from the launcher as a [Helium][helium] app window (`localhost:4567`). [Moku][moku] covers manga, light novels and anime (the release Flatpak bundle, through nix-flatpak), with a local [FlareSolverr][flaresolverr] for Cloudflare-protected sources |
 | **Finance** | [HomeBank][homebank] (personal accounting with labeled transactions and a running balance) |
 | **Collection Tracking** | [Tonkatsu Box][tonkatsu-box] (games, film, anime, manga, visual novels, books and music in one local database, imports from Steam and AniList; a prebuilt bundle kept in `~/.local/opt/` instead of nixpkgs) |
 | **Japanese** | [fcitx5][fcitx5] + [Mozc][mozc] for typing hiragana, katakana and kanji, plus [innoextract][innoextract], [cabextract][cabextract] and [mdf2iso][mdf2iso] for unpacking raw Japanese visual novels (off by default) |
@@ -236,7 +236,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | | |
 | --- | --- |
 | **Disk** | ext4 on a [LUKS][luks]-encrypted partition, unlocked at boot |
-| **Access Control** | [AppArmor][apparmor] profiles for the apps that open untrusted files or run third-party code (mpv, yt-dlp, streamlink, Evince, File Roller, unrar, Obsidian, Mangayomi, Prism Launcher), limiting each to the files it needs. They run in log-only mode for now. Crash dumps are switched off so a crash cannot spill memory contents to disk |
+| **Access Control** | [AppArmor][apparmor] profiles for the apps that open untrusted files or run third-party code (mpv, yt-dlp, streamlink, Evince, File Roller, unrar, Obsidian, Prism Launcher), limiting each to the files it needs. They run in log-only mode for now. Crash dumps are switched off so a crash cannot spill memory contents to disk |
 | **Kernel Hardening** | Boot settings that make the system harder to attack: the core of the OS refuses to be modified while running, memory is placed unpredictably so an attacker cannot count on where things are, and freed memory is wiped instead of left lying around |
 | **Network Hardening** | The usual anti-spoofing settings: packets claiming to come from an address they cannot have come from get dropped, requests to reroute traffic are ignored, and the machine stays up under a basic flood attack |
 | **Auditing** | [auditd][auditd], with a daily timer to keep the log from growing forever |
@@ -320,7 +320,6 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [yazi]: https://github.com/sxyazi/yazi
 [arrpc]: https://arrpc.openasar.dev
 [video-trimmer]: https://gitlab.gnome.org/YaLTeR/video-trimmer
-[mangayomi]: https://github.com/kodjodevf/mangayomi
 [moku]: https://github.com/moku-project/Moku
 [flaresolverr]: https://github.com/FlareSolverr/FlareSolverr
 [suwayomi]: https://github.com/Suwayomi/Suwayomi-Server

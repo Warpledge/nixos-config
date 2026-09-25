@@ -13,7 +13,6 @@ logged as `apparmor="ALLOWED"`.
 | `evince` | `evince`, `evince-previewer` | always |
 | `file-roller`, `unrar` | the GUI and the `unrar` CLI | always |
 | `obsidian` | the `obsidian` launcher script | `office.obsidian` |
-| `mangayomi` | the binary inside the extracted AppImage | `media.mangayomi` |
 | `prismlauncher` | the real Prism binary, behind the mullvad-exclude wrapper | `gameLaunchers.prismlauncher` |
 
 ## Checking it works

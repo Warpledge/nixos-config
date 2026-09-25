@@ -18,7 +18,6 @@
     #--- Per-app profiles (controlled by hostConfig)
     ++ lib.optionals hostConfig.media.mpv [./mpv.nix]
     ++ lib.optionals hostConfig.media.streamlinkTwitchGui [./streamlink.nix]
-    ++ lib.optionals hostConfig.media.mangayomi [./mangayomi.nix]
     ++ lib.optionals hostConfig.office.obsidian [./obsidian.nix]
     ++ lib.optionals hostConfig.gameLaunchers.prismlauncher [./prismlauncher.nix];
 
