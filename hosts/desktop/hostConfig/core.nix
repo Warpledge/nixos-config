@@ -101,6 +101,10 @@
   # on the device, so it works on de-Googled phones/tablets
   scrcpy.enable = true;
 
+  #--- Suwayomi Manga Server
+  # Local manga reader, web UI at http://localhost:4567
+  suwayomi.enable = true;
+
   #--- Security Software Selection
   # Enable the security and privacy applications you want installed
   security = {

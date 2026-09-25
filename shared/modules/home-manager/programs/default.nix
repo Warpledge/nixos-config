@@ -60,6 +60,7 @@
     ++ lib.optionals hostConfig.media.videoTrimmer [./media/video-trimmer.nix]
     ++ lib.optionals hostConfig.media.mangayomi [./media/mangayomi.nix]
     ++ lib.optionals hostConfig.media.streamlinkTwitchGui [./media/streamlink-twitch-gui.nix]
+    ++ lib.optionals hostConfig.suwayomi.enable [./media/suwayomi.nix]
     #--- Terminals (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.terminals.kitty [./terminals/kitty.nix]
     ++ lib.optionals hostConfig.terminals.ghostty [./terminals/ghostty.nix]

@@ -58,6 +58,8 @@
     ++ lib.optionals hostConfig.gameLaunchers.twintail [./services/flatpak.nix]
     #--- SSH Server (controlled by hostConfig)
     ++ lib.optionals hostConfig.ssh.enable [./services/ssh.nix]
+    #--- Suwayomi Manga Server (controlled by hostConfig)
+    ++ lib.optionals hostConfig.suwayomi.enable [./services/suwayomi.nix]
     #--- Japanese Input Method (controlled by hostConfig)
     ++ lib.optionals hostConfig.japanese.ime [./system/japanese-ime.nix];
 }

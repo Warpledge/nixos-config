@@ -200,7 +200,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | **AI Tooling** | [Claude Code][claude-code], [OpenCode][opencode], [LM Studio][lmstudio] |
 | **Android** | [scrcpy][scrcpy] (mirror and control a device over USB or wifi, nothing to install on the phone) |
 | **Video Trimming** | [Video Trimmer][video-trimmer] (cut a clip out of a video without re-encoding it) |
-| **Manga / Anime Reader** | [Mangayomi][mangayomi] (manga, novels and anime from extension repos), the upstream AppImage wrapped with `appimageTools` rather than the nixpkgs build, which runs a release or two behind |
+| **Manga / Anime Reader** | [Mangayomi][mangayomi] (manga, novels and anime from extension repos), the upstream AppImage wrapped with `appimageTools` rather than the nixpkgs build, which runs a release or two behind. [Suwayomi][suwayomi] is a local manga reader, opened from the launcher as a [Helium][helium] app window (`localhost:4567`) |
 | **Finance** | [HomeBank][homebank] (personal accounting with labeled transactions and a running balance) |
 | **Collection Tracking** | [Tonkatsu Box][tonkatsu-box] (games, film, anime, manga, visual novels, books and music in one local database, imports from Steam and AniList; a prebuilt bundle kept in `~/.local/opt/` instead of nixpkgs) |
 | **Japanese** | [fcitx5][fcitx5] + [Mozc][mozc] for typing hiragana, katakana and kanji, plus [innoextract][innoextract], [cabextract][cabextract] and [mdf2iso][mdf2iso] for unpacking raw Japanese visual novels (off by default) |
@@ -321,6 +321,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [arrpc]: https://arrpc.openasar.dev
 [video-trimmer]: https://gitlab.gnome.org/YaLTeR/video-trimmer
 [mangayomi]: https://github.com/kodjodevf/mangayomi
+[suwayomi]: https://github.com/Suwayomi/Suwayomi-Server
 [streamlink-twitch-gui]: https://github.com/streamlink/streamlink-twitch-gui
 [feedback]: https://github.com/got-feedBack/feedBack-desktop
 [streamlink]: https://streamlink.github.io/
