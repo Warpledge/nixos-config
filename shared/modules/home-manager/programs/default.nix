@@ -36,6 +36,9 @@
       ./core.nix
       ./discord/discord.nix
       ./gaming/gaming.nix
+      ./gaming/nix-gamescope.nix
+      ./gaming/nix-performance.nix
+      ./gaming/nix-vn.nix
       ./gaming/tml-prelaunch.nix
       ./git.nix
     ]

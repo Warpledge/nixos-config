@@ -11,7 +11,6 @@
     args = [
       "--rt" # Realtime scheduling support
       "--expose-wayland" # Expose Wayland socket for native games
-      "--force-grab-cursor"
     ];
   };
 }
