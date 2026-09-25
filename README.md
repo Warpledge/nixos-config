@@ -240,7 +240,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | **Kernel Hardening** | Boot settings that make the system harder to attack: the core of the OS refuses to be modified while running, memory is placed unpredictably so an attacker cannot count on where things are, and freed memory is wiped instead of left lying around |
 | **Network Hardening** | The usual anti-spoofing settings: packets claiming to come from an address they cannot have come from get dropped, requests to reroute traffic are ignored, and the machine stays up under a basic flood attack |
 | **Auditing** | [auditd][auditd], with a daily timer to keep the log from growing forever |
-| **Hosts Blocklists** | [StevenBlack][stevenblack] (fake news and gambling), [shady-hosts][shady-hosts] and [MetaMask's crypto phishing list][eth-phishing], each pinned to a commit so a rebuild cannot pull in something unreviewed |
+| **Hosts Blocklists** | [StevenBlack][stevenblack] (the base ads and malware list, plus fake news and gambling), from the nixpkgs package |
 | **Browser** | [Zen][zen] with [Arkenfox][arkenfox] and [Securefox][securefox] tweaks, plus [Mullvad Browser][mullvad-browser] |
 | **Secrets** | [GNOME Keyring][gnome-keyring] |
 | **Antivirus** | [ClamAV][clamav] (off by default) |
@@ -368,8 +368,6 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [apparmor]: https://apparmor.net
 [auditd]: https://github.com/linux-audit/audit-userspace
 [stevenblack]: https://github.com/StevenBlack/hosts
-[shady-hosts]: https://github.com/shreyasminocha/shady-hosts
-[eth-phishing]: https://github.com/MetaMask/eth-phishing-detect
 [daita]: https://mullvad.net/en/vpn/daita
 [arkenfox]: https://github.com/arkenfox/user.js
 [securefox]: https://github.com/yokoffing/Betterfox
