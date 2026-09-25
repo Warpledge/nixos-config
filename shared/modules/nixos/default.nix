@@ -54,12 +54,16 @@
     ++ lib.optionals hostConfig.clamav.enable [./services/clamav.nix]
     #--- Docker (controlled by hostConfig)
     ++ lib.optionals hostConfig.docker.enable [./services/docker.nix]
-    #--- Flatpak (controlled by hostConfig; twintail is the only declared flatpak)
-    ++ lib.optionals hostConfig.gameLaunchers.twintail [./services/flatpak.nix]
+    #--- Flatpak (controlled by hostConfig; loaded for the Flatpak apps: twintail, moku)
+    ++ lib.optionals (hostConfig.gameLaunchers.twintail || hostConfig.media.moku) [./services/flatpak.nix]
     #--- SSH Server (controlled by hostConfig)
     ++ lib.optionals hostConfig.ssh.enable [./services/ssh.nix]
     #--- Suwayomi Manga Server (controlled by hostConfig)
     ++ lib.optionals hostConfig.suwayomi.enable [./services/suwayomi.nix]
+    #--- FlareSolverr for Moku's Cloudflare-protected sources (controlled by hostConfig)
+    ++ lib.optionals hostConfig.media.moku [./services/flaresolverr.nix]
+    #--- Moku Flatpak (controlled by hostConfig)
+    ++ lib.optionals hostConfig.media.moku [./services/moku.nix]
     #--- Japanese Input Method (controlled by hostConfig)
     ++ lib.optionals hostConfig.japanese.ime [./system/japanese-ime.nix];
 }

@@ -61,6 +61,7 @@
     freetube = true;
     videoTrimmer = true;
     mangayomi = true; # Manga, novel and anime reader (AppImage, ahead of nixpkgs)
+    moku = true; # Manga, light novel and anime app (Flatpak)
     streamlinkTwitchGui = true; # Twitch browser; streams play in mpv via streamlink (AppImage)
   };
 
@@ -140,7 +141,7 @@
     prismlauncher = true; # Minecraft
     lutris = false; # Wine launcher
     faugus = false; # UMU/Proton launcher
-    twintail = false; # Gacha game launcher (Flatpak)
+    twintail = true; # Gacha game launcher (Flatpak)
     easyrpg = true; # RPG Maker 2000/2003 game interpreter
   };
 
