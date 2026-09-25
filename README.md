@@ -114,13 +114,15 @@ The top level is a set of categories. Pick one and it opens into its own menu of
 | `nixm firmware-update` | Install firmware updates |
 | `nixm firmware-devices` | List devices with firmware support |
 
-#### FreeTube
+#### Backup
 
-Each run drops a `YYYY-MM-DD_HH-MM-SS` folder into `~/Backups/FreeTube` holding all three files, and the 10 most recent runs are kept. The files use FreeTube's own Export format, so its Settings → Data Settings → Import reads them straight back. Close FreeTube first: it rewrites its databases on exit.
+Each run drops a `YYYY-MM-DD_HH-MM-SS` folder into `~/Backups/FreeTube` and `~/Backups/Zen`, and the 10 most recent runs of each are kept. The FreeTube files use its own Export format, so Settings → Data Settings → Import reads them straight back; close FreeTube first, since it rewrites its databases on exit. The Zen folder holds only a `bookmarks.html`, the standard bookmark file that any browser can import (Zen and Firefox included), with folders intact.
 
 | Command | Description |
 | --- | --- |
-| `nixm freetube-backup` | Export subscriptions, playlists and watch history to a new dated folder |
+| `nixm backup` | Run both backups below with one shared timestamp |
+| `nixm freetube-backup` | Export FreeTube subscriptions, playlists and watch history |
+| `nixm zen-backup` | Export Zen's bookmarks as an HTML file any browser imports |
 
 #### Tools
 

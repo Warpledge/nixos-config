@@ -35,7 +35,9 @@ nixm flake-update       # Update flake inputs only (no rebuild)
 nixm dryrun             # Rebuild without applying
 nixm gc                 # GC, keep last 5 generations
 nixm rollback           # Roll back to the previous generation
-nixm freetube-backup    # Export FreeTube subs, playlists and history to a dated ~/Backups/FreeTube folder
+nixm backup             # Back up FreeTube (subs, playlists, history) and Zen bookmarks (as bookmarks.html) to dated ~/Backups folders
+nixm freetube-backup    # FreeTube only (app must be closed)
+nixm zen-backup         # Zen only
 nixm vpn-list           # Show the Android VPN lockdown allowlist on an adb device
 nixm vpn-edit           # Edit that allowlist in $EDITOR (adb-writable, no device owner; applies on reboot)
 nix flake lock --update-input <name>   # Bump a single input
@@ -175,7 +177,7 @@ Gotchas. Grep the option name before assuming which file owns it:
 Subscriptions, profiles, playlists and history are **not** declarative. `nixm freetube-backup`
 writes them to `~/Backups/FreeTube/<YYYY-MM-DD_HH-MM-SS>/` as
 `freetube-{subscriptions,playlists,watch-history}.db`, one JSON document per line, which is what
-FreeTube's own Export writes and its Import reads. The 10 newest folders are kept; `ft_prune`
+FreeTube's own Export writes and its Import reads. The 10 newest folders are kept; `backup_prune`
 only matches names in stamp form, so anything else under that directory is left alone. A run
 that exports nothing removes its own folder and exits 1, so it never displaces a real backup.
 Restoring goes through the app's Settings → Data Settings → Import, not by copying files

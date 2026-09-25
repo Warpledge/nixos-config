@@ -20,6 +20,45 @@
   c = config.lib.stylix.colors;
   rgb = n: "${c."${n}-rgb-r"};${c."${n}-rgb-g"};${c."${n}-rgb-b"}";
   hex = n: "#${c.${n}}";
+
+  #--- Turns moz_bookmarks rows into a Netscape bookmark file, the format
+  #--- every browser's "import bookmarks from HTML" reads. Tags and
+  #--- place: queries are Firefox-only, so they are left out.
+  zenBookmarksHtml = pkgs.writeText "zen-bookmarks-html.jq" ''
+    (group_by(.parent)
+      | map({key: (.[0].parent | tostring), value: sort_by(.position)})
+      | from_entries) as $kids
+    | (map({key: .guid, value: .}) | from_entries) as $root
+    | def date: (. // 0) / 1000000 | floor | tostring;
+      def node($ind; $attr):
+        if .type == 1 then
+          if (.url // "") == "" or (.url | startswith("place:")) then ""
+          else "\($ind)<DT><A HREF=\"\(.url | @html)\" ADD_DATE=\"\(.dateAdded | date)\" LAST_MODIFIED=\"\(.lastModified | date)\">\((.title // .url) | @html)</A>"
+          end
+        elif .type == 2 then
+          ([($kids[.id | tostring] // [])[] | node($ind + "    "; "")] | map(select(. != ""))) as $c
+          | "\($ind)<DT><H3 ADD_DATE=\"\(.dateAdded | date)\" LAST_MODIFIED=\"\(.lastModified | date)\"\($attr)>\((.title // "") | @html)</H3>\n\($ind)<DL><p>"
+            + (if ($c | length) > 0 then "\n" + ($c | join("\n")) else "" end)
+            + "\n\($ind)</DL><p>"
+        elif .type == 3 then "\($ind)<HR>"
+        else ""
+        end;
+      [
+        "<!DOCTYPE NETSCAPE-Bookmark-file-1>",
+        "<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=UTF-8\">",
+        "<TITLE>Bookmarks</TITLE>",
+        "<H1>Bookmarks Menu</H1>",
+        "<DL><p>"
+      ]
+      + [($kids[$root["menu________"].id | tostring] // [])[] | node("    "; "")]
+      + [$root["toolbar_____"] | .title = "Bookmarks Toolbar" | node("    "; " PERSONAL_TOOLBAR_FOLDER=\"true\"")]
+      + [$root["unfiled_____"] | .title = "Other Bookmarks" | node("    "; " UNFILED_BOOKMARKS_FOLDER=\"true\"")]
+      + [$root["mobile______"] | select(($kids[.id | tostring] // []) | length > 0) | .title = "Mobile Bookmarks" | node("    "; "")]
+      + ["</DL>"]
+      | map(select(. != ""))
+      | join("\n")
+  '';
+
   nixm =
     pkgs.writeShellScriptBin "nixm"
     # bash
@@ -95,19 +134,72 @@
         echo "  $label: $(wc -l < "$out") records"
       }
 
-      #--- Keeps the newest FT_KEEP dated folders. The glob doubles as the
-      #--- guard: only names in stamp form are candidates, and the stamp
-      #--- sorts lexicographically, so oldest come first.
-      function ft_prune() {
+      #--- Keeps the newest BACKUP_KEEP dated folders under $1. The glob
+      #--- doubles as the guard: only names in stamp form are candidates,
+      #--- and the stamp sorts lexicographically, so oldest come first.
+      function backup_prune() {
         local dirs old
         shopt -s nullglob
-        dirs=("$FT_BACKUP_DIR"/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]_[0-9][0-9]-[0-9][0-9]-[0-9][0-9])
+        dirs=("$1"/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]_[0-9][0-9]-[0-9][0-9]-[0-9][0-9])
         shopt -u nullglob
-        [[ ''${#dirs[@]} -gt $FT_KEEP ]] || return 0
-        for old in "''${dirs[@]:0:$(( ''${#dirs[@]} - FT_KEEP ))}"; do
+        [[ ''${#dirs[@]} -gt $BACKUP_KEEP ]] || return 0
+        for old in "''${dirs[@]:0:$(( ''${#dirs[@]} - BACKUP_KEEP ))}"; do
           rm -rf "$old"
           echo "  pruned $(basename "$old")"
         done
+      }
+
+      #--- Filenames inside match FreeTube's own Export, so its Import
+      #--- accepts them unchanged.
+      function ft_backup() {
+        ft_closed || return 1
+        FT_DEST="$FT_BACKUP_DIR/$STAMP"
+        mkdir -p "$FT_DEST"
+        echo "Backing up FreeTube to $FT_DEST"
+        ft_export profiles  freetube-subscriptions.db  "subscriptions"
+        ft_export playlists freetube-playlists.db      "playlists"
+        ft_export history   freetube-watch-history.db  "watch history"
+        #--- rmdir only succeeds on an empty dir, so a run that exported
+        #--- nothing leaves no folder behind and does not count as a backup
+        if rmdir "$FT_DEST" 2>/dev/null; then
+          echo "  nothing was exported" >&2
+          return 1
+        fi
+        backup_prune "$FT_BACKUP_DIR"
+      }
+
+      #--- places.sqlite holds bookmarks and history. Zen keeps it under an
+      #--- exclusive lock while running, so the database and its WAL are
+      #--- copied first and the export is read from the copy.
+      function zen_backup() {
+        local src="$ZEN_PROFILE/places.sqlite" dest="$ZEN_BACKUP_DIR/$STAMP" tmp count
+        if [[ ! -f "$src" ]]; then
+          echo "No Zen profile at $ZEN_PROFILE" >&2
+          return 1
+        fi
+        tmp=$(mktemp -d)
+        cp "$src" "$tmp/places.sqlite"
+        [[ -f "$src-wal" ]] && cp "$src-wal" "$tmp/places.sqlite-wal"
+        echo "Backing up Zen bookmarks to $dest"
+        if [[ $(${pkgs.sqlite}/bin/sqlite3 "$tmp/places.sqlite" 'PRAGMA integrity_check;') != ok ]]; then
+          echo "  database copy failed its integrity check, nothing kept" >&2
+          rm -rf "$tmp"
+          return 1
+        fi
+        ${pkgs.sqlite}/bin/sqlite3 -json "$tmp/places.sqlite" \
+          'SELECT b.id, b.parent, b.type, b.guid, b.title, b.position, b.dateAdded, b.lastModified, p.url
+             FROM moz_bookmarks b LEFT JOIN moz_places p ON p.id = b.fk;' \
+          | ${pkgs.jq}/bin/jq -r -f ${zenBookmarksHtml} > "$tmp/bookmarks.html"
+        count=$(grep -c '<DT><A ' "$tmp/bookmarks.html")
+        if [[ $count -eq 0 ]]; then
+          echo "  export came out empty, nothing kept" >&2
+          rm -rf "$tmp"
+          return 1
+        fi
+        install -Dm644 "$tmp/bookmarks.html" "$dest/bookmarks.html"
+        rm -rf "$tmp"
+        echo "  bookmarks: $count"
+        backup_prune "$ZEN_BACKUP_DIR"
       }
 
       #-------------------------------------------------------------------#
@@ -124,8 +216,8 @@
       C_FLA="''${E}[38;2;${rgb "base0A"}m"
       C_TLS="''${E}[38;2;${rgb "base0E"}m"
       C_WRN="''${E}[38;2;${rgb "base08"}m"
-      #--- Same slot as C_WRN, kept separate because it means brand, not danger
-      C_FTB="''${E}[38;2;${rgb "base08"}m"
+      #--- Same slot as C_WRN, kept separate because it does not mean danger
+      C_BAK="''${E}[38;2;${rgb "base08"}m"
       C_AND="''${E}[38;2;${rgb "base07"}m"
       C_DIM="''${E}[38;2;${rgb "base03"}m"
 
@@ -143,7 +235,7 @@
 
       MENU_MAIN=(
         "@menu:nixos|''${C_NIX}󱄅 NixOS''${R} ''${C_DIM}▸''${R}"
-        "@menu:freetube|''${C_FTB}󰗃 FreeTube''${R} ''${C_DIM}▸''${R}"
+        "@menu:backup|''${C_BAK}󰆓 Backup''${R} ''${C_DIM}▸''${R}"
         "@menu:flatpak|''${C_FLA}󰪮 Flatpak''${R} ''${C_DIM}▸''${R}"
         "@menu:firmware|''${C_FRM}󰚰 Firmware''${R} ''${C_DIM}▸''${R}"
         "@menu:tools|''${C_TLS}󰘳 Tools''${R} ''${C_DIM}▸''${R}"
@@ -187,8 +279,10 @@
         "nixm flatpak-list|''${C_FLA}󰪮''${R} List Flatpaks"
       )
 
-      MENU_FREETUBE=(
-        "nixm freetube-backup|''${C_FTB}󰆓''${R} Back Up Everything"
+      MENU_BACKUP=(
+        "nixm backup|''${C_BAK}󰆓''${R} Back Up Everything"
+        "nixm freetube-backup|''${C_BAK}󰗃''${R} FreeTube Only"
+        "nixm zen-backup|''${C_BAK}󰈹''${R} Zen Bookmarks Only"
       )
 
       MENU_TOOLS=(
@@ -224,7 +318,7 @@
           case $level in
             main)     cmd=$(pick "nixm> "     "''${MENU_MAIN[@]}") ;;
             nixos)    cmd=$(pick "nixos> "    "''${MENU_NIXOS[@]}" "$BACK") ;;
-            freetube) cmd=$(pick "freetube> " "''${MENU_FREETUBE[@]}" "$BACK") ;;
+            backup)   cmd=$(pick "backup> "   "''${MENU_BACKUP[@]}" "$BACK") ;;
             flatpak)  cmd=$(pick "flatpak> "  "''${MENU_FLATPAK[@]}" "$BACK") ;;
             firmware) cmd=$(pick "firmware> " "''${MENU_FIRMWARE[@]}" "$BACK") ;;
             tools)    cmd=$(pick "tools> "    "''${MENU_TOOLS[@]}" "$BACK") ;;
@@ -254,10 +348,13 @@
       HOSTNAME=$(hostname)
       FLAKE_PATH="/home/${username}/nixos-config"
 
-      #--- Kept outside the repo: subscriptions, playlists and history are
+      #--- Kept outside the repo: subscriptions, bookmarks and history are
       #--- personal data and this flake is public. Point a sync tool here.
       FT_BACKUP_DIR="$HOME/Backups/FreeTube"
-      FT_KEEP=10
+      ZEN_BACKUP_DIR="$HOME/Backups/Zen"
+      ZEN_PROFILE="$HOME/.zen/default"
+      BACKUP_KEEP=10
+      STAMP=$(date +%Y-%m-%d_%H-%M-%S)
 
       case $1 in
         # --- NixOS Operations ---
@@ -297,24 +394,21 @@
           sudo /nix/var/nix/profiles/system/bin/switch-to-configuration switch
           ;;
 
-        # --- FreeTube ---
-        #--- One dated folder per run. Filenames inside match FreeTube's own
-        #--- Export, so its Import accepts them unchanged.
+        # --- Backup ---
+        #--- One dated folder per app per run, sharing the same stamp.
+        #--- One app failing (FreeTube still open) does not stop the other.
+        backup)
+          status=0
+          ft_backup || status=1
+          echo ""
+          zen_backup || status=1
+          exit $status
+          ;;
         freetube-backup)
-          ft_closed || exit 1
-          FT_DEST="$FT_BACKUP_DIR/$(date +%Y-%m-%d_%H-%M-%S)"
-          mkdir -p "$FT_DEST"
-          echo "Backing up FreeTube to $FT_DEST"
-          ft_export profiles  freetube-subscriptions.db  "subscriptions"
-          ft_export playlists freetube-playlists.db      "playlists"
-          ft_export history   freetube-watch-history.db  "watch history"
-          #--- rmdir only succeeds on an empty dir, so a run that exported
-          #--- nothing leaves no folder behind and does not count as a backup
-          if rmdir "$FT_DEST" 2>/dev/null; then
-            echo "Nothing was exported." >&2
-            exit 1
-          fi
-          ft_prune
+          ft_backup
+          ;;
+        zen-backup)
+          zen_backup
           ;;
 
 
@@ -574,10 +668,11 @@
           echo "  flatpak-update    - Update Flatpaks"
           echo "  flatpak-list      - List installed Flatpaks"
           echo ""
-          echo "FreeTube (app must be closed):"
-          echo "  freetube-backup   - Export subscriptions, playlists and history"
-          echo "                      to a dated folder in ~/Backups/FreeTube,"
-          echo "                      keeping the 10 most recent"
+          echo "Backup (dated folders under ~/Backups, 10 most recent kept):"
+          echo "  backup            - Both of the below"
+          echo "  freetube-backup   - FreeTube subscriptions, playlists and history"
+          echo "                      to ~/Backups/FreeTube (FreeTube must be closed)"
+          echo "  zen-backup        - Zen bookmarks as bookmarks.html to ~/Backups/Zen"
           echo ""
           echo "Tools:"
           echo "  vulkan            - Vulkan capabilities"
