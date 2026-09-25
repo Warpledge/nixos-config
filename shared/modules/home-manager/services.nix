@@ -34,25 +34,4 @@
   #--- Drop default deps to break a startup ordering cycle: the service
   #--- runs both after and before basic.target. It doesn't need basic.target.
   systemd.user.services.set-SSH_AUTH_SOCK.Unit.DefaultDependencies = false;
-
-  #--------------------------------------------------------------------#
-  #-- Polkit Agent
-  #--------------------------------------------------------------------#
-  systemd.user.services.polkit-gnome-authentication-agent-1 = {
-    Unit.Description = "polkit-gnome-authentication-agent-1";
-
-    Install = {
-      WantedBy = ["graphical-session.target"];
-      Wants = ["graphical-session.target"];
-      After = ["graphical-session.target"];
-    };
-
-    Service = {
-      Type = "simple";
-      ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
-      Restart = "on-failure";
-      RestartSec = 3; # Wait 3 seconds before restarting to avoid thrashing
-      TimeoutStopSec = 10;
-    };
-  };
 }
