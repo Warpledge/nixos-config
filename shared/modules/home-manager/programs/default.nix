@@ -59,6 +59,8 @@
     ++ lib.optionals hostConfig.media.freetube [./media/freetube]
     ++ lib.optionals hostConfig.media.videoTrimmer [./media/video-trimmer.nix]
     ++ lib.optionals hostConfig.media.streamlinkTwitchGui [./media/streamlink-twitch-gui.nix]
+    ++ lib.optionals hostConfig.media.moku [./media/moku]
+    ++ lib.optionals hostConfig.media.seanime [./media/seanime.nix]
     ++ lib.optionals hostConfig.suwayomi.enable [./media/suwayomi.nix]
     #--- Terminals (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.terminals.kitty [./terminals/kitty.nix]
@@ -80,6 +82,7 @@
     #--- Local Packages (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.local.granblueRelinkMods [./local/relink-mod-organizer.nix ./local/reloaded-ii-gbfr.nix]
     ++ lib.optionals hostConfig.local.tonkatsuBox [./local/tonkatsu-box.nix]
+    ++ lib.optionals hostConfig.local.galleryReader [./local/gallery-reader.nix]
     #--- WinBoat (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.winboat.enable [./emulation/winboat.nix]
     #--- Android Screen Mirroring (controlled by host hostConfig.nix)

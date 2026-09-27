@@ -1,0 +1,77 @@
+diff --git a/src/main/kotlin/tsunagu/grpc/ExtensionServiceImpl.kt b/src/main/kotlin/tsunagu/grpc/ExtensionServiceImpl.kt
+--- a/src/main/kotlin/tsunagu/grpc/ExtensionServiceImpl.kt	2026-09-27 02:47:35.065215977 -0500
++++ b/src/main/kotlin/tsunagu/grpc/ExtensionServiceImpl.kt	2026-09-27 02:47:35.099751096 -0500
+@@ -25,7 +25,6 @@
+ import tsunagu.novel.NovelPlugin
+ import tsunagu.novel.SourceNovel
+ import tsunagu.grpc.AnimeFilterSerde
+-import tsunagu.util.awaitSingle
+ import tsunagu.grpc.FilterSerde.applyTo
+ import tsunagu.grpc.FilterSerde.toProto
+ import tsunagu.registry.ExtensionRegistry
+@@ -262,7 +261,7 @@
+             val builder = Sandbox.SearchResponse.newBuilder()
+             when (val source = extension.source) {
+                 is HttpSource -> {
+-                    val page = runBlocking { source.fetchPopularManga(request.page).awaitSingle() }
++                    val page = runBlocking { source.getPopularManga(request.page) }
+                     builder.setHasNextPage(page.hasNextPage)
+                     page.mangas.forEach { manga ->
+                         EntryModelCache.putManga(request.extensionId, manga)
+@@ -270,7 +269,7 @@
+                     }
+                 }
+                 is AnimeHttpSource -> {
+-                    val page = runBlocking { source.fetchPopularAnime(request.page).awaitSingle() }
++                    val page = runBlocking { source.getPopularAnime(request.page) }
+                     builder.setHasNextPage(page.hasNextPage)
+                     page.animes.forEach { anime ->
+                         EntryModelCache.putAnime(request.extensionId, anime)
+@@ -324,7 +323,7 @@
+             val builder = Sandbox.SearchResponse.newBuilder()
+             when (val source = extension.source) {
+                 is HttpSource -> {
+-                    val page = runBlocking { source.fetchLatestUpdates(request.page).awaitSingle() }
++                    val page = runBlocking { source.getLatestUpdates(request.page) }
+                     builder.setHasNextPage(page.hasNextPage)
+                     page.mangas.forEach { manga ->
+                         EntryModelCache.putManga(request.extensionId, manga)
+@@ -332,7 +331,7 @@
+                     }
+                 }
+                 is AnimeHttpSource -> {
+-                    val page = runBlocking { source.fetchLatestUpdates(request.page).awaitSingle() }
++                    val page = runBlocking { source.getLatestUpdates(request.page) }
+                     builder.setHasNextPage(page.hasNextPage)
+                     page.animes.forEach { anime ->
+                         EntryModelCache.putAnime(request.extensionId, anime)
+diff --git a/src/main/kotlin/tsunagu/Main.kt b/src/main/kotlin/tsunagu/Main.kt
+--- a/src/main/kotlin/tsunagu/Main.kt	2026-09-27 02:47:35.076700220 -0500
++++ b/src/main/kotlin/tsunagu/Main.kt	2026-09-27 02:47:35.099852696 -0500
+@@ -7,6 +7,7 @@
+ import java.net.URLConnection
+ import java.util.concurrent.TimeUnit
+ import kotlinx.serialization.json.Json
++import kotlinx.serialization.protobuf.ProtoBuf
+ import org.koin.core.context.startKoin
+ import org.koin.dsl.module
+ import tsunagu.grpc.ExtensionServiceImpl
+@@ -31,2 +32,4 @@
+                 single { Json { ignoreUnknownKeys = true; explicitNulls = false } }
++                // Mihon provides this too; some sources resolve it at class init
++                single<ProtoBuf> { ProtoBuf }
+                 single { NetworkHelper() }
+diff --git a/src/main/kotlin/tsunagu/registry/ExtensionRegistry.kt b/src/main/kotlin/tsunagu/registry/ExtensionRegistry.kt
+--- a/src/main/kotlin/tsunagu/registry/ExtensionRegistry.kt	2026-09-27 02:47:35.087932421 -0500
++++ b/src/main/kotlin/tsunagu/registry/ExtensionRegistry.kt	2026-09-27 02:47:59.517625649 -0500
+@@ -94,8 +94,9 @@
+             throw InvalidExtensionIdException("novel extensions are disabled: $extensionId")
+         }
+         val target = targetFile(extensionId, ext)
++        // A cleared jar cache leaves sourceFile missing; the installed copy still loads
+         val upToDate = target.exists() &&
+-            (target.canonicalFile == sourceFile.canonicalFile || target.length() == sourceFile.length())
++            (!sourceFile.exists() || target.canonicalFile == sourceFile.canonicalFile || target.length() == sourceFile.length())
+         evict(extensionId)
+         if (!upToDate) {
+             replaceFile(target) { Files.copy(sourceFile.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING) }

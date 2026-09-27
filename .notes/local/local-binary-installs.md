@@ -129,3 +129,20 @@ re-fetched on import) or `.xcollx` (board layouts plus embedded covers,
 offline). Tier lists and mood grids export as PNG. Community collections live
 at <https://github.com/hacan359/tonkatsu-collections> and are browsable in-app
 under Settings -> Import -> Browse Online Collections.
+
+## gallery-reader
+
+- **What:** a Flutter gallery client.
+  `~/.local/opt/gallery-reader/SOURCE` records the upstream releases page and
+  the installed version.
+- **Command:** `gallery-reader` (also a desktop entry).
+- **Location:** `~/.local/opt/gallery-reader/`
+- **Runtime:** same as tonkatsu-box (RUNPATH `$ORIGIN/lib`, GTK3 stack,
+  `/run/opengl-driver/lib`), plus WebKitGTK 4.1, libsoup 3 and glib-networking
+  for its in-app login window. The wrapper runs the bundle's only top-level
+  executable, so the binary's name never appears in the module.
+- **Restore:** upstream ships no AppImage or tarball, only `.deb` files. Take the
+  `Linux-x64.deb`, unpack it with `dpkg-deb -x`, copy the contents of its
+  `opt/<app>/` directory into the folder, and copy
+  `usr/share/icons/hicolor/512x512/apps/*.png` to `icon.png` there. Keep
+  `SOURCE`. Installed on 2026-09-27.

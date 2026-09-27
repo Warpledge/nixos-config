@@ -1,0 +1,80 @@
+diff --git a/backend/cmd/server/main.go b/backend/cmd/server/main.go
+--- a/backend/cmd/server/main.go	2026-09-27 02:31:48.519563539 -0500
++++ b/backend/cmd/server/main.go	2026-09-27 02:31:48.529500154 -0500
+@@ -299,7 +299,7 @@
+ 	mux := http.NewServeMux()
+ 
+ 	mux.Handle("/content/", &rest.ContentHandler{Q: q, Sc: supervised, Sr: streamResolver})
+-	mux.Handle("/proxy/cover/", &rest.CoverProxyHandler{Q: q, CoverCacheDir: filepath.Join(absMediaDir, "covers")})
++	mux.Handle("/proxy/cover/", &rest.CoverProxyHandler{Q: q, CoverCacheDir: filepath.Join(absMediaDir, "covers"), Sc: supervised})
+ 	remoteImg := &rest.RemoteCoverProxyHandler{CoverCacheDir: filepath.Join(absMediaDir, "covers", "remote")}
+ 	mux.Handle("/proxy/cover/remote/", remoteImg)
+ 	mux.Handle("/proxy/img/", remoteImg)
+diff --git a/backend/internal/api/rest/covers.go b/backend/internal/api/rest/covers.go
+--- a/backend/internal/api/rest/covers.go	2026-09-27 02:31:48.508039932 -0500
++++ b/backend/internal/api/rest/covers.go	2026-09-27 02:31:48.531884032 -0500
+@@ -1,6 +1,7 @@
+ package rest
+ 
+ import (
++	"context"
+ 	"database/sql"
+ 	"encoding/base64"
+ 	"net/http"
+@@ -11,11 +12,13 @@
+ 
+ 	"tsunagu/backend/internal/db/sqlcgen"
+ 	"tsunagu/backend/internal/image"
++	"tsunagu/backend/internal/sandbox"
+ )
+ 
+ type CoverProxyHandler struct {
+ 	Q             *sqlcgen.Queries
+ 	CoverCacheDir string
++	Sc            *sandbox.SupervisedClient
+ }
+ 
+ func (h *CoverProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+@@ -80,6 +83,9 @@
+ 		}
+ 	}
+ 	if localPath == "" {
++		localPath = h.viaSandbox(ctx, entry, candidates, destName)
++	}
++	if localPath == "" {
+ 		http.Error(w, "fetching cover failed", http.StatusBadGateway)
+ 		return
+ 	}
+@@ -101,6 +107,32 @@
+ 	_, _ = w.Write(data)
+ }
+ 
++// viaSandbox fetches the cover with the source extension's own client, for covers that need
++// its headers or cookies, or that only the extension can resolve.
++func (h *CoverProxyHandler) viaSandbox(ctx context.Context, entry sqlcgen.Medium, candidates []string, destName string) string {
++	if h.Sc == nil || !entry.ExtensionID.Valid {
++		return ""
++	}
++	ext, err := h.Q.GetExtension(ctx, entry.ExtensionID.Int64)
++	if err != nil {
++		return ""
++	}
++	c, err := h.Sc.Ensure(ctx)
++	if err != nil {
++		return ""
++	}
++	for _, u := range candidates {
++		img, err := c.GetImageBytes(ctx, ext.PackageName, u)
++		if err != nil {
++			continue
++		}
++		if p, err := image.SaveBytesToFile(img.GetData(), img.GetContentType(), h.CoverCacheDir, destName); err == nil {
++			return p
++		}
++	}
++	return ""
++}
++
+ type RemoteCoverProxyHandler struct {
+ 	CoverCacheDir string
+ }

@@ -681,6 +681,23 @@
         "type": "github"
       }
     },
+    "moku": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1789869323,
+        "narHash": "sha256-oG9TqCcv6Db4RmJZSBW+oFhzFZRmdPSfW56glFXvLso=",
+        "owner": "moku-project",
+        "repo": "Moku",
+        "rev": "fd26324ab2c0530ef888d8ef13c6a4759bf34abd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "moku-project",
+        "ref": "v0.13.1",
+        "repo": "Moku",
+        "type": "github"
+      }
+    },
     "niri": {
       "inputs": {
         "niri-stable": "niri-stable",
@@ -1082,6 +1099,7 @@
         "dms-plugin-registry": "dms-plugin-registry",
         "helium": "helium",
         "home-manager": "home-manager",
+        "moku": "moku",
         "niri": "niri",
         "nix-flatpak": "nix-flatpak",
         "nixcord": "nixcord",
@@ -1089,6 +1107,7 @@
         "nur": "nur",
         "spicetify-nix": "spicetify-nix",
         "stylix": "stylix",
+        "tsunagu": "tsunagu",
         "zen-browser": "zen-browser"
       }
     },
@@ -1324,6 +1343,23 @@
       "original": {
         "owner": "numtide",
         "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "tsunagu": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1789868806,
+        "narHash": "sha256-nM68R7ALR37R1cTbVAYh5Y0jLlUEyn6qsF9r4e1vBN4=",
+        "owner": "moku-project",
+        "repo": "Tsunagu",
+        "rev": "ca03daac0ed9bf4e26a9d9dedf1553edf53fce15",
+        "type": "github"
+      },
+      "original": {
+        "owner": "moku-project",
+        "ref": "v0.4.1",
+        "repo": "Tsunagu",
         "type": "github"
       }
     },

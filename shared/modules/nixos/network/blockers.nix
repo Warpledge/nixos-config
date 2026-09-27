@@ -10,7 +10,7 @@
       enable = true;
       #--- Drops the list's own `localhost` lines; NixOS already writes
       #--- 127.0.0.1/::1, and its macOS-only `fe80::1%lo0 localhost` breaks
-      #--- apps dialing localhost (Tsunagu's sandbox never became ready)
+      #--- apps dialing localhost
       package = pkgs.stevenblack-blocklist.overrideAttrs (old: {
         postInstall =
           (old.postInstall or "")

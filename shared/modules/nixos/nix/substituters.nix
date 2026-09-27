@@ -16,6 +16,7 @@
       "https://claude-code.cachix.org" # Claude Code CLI
       "https://vicinae.cachix.org" # Community packages
       "https://ghostty.cachix.org" # Ghostty terminal
+      "https://moku.cachix.org" # Moku manga/anime reader + Tsunagu backend
       # "https://cache.garnix.io" # Garnix cache for affinity-nix
       "https://attic.xuyh0120.win/lantian" # CachyOS kernel prebuilt cache
     ];
@@ -29,6 +30,7 @@
       "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
       "vicinae.cachix.org-1:1kDrfienkGHPYbkpNj1mWTr7Fm1+zcenzgTizIcI3oc="
       "ghostty.cachix.org-1:QB389yTa6gTyneehvqG58y0WnHjQOqgnA+wBnpWWxns="
+      "moku.cachix.org-1:EnMXp6/uQVI6IRbKW0xEQylSYoV2N4vszOsoW6/Pq1s="
       # "garnix.io:CTFPyKSLcx5PfjUjecm6qvvJC7ccXistiQ15g14FJh8="
       "lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc="
     ];

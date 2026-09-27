@@ -1,0 +1,316 @@
+diff --git a/src/lib/components/browse/lib/searchFilter.ts b/src/lib/components/browse/lib/searchFilter.ts
+--- a/src/lib/components/browse/lib/searchFilter.ts	2026-09-27 01:55:51.949923759 -0500
++++ b/src/lib/components/browse/lib/searchFilter.ts	2026-09-27 01:55:51.991491521 -0500
+@@ -132,6 +132,21 @@
+   return { inputs: walk(nodes), matched };
+ }
+ 
++/** A source's whole filter tree as search input, in the order it was served. */
++export function filterInputsOf(nodes: FilterNode[]): FilterInput[] {
++  return nodes.map((n): FilterInput => {
++    switch (n.__typename) {
++      case "SelectFilter":   return { name: n.name, select: { state: n.state } };
++      case "TextFilter":     return { name: n.name, text: { state: n.state } };
++      case "CheckBoxFilter": return { name: n.name, checkbox: { state: n.state } };
++      case "TriStateFilter": return { name: n.name, tristate: { state: n.state } };
++      case "SortFilter":     return { name: n.name, sort: { hasState: n.hasState, index: n.index, ascending: n.ascending } };
++      case "GroupFilter":    return { name: n.name, group: { children: filterInputsOf(n.children) } };
++      default:               return { name: n.name };
++    }
++  });
++}
++
+ export function filterSourceCache(
+   sourceCache: Map<string, CachedManga>,
+   tags:        string[],
+diff --git a/src/lib/components/browse/SourceTab.svelte b/src/lib/components/browse/SourceTab.svelte
+--- a/src/lib/components/browse/SourceTab.svelte	2026-09-27 01:55:51.956648984 -0500
++++ b/src/lib/components/browse/SourceTab.svelte	2026-09-27 01:55:51.991599902 -0500
+@@ -1,7 +1,7 @@
+ <script lang="ts">
+   import { onDestroy, untrack } from "svelte";
+   import { tsunagu }            from "$lib/server-adapters/tsunagu";
+-  import { toBrowseManga, coverFirst } from "$lib/components/browse/lib/searchFilter";
++  import { toBrowseManga, coverFirst, filterInputsOf } from "$lib/components/browse/lib/searchFilter";
+   import { settingsState, updateSettings } from "$lib/state/settings.svelte";
+   import { shouldHideNsfw } from "$lib/core/util";
+   import { sourceErrorInfo } from "$lib/core/sourceErrors";
+@@ -11,6 +11,7 @@
+   import ContextMenu            from "$lib/components/shared/ui/ContextMenu.svelte";
+   import { PushPin, PushPinSlash, ArrowRight } from "phosphor-svelte";
+   import type { Manga, Source } from "$lib/types";
++  import type { FilterNode, FilterInput } from "$lib/server-adapters/types";
+   import { canonicalLang, langBadge, LANG_ALL } from "$lib/core/lang";
+   import { longPress } from "$lib/core/ui/touchscreen";
+ 
+@@ -37,6 +38,13 @@
+   let src_browseError: string | null  = $state(null);
+   let src_abortCtrl: AbortController | null = null;
+ 
++  // The source's own filters: an editable copy, its served defaults, and what the last Apply sent.
++  let src_filterNodes: FilterNode[]          = $state([]);
++  let src_filterDefaults                     = $state("");
++  let src_filtersOpen                        = $state(false);
++  let src_filtersApplied: FilterInput[] | null = $state(null);
++  const src_filtersDirty = $derived(JSON.stringify(src_filterNodes) !== src_filterDefaults);
++
+   let ctx_x      = $state(0);
+   let ctx_y      = $state(0);
+   let ctx_source: Source | null = $state(null);
+@@ -104,8 +112,8 @@
+       const isLocal = !!localSource && src.id === localSource.id;
+       const result = isLocal
+         ? await tsunagu.localSourceSearch(type === "SEARCH" ? (q ?? "") : "", page, ctrl.signal)
+-        : type === "SEARCH" && q
+-          ? await tsunagu.search(pkgName, q, page, undefined, ctrl.signal)
++        : type === "SEARCH" && (q || src_filtersApplied)
++          ? await tsunagu.search(pkgName, q ?? "", page, src_filtersApplied ?? undefined, ctrl.signal)
+           : await tsunagu.popularManga(pkgName, page, ctrl.signal);
+       if (ctrl.signal.aborted) return;
+       const incoming = result.results
+@@ -139,9 +147,46 @@
+ 
+   function srcSelectSource(src: Source) {
+     src_activeSource = src; src_browseQuery = ""; src_submitted = "";
++    srcLoadFilters(src);
+     srcFetchBrowse(src, "POPULAR");
+   }
+ 
++  const srcMode = (): "SEARCH" | "POPULAR" => (src_submitted || src_filtersApplied ? "SEARCH" : "POPULAR");
++
++  async function srcLoadFilters(src: Source) {
++    src_filterNodes = []; src_filterDefaults = ""; src_filtersOpen = false; src_filtersApplied = null;
++    if (localSource && src.id === localSource.id) return;
++    try {
++      const nodes = await tsunagu.filterOptions(src.id);
++      if (src_activeSource?.id !== src.id) return;
++      src_filterDefaults = JSON.stringify(nodes);
++      src_filterNodes = nodes;
++    } catch (e) {
++      console.error(e);
++    }
++  }
++
++  function srcApplyFilters() {
++    if (!src_activeSource) return;
++    src_filtersApplied = src_filtersDirty ? filterInputsOf(src_filterNodes) : null;
++    src_filtersOpen = false;
++    srcFetchBrowse(src_activeSource, srcMode(), src_submitted || undefined);
++  }
++
++  function srcResetFilters() {
++    src_filterNodes = JSON.parse(src_filterDefaults || "[]");
++    if (!src_filtersApplied) return;
++    src_filtersApplied = null;
++    if (src_activeSource) srcFetchBrowse(src_activeSource, srcMode(), src_submitted || undefined);
++  }
++
++  // Tachiyomi tri-states: 0 ignore, 1 include, 2 exclude.
++  const cycleTriState = (n: { state: number }) => { n.state = (n.state + 1) % 3; };
++
++  const activeCount = (nodes: FilterNode[]): number => nodes.reduce((sum, n) =>
++    sum + (n.__typename === "GroupFilter" ? activeCount(n.children)
++      : (n.__typename === "CheckBoxFilter" && n.state) || (n.__typename === "TriStateFilter" && n.state !== 0) ? 1 : 0), 0);
++
+   function srcHandleSearch() {
+     if (!src_activeSource || !src_browseQuery.trim()) return;
+     src_submitted = src_browseQuery.trim();
+@@ -150,7 +195,7 @@
+ 
+   function srcClearSearch() {
+     src_browseQuery = ""; src_submitted = "";
+-    if (src_activeSource) srcFetchBrowse(src_activeSource, "POPULAR");
++    if (src_activeSource) srcFetchBrowse(src_activeSource, srcMode());
+   }
+ 
+   function openCtx(e: MouseEvent, src: Source) {
+@@ -174,6 +219,60 @@
+   onDestroy(() => { src_abortCtrl?.abort(); });
+ </script>
+ 
++{#snippet filterNode(n: FilterNode)}
++  {#if n.__typename === "GroupFilter"}
++    {@const active = activeCount(n.children)}
++    <details class="filterGroup">
++      <summary class="filterLabel">{n.name}{active ? ` (${active})` : ""}</summary>
++      <div class="filterChips">
++        {#each n.children as c, i (i)}{@render filterNode(c)}{/each}
++      </div>
++    </details>
++  {:else if n.__typename === "SelectFilter"}
++    <label class="filterField">
++      <span class="filterLabel">{n.name}</span>
++      <select class="langSelect filterSelect" value={n.state} onchange={(e) => (n.state = +e.currentTarget.value)}>
++        {#each n.values as v, i (i)}<option value={i}>{v}</option>{/each}
++      </select>
++    </label>
++  {:else if n.__typename === "SortFilter"}
++    <label class="filterField">
++      <span class="filterLabel">{n.name}</span>
++      <select
++        class="langSelect filterSelect"
++        value={n.hasState ? n.index : -1}
++        onchange={(e) => {
++          const i = +e.currentTarget.value;
++          n.hasState = i >= 0;
++          n.index = i >= 0 ? i : null;
++          n.ascending = i >= 0 ? (n.ascending ?? false) : null;
++        }}
++      >
++        <option value={-1}>Default</option>
++        {#each n.values as v, i (i)}<option value={i}>{v}</option>{/each}
++      </select>
++      {#if n.hasState}
++        <button class="chip" onclick={() => (n.ascending = !n.ascending)}>{n.ascending ? "Ascending" : "Descending"}</button>
++      {/if}
++    </label>
++  {:else if n.__typename === "TextFilter"}
++    <label class="filterField">
++      <span class="filterLabel">{n.name}</span>
++      <input class="filterText" value={n.state} oninput={(e) => (n.state = e.currentTarget.value)} />
++    </label>
++  {:else if n.__typename === "CheckBoxFilter"}
++    <button class="chip" class:chipOn={n.state} onclick={() => (n.state = !n.state)}>{n.name}</button>
++  {:else if n.__typename === "TriStateFilter"}
++    <button class="chip" class:chipOn={n.state === 1} class:chipOff={n.state === 2} onclick={() => cycleTriState(n)}>
++      {n.state === 2 ? "− " : ""}{n.name}
++    </button>
++  {:else if n.__typename === "HeaderFilter"}
++    <p class="filterLabel filterHeader">{n.name}</p>
++  {:else if n.__typename === "SeparatorFilter"}
++    <hr class="filterSep" />
++  {/if}
++{/snippet}
++
+ <div class="splitRoot">
+   <div class="splitSidebar">
+     <div class="srcLangRow">
+@@ -297,8 +396,25 @@
+           {/if}
+         </div>
+         <button class="searchBtn" onclick={srcHandleSearch} disabled={!src_browseQuery.trim() || src_loadingBrowse}>Search</button>
++        {#if src_filterNodes.length > 0}
++          <button class="searchBtn" class:filterBtnActive={!!src_filtersApplied} onclick={() => (src_filtersOpen = !src_filtersOpen)}>
++            Filters{src_filtersApplied ? " (on)" : ""}
++          </button>
++        {/if}
+       </div>
+ 
++      {#if src_filtersOpen}
++        <div class="filterPanel">
++          <div class="filterBody">
++            {#each src_filterNodes as n, i (i)}{@render filterNode(n)}{/each}
++          </div>
++          <div class="filterActions">
++            <button class="showMoreBtn" onclick={srcResetFilters} disabled={!src_filtersDirty && !src_filtersApplied}>Reset</button>
++            <button class="searchBtn" onclick={srcApplyFilters} disabled={src_loadingBrowse}>Apply</button>
++          </div>
++        </div>
++      {/if}
++
+       {#if src_loadingBrowse && src_browseResults.length === 0}
+         <div class="tagGrid">
+           {#each Array(18) as _, i (i)}
+@@ -321,7 +437,7 @@
+               <button
+                 class="showMoreBtn"
+                 disabled={src_loadingBrowse}
+-                onclick={() => src_activeSource && srcFetchBrowse(src_activeSource, src_submitted ? "SEARCH" : "POPULAR", src_submitted || undefined, src_currentPage + 1)}
++                onclick={() => src_activeSource && srcFetchBrowse(src_activeSource, srcMode(), src_submitted || undefined, src_currentPage + 1)}
+               >
+                 {src_loadingBrowse ? "Loading…" : "Load more"}
+               </button>
+@@ -335,7 +451,7 @@
+           <button
+             class="searchBtn"
+             style="margin-top:var(--sp-3)"
+-            onclick={() => src_activeSource && srcFetchBrowse(src_activeSource, src_submitted ? "SEARCH" : "POPULAR", src_submitted || undefined, 1)}
++            onclick={() => src_activeSource && srcFetchBrowse(src_activeSource, srcMode(), src_submitted || undefined, 1)}
+           >
+             Retry
+           </button>
+@@ -415,6 +531,23 @@
+   .searchBtn          { padding: 6px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-dim); background: var(--bg-raised); font-family: var(--font-ui); font-size: var(--text-xs); letter-spacing: var(--tracking-wide); color: var(--text-muted); cursor: pointer; transition: background var(--t-base), color var(--t-base), border-color var(--t-base); flex-shrink: 0; }
+   .searchBtn:hover:not(:disabled) { background: var(--bg-overlay); color: var(--text-secondary); border-color: var(--border-strong); }
+   .searchBtn:disabled { opacity: 0.4; cursor: default; }
++  .filterBtnActive    { background: var(--accent-muted); border-color: var(--accent-dim); color: var(--accent-fg); }
++  .filterPanel        { display: flex; flex-direction: column; max-height: 45vh; border-bottom: 1px solid var(--border-dim); flex-shrink: 0; }
++  .filterBody         { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border-dim) transparent; }
++  .filterActions      { display: flex; justify-content: flex-end; gap: var(--sp-2); padding: var(--sp-2) var(--sp-4); border-top: 1px solid var(--border-dim); }
++  .filterField        { display: flex; align-items: center; gap: var(--sp-2); }
++  .filterLabel        { font-family: var(--font-ui); font-size: var(--text-2xs); color: var(--text-faint); letter-spacing: var(--tracking-wider); text-transform: uppercase; }
++  .filterHeader       { margin: var(--sp-1) 0 0; }
++  .filterSelect       { max-width: 260px; }
++  .filterText         { background: var(--bg-raised); border: 1px solid var(--border-dim); border-radius: var(--radius-sm); color: var(--text-primary); font-size: var(--text-xs); padding: 4px 8px; outline: none; }
++  .filterText:focus   { border-color: var(--border-strong); }
++  .filterSep          { border: none; border-top: 1px solid var(--border-dim); margin: 0; width: 100%; }
++  .filterGroup summary { cursor: pointer; padding: 2px 0; }
++  .filterChips        { display: flex; flex-wrap: wrap; gap: 6px; padding: var(--sp-2) 0 var(--sp-1); }
++  .chip               { padding: 3px 9px; border-radius: var(--radius-md); border: 1px solid var(--border-dim); background: none; font-family: var(--font-ui); font-size: var(--text-xs); color: var(--text-muted); cursor: pointer; transition: background var(--t-fast), color var(--t-fast), border-color var(--t-fast); }
++  .chip:hover         { background: var(--bg-raised); border-color: var(--border-strong); }
++  .chipOn             { background: var(--accent-muted); border-color: var(--accent-dim); color: var(--accent-fg); }
++  .chipOff            { border-color: rgba(180,60,60,0.35); color: var(--color-error); text-decoration: line-through; }
+   .tagGrid            { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: var(--sp-4); padding: var(--sp-4); overflow-y: auto; flex: 1; align-content: start; }
+   .card               { background: none; border: none; padding: 0; cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: var(--sp-2); }
+   .coverWrap          { position: relative; aspect-ratio: 2/3; border-radius: var(--radius-md); clip-path: inset(0 round var(--radius-md)); background: var(--bg-raised); border: 1px solid var(--border-dim); }
+diff --git a/src/lib/server-adapters/tsunagu/discovery.ts b/src/lib/server-adapters/tsunagu/discovery.ts
+--- a/src/lib/server-adapters/tsunagu/discovery.ts	2026-09-27 01:55:51.945088165 -0500
++++ b/src/lib/server-adapters/tsunagu/discovery.ts	2026-09-27 01:56:01.306278230 -0500
+@@ -1,23 +1,42 @@
+ import { gql, baseUrl } from './gql'
+ import type { SearchResponse, SourceDetails, PreviewChapter, RecentChapter, FilterNode, FilterInput, SourcePreference, MangaInfo, LibraryUpdateStatus } from '$lib/server-adapters/types'
+ 
++// GraphQL rejects a fragment that spreads itself, so groups are expanded two levels deep, and
++// `state` differs in type per filter kind, so each kind aliases it and withState() renames it back.
+ const FILTER_NODE_FRAGMENT = `
+-	fragment FilterNodeFields on FilterNode {
++	fragment FilterLeafFields on FilterNode {
+ 		__typename
+ 		... on HeaderFilter    { name }
+ 		... on SeparatorFilter { name }
+-		... on SelectFilter    { name values state }
+-		... on TextFilter      { name state }
+-		... on CheckBoxFilter  { name state }
+-		... on TriStateFilter  { name state }
++		... on SelectFilter    { name values selectState: state }
++		... on TextFilter      { name textState: state }
++		... on CheckBoxFilter  { name checkState: state }
++		... on TriStateFilter  { name triState: state }
+ 		... on SortFilter      { name values hasState index ascending }
++	}
++	fragment FilterNodeFields on FilterNode {
++		...FilterLeafFields
+ 		... on GroupFilter {
+ 			name
+-			children { ...FilterNodeFields }
++			children {
++				...FilterLeafFields
++				... on GroupFilter { name children { ...FilterLeafFields } }
++			}
+ 		}
+ 	}
+ `
+ 
++const STATE_ALIASES = ["selectState", "textState", "checkState", "triState"]
++
++function withState(nodes: any[]): FilterNode[] {
++	return nodes.map((n) => {
++		const out: any = { ...n }
++		for (const a of STATE_ALIASES) if (a in out) { out.state = out[a]; delete out[a] }
++		if (out.children) out.children = withState(out.children)
++		return out
++	})
++}
++
+ export const discovery = {
+ 	async mangaInfo(extensionId: string, sourceEntryId: string, includeChapters: boolean): Promise<MangaInfo> {
+ 		const data = await gql<{ resolveMedia: MangaInfo }>(
+@@ -142,7 +161,7 @@
+ 			{ extensionId },
+ 			baseUrl()
+ 		)
+-		return data.filterOptions
++		return withState(data.filterOptions)
+ 	},
+ 
+ 	async sourceDetails(extensionId: string, sourceEntryId: string): Promise<SourceDetails> {

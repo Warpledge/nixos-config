@@ -200,7 +200,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | **AI Tooling** | [Claude Code][claude-code], [OpenCode][opencode], [LM Studio][lmstudio] |
 | **Android** | [scrcpy][scrcpy] (mirror and control a device over USB or wifi, nothing to install on the phone) |
 | **Video Trimming** | [Video Trimmer][video-trimmer] (cut a clip out of a video without re-encoding it) |
-| **Manga / Anime Reader** | [Suwayomi][suwayomi] is a local manga reader, opened from the launcher as a [Helium][helium] app window (`localhost:4567`). [Moku][moku] covers manga, light novels and anime (the release Flatpak bundle, through nix-flatpak), with a local [FlareSolverr][flaresolverr] for Cloudflare-protected sources |
+| **Manga / Anime Reader** | [Suwayomi][suwayomi] is a local manga reader, opened from the launcher as a [Helium][helium] app window (`localhost:4567`). [Moku][moku] covers manga, light novels and anime, built from source with a fix for overlapping search results and a per-source filter panel, with a local [FlareSolverr][flaresolverr] for Cloudflare-protected sources. [Seanime][seanime] runs as a user service and opens as a Helium app window (`127.0.0.1:43211`); its streaming, manga and torrent sources are JavaScript extensions added from the Extensions page |
 | **Finance** | [HomeBank][homebank] (personal accounting with labeled transactions and a running balance) |
 | **Collection Tracking** | [Tonkatsu Box][tonkatsu-box] (games, film, anime, manga, visual novels, books and music in one local database, imports from Steam and AniList; a prebuilt bundle kept in `~/.local/opt/` instead of nixpkgs) |
 | **Japanese** | [fcitx5][fcitx5] + [Mozc][mozc] for typing hiragana, katakana and kanji, plus [innoextract][innoextract], [cabextract][cabextract] and [mdf2iso][mdf2iso] for unpacking raw Japanese visual novels (off by default) |
@@ -323,6 +323,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [moku]: https://github.com/moku-project/Moku
 [flaresolverr]: https://github.com/FlareSolverr/FlareSolverr
 [suwayomi]: https://github.com/Suwayomi/Suwayomi-Server
+[seanime]: https://seanime.app
 [streamlink-twitch-gui]: https://github.com/streamlink/streamlink-twitch-gui
 [feedback]: https://github.com/got-feedBack/feedBack-desktop
 [streamlink]: https://streamlink.github.io/

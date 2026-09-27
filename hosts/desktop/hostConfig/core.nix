@@ -21,7 +21,7 @@
 
   #--- Mullvad VPN
   mullvad.enable = true;
-  mullvad.splitTunnel = ["steam" "heroic" "prismlauncher" "claude" "opencode" "vesktop" "spotify" "freetube" "ferdium"]; # Apps always routed around the VPN (see shared/modules/mullvad/)
+  mullvad.splitTunnel = ["steam" "heroic" "prismlauncher" "opencode" "vesktop" "spotify" "freetube" "ferdium"]; # Apps always routed around the VPN (see shared/modules/mullvad/)
 
   #--- Browser Selection
   # Enable the browsers you want installed
@@ -60,8 +60,9 @@
     spotify = true;
     freetube = true;
     videoTrimmer = true;
-    moku = true; # Manga, light novel and anime app (Flatpak)
+    moku = true; # Manga, novel and anime reader (built from source with UI fixes)
     streamlinkTwitchGui = true; # Twitch browser; streams play in mpv via streamlink (AppImage)
+    seanime = true; # Anime and manga media server with a Helium app-window launcher
   };
 
   #--- Graphics Software Selection
@@ -94,6 +95,7 @@
   local = {
     granblueRelinkMods = false; # RelinkModOrganizer + Reloaded-II
     tonkatsuBox = true; # Collection manager (games, film, anime, manga, books)
+    galleryReader = true; # Gallery client (prebuilt Flutter bundle)
   };
 
   #--- Android Screen Mirroring (scrcpy)
@@ -140,7 +142,7 @@
     prismlauncher = true; # Minecraft
     lutris = false; # Wine launcher
     faugus = false; # UMU/Proton launcher
-    twintail = true; # Gacha game launcher (Flatpak)
+    twintail = false; # Gacha game launcher (Flatpak)
     easyrpg = true; # RPG Maker 2000/2003 game interpreter
   };
 

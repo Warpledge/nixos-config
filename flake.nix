@@ -70,6 +70,14 @@
       url = "github:schembriaiden/helium-browser-nix-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    tsunagu = {
+      url = "github:moku-project/Tsunagu/v0.4.1"; # the backend Moku 0.13.1 ships with; bump with `moku`
+      flake = false;
+    };
+    moku = {
+      url = "github:moku-project/Moku/v0.13.1"; # built in home-manager media/moku; bump with `tsunagu`
+      flake = false;
+    };
 
     #--- Window Managers
     niri = {

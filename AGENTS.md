@@ -24,6 +24,9 @@ home-manager, Niri WM, Stylix theming (Catppuccin Mocha).
    or PR description, it carries no `Co-Authored-By:` trailer, no "Generated
    with" line, and no mention of Claude or any agent. The user is the sole
    author of every commit.
+8. **No desktop screenshots without permission.** Never capture the screen,
+   a window, or the desktop unless the user has said yes to that specific
+   capture first.
 
 ## Looking things up
 
