@@ -1,7 +1,16 @@
 diff --git a/backend/cmd/server/main.go b/backend/cmd/server/main.go
---- a/backend/cmd/server/main.go	2026-09-27 02:31:48.519563539 -0500
-+++ b/backend/cmd/server/main.go	2026-09-27 02:31:48.529500154 -0500
-@@ -299,7 +299,7 @@
+index 3571ba8..2b9b7ba 100644
+--- a/backend/cmd/server/main.go
++++ b/backend/cmd/server/main.go
+@@ -210,6 +210,7 @@ func main() {
+ 		},
+ 	})
+ 	defer supervised.Shutdown()
++	syncer.SetSandbox(supervised)
+ 
+ 	go func() {
+ 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+@@ -299,7 +300,7 @@ func main() {
  	mux := http.NewServeMux()
  
  	mux.Handle("/content/", &rest.ContentHandler{Q: q, Sc: supervised, Sr: streamResolver})
@@ -11,8 +20,9 @@ diff --git a/backend/cmd/server/main.go b/backend/cmd/server/main.go
  	mux.Handle("/proxy/cover/remote/", remoteImg)
  	mux.Handle("/proxy/img/", remoteImg)
 diff --git a/backend/internal/api/rest/covers.go b/backend/internal/api/rest/covers.go
---- a/backend/internal/api/rest/covers.go	2026-09-27 02:31:48.508039932 -0500
-+++ b/backend/internal/api/rest/covers.go	2026-09-27 02:31:48.531884032 -0500
+index 5907e61..88fa7ae 100644
+--- a/backend/internal/api/rest/covers.go
++++ b/backend/internal/api/rest/covers.go
 @@ -1,6 +1,7 @@
  package rest
  
@@ -21,7 +31,7 @@ diff --git a/backend/internal/api/rest/covers.go b/backend/internal/api/rest/cov
  	"database/sql"
  	"encoding/base64"
  	"net/http"
-@@ -11,11 +12,13 @@
+@@ -11,11 +12,13 @@ import (
  
  	"tsunagu/backend/internal/db/sqlcgen"
  	"tsunagu/backend/internal/image"
@@ -35,22 +45,30 @@ diff --git a/backend/internal/api/rest/covers.go b/backend/internal/api/rest/cov
  }
  
  func (h *CoverProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-@@ -80,6 +83,9 @@
+@@ -75,10 +78,17 @@ func (h *CoverProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+ 	}
+ 	var localPath string
+ 	for _, u := range candidates {
++		// Served from disk by the sandbox's Kototoro bridge; unreachable from here.
++		if strings.HasPrefix(u, "http://kototoro.local/") {
++			continue
++		}
+ 		if localPath, err = image.DownloadToFile(u, h.CoverCacheDir, destName); err == nil {
+ 			break
  		}
  	}
- 	if localPath == "" {
++	if localPath == "" {
 +		localPath = h.viaSandbox(ctx, entry, candidates, destName)
 +	}
-+	if localPath == "" {
+ 	if localPath == "" {
  		http.Error(w, "fetching cover failed", http.StatusBadGateway)
  		return
- 	}
-@@ -101,6 +107,32 @@
+@@ -101,6 +111,32 @@ func (h *CoverProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
  	_, _ = w.Write(data)
  }
  
 +// viaSandbox fetches the cover with the source extension's own client, for covers that need
-+// its headers or cookies, or that only the extension can resolve.
++// its headers or cookies, or that only the extension can serve.
 +func (h *CoverProxyHandler) viaSandbox(ctx context.Context, entry sqlcgen.Medium, candidates []string, destName string) string {
 +	if h.Sc == nil || !entry.ExtensionID.Valid {
 +		return ""
@@ -78,3 +96,23 @@ diff --git a/backend/internal/api/rest/covers.go b/backend/internal/api/rest/cov
  type RemoteCoverProxyHandler struct {
  	CoverCacheDir string
  }
+diff --git a/backend/internal/sync/sync.go b/backend/internal/sync/sync.go
+index b5b1809..1bb5497 100644
+--- a/backend/internal/sync/sync.go
++++ b/backend/internal/sync/sync.go
+@@ -37,6 +37,7 @@ type Syncer struct {
+ 
+ 	enricher  Enricher
+ 	recompute Recomputer
++	sandbox   *sandbox.SupervisedClient
+ }
+ 
+ type Enricher interface {
+@@ -212,6 +213,7 @@ func (s *Syncer) AddRepository(ctx context.Context, indexURL string, name string
+ }
+ 
+ func (s *Syncer) applyRepoIndex(ctx context.Context, repoID int64, parsed []repository.ParsedExtension) error {
++	parsed = s.expandBundles(ctx, parsed)
+ 	for _, ext := range parsed {
+ 		contentType := ext.ContentType
+ 		if contentType == "" {
