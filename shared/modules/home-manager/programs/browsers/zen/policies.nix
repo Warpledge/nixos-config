@@ -25,7 +25,7 @@
 
   DNSOverHTTPS = {
     Enabled = true;
-    ProviderURL = "https://extended.dns.mullvad.net/dns-query";
+    ProviderURL = "https://dns.quad9.net/dns-query";
     Locked = true;
   };
 

@@ -82,9 +82,9 @@
     export JAVA_HOME=${tsunagu.tsunagu-jre}
     export PATH=${lib.makeBinPath [pkgs.ffmpeg-headless]}''${PATH:+:$PATH}
 
-    #--- Mullvad's in-tunnel resolver SERVFAILs some image CDNs; its DoH
-    #--- with ads/trackers/malware/social blocking answers them
-    export SANDBOX_DOH=https://extended.dns.mullvad.net/dns-query
+    #--- Mullvad's in-tunnel resolver SERVFAILs some image CDNs; Quad9's DoH
+    #--- answers them
+    export SANDBOX_DOH=https://dns.quad9.net/dns-query
 
     exec ${tsunaguServer}/bin/tsunagu "$@"
   '';

@@ -87,11 +87,11 @@
   "dom.security.https_only_mode_send_http_background_request" = false;
 
   #--- DNS over HTTPS (Maximum Protection)
-  # Mullvad's public DoH works with and without VPN active — no conflict
+  # Quad9's public DoH works with and without VPN active — no conflict
   # Mode 3 = DoH only, no plaintext fallback
   "network.trr.mode" = 3;
-  "network.trr.uri" = "https://extended.dns.mullvad.net/dns-query";
-  "network.trr.custom_uri" = "https://extended.dns.mullvad.net/dns-query";
+  "network.trr.uri" = "https://dns.quad9.net/dns-query";
+  "network.trr.custom_uri" = "https://dns.quad9.net/dns-query";
 
   #--- Network Hardening
   "network.proxy.socks_remote_dns" = true;
