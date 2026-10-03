@@ -32,39 +32,32 @@
 
   #--- Official TONE3000 NAM player: browses the site's capture/IR library from
   #--- inside the plugin. Not in nixpkgs; prebuilt release, so autoPatchelf it.
-  #--- The GUI is a JUCE WebView, and JUCE dlopens WebKitGTK/GTK3/libcurl by
-  #--- soname at runtime rather than linking them. dlopen resolves through the
-  #--- RUNPATH of the calling object, so appendRunpaths covers the plugins too
-  #--- (they load into a DAW and cannot be wrapped). Missing WebKitGTK renders
-  #--- the whole window black; missing libcurl kills tone downloads.
+  #--- JUCE dlopens libcurl and the X11 extensions by soname at runtime rather
+  #--- than linking them. dlopen resolves through the RUNPATH of the calling
+  #--- object, so appendRunpaths covers the plugins too (they load into a DAW
+  #--- and cannot be wrapped). Missing libcurl kills tone downloads.
   tone3000 = pkgs.stdenv.mkDerivation (finalAttrs: {
     pname = "tone3000";
-    version = "0.0.2";
+    version = "0.0.11";
 
-    #--- The linux release asset is a zip that contains a single tarball.
     src = pkgs.fetchurl {
-      url = "https://github.com/tone-3000/tone3000-plugin/releases/download/v${finalAttrs.version}/TONE3000-v${finalAttrs.version}-linux-x64.zip";
-      hash = "sha256-+t5UNOeKDP7+t7E5h81UnhaffByvBYTuvBzhSX2sY20=";
+      url = "https://github.com/tone-3000/tone3000-plugin/releases/download/v${finalAttrs.version}/TONE3000-v${finalAttrs.version}-linux-x64.tar.gz";
+      hash = "sha256-0W38+KAHdJ9nItgqnN2FNeETSQLq53P5LDOcgT79kYU=";
     };
 
-    nativeBuildInputs = with pkgs; [unzip autoPatchelfHook copyDesktopItems];
+    nativeBuildInputs = with pkgs; [autoPatchelfHook copyDesktopItems];
 
     buildInputs = with pkgs; [
       alsa-lib
       fontconfig
-      freetype
       stdenv.cc.cc.lib
       libx11
     ];
 
-    #--- getLib, not "${p}/lib": curl and glib default to their `bin` output,
-    #--- which has no lib dir, and a dead runpath entry fails silently.
+    #--- getLib, not "${p}/lib": curl defaults to its `bin` output, which has
+    #--- no lib dir, and a dead runpath entry fails silently.
     appendRunpaths =
       (map (p: "${lib.getLib p}/lib") (with pkgs; [
-        webkitgtk_4_1
-        libsoup_3
-        glib
-        gtk3
         curl
         libGL
         libxcursor
@@ -74,14 +67,6 @@
         libxscrnsaver
       ]))
       ++ ["/run/opengl-driver/lib"];
-
-    unpackPhase = ''
-      runHook preUnpack
-      unzip -q "$src"
-      tar -xzf TONE3000-*-linux-x64.tar.gz
-      cd TONE3000-*-linux-x64
-      runHook postUnpack
-    '';
 
     #--- install.sh is for FHS distros; place the formats by hand instead so
     #--- LV2_PATH/CLAP_PATH/VST3_PATH below pick them up out of the profile.

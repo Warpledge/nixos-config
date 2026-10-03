@@ -11,10 +11,10 @@
 
     #--- Pinned ahead of nixpkgs (2.1.1867)
     package = pkgs.suwayomi-server.overrideAttrs (finalAttrs: _: {
-      version = "2.3.2243";
+      version = "2.4.2366";
       src = pkgs.fetchurl {
         url = "https://github.com/Suwayomi/Suwayomi-Server/releases/download/v${finalAttrs.version}/Suwayomi-Server-v${finalAttrs.version}.jar";
-        hash = "sha256-ghFBsy4XDUoC08vf7Vd+2PB70iOD/19BMuu1rkDpjdU=";
+        hash = "sha256-r5/rIK+dfr6eMHaebG68f8erHERziNQuAoCx2l/ge/0=";
       };
     });
 
