@@ -37,5 +37,6 @@
     autoEnable = true; # auto-enroll all ports
     flavor = "mocha";
     accent = "mauve";
+    tty.enable = false; # stylix's console target owns console.colors; both set means 32 values the kernel rejects
   };
 }

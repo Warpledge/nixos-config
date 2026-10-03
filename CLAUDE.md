@@ -31,6 +31,7 @@ statix check .          # Lint for Nix antipatterns (inherit, empty patterns, et
 nixm lint               # Run both deadnix and statix in one shot (wraps the above two)
 nixm rebuild            # Apply config (wraps `nh os switch`)
 nixm rebuild 2>&1 | grep -E "error|Error|failed|Failed" || echo "✓"  # token-light rebuild
+nixm boot               # Build, activate on next boot (`nh os boot`); use when an update bumps glibc/systemd, since a live switch froze the desktop on 2026-10-03
 nixm upgrade            # Update flake inputs + rebuild
 nixm flake-update       # Update flake inputs only (no rebuild)
 nixm dryrun             # Rebuild without applying
@@ -422,6 +423,10 @@ Local (non-nixpkgs) binary installs live under `.notes/local/`:
 
 - `local/local-binary-installs.md` — the `~/.local/opt` + `hostConfig.local` pattern for prebuilt third-party bundles kept out of git; restore steps for fresh installs / the laptop. **Add an entry here for each new local app.**
 - `local/appimage-wraps.md` — the `appimageTools.wrapType2` pattern for upstream AppImages. Hash-pinned into the store, so nothing to restore by hand; covers the per-app `Exec`/icon fixups, a non-executable `AppRun`, how to get a new hash when `nix store prefetch-file` hits the daemon's DNS timeout, and building one module without a rebuild.
+
+nixpkgs update notes live under `.notes/nixpkgs/`:
+
+- `nixpkgs/disabled-packages.md` — packages switched off because a flake update broke them, with the date, the nixpkgs rev and how to tell a fix has landed. **Add a row whenever an update forces a package off, and remove it on re-enable.**
 
 Window manager notes live under `.notes/wm/`:
 

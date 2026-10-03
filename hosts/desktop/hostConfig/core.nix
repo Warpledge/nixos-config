@@ -76,7 +76,7 @@
   #--- Audio Software Selection
   # Enable the music and audio applications you want installed
   audio = {
-    reaper = true; # DAW; ships SWS/S&M + ReaPack, JACK routed through PipeWire
+    reaper = false; # DAW; ships SWS/S&M + ReaPack, JACK routed through PipeWire
     guitar = true; # Amp sims (TONE3000/Guitarix) + cab IRs; Katana DI capture
     feedback = true; # Guitar rhythm game, reads Guitar Pro tabs (AppImage)
   };

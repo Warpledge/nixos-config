@@ -36,7 +36,6 @@
       #--- Utility
       gamemode
       mangohud
-      goverlay
       antimicrox
       r2modman
       satisfactorymodmanager

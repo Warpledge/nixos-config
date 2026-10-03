@@ -17,7 +17,6 @@
   #-- Nix Daemon Configuration
   #--------------------------------------------------------------------#
   nix = {
-    nixPath = ["nixpkgs=${inputs.nixpkgs}"]; # Flake-based nixpkgs
     channel.enable = false; # flakes only
     daemonCPUSchedPolicy = "batch"; # Low CPU priority for daemon
     daemonIOSchedClass = "idle"; # Idle IO priority for daemon
@@ -31,6 +30,7 @@
     #-- Nix Settings
     #--------------------------------------------------------------------#
     settings = {
+      nix-path = ["nixpkgs=${inputs.nixpkgs}"]; # Flake-based nixpkgs
       warn-dirty = false;
       min-free = "${toString (5 * 1024 * 1024 * 1024)}"; # Trigger GC at 5GB free
       max-free = "${toString (10 * 1024 * 1024 * 1024)}"; # Free up to 10GB

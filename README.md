@@ -74,6 +74,7 @@ The top level is a set of categories. Pick one and it opens into its own menu of
 | Command | Description |
 | --- | --- |
 | `nixm rebuild` | Apply the current config (`nh os switch`) |
+| `nixm boot` | Build the config and apply it on next boot (`nh os boot`) |
 | `nixm upgrade` | Update all flake inputs and rebuild |
 | `nixm flake-update` | Update flake inputs without rebuilding |
 | `nixm dryrun` | Preview what a rebuild would change |

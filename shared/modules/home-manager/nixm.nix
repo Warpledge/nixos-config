@@ -246,6 +246,7 @@
 
       MENU_NIXOS=(
         "nixm rebuild|''${C_NIX}󰑓''${R} Rebuild System"
+        "nixm boot|''${C_NIX}󰜉''${R} Rebuild for Next Boot"
         "nixm upgrade|''${C_NIX}󰦗''${R} Upgrade System"
         "nixm flake-update|''${C_NIX}󰏢''${R} Flake Update"
         "nixm dryrun|''${C_NIX}󰚀''${R} Dry-run Rebuild"
@@ -360,6 +361,11 @@
         # --- NixOS Operations ---
         rebuild)
           nh os switch "$FLAKE_PATH#nixosConfigurations.$HOSTNAME"
+          ;;
+        #--- Nothing is activated live; use after glibc/systemd bumps
+        boot)
+          nh os boot "$FLAKE_PATH#nixosConfigurations.$HOSTNAME" &&
+            echo "Reboot to switch to the new generation."
           ;;
         lint)
           echo "=== deadnix: unused arguments ==="
@@ -640,6 +646,7 @@
           echo ""
           echo "NixOS:"
           echo "  rebuild           - Rebuild system"
+          echo "  boot              - Rebuild, activate on next boot"
           echo "  upgrade           - Rebuild and upgrade system"
           echo "  flake-update      - Update flake inputs"
           echo "  dryrun            - Dry-run rebuild"
