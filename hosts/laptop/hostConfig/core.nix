@@ -63,6 +63,7 @@
     moku = true; # Manga, novel and anime reader (built from source with UI fixes)
     streamlinkTwitchGui = true; # Twitch browser; streams play in mpv via streamlink (AppImage)
     seanime = true; # Anime and manga media server with a Helium app-window launcher
+    boorusama = true; # Booru image board browser (AppImage)
   };
 
   #--- Graphics Software Selection

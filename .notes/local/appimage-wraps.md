@@ -10,6 +10,7 @@ restore step.
 | --- | --- | --- | --- |
 | fee[dB]ack | `home-manager/programs/gaming/feedback.nix` | 0.3.0-unstable-2026-07-23 | not in nixpkgs; upstream ships only AppImages |
 | Streamlink Twitch GUI | `home-manager/programs/media/streamlink-twitch-gui.nix` | 2.5.3 | not in nixpkgs under any name, checked 2026-09-22 |
+| Boorusama | `home-manager/programs/media/boorusama.nix` | 4.5.0 | not in nixpkgs, checked 2026-10-04 |
 
 ## The pattern
 
