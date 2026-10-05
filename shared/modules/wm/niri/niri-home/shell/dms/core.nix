@@ -25,11 +25,55 @@
     niri.enableSpawn = false;
 
     #--- Plugins
+    # Any `settings` here makes plugin_settings.json a read-only store link, so
+    # changes in a plugin's settings page no longer save: mirror them back here.
     plugins = {
-      amdGpuMonitor.enable = true;
-      claudeCodeUsage.enable = hostConfig.claude.enable;
-      powerUsagePlugin.enable = lib.mkIf (hostname == "laptop") true;
-      screenRecorder.enable = true;
+      # The variant pins the desktop's GPU by PCI address; the bar widget id
+      # in settings.json (amdGpuMonitor:<id>) must match it.
+      amdGpuMonitor = {
+        enable = hostname == "desktop";
+        settings = {
+          popoutStyle = "default";
+          minimumWidth = true;
+          variants = [
+            {
+              id = "variant_1791177076814";
+              name = "AMD Radeon RX 9070 XT";
+              originalName = "AMD Radeon RX 9070 XT";
+              description = "Monitor your discrete AMD Radeon RX 9070 XT";
+              gpuPci = "0000:09:00.0";
+              gpuType = "dGPU";
+              icon = "memory";
+            }
+          ];
+        };
+      };
+
+      # The plugin stores its options as strings, booleans included.
+      aiOverviewControl = {
+        enable = hostConfig.claude.enable;
+        settings = {
+          providerSelection = "claude";
+          pillProviders = "claude";
+          languageOverride = "en_US";
+          densityMode = "comfortable";
+          pillMode = "auto";
+          pillTooltip = "true";
+          pillCompact = "false";
+          showAntigravityModelDetails = "false";
+          notifyThreshold = "85";
+        };
+      };
+
+      quickCapture = {
+        enable = true;
+        settings = {
+          toolbarPosition = "bottom";
+          showToolbarBorder = false;
+          show_shortcut_hints = true;
+          color_palette_preset = "catppuccin";
+        };
+      };
     };
 
     #--- Core features
@@ -59,17 +103,19 @@
     "Mod+L".action.spawn = dms "lock lock"; # Toggle lock screen
     "Mod+I".action.spawn = dms "inhibit toggle"; # Toggle idle inhibit
     "Mod+slash".action.spawn = dms "keybinds toggle niri"; # Show Keybind Cheatsheet
-    "Mod+Insert".action.spawn = dms "screenRecorder toggleRecording"; # Screen Recorder
     "Mod+R".action.spawn = ["dms" "restart"]; # Restart DMS
 
-    #--- Screenshots
-    # dms screenshot is a standalone CLI, not an ipc call; saves to
-    # $XDG_PICTURES_DIR/Screenshots and copies to the clipboard.
-    "Print".action.spawn = ["dms" "screenshot" "region"]; # Region Select
-    "Mod+Print".action.spawn = ["dms" "screenshot" "window"]; # Focused Window
-    "Mod+Shift+Print".action.spawn = ["dms" "screenshot" "full"]; # Focused Output
-    "Ctrl+Print".action.spawn = ["dms" "screenshot" "all"]; # All Outputs
-    "Mod+Ctrl+Print".action.spawn = ["dms" "screenshot" "scroll"]; # Scrolling Capture
+    #--- Quick Capture: screenshots open in its editor
+    "Print".action.spawn = dms "quickCapture screenshot region edit"; # Region Select
+    "Mod+Print".action.spawn = dms "quickCapture screenshot window edit"; # Focused Window
+    "Mod+Shift+Print".action.spawn = dms "quickCapture screenshot full edit"; # Focused Output
+    "Ctrl+Print".action.spawn = dms "quickCapture screenshot all edit"; # All Outputs
+    "Mod+Ctrl+Print".action.spawn = dms "quickCapture screenshot scroll edit"; # Scrolling Capture
+
+    #--- Quick Capture: recording
+    # portal only: the gpu-screen-recorder screen/region modes capture via KMS,
+    # which bypasses niri's block-out-from rules.
+    "Mod+End".action.spawn = dms "quickCapture recordToggle portal"; # Toggle Recording
 
     #--- Audio controls
     "XF86AudioRaiseVolume".action.spawn = dms "audio increment 3"; # Volume Up

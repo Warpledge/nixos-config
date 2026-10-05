@@ -8,8 +8,17 @@ let
       matches = [
         {app-id = "org.gnome.seahorse.Application";}
         {app-id = "bitwarden";}
-        {app-id = "Mullvad VPN";}
+        {app-id = "mullvad-vpn";}
         {app-id = "Mullvad Browser";}
+        {app-id = "^helium$";}
+        {app-id = "^chrome-localhost__-Default$";} # Suwayomi (Helium app window)
+        {app-id = "^chrome-127\\.0\\.0\\.1__-Default$";} # Seanime (Helium app window)
+        {app-id = "^moku$";}
+        {app-id = "^boorusama$";}
+        {app-id = "^thunderbird$";}
+        {app-id = "^md\\.obsidian\\.Obsidian$";}
+        {app-id = "^homebank$";}
+        {app-id = "^vesktop$";}
       ];
       block-out-from = "screen-capture";
     }
@@ -319,7 +328,10 @@ in {
         place-within-backdrop = true;
       }
       {
-        matches = [{namespace = "^dms:clipboard$";}];
+        matches = [
+          {namespace = "^dms:clipboard$";}
+          {namespace = "^dms:notification-popup$";}
+        ];
         block-out-from = "screen-capture";
       }
     ];

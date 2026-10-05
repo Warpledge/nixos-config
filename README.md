@@ -192,7 +192,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | **File Manager** | [Nautilus][nautilus], [Yazi][yazi] (terminal file manager) |
 | **Media Player** | [mpv][mpv], [Spotify][spotify] via [spicetify-nix][spicetify], [FreeTube][freetube] |
 | **Twitch** | [Streamlink Twitch GUI][streamlink-twitch-gui] browses Twitch and hands the stream to [Streamlink][streamlink], which plays it in mpv, so there are no ads and the follow list stays local with no Twitch account attached; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs |
-| **Screenshot / Recording** | [dms screenshot][dms] (Niri), [grim][grim] + [slurp][slurp] (Hyprland), [gpu-screen-recorder][gpu-screen-recorder] |
+| **Screenshot / Recording** | [Quick Capture][quick-capture] (Niri), [grim][grim] + [slurp][slurp] (Hyprland), [gpu-screen-recorder][gpu-screen-recorder] |
 | **Graphics** | [Blender][blender], [Krita][krita], [Affinity Suite v3][affinity-nix] (via Wine), all off by default |
 | **Audio** | [Reaper][reaper] (DAW, with [SWS][sws] and [ReaPack][reapack]) |
 | **Guitar** | [TONE3000][tone3000] (official NAM player, browses its capture and IR library in-app), [Guitarix][guitarix] (modular amp rig), [ir.lv2][ir-lv2] for cabinet IRs, [qpwgraph][qpwgraph] for patching, plus [FxFloorBoard][katana-fxfloorboard] to edit patches on the Boss Katana itself |
@@ -301,6 +301,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [grim]: https://sr.ht/~emersion/grim
 [slurp]: https://github.com/emersion/slurp
 [gpu-screen-recorder]: https://git.dec05eba.com/gpu-screen-recorder
+[quick-capture]: https://github.com/hthienloc/dms-plugins
 [blender]: https://www.blender.org
 [krita]: https://krita.org
 [affinity-nix]: https://github.com/mrshmllow/affinity-nix
@@ -534,14 +535,12 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./shared
 
 | Keybind | Action |
 | --- | --- |
-| `Print` | Region screenshot (DMS) |
+| `Print` | Region screenshot (Quick Capture, opens its editor) |
 | `Mod+Print` | Focused window screenshot |
 | `Mod+Shift+Print` | Focused output screenshot |
 | `Ctrl+Print` | All outputs screenshot |
 | `Mod+Ctrl+Print` | Scrolling capture |
-| `Mod+Home` | Start screen recording |
-| `Mod+End` | Stop screen recording |
-| `Mod+Insert` | Toggle the DMS screen recorder |
+| `Mod+End` | Toggle screen recording (portal) |
 | `Volume Up/Down/Mute` | Volume, routed through DMS so the on-screen indicator shows |
 | `Mic Mute` | Mute the microphone |
 | `Brightness Up/Down` | Screen brightness |
@@ -668,7 +667,7 @@ The main things this config pulls in from outside the standard NixOS package set
 | [`niri`](https://github.com/sodiboo/niri-flake) (sodiboo/niri-flake) | Niri WM |
 | [`cosmic-manager`](https://github.com/HeitorAugustoLN/cosmic-manager) | Declarative COSMIC panels, keybinds and settings |
 | [`dms`](https://github.com/AvengeMedia/DankMaterialShell) (AvengeMedia, stable) | DankMaterialShell |
-| [`dms-plugin-registry`](https://github.com/AvengeMedia/dms-plugin-registry) | DankMaterialShell plugins (Claude Code usage, power usage, screen recorder) |
+| [`dms-plugin-registry`](https://github.com/AvengeMedia/dms-plugin-registry) | DankMaterialShell plugins (AI usage overview, Quick Capture, AMD GPU monitor) |
 | [`dank-greeter`](https://github.com/AvengeMedia/dank-greeter) | Login screen that matches DankMaterialShell |
 | [`stylix`](https://github.com/nix-community/stylix) | System-wide theming |
 | [`catppuccin`](https://github.com/catppuccin/nix) | Catppuccin theme module |
