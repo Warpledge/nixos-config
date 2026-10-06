@@ -117,7 +117,7 @@ The top level is a set of categories. Pick one and it opens into its own menu of
 
 #### Backup
 
-Each run drops a `YYYY-MM-DD_HH-MM-SS` folder into `~/Backups/FreeTube` and `~/Backups/Zen`, and the 10 most recent runs of each are kept. The FreeTube files use its own Export format, so Settings → Data Settings → Import reads them straight back; close FreeTube first, since it rewrites its databases on exit. The Zen folder holds only a `bookmarks.html`, the standard bookmark file that any browser can import (Zen and Firefox included), with folders intact.
+Each run drops a `YYYY-MM-DD_HH-MM-SS` folder into `~/SyncBackups/<hostname>/FreeTube` and `~/SyncBackups/<hostname>/Zen`, and the 10 most recent runs of each are kept. Each host gets its own folder so [Syncthing][syncthing] can share `~/SyncBackups` between machines without one pruning the other's runs. The FreeTube files use its own Export format, so Settings → Data Settings → Import reads them straight back; close FreeTube first, since it rewrites its databases on exit. The Zen folder holds only a `bookmarks.html`, the standard bookmark file that any browser can import (Zen and Firefox included), with folders intact.
 
 | Command | Description |
 | --- | --- |
@@ -245,6 +245,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | **Hosts Blocklists** | [StevenBlack][stevenblack] (the base ads and malware list, plus fake news and gambling), from the nixpkgs package |
 | **Browser** | [Zen][zen] with [Arkenfox][arkenfox] and [Securefox][securefox] tweaks, plus [Mullvad Browser][mullvad-browser] |
 | **Secrets** | [GNOME Keyring][gnome-keyring] |
+| **Passwords** | [KeePassXC][keepassxc], with the vault file synced between devices by [Syncthing][syncthing] |
 | **Antivirus** | [ClamAV][clamav] (off by default) |
 
 </details>
@@ -366,6 +367,8 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [resolved]: https://www.freedesktop.org/software/systemd/man/systemd-resolved.html
 [networkmanager]: https://networkmanager.dev
 [clamav]: https://www.clamav.net
+[keepassxc]: https://keepassxc.org/
+[syncthing]: https://syncthing.net/
 [keyd]: https://github.com/rvaiya/keyd
 [gnome-keyring]: https://wiki.gnome.org/Projects/GnomeKeyring
 [luks]: https://gitlab.com/cryptsetup/cryptsetup

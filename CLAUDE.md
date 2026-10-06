@@ -37,7 +37,7 @@ nixm flake-update       # Update flake inputs only (no rebuild)
 nixm dryrun             # Rebuild without applying
 nixm gc                 # GC, keep last 5 generations
 nixm rollback           # Roll back to the previous generation
-nixm backup             # Back up FreeTube (subs, playlists, history) and Zen bookmarks (as bookmarks.html) to dated ~/Backups folders
+nixm backup             # Back up FreeTube (subs, playlists, history) and Zen bookmarks (as bookmarks.html) to dated ~/SyncBackups folders
 nixm freetube-backup    # FreeTube only (app must be closed)
 nixm zen-backup         # Zen only
 nixm vpn-list           # Show the Android VPN lockdown allowlist on an adb device
@@ -69,8 +69,8 @@ The authoritative list of toggles is **`hosts/{hostname}/hostConfig/core.nix`**.
 - `username` — read by `flake.nix` itself (`inherit (hostConfig) username`), not just by modules
 - `windowManager` — `"hyprland" | "niri" | "gnome" | "cosmic"`
 - `kernel` — `"zen" | "latest" | "xanmod" | "cachyos"`
-- Service toggles: `mullvad.enable` (plus `mullvad.splitTunnel`, a list of command names routed around the VPN), `clamav.enable`, `docker.enable`, `winboat.enable`, `discord.arrpc.enable`, `scrcpy.enable`, `ssh.enable`, `suwayomi.enable`
-- Attribute-set toggles: `browsers.{zen,mullvad,helium,ferdium}`, `terminals.{kitty,ghostty}`, `editors.{helix,zed}`, `fileBrowsers.{nautilus,yazi}`, `media.{mpv,spotify,freetube,videoTrimmer,moku,streamlinkTwitchGui,seanime}`, `graphics.{blender,krita,affinity}`, `audio.{reaper,guitar,feedback,rocksmith}`, `office.{thunderbird,obsidian,homebank}`, `security.{bleachbit}`, `gameLaunchers.{steam,heroic,prismlauncher,lutris,faugus,twintail,easyrpg}`, `japanese.{ime,vn}`
+- Service toggles: `mullvad.enable` (plus `mullvad.splitTunnel`, a list of command names routed around the VPN), `clamav.enable`, `docker.enable`, `winboat.enable`, `discord.arrpc.enable`, `scrcpy.enable`, `ssh.enable`, `suwayomi.enable`, `syncthing.enable`
+- Attribute-set toggles: `browsers.{zen,mullvad,helium,ferdium}`, `terminals.{kitty,ghostty}`, `editors.{helix,zed}`, `fileBrowsers.{nautilus,yazi}`, `media.{mpv,spotify,freetube,videoTrimmer,moku,streamlinkTwitchGui,seanime}`, `graphics.{blender,krita,affinity}`, `audio.{reaper,guitar,feedback,rocksmith}`, `office.{thunderbird,obsidian,homebank}`, `security.{bleachbit,keepassxc}`, `gameLaunchers.{steam,heroic,prismlauncher,lutris,faugus,twintail,easyrpg}`, `japanese.{ime,vn}`
 - `local.{granblueRelinkMods}` — wrappers around prebuilt bundles under `~/.local/opt/` (kept out of git); see `.notes/local/local-binary-installs.md`
 - AI tools: `claude.enable`, `opencode.enable`, `lmstudio.enable`
 
@@ -111,12 +111,12 @@ Gotchas. Grep the option name before assuming which file owns it:
 
 ### Module layout
 
-- `shared/modules/nixos/` — system: `gaming/` (default, esync, gamemode, gamescope, java, kernel, steam, twintail), `network/` (core, blockers), `nix/` (core, nh, nixpkgs, substituters), `security/` (apparmor/, auditd, core, kernel, keyring, sudo), `services/` (adb, desktop, docker, flatpak, keyd, power, runners, sound, clamav, ssh, suwayomi, flaresolverr), `system/` (bootloader, display-manager, documentation, input, locale, packages, shell, tweaks, user, wayland, zram, japanese-ime)
+- `shared/modules/nixos/` — system: `gaming/` (default, esync, gamemode, gamescope, java, kernel, steam, twintail), `network/` (core, blockers), `nix/` (core, nh, nixpkgs, substituters), `security/` (apparmor/, auditd, core, kernel, keyring, sudo), `services/` (adb, desktop, docker, flatpak, keyd, power, runners, sound, clamav, ssh, suwayomi, syncthing, flaresolverr), `system/` (bootloader, display-manager, documentation, input, locale, packages, shell, tweaks, user, wayland, zram, japanese-ime)
 - `shared/modules/home-manager/` — user: `programs/` (browsers, terminals, editors, ai, shell, emulation, fetch, file-browsers, graphics, audio, media, office, security, launchers, local, gaming, android, discord, plus `core.nix`, `git.nix`). `mime.nix`, `nixm.nix`, `services.nix` and `variables.nix` are single files at that level, not directories
   - `programs/local/` — wrappers for non-nixpkgs prebuilt bundles living in `~/.local/opt/`; the payload is intentionally not in the repo
   - AppImage wraps (`appimageTools`) sit in the folder for what the app is, not how it is packaged: `gaming/feedback.nix`, `media/streamlink-twitch-gui.nix`. The payload is hash-pinned into the store, so unlike `programs/local/` nothing lives outside git (see `.notes/local/appimage-wraps.md`)
   - `default.nix` carries a `clearStaleBackups` activation hook that deletes `*.bak` under `~/.config`, `~/.local/{share,state}` before `checkLinkTargets`. This is why HM activation never fails on leftover backups. Don't remove it when debugging a "file exists" error; find the real conflicting file instead.
-  - `programs/media/freetube/` — `settings.nix` (mirrored from the app), `blocked-channels.nix` (~2k channel ids in one flat list, sorted by lowercased name under `LC_ALL=C`) and `youtube-dispatch.nix`, the link handler `mime.nix` points `webLinks` at. The first two are **mirrored**: the home-manager module copies `hm_settings.db` over `settings.db` **only when the declared content changes**, and FreeTube rewrites that file from memory when it exits, so close FreeTube before rebuilding, or the copy is clobbered and stays clobbered until the module changes again. Blocklist entries are emitted with a `preferredName` and a placeholder `icon`, because FreeTube re-resolves every entry missing either one, at one API call each. Subscriptions, profiles, playlists and history are **not** in the repo: they are personal data and this flake is public. `nixm freetube-backup` exports them to a dated folder under `~/Backups/FreeTube` instead, in FreeTube's own Export format so its Import reads them back.
+  - `programs/media/freetube/` — `settings.nix` (mirrored from the app), `blocked-channels.nix` (~2k channel ids in one flat list, sorted by lowercased name under `LC_ALL=C`) and `youtube-dispatch.nix`, the link handler `mime.nix` points `webLinks` at. The first two are **mirrored**: the home-manager module copies `hm_settings.db` over `settings.db` **only when the declared content changes**, and FreeTube rewrites that file from memory when it exits, so close FreeTube before rebuilding, or the copy is clobbered and stays clobbered until the module changes again. Blocklist entries are emitted with a `preferredName` and a placeholder `icon`, because FreeTube re-resolves every entry missing either one, at one API call each. Subscriptions, profiles, playlists and history are **not** in the repo: they are personal data and this flake is public. `nixm freetube-backup` exports them to a dated folder under `~/SyncBackups/<hostname>/FreeTube` instead, in FreeTube's own Export format so its Import reads them back.
 - `shared/modules/wm/{hyprland,niri,gnome,cosmic}/` — each has `<wm>-nixos/` and `<wm>-home/`. Only Hyprland and Niri integrate DankMaterialShell (DMS); GNOME uses `gnome-home/extensions/` + `dconf.nix`, COSMIC uses `cosmic-home/shell/{panel,applets}.nix`
 - `shared/modules/theme/` — stylix, catppuccin, fonts, plus `gtk.nix` and `qt.nix`, the toolkit theming targets rule 5 routes through
 - `shared/modules/mullvad/` — `mullvad-nixos/` (daemon settings + system-package split tunnel) and `mullvad-home/` (tray app + home-package split tunnel). Imported from `shared/core.nix` like the WM, gated on `hostConfig.mullvad.enable`
@@ -178,7 +178,7 @@ Gotchas. Grep the option name before assuming which file owns it:
 5. `alejandra .` → `nix flake check`, then hand back for the rebuild, with the app still closed.
 
 Subscriptions, profiles, playlists and history are **not** declarative. `nixm freetube-backup`
-writes them to `~/Backups/FreeTube/<YYYY-MM-DD_HH-MM-SS>/` as
+writes them to `~/SyncBackups/<hostname>/FreeTube/<YYYY-MM-DD_HH-MM-SS>/` as
 `freetube-{subscriptions,playlists,watch-history}.db`, one JSON document per line, which is what
 FreeTube's own Export writes and its Import reads. The 10 newest folders are kept; `backup_prune`
 only matches names in stamp form, so anything else under that directory is left alone. A run
@@ -248,7 +248,7 @@ These are only imported when the WM is active, e.g. `lib.optional (hostConfig.wi
 
 - DNS: systemd-resolved + NetworkManager (DNSStubListener disabled so port 53 is free)
 - WiFi: iwd, IPv6 privacy, random MAC
-- Firewall: TCP 22 (open; sshd only runs when `hostConfig.ssh.enable` is set), 80, 443, 25566 (Minecraft), 7777 (Terraria), 5555 (ADB); UDP 27000–27036 range (Steam). Defined in `shared/modules/nixos/network/core.nix`.
+- Firewall: TCP 22 (open; sshd only runs when `hostConfig.ssh.enable` is set), 80, 443, 25566 (Minecraft), 7777 (Terraria), 5555 (ADB); UDP 27000–27036 range (Steam). Defined in `shared/modules/nixos/network/core.nix`. When `hostConfig.syncthing.enable` is set, the Syncthing module also opens TCP/UDP 22000 and UDP 21027.
 - Mullvad: `hostConfig.mullvad.enable` (WireGuard + quantum resistance), `shared/modules/mullvad/`, split across `mullvad-nixos/` (daemon settings, split tunnel) and `mullvad-home/` (tray app). Settings are applied with the `mullvad` CLI from a oneshot unit, not by templating `settings.json`, which the daemon rewrites. Relay and entry selection are deliberately unmanaged so exits can be switched by hand. `hostConfig.mullvad.splitTunnel` names apps routed around the VPN; the NixOS half wraps system packages, the home half wraps `home.packages` ones, and the home profile outranks `/run/current-system/sw/bin` in PATH, so a NixOS wrapper for an HM package is silently shadowed.
 - `network/blockers.nix` — hosts-level blocklists, always imported
 

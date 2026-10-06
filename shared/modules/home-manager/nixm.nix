@@ -350,9 +350,10 @@
       FLAKE_PATH="/home/${username}/nixos-config"
 
       #--- Kept outside the repo: subscriptions, bookmarks and history are
-      #--- personal data and this flake is public. Point a sync tool here.
-      FT_BACKUP_DIR="$HOME/Backups/FreeTube"
-      ZEN_BACKUP_DIR="$HOME/Backups/Zen"
+      #--- personal data and this flake is public. Per-host folders, since
+      #--- ~/SyncBackups is synced and each host prunes only its own runs.
+      FT_BACKUP_DIR="$HOME/SyncBackups/$HOSTNAME/FreeTube"
+      ZEN_BACKUP_DIR="$HOME/SyncBackups/$HOSTNAME/Zen"
       ZEN_PROFILE="$HOME/.zen/default"
       BACKUP_KEEP=10
       STAMP=$(date +%Y-%m-%d_%H-%M-%S)
@@ -675,11 +676,11 @@
           echo "  flatpak-update    - Update Flatpaks"
           echo "  flatpak-list      - List installed Flatpaks"
           echo ""
-          echo "Backup (dated folders under ~/Backups, 10 most recent kept):"
+          echo "Backup (dated folders under ~/SyncBackups/<host>, 10 most recent kept):"
           echo "  backup            - Both of the below"
           echo "  freetube-backup   - FreeTube subscriptions, playlists and history"
-          echo "                      to ~/Backups/FreeTube (FreeTube must be closed)"
-          echo "  zen-backup        - Zen bookmarks as bookmarks.html to ~/Backups/Zen"
+          echo "                      to ~/SyncBackups/<host>/FreeTube (FreeTube must be closed)"
+          echo "  zen-backup        - Zen bookmarks as bookmarks.html to ~/SyncBackups/<host>/Zen"
           echo ""
           echo "Tools:"
           echo "  vulkan            - Vulkan capabilities"

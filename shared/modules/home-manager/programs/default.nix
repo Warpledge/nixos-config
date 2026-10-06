@@ -63,6 +63,7 @@
     ++ lib.optionals hostConfig.media.seanime [./media/seanime.nix]
     ++ lib.optionals hostConfig.media.boorusama [./media/boorusama.nix]
     ++ lib.optionals hostConfig.suwayomi.enable [./media/suwayomi.nix]
+    ++ lib.optionals hostConfig.syncthing.enable [./syncthing.nix]
     #--- Terminals (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.terminals.kitty [./terminals/kitty.nix]
     ++ lib.optionals hostConfig.terminals.ghostty [./terminals/ghostty.nix]
@@ -81,6 +82,7 @@
     ++ lib.optionals hostConfig.office.homebank [./office/homebank.nix]
     #--- Security (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.security.bleachbit [./security/bleachbit.nix]
+    ++ lib.optionals hostConfig.security.keepassxc [./security/keepassxc.nix]
     #--- Local Packages (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.local.granblueRelinkMods [./local/relink-mod-organizer.nix ./local/reloaded-ii-gbfr.nix]
     ++ lib.optionals hostConfig.local.tonkatsuBox [./local/tonkatsu-box.nix]

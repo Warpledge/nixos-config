@@ -17,6 +17,7 @@ let
         {app-id = "^helium$";}
         {app-id = "^chrome-localhost__-Default$";} # Suwayomi (Helium app window)
         {app-id = "^chrome-127\\.0\\.0\\.1__-Default$";} # Seanime (Helium app window)
+        {app-id = "^chrome-127\\.0\\.0\\.1__index\\.html-Default$";} # Syncthing (Helium app window)
         {app-id = "^moku$";}
         {app-id = "^boorusama$";}
         {app-id = "^thunderbird$";}

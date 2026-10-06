@@ -60,6 +60,8 @@
     ++ lib.optionals hostConfig.ssh.enable [./services/ssh.nix]
     #--- Suwayomi Manga Server (controlled by hostConfig)
     ++ lib.optionals hostConfig.suwayomi.enable [./services/suwayomi.nix]
+    #--- Syncthing File Sync (controlled by hostConfig)
+    ++ lib.optionals hostConfig.syncthing.enable [./services/syncthing.nix]
     #--- FlareSolverr for Moku's Cloudflare-protected sources (controlled by hostConfig)
     ++ lib.optionals hostConfig.media.moku [./services/flaresolverr.nix]
     #--- Japanese Input Method (controlled by hostConfig)

@@ -109,10 +109,15 @@
   # Local manga reader, web UI at http://localhost:4567
   suwayomi.enable = true;
 
+  #--- Syncthing File Sync
+  # Peer-to-peer sync, web UI at http://127.0.0.1:8384
+  syncthing.enable = true;
+
   #--- Security Software Selection
   # Enable the security and privacy applications you want installed
   security = {
     bleachbit = true; # Disk cleaner for caches, logs and browser leftovers
+    keepassxc = true; # Offline password manager (vault synced with Syncthing)
   };
 
   #--- SSH Server
