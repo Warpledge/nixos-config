@@ -74,6 +74,7 @@
     ++ lib.optionals hostConfig.audio.reaper [./audio/reaper.nix]
     ++ lib.optionals hostConfig.audio.guitar [./audio/guitar.nix]
     ++ lib.optionals hostConfig.audio.feedback [./gaming/feedback.nix]
+    ++ lib.optionals hostConfig.audio.rocksmith [./gaming/rocksmith.nix]
     #--- Office (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.office.thunderbird [./office/thunderbird.nix]
     ++ lib.optionals hostConfig.office.obsidian [./office/obsidian.nix]

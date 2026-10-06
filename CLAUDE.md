@@ -70,7 +70,7 @@ The authoritative list of toggles is **`hosts/{hostname}/hostConfig/core.nix`**.
 - `windowManager` — `"hyprland" | "niri" | "gnome" | "cosmic"`
 - `kernel` — `"zen" | "latest" | "xanmod" | "cachyos"`
 - Service toggles: `mullvad.enable` (plus `mullvad.splitTunnel`, a list of command names routed around the VPN), `clamav.enable`, `docker.enable`, `winboat.enable`, `discord.arrpc.enable`, `scrcpy.enable`, `ssh.enable`, `suwayomi.enable`
-- Attribute-set toggles: `browsers.{zen,mullvad,helium,ferdium}`, `terminals.{kitty,ghostty}`, `editors.{helix,zed}`, `fileBrowsers.{nautilus,yazi}`, `media.{mpv,spotify,freetube,videoTrimmer,moku,streamlinkTwitchGui,seanime}`, `graphics.{blender,krita,affinity}`, `audio.{reaper,guitar,feedback}`, `office.{thunderbird,obsidian,homebank}`, `security.{bleachbit}`, `gameLaunchers.{steam,heroic,prismlauncher,lutris,faugus,twintail,easyrpg}`, `japanese.{ime,vn}`
+- Attribute-set toggles: `browsers.{zen,mullvad,helium,ferdium}`, `terminals.{kitty,ghostty}`, `editors.{helix,zed}`, `fileBrowsers.{nautilus,yazi}`, `media.{mpv,spotify,freetube,videoTrimmer,moku,streamlinkTwitchGui,seanime}`, `graphics.{blender,krita,affinity}`, `audio.{reaper,guitar,feedback,rocksmith}`, `office.{thunderbird,obsidian,homebank}`, `security.{bleachbit}`, `gameLaunchers.{steam,heroic,prismlauncher,lutris,faugus,twintail,easyrpg}`, `japanese.{ime,vn}`
 - `local.{granblueRelinkMods}` — wrappers around prebuilt bundles under `~/.local/opt/` (kept out of git); see `.notes/local/local-binary-installs.md`
 - AI tools: `claude.enable`, `opencode.enable`, `lmstudio.enable`
 
@@ -79,7 +79,7 @@ Desktop and laptop should stay byte-identical apart from the header comment and 
 Gotchas. Grep the option name before assuming which file owns it:
 
 - **`boot.kernelModules` silently swallows kernel parameters.** modprobe cannot resolve them, `systemd-modules-load.service` logs `Failed to find module '<param>'` and still exits 0, so the hardening looks applied and is not. Eleven params sat there until 2026-09-22. Check with `grep <param> /proc/cmdline`, not by reading the module.
-- `audio.feedback` is the one toggle that does not match its folder: fee[dB]ack lives in `programs/gaming/` as a game, but shares the Katana rig with `audio.guitar`.
+- `audio.feedback` and `audio.rocksmith` are the two toggles that do not match their folder: both live in `programs/gaming/` as games, but share the Katana rig with `audio.guitar`.
 - `gameLaunchers.steam` / `.twintail` are wired in `shared/modules/nixos/gaming/default.nix`; `heroic`, `prismlauncher`, `lutris`, `faugus`, `easyrpg` are wired in `home-manager/programs/default.nix`.
 - The Katana patch editor is a `~/.local/opt` bundle but does **not** live in `programs/local/`; it moved into `audio/guitar.nix` with the rest of the amp rig, so it has no `local.*` toggle of its own and rides on `audio.guitar`.
 - The AI modules and `emulation/winboat.nix` are conditionally imported **and** wrap their body in `config = lib.mkIf hostConfig.<toggle> {...}`, so the inner guard never fires on its own. New modules take the conditional import alone.
@@ -413,6 +413,7 @@ Game-specific notes live under `.notes/gaming/`:
 - `gaming/steam-launch-parameters.md` — per-game Steam launch flags; documents the `tml-prelaunch` script (`shared/modules/home-manager/programs/gaming/tml-prelaunch.nix`)
 - `gaming/launcher-env-variables.md` — common env vars + wrappers for Heroic/Lutris/Faugus/umu/Steam (JP locale, Proton WineD3D, XWayland wrapper, RPG Maker, perf wrappers)
 - `gaming/steam-client-menu-bug.md` — Steam's menus self-dismiss on niri because xwayland-satellite 0.8.2 focuses override-redirect windows; `niri-home/core/xwayland.nix` pins past it to upstream `add2795` (PR #494). Drop the pin once nixpkgs ships that commit
+- `gaming/rocksmith-2014.md` — Rocksmith 2014 on Proton 11 + WOW64 with the Katana DI via PipeASIO and RS_ASIO: the manual install steps the `audio.rocksmith` module can't do, the Katana driver-priority stall, why calibration is skipped, which CDLC enabler build works (the CustomsForge v4.0 one, not the newer GitHub build), and the optional RSMods setup
 - `gaming/minecraft_servers/{GTNH,TerraFirmaGreg-Modern}/` — each pack has `index.md` listing its sub-files (server setup, mods, config tweaks, etc.). **Update the relevant sub-file when that pack's config, mods, or settings change.** The matching declarative modules live at `hosts/laptop/minecraft-servers/{gtnh-server,tfg-server}.nix` (add a new server by creating a `.nix` there, importing it in that dir's `default.nix`, and adding a line to the hardcoded pack list in `mcservers.nix`, the fzf picker that names each pack with its version and dispatches to that server's command).
 
 Android device notes live under `.notes/android/`:

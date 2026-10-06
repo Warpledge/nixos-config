@@ -43,6 +43,19 @@
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
+
+    #--- The Katana's capture outranks every other device as graph driver, and
+    #--- it only runs at 44.1k, so it pins any graph it joins to 44.1k and
+    #--- stalls clients that force 48k (Rocksmith via PipeASIO). Below the
+    #--- onboard output (1009) it follows instead and gets resampled.
+    wireplumber.extraConfig."51-katana-driver" = {
+      "monitor.alsa.rules" = [
+        {
+          matches = [{"node.name" = "alsa_input.hw_KATANA_0";}];
+          actions.update-props."priority.driver" = 1000;
+        }
+      ];
+    };
   };
 
   #--------------------------------------------------------------------#

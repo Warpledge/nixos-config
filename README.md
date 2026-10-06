@@ -196,7 +196,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | **Graphics** | [Blender][blender], [Krita][krita], [Affinity Suite v3][affinity-nix] (via Wine), all off by default |
 | **Audio** | [Reaper][reaper] (DAW, with [SWS][sws] and [ReaPack][reapack]) |
 | **Guitar** | [TONE3000][tone3000] (official NAM player, browses its capture and IR library in-app), [Guitarix][guitarix] (modular amp rig), [ir.lv2][ir-lv2] for cabinet IRs, [qpwgraph][qpwgraph] for patching, plus [FxFloorBoard][katana-fxfloorboard] to edit patches on the Boss Katana itself |
-| **Rhythm Game** | [feedBack][feedback] plays Guitar Pro tabs through its own audio engine, with VST hosting and amp modeling, so the Katana DI feed doubles as the game input; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs |
+| **Rhythm Games** | [feedBack][feedback] plays Guitar Pro tabs through its own audio engine, with VST hosting and amp modeling, so the Katana DI feed doubles as the game input; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs. [Rocksmith 2014][rocksmith] runs on Proton and reads the same DI through [PipeASIO][pipeasio] and [RS_ASIO][rs-asio]; the module writes their config, and the hand-done install steps live in `.notes/gaming/rocksmith-2014.md` |
 | **Chat / Productivity** | [Vesktop][vesktop] via [nixcord][nixcord] (Vencord, with [arRPC][arrpc] running alongside it so Steam and Proton games show up as rich presence), [Ferdium][ferdium] (all your web messengers in one window), [Thunderbird][thunderbird], [Obsidian][obsidian] |
 | **AI Tooling** | [Claude Code][claude-code], [OpenCode][opencode], [LM Studio][lmstudio] |
 | **Android** | [scrcpy][scrcpy] (mirror and control a device over USB or wifi, nothing to install on the phone) |
@@ -331,6 +331,9 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [gocryptfs]: https://nuetzlich.net/gocryptfs/
 [streamlink-twitch-gui]: https://github.com/streamlink/streamlink-twitch-gui
 [feedback]: https://github.com/got-feedBack/feedBack-desktop
+[rocksmith]: https://store.steampowered.com/app/221680/
+[pipeasio]: https://github.com/M0n7y5/pipeasio
+[rs-asio]: https://github.com/mdias/rs_asio
 [streamlink]: https://streamlink.github.io/
 [homebank]: https://www.gethomebank.org
 [fcitx5]: https://github.com/fcitx/fcitx5

@@ -80,6 +80,7 @@
     reaper = false; # DAW; ships SWS/S&M + ReaPack, JACK routed through PipeWire
     guitar = true; # Amp sims (TONE3000/Guitarix) + cab IRs; Katana DI capture
     feedback = true; # Guitar rhythm game, reads Guitar Pro tabs (AppImage)
+    rocksmith = true; # Rocksmith 2014 (Steam): RS_ASIO + PipeASIO config for the Katana DI
   };
 
   #--- Office Software Selection
