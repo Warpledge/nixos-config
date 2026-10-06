@@ -239,8 +239,8 @@
         #--- MCP Servers
         context_servers = {
           nixos = {
-            command = "nix";
-            args = ["run" "github:utensils/mcp-nixos" "--"];
+            command = lib.getExe pkgs.mcp-nixos;
+            args = [];
             env = {};
           };
         };

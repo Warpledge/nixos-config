@@ -8,6 +8,10 @@ let
       matches = [
         {app-id = "org.gnome.seahorse.Application";}
         {app-id = "bitwarden";}
+        {
+          app-id = "^zen-beta$";
+          title = "^Extension: \\(Bitwarden";
+        } # Bitwarden extension popup (Zen)
         {app-id = "mullvad-vpn";}
         {app-id = "Mullvad Browser";}
         {app-id = "^helium$";}
@@ -125,6 +129,19 @@ let
       open-floating = true;
       default-column-width = {fixed = 1687;};
       default-window-height = {fixed = 222;};
+    }
+
+    #--- Bitwarden extension popout (Zen PIN unlock); outranks the zen-beta full-width rule
+    {
+      matches = [
+        {
+          app-id = "^zen-beta$";
+          title = "^Extension: \\(Bitwarden";
+        }
+      ];
+      open-floating = true;
+      default-column-width = {fixed = 553;};
+      default-window-height = {fixed = 762;};
     }
 
     #--- TONE3000 (JUCE standalone): fixed-size UI that letterboxes when tiled.

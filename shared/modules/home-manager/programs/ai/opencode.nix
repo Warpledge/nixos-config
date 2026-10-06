@@ -2,6 +2,7 @@
 # OPENCODE - OPEN SOURCE AI CODING AGENT
 #=====================================================================#
 {
+  config,
   lib,
   pkgs,
   hostConfig,
@@ -11,8 +12,19 @@
     #--------------------------------------------------------------------#
     #-- Package Installation
     #--------------------------------------------------------------------#
-    home.packages = with pkgs; [
-      opencode
-    ];
+    programs.opencode = {
+      enable = true;
+      enableMcpIntegration = true;
+
+      #--- Off for the local model: context7 indexes JS/Python framework docs, and its
+      #--- ~4.9KB of tool schemas ship in every request (nixos is ~6.7KB).
+      #--- Overrides replace the whole entry, so the full server is restated here.
+      settings.mcp.context7 = {
+        type = "local";
+        command = [(lib.getExe pkgs.context7-mcp)];
+        environment.CONTEXT7_API_KEY = "{file:${config.xdg.configHome}/context7/api-key}";
+        enabled = false;
+      };
+    };
   };
 }

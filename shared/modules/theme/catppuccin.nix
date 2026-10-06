@@ -26,6 +26,7 @@
         apply = true; # Auto-apply theme via kvantum.kvconfig
       };
       zed.enable = false;
+      opencode.enable = false; # stylix's opencode target owns tui.theme
     };
   };
 

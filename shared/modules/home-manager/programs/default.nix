@@ -93,6 +93,7 @@
     ++ lib.optionals hostConfig.claude.enable [./ai/claude.nix]
     ++ lib.optionals hostConfig.opencode.enable [./ai/opencode.nix]
     ++ lib.optionals hostConfig.lmstudio.enable [./ai/lmstudio.nix]
+    ++ lib.optionals (hostConfig.claude.enable || hostConfig.opencode.enable) [./ai/mcp.nix]
     #--- Japanese VN / Game Support (controlled by host hostConfig.nix)
     ++ lib.optionals hostConfig.japanese.vn [./gaming/japanese-vn.nix]
     #--- Discord Rich Presence / Game Detection (controlled by host hostConfig.nix)
