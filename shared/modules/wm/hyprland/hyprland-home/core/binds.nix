@@ -1,105 +1,91 @@
 #=====================================================================#
 # HYPRLAND KEYBINDS
 #=====================================================================#
-{
+{lib, ...}: let
+  lua = lib.generators.mkLuaInline;
+  str = lib.generators.toLua {};
+  bind = keys: dsp: {_args = [keys (lua dsp)];};
+  exec = keys: cmd: bind keys "hl.dsp.exec_cmd(${str cmd})";
+  workspaces = map toString (lib.range 1 9);
+in {
   #--------------------------------------------------------------------#
   #-- Hyprland Keybinds
   #--------------------------------------------------------------------#
   wayland.windowManager.hyprland = {
     settings = {
       #--- Key Bindings
-      bind = [
-        #--- Special Workspace
-        "SUPER, 0, togglespecialworkspace, scratchpad"
-        "SUPER SHIFT, 0, movetoworkspace, special:scratchpad"
+      bind =
+        [
+          #--- Special Workspace
+          (bind "SUPER + 0" ''hl.dsp.workspace.toggle_special("scratchpad")'')
+          (bind "SUPER + SHIFT + 0" ''hl.dsp.window.move({ workspace = "special:scratchpad" })'')
 
-        #--- Applications
-        "SUPER, Return, exec, kitty" # Terminal
-        "SUPER, Z, exec, zeditor" # Code Editor
-        "SUPER, B, exec, zen-beta" # Web Browser
-        "SUPER, E, exec, nautilus" # Files
+          #--- Applications
+          (exec "SUPER + Return" "kitty") # Terminal
+          (exec "SUPER + Z" "zeditor") # Code Editor
+          (exec "SUPER + B" "zen-beta") # Web Browser
+          (exec "SUPER + E" "nautilus") # Files
 
-        #--- Gaming & XWayland Apps
-        "SUPER SHIFT, S, exec, steam"
-        "SUPER SHIFT, D, exec, vesktop" # Nixcord
-        "SUPER SHIFT, H, exec, heroic" # Epic / GoG Launcher
-        "SUPER SHIFT, G, exec, lutris" # Game Launcher
-        "SUPER SHIFT, M, exec, spotify" # Spicetify
-        "SUPER SHIFT, Y, exec, freetube"
+          #--- Gaming & XWayland Apps
+          (exec "SUPER + SHIFT + S" "steam")
+          (exec "SUPER + SHIFT + D" "vesktop") # Nixcord
+          (exec "SUPER + SHIFT + H" "heroic") # Epic / GoG Launcher
+          (exec "SUPER + SHIFT + G" "lutris") # Game Launcher
+          (exec "SUPER + SHIFT + M" "spotify") # Spicetify
+          (exec "SUPER + SHIFT + Y" "freetube")
 
-        #--- Window Management
-        "SUPER, Q, killactive," # Close window
-        "SUPER, Space, exec, toggle_float" # Toggle Floating
-        "SUPER, F, fullscreen" # Toggle Fullscreen
-        "SUPER, D, fullscreen, 1" # Toggle Maximize
+          #--- Window Management
+          (bind "SUPER + Q" "hl.dsp.window.close()") # Close window
+          (exec "SUPER + Space" "toggle_float") # Toggle Floating
+          (bind "SUPER + F" "hl.dsp.window.fullscreen()") # Toggle Fullscreen
+          (bind "SUPER + D" ''hl.dsp.window.fullscreen({ mode = "maximized" })'') # Toggle Maximize
 
-        "SUPER, T, exec, toggle_opacity" # Toggle Opacity
-
+          (exec "SUPER + T" "toggle_opacity") # Toggle Opacity
+        ]
         #--- Switch Workspace
-        "SUPER, 1, workspace, 1"
-        "SUPER, 2, workspace, 2"
-        "SUPER, 3, workspace, 3"
-        "SUPER, 4, workspace, 4"
-        "SUPER, 5, workspace, 5"
-        "SUPER, 6, workspace, 6"
-        "SUPER, 7, workspace, 7"
-        "SUPER, 8, workspace, 8"
-        "SUPER, 9, workspace, 9"
-
+        ++ map (n: bind "SUPER + ${n}" "hl.dsp.focus({ workspace = ${n} })") workspaces
         #--- Move to Workspace
-        "SUPER SHIFT, 1, movetoworkspacesilent, 1"
-        "SUPER SHIFT, 2, movetoworkspacesilent, 2"
-        "SUPER SHIFT, 3, movetoworkspacesilent, 3"
-        "SUPER SHIFT, 4, movetoworkspacesilent, 4"
-        "SUPER SHIFT, 5, movetoworkspacesilent, 5"
-        "SUPER SHIFT, 6, movetoworkspacesilent, 6"
-        "SUPER SHIFT, 7, movetoworkspacesilent, 7"
-        "SUPER SHIFT, 8, movetoworkspacesilent, 8"
-        "SUPER SHIFT, 9, movetoworkspacesilent, 9"
+        ++ map (n: bind "SUPER + SHIFT + ${n}" "hl.dsp.window.move({ workspace = ${n}, follow = false })") workspaces
+        ++ [
+          #--- Focus Window
+          (bind "SUPER + left" ''hl.dsp.focus({ direction = "left" })'')
+          (bind "SUPER + right" ''hl.dsp.focus({ direction = "right" })'')
+          (bind "SUPER + up" ''hl.dsp.focus({ direction = "up" })'')
+          (bind "SUPER + down" ''hl.dsp.focus({ direction = "down" })'')
 
-        #--- Focus Window
-        "SUPER, left, movefocus, l"
-        "SUPER, right, movefocus, r"
-        "SUPER, up, movefocus, u"
-        "SUPER, down, movefocus, d"
+          #--- Window Movement
+          (bind "SUPER + SHIFT + left" ''hl.dsp.window.move({ direction = "left" })'')
+          (bind "SUPER + SHIFT + right" ''hl.dsp.window.move({ direction = "right" })'')
+          (bind "SUPER + SHIFT + up" ''hl.dsp.window.move({ direction = "up" })'')
+          (bind "SUPER + SHIFT + down" ''hl.dsp.window.move({ direction = "down" })'')
 
-        #--- Window Movement
-        "SUPER SHIFT, left, movewindow, l"
-        "SUPER SHIFT, right, movewindow, r"
-        "SUPER SHIFT, up, movewindow, u"
-        "SUPER SHIFT, down, movewindow, d"
+          #--- Window Resize
+          (bind "SUPER + CTRL + left" "hl.dsp.window.resize({ x = -80, y = 0, relative = true })")
+          (bind "SUPER + CTRL + right" "hl.dsp.window.resize({ x = 80, y = 0, relative = true })")
+          (bind "SUPER + CTRL + up" "hl.dsp.window.resize({ x = 0, y = -80, relative = true })")
+          (bind "SUPER + CTRL + down" "hl.dsp.window.resize({ x = 0, y = 80, relative = true })")
+          (bind "SUPER + ALT + left" "hl.dsp.window.move({ x = -80, y = 0, relative = true })")
+          (bind "SUPER + ALT + right" "hl.dsp.window.move({ x = 80, y = 0, relative = true })")
+          (bind "SUPER + ALT + up" "hl.dsp.window.move({ x = 0, y = -80, relative = true })")
+          (bind "SUPER + ALT + down" "hl.dsp.window.move({ x = 0, y = 80, relative = true })")
 
-        #--- Window Resize
-        "SUPER CTRL, left, resizeactive, -80 0"
-        "SUPER CTRL, right, resizeactive, 80 0"
-        "SUPER CTRL, up, resizeactive, 0 -80"
-        "SUPER CTRL, down, resizeactive, 0 80"
-        "SUPER ALT, left, moveactive,  -80 0"
-        "SUPER ALT, right, moveactive, 80 0"
-        "SUPER ALT, up, moveactive, 0 -80"
-        "SUPER ALT, down, moveactive, 0 80"
+          #--- Media Controls
+          (exec "XF86AudioPlay" "playerctl play-pause")
+          (exec "XF86AudioNext" "playerctl next")
+          (exec "XF86AudioPrev" "playerctl previous")
+          (exec "XF86AudioStop" "playerctl stop")
 
-        #--- Media Controls
-        ",XF86AudioPlay,exec, playerctl play-pause"
-        ",XF86AudioNext,exec, playerctl next"
-        ",XF86AudioPrev,exec, playerctl previous"
-        ",XF86AudioStop,exec, playerctl stop"
+          #--- Screenshot binds live with the other DMS commands in shell/dms/core.nix
 
-        #============= Screen Capture ================================
-        ",Print, exec, slurp | grim -g - - | wl-copy"
-        "SUPER, Print, exec, screenshot --save"
-        "SUPER SHIFT, Print, exec, screenshot --swappy"
+          #================= Extra =====================================
+          #--- Workspaces
+          (bind "SUPER + mouse_up" ''hl.dsp.focus({ workspace = "e+1" })'')
+          (bind "SUPER + mouse_down" ''hl.dsp.focus({ workspace = "e-1" })'')
 
-        #================= Extra =====================================
-        #--- Workspaces
-        "SUPER, mouse_up, workspace, e+1"
-        "SUPER, mouse_down, workspace, e-1"
-      ];
-
-      bindm = [
-        "SUPER,mouse:272, movewindow" # Move Window (mouse)
-        "SUPER,mouse:273, resizewindow" # Resize Window (mouse)
-      ];
+          #--- Mouse (the drag/resize dispatchers make these mouse binds)
+          (bind "SUPER + mouse:272" "hl.dsp.window.drag()") # Move Window (mouse)
+          (bind "SUPER + mouse:273" "hl.dsp.window.resize()") # Resize Window (mouse)
+        ];
     };
   };
 }

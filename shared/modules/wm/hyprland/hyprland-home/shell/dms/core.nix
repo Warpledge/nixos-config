@@ -30,34 +30,39 @@
   #--------------------------------------------------------------------#
   #-- DankMaterialShell HYPRLAND KEYBINDS --#
   #--------------------------------------------------------------------#
-  wayland.windowManager.hyprland.settings = {
-    bind = [
-      #--- DankMaterialShell Controls
-      "SUPER, A, exec, dms ipc call spotlight toggle" # Application Launcher
-      "SUPER, V, exec, dms ipc call clipboard toggle" # Clipboard Manager
-      "SUPER, P, exec, dms ipc call processlist toggle" # Task Manager
-      "SUPER, comma, exec, dms ipc call settings toggle" # Settings
-      "SUPER, N, exec, dms ipc call notepad toggle" # Notepad
-      "SUPER, K, exec, dms ipc call powermenu toggle" # Power Menu
-      "SUPER, W, exec, dms ipc dankdash wallpaper" # Browse Wallpapers
-      "SUPER SHIFT, N, exec, dms ipc call night toggle" # Night Mode Toggle
-      "SUPER, L, exec, dms ipc call lock lock" # Toggle lock screen
-      "SUPER, I, exec, dms ipc call inhibit toggle" # Toggle idle inhibit
-      "SUPER, slash, exec, dms ipc call keybinds toggle hyprland" # Show Keybind Cheatsheet
-    ];
+  wayland.windowManager.hyprland.settings.bind = let
+    str = lib.generators.toLua {};
+    exec = keys: cmd: opts: {
+      _args =
+        [keys (lib.generators.mkLuaInline "hl.dsp.exec_cmd(${str cmd})")]
+        ++ lib.optional (opts != {}) opts;
+    };
+    dms = keys: action: exec keys "dms ipc call ${action}" {};
+    dmsLocked = keys: action: exec keys "dms ipc call ${action}" {locked = true;};
+  in [
+    #--- DankMaterialShell Controls
+    (dms "SUPER + A" "spotlight toggle") # Application Launcher
+    (dms "SUPER + V" "clipboard toggle") # Clipboard Manager
+    (dms "SUPER + P" "processlist toggle") # Task Manager
+    (dms "SUPER + comma" "settings toggle") # Settings
+    (dms "SUPER + N" "notepad toggle") # Notepad
+    (dms "SUPER + K" "powermenu toggle") # Power Menu
+    (dms "SUPER + W" "dankdash wallpaper") # Browse Wallpapers
+    (dms "SUPER + SHIFT + N" "night toggle") # Night Mode Toggle
+    (dms "SUPER + L" "lock lock") # Toggle lock screen
+    (dms "SUPER + I" "inhibit toggle") # Toggle idle inhibit
+    (dms "SUPER + slash" "keybinds toggle hyprland") # Show Keybind Cheatsheet
 
-    bindl = [
-      #--- Audio controls
-      ",XF86AudioRaiseVolume, exec, dms ipc call audio increment 3" # Volume Up
-      ",XF86AudioLowerVolume, exec, dms ipc call audio decrement 3" # Volume Down
-      ",XF86AudioMute, exec, dms ipc call audio mute" # Mute Audio
-      ",XF86AudioMicMute, exec, dms ipc call audio micmute" # Mute Microphone
+    #--- Audio controls (locked: work on the lock screen)
+    (dmsLocked "XF86AudioRaiseVolume" "audio increment 3") # Volume Up
+    (dmsLocked "XF86AudioLowerVolume" "audio decrement 3") # Volume Down
+    (dmsLocked "XF86AudioMute" "audio mute") # Mute Audio
+    (dmsLocked "XF86AudioMicMute" "audio micmute") # Mute Microphone
 
-      #--- Brightness controls
-      ",XF86MonBrightnessUp, exec, dms ipc call brightness increment 5" # Brightness Up
-      ",XF86MonBrightnessDown, exec, dms ipc call brightness decrement 5" # Brightness Down
-    ];
-  };
+    #--- Brightness controls
+    (dmsLocked "XF86MonBrightnessUp" "brightness increment 5") # Brightness Up
+    (dmsLocked "XF86MonBrightnessDown" "brightness decrement 5") # Brightness Down
+  ];
 
   #--------------------------------------------------------------------#
   #-- DECLARATIVE DankMaterialShell SETTINGS --#

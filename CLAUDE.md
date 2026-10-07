@@ -196,9 +196,11 @@ into place.
 
 **Keybind syntax differs per WM, so never mix them.**
 
-Hyprland uses string dispatch (`shared/modules/wm/hyprland/hyprland-home/core/binds.nix`):
+Hyprland uses the Lua config (`configType = "lua"`), so each bind is an `hl.bind` call built from `_args` with a Lua dispatcher (`shared/modules/wm/hyprland/hyprland-home/core/binds.nix`). Window and layer rules stay in the `"match:class X, float on"` string form and go through `core/rules/luaRule.nix`. Check changes with `Hyprland --verify-config -c <built hyprland.lua>`:
 ```nix
-bind = [ "$mainMod, Return, exec, kitty" ];
+bind = [
+  {_args = ["SUPER + Return" (lib.generators.mkLuaInline ''hl.dsp.exec_cmd("kitty")'')];}
+];
 ```
 
 Niri uses attribute-set actions, and **spawns with arguments must be lists**, not strings (`shared/modules/wm/niri/niri-home/core/binds.nix`):

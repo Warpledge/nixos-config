@@ -1,27 +1,36 @@
 #=====================================================================#
 # HYPRLAND SETTINGS (LAPTOP-SPECIFIC)
 #=====================================================================#
-{username, ...}: {
+{
+  lib,
+  username,
+  ...
+}: {
   #--------------------------------------------------------------------#
   #-- Display, Input & GPU Configuration
   #--------------------------------------------------------------------#
   home-manager.users.${username} = {
     wayland.windowManager.hyprland.settings = {
       #--- Input Devices
-      cursor = {
+      config.cursor = {
         no_hardware_cursors = true; # Disable hardware cursors on laptop
       };
 
       #--- Autostart (Laptop-Specific)
-      exec-once = [
-        #--- Solaar - Logitech device manager
-        #--- Runs in system tray and applies mouse settings automatically
-        "solaar --window=hide"
+      on = [
+        {
+          _args = [
+            "hyprland.start"
+            #--- Solaar - Logitech device manager
+            #--- Runs in system tray and applies mouse settings automatically
+            (lib.generators.mkLuaInline ''function() hl.exec_cmd("solaar --window=hide") end'')
+          ];
+        }
       ];
 
       #--- GPU Configuration (Laptop-Specific)
       #--- Hybrid AMD/NVIDIA setup for Lenovo Legion 83EX
-      env = [
+      env = map (kv: {_args = lib.splitString "," kv;}) [
         # GPU Configuration - Use AMD iGPU for Hyprland on laptop
         "LIBVA_DRIVER_NAME,radeonsi"
         "GBM_BACKEND,mesa"

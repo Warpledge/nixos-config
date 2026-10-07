@@ -1,7 +1,7 @@
 #=====================================================================#
 # WINDOW RULES (simplified format)
 #=====================================================================#
-_: let
+{lib, ...}: let
   opacity = import ./opacity.nix;
   floating = import ./floating.nix;
   pinning = import ./pinning.nix;
@@ -12,5 +12,5 @@ _: let
 
   allRules = opacity ++ floating ++ pinning ++ gaming ++ workspaces ++ browser ++ system;
 in {
-  wayland.windowManager.hyprland.settings.windowrule = allRules;
+  wayland.windowManager.hyprland.settings.window_rule = map (import ../luaRule.nix {inherit lib;}) allRules;
 }

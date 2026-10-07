@@ -35,7 +35,7 @@
   #--------------------------------------------------------------------#
   wayland.windowManager.hyprland = {
     enable = true;
-    configType = "hyprlang";
+    configType = "lua"; # Settings use the Lua shapes (hl.config, hl.bind, hl.window_rule, ...)
     xwayland.enable = true;
     systemd = {
       enable = true;
