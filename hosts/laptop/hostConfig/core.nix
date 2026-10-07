@@ -60,10 +60,10 @@
     spotify = true;
     freetube = true;
     videoTrimmer = true;
-    moku = true; # Manga, novel and anime reader (built from source with UI fixes)
+    moku = false; # Manga, novel and anime reader (built from source with UI fixes)
     streamlinkTwitchGui = true; # Twitch browser; streams play in mpv via streamlink (AppImage)
-    seanime = true; # Anime and manga media server with a Helium app-window launcher
-    boorusama = true; # Booru image board browser (AppImage)
+    seanime = false; # Anime and manga media server with a Helium app-window launcher
+    boorusama = false; # Booru image board browser (AppImage)
   };
 
   #--- Graphics Software Selection
@@ -96,8 +96,8 @@
   # wrapper around an app kept under ~/.local/opt/ (out of the repo)
   local = {
     granblueRelinkMods = false; # GBFR mod tools: RelinkModOrganizer (data mods) + Reloaded-II (code/hook mods)
-    tonkatsuBox = true; # Collection manager (games, film, anime, manga, books)
-    galleryReader = true; # Gallery client (prebuilt Flutter bundle)
+    tonkatsuBox = false; # Collection manager (games, film, anime, manga, books)
+    galleryReader = false; # Gallery client (prebuilt Flutter bundle)
   };
 
   #--- Android Screen Mirroring (scrcpy)
@@ -107,7 +107,7 @@
 
   #--- Suwayomi Manga Server
   # Local manga reader, web UI at http://localhost:4567
-  suwayomi.enable = true;
+  suwayomi.enable = false;
 
   #--- Syncthing File Sync
   # Peer-to-peer sync, web UI at http://127.0.0.1:8384
@@ -150,7 +150,13 @@
     lutris = false; # Wine launcher
     faugus = false; # UMU/Proton launcher
     twintail = false; # Gacha game launcher (Flatpak)
-    easyrpg = true; # RPG Maker 2000/2003 game interpreter
+    easyrpg = false; # RPG Maker 2000/2003 game interpreter
+  };
+
+  #--- Gaming Tools
+  gamingTools = {
+    r2modman = false; # Thunderstore mod manager
+    pathOfBuilding = false; # Path of Exile build planner (Rusty PoB)
   };
 
   #--- Discord Rich Presence (arRPC)

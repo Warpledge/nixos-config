@@ -37,9 +37,7 @@
       gamemode
       mangohud
       antimicrox
-      r2modman
       satisfactorymodmanager
-      rusty-path-of-building
 
       #--- Wine
       wineWow64Packages.waylandFull

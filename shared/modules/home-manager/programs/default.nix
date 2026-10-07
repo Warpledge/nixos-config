@@ -105,5 +105,8 @@
     ++ lib.optionals hostConfig.gameLaunchers.prismlauncher [./launchers/prismlauncher.nix]
     ++ lib.optionals hostConfig.gameLaunchers.lutris [./launchers/lutris.nix]
     ++ lib.optionals hostConfig.gameLaunchers.faugus [./launchers/faugus.nix]
-    ++ lib.optionals hostConfig.gameLaunchers.easyrpg [./launchers/easyrpg.nix];
+    ++ lib.optionals hostConfig.gameLaunchers.easyrpg [./launchers/easyrpg.nix]
+    #--- Gaming Tools (controlled by host hostConfig.nix)
+    ++ lib.optionals hostConfig.gamingTools.r2modman [./gaming/r2modman.nix]
+    ++ lib.optionals hostConfig.gamingTools.pathOfBuilding [./gaming/path-of-building.nix];
 }

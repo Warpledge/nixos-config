@@ -153,6 +153,12 @@
     easyrpg = true; # RPG Maker 2000/2003 game interpreter
   };
 
+  #--- Gaming Tools
+  gamingTools = {
+    r2modman = true; # Thunderstore mod manager
+    pathOfBuilding = true; # Path of Exile build planner (Rusty PoB)
+  };
+
   #--- Discord Rich Presence (arRPC)
   # Standalone arRPC server for Steam/Proton game detection in Vesktop
   discord.arrpc.enable = true;
