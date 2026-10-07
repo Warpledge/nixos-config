@@ -36,9 +36,9 @@
         "GBM_BACKEND,mesa"
         "WLR_DRM_DEVICES,/dev/dri/card1:/dev/dri/card0"
 
-        # NVIDIA offload available via nvidia-offload command
-        "__NV_PRIME_RENDER_OFFLOAD,1"
-        "__VK_LAYER_NV_optimus,NVIDIA_only"
+        # Global NVIDIA offload, left off: route individual apps with nvidia-offload
+        # "__NV_PRIME_RENDER_OFFLOAD,1"
+        # "__VK_LAYER_NV_optimus,NVIDIA_only"
       ];
     };
   };
