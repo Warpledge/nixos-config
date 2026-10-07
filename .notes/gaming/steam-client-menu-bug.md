@@ -22,10 +22,12 @@ that looked fine here, and the bug persists on `1788652215`.
 
 ## Fix in this repo
 
-`niri-home/core/xwayland.nix` pins `xwayland-satellite` to `add2795` via
-`overrideAttrs` and sets `programs.niri.settings.xwayland-satellite.path` so niri uses
-it instead of resolving from PATH. Drop the pin once nixpkgs ships a tag containing
-that commit; niri-flake's `xwayland-satellite-unstable` is also still on 0.8.2.
+Fixed upstream in **v0.8.3**, which contains `add2795` (GitHub compare
+`add2795...v0.8.3`: ahead by 2, behind by 0). nixpkgs `151fa4e` (2026-10-06) ships 0.8.3,
+so the repo's source pin on `add2795` was dropped on 2026-10-07.
+`niri-home/core/xwayland.nix` still sets `programs.niri.settings.xwayland-satellite.path`
+to the nixpkgs build, so niri doesn't fall back to niri-flake's
+`xwayland-satellite-unstable`, which was on 0.8.2 when the pin went in.
 
 ## Why this was missed the first time
 

@@ -467,7 +467,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./shared
 | `Mod+Z` | Code editor (Zed) |
 | `Mod+B` | Browser (Zen) |
 | `Mod+E` | File manager (Nautilus) |
-| `Mod+Shift+S` | Steam (nested labwc, see [note](.notes/gaming/steam-client-menu-bug.md)) |
+| `Mod+Shift+S` | Steam |
 | `Mod+Shift+D` | Discord (Vesktop) |
 | `Mod+Shift+H` | Heroic |
 | `Mod+Shift+G` | Lutris |
