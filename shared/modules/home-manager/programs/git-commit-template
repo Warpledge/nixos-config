@@ -1,0 +1,15 @@
+
+# type(scope): imperative subject, lowercase, no period, <= 72 chars
+#
+# - what changed, one bullet per change that matters
+# - why, when it isn't obvious
+#
+# type:  feat | fix | refactor | perf | docs | chore | revert
+# scope: area as the repo names it (hyprland, niri, dms, moku, freetube,
+#        apparmor, mullvad, theme, claude, desktop, laptop, flake);
+#        omit when the commit spans the whole config
+# breaking: type(scope)!: plus a "BREAKING CHANGE: ..." footer
+#
+# e.g. fix(moku): refresh stale pnpmHash after nixpkgs bump
+#      chore(flake): update inputs
+#      feat(hyprland): migrate config to Lua, add quad layout
