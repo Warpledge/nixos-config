@@ -31,7 +31,8 @@
       prismlauncher = "${pkgs.prismlauncher}/bin/prismlauncher";
     }
     // lib.optionalAttrs hostConfig.claude.enable {
-      claude = "${pkgs.claude-code}/bin/claude";
+      # The package programs.claude-code installs, plugin wrapper included when it adds one
+      claude = "${config.programs.claude-code.finalPackage}/bin/claude";
     }
     // lib.optionalAttrs hostConfig.opencode.enable {
       opencode = "${pkgs.opencode}/bin/opencode";
