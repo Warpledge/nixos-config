@@ -8,7 +8,8 @@ home-manager, Niri WM, Stylix theming (Catppuccin Mocha).
 1. **Never run `nixm rebuild` or `nixos-rebuild`.** Stop and ask instead.
    Validation you SHOULD run yourself before reporting done:
    `alejandra .` then `git add <new files>` then `nix flake check`.
-   The user handles all git operations.
+   Commit only when asked (see rule 7); pushing and history rewrites stay
+   with the user.
 2. **`git add` new files before `nix flake check`** — the flake ignores
    untracked files and the check fails with "file is not available".
 3. **Stylix owns all theming.** Never set colors, fonts, or wallpaper in a
@@ -20,10 +21,13 @@ home-manager, Niri WM, Stylix theming (Catppuccin Mocha).
 5. **Surgical edits only.** Never rewrite a whole file. Never delete existing
    content, including commented-out code and disabled options.
 6. **Public repo.** No passwords, API keys, tokens, or secrets.
-7. **No agent attribution in commits.** If asked to write a commit message
-   or PR description, it carries no `Co-Authored-By:` trailer, no "Generated
-   with" line, and no mention of Claude or any agent. The user is the sole
-   author of every commit.
+7. **No agent attribution in commits.** Commits you make use the repo's
+   configured git identity (the user's), and every commit message or PR
+   description carries no `Co-Authored-By:` trailer, no "Generated with"
+   line, and no mention of Claude or any agent. The user is the sole author
+   of every commit. Messages use Conventional Commits: `type(scope): subject`
+   (feat, fix, refactor, perf, docs, chore, revert; scope is the repo area,
+   e.g. hyprland, moku, flake) plus a bullet body saying what and why.
 8. **No desktop screenshots without permission.** Never capture the screen,
    a window, or the desktop unless the user has said yes to that specific
    capture first.

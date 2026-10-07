@@ -1,0 +1,84 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(alejandra:*)",
+      "Bash(deadnix:*)",
+      "Bash(statix:*)",
+      "Bash(nix flake:*)",
+      "Bash(nix build:*)",
+      "Bash(nix eval:*)",
+      "Bash(nix-store -q:*)",
+      "Bash(journalctl:*)",
+      "Bash(lspci:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(which:*)",
+      "Bash(readlink:*)",
+      "Bash(free:*)",
+      "Bash(df:*)",
+      "Bash(jq:*)",
+      "Bash(jar tf:*)",
+      "Bash(xdg-open:*)",
+      "Read(/home/warpledge/.config/**)",
+      "Read(/home/warpledge/.local/share/PrismLauncher/**)",
+      "Read(/home/warpledge/Documents/Minecraft_Servers/**)",
+      "Read(/home/warpledge/Downloads/**)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:wiki.nixos.org)",
+      "WebFetch(domain:nix.dev)",
+      "WebFetch(domain:discourse.nixos.org)",
+      "WebFetch(domain:search.nixos.org)",
+      "WebFetch(domain:mynixos.com)",
+      "WebFetch(domain:flakehub.com)",
+      "WebFetch(domain:wiki.archlinux.org)",
+      "WebFetch(domain:aur.archlinux.org)",
+      "WebFetch(domain:www.protondb.com)",
+      "WebFetch(domain:pcgamingwiki.com)",
+      "WebFetch(domain:steamdb.info)",
+      "WebFetch(domain:modrinth.com)",
+      "WebFetch(domain:www.curseforge.com)",
+      "WebFetch(domain:gtnh.huijiwiki.com)",
+      "WebFetch(domain:wiki.gtnewhorizons.com)",
+      "WebFetch(domain:danklinux.com)",
+      "mcp__plugin_hm_nixos__nix",
+      "mcp__plugin_hm_nixos__nix_versions",
+      "mcp__plugin_hm_context7__resolve-library-id",
+      "mcp__plugin_hm_context7__query-docs"
+    ],
+    "deny": [
+      "Bash(nixm rebuild*)",
+      "Bash(nixm boot*)",
+      "Bash(nixm upgrade*)",
+      "Bash(nixm rollback*)",
+      "Bash(n rebuild*)",
+      "Bash(n boot*)",
+      "Bash(n upgrade*)",
+      "Bash(n rollback*)",
+      "Bash(nixos-rebuild*)",
+      "Bash(sudo nixos-rebuild*)",
+      "Bash(nh os*)",
+      "Bash(sudo nh os*)",
+      "Bash(grim*)",
+      "Bash(niri msg action screenshot*)",
+      "Bash(dms ipc call quickCapture screenshot*)"
+    ],
+    "ask": []
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{ f=$(jq -r \".tool_input.file_path // .tool_response.filePath // empty\"); case \"$f\" in *.nix) alejandra -q \"$f\" ;; */README.md) if grep -qx -- \"---\" \"$f\"; then printf \"%s\\n\" \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"PostToolUse\\\",\\\"additionalContext\\\":\\\"README.md now has a --- line; Zed pairs these like front-matter delimiters (see CLAUDE.md). Remove it.\\\"}}\"; fi ;; esac; } 2>/dev/null || true",
+            "statusMessage": "Formatting"
+          }
+        ]
+      }
+    ]
+  }
+}
