@@ -80,7 +80,7 @@ Desktop and laptop should stay byte-identical apart from the header comment and 
 
 Gotchas. Grep the option name before assuming which file owns it:
 
-- **`boot.kernelModules` silently swallows kernel parameters.** modprobe cannot resolve them, `systemd-modules-load.service` logs `Failed to find module '<param>'` and still exits 0, so the hardening looks applied and is not. Eleven params sat there until 2026-09-22. Check with `grep <param> /proc/cmdline`, not by reading the module.
+- **`boot.kernelModules` silently swallows kernel parameters.** modprobe cannot resolve them, `systemd-modules-load.service` logs `Failed to find module '<param>'` and still exits 0, so the hardening looks applied and is not. Eleven params sat there until 2026-09-22. Check with `grep <param> /proc/cmdline`, not by reading the module. An assertion in `security/kernel.nix` now fails the build on any `kernelModules` entry containing `=`; a bare flag like `slab_nomerge` still gets through.
 - `audio.feedback` and `audio.rocksmith` are the two toggles that do not match their folder: both live in `programs/gaming/` as games, but share the Katana rig with `audio.guitar`.
 - `gameLaunchers.steam` / `.twintail` are wired in `shared/modules/nixos/gaming/default.nix`; `heroic`, `prismlauncher`, `lutris`, `faugus`, `easyrpg` are wired in `home-manager/programs/default.nix`.
 - Toggles that load from both trees: `suwayomi.enable` and `syncthing.enable` (a `nixos/services/` module plus `programs/media/suwayomi.nix` or `programs/syncthing.nix`), and `media.moku`, which also loads `nixos/services/flaresolverr.nix`.

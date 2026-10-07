@@ -3,6 +3,10 @@
 #=====================================================================#
 #--- Security tweaks adapted from @hlissner, @linuxmobile
 {
+  config,
+  lib,
+  ...
+}: {
   boot = {
     #--------------------------------------------------------------------#
     #-- Kernel Modules
@@ -161,4 +165,15 @@
       options rtw88_pci disable_aspm=y
     '';
   };
+
+  #--------------------------------------------------------------------#
+  #-- Assertion
+  #--------------------------------------------------------------------#
+  # modprobe can't resolve a kernel parameter and systemd-modules-load still exits 0
+  assertions = [
+    {
+      assertion = !(lib.any (lib.hasInfix "=") config.boot.kernelModules);
+      message = "boot.kernelModules holds a kernel parameter (${lib.concatStringsSep ", " (lib.filter (lib.hasInfix "=") config.boot.kernelModules)}); move it to boot.kernelParams.";
+    }
+  ];
 }
