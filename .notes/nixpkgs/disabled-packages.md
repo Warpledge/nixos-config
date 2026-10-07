@@ -4,8 +4,7 @@ Packages switched off because they stopped building after a flake update. Add a 
 
 | Package | Disabled in | Date | Broken at nixpkgs | Reason |
 | --- | --- | --- | --- | --- |
-| GOverlay | `goverlay` dropped from the package list in `home-manager/programs/gaming/gaming.nix` (MangoHud stays) | 2026-10-03 | `c59305b` (2026-10-01), last good `e158d9e` (2026-09-26) | Its dependency `lazarus-qt6-4.8-0` fails in `installPhase`: the stdenv refuses `--prefix NIX_LDFLAGS` because the value has an empty PATH-like segment. Full log via `nix log` on the lazarus-qt6 drv |
-| REAPER | `audio.reaper = false` in both `hostConfig/core.nix` files | 2026-10-03 | `c59305b` (2026-10-01), last good `e158d9e` (2026-09-26) | Disabled by hand during the same update; reason not recorded |
+| REAPER | `audio.reaper = false` in both `hostConfig/core.nix` files | 2026-10-03 | `c59305b` (2026-10-01), last good `e158d9e` (2026-09-26); still broken at `151fa4e` (2026-10-06) | REAPER itself builds; its SWS and ReaPack extensions fail on GCC 16. ReaPack: `implicit capture of 'this' via '[=]' is deprecated in C++20` under `-Werror=deprecated`. SWS: `g_actions` in `BR_ContextualToolbars.cpp` is a non-literal `constexpr` |
 
 ## Checking whether a fix has landed
 

@@ -77,7 +77,7 @@
   #--- Audio Software Selection
   # Enable the music and audio applications you want installed
   audio = {
-    reaper = false; # DAW; ships SWS/S&M + ReaPack, JACK routed through PipeWire
+    reaper = false; # broken in nixpkgs 151fa4e (SWS + ReaPack fail on GCC 16), see disabled-packages.md
     guitar = true; # Amp sims (TONE3000/Guitarix) + cab IRs; Katana DI capture
     feedback = true; # Guitar rhythm game, reads Guitar Pro tabs (AppImage)
     rocksmith = true; # Rocksmith 2014 (Steam): RS_ASIO + PipeASIO config for the Katana DI
