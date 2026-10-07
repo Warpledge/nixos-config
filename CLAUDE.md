@@ -436,3 +436,5 @@ Window manager notes live under `.notes/wm/`:
 
 - `wm/niri-xdg-portals.md` — why `xdg-desktop-portal-gnome` drops to Settings-only when `GDK_BACKEND` is set, how niri-flake hides the system portal backends, and the `busctl` health check
 - `wm/cosmic-manager.md` — how cosmic-manager applies config, the `$`-in-`Spawn` RON trap, panel/applet config traps, and the DMS bar the COSMIC panel mirrors
+
+Planned work lives under `.notes/todo/`, one file per task, named after it (`todo/affinity-setup.md`). **When the user says "add X to the todo", write a new file there** holding what the task is, why they want it, what the repo already has toward it, the steps left, and any research already done (links, versions, gotchas). Update the file rather than starting a second one for the same task, and delete it once the work is done. These are working notes: no `README.md` or Components entry.

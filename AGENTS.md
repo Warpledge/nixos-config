@@ -141,6 +141,16 @@ in both files with the same value unless told otherwise.
    CommonMark and GitHub renders it fine, so the preview pane is not a reliable
    check. Section breaks come from the `##` heading alone.
 
+## Todo notes
+
+Planned work lives under `.notes/todo/`, one file per task, named after it
+(`todo/affinity-setup.md`). **When the user says "add X to the todo", write a
+new file there** holding what the task is, why they want it, what the repo
+already has toward it, the steps left, and any research already done (links,
+versions, gotchas). Update the file rather than starting a second one for the
+same task, and delete it once the work is done. These are working notes: no
+`README.md` or Components entry.
+
 ## Formatting
 
 Every module opens with a banner. **Copy it byte-for-byte from a neighbouring
