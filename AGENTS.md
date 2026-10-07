@@ -15,7 +15,9 @@ home-manager, Niri WM, Stylix theming (Catppuccin Mocha).
 3. **Stylix owns all theming.** Never set colors, fonts, or wallpaper in a
    module. Stylix targets already configure them; hardcoded values conflict
    with the theme or silently override it. Enable a program's theming and let
-   Stylix supply the palette.
+   Stylix supply the palette. catppuccin/nix (`shared/modules/theme/catppuccin.nix`)
+   also auto-enables its ports; where both theme an app, one target is switched
+   off in `shared/modules/theme/`.
 4. **Set only what was asked for.** Do not add extra options, defaults, or
    "nice to have" settings beyond the request.
 5. **Surgical edits only.** Never rewrite a whole file. Never delete existing
@@ -127,7 +129,7 @@ in both files with the same value unless told otherwise.
 6. Add it to the matching list under **Components** in `README.md`, including
    the link reference definition at the bottom of that file
 
-   **`README.md` is ~25 KB — never read it in full.** Locate the two regions
+   **`README.md` is ~34 KB — never read it in full.** Locate the two regions
    you need with grep, then edit those lines directly:
 
    ```bash

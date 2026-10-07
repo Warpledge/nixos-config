@@ -686,6 +686,8 @@ The main things this config pulls in from outside the standard NixOS package set
 | [`spicetify-nix`](https://github.com/gerg-l/spicetify-nix) | Spotify theming |
 | [`zen-browser`](https://github.com/0xc000022070/zen-browser-flake) | Zen Browser |
 | [`helium`](https://github.com/schembriaiden/helium-browser-nix-flake) | Helium Browser |
+| [`moku`](https://github.com/moku-project/Moku) (pinned release) | Moku reader for manga, light novels and anime, built from source |
+| [`tsunagu`](https://github.com/moku-project/Tsunagu) (pinned release) | Moku's extension backend, bumped together with `moku` |
 | [`cachyos-kernel`](https://github.com/xddxdd/nix-cachyos-kernel) | CachyOS kernel |
 | [`nix-flatpak`](https://github.com/gmodena/nix-flatpak) | Declarative Flatpak management |
 | [`claude-code`](https://github.com/sadjow/claude-code-nix) | Claude Code, packaged so it updates without waiting on nixpkgs |
