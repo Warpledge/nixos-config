@@ -20,7 +20,7 @@
   versions =
     upstreamVersions
     // {
-      frontend.pnpmHash = "sha256-xHzPYxAC9rW1styY++xOmdVbEqUUB1NDYDq84WJD3WI=";
+      frontend.pnpmHash = "sha256-77nWx3b8XkaCPzfdXemJBOpUFKSTiRTi/bsgnoB3k4M=";
     };
 
   tsunagu = import "${inputs.tsunagu}/nix/packages.nix" {inherit pkgs lib;};
