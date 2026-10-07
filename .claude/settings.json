@@ -76,7 +76,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "{ f=$(jq -r \".tool_input.file_path // .tool_response.filePath // empty\"); case \"$f\" in *.nix) alejandra -q \"$f\" ;; */README.md) if grep -qx -- \"---\" \"$f\"; then printf \"%s\\n\" \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"PostToolUse\\\",\\\"additionalContext\\\":\\\"README.md now has a --- line; Zed pairs these like front-matter delimiters (see CLAUDE.md). Remove it.\\\"}}\"; fi ;; esac; } 2>/dev/null || true",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/shared/modules/home-manager/programs/ai/hooks/post-edit.sh\"",
             "statusMessage": "Formatting"
           }
         ]
