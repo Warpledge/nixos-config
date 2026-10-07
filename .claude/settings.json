@@ -2,9 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(alejandra:*)",
-      "Bash(deadnix:*)",
-      "Bash(statix:*)",
-      "Bash(nix flake:*)",
+      "Bash(deadnix --no-lambda-arg)",
+      "Bash(deadnix --no-lambda-arg .)",
+      "Bash(statix check:*)",
+      "Bash(nix flake check:*)",
+      "Bash(nix flake show:*)",
+      "Bash(nix flake metadata:*)",
       "Bash(nix build:*)",
       "Bash(nix eval:*)",
       "Bash(nix-store -q:*)",
@@ -18,7 +21,6 @@
       "Bash(df:*)",
       "Bash(jq:*)",
       "Bash(jar tf:*)",
-      "Bash(xdg-open:*)",
       "Read(/home/warpledge/.config/**)",
       "Read(/home/warpledge/.local/share/PrismLauncher/**)",
       "Read(/home/warpledge/Documents/Minecraft_Servers/**)",
