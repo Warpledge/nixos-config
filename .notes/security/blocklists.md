@@ -1,4 +1,4 @@
-# Blocklists for uBlock Origin & AdGuard Home
+# Blocklists for uBlock Origin
 
 ## Privacy & Tracking Enhancements
 

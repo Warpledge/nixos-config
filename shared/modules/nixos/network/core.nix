@@ -102,7 +102,4 @@
       FallbackDNS = [""];
     };
   };
-
-  #--- Default system nameservers (can be overridden by AdGuard Home)
-  networking.nameservers = lib.mkDefault [];
 }

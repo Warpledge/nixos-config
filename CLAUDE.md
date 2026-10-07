@@ -399,7 +399,7 @@ If that returns a path, read it and use `programs.<pkg>` instead.
 
 Security/privacy notes live under `.notes/security/`:
 
-- `security/blocklists.md` — uBlock Origin and AdGuard Home filter lists
+- `security/blocklists.md` — uBlock Origin filter lists
 - `security/ublock-filters.md` — custom uBlock cosmetic filters (paste into uBlock → My Filters)
 - `security/android-quic-vpn-leak.md` — QUIC VPN bypass (CVE, May 2026): mitigation via `adb shell device_config put tethering close_quic_connection -1`; re-apply after Android updates
 - `security/apparmor.md` — the per-app AppArmor profiles: what each attaches to, reading `apparmor="ALLOWED"` log lines, moving a profile to enforce, and what breaks first when you do
