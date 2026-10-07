@@ -381,6 +381,9 @@ Common errors:
 | Package metadata | `nix eval --raw nixpkgs#<pkg>.meta.homepage` |
 | nixpkgs packages / NixOS + home-manager options | the **nixos-mcp** tool (over `nix search` or scraping `search.nixos.org`) |
 | Library / SDK / API docs | the **context7** tool (over web search) |
+| Upstream releases, tags, issues, files | the **github** MCP tool, read-only (over fetching github.com) |
+| How an upstream repo works when context7 has little on it (DMS, niri-flake, cosmic-manager, stylix, Tsunagu) | the **deepwiki** MCP tool |
+| How other public flakes configure something (regex code search) | the **grep** MCP tool (grep.app) |
 | An app's own config syntax | `nix-shell -p <pkg> --run 'man <name>'` |
 
 **Check for a home-manager module before falling back to `home.packages`.** Many programs have one and it is the better module:

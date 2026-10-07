@@ -63,6 +63,11 @@
             ".bash" = "shellscript";
           };
         };
+        markdown = {
+          command = lib.getExe pkgs.marksman;
+          args = ["server"];
+          extensionToLanguage.".md" = "markdown";
+        };
       };
     };
 

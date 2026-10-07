@@ -30,6 +30,12 @@ in {
         args = ["stdio" "--read-only"];
         env.GITHUB_PERSONAL_ACCESS_TOKEN.file = "${tokenDir}/github";
       };
+
+      #--- Remote and keyless: Q&A over a public repo's generated wiki
+      deepwiki.url = "https://mcp.deepwiki.com/mcp";
+
+      #--- Remote and keyless: regex code search across public GitHub repos
+      grep.url = "https://mcp.grep.app";
     };
   };
 
