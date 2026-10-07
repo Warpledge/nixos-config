@@ -34,6 +34,7 @@
     autoConnect = true; # daemon dials as soon as it starts
     lan = "allow"; # "block" to drop LAN traffic before the firewall sees it
     quantumResistant = "on";
+    multihop = true; # entry location stays unmanaged, like exit selection
 
     #--- directOnly makes a non-DAITA relay fail instead of silently
     #--- inserting a multihop entry behind your back.
@@ -76,6 +77,7 @@
       mullvad auto-connect set ${onOff settings.autoConnect}
       mullvad lan set ${settings.lan}
       mullvad tunnel set quantum-resistant ${settings.quantumResistant}
+      mullvad relay set multihop ${onOff settings.multihop}
       mullvad tunnel set daita ${onOff settings.daita.enable}
       mullvad tunnel set daita-direct-only ${onOff settings.daita.directOnly}
 
