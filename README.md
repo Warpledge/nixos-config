@@ -585,14 +585,15 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./shared
 | `Mod+F` | Fullscreen |
 | `Mod+D` | Maximize |
 | `Mod+T` | Toggle opacity |
+| `Mod+H` | Toggle HDR on the main monitor |
 | `Mod+0` | Toggle scratchpad |
 | `Mod+Shift+0` | Move to scratchpad |
 
-#### Focus & Movement
 #### Shell (DankMaterialShell)
 
 Same binds as the Niri table, `Mod+A` through `Mod+R`.
 
+#### Focus & Movement
 
 | Keybind | Action |
 | --- | --- |

@@ -63,7 +63,7 @@
           mfact = 0.5;
         };
         general = {
-          layout = "master";
+          layout = "quad"; # core/layouts/quad.lua
           resize_on_border = false;
 
           gaps_in = 4;
@@ -159,6 +159,9 @@
         binds = {
           scroll_event_delay = 0;
           hide_special_on_workspace_change = true;
+        };
+        render = {
+          cm_auto_hdr = 0; # HDR only via toggle_hdr (Mod+H), never auto-switched by fullscreen apps
         };
       };
     };

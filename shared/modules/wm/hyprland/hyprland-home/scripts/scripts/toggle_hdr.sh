@@ -1,25 +1,15 @@
 #!/usr/bin/env bash
 # Toggle HDR on/off for Dell AW2725D OLED monitor
 
-HDR_STATE_FILE="$HOME/.cache/hyprland_hdr_state"
-mkdir -p "$HOME/.cache"
+# Reads the live preset, so the toggle stays correct across restarts and reloads.
+# Keep the mode string in sync with hosts/desktop/wm/hyprland.nix.
+MONITOR='output = "DP-2", mode = "2560x1440@280", position = "0x0", scale = 1.0, bitdepth = 10'
+PRESET=$(hyprctl monitors -j | jq -r '.[] | select(.name == "DP-2") | .colorManagementPreset')
 
-# Initialize state file if it doesn't exist
-if [ ! -f "$HDR_STATE_FILE" ]; then
-  echo "0" > "$HDR_STATE_FILE"
-fi
-
-# Check current state
-HDR_ENABLED=$(cat "$HDR_STATE_FILE" 2>/dev/null || echo "0")
-
-if [ "$HDR_ENABLED" = "1" ]; then
-  # Disable HDR
-  hyprctl keyword monitor "DP-2, 2560x1440@280, 0x0, 1.0, bitdepth, 10" 2>&1 > /dev/null
-  echo "0" > "$HDR_STATE_FILE"
+if [ "$PRESET" = "hdr" ]; then
+  hyprctl eval "hl.monitor({ $MONITOR, cm = \"auto\" })" > /dev/null
   notify-send "HDR" "Disabled" -u low -i display-brightness-low 2>/dev/null || true
 else
-  # Enable HDR
-  hyprctl keyword monitor "DP-2, 2560x1440@280, 0x0, 1.0, bitdepth, 10, cm, hdr" 2>&1 > /dev/null
-  echo "1" > "$HDR_STATE_FILE"
+  hyprctl eval "hl.monitor({ $MONITOR, cm = \"hdr\" })" > /dev/null
   notify-send "HDR" "Enabled" -u low -i display-brightness 2>/dev/null || true
 fi

@@ -55,6 +55,34 @@
   "match:title ^(Transmission)$, float on"
   "match:title ^(Firefox — Sharing Indicator)$, float on"
 
+  #--- Floating: System dialogs (mirrors niri)
+  "match:class ^(com\\.saivert\\.pwvucontrol)$, float on"
+  "match:class ^(io\\.github\\.fsobolev\\.Cavalier)$, float on"
+  "match:class ^(gcr-prompter)$, float on"
+  "match:class ^(blueman-manager)$, float on"
+  "match:class ^(xdg-desktop-portal-gtk)$, float on"
+  "match:class ^(org\\.kde\\.polkit-kde-authentication-agent-1)$, float on"
+  "match:class ^(pinentry.*)$, float on"
+
+  #--- Floating: Wine installers and dialogs
+  "match:class ^(wineboot\\.exe|control\\.exe)$, float on"
+  "match:title ^(Wine|Wine Mono Installer|Wine Gecko Installer)$, float on"
+
+  #--- Floating: ProtonUp-Qt (Wine/Proton Installer)
+  "match:class ^(net\\.davidotek\\.pupgui2)$, float on"
+  "match:class ^(net\\.davidotek\\.pupgui2)$, size 600 600"
+
+  #--- Floating: Guitar Pro 8 Fretboard panel
+  "match:title ^(Fretboard - Guitar Pro 8)$, float on"
+  "match:title ^(Fretboard - Guitar Pro 8)$, size 1687 222"
+
+  #--- Floating: TONE3000 (JUCE standalone, fixed-size UI that letterboxes when tiled)
+  "match:class ^(TONE3000)$, float on"
+
+  #--- Floating: Bitwarden extension popout (Zen PIN unlock)
+  "match:class ^(zen-beta)$, match:title ^Extension: \\(Bitwarden.*, float on"
+  "match:class ^(zen-beta)$, match:title ^Extension: \\(Bitwarden.*, size 553 762"
+
   #--- Centering: File Dialogs
   "match:title ^(Open File)(.*)$, center on"
   "match:title ^(Select a File)(.*)$, center on"

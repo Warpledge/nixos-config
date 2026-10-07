@@ -9,8 +9,9 @@
   workspaces = import ./workspaces.nix;
   browser = import ./browser.nix;
   system = import ./system.nix;
+  privacy = import ./privacy.nix;
 
-  allRules = opacity ++ floating ++ pinning ++ gaming ++ workspaces ++ browser ++ system;
+  allRules = opacity ++ floating ++ pinning ++ gaming ++ workspaces ++ browser ++ system ++ privacy;
 in {
   wayland.windowManager.hyprland.settings.window_rule = map (import ../luaRule.nix {inherit lib;}) allRules;
 }

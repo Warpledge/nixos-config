@@ -12,12 +12,15 @@
   "match:title ^(Volume Control)$, pin on"
   "match:class ^(io.github.alainm23.planify)$, pin on"
 
+  #--- DMS Quick Capture editor: a tiled window opened under a fullscreen one stays hidden behind it
+  "match:class ^(com\\.danklinux\\.dms)$, match:title ^(Quick Capture)$, float on, pin on"
+
   #--- Picture-in-Picture
-  "match:title ^([Pp]icture[-\s]?[Ii]n[-\s]?[Pp]icture)(.*)$, float on"
-  "match:title ^([Pp]icture[-\s]?[Ii]n[-\s]?[Pp]icture)(.*)$, keep_aspect_ratio on"
-  "match:title ^([Pp]icture[-\s]?[Ii]n[-\s]?[Pp]icture)(.*)$, move 73% 72%"
-  "match:title ^([Pp]icture[-\s]?[Ii]n[-\s]?[Pp]icture)(.*)$, size 25% 25%"
-  "match:title ^([Pp]icture[-\s]?[Ii]n[-\s]?[Pp]icture)(.*)$, pin on"
+  "match:title ^([Pp]icture[-\\s]?[Ii]n[-\\s]?[Pp]icture)(.*)$, float on"
+  "match:title ^([Pp]icture[-\\s]?[Ii]n[-\\s]?[Pp]icture)(.*)$, keep_aspect_ratio on"
+  "match:title ^([Pp]icture[-\\s]?[Ii]n[-\\s]?[Pp]icture)(.*)$, move 73% 72%"
+  "match:title ^([Pp]icture[-\\s]?[Ii]n[-\\s]?[Pp]icture)(.*)$, size 25% 25%"
+  "match:title ^([Pp]icture[-\\s]?[Ii]n[-\\s]?[Pp]icture)(.*)$, pin on"
 
   #--- Positioning
   "match:title ^(Firefox — Sharing Indicator)$, move 0 0"

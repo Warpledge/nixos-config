@@ -13,7 +13,9 @@
   #--------------------------------------------------------------------#
   programs.hyprland = {
     enable = true;
-    withUWSM = true;
+    # Off: 0.56.2 segfaults in aquamarine at startup under UWSM. Session units come
+    # from home-manager's hyprland systemd integration, which assumes no UWSM.
+    withUWSM = false;
   };
 
   #--------------------------------------------------------------------#

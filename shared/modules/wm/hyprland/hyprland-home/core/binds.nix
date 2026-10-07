@@ -41,6 +41,7 @@ in {
           (bind "SUPER + D" ''hl.dsp.window.fullscreen({ mode = "maximized" })'') # Toggle Maximize
 
           (exec "SUPER + T" "toggle_opacity") # Toggle Opacity
+          (exec "SUPER + H" "toggle_hdr") # Toggle HDR on the main monitor
         ]
         #--- Switch Workspace
         ++ map (n: bind "SUPER + ${n}" "hl.dsp.focus({ workspace = ${n} })") workspaces

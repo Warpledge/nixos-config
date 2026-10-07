@@ -7,4 +7,5 @@
   "match:title ^(.*[Ll]ogin.*)$, stay_focused on"
   "match:class ^(twintail)$, no_blur on"
   "match:class ^(helium)$, maximize on"
+  "match:class ^(freetube)$, no_initial_focus on" # youtube-dispatch link handoffs stay in the background
 ]

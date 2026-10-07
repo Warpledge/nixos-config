@@ -34,6 +34,10 @@ in [
   "match:class ^(org.quickshell)$, ${opacityRule}"
   "match:class ^(Revolt)$, ${opacityRule}"
   "match:class ^(Spotify)$, ${opacityRule}"
+  "match:class ^(spotify)$, ${opacityRule}"
+  "match:class ^(discord)$, ${opacityRule}"
+  "match:class ^(vesktop)$, ${opacityRule}"
+  "match:class ^(heroic)$, ${opacityRule}"
   "match:class ^(Root)$, ${opacityRule}"
   "match:class ^(org.prismlauncher.PrismLauncher)$, ${opacityRule}"
   # "match:class ^(zen-beta)$, ${opacityRule}" # Zen Browser
