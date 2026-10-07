@@ -35,6 +35,12 @@
   #--- Blur & Animations: Session
   "match:namespace quickshell:session, blur on, ignore_alpha 0"
 
+  #--- Blur: DankMaterialShell
+  # Hyprland lacks ext-background-effect-v1, so DMS's own blurEnabled is a no-op
+  # here and its surfaces need a compositor-side rule.
+  "match:namespace ^dms:.*, blur on, ignore_alpha 0.79"
+  "match:namespace ^dms:.*, blur_popups on"
+
   #--- Xray (transparency effect)
   "match:namespace .*, xray on"
 ]

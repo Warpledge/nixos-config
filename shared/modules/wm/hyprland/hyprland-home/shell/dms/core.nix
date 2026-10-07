@@ -1,10 +1,13 @@
 {
   inputs,
   lib,
+  hostname,
+  hostConfig,
   ...
 }: {
   imports = [
     inputs.dms.homeModules.dank-material-shell
+    inputs.dms-plugin-registry.homeModules.default
   ];
 
   #--------------------------------------------------------------------#
@@ -16,6 +19,58 @@
     systemd = {
       enable = true; # Systemd service for auto-start
       restartIfChanged = true; # Auto-restart dms.service when dank-material-shell changes
+    };
+
+    #--- Plugins
+    # Mirrors the niri module. Any `settings` here makes plugin_settings.json a
+    # read-only store link, so changes in a plugin's settings page no longer save.
+    plugins = {
+      # The variant pins the desktop's GPU by PCI address; the bar widget id
+      # in settings.json (amdGpuMonitor:<id>) must match it.
+      amdGpuMonitor = {
+        enable = hostname == "desktop";
+        settings = {
+          popoutStyle = "default";
+          minimumWidth = true;
+          variants = [
+            {
+              id = "variant_1791177076814";
+              name = "AMD Radeon RX 9070 XT";
+              originalName = "AMD Radeon RX 9070 XT";
+              description = "Monitor your discrete AMD Radeon RX 9070 XT";
+              gpuPci = "0000:09:00.0";
+              gpuType = "dGPU";
+              icon = "memory";
+            }
+          ];
+        };
+      };
+
+      # The plugin stores its options as strings, booleans included.
+      aiOverviewControl = {
+        enable = hostConfig.claude.enable;
+        settings = {
+          providerSelection = "claude";
+          pillProviders = "claude";
+          languageOverride = "en_US";
+          densityMode = "comfortable";
+          pillMode = "auto";
+          pillTooltip = "true";
+          pillCompact = "false";
+          showAntigravityModelDetails = "false";
+          notifyThreshold = "85";
+        };
+      };
+
+      quickCapture = {
+        enable = true;
+        settings = {
+          toolbarPosition = "bottom";
+          showToolbarBorder = false;
+          show_shortcut_hints = true;
+          color_palette_preset = "catppuccin";
+        };
+      };
     };
 
     #--- Core features
@@ -52,6 +107,19 @@
     (dms "SUPER + L" "lock lock") # Toggle lock screen
     (dms "SUPER + I" "inhibit toggle") # Toggle idle inhibit
     (dms "SUPER + slash" "keybinds toggle hyprland") # Show Keybind Cheatsheet
+    (exec "SUPER + R" "dms restart" {}) # Restart DMS
+
+    #--- Quick Capture: screenshots open in its editor
+    (dms "Print" "quickCapture screenshot region edit") # Region Select
+    (dms "SUPER + Print" "quickCapture screenshot window edit") # Focused Window
+    (dms "SUPER + SHIFT + Print" "quickCapture screenshot full edit") # Focused Output
+    (dms "CTRL + Print" "quickCapture screenshot all edit") # All Outputs
+    (dms "SUPER + CTRL + Print" "quickCapture screenshot scroll edit") # Scrolling Capture
+
+    #--- Quick Capture: recording
+    # portal only: the gpu-screen-recorder screen/region modes capture via KMS,
+    # which bypasses the no_screen_share rules.
+    (dms "SUPER + End" "quickCapture recordToggle portal") # Toggle Recording
 
     #--- Audio controls (locked: work on the lock screen)
     (dmsLocked "XF86AudioRaiseVolume" "audio increment 3") # Volume Up
@@ -67,7 +135,17 @@
   #--------------------------------------------------------------------#
   #-- DECLARATIVE DankMaterialShell SETTINGS --#
   #--------------------------------------------------------------------#
-  home.file.".config/DankMaterialShell/settings.json" = {
-    text = builtins.toJSON (lib.importJSON ./settings.json);
+  home.file = {
+    #--- DMS Main Settings
+    # Mirrors niri's settings.json; read-only store link, so anything DMS
+    # rewrites at runtime must be baked in here.
+    ".config/DankMaterialShell/settings.json" = {
+      text = builtins.toJSON (lib.importJSON ./settings.json);
+    };
+
+    #--- DMS Clipboard Settings
+    ".config/DankMaterialShell/clsettings.json" = {
+      source = ./clsettings.json;
+    };
   };
 }
