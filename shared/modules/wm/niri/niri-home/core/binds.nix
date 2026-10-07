@@ -1,7 +1,11 @@
 #=====================================================================#
 # NIRI KEYBINDS
 #=====================================================================#
-_: {
+{
+  config,
+  lib,
+  ...
+}: {
   #--------------------------------------------------------------------#
   #-- Niri Keybindings
   #--------------------------------------------------------------------#
@@ -94,4 +98,17 @@ _: {
     "Mod+E".action.spawn = ["nautilus"];
     "Mod+Shift+M".action.spawn = ["spotify"];
   };
+
+  #--------------------------------------------------------------------#
+  #-- Assertion
+  #--------------------------------------------------------------------#
+  # A string spawn runs its first word only; arguments go in a list
+  assertions = let
+    bad = lib.attrNames (lib.filterAttrs (_: b: lib.isString (b.action.spawn or null) && lib.hasInfix " " b.action.spawn) config.programs.niri.settings.binds);
+  in [
+    {
+      assertion = bad == [];
+      message = "niri bind(s) ${lib.concatStringsSep ", " bad} pass a spawn command with arguments as a string; use a list, e.g. [\"playerctl\" \"play-pause\"].";
+    }
+  ];
 }

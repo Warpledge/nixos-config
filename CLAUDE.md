@@ -205,7 +205,7 @@ programs.niri.settings.binds = {
 };
 ```
 
-A string like `"dms ipc call spotlight"` in Niri only runs `dms` and drops the rest, so use `["dms" "ipc" "call"] ++ lib.splitString " " action`.
+A string like `"dms ipc call spotlight"` in Niri only runs `dms` and drops the rest, so use `["dms" "ipc" "call"] ++ lib.splitString " " action`. An assertion in `niri-home/core/binds.nix` fails the build on a `spawn` string containing a space.
 
 COSMIC is the opposite of Niri: `Spawn` is a **single string** run through `/bin/sh -c`, so arguments and shell syntax belong inline and must *not* be split into a list (`shared/modules/wm/cosmic/cosmic-home/core/binds.nix`):
 ```nix
