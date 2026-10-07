@@ -27,6 +27,7 @@
       };
       zed.enable = false;
       opencode.enable = false; # stylix's opencode target owns tui.theme
+      hyprland.enable = false; # emits Lua-only colors that break configType = "hyprlang"; stylix's hyprland target owns them
     };
   };
 
