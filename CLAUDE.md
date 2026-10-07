@@ -33,7 +33,7 @@ statix check .          # Lint for Nix antipatterns (inherit, empty patterns, et
 nixm lint               # Run both deadnix and statix in one shot (wraps the above two)
 nixm rebuild            # Apply config (wraps `nh os switch`)
 nixm rebuild 2>&1 | grep -E "error|Error|failed|Failed" || echo "✓"  # token-light rebuild
-nixm boot               # Build, activate on next boot (`nh os boot`); use when an update bumps glibc/systemd, since a live switch froze the desktop on 2026-10-03
+nixm boot               # Build, activate on next boot (`nh os boot`); use when an update bumps glibc/systemd/niri/xwayland-satellite, since live switches froze the desktop on 2026-10-03 (glibc/systemd) and 2026-10-07 (xwayland-satellite)
 nixm upgrade            # Update flake inputs + rebuild
 nixm flake-update       # Update flake inputs only (no rebuild)
 nixm dryrun             # Rebuild without applying

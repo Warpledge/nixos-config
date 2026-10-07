@@ -10,6 +10,7 @@
       "Bash(nix flake metadata:*)",
       "Bash(nix build:*)",
       "Bash(nix eval:*)",
+      "Bash(nix log:*)",
       "Bash(nix-store -q:*)",
       "Bash(journalctl:*)",
       "Bash(lspci:*)",

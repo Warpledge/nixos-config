@@ -27,6 +27,7 @@
         claude-md-management = "${official}/plugins/claude-md-management";
         skill-creator = "${official}/plugins/skill-creator";
         claude-code-setup = "${official}/plugins/claude-code-setup";
+        claude-security = "${official}/plugins/claude-security";
       };
 
       #--- Repo-local skills and subagents (synced to every host through this module)
@@ -36,6 +37,7 @@
         apparmor-check = ./skills/apparmor-check;
         commit = ./skills/commit;
         disable-package = ./skills/disable-package;
+        flake-update = ./skills/flake-update;
         freetube-sync = ./skills/freetube-sync;
         hyprland-verify = ./skills/hyprland-verify;
         moku-bump = ./skills/moku-bump;
@@ -43,6 +45,8 @@
       agents = {
         public-repo-auditor = ./agents/public-repo-auditor.md;
         prose-reviewer = ./agents/prose-reviewer.md;
+        build-triager = ./agents/build-triager.md;
+        docs-drift-auditor = ./agents/docs-drift-auditor.md;
       };
 
       #--- Language servers (go into the generated "hm" plugin, not settings.json)
@@ -71,7 +75,7 @@
       };
     };
 
-    #--- Secret scanner the commit skill runs on staged changes
-    home.packages = [pkgs.gitleaks];
+    #--- gitleaks: the commit skill's secret scan; python3: the claude-security plugin's scripts
+    home.packages = [pkgs.gitleaks pkgs.python3];
   };
 }
