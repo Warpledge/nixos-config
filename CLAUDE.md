@@ -251,7 +251,7 @@ These are only imported when the WM is active, e.g. `lib.optional (hostConfig.wi
 
 ## Security
 
-LUKS, kernel hardening, AppArmor, GNOME Keyring, auditd. Mullvad VPN as above. Wheel needs a password for sudo, so `nixm rebuild` prompts once; the NOPASSWD list in `security/sudo.nix` covers only sync, poweroff, reboot, shutdown and dmesg. Keep it to commands that cannot be turned into a root shell (sed, systemctl and nixos-rebuild all can).
+LUKS, kernel hardening, AppArmor, GNOME Keyring, auditd. Mullvad VPN as above. Wheel needs a password for sudo, so `nixm rebuild` prompts once; the NOPASSWD list in `security/sudo.nix` covers only sync, poweroff, reboot and shutdown. Keep it to commands that cannot be turned into a root shell (sed, systemctl, nixos-rebuild and dmesg all can).
 
 Audit tooling is `lynis` (configuration) and `sbomnix`/`vulnxscan` (CVE scanning against the real closure, via osv.dev). **Do not go back to `vulnix`**: it only knows NVD's legacy JSON 1.1 feeds, which return 403 since their retirement, so every run ends in a `ConnectionError` traceback. Verified 2026-09-22, when the NVD API 2.0 answered 200 from the same machine.
 

@@ -19,17 +19,17 @@ in {
         Defaults lecture = never # Don't show sudo lecture on first use
         Defaults pwfeedback # Show password input feedback (asterisks)
         Defaults env_keep += "EDITOR DISPLAY" # PATH deliberately excluded: keeping it defeats secure_path
-        Defaults timestamp_timeout = 300 # Cache password for 5 minutes
+        Defaults timestamp_timeout = 5 # Cache password for 5 minutes
       '';
       extraRules = let
         # Only commands that cannot be turned into a root shell; sed, systemctl,
-        # nixos-rebuild and the nix tools all can, so they need the password
+        # nixos-rebuild, dmesg (-F reads any file, its pager runs as root) and
+        # the nix tools all can, so they need the password
         sudoRules = [
           "sync" # Sync filesystems
           "poweroff" # Power off system
           "reboot" # Reboot system
           "shutdown" # Shutdown system
-          "dmesg" # Kernel messages
         ];
         # sudo matches the path a bare command resolves to, not its store path
         mkSudoRule = command: {
