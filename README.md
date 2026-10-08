@@ -210,9 +210,9 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 
 | | |
 | --- | --- |
-| **Launchers** | [Steam][steam] (Gamescope), [Heroic][heroic], [Prism Launcher][prismlauncher], [Twintail][twintail] (gacha games), [Hytale][hytale] (the one Flatpak, installed by hand), [Faugus Launcher][faugus-launcher] and [Lutris][lutris], those two off by default |
+| **Launchers** | [Steam][steam] ([Gamescope][gamescope]), [Heroic][heroic], [Prism Launcher][prismlauncher], [Hytale][hytale] (the one Flatpak, installed by hand), [EasyRPG Player][easyrpg] (RPG Maker 2000/2003 games), plus [Twintail][twintail] (gacha games), [Faugus Launcher][faugus-launcher] and [Lutris][lutris], those three off by default |
 | **Tools** | [GameMode][gamemode], [MangoHud][mangohud], [Goverlay][goverlay], [r2modman][r2modman], [ProtonPlus][protonplus], [Satisfactory Mod Manager][smm], [AntimicroX][antimicrox], [Rusty PoB][rpob] |
-| **Granblue Relink Mods** | [RelinkModOrganizer][rmo] for data mods and [Reloaded-II][reloaded-ii] for code mods, both prebuilt bundles kept in `~/.local/opt/` instead of nixpkgs (off by default) |
+| **Granblue Relink Mods** | [RelinkModOrganizer][rmo] for data mods and [Reloaded-II][reloaded-ii] for code mods, both prebuilt bundles kept out of nixpkgs: RelinkModOrganizer in `~/.local/opt/`, Reloaded-II in the Desktop folder its installer makes, run in the game's Proton prefix (off by default) |
 </details>
 
 <details>
@@ -223,7 +223,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | **Audio** | [PipeWire][pipewire] (ALSA + PulseAudio compat) |
 | **Containers** | [Docker][docker], off by default |
 | **Flatpak** | [nix-flatpak][nix-flatpak] (declarative Flatpak management) |
-| **Networking** | [systemd-resolved][resolved] + [NetworkManager][networkmanager] (iwd), with [Mullvad][mullvad] covered below |
+| **Networking** | [systemd-resolved][resolved] + [NetworkManager][networkmanager] (iwd), and [Mullvad][mullvad] over WireGuard with multihop, [DAITA][daita] and a kill switch that blocks traffic while the tunnel is down |
 | **Key Remapping** | [keyd][keyd] |
 | **Bootloader** | [systemd-boot][systemd-boot] |
 | **Kernel** | [CachyOS kernel][cachyos-kernel] (selectable: zen / latest / xanmod / cachyos) |
@@ -244,6 +244,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | **Secrets** | [GNOME Keyring][gnome-keyring] |
 | **Passwords** | [KeePassXC][keepassxc], with the vault file synced between devices by [Syncthing][syncthing] |
 | **Antivirus** | [ClamAV][clamav] (off by default) |
+| **Cleanup** | [BleachBit][bleachbit] clears caches, logs and browser leftovers when run by hand; nothing runs on a schedule |
 
 </details>
 
@@ -333,6 +334,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [rpob]: https://pathofbuilding.community
 [twintail]: https://github.com/TwintailTeam/TwintailLauncher
 [hytale]: https://hytale.com
+[easyrpg]: https://easyrpg.org/
 [rmo]: https://github.com/RokyZevon/RelinkModOrganizer
 [reloaded-ii]: https://github.com/Reloaded-Project/Reloaded-II
 [claude-code]: https://github.com/anthropics/claude-code
@@ -343,6 +345,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [resolved]: https://www.freedesktop.org/software/systemd/man/systemd-resolved.html
 [networkmanager]: https://networkmanager.dev
 [clamav]: https://www.clamav.net
+[bleachbit]: https://bleachbit.sourceforge.net
 [keepassxc]: https://keepassxc.org/
 [syncthing]: https://syncthing.net/
 [keyd]: https://github.com/rvaiya/keyd
@@ -624,7 +627,7 @@ shared/
   ├── default.nix                 # NixOS + home-manager wiring
   └── modules/
       ├── nixos/                  # system modules
-      ├── home-manager/           # user modules
+      ├── home/                   # user modules
       ├── theme/                  # stylix, catppuccin, fonts, GTK, QT
       └── wm/                     # window managers
 docs/                           # personal notes I share between devices
