@@ -210,7 +210,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 
 | | |
 | --- | --- |
-| **Launchers** | [Steam][steam] ([Gamescope][gamescope]), [Heroic][heroic], [Prism Launcher][prismlauncher], [Hytale][hytale] (the one Flatpak, installed by hand), [EasyRPG Player][easyrpg] (RPG Maker 2000/2003 games), plus [Twintail][twintail] (gacha games), [Faugus Launcher][faugus-launcher] and [Lutris][lutris], those three off by default |
+| **Launchers** | [Steam][steam] ([Gamescope][gamescope]), [Heroic][heroic], [Prism Launcher][prismlauncher], [Hytale][hytale] (the one Flatpak, installed by hand), [EasyRPG Player][easyrpg] (RPG Maker 2000/2003 games), [Faugus Launcher][faugus-launcher], plus [Twintail][twintail] (gacha games) and [Lutris][lutris], those two off by default |
 | **Tools** | [GameMode][gamemode], [MangoHud][mangohud], [Goverlay][goverlay], [r2modman][r2modman], [ProtonPlus][protonplus], [Satisfactory Mod Manager][smm], [AntimicroX][antimicrox], [Rusty PoB][rpob] |
 | **Granblue Relink Mods** | [RelinkModOrganizer][rmo] for data mods and [Reloaded-II][reloaded-ii] for code mods, both prebuilt bundles kept out of nixpkgs: RelinkModOrganizer in `~/.local/opt/`, Reloaded-II in the Desktop folder its installer makes, run in the game's Proton prefix (off by default) |
 </details>

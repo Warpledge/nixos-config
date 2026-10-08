@@ -157,7 +157,7 @@
     heroic = true; # Epic / GOG / Amazon
     prismlauncher = true; # Minecraft
     lutris = false; # Wine launcher
-    faugus = false; # UMU/Proton launcher
+    faugus = true; # UMU/Proton launcher
     twintail = false; # Gacha game launcher
     hytale = true; # Enables Flatpak; official launcher installed by hand
     easyrpg = true; # RPG Maker 2000/2003 game interpreter
