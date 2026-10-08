@@ -2,25 +2,13 @@
 # APPARMOR PROFILES
 #=====================================================================#
 #- Every profile starts in complain mode: nothing is blocked, would-be
-#- denials are logged. See .notes/security/apparmor.md before enforcing.
+#- denials are logged. See docs/security/apparmor.md before enforcing.
 {
   lib,
   pkgs,
   hostConfig,
   ...
 }: {
-  imports =
-    [
-      ./archives.nix
-      ./evince.nix
-      ./yt-dlp.nix
-    ]
-    #--- Per-app profiles (controlled by hostConfig)
-    ++ lib.optionals hostConfig.media.mpv [./mpv.nix]
-    ++ lib.optionals hostConfig.media.streamlinkTwitchGui [./streamlink.nix]
-    ++ lib.optionals hostConfig.office.obsidian [./obsidian.nix]
-    ++ lib.optionals hostConfig.gameLaunchers.prismlauncher [./prismlauncher.nix];
-
   #--------------------------------------------------------------------#
   #-- Include Path
   #--------------------------------------------------------------------#
@@ -107,4 +95,19 @@
       network netlink raw,
     '';
   };
+
+  #--------------------------------------------------------------------#
+  #-- Imports
+  #--------------------------------------------------------------------#
+  imports =
+    [
+      ./archives.nix
+      ./evince.nix
+      ./yt-dlp.nix
+    ]
+    #--- Per-app profiles (controlled by hostConfig)
+    ++ lib.optionals hostConfig.media.mpv [./mpv.nix]
+    ++ lib.optionals hostConfig.media.streamlinkTwitchGui [./streamlink.nix]
+    ++ lib.optionals hostConfig.office.obsidian [./obsidian.nix]
+    ++ lib.optionals hostConfig.gaming.prismlauncher [./prismlauncher.nix];
 }

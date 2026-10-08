@@ -1,7 +1,7 @@
 #=====================================================================#
 # SSH SERVER (OPENSSH + FAIL2BAN)
 #=====================================================================#
-#- Key-only access for one user. Port 22 is opened in network/core.nix,
+#- Key-only access for one user. Port 22 is opened in network/firewall.nix,
 #- not here, so the firewall list stays in one place.
 #-
 #- Enabling this without a key in authorizedKeys below leaves no way in:

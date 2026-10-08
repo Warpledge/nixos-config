@@ -6,15 +6,17 @@
   hostConfig,
   ...
 }: {
+  #--------------------------------------------------------------------#
+  #-- Imports
+  #--------------------------------------------------------------------#
   imports =
     [
-      ./esync.nix
-      ./gamemode.nix
-      ./gamescope.nix
-      ./java.nix
-      ./kernel.nix
+      ./performance/esync.nix
+      ./performance/gamemode.nix
+      ./performance/kernel.nix
+      ./tools/gamescope.nix
+      ./tools/java.nix
     ]
     #--- Game Launchers (controlled by hostConfig)
-    ++ lib.optionals hostConfig.gameLaunchers.steam [./steam.nix]
-    ++ lib.optionals hostConfig.gameLaunchers.twintail [./twintail.nix];
+    ++ lib.optionals hostConfig.gaming.steam [./launchers/steam.nix];
 }

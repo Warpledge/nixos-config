@@ -1,0 +1,161 @@
+#=====================================================================#
+# GAMING ENVIRONMENT CONFIGURATION
+#=====================================================================#
+{
+  pkgs,
+  config,
+  lib,
+  hostConfig,
+  ...
+}: {
+  #--------------------------------------------------------------------#
+  #-- Gaming Configuration
+  #--------------------------------------------------------------------#
+
+  #- Create shader cache directory (improves game startup performance)
+  home = {
+    file = {
+      ".cache/mesa_shader_cache/.keep".text = "";
+      ".cache/radv_builtin_shaders64/.keep".text = "";
+      #- Raise OpenAL source limit to prevent audio popping in sound-heavy games (e.g. tModLoader + Calamity)
+      ".alsoftrc".text = ''
+        [general]
+        sources = 512
+      '';
+    };
+
+    #--- Wrappers
+    packages = with pkgs; [
+      #--- Vintage Story
+      # (writeShellScriptBin "vintagestory-mesa" ''
+      #   export MESA_GLTHREAD=true
+      #   ${vintagestory}/bin/vintagestory "$@"
+      # '')
+
+      #--------------------------------------------------------------------#
+      #-- Packages
+      #--------------------------------------------------------------------#
+      #--- Utility
+      gamemode
+      mangohud
+      goverlay
+      antimicrox
+      satisfactorymodmanager
+
+      #--- Wine
+      wineWow64Packages.waylandFull
+      dxvk
+      vkd3d
+      winetricks
+
+      #--- Proton
+      vkd3d-proton
+      umu-launcher
+      protontricks
+      protonplus
+
+      #--- Vulkan
+      vulkan-loader
+      vulkan-tools
+      vulkan-validation-layers
+
+      #--- For tModLoader support
+      dotnet-sdk_8
+      mono
+
+      #--- Other Dependencies
+      lua5
+      game-devices-udev-rules
+      corefonts
+      alsa-lib
+      libGL
+
+      #--- Performance Monitoring
+      clinfo
+      mesa-demos
+      inxi
+    ];
+
+    #--------------------------------------------------------------------#
+    #-- Environment Variables
+    #--------------------------------------------------------------------#
+    sessionVariables = {
+      #--- Mesa/AMD Graphics Optimizations
+      MESA_GLTHREAD = "true"; # AMD specific OpenGL application performance boost
+      mesa_glthread = "true"; # Lowercase variant for compatibility
+
+      #--- Wine/Proton optimizations
+      DXVK_HUD = "compiler"; # Show shader compilation (can disable by removing this)
+      DXVK_ASYNC = "1"; # Enable async shader compilation to reduce stutters
+      DXVK_STATE_CACHE_PATH = "$HOME/.cache/dxvk";
+      STAGING_SHARED_MEMORY = "1"; # Wine staging shared memory
+      WINE_LARGE_ADDRESS_AWARE = "1"; # Enable 4GB+ memory for 32-bit games
+
+      #--- Additional performance variables
+      __GL_THREADED_OPTIMIZATIONS = "1"; # NVIDIA variable that doesn't hurt on AMD
+      __GL_YIELD = "USLEEP"; # Better CPU usage in some scenarios
+
+      #--- ADDITIONAL Proton optimizations
+      PROTON_ENABLE_NVAPI = "1"; # Better GPU info reporting
+      PROTON_NO_ESYNC = "0"; # Ensure esync is enabled
+      PROTON_NO_FSYNC = "0"; # Ensure fsync is enabled
+      PROTON_FORCE_LARGE_ADDRESS_AWARE = "1"; # Better memory usage
+
+      #--- GE-Proton specific
+      PROTON_LOG = "0"; # Disable logging for performance
+      PROTON_DUMP_DEBUG_COMMANDS = "0"; # No debug overhead
+
+      #--- Better frame pacing
+      vblank_mode = "0"; # Let game control vsync
+      __GL_SYNC_TO_VBLANK = "0"; # Nvidia equivalent
+
+      # Better shader caching
+      MESA_SHADER_CACHE_DIR = "${config.home.homeDirectory}/.cache/mesa_shader_cache";
+      RADV_BUILTIN_CACHE_PATH = "${config.home.homeDirectory}/.cache/radv_builtin_shaders64";
+      AMD_SHADER_DISK_CACHE_PATH = "${config.home.homeDirectory}/.cache/amd_shader_cache";
+
+      # Increase cache size for large game library
+      MESA_SHADER_CACHE_MAX_SIZE = "10G";
+    };
+  };
+
+  #--------------------------------------------------------------------#
+  #-- MangoHud Overlay
+  #--------------------------------------------------------------------#
+  #--- FPS-only overlay, top-right corner (stylix target disabled in theme/stylix.nix)
+  #--- font_file references the themed JetBrainsMono Nerd Font (Mono cut → fixed-width digits)
+  xdg.configFile."MangoHud/MangoHud.conf".text = ''
+    fps_only
+    position=top-right
+    font_size=16
+    background_alpha=0
+    text_color=00FF00
+    font_file=${config.stylix.fonts.monospace.package}/share/fonts/truetype/NerdFonts/JetBrainsMono/JetBrainsMonoNerdFontMono-Regular.ttf
+  '';
+
+  #--------------------------------------------------------------------#
+  #-- Imports
+  #--------------------------------------------------------------------#
+  imports =
+    [
+      ./scripts/nix-gamescope.nix
+      ./scripts/nix-performance.nix
+      ./scripts/nix-vn.nix
+      ./scripts/tml-prelaunch.nix
+    ]
+    #--- Launchers (steam is in nixos/gaming; hytale is a hand-installed Flatpak)
+    ++ lib.optionals hostConfig.gaming.heroic [./launchers/heroic.nix]
+    ++ lib.optionals hostConfig.gaming.prismlauncher [./launchers/prismlauncher.nix]
+    ++ lib.optionals hostConfig.gaming.lutris [./launchers/lutris.nix]
+    ++ lib.optionals hostConfig.gaming.faugus [./launchers/faugus.nix]
+    ++ lib.optionals hostConfig.gaming.easyrpg [./launchers/easyrpg.nix]
+    ++ lib.optionals hostConfig.gaming.twintail [./launchers/twintail.nix]
+    #--- Games
+    ++ lib.optionals hostConfig.gaming.feedback [./games/feedback.nix]
+    ++ lib.optionals hostConfig.gaming.rocksmith [./games/rocksmith.nix]
+    #--- Tools
+    ++ lib.optionals hostConfig.gaming.r2modman [./tools/r2modman.nix]
+    ++ lib.optionals hostConfig.gaming.pathOfBuilding [./tools/path-of-building.nix]
+    ++ lib.optionals hostConfig.gaming.granblueRelinkMods [./tools/relink-mod-organizer.nix ./tools/reloaded-ii-gbfr.nix]
+    ++ lib.optionals hostConfig.japanese.vn [./tools/japanese-vn.nix];
+}

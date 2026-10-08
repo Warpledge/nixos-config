@@ -6,64 +6,63 @@
   hostConfig,
   ...
 }: {
+  #--------------------------------------------------------------------#
+  #-- Imports
+  #--------------------------------------------------------------------#
   imports =
     [
       #--- Gaming
       ./gaming
 
       #--- Network
-      ./network/blockers.nix
-      ./network/core.nix
+      ./network
 
       #--- Nix Daemon & Tooling
-      ./nix/core.nix
-      ./nix/nh.nix
-      ./nix/nixpkgs.nix
-      ./nix/substituters.nix
+      ./nix
 
       #--- Security & Hardening
       ./security/apparmor
-      ./security/auditd.nix
-      ./security/core.nix
-      ./security/kernel.nix
-      ./security/keyring.nix
-      ./security/sudo.nix
+      ./security/audit/auditd.nix
+      ./security/auth/keyring.nix
+      ./security/auth/sudo.nix
+      ./security/hardening
 
       #--- System Services
-      ./services/adb.nix
       ./services/desktop.nix
-      ./services/keyd.nix
-      ./services/power.nix
-      ./services/runners.nix
-      ./services/sound.nix
+      ./services/hardware/adb.nix
+      ./services/hardware/keyd.nix
+      ./services/hardware/power.nix
+      ./services/hardware/sound.nix
+      ./services/runtimes/runners.nix
 
       #--- System Configuration
       ./system/bootloader.nix
-      ./system/display-manager.nix
       ./system/documentation.nix
-      ./system/input.nix
-      ./system/locale.nix
       ./system/packages.nix
-      ./system/shell.nix
-      ./system/tweaks.nix
-      ./system/user.nix
-      ./system/wayland.nix
-      ./system/zram.nix
+      ./system/desktop/input.nix
+      ./system/desktop/wayland.nix
+      ./system/language/locale.nix
+      ./system/tuning/tweaks.nix
+      ./system/tuning/zram.nix
+      ./system/user/shell.nix
+      ./system/user/user.nix
     ]
+    #--- Mullvad VPN, system and home-manager halves (controlled by hostConfig)
+    ++ lib.optionals hostConfig.mullvad.enable [./security/vpn/mullvad]
     #--- ClamAV Antivirus (controlled by hostConfig)
-    ++ lib.optionals hostConfig.clamav.enable [./services/clamav.nix]
+    ++ lib.optionals hostConfig.clamav.enable [./security/av/clamav.nix]
     #--- Docker (controlled by hostConfig)
-    ++ lib.optionals hostConfig.docker.enable [./services/docker.nix]
-    #--- Flatpak (controlled by hostConfig; loaded for the Flatpak apps: twintail)
-    ++ lib.optionals hostConfig.gameLaunchers.twintail [./services/flatpak.nix]
+    ++ lib.optionals hostConfig.docker.enable [./services/runtimes/docker.nix]
+    #--- Flatpak (controlled by hostConfig; loaded for the Flatpak apps: hytale)
+    ++ lib.optionals hostConfig.gaming.hytale [./services/runtimes/flatpak.nix]
     #--- SSH Server (controlled by hostConfig)
     ++ lib.optionals hostConfig.ssh.enable [./services/ssh.nix]
     #--- Suwayomi Manga Server (controlled by hostConfig)
-    ++ lib.optionals hostConfig.suwayomi.enable [./services/suwayomi.nix]
+    ++ lib.optionals hostConfig.suwayomi.enable [./services/servers/suwayomi.nix]
     #--- Syncthing File Sync (controlled by hostConfig)
-    ++ lib.optionals hostConfig.syncthing.enable [./services/syncthing.nix]
+    ++ lib.optionals hostConfig.syncthing.enable [./services/servers/syncthing.nix]
     #--- FlareSolverr for Moku's Cloudflare-protected sources (controlled by hostConfig)
-    ++ lib.optionals hostConfig.media.moku [./services/flaresolverr.nix]
+    ++ lib.optionals hostConfig.media.moku [./services/servers/flaresolverr.nix]
     #--- Japanese Input Method (controlled by hostConfig)
-    ++ lib.optionals hostConfig.japanese.ime [./system/japanese-ime.nix];
+    ++ lib.optionals hostConfig.japanese.ime [./system/language/japanese-ime.nix];
 }

@@ -13,10 +13,10 @@
   }: let
     #--- System builder function
     mkSystem = hostname: let
-      hostConfig = import "${self}/hosts/${hostname}/hostConfig/core.nix";
+      hostConfig = import "${self}/hosts/${hostname}/settings.nix";
       inherit (hostConfig) username;
     in {
-      modules = [./hosts/${hostname}/${hostname}.nix];
+      modules = [./hosts/${hostname}];
       specialArgs = {
         inherit self inputs username hostname hostConfig;
       };
@@ -83,12 +83,6 @@
     niri = {
       url = "github:sodiboo/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";
-    };
-    #--- Cosmic Manager
-    cosmic-manager = {
-      url = "github:HeitorAugustoLN/cosmic-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.home-manager.follows = "home-manager";
     };
     #--- DMS
     dms = {

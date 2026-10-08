@@ -26,13 +26,13 @@ Rebuilds stack up rather than overwrite each other: the old one stays on disk an
 
 ## Overview
 
-- **One config, two machines:** both build from the same files. Each one has its own settings file ([`hostConfig/core.nix`](./hosts/desktop/hostConfig/core.nix)) where I flip features on and off, so they only differ where I want them to.
+- **One config, two machines:** both build from the same files. Each one has its own settings file ([`settings.nix`](./hosts/desktop/settings.nix)) where I flip features on and off, so they only differ where I want them to.
 - **The same theme everywhere:** [Catppuccin][catppuccin] Mocha Mauve, set once with [Stylix][stylix] and handed down to everything that can take it, with [catppuccin/nix][catppuccin-nix] alongside it covering the apps that have a proper Catppuccin port of their own.
 - **Private by default:** full-disk encryption ([LUKS][luks]), [AppArmor][apparmor], kernel hardening settings, an always-on [Mullvad][mullvad] VPN, and [Zen][zen] locked down with [Arkenfox][arkenfox] and [Securefox][securefox].
-- **Runs the awkward stuff:** Windows apps ([WinBoat][winboat]), [AppImages](./.notes/local/appimage-wraps.md), Flatpaks ([nix-flatpak][nix-flatpak]), and the normal Linux programs Nix usually won't run ([nix-ld][nix-ld]).
+- **Runs the awkward stuff:** [AppImages](./docs/local/appimage-wraps.md), Flatpaks ([nix-flatpak][nix-flatpak]), and the normal Linux programs Nix usually won't run ([nix-ld][nix-ld]).
 - **The tools I actually work in:** [Docker][docker], [tmux][tmux], [Zed][zed] and [Helix][helix], git with nicer diffs ([delta][delta]) and the [gh][gh] CLI.
 - **Built for gaming:** [Steam][steam] and Gamescope, [GameMode][gamemode] and [MangoHud][mangohud], plus kernel and GPU tweaks per machine.
-- **Nix commands behind a menu:** [`nixm`](./shared/modules/home-manager/nixm.nix) (short for "nix menu") puts rebuilds, cleanup, rollbacks and updates one keypress away, so I'm not looking commands up.
+- **Nix commands behind a menu:** [`nixm`](./shared/modules/home/nixm.nix) (short for "nix menu") puts rebuilds, cleanup, rollbacks and updates one keypress away, so I'm not looking commands up.
 
 ## Host Machines
 
@@ -43,7 +43,7 @@ Rebuilds stack up rather than overwrite each other: the old one stays on disk an
 
 **Niri WM**
 
-![Niri desktop with Zed and fastfetch](./screenshots/niri-desktop.png)
+![Niri desktop with Zed and fastfetch](./docs/screenshots/niri-desktop.png)
 
 ## Theming
 
@@ -58,13 +58,13 @@ Both tools would happily theme the same app and fight over it, so for each one I
 
 ## System Management TUI Script
 
-![nixm top level menu](./screenshots/nixm-tui-main.png)
+![nixm top level menu](./docs/screenshots/nixm-tui-main.png)
 
 The top level is a set of categories. Pick one and it opens into its own menu of sub-commands, so you never have to remember the command names:
 
-![nixm NixOS submenu](./screenshots/nixm-tui-nixos.png)
+![nixm NixOS submenu](./docs/screenshots/nixm-tui-nixos.png)
 
-`nixm` is the script I use to manage the system day to day (it lives in [`shared/modules/home-manager/nixm.nix`](./shared/modules/home-manager/nixm.nix)). Run it on its own for a TUI (terminal UI) menu, or pass a subcommand to jump straight to it. It started out as a script from [anotherhadi's NixOS config](https://github.com/anotherhadi/nixy), and I've reworked and extended it a lot since.
+`nixm` is the script I use to manage the system day to day (it lives in [`shared/modules/home/nixm.nix`](./shared/modules/home/nixm.nix)). Run it on its own for a TUI (terminal UI) menu, or pass a subcommand to jump straight to it. It started out as a script from [anotherhadi's NixOS config](https://github.com/anotherhadi/nixy), and I've reworked and extended it a lot since.
 
 <details>
 <summary>📋 All nixm commands</summary>
@@ -151,15 +151,12 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 
 | | |
 | --- | --- |
-| **Window Manager** | [Niri][niri] / [Hyprland][hyprland] / [GNOME][gnome] / [COSMIC][cosmic] (WIP, not daily driven yet) |
-| **Status Bar / Notifier / Launcher / Lock** | [DankMaterialShell][dms] (Niri + Hyprland) / GNOME Shell + extensions (GNOME) / COSMIC Panel + applets (COSMIC) |
-| **Display Manager** | [dms-greeter][dms-greeter] via [greetd][greetd] (Niri, Hyprland) / [GDM][gdm] (GNOME) / [cosmic-greeter][cosmic-greeter] (COSMIC) |
+| **Window Manager** | [Niri][niri] / [Hyprland][hyprland] |
+| **Status Bar / Notifier / Launcher / Lock** | [DankMaterialShell][dms] |
+| **Display Manager** | [dms-greeter][dms-greeter] via [greetd][greetd] |
 | **Color Scheme** | [Catppuccin][catppuccin] Mocha Mauve applied globally via [Stylix][stylix] + [catppuccin/nix][catppuccin-nix] |
 | **Fonts** | [JetBrains Mono Nerd Font][nerd-fonts], Monaspace, Roboto, Nerd Fonts Symbols |
 | **Window Switcher** | [niriswitcher][niriswitcher] (Niri only) |
-| **GNOME Extensions** | [Dash to Panel][dash-to-panel], [Blur my Shell][blur-my-shell], [AppIndicator][appindicator], [Astra Monitor][astra-monitor], [Caffeine][caffeine], [Auto Move Windows][auto-move-windows], [GNOME UI Tune][gnome-ui-tune], [Space Bar][space-bar], [Date Menu Formatter][date-menu-formatter] |
-| **COSMIC Applets** | [Minimon][minimon] (CPU/RAM/GPU/temps/net/disk in the bar), [Privacy Indicator][cosmic-privacy], [Caffeine][cosmic-caffeine], plus [Tweaks][cosmic-tweaks] |
-| **COSMIC Config** | **WIP.** [cosmic-manager][cosmic-manager] keeps the panel layout, keybinds and compositor settings declarative, so a fresh machine comes up already set up. Still being built out, so it is not in rotation with Niri and Hyprland yet |
 </details>
 
 <details>
@@ -180,7 +177,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | --- | --- |
 | **Editors / IDE** | [Zed][zed], [Helix][helix], [micro][micro] (quick edits) |
 | **Formatter** | [alejandra][alejandra] v3.0.0 |
-| **Rebuild Wrapper** | [`nixm`](./shared/modules/home-manager/nixm.nix) (fzf menu over [nh][nh]) |
+| **Rebuild Wrapper** | [`nixm`](./shared/modules/home/nixm.nix) (fzf menu over [nh][nh]) |
 </details>
 
 <details>
@@ -196,7 +193,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | **Graphics** | [Blender][blender], [Krita][krita], [Affinity Suite v3][affinity-nix] (via Wine), all off by default |
 | **Audio** | [Reaper][reaper] (DAW, with [SWS][sws] and [ReaPack][reapack]) |
 | **Guitar** | [TONE3000][tone3000] (official NAM player, browses its capture and IR library in-app), [Guitarix][guitarix] (modular amp rig), [ir.lv2][ir-lv2] for cabinet IRs, [qpwgraph][qpwgraph] for patching, plus [FxFloorBoard][katana-fxfloorboard] to edit patches on the Boss Katana itself |
-| **Rhythm Games** | [feedBack][feedback] plays Guitar Pro tabs through its own audio engine, with VST hosting and amp modeling, so the Katana DI feed doubles as the game input; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs. [Rocksmith 2014][rocksmith] runs on Proton and reads the same DI through [PipeASIO][pipeasio] and [RS_ASIO][rs-asio]; the module writes their config, and the hand-done install steps live in `.notes/gaming/rocksmith-2014.md` |
+| **Rhythm Games** | [feedBack][feedback] plays Guitar Pro tabs through its own audio engine, with VST hosting and amp modeling, so the Katana DI feed doubles as the game input; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs. [Rocksmith 2014][rocksmith] runs on Proton and reads the same DI through [PipeASIO][pipeasio] and [RS_ASIO][rs-asio]; the module writes their config, and the hand-done install steps live in `docs/gaming/rocksmith-2014.md` |
 | **Chat / Productivity** | [Vesktop][vesktop] via [nixcord][nixcord] (Vencord, with [arRPC][arrpc] running alongside it so Steam and Proton games show up as rich presence), [Ferdium][ferdium] (all your web messengers in one window), [Thunderbird][thunderbird], [Obsidian][obsidian] |
 | **AI Tooling** | [Claude Code][claude-code], [OpenCode][opencode], [LM Studio][lmstudio] |
 | **Android** | [scrcpy][scrcpy] (mirror and control a device over USB or wifi, nothing to install on the phone) |
@@ -213,7 +210,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 
 | | |
 | --- | --- |
-| **Launchers** | [Steam][steam] (Gamescope), [Heroic][heroic], [Prism Launcher][prismlauncher], [Twintail][twintail] (gacha games, Flatpak), [Faugus Launcher][faugus-launcher] and [Lutris][lutris], those two off by default |
+| **Launchers** | [Steam][steam] (Gamescope), [Heroic][heroic], [Prism Launcher][prismlauncher], [Twintail][twintail] (gacha games), [Hytale][hytale] (the one Flatpak, installed by hand), [Faugus Launcher][faugus-launcher] and [Lutris][lutris], those two off by default |
 | **Tools** | [GameMode][gamemode], [MangoHud][mangohud], [Goverlay][goverlay], [r2modman][r2modman], [ProtonPlus][protonplus], [Satisfactory Mod Manager][smm], [AntimicroX][antimicrox], [Rusty PoB][rpob] |
 | **Granblue Relink Mods** | [RelinkModOrganizer][rmo] for data mods and [Reloaded-II][reloaded-ii] for code mods, both prebuilt bundles kept in `~/.local/opt/` instead of nixpkgs (off by default) |
 </details>
@@ -224,7 +221,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | | |
 | --- | --- |
 | **Audio** | [PipeWire][pipewire] (ALSA + PulseAudio compat) |
-| **Containers / VMs** | [Docker][docker], [WinBoat][winboat] (Windows apps), both off by default |
+| **Containers** | [Docker][docker], off by default |
 | **Flatpak** | [nix-flatpak][nix-flatpak] (declarative Flatpak management) |
 | **Networking** | [systemd-resolved][resolved] + [NetworkManager][networkmanager] (iwd), with [Mullvad][mullvad] covered below |
 | **Key Remapping** | [keyd][keyd] |
@@ -252,24 +249,6 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 
 [niri]: https://github.com/YaLTeR/niri
 [hyprland]: https://hyprland.org
-[gnome]: https://www.gnome.org
-[cosmic]: https://github.com/pop-os/cosmic-epoch
-[cosmic-greeter]: https://github.com/pop-os/cosmic-greeter
-[minimon]: https://github.com/cosmic-utils/minimon-applet
-[cosmic-privacy]: https://github.com/D-Brox/cosmic-ext-applet-privacy-indicator
-[cosmic-caffeine]: https://github.com/tropicbliss/cosmic-ext-applet-caffeine
-[cosmic-tweaks]: https://github.com/cosmic-utils/tweaks
-[cosmic-manager]: https://github.com/HeitorAugustoLN/cosmic-manager
-[gdm]: https://wiki.gnome.org/Projects/GDM
-[dash-to-panel]: https://github.com/home-sweet-gnome/dash-to-panel
-[blur-my-shell]: https://github.com/aunetx/blur-my-shell
-[appindicator]: https://github.com/ubuntu/gnome-shell-extension-appindicator
-[astra-monitor]: https://github.com/AstraExt/astra-monitor
-[caffeine]: https://github.com/eonpatapon/gnome-shell-extension-caffeine
-[auto-move-windows]: https://gitlab.gnome.org/GNOME/gnome-shell-extensions
-[gnome-ui-tune]: https://github.com/somepaulo/gnome-ui-tune
-[space-bar]: https://github.com/luchrioh/space-bar
-[date-menu-formatter]: https://github.com/marcinjakubowski/date-menu-formatter
 [dms]: https://github.com/AvengeMedia/DankMaterialShell
 [dms-greeter]: https://github.com/AvengeMedia/dank-greeter
 [greetd]: https://git.sr.ht/~kennylevinsen/greetd
@@ -352,14 +331,14 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [antimicrox]: https://github.com/AntiMicroX/antimicrox
 [lutris]: https://lutris.net
 [rpob]: https://pathofbuilding.community
-[twintail]: https://flathub.org/apps/app.twintaillauncher.ttl
+[twintail]: https://github.com/TwintailTeam/TwintailLauncher
+[hytale]: https://hytale.com
 [rmo]: https://github.com/RokyZevon/RelinkModOrganizer
 [reloaded-ii]: https://github.com/Reloaded-Project/Reloaded-II
 [claude-code]: https://github.com/anthropics/claude-code
 [opencode]: https://github.com/opencode-ai/opencode
 [lmstudio]: https://lmstudio.ai
 [docker]: https://www.docker.com
-[winboat]: https://github.com/TibixDev/winboat
 [mullvad]: https://mullvad.net
 [resolved]: https://www.freedesktop.org/software/systemd/man/systemd-resolved.html
 [networkmanager]: https://networkmanager.dev
@@ -389,7 +368,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 
 ## Shell Shortcuts
 
-Short commands I use in place of longer ones, all set up in [`zsh.nix`](./shared/modules/home-manager/programs/shell/zsh.nix). The ones marked _(fn)_ take an argument.
+Short commands I use in place of longer ones, all set up in [`zsh.nix`](./shared/modules/home/programs/shell/zsh.nix). The ones marked _(fn)_ take an argument.
 
 <details>
 <summary>⚡ All shell shortcuts</summary>
@@ -637,31 +616,29 @@ Same binds as the Niri table, `Mod+A` through `Mod+R`.
 ```
 flake.nix
 hosts/{desktop,laptop}/
-  ├── hostConfig/core.nix         # per-host toggles
-  ├── {hostname}.nix              # host entry
-  ├── hardware-configuration.nix  # system specific hardware configuration
-  ├── gpu.nix                     # per-host GPU configuration
+  ├── settings.nix                # per-host toggles and options
+  ├── default.nix                 # host entry
+  ├── hardware/                   # hardware-configuration.nix, GPU, swapfile (laptop)
   └── wm/                         # per-host WM overrides
 shared/
-  ├── core.nix                    # NixOS + home-manager wiring
+  ├── default.nix                 # NixOS + home-manager wiring
   └── modules/
       ├── nixos/                  # system modules
       ├── home-manager/           # user modules
       ├── theme/                  # stylix, catppuccin, fonts, GTK, QT
       └── wm/                     # window managers
-.notes/                           # personal notes I share between devices
+docs/                           # personal notes I share between devices
 ```
 
 **How it loads:** the flake picks a machine, reads that host's toggles, and loads only the modules they enable:
 
 ```
 flake.nix
-  → hosts/{hostname}/{hostname}.nix             # Pick the machine
-    → hosts/{hostname}/hostConfig/core.nix      # Read its on/off switches
-    → shared/core.nix                           # Wire up system + user config
-      → shared/modules/{nixos,home-manager}/    # Load only the enabled modules
-      → shared/modules/wm/${windowManager}/     # Load only the active window manager
-      → shared/modules/mullvad/                 # VPN daemon, tray app, split tunnel
+  → hosts/{hostname}/default.nix             # Pick the machine
+    → hosts/{hostname}/settings.nix          # Read its on/off switches
+    → shared/default.nix                     # Wire up system + user config
+      → shared/modules/{nixos,home}/         # Load only the enabled modules
+      → shared/modules/wm/${windowManager}/  # Load only the active window manager
 ```
 
 That one file per host decides the window manager and the kernel, which browsers, terminals and editors get installed, and which services run.
@@ -676,7 +653,6 @@ The main things this config pulls in from outside the standard NixOS package set
 | [`home-manager`](https://github.com/nix-community/home-manager) | User environment management |
 | [`nur`](https://github.com/nix-community/NUR) | NixOS User Repository |
 | [`niri`](https://github.com/sodiboo/niri-flake) (sodiboo/niri-flake) | Niri WM |
-| [`cosmic-manager`](https://github.com/HeitorAugustoLN/cosmic-manager) | Declarative COSMIC panels, keybinds and settings |
 | [`dms`](https://github.com/AvengeMedia/DankMaterialShell) (AvengeMedia, stable) | DankMaterialShell |
 | [`dms-plugin-registry`](https://github.com/AvengeMedia/dms-plugin-registry) | DankMaterialShell plugins (AI usage overview, Quick Capture, AMD GPU monitor) |
 | [`dank-greeter`](https://github.com/AvengeMedia/dank-greeter) | Login screen that matches DankMaterialShell |

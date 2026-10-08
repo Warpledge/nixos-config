@@ -1,0 +1,133 @@
+# Local Binary Installs
+
+Prebuilt third-party apps that aren't in nixpkgs and aren't worth packaging.
+They live under `~/.local/opt/` (out of git), and a thin wrapper module puts
+them on PATH with whatever runtime env they need. The module sits in the folder
+for what the app is, and its toggle in the matching `hostConfig` category.
+
+## The pattern
+
+- **Binary:** unpacked into `~/.local/opt/<name>/` on each machine. Not tracked
+  by git, so it has to be restored by hand on a fresh install or the laptop.
+- **Wrapper:** `programs/<category>/<name>.nix` wraps the binary with
+  `writeShellScriptBin`, sets any runtime env, and `exec`s it. nix-ld handles
+  the ELF interpreter for foreign dynamically linked binaries.
+- **Toggle:** `hostConfig.<category>.<name>` in both host configs, imported by
+  that category's router (`programs/default.nix`, or `programs/gaming/default.nix`
+  for `gaming.*`).
+
+## Restore on a fresh install / laptop
+
+For each app below, recreate `~/.local/opt/<name>/` from the source, make the
+binary executable, then `nixm rebuild`. The wrapper and toggle are already in
+git so only the binary bundle needs restoring.
+
+---
+
+## katana-fxfloorboard
+
+- **What:** Boss Katana MK2 amp patch editor (Colin Willcocks' tool).
+- **Command:** `katana-fxfloorboard` (also a desktop entry).
+- **Location:** `~/.local/opt/katana-fxfloorboard/`
+- **Wrapper:** `programs/audio/guitar/katana-floorboard.nix`, toggle
+  `audio.katanaFloorboard`.
+- **Runtime:** bundle ships its own libs (RUNPATH points at `./lib`); wrapper
+  only sets `ALSA_CONFIG_PATH` so RtMidi/ALSA can reach the amp.
+- **Restore:** unpack the Linux bundle into the folder, keep the `lib/` dir next
+  to the `Katana-MK2-FxFloorBoard` binary, `chmod +x` it.
+
+## relink-mod-organizer
+
+- **What:** GUI mod manager for Granblue Fantasy: Relink (RokyZevon). Front end
+  over GBFRDataTools with enable/disable toggles and a mods folder, so you're
+  not hand-registering each mod.
+- **Command:** `relink-mod-organizer` (also a desktop entry).
+- **Location:** `~/.local/opt/relink-mod-organizer/`
+- **Wrapper:** `programs/gaming/tools/relink-mod-organizer.nix` (plus
+  `reloaded-ii-gbfr.nix`), toggle `gaming.granblueRelinkMods`.
+- **Runtime:** self-contained .NET single-file build (no external dotnet), but
+  an Avalonia GUI. The wrapper supplies the libs its bundled Skia/Avalonia
+  stack dlopens (fontconfig, freetype, GL, X11, xkbcommon) via
+  `LD_LIBRARY_PATH`, and sets `DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1` to skip
+  the ICU dependency. nix-ld handles the ELF interpreter. It also adds
+  `/run/opengl-driver/lib` and sets `LIBGL_ALWAYS_SOFTWARE=1`: with hardware
+  GLX (Niri -> XWayland, AMD + mesa) the Avalonia window never maps, so it
+  falls back to software rendering (fine for a config UI). It's an X11-only
+  Avalonia app, and Niri launcher-spawned processes don't inherit `DISPLAY`
+  (so it crashed when launched from the app menu but worked from a terminal);
+  the wrapper defaults `DISPLAY` to `:0` (where xwayland-satellite runs).
+- **Restore:** grab `RelinkModOrganizer-linux-x64.tar.gz` from
+  <https://github.com/RokyZevon/RelinkModOrganizer/releases>, extract so the
+  `RelinkModOrganizer` binary lands directly in the folder, `chmod +x` it. If a
+  future Avalonia build errors on a missing `.so`, add that lib to
+  `runtimeLibs` in the wrapper module.
+- **Usage:** Settings -> Locate Game (`granblue_fantasy_relink.exe`), Mod List
+  -> Open Mods Folder, drop unzipped mod folders in, Reload, enable, "Mod it".
+
+### Managing Relink mods
+
+RMO owns `data.i`. Install/enable/disable/uninstall all happen in the GUI, so
+don't hand-edit the game's `data/` folder alongside it. Mods come as
+`gbfrelink.<id>/GBFR/data/...` folders (Reloaded/manager format); drop the
+unzipped folder into RMO's mods folder and hit "Mod it".
+
+Game path: `~/.local/share/Steam/steamapps/common/Granblue Fantasy Relink`.
+
+**Before a Steam game update:** restore `data.i` from the `orig_data.i` backup
+in the game folder first, or Steam's delta patch chokes on the modded index.
+Re-apply mods in RMO afterwards. (Verifying game files also restores `data.i`.)
+
+If RMO ever breaks, GBFRDataTools is the underlying CLI it wraps
+(<https://github.com/Nenkai/GBFRDataTools/releases>, v1.4.0 = last native Linux
+build). The manual path is: copy a mod's `GBFR/data/*` into `<game>/data/`, back
+up `data.i` to `orig_data.i`, then `GBFRDataTools add-external-files -i
+"<game>/data.i" --overwrite` (needs `dotnet-runtime_9` via `DOTNET_ROOT`).
+
+## tonkatsu-box
+
+- **What:** Tonkatsu Box (hacan359), a local-first collection manager for
+  games, movies, TV, anime, manga, visual novels, books and audio. MIT, Flutter
+  desktop build. Catalogs include IGDB, TMDB, VNDB, AniList, MangaDex,
+  MusicBrainz.
+- **Command:** `tonkatsu-box` (also a desktop entry).
+- **Location:** `~/.local/opt/tonkatsu-box/`
+- **Wrapper:** `programs/media/tonkatsu-box.nix`, toggle `media.tonkatsuBox`.
+- **Runtime:** the bundle's RUNPATH is `$ORIGIN/lib`, so its own Flutter
+  plugins resolve themselves. The wrapper only adds the GTK3 stack the engine
+  links against (gtk3, glib, pango, cairo, atk, gdk-pixbuf, harfbuzz, libepoxy,
+  fontconfig, zlib, libstdc++) plus `/run/opengl-driver/lib` for Flutter's
+  Impeller GL backend. `lib/libdartjni.so` wants `libjvm.so` and is never
+  loaded on desktop, so it needs no JDK.
+- **Restore:** download `tonkatsu-box-v<version>-linux.tar.gz` from
+  <https://github.com/hacan359/tonkatsu_box/releases>, extract so `tonkatsu_box`
+  lands directly in the folder next to `lib/` and `data/`, `chmod +x` it.
+  Installed as v0.44.0 on 2026-09-20.
+
+### Steam library import
+
+Settings -> Import -> Steam Library. Needs a Steam Web API key from
+<https://steamcommunity.com/dev/apikey>, a 64-bit SteamID, and a public game
+library. There is no OpenID browser login, which is what a Mullvad exit gets
+blocked on: Steam refused a browser sign-in over `us-chi-wg-202` on 2026-09-20
+because DataPacket netblocks register as GB. Fetching the API key still needs
+one signed-in page load, so do it from the Steam client's own browser, which is
+already authenticated and rides the real IP via `mullvad.splitTunnel`.
+
+### Device-to-device sync
+
+Settings -> Database -> Network Sync -> Nearby devices. One-way **full
+replacement**, not a merge: the receiving device's database is overwritten, so
+pick one master device. Manual on both ends, both on the same Wi-Fi. "Also
+transfer settings" carries API keys and logins across. It keeps a one-step
+safety copy before overwriting (Settings -> Database -> Backup restores it, and
+restoring twice undoes the restore); use Backup All Data for a real archive.
+Per upstream docs an active VPN hides the devices from each other, so Mullvad's
+LAN sharing has to stay on at both ends.
+
+### Sharing
+
+No public profiles. Collections export as `.xcoll` (ids only, metadata
+re-fetched on import) or `.xcollx` (board layouts plus embedded covers,
+offline). Tier lists and mood grids export as PNG. Community collections live
+at <https://github.com/hacan359/tonkatsu-collections> and are browsable in-app
+under Settings -> Import -> Browse Online Collections.

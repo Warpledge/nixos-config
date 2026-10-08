@@ -13,14 +13,14 @@
     #--- Disable auto-lock on laptop (server runs unattended)
     home.file.".config/DankMaterialShell/settings.json" = lib.mkForce {
       text = builtins.toJSON (
-        (lib.importJSON ../../../shared/modules/wm/niri/niri-home/shell/dms/settings.json)
+        (lib.importJSON ../../../shared/modules/wm/niri/home/shell/dms/settings.json)
         // {acLockTimeout = 0;}
       );
     };
 
     programs.niri.settings = {
       #--- Monitors
-      # Defined in shared/modules/wm/niri/niri-home/core/monitors.nix
+      # Defined in shared/modules/wm/niri/home/core/monitors.nix
       #--- Autostart (Laptop-Specific)
       spawn-at-startup = [
         #--- Solaar - Logitech device manager

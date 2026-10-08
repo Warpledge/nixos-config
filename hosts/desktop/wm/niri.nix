@@ -3,5 +3,5 @@
 #=====================================================================#
 _: {
   # Monitor configuration is now handled in:
-  # shared/modules/wm/niri/niri-home/core/monitors.nix
+  # shared/modules/wm/niri/home/core/monitors.nix
 }

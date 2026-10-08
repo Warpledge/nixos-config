@@ -29,7 +29,7 @@
         waybar.enable = false; # conflicts
         zed.enable = false; # handled by app
         kde.enable = false; # breaks KDE apps / Desktop
-        forge.enable = false; # breaks gnome forge extension
+        forge.enable = false; # GNOME Shell extension, not installed
         hyprlock.enable = false; # have custom theme
         mangohud.enable = false; # managed via programs.mangohud
         helix.enable = false;
@@ -43,7 +43,7 @@
         zen-browser.enable = false;
 
         dank-material-shell.enable = false;
-        gnome.image.enable = false; # let GNOME Settings own the wallpaper
+        gnome.image.enable = false; # DMS owns the wallpaper; the rest of the target (dark mode, fonts) is read by GTK apps
 
         vscode.profileNames = ["default"];
         zen-browser.profileNames = ["default"];

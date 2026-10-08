@@ -93,19 +93,21 @@ If that returns a path, read it and use `programs.<pkg>` instead.
 
 ## Architecture
 
-`hostConfig` (from `hosts/<host>/hostConfig/core.nix`) is threaded through
+`hostConfig` (from `hosts/<host>/settings.nix`) is threaded through
 `specialArgs`, so every module can read it. Conditional imports in
-`shared/modules/home-manager/programs/default.nix` decide what actually loads —
-it is the only router under `programs/`. Most subdirectories are flat `.nix`
+`shared/modules/home/programs/default.nix` decide what actually loads —
+it is the router under `programs/`, except `gaming/default.nix`, which routes the
+`gaming.*` launchers, games and tools. Most subdirectories are flat `.nix`
 files, but `browsers/{zen,mullvad,helium}/` and `media/freetube/` each have a
 `default.nix` of their own — those are multi-file module bundles, not routers,
-so a new toggle's import still goes in `programs/default.nix`.
+so a new toggle's import still goes in `programs/default.nix` (or
+`programs/gaming/default.nix` for a `gaming.*` app).
 
 | Scope | Path |
 | --- | --- |
-| Shared user config | `shared/modules/home-manager/` |
+| Shared user config | `shared/modules/home/` |
 | Shared system config | `shared/modules/nixos/` |
-| Per-host toggles | `hosts/{desktop,laptop}/hostConfig/core.nix` |
+| Per-host toggles | `hosts/{desktop,laptop}/settings.nix` |
 
 **Desktop and laptop hostConfig stay symmetrical.** Every toggle you add goes
 in both files with the same value unless told otherwise.
@@ -113,7 +115,7 @@ in both files with the same value unless told otherwise.
 ## Adding an application
 
 1. Add the toggle to **both** host configs, in the group it belongs to
-2. Create the module under `shared/modules/home-manager/programs/<group>/`.
+2. Create the module under `shared/modules/home/programs/<group>/`.
    Check for a home-manager module first (see above) — prefer
    `programs.<pkg>.enable` over `home.packages = [pkgs.<pkg>]`
 3. Add the conditional import to `programs/default.nix`:
@@ -145,7 +147,7 @@ in both files with the same value unless told otherwise.
 
 ## Todo notes
 
-Planned work lives under `.notes/todo/`, one file per task, named after it
+Planned work lives under `docs/todo/`, one file per task, named after it
 (`todo/affinity-setup.md`). **When the user says "add X to the todo", write a
 new file there** holding what the task is, why they want it, what the repo
 already has toward it, the steps left, and any research already done (links,
@@ -175,7 +177,7 @@ restating the code, no listing alternatives that were not chosen.
 
 ## Writing style
 
-For replies, `README.md`, `.notes/` and commit messages. Code comments are
+For replies, `README.md`, `docs/` and commit messages. Code comments are
 covered under **Formatting** above.
 
 - Lead with the answer. No "Great question", no exclamation marks, no closing
@@ -191,10 +193,10 @@ covered under **Formatting** above.
   tapestry, testament, pivotal, foster, enhance, cutting-edge, world-class.
   Same for any word used twice in a short passage.
 - Use contractions and plain words.
-- No em dashes inside a sentence in `README.md` or `.notes/`; use a colon, a
+- No em dashes inside a sentence in `README.md` or `docs/`; use a colon, a
   comma, parentheses, or two sentences. A dash separating a label from its
   description in a list (`` `path/` — what it holds ``) is structure and stays.
-- In `.notes/`, give absolute dates and versions (not "recently"), name the
+- In `docs/`, give absolute dates and versions (not "recently"), name the
   condition behind a "sometimes", and cite where a claim came from.
 
 Prose only. Code blocks, command output, quotes and table cells are left

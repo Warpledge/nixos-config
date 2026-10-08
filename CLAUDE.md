@@ -4,22 +4,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-NixOS flake managing **Desktop** (Ryzen 5800X3D + RX 9070 XT, 280Hz OLED + 144Hz) and **Laptop** (Legion Slim 5, Ryzen 7735HS + hybrid AMD 680M/RTX 4070, 1600p@165Hz). Nixpkgs unstable, Catppuccin Mocha Mauve via Stylix. Active WM: Niri; Hyprland, GNOME, and COSMIC modules also exist (Niri and Hyprland are the fully built-out ones).
+NixOS flake managing **Desktop** (Ryzen 5800X3D + RX 9070 XT, 280Hz OLED + 144Hz) and **Laptop** (Legion Slim 5, Ryzen 7735HS + hybrid AMD 680M/RTX 4070, 1600p@165Hz). Nixpkgs unstable, Catppuccin Mocha Mauve via Stylix. Active WM: Niri; a Hyprland module also exists.
 
 ## Critical Rules
 
-1. **Never run `nixm rebuild` or `nixos-rebuild`.** Stop and ask instead. Validation you SHOULD run yourself before reporting done: `alejandra .` → `git add <new files>` → `nix flake check`. Commit only when asked (see rule 7); pushing and history rewrites stay with the user.
+1. **Never run `nixm rebuild` or `nixos-rebuild`.** Stop and ask instead. Validation you SHOULD run yourself before reporting done: `alejandra .` → `git add <new files>` → `nix flake check`. Commit only when asked (see rule 6); pushing and history rewrites stay with the user.
 2. **`git add` new files before `nix flake check`** — the flake won't see untracked files.
-3. **Use surgical edits** (exact `old_string` → `new_string`), never rewrite whole files.
+3. **Edit existing files in place; don't rewrite them whole.** A rewrite drops commented-out code and disabled options without showing it in review.
 4. **Public repo:** no passwords, API keys, tokens, or secrets.
-5. **Stylix owns theming.** Never set colors, fonts, or wallpaper in a module: enable the program's theming target and let Stylix supply the palette. Hardcoded values conflict with or silently override the theme. catppuccin/nix (`theme/catppuccin.nix`) auto-enables its ports beside Stylix; where both theme an app, one target is switched off in `theme/`. Apps neither covers carry upstream's Catppuccin file (Zen's `userChrome.css`/`userContent.css`, COSMIC's `themes/*.ron`, Forge's `stylesheet.css`).
-6. **Set only what was asked for.** No extra options, defaults, or "nice to have" settings beyond the request.
-7. **No agent attribution in commits.** Commits you make use the repo's configured git identity (the user's), and every commit message or PR description carries no `Co-Authored-By:` trailer, no "Generated with" line, and no mention of Claude or any agent. The user is the sole author of every commit. Messages use Conventional Commits, `type(scope): subject` plus a bullet body (types, scopes and examples in the `commit` skill; the git commit template mirrors them).
-8. **No desktop screenshots without permission.** Never capture the screen, a window, or the desktop (screenshot tools, `grim`, niri's screenshot actions, computer-use captures) unless the user has said yes to that specific capture first.
+5. **Stylix owns theming.** Never set colors, fonts, or wallpaper in a module: enable the program's theming target and let Stylix supply the palette. Hardcoded values conflict with or silently override the theme. catppuccin/nix (`theme/catppuccin.nix`) auto-enables its ports beside Stylix; where both theme an app, one target is switched off in `theme/`. Apps neither covers carry upstream's Catppuccin file (Zen's `userChrome.css`/`userContent.css`).
+6. **No agent attribution in commits.** Commits you make use the repo's configured git identity (the user's), and every commit message or PR description carries no `Co-Authored-By:` trailer, no "Generated with" line, and no mention of Claude or any agent. The user is the sole author of every commit. Messages use Conventional Commits, `type(scope): subject` plus a bullet body (types, scopes and examples in the `commit` skill; the git commit template mirrors them).
+7. **No desktop screenshots without permission.** Never capture the screen, a window, or the desktop (screenshot tools, `grim`, niri's screenshot actions, computer-use captures) unless the user has said yes to that specific capture first.
 
 `AGENTS.md` at the repo root is a second, shorter ruleset for other agents (opencode reads it *instead of* `CLAUDE.md`). The two must not contradict each other: when a rule here changes, check whether `AGENTS.md` says the same.
 
-Only `.claude/settings.json` is tracked (public); everything else under `.claude/` is gitignored, including `settings.local.json`, where Claude Code saves "always allow" approvals that could capture a secret from an approved command. **Maintenance check:** before committing a change to `.claude/settings.json`, and during any CLAUDE.md audit, read both files for tokens, keys, credentialed URLs or private paths; nothing secret may sit in `settings.json`, and stale or sensitive approvals in `settings.local.json` get pruned. Keep Bash allow rules to read-only commands: in auto mode a matching allow rule skips the safety classifier (`autoMode.classifyAllShell` is off by default). `alejandra` is the one writer on the list, since the edit hook runs it anyway; `deadnix` is listed only as the exact `deadnix --no-lambda-arg` (with or without ` .`), because a prefix rule would also let `--edit` through. `nix flake check`, `show` and `metadata` are exact rules for the same reason, and `nix build`/`nix eval` aren't listed: `--impure --expr` reads and sends out any file, `--option` can enable `builtins.exec`. The same file's deny rules enforce rules 1 and 8 (rebuild, boot, upgrade and rollback commands, and the screenshot tools), so a capture the user approved runs on their side with `!`. Its `PostToolUse` hook runs `shared/modules/home-manager/programs/ai/hooks/post-edit.sh`, which formats each edited `.nix` file with `alejandra` and tells Claude when `README.md` gains a `---` line, when a color literal lands in a `.nix` file outside `theme/` (rule 5), and, after any `hostConfig/core.nix` edit, which toggles now differ between the hosts. Gitignored too are `assign.kat`, `preferences.xml` and `license.txt` at the root: the BOSS Katana FloorBoard app writes them into whatever directory it starts in, and they're runtime artifacts rather than strays to clean up.
+Only `.claude/settings.json` is tracked (public); the rest of `.claude/` is gitignored, including `settings.local.json`, where "always allow" approvals land and can capture a secret. **Maintenance check:** before committing a `settings.json` change, and in any CLAUDE.md audit, read both files for tokens, keys, credentialed URLs or private paths; nothing secret goes in `settings.json`, and stale or sensitive local approvals get pruned. Bash allow rules stay read-only, since in auto mode a matching allow rule skips the safety classifier (`autoMode.classifyAllShell` is off by default). `alejandra` is the one writer (the edit hook runs it anyway). `deadnix --no-lambda-arg` (with or without ` .`) and `nix flake check`/`show`/`metadata` are exact rules, because a prefix rule would also let risky flags through (deadnix's `--edit`). `nix build`/`nix eval` stay off: `--impure --expr` reads and sends out any file, and `--option` can enable `builtins.exec`. Deny rules enforce rules 1 and 7 (rebuild, activation, boot, upgrade, rollback and screenshot commands), so an approved capture runs on the user's side with `!`. The `PostToolUse` hook, `shared/modules/home/programs/ai/hooks/post-edit.sh`, runs `alejandra` on each edited `.nix` file and flags three things: a new `---` line in `README.md`, a color literal outside `theme/` (rule 5), and host toggle drift after a `settings.nix` edit.
 
 ## Commands
 
@@ -48,47 +47,45 @@ nix flake update <name> # Bump a single input
 run <pkg> [args]        # Ad-hoc launch a nixpkgs package without installing it (zsh function)
 ```
 
-`nixm` is an fzf-driven menu defined in `shared/modules/home-manager/nixm.nix` (aliased to `n`). Run `nixm <bogus>` to print the full subcommand list.
+`nixm` is an fzf-driven menu defined in `shared/modules/home/nixm.nix` (aliased to `n`). Run `nixm <bogus>` to print the full subcommand list.
 
 ## Architecture
 
 ```
 flake.nix
-  → hosts/{hostname}/{hostname}.nix          (host entry)
-    → hosts/{hostname}/hostConfig/core.nix   (toggles, passed as specialArgs)
-    → shared/core.nix                        (NixOS + home-manager wiring)
-      → shared/modules/{nixos,home-manager}/ (modular configs)
+  → hosts/{hostname}/default.nix             (host entry)
+    → hosts/{hostname}/settings.nix          (toggles, passed as specialArgs)
+    → shared/default.nix                     (NixOS + home-manager wiring)
+      → shared/modules/{nixos,home}/         (modular configs)
       → shared/modules/wm/${windowManager}/  (active WM only)
-      → shared/modules/mullvad/            (both trees, if mullvad.enable)
 ```
 
-`hostConfig` from each host's `hostConfig/core.nix` is threaded through `specialArgs`, so every module can read it. Conditional imports in each subdir's `default.nix` decide what loads.
+`hostConfig` from each host's `settings.nix` is threaded through `specialArgs`, so every module can read it. Conditional imports in each subdir's `default.nix` decide what loads.
 
 ### hostConfig
 
-The authoritative list of toggles is **`hosts/{hostname}/hostConfig/core.nix`**. Read it directly, don't trust this file to stay in sync. Current shape (desktop and laptop are kept symmetrical):
+The authoritative list of toggles is **`hosts/{hostname}/settings.nix`**. Read it directly, don't trust this file to stay in sync. Current shape (desktop and laptop are kept symmetrical):
 
 - `username` — read by `flake.nix` itself (`inherit (hostConfig) username`), not just by modules
-- `windowManager` — `"hyprland" | "niri" | "gnome" | "cosmic"`
+- `windowManager` — `"hyprland" | "niri"`
 - `kernel` — `"zen" | "latest" | "xanmod" | "cachyos"`
-- Service toggles: `mullvad.enable` (plus `mullvad.splitTunnel`, a list of command names routed around the VPN), `clamav.enable`, `docker.enable`, `winboat.enable`, `discord.arrpc.enable`, `scrcpy.enable`, `ssh.enable`, `suwayomi.enable`, `syncthing.enable`
-- Attribute-set toggles: `browsers.{zen,mullvad,helium,ferdium}`, `terminals.{kitty,ghostty}`, `editors.{helix,zed}`, `fileBrowsers.{nautilus,yazi}`, `media.{mpv,spotify,freetube,videoTrimmer,moku,streamlinkTwitchGui,seanime,boorusama}`, `graphics.{blender,krita,affinity}`, `audio.{reaper,guitar,feedback,rocksmith}`, `office.{thunderbird,obsidian,homebank}`, `security.{bleachbit,keepassxc}`, `gameLaunchers.{steam,heroic,prismlauncher,lutris,faugus,twintail,easyrpg}`, `gamingTools.{r2modman,pathOfBuilding}`, `japanese.{ime,vn}`
-- `local.{granblueRelinkMods,galleryReader,tonkatsuBox}` — wrappers around prebuilt bundles under `~/.local/opt/` (kept out of git); see `.notes/local/local-binary-installs.md`
+- Service toggles: `mullvad.enable` (plus `mullvad.splitTunnel`, a list of command names routed around the VPN), `clamav.enable`, `docker.enable`, `discord.arrpc.enable`, `scrcpy.enable`, `ssh.enable`, `suwayomi.enable`, `syncthing.enable`
+- Attribute-set toggles: `browsers.{zen,mullvad,helium,ferdium}`, `terminals.{kitty,ghostty}`, `editors.{helix,zed}`, `fileBrowsers.{nautilus,yazi}`, `media.{mpv,spotify,freetube,videoTrimmer,moku,streamlinkTwitchGui,seanime,boorusama,tonkatsuBox}`, `graphics.{blender,krita,affinity}`, `audio.{reaper,guitarix,tone3000,katanaFloorboard}`, `office.{thunderbird,obsidian,homebank}`, `security.{bleachbit,keepassxc}`, `gaming.{steam,heroic,prismlauncher,lutris,faugus,twintail,hytale,easyrpg,feedback,rocksmith,r2modman,pathOfBuilding,granblueRelinkMods}`, `japanese.{ime,vn}`
+- `~/.local/opt` bundles (kept out of git) have no category of their own: `media.tonkatsuBox`, `gaming.granblueRelinkMods` and `audio.katanaFloorboard` wrap them; see `docs/local/local-binary-installs.md`
 - AI tools: `claude.enable`, `opencode.enable`, `lmstudio.enable`
 
-Desktop and laptop should stay byte-identical apart from the header comment and a short list of deliberate differences. As of 2026-10-06 those are true on desktop and false on laptop: `gameLaunchers.{heroic,easyrpg}`, `discord.arrpc.enable`, `suwayomi.enable`, `media.{moku,seanime,boorusama}`, `local.{galleryReader,tonkatsuBox}` and `gamingTools.{r2modman,pathOfBuilding}` (plus a longer trailing comment on `local.granblueRelinkMods` in the laptop file). Verify with `diff hosts/desktop/hostConfig/core.nix hosts/laptop/hostConfig/core.nix` before assuming.
+Desktop and laptop should stay byte-identical apart from the header comment and a short list of deliberate differences. As of 2026-10-08 those are true on desktop and false on laptop: `gaming.{heroic,easyrpg,hytale,r2modman,pathOfBuilding}`, `discord.arrpc.enable`, `suwayomi.enable`, `media.{moku,seanime,boorusama,tonkatsuBox}`. Verify with `diff hosts/desktop/settings.nix hosts/laptop/settings.nix` before assuming.
 
 Gotchas. Grep the option name before assuming which file owns it:
 
-- **`boot.kernelModules` silently swallows kernel parameters.** modprobe cannot resolve them, `systemd-modules-load.service` logs `Failed to find module '<param>'` and still exits 0, so the hardening looks applied and is not. Eleven params sat there until 2026-09-22. Check with `grep <param> /proc/cmdline`, not by reading the module. An assertion in `security/kernel.nix` now fails the build on any `kernelModules` entry containing `=`; a bare flag like `slab_nomerge` still gets through.
-- `audio.feedback` and `audio.rocksmith` are the two toggles that do not match their folder: both live in `programs/gaming/` as games, but share the Katana rig with `audio.guitar`.
-- `gameLaunchers.steam` / `.twintail` are wired in `shared/modules/nixos/gaming/default.nix`; `heroic`, `prismlauncher`, `lutris`, `faugus`, `easyrpg` are wired in `home-manager/programs/default.nix`.
-- Toggles that load from both trees: `suwayomi.enable` and `syncthing.enable` (a `nixos/services/` module plus `programs/media/suwayomi.nix` or `programs/syncthing.nix`), and `media.moku`, which also loads `nixos/services/flaresolverr.nix`.
-- `nixos/services/flatpak.nix` (nix-flatpak) loads only while a Flatpak app's toggle is on, today `gameLaunchers.twintail`. A new Flatpak app adds its toggle to that condition in `nixos/default.nix`, or `services.flatpak.packages` doesn't exist for it to set.
-- `hostConfig.kernel` is read in `system/bootloader.nix` (and `shared/core.nix` for the CachyOS overlay); `gaming/kernel.nix` only holds gaming sysctls and boot params.
+- **`boot.kernelModules` silently swallows kernel parameters.** modprobe cannot resolve them, `systemd-modules-load.service` logs `Failed to find module '<param>'` and still exits 0, so the hardening looks applied and is not. Eleven params sat there until 2026-09-22. Check with `grep <param> /proc/cmdline`, not by reading the module. An assertion in `security/hardening/kernel.nix` now fails the build on any `kernelModules` entry containing `=`; a bare flag like `slab_nomerge` still gets through.
+- `gaming.steam` is wired in `shared/modules/nixos/gaming/default.nix` and `gaming.hytale` only gates Flatpak in `nixos/default.nix`; the rest of `gaming.*` is wired in `home/programs/gaming/default.nix`.
+- `media.moku` loads from both trees: the home-manager bundle plus `nixos/services/servers/flaresolverr.nix`. `suwayomi.enable`, `syncthing.enable` and `mullvad.enable` each load one NixOS module (`nixos/services/servers/{suwayomi,syncthing}.nix`, `nixos/security/vpn/mullvad/`) that sets its home-manager half through `home-manager.users.${username}`.
+- `nixos/services/runtimes/flatpak.nix` (nix-flatpak) loads only while a Flatpak app's toggle is on, today `gaming.hytale`, the one Flatpak left. Hytale isn't on Flathub: its launcher is Hypixel's own bundle, installed by hand, so `services.flatpak.packages` stays empty for it. A new Flatpak app adds its toggle to that condition in `nixos/default.nix`, or `services.flatpak.packages` doesn't exist for it to set.
+- `hostConfig.kernel` is read in `system/bootloader.nix` (and `shared/default.nix` for the CachyOS overlay); `gaming/performance/kernel.nix` only holds gaming sysctls and boot params.
 - `alejandra`, `claude-code` and `affinity-nix` keep their own nixpkgs on purpose (the comments in `flake.nix` say why: a GCC 15 build failure, and binary caches that only match their own pin), and `nix-flatpak` has no nixpkgs input. Don't add `inputs.nixpkgs.follows` to them.
-- The Katana patch editor is a `~/.local/opt` bundle but does **not** live in `programs/local/`; it moved into `audio/guitar.nix` with the rest of the amp rig, so it has no `local.*` toggle of its own and rides on `audio.guitar`.
-- `ai/{claude,opencode,lmstudio}.nix` and `emulation/winboat.nix` are conditionally imported **and** wrap their body in `config = lib.mkIf hostConfig.<toggle> {...}`, so the inner guard never fires on its own. New modules take the conditional import alone.
+- `audio/guitar/` loads when any of `audio.{guitarix,tone3000,katanaFloorboard}` is on; its `default.nix` holds the shared cab IR, tuner and patchbay packages plus the plugin paths, then gates each app on its own toggle.
+- `ai/{claude,opencode,lmstudio}.nix` are conditionally imported **and** wrap their body in `config = lib.mkIf hostConfig.<toggle> {...}`, so the inner guard never fires on its own. New modules take the conditional import alone.
 - Module *loading* goes through `lib.optionals` in a `default.nix`; config *logic* inside a module uses `if/then/else`. Mixing them up is why an option looks wired but has no effect.
 - Reach nested attrs that may not exist with `hostConfig.feature.sub or false`, never a bare path.
 - **Moku is built from source, pinned twice:** the `moku` and `tsunagu` inputs move together, since Tsunagu is the backend each Moku release ships with. The comments in `media/moku/default.nix` explain each patch and hash override, `tsunagu/` holds the Kototoro bridge, and the `moku-bump` skill has the bump order and what each patch fixes. Sources that drive an Android WebView can't work in Tsunagu. Library and extensions live in `~/.local/share/{tsunagu,io.github.MokuProject.Moku}`.
@@ -97,58 +94,58 @@ Gotchas. Grep the option name before assuming which file owns it:
 
 ```nix
 # Single boolean
-++ lib.optionals hostConfig.clamav.enable [./services/clamav.nix]
+++ lib.optionals hostConfig.clamav.enable [./security/av/clamav.nix]
 
 # Attribute-set item
 ++ lib.optionals hostConfig.browsers.zen [./browsers/zen]
 ++ lib.optionals hostConfig.media.mpv [./media/mpv.nix]
 
-# WM module selection (in shared/core.nix) — the WM is split across both trees
+# WM module selection (in shared/default.nix) — the WM is split across both trees
 # NixOS imports:
-./modules/wm/${hostConfig.windowManager}/${hostConfig.windowManager}-nixos
+./modules/wm/${hostConfig.windowManager}/session.nix
 # home-manager imports:
-./modules/wm/${hostConfig.windowManager}/${hostConfig.windowManager}-home
+./modules/wm/${hostConfig.windowManager}/home
 
-# Per-host WM override (in hosts/{hostname}/{hostname}.nix)
+# Per-host WM override (in hosts/{hostname}/default.nix)
 ++ (lib.optional (hostConfig.windowManager == "niri") ./wm/niri.nix)
 ```
 
-`shared/core.nix` is also where the overlay list is assembled, where `nixpkgs.config` sets `allowUnfree` and `android_sdk.accept_license`, and where `home-manager.backupFileExtension = "bak"` is set. One overlay lives in that list: the CachyOS kernel one, applied when `hostConfig.kernel == "cachyos"` (`inputs.cachyos-kernel.overlays.pinned`). A new overlay is appended to the same list. Both `system.stateVersion` and `home.stateVersion` are pinned to `25.11`, marked DO NOT CHANGE.
+`shared/default.nix` is also where the overlay list is assembled, where `nixpkgs.config` sets `allowUnfree` and `android_sdk.accept_license`, and where `home-manager.backupFileExtension = "bak"` is set. One overlay lives in that list: the CachyOS kernel one, applied when `hostConfig.kernel == "cachyos"` (`inputs.cachyos-kernel.overlays.pinned`). A new overlay is appended to the same list. Both `system.stateVersion` and `home.stateVersion` are pinned to `25.11`, marked DO NOT CHANGE.
 
 ### Module layout
 
-- `shared/modules/nixos/` — system: `gaming/` (default, esync, gamemode, gamescope, java, kernel, steam, twintail), `network/` (core, blockers), `nix/` (core, nh, nixpkgs, substituters), `security/` (apparmor/, auditd, core, kernel, keyring, sudo), `services/` (adb, desktop, docker, flatpak, keyd, power, runners, sound, clamav, ssh, suwayomi, syncthing, flaresolverr), `system/` (bootloader, display-manager, documentation, input, locale, packages, shell, tweaks, user, wayland, zram, japanese-ime)
-- `shared/modules/home-manager/` — user: `programs/` (browsers, terminals, editors, ai, shell, emulation, fetch, file-browsers, graphics, audio, media, office, security, launchers, local, gaming, android, discord, plus `core.nix`, `git.nix` and `syncthing.nix` at its root). `mime.nix`, `nixm.nix`, `services.nix` and `variables.nix` are single files at that level, not directories
-  - `programs/local/` — wrappers for non-nixpkgs prebuilt bundles living in `~/.local/opt/`; the payload is intentionally not in the repo
+- `shared/modules/nixos/` — system: `gaming/` (default, `launchers/` steam, `performance/` esync + gamemode + kernel, `tools/` gamescope + java), `network/` (default, blockers, dns, firewall, networkmanager), `nix/` (default, nh, nixpkgs, substituters), `security/` (`apparmor/`, `audit/` auditd, `auth/` keyring + sudo, `av/` clamav, `hardening/` default + kernel, `vpn/mullvad/`), `services/` (desktop, `hardware/` adb + keyd + power + sound, `runtimes/` docker + flatpak + runners, `servers/` flaresolverr + suwayomi + syncthing, ssh), `system/` (bootloader, documentation, packages, `desktop/` input + wayland, `language/` locale + japanese-ime, `tuning/` tweaks + zram, `user/` shell + user)
+- `shared/modules/home/` — user: `programs/` (browsers, terminals, editors, ai, shell, fetch, file-browsers, graphics, audio, media, office, security, gaming (`launchers/`, `games/`, `tools/`, `scripts/`), git (`git.nix` + the commit template), utilities (`utilities.nix`, the general package list), android, discord, plus `options.nix` at its root). `mime.nix`, `nixm.nix`, `services.nix` and `variables.nix` are single files at that level, not directories
+  - Wrappers for prebuilt bundles in `~/.local/opt/` (`media/tonkatsu-box.nix`, `gaming/tools/{relink-mod-organizer,reloaded-ii-gbfr}.nix`, `audio/guitar/katana-floorboard.nix`) sit in the folder for what the app is; the payload is intentionally not in the repo
   - `programs/ai/skills/<name>/` and `programs/ai/agents/<name>.md` — Claude Code skills and subagents kept in the repo so every host gets them, registered in `ai/claude.nix` under `programs.claude-code.{skills,agents}`, beside the pinned plugins and LSP servers. New ones (including what skill-creator writes to `~/.claude/skills/`) move here. Commits go through the user-only `commit` skill, which runs `gitleaks` on the staged diff and the `public-repo-auditor` subagent
   - `programs/ai/mcp.nix` — MCP servers shared by Claude Code and opencode. API keys are read at launch from owner-only files in `~/.nixos-config-mcp/`, so they never reach the repo or the store; a new server that needs a key does the same
-  - AppImage wraps (`appimageTools`) sit in the folder for what the app is, not how it is packaged: `gaming/feedback.nix`, `media/streamlink-twitch-gui.nix`, `media/boorusama.nix`. The payload is hash-pinned into the store, so unlike `programs/local/` nothing lives outside git (see `.notes/local/appimage-wraps.md`)
+  - AppImage wraps (`appimageTools`) sit in the folder for what the app is, not how it is packaged: `gaming/games/feedback.nix`, `media/streamlink-twitch-gui.nix`, `media/boorusama.nix`. The payload is hash-pinned into the store, so unlike the `~/.local/opt` wrappers nothing lives outside git (see `docs/local/appimage-wraps.md`)
   - `default.nix` carries a `clearStaleBackups` activation hook that deletes `*.bak` under `~/.config`, `~/.local/{share,state}` before `checkLinkTargets`. This is why HM activation never fails on leftover backups. Don't remove it when debugging a "file exists" error; find the real conflicting file instead.
   - `programs/media/freetube/` — `settings.nix` (mirrored from the app), `blocked-channels.nix` (~870 channel ids in one flat list, sorted by lowercased name under `LC_ALL=C`) and `youtube-dispatch.nix`, the link handler `mime.nix` points `webLinks` at. The first two are **mirrored**: the home-manager module copies `hm_settings.db` over `settings.db` **only when the declared content changes**, and FreeTube rewrites that file from memory when it exits, so close FreeTube before rebuilding, or the copy is clobbered and stays clobbered until the module changes again. Blocklist entries are emitted with a `preferredName` and a placeholder `icon`, because FreeTube re-resolves every entry missing either one, at one API call each. Subscriptions, profiles, playlists and history are **not** in the repo: they are personal data and this flake is public. `nixm freetube-backup` exports them to a dated folder under `~/SyncBackups/<hostname>/FreeTube` instead, in FreeTube's own Export format so its Import reads them back.
-- `shared/modules/wm/{hyprland,niri,gnome,cosmic}/` — each has `<wm>-nixos/` and `<wm>-home/`. Only Hyprland and Niri integrate DankMaterialShell (DMS); GNOME uses `gnome-home/extensions/` + `dconf.nix`, COSMIC uses `cosmic-home/shell/{panel,applets}.nix`
-- `shared/modules/theme/` — stylix, catppuccin, fonts, plus `gtk.nix` and `qt.nix`, the toolkit theming targets rule 5 routes through. No module sets the wallpaper: DMS picks it at runtime (`Mod+W`), GNOME Settings does under GNOME, and `.wallpapers/` holds the images
-- `shared/modules/mullvad/` — `mullvad-nixos/` (daemon settings + system-package split tunnel) and `mullvad-home/` (tray app + home-package split tunnel). Imported from `shared/core.nix` like the WM, gated on `hostConfig.mullvad.enable`
-- `hosts/{hostname}/` — `gpu.nix`, `hardware-configuration.nix`, `{hostname}.nix`, `hostConfig/core.nix`, `wm/<wm>.nix` (per-WM host overrides: GPU env vars, autostart, Hyprland monitors)
-- `hosts/laptop/` also has `swapfile.nix` and `minecraft-servers/` (GTNH + TerraFirmaGreg server definitions, plus `mcservers.nix`, an fzf picker over them). `minecraft-servers/` is a **home-manager** module injected from `laptop.nix` via `home-manager.users.${username}.imports`, not a NixOS module, and the only place in the repo that reaches into HM from a host entry file.
+- `shared/modules/wm/{hyprland,niri}/` — each has `session.nix` (NixOS: turns the WM on, login screen, keyring unlock) and `home/` (home-manager, everything else, including DankMaterialShell (DMS))
+- `shared/modules/theme/` — stylix, catppuccin, fonts, plus `gtk.nix` and `qt.nix`, the toolkit theming targets rule 5 routes through. No module sets the wallpaper: DMS picks it at runtime (`Mod+W`) and `theme/wallpapers/` holds the images
+- `shared/modules/nixos/security/vpn/mullvad/` — `daemon.nix` (daemon settings), `gui.nix` (tray app, a home-manager module) and `split-tunnel.nix` (system and home wrappers). Imported from `nixos/default.nix`, gated on `hostConfig.mullvad.enable`
+- `hosts/{hostname}/` — `default.nix` (host entry), `settings.nix`, `hardware/` (`gpu.nix`, `hardware-configuration.nix`), `wm/<wm>.nix` (per-WM host overrides: GPU env vars, autostart, Hyprland monitors)
+- `hosts/laptop/` also has `hardware/swapfile.nix` and `minecraft-servers/` (GTNH + TerraFirmaGreg server definitions, plus `mcservers.nix`, an fzf picker over them). `minecraft-servers/` is a **home-manager** module injected from `hosts/laptop/default.nix` via `home-manager.users.${username}.imports`, not a NixOS module, and the only place in the repo that reaches into HM from a host entry file.
 
 ### Where to place things
 
 | Scope | Path |
 | --- | --- |
 | Shared system | `shared/modules/nixos/` |
-| Shared user | `shared/modules/home-manager/` |
+| Shared user | `shared/modules/home/` |
 | Per-host hardware/entry | `hosts/{hostname}/` |
-| Per-host toggle | `hosts/{hostname}/hostConfig/core.nix` |
+| Per-host toggle | `hosts/{hostname}/settings.nix` |
 | WM internals | `shared/modules/wm/{wm}/` |
-| Mullvad VPN | `shared/modules/mullvad/{mullvad-nixos,mullvad-home}/` |
-| Per-host WM overrides | `hosts/{hostname}/wm/{wm}.nix` (only `hyprland.nix` / `niri.nix` exist; GNOME and COSMIC have no host overrides) |
+| Mullvad VPN | `shared/modules/nixos/security/vpn/mullvad/` |
+| Per-host WM overrides | `hosts/{hostname}/wm/{wm}.nix` (`hyprland.nix` / `niri.nix`) |
 
 ## Workflows
 
 **Add an application:**
 1. Add the toggle to **both** host configs (keep them symmetrical)
-2. Create the module in the right subdir (`shared/modules/home-manager/programs/...`)
-3. Add the conditional import to `shared/modules/home-manager/programs/default.nix`, the only router under `programs/`. The nested `default.nix` files (`browsers/{zen,mullvad,helium}/`, `media/freetube/`) are multi-file module bundles, not routers
+2. Create the module in the right subdir (`shared/modules/home/programs/...`)
+3. Add the conditional import to `shared/modules/home/programs/default.nix`, the router under `programs/`; a `gaming.*` app goes in `programs/gaming/default.nix`, which routes its own launchers, games and tools. The nested `default.nix` files (`browsers/{zen,mullvad,helium}/`, `media/freetube/`) are multi-file module bundles, not routers
 4. `alejandra .` → `git add` new files → `nix flake check` (do not rebuild; hand it back)
 5. Give any prose the task wrote or edited a cut-only revision pass before handing back: remove words, add none. No new information, no new claims, no rephrasing that smuggles either in. See **Writing Style**.
 6. Add it to the matching `<details>` table under **Components** in `README.md` (plus `## Structure` for a new directory, `## Flake Inputs` for a new input), and its link-reference definition at the bottom: the README is the public-facing doc and drifts easily.
@@ -178,17 +175,17 @@ inside it as `channelsHidden`, a JSON **string** needing `fromjson`. A `nixm fre
 folder is restored through the app's Settings → Data Settings → Import, not by copying files
 into place.
 
-**Add a system service:** same flow, but `shared/modules/nixos/services/<name>.nix` and import in `shared/modules/nixos/default.nix`.
+**Add a system service:** same flow, but `shared/modules/nixos/services/<category>/<name>.nix` and import in `shared/modules/nixos/default.nix`.
 
 **Switch WM:** change `windowManager` in the host's hostConfig, then hand back for the rebuild.
 
-**Customize WM:** edit `shared/modules/wm/{wm}/{wm}-home/...` for shared behavior, or `hosts/{hostname}/wm/{wm}.nix` for per-host overrides (GPU env vars, Hyprland monitors). Niri's monitors for both hosts are in `niri-home/core/monitors.nix`, keyed on `hostname`.
+**Customize WM:** edit `shared/modules/wm/{wm}/home/...` for shared behavior, or `hosts/{hostname}/wm/{wm}.nix` for per-host overrides (GPU env vars, Hyprland monitors). Niri's monitors for both hosts are in `niri/home/core/monitors.nix`, keyed on `hostname`.
 
 ## Window Managers
 
 **Keybind syntax differs per WM, so never mix them.**
 
-Hyprland uses the Lua config (`configType = "lua"`), so each bind is an `hl.bind` call built from `_args` with a Lua dispatcher. `shared/modules/wm/hyprland/hyprland-home/core/binds.nix` wraps that shape in two helpers, and new binds go through them:
+Hyprland uses the Lua config (`configType = "lua"`), so each bind is an `hl.bind` call built from `_args` with a Lua dispatcher. `shared/modules/wm/hyprland/home/core/binds.nix` wraps that shape in two helpers, and new binds go through them:
 ```nix
 (exec "SUPER + Return" "kitty")                                       # hl.dsp.exec_cmd("kitty")
 (bind "SUPER + 0" ''hl.dsp.workspace.toggle_special("scratchpad")'')  # any other dispatcher
@@ -196,7 +193,7 @@ Hyprland uses the Lua config (`configType = "lua"`), so each bind is an `hl.bind
 
 Window and layer rules stay in the `"match:class X, float on"` string form and go through `core/rules/luaRule.nix`. Check changes with the `hyprland-verify` skill, which builds a host's `hyprland.lua` (even while it runs niri) and runs `Hyprland --verify-config` on it.
 
-Niri uses attribute-set actions, and **spawns with arguments must be lists**, not strings (`shared/modules/wm/niri/niri-home/core/binds.nix`):
+Niri uses attribute-set actions, and **spawns with arguments must be lists**, not strings (`shared/modules/wm/niri/home/core/binds.nix`):
 ```nix
 programs.niri.settings.binds = {
   "Mod+Return".action.spawn = "kitty";                            # single command, string OK
@@ -205,30 +202,18 @@ programs.niri.settings.binds = {
 };
 ```
 
-A string like `"dms ipc call spotlight"` in Niri only runs `dms` and drops the rest, so use `["dms" "ipc" "call"] ++ lib.splitString " " action`. An assertion in `niri-home/core/binds.nix` fails the build on a `spawn` string containing a space.
+A string like `"dms ipc call spotlight"` in Niri only runs `dms` and drops the rest, so use `["dms" "ipc" "call"] ++ lib.splitString " " action`. An assertion in `niri/home/core/binds.nix` fails the build on a `spawn` string containing a space.
 
-COSMIC is the opposite of Niri: `Spawn` is a **single string** run through `/bin/sh -c`, so arguments and shell syntax belong inline and must *not* be split into a list (`shared/modules/wm/cosmic/cosmic-home/core/binds.nix`):
-```nix
-{key = "XF86AudioStop"; action = arg "Spawn" "playerctl pause";}          # one string
-{key = "Super+F";       action = plain "Maximize";}                       # nullary enum
-{key = "Super+Tab";     action = enumArg "System" "WorkspaceOverview";}   # nested enum
-```
+**DMS** (DankMaterialShell): Niri and Hyprland only. Declarative config lives at `shared/modules/wm/{wm}/home/shell/dms/`. Both have `default.nix`, `settings.json` and `clsettings.json`; Niri additionally has `niri-cheatsheet.json`. The DMS keybind helper differs per WM (an `hl.dsp.exec_cmd` Lua helper for Hyprland, list concat for Niri).
 
-GNOME defines no keybinds of its own beyond dconf. It is a light-weight fallback, not a peer of Niri/Hyprland/COSMIC.
+DMS runs as a systemd user service (`systemd.enable`, `niri.enableSpawn = false`), so it inherits the **systemd user manager** environment (`shared/modules/home/variables.nix`), not niri's `programs.niri.settings.environment` block. It launches every app with `systemd-run --user --scope`, so those session variables, and not niri's, govern anything started from the spotlight. Keep the two sets compatible: `QT_QPA_PLATFORM` and `GDK_BACKEND` must keep their X11 fallbacks (`wayland;xcb`, `wayland,x11`) or X11-only apps die instantly from the launcher while still working from a terminal: a Qt app with no wayland plugin aborts in ~50 ms, a JUCE/GTK one exits with "cannot open display". Diagnose by diffing `tr '\0' '\n' < /proc/$(pgrep -x .quickshell-wra)/environ` against `env`, then replaying with `env -i "${DMS_ENV[@]}" <app>`. A rebuild alone does not fix a bad value: the running manager keeps the old import, so `systemctl --user set-environment` then restart `dms.service`, or log out.
 
-**DMS** (DankMaterialShell): Niri and Hyprland only. Declarative config lives at `shared/modules/wm/{wm}/{wm}-home/shell/dms/`. Both have `core.nix`, `settings.json` and `clsettings.json`; Niri additionally has `niri-cheatsheet.json`. The DMS keybind helper differs per WM (an `hl.dsp.exec_cmd` Lua helper for Hyprland, list concat for Niri).
+**XDG portals** (Niri): `niri/session.nix` strips `GDK_BACKEND` from `xdg-desktop-portal-gnome`, and `niri/home/core/portals.nix` adds the gtk backend back. Read `docs/wm/niri-xdg-portals.md` before touching either, and never "fix" a portal by dropping the X11 fallback from `variables.nix`.
 
-DMS runs as a systemd user service (`systemd.enable`, `niri.enableSpawn = false`), so it inherits the **systemd user manager** environment (`shared/modules/home-manager/variables.nix`), not niri's `programs.niri.settings.environment` block. It launches every app with `systemd-run --user --scope`, so those session variables, and not niri's, govern anything started from the spotlight. Keep the two sets compatible: `QT_QPA_PLATFORM` and `GDK_BACKEND` must keep their X11 fallbacks (`wayland;xcb`, `wayland,x11`) or X11-only apps die instantly from the launcher while still working from a terminal: a Qt app with no wayland plugin aborts in ~50 ms, a JUCE/GTK one exits with "cannot open display". Diagnose by diffing `tr '\0' '\n' < /proc/$(pgrep -x .quickshell-wra)/environ` against `env`, then replaying with `env -i "${DMS_ENV[@]}" <app>`. A rebuild alone does not fix a bad value: the running manager keeps the old import, so `systemctl --user set-environment` then restart `dms.service`, or log out.
-
-**XDG portals** (Niri): `niri-nixos/default.nix` strips `GDK_BACKEND` from `xdg-desktop-portal-gnome`, and `niri-home/core/portals.nix` adds the gtk backend back. Read `.notes/wm/niri-xdg-portals.md` before touching either, and never "fix" a portal by dropping the X11 fallback from `variables.nix`.
-
-**COSMIC** config goes through the `cosmic-manager` flake input (`cosmic-home/default.nix`), which applies it with `cosmic-ctl` instead of symlinking. Never go back to `xdg.configFile` + `force = true`, and never put `$` in a `Spawn` string. Read `.notes/wm/cosmic-manager.md` before editing COSMIC panels, applets or binds.
-
-**Login:** Niri and Hyprland start from the DMS greeter (greetd, through the `dank-greeter` input, set up in `<wm>-nixos/default.nix`), COSMIC from cosmic-greeter (also greetd), GNOME from GDM. `system/display-manager.nix` unmasks `gdm` and `greetd` on every activation, because switching `windowManager` leaves the old display manager masked and the new one can't start.
+**Login:** Niri and Hyprland start from the DMS greeter (greetd, through the `dank-greeter` input, set up in `<wm>/session.nix`).
 
 **Hyprland-only directories:** `core/animations.nix`, `core/layouts/`, `core/variables.nix`, `core/rules/{windowrules,layerrules}/`, `scripts/`.
 **Niri-only directories:** `core/monitors.nix`, `core/rules.nix`, `core/xwayland.nix`, `addons/`.
-**COSMIC-only files:** `core/settings.nix` (compositor + the cosmic-manager master toggle), `core/binds.nix`, `core/mime.nix`.
 
 Per-host WM overrides exist where needed:
 - `hosts/laptop/wm/{hyprland,niri}.nix` — hybrid-GPU env (`WLR_DRM_DEVICES`), Solaar autostart; the niri one also turns off DMS auto-lock
@@ -245,23 +230,23 @@ These are only imported when the WM is active, e.g. `lib.optional (hostConfig.wi
 
 - DNS: systemd-resolved (stub listener on 127.0.0.53, opportunistic DNS-over-TLS, no fallback servers) + NetworkManager
 - WiFi: iwd, IPv6 privacy, random MAC
-- Firewall: TCP 22 (open; sshd only runs when `hostConfig.ssh.enable` is set), 80, 443, 25566 (Minecraft), 7777 (Terraria), 5555 (ADB); UDP 27000–27009, 27015, 27031–27036 and 4380 (Steam). Defined in `shared/modules/nixos/network/core.nix`. When `hostConfig.syncthing.enable` is set, the Syncthing module also opens TCP/UDP 22000 and UDP 21027.
-- Mullvad: `hostConfig.mullvad.enable` (WireGuard, quantum resistance, multihop, DAITA; lockdown mode cuts all traffic while the tunnel is down), `shared/modules/mullvad/`, split across `mullvad-nixos/` (daemon settings, split tunnel) and `mullvad-home/` (tray app). Settings are applied with the `mullvad` CLI from a oneshot unit, not by templating `settings.json`, which the daemon rewrites. Relay and entry selection are deliberately unmanaged so exits can be switched by hand. `hostConfig.mullvad.splitTunnel` names apps routed around the VPN; the NixOS half wraps system packages, the home half wraps `home.packages` ones, and the home profile outranks `/run/current-system/sw/bin` in PATH, so a NixOS wrapper for an HM package is silently shadowed.
+- Firewall: TCP 22 (open; sshd only runs when `hostConfig.ssh.enable` is set), 80, 443, 25566 (Minecraft), 7777 (Terraria), 5555 (ADB); UDP 27000–27009, 27015, 27031–27036 and 4380 (Steam). Defined in `shared/modules/nixos/network/firewall.nix`. When `hostConfig.syncthing.enable` is set, the Syncthing module also opens TCP/UDP 22000 and UDP 21027.
+- Mullvad: `hostConfig.mullvad.enable` (WireGuard, quantum resistance, multihop, DAITA; lockdown mode cuts all traffic while the tunnel is down), `shared/modules/nixos/security/vpn/mullvad/`: `daemon.nix` (daemon settings), `gui.nix` (tray app) and `split-tunnel.nix`. Settings are applied with the `mullvad` CLI from a oneshot unit, not by templating `settings.json`, which the daemon rewrites. Relay and entry selection are deliberately unmanaged so exits can be switched by hand. `hostConfig.mullvad.splitTunnel` names apps routed around the VPN; `split-tunnel.nix` puts each wrapper in the profile its app is installed in, since the home profile outranks `/run/current-system/sw/bin` in PATH and a system wrapper for an HM package is silently shadowed.
 - `network/blockers.nix` — hosts-level blocklists, always imported
 
 ## Security
 
-LUKS, kernel hardening, AppArmor, GNOME Keyring, auditd. Mullvad VPN as above. Wheel needs a password for sudo, so `nixm rebuild` prompts once (in a zenity window when no terminal is attached, as with `! nixm rebuild` in Claude Code, through the `SUDO_ASKPASS` helper `nixm.nix` sets); the NOPASSWD list in `security/sudo.nix` covers only sync, poweroff, reboot and shutdown. Keep it to commands that cannot be turned into a root shell (sed, systemctl, nixos-rebuild and dmesg all can).
+LUKS, kernel hardening, AppArmor, GNOME Keyring, auditd. Mullvad VPN as above. Wheel needs a password for sudo, so `nixm rebuild` prompts once (in a zenity window when no terminal is attached, as with `! nixm rebuild` in Claude Code, through the `SUDO_ASKPASS` helper `nixm.nix` sets); the NOPASSWD list in `security/auth/sudo.nix` covers only sync, poweroff, reboot and shutdown. Keep it to commands that cannot be turned into a root shell (sed, systemctl, nixos-rebuild and dmesg all can).
 
 Audit tooling is `lynis` (configuration) and `sbomnix`/`vulnxscan` (CVE scanning against the real closure, via osv.dev). **Do not go back to `vulnix`**: it only knows NVD's legacy JSON 1.1 feeds, which return 403 since their retirement, so every run ends in a `ConnectionError` traceback. Verified 2026-09-22, when the NVD API 2.0 answered 200 from the same machine.
 
-**AppArmor profiles** live in `shared/modules/nixos/security/apparmor/`, one module per app (`archives.nix` holds file-roller and unrar), gated on the app's hostConfig toggle where it has one, all in `complain` mode. Attach them by store-path glob (`/nix/store/*-mpv-*/bin/mpv`), never to a binary Nix builds also run (unzip, tar). `nix flake check` does not parse profiles, so test-compile them with the `apparmor-check` skill before handing back. Log reading, the enforce procedure and known gaps are in `.notes/security/apparmor.md`.
+**AppArmor profiles** live in `shared/modules/nixos/security/apparmor/`, one module per app (`archives.nix` holds file-roller and unrar), gated on the app's hostConfig toggle where it has one, all in `complain` mode. Attach them by store-path glob (`/nix/store/*-mpv-*/bin/mpv`), never to a binary Nix builds also run (unzip, tar). `nix flake check` does not parse profiles, so test-compile them with the `apparmor-check` skill before handing back. Log reading, the enforce procedure and known gaps are in `docs/security/apparmor.md`.
 
 `hostConfig.ssh.enable` gates `nixos/services/ssh.nix`, which owns both sshd and fail2ban: key-only auth, no root login, no forwarding, ed25519 host key, and the fail2ban sshd jail. An assertion refuses to build when the toggle is on and `authorizedKeys.keys` in that module is empty, since password and keyboard-interactive auth are both off and there would be no way in.
 
 ## Writing Style
 
-Covers everything with prose in it: chat replies, `README.md`, `.notes/`, commit
+Covers everything with prose in it: chat replies, `README.md`, `docs/`, commit
 messages. Code comments have their own rules under **Comment Style** below.
 
 **Avoid the usual LLM tells.** They are what makes a reader decide a text was
@@ -308,7 +293,7 @@ machine-written:
 
 What to do instead: use contractions, vary sentence length, and vary the
 subject, since consecutive sentences opening the same way read stiff. Plain
-words over jargon. In `README.md` and `.notes/` prose also skip em dashes; a
+words over jargon. In `README.md` and `docs/` prose also skip em dashes; a
 colon, a comma, parentheses, or two sentences all work. This applies to dashes
 inside a sentence. A dash separating a label from its description in a list
 (`` `path/` — what it holds ``) is structure, not prose, and stays.
@@ -317,7 +302,7 @@ Structure is not the problem and should stay. The bold-label bullet listing
 (`**Short label:** description`) is the house style for `README.md` and stays
 even when the wording around it gets loosened up.
 
-`.notes/` carries three extra rules, because a note is read months later with
+`docs/` carries three extra rules, because a note is read months later with
 no memory of writing it. Pin anything time-bound to an absolute date or
 version rather than "recently", "currently" or "the latest version". Replace a
 vague frequency ("sometimes crashes") with the condition that triggers it. Say
@@ -336,6 +321,8 @@ Alejandra (v3.0.0) is the formatter. Header hierarchy used throughout the repo:
 - **L2** — `#-- Section Name` (title case) between two `#----...----#` rules
 - **L3** — `#--- Item description`
 - **L4** — inline `# comment` (explain *why*, not *what*)
+
+A `default.nix` that imports anything keeps its `imports` in a final `#-- Imports` L2 section, after the rest of its config.
 
 Spacing: 1 blank line before each header level, none after L1 (code starts on the next line), none between L3 items, 1 after closing braces. Alejandra collapses multiple blank lines to one.
 
@@ -370,7 +357,7 @@ Common errors:
 
 **Rollback:** `sudo nixos-rebuild switch --rollback`, or pick a generation from the bootloader.
 
-**Laptop GPU:** `lspci | grep -i vga`, `env | grep -E 'DRI|VDPAU|LIBVA|VK'`. Configs: `hosts/laptop/gpu.nix` and `hosts/laptop/wm/{hyprland,niri}.nix`. Verify offload with `nvidia-offload glxinfo | grep "OpenGL renderer"`.
+**Laptop GPU:** `lspci | grep -i vga`, `env | grep -E 'DRI|VDPAU|LIBVA|VK'`. Configs: `hosts/laptop/hardware/gpu.nix` and `hosts/laptop/wm/{hyprland,niri}.nix`. Verify offload with `nvidia-offload glxinfo | grep "OpenGL renderer"`.
 
 ## Looking things up
 
@@ -382,7 +369,7 @@ Common errors:
 | nixpkgs packages / NixOS + home-manager options | the **nixos-mcp** tool (over `nix search` or scraping `search.nixos.org`) |
 | Library / SDK / API docs | the **context7** tool (over web search) |
 | Upstream releases, tags, issues, files | the **github** MCP tool, read-only (over fetching github.com) |
-| How an upstream repo works when context7 has little on it (DMS, niri-flake, cosmic-manager, stylix, Tsunagu) | the **deepwiki** MCP tool |
+| How an upstream repo works when context7 has little on it (DMS, niri-flake, stylix, Tsunagu) | the **deepwiki** MCP tool |
 | How other public flakes configure something (regex code search) | the **grep** MCP tool (grep.app) |
 | An app's own config syntax | `nix-shell -p <pkg> --run 'man <name>'` |
 
@@ -398,40 +385,39 @@ If that returns a path, read it and use `programs.<pkg>` instead.
 
 **Stop once you have the answer.** A package's own man page is authoritative for its config syntax; don't go on to read the nixpkgs derivation or build inputs, which describe how it is built, not how it is configured. Don't guess documentation URLs: if two web fetches fail, fall back to a local source.
 
-## Reference Notes (`.notes/`)
+## Reference Notes (`docs/`)
 
-Security/privacy notes live under `.notes/security/`:
+Security/privacy notes live under `docs/security/`:
 
 - `security/blocklists.md` — uBlock Origin filter lists
 - `security/ublock-filters.md` — custom uBlock cosmetic filters (paste into uBlock → My Filters)
 - `security/android-quic-vpn-leak.md` — QUIC VPN bypass (CVE, May 2026): mitigation via `adb shell device_config put tethering close_quic_connection -1`; re-apply after Android updates
 - `security/apparmor.md` — the per-app AppArmor profiles: what each attaches to, reading `apparmor="ALLOWED"` log lines, moving a profile to enforce, and what breaks first when you do
 
-Game-specific notes live under `.notes/gaming/`:
+Game-specific notes live under `docs/gaming/`:
 
 - `gaming/tmodloader-debugging.md` — tModLoader paths and log locations
-- `gaming/steam-launch-parameters.md` — per-game Steam launch flags; documents the `tml-prelaunch` script (`shared/modules/home-manager/programs/gaming/tml-prelaunch.nix`)
+- `gaming/steam-launch-parameters.md` — per-game Steam launch flags; documents the `tml-prelaunch` script (`shared/modules/home/programs/gaming/scripts/tml-prelaunch.nix`)
 - `gaming/launcher-env-variables.md` — common env vars + wrappers for Heroic/Lutris/Faugus/umu/Steam (JP locale, Proton WineD3D, XWayland wrapper, RPG Maker, perf wrappers)
-- `gaming/steam-client-menu-bug.md` — Steam's menus self-dismiss on niri because xwayland-satellite 0.8.2 focuses override-redirect windows; fixed in v0.8.3 (upstream `add2795`, PR #494), which nixpkgs ships, so `niri-home/core/xwayland.nix` uses the nixpkgs build again
-- `gaming/rocksmith-2014.md` — Rocksmith 2014 on Proton 11 + WOW64 with the Katana DI via PipeASIO and RS_ASIO: the manual install steps the `audio.rocksmith` module can't do, the Katana driver-priority stall, why calibration is skipped, which CDLC enabler build works (the CustomsForge v4.0 one, not the newer GitHub build), and the optional RSMods setup
+- `gaming/steam-client-menu-bug.md` — Steam's menus self-dismiss on niri because xwayland-satellite 0.8.2 focuses override-redirect windows; fixed in v0.8.3 (upstream `add2795`, PR #494), which nixpkgs ships, so `niri/home/core/xwayland.nix` uses the nixpkgs build again
+- `gaming/rocksmith-2014.md` — Rocksmith 2014 on Proton 11 + WOW64 with the Katana DI via PipeASIO and RS_ASIO: the manual install steps the `gaming.rocksmith` module can't do, the Katana driver-priority stall, why calibration is skipped, which CDLC enabler build works (the CustomsForge v4.0 one, not the newer GitHub build), and the optional RSMods setup
 - `gaming/minecraft_servers/{GTNH,TerraFirmaGreg-Modern}/` — each pack has `index.md` listing its sub-files (server setup, mods, config tweaks, etc.). **Update the relevant sub-file when that pack's config, mods, or settings change.** The matching declarative modules live at `hosts/laptop/minecraft-servers/{gtnh-server,tfg-server}.nix` (add a new server by creating a `.nix` there, importing it in that dir's `default.nix`, and adding a line to the hardcoded pack list in `mcservers.nix`, the fzf picker that names each pack with its version and dispatches to that server's command).
 
-Android device notes live under `.notes/android/`:
+Android device notes live under `docs/android/`:
 
 - `android/debloat/Lenovo-Idea-Tab-Pro/` — `index.md` (full redo procedure: never-remove list, install-replacements-first ordering, PMS flush, reboot test, privacy settings) + `removal-list.txt` (the 131 verified-safe packages). **A ZUI OTA restores every stock package, so this gets redone after each system update** with the `android-debloat-redo` skill.
 
-Local (non-nixpkgs) binary installs live under `.notes/local/`:
+Local (non-nixpkgs) binary installs live under `docs/local/`:
 
-- `local/local-binary-installs.md` — the `~/.local/opt` + `hostConfig.local` pattern for prebuilt third-party bundles kept out of git; restore steps for fresh installs / the laptop. **Add an entry here for each new local app.**
+- `local/local-binary-installs.md` — the `~/.local/opt` wrapper pattern for prebuilt third-party bundles kept out of git; restore steps for fresh installs / the laptop. **Add an entry here for each new local app.**
 - `local/appimage-wraps.md` — the `appimageTools.wrapType2` pattern for upstream AppImages. Hash-pinned into the store, so nothing to restore by hand; covers the per-app `Exec`/icon fixups, a non-executable `AppRun`, how to get a new hash when `nix store prefetch-file` hits the daemon's DNS timeout, and building one module without a rebuild.
 
-nixpkgs update notes live under `.notes/nixpkgs/`:
+nixpkgs update notes live under `docs/nixpkgs/`:
 
 - `nixpkgs/disabled-packages.md` — packages switched off because a flake update broke them, with the date, the nixpkgs rev and how to tell a fix has landed. **Add a row whenever an update forces a package off, and remove it on re-enable.**
 
-Window manager notes live under `.notes/wm/`:
+Window manager notes live under `docs/wm/`:
 
 - `wm/niri-xdg-portals.md` — why `xdg-desktop-portal-gnome` drops to Settings-only when `GDK_BACKEND` is set, how niri-flake hides the system portal backends, and the `busctl` health check
-- `wm/cosmic-manager.md` — how cosmic-manager applies config, the `$`-in-`Spawn` RON trap, panel/applet config traps, and the DMS bar the COSMIC panel mirrors
 
-Planned work lives under `.notes/todo/`, one file per task, named after it (`todo/affinity-setup.md`). **When the user says "add X to the todo", write a new file there** holding what the task is, why they want it, what the repo already has toward it, the steps left, and any research already done (links, versions, gotchas). Update the file rather than starting a second one for the same task, and delete it once the work is done. These are working notes: no `README.md` or Components entry.
+Planned work lives under `docs/todo/`, one file per task, named after it (`todo/affinity-setup.md`). **When the user says "add X to the todo", write a new file there** holding what the task is, why they want it, what the repo already has toward it, the steps left, and any research already done (links, versions, gotchas). Update the file rather than starting a second one for the same task, and delete it once the work is done. These are working notes: no `README.md` or Components entry.

@@ -1,4 +1,7 @@
 {
+  "outputStyle": "Concise",
+  "spinnerTipsEnabled": true,
+  "prefersReducedMotion": false,
   "permissions": {
     "allow": [
       "Bash(alejandra:*)",
@@ -44,6 +47,7 @@
       "WebFetch(domain:gtnh.huijiwiki.com)",
       "WebFetch(domain:wiki.gtnewhorizons.com)",
       "WebFetch(domain:danklinux.com)",
+      "WebFetch(domain:learnjapanese.moe)",
       "mcp__plugin_hm_nixos__nix",
       "mcp__plugin_hm_nixos__nix_versions",
       "mcp__plugin_hm_context7__resolve-library-id",
@@ -62,6 +66,8 @@
       "Bash(sudo nixos-rebuild*)",
       "Bash(nh os*)",
       "Bash(sudo nh os*)",
+      "Bash(*switch-to-configuration*)",
+      "Bash(home-manager switch*)",
       "Bash(grim*)",
       "Bash(niri msg action screenshot*)",
       "Bash(dms ipc call quickCapture screenshot*)"
@@ -75,7 +81,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/shared/modules/home-manager/programs/ai/hooks/post-edit.sh\"",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/shared/modules/home/programs/ai/hooks/post-edit.sh\"",
             "statusMessage": "Formatting"
           }
         ]

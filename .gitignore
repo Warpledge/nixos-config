@@ -22,9 +22,4 @@ result-*
 
 # WIP / personal scratchpad
 wip/
-/.notes/todo/quick-todos.md
-
-# BOSS Katana FloorBoard runtime artifacts (app writes these to CWD)
-/assign.kat
-/preferences.xml
-/license.txt
+/docs/todo/quick-todos.md
