@@ -19,6 +19,9 @@ import java.util.zip.ZipFile
  *
  * Nothing in this file may reference org.skepsun.* or tsunagu.kototoro.bridge.*: those
  * classes only exist inside the per-plugin class loader built by [pluginLoader].
+ *
+ * Only the Nix-pinned plugin (TSUNAGU_KOTOTORO_JAR) is ever loaded; a jar handed in by a
+ * repo sync or install is checked for shape and then replaced by it.
  */
 object KototoroPlugin {
     const val PACKAGE = "org.skepsun.kototoro.parsers"
@@ -43,8 +46,9 @@ object KototoroPlugin {
 
     fun isCatalogueRequest(extensionId: String): Boolean = extensionId == PACKAGE
 
+    @Suppress("UNUSED_PARAMETER")
     fun catalogue(file: File): List<CatalogueEntry> {
-        val loader = pluginLoader(file)
+        val loader = pluginLoader()
         try {
             @Suppress("UNCHECKED_CAST")
             val rows = entry(loader).getMethod("catalogue").invoke(null) as List<Array<String>>
@@ -61,9 +65,9 @@ object KototoroPlugin {
         if (name == extensionId || name.isEmpty()) {
             throw ExtensionLoadException("$extensionId is not a Kototoro parser id")
         }
-        val loader = pluginLoader(file)
+        val loader = pluginLoader()
         val source = entry(loader).getMethod("create", String::class.java).invoke(null, name)
-            ?: throw ExtensionLoadException("Kototoro plugin ${file.name} has no parser $name")
+            ?: throw ExtensionLoadException("Kototoro plugin ${pinnedJar().name} has no parser $name (installed as ${file.name})")
         val contentType = ContentTypeClassifier.classify(source.javaClass)
             ?: throw ExtensionLoadException("could not classify Kototoro parser $name")
         return LoadedExtension(extensionId, source, loader, contentType)
@@ -71,7 +75,15 @@ object KototoroPlugin {
 
     private fun entry(loader: ClassLoader): Class<*> = loader.loadClass("tsunagu.kototoro.bridge.Entry")
 
-    private fun pluginLoader(file: File): URLClassLoader {
+    private fun pinnedJar(): File {
+        val path = System.getenv("TSUNAGU_KOTOTORO_JAR")
+            ?: throw ExtensionLoadException("TSUNAGU_KOTOTORO_JAR not set")
+        return File(path).takeIf { it.isFile }
+            ?: throw ExtensionLoadException("Kototoro plugin $path not found")
+    }
+
+    private fun pluginLoader(): URLClassLoader {
+        val file = pinnedJar()
         val hash = MessageDigest.getInstance("SHA-256").digest(file.readBytes()).joinToString("") { "%02x".format(it) }
         val jar = converted.compute(hash) { _, cached ->
             cached?.takeIf { it.exists() } ?: Dex2JarConverter.convert(file)

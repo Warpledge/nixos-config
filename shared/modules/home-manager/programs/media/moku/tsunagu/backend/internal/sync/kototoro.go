@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
 	"tsunagu/backend/internal/repository"
 	"tsunagu/backend/internal/sandbox"
@@ -12,7 +13,9 @@ import (
 
 // A Kototoro parser plugin is one repo entry holding every site. The sandbox lists the
 // parsers when asked to load the bare package id, and each becomes its own extension
-// ("<package>.<SOURCE>") pointing at the same plugin jar.
+// ("<package>.<SOURCE>") pointing at the same plugin jar. Parsers are listed from the
+// Nix-pinned plugin (TSUNAGU_KOTOTORO_JAR), never from the jar a repo index names: any
+// index can claim this package id.
 const kototoroPackage = "org.skepsun.kototoro.parsers"
 
 func (s *Syncer) SetSandbox(sc *sandbox.SupervisedClient) { s.sandbox = sc }
@@ -39,13 +42,15 @@ func (s *Syncer) expandKototoro(ctx context.Context, ext repository.ParsedExtens
 	if s.sandbox == nil {
 		return nil, fmt.Errorf("sandbox not available")
 	}
+	path := os.Getenv("TSUNAGU_KOTOTORO_JAR")
+	if path == "" {
+		return nil, fmt.Errorf("TSUNAGU_KOTOTORO_JAR not set")
+	}
+	// Kept as the install URL so the registry has a file to store; the sandbox runs the
+	// pinned plugin in its place.
 	url := ext.JarURL
 	if url == "" {
 		url = ext.ApkURL
-	}
-	path, err := repository.DownloadExtensionFile(s.cacheDir, ext.PackageName, ext.VersionName, url, "jar")
-	if err != nil {
-		return nil, err
 	}
 	c, err := s.sandbox.Ensure(ctx)
 	if err != nil {

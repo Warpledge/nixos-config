@@ -25,7 +25,8 @@
 
   tsunagu = import "${inputs.tsunagu}/nix/packages.nix" {inherit pkgs lib;};
 
-  #--- Compile-time Kototoro API: the plugin's dex turned back into JVM classes
+  #--- The only Kototoro plugin the sandbox runs (TSUNAGU_KOTOTORO_JAR), whatever jar a repo index
+  #--- lists; kototoroApi is its dex turned back into JVM classes for compiling the bridge
   kototoroPlugin = pkgs.fetchurl {
     url = "https://raw.githubusercontent.com/skepsun/kototoro-parsers/58950ebc43b53cbfd8d4523544e870fd96b0c1cc/apk/plugin.jar"; # v1.0.134
     hash = "sha256-F0s6i606OsqGaoEA9CTdTTCZHbqml6DLsuCu0KQaWro=";
@@ -44,8 +45,8 @@
     hash = "sha256-cLNZJOS6vN/6N9Dlde4DnFai2XEjNCYkxItgMjNwQ0E=";
   };
 
-  #--- Upstream's vendorHash is stale at v0.4.1. server.patch expands a Kototoro repo on sync and
-  #--- retries a failed cover download through the extension's own client
+  #--- Upstream's vendorHash is stale at v0.4.1. server.patch expands a Kototoro repo on sync (from
+  #--- the pinned plugin, never the index's jar) and retries a failed cover download through the extension's own client
   tsunaguServer = tsunagu.tsunagu-server.overrideAttrs (old: {
     vendorHash = "sha256-rPtZJzXAuctkAWPGX/89a7Z9Cr+py510g5QCArOOTJE=";
     patches = (old.patches or []) ++ [./tsunagu/server.patch];
@@ -79,6 +80,7 @@
   #--- Moku execs TSUNAGU_BIN as is, so the sandbox runtime is set here
   server = pkgs.writeShellScriptBin "tsunagu" ''
     export TSUNAGU_SANDBOX_JAR=${tsunaguSandbox}/share/tsunagu/sandbox.jar
+    export TSUNAGU_KOTOTORO_JAR=${kototoroPlugin}
     export JAVA_HOME=${tsunagu.tsunagu-jre}
     export PATH=${lib.makeBinPath [pkgs.ffmpeg-headless]}''${PATH:+:$PATH}
 

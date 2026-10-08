@@ -47,6 +47,8 @@ the `repo` branch of skepsun/kototoro-parsers by deploy commits).
 4. Kototoro: bump the `plugin.jar` URL commit, its `hash` and the `# vX` comment together
    when status shows a newer build or the sandbox log has `NoSuchMethodError` naming
    `org.skepsun.`; jsoup and collection stay at the versions that plugin is built against.
+   The sandbox runs only this pinned jar (`TSUNAGU_KOTOTORO_JAR`), never the one a repo
+   index lists, so new parsers reach Moku through this bump and not through a repo sync.
 
 ## Checking a hash is really right
 
