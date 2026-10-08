@@ -12,7 +12,7 @@ Work from the repo root. Check each item below, and for every mismatch record th
 `file:line`, what it claims, and the command output or file that contradicts it.
 
 1. **Paths.** Every literal repo path in backticks in `CLAUDE.md`, `AGENTS.md` and
-   `README.md` (starting `shared/`, `hosts/`, `docs/`, `.claude/`, or a root file) must
+   `README.md` (starting `modules/`, `hosts/`, `docs/`, `.claude/`, or a root file) must
    exist. Expand `{a,b}` braces before testing; skip `<placeholder>` and `...` paths.
    Paths given relative to a section's subject (`core/rules.nix` under Niri) resolve
    against that subject's directory.
@@ -22,7 +22,7 @@ Work from the repo root. Check each item below, and for every mismatch record th
    `diff hosts/desktop/settings.nix hosts/laptop/settings.nix`; report a
    difference the doc doesn't list and a listed one that no longer differs.
 3. **Claude tooling.** Skills, agents, plugins, hooks and LSP servers that CLAUDE.md names
-   must match `shared/modules/home/programs/ai/claude.nix` and the directories
+   must match `modules/home/programs/ai/claude.nix` and the directories
    under `programs/ai/`; MCP servers named must match `programs/ai/mcp.nix`. The hook
    described in CLAUDE.md must match `.claude/settings.json` and `programs/ai/hooks/`.
 4. **Module layout.** File and directory lists in CLAUDE.md's Module layout and Window

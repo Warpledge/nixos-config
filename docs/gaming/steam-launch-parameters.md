@@ -8,7 +8,7 @@ Game-specific launch parameters, and why each one is set.
 PROTON_ENABLE_WAYLAND=0 WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS="--no-sandbox" %command%
 ```
 
-**Notes:** `PROTON_ENABLE_WAYLAND=0` forces XWayland, required because Wine's native Wayland driver splits the WebView2 login child window into a separate Wayland surface that can't composite back into the Unity game window (shows as white box). XWayland handles child window compositing correctly. `--no-sandbox` keeps the Chromium renderer process stable under Wine. Also requires a niri window rule for `msedgewebview2.exe` with `clip-to-geometry = false` and `draw-border-with-background = true` (in `shared/modules/wm/niri/home/core/rules.nix`).
+**Notes:** `PROTON_ENABLE_WAYLAND=0` forces XWayland, required because Wine's native Wayland driver splits the WebView2 login child window into a separate Wayland surface that can't composite back into the Unity game window (shows as white box). XWayland handles child window compositing correctly. `--no-sandbox` keeps the Chromium renderer process stable under Wine. Also requires a niri window rule for `msedgewebview2.exe` with `clip-to-geometry = false` and `draw-border-with-background = true` (in `modules/wm/niri/home/core/rules.nix`).
 
 ---
 
@@ -33,7 +33,7 @@ tml-prelaunch && DOTNET_DefaultStackSize=51200000 gamemoderun %command%
 - `DOTNET_DefaultStackSize=51200000` — redundant env var fallback, kept for safety
 
 **Pre-launch script:** declaratively managed in nixos-config
-- `shared/modules/home/programs/gaming/scripts/tml-prelaunch.nix`
+- `modules/home/programs/gaming/scripts/tml-prelaunch.nix`
 - Uses `${pkgs.jq}/bin/jq` (nix store path, no PATH dependency)
 - Merges settings into existing JSON, preserving all other tModLoader properties
 - Idempotent — no-ops if file is missing

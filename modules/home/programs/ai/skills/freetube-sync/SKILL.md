@@ -6,7 +6,7 @@ description: Fold channels blocked or unblocked in the FreeTube app back into th
 # FreeTube sync
 
 FreeTube keeps its blocklist in `~/.config/FreeTube/settings.db`; the repo mirrors it in
-`shared/modules/home/programs/media/freetube/blocked-channels.nix`. The full
+`modules/home/programs/media/freetube/blocked-channels.nix`. The full
 reasoning is under **Update FreeTube state** in CLAUDE.md; this skill is the runnable form.
 
 ## Steps

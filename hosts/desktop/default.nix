@@ -44,7 +44,7 @@
       ./hardware/gpu.nix
       ./hardware/hardware-configuration.nix
 
-      ../../shared
+      ../../modules
     ]
     ++ (lib.optional (hostConfig.windowManager == "hyprland") ./wm/hyprland.nix)
     ++ (lib.optional (hostConfig.windowManager == "niri") ./wm/niri.nix);

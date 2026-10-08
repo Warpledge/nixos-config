@@ -32,7 +32,7 @@ Rebuilds stack up rather than overwrite each other: the old one stays on disk an
 - **Runs the awkward stuff:** [AppImages](./docs/local/appimage-wraps.md), Flatpaks ([nix-flatpak][nix-flatpak]), and the normal Linux programs Nix usually won't run ([nix-ld][nix-ld]).
 - **The tools I actually work in:** [Docker][docker], [tmux][tmux], [Zed][zed] and [Helix][helix], git with nicer diffs ([delta][delta]) and the [gh][gh] CLI.
 - **Built for gaming:** [Steam][steam] and Gamescope, [GameMode][gamemode] and [MangoHud][mangohud], plus kernel and GPU tweaks per machine.
-- **Nix commands behind a menu:** [`nixm`](./shared/modules/home/nixm.nix) (short for "nix menu") puts rebuilds, cleanup, rollbacks and updates one keypress away, so I'm not looking commands up.
+- **Nix commands behind a menu:** [`nixm`](./modules/home/nixm.nix) (short for "nix menu") puts rebuilds, cleanup, rollbacks and updates one keypress away, so I'm not looking commands up.
 
 ## Host Machines
 
@@ -64,7 +64,7 @@ The top level is a set of categories. Pick one and it opens into its own menu of
 
 ![nixm NixOS submenu](./docs/screenshots/nixm-tui-nixos.png)
 
-`nixm` is the script I use to manage the system day to day (it lives in [`shared/modules/home/nixm.nix`](./shared/modules/home/nixm.nix)). Run it on its own for a TUI (terminal UI) menu, or pass a subcommand to jump straight to it. It started out as a script from [anotherhadi's NixOS config](https://github.com/anotherhadi/nixy), and I've reworked and extended it a lot since.
+`nixm` is the script I use to manage the system day to day (it lives in [`modules/home/nixm.nix`](./modules/home/nixm.nix)). Run it on its own for a TUI (terminal UI) menu, or pass a subcommand to jump straight to it. It started out as a script from [anotherhadi's NixOS config](https://github.com/anotherhadi/nixy), and I've reworked and extended it a lot since.
 
 <details>
 <summary>📋 All nixm commands</summary>
@@ -177,7 +177,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | --- | --- |
 | **Editors / IDE** | [Zed][zed], [Helix][helix], [micro][micro] (quick edits) |
 | **Formatter** | [alejandra][alejandra] v3.0.0 |
-| **Rebuild Wrapper** | [`nixm`](./shared/modules/home/nixm.nix) (fzf menu over [nh][nh]) |
+| **Rebuild Wrapper** | [`nixm`](./modules/home/nixm.nix) (fzf menu over [nh][nh]) |
 </details>
 
 <details>
@@ -371,7 +371,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 
 ## Shell Shortcuts
 
-Short commands I use in place of longer ones, all set up in [`zsh.nix`](./shared/modules/home/programs/shell/zsh.nix). The ones marked _(fn)_ take an argument.
+Short commands I use in place of longer ones, all set up in [`zsh.nix`](./modules/home/programs/shell/zsh.nix). The ones marked _(fn)_ take an argument.
 
 <details>
 <summary>⚡ All shell shortcuts</summary>
@@ -623,13 +623,12 @@ hosts/{desktop,laptop}/
   ├── default.nix                 # host entry
   ├── hardware/                   # hardware-configuration.nix, GPU, swapfile (laptop)
   └── wm/                         # per-host WM overrides
-shared/
+modules/
   ├── default.nix                 # NixOS + home-manager wiring
-  └── modules/
-      ├── nixos/                  # system modules
-      ├── home/                   # user modules
-      ├── theme/                  # stylix, catppuccin, fonts, GTK, QT
-      └── wm/                     # window managers
+  ├── nixos/                      # system modules
+  ├── home/                       # user modules
+  ├── theme/                      # stylix, catppuccin, fonts, GTK, QT
+  └── wm/                         # window managers
 docs/                           # personal notes I share between devices
 ```
 
@@ -639,9 +638,9 @@ docs/                           # personal notes I share between devices
 flake.nix
   → hosts/{hostname}/default.nix             # Pick the machine
     → hosts/{hostname}/settings.nix          # Read its on/off switches
-    → shared/default.nix                     # Wire up system + user config
-      → shared/modules/{nixos,home}/         # Load only the enabled modules
-      → shared/modules/wm/${windowManager}/  # Load only the active window manager
+    → modules/default.nix                    # Wire up system + user config
+      → modules/{nixos,home}/                # Load only the enabled modules
+      → modules/wm/${windowManager}/         # Load only the active window manager
 ```
 
 That one file per host decides the window manager and the kernel, which browsers, terminals and editors get installed, and which services run.

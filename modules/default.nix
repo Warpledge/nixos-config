@@ -38,9 +38,9 @@ in {
     users.${username} = {
       imports = [
         #--- Home System
-        ./modules/home
+        ./home
         #--- Home Desktop (controlled by hostConfig)
-        ./modules/wm/${hostConfig.windowManager}/home
+        ./wm/${hostConfig.windowManager}/home
       ];
       home = {
         username = lib.mkDefault "${username}";
@@ -63,9 +63,9 @@ in {
     inputs.catppuccin.nixosModules.catppuccin
 
     #--- System Modules
-    ./modules/nixos
-    ./modules/theme
+    ./nixos
+    ./theme
     #--- Desktop Environment (controlled by hostConfig)
-    ./modules/wm/${hostConfig.windowManager}/session.nix
+    ./wm/${hostConfig.windowManager}/session.nix
   ];
 }

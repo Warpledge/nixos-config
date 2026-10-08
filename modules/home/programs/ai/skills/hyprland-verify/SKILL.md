@@ -1,6 +1,6 @@
 ---
 name: hyprland-verify
-description: Verify this NixOS repo's Hyprland config with Hyprland's own checker before handing back. Use after any change under shared/modules/wm/hyprland/, hosts/*/wm/hyprland.nix, Hyprland binds, window or layer rules, monitors, the quad layout, or the Hyprland theming targets, and whenever the user asks whether the Hyprland config is valid, even if the host currently runs niri. nix flake check does not catch Lua config errors; this does.
+description: Verify this NixOS repo's Hyprland config with Hyprland's own checker before handing back. Use after any change under modules/wm/hyprland/, hosts/*/wm/hyprland.nix, Hyprland binds, window or layer rules, monitors, the quad layout, or the Hyprland theming targets, and whenever the user asks whether the Hyprland config is valid, even if the host currently runs niri. nix flake check does not catch Lua config errors; this does.
 ---
 
 # Hyprland verify

@@ -9,9 +9,9 @@ Added 2026-10-07.
 The wiring went in with commit `4d1a513` (2026-05-19), but the toggle has been `false` on both hosts ever since, so it has never been built or run here.
 
 - `flake.nix` — `affinity-nix` input (`github:mrshmllow/affinity-nix`), deliberately not following our nixpkgs so its builds match upstream's binary cache. Pinned at `11312af` (2026-09-28) as of this note.
-- `shared/modules/nixos/nix/nixpkgs.nix` — applies `inputs.affinity-nix.overlays.default`, which provides `pkgs.affinity-v3`.
-- `shared/modules/home/programs/graphics/affinity.nix` — puts `affinity-v3` in `home.packages`.
-- `shared/modules/home/programs/default.nix` — imports that module when `hostConfig.graphics.affinity` is set.
+- `modules/nixos/nix/nixpkgs.nix` — applies `inputs.affinity-nix.overlays.default`, which provides `pkgs.affinity-v3`.
+- `modules/home/programs/graphics/affinity.nix` — puts `affinity-v3` in `home.packages`.
+- `modules/home/programs/default.nix` — imports that module when `hostConfig.graphics.affinity` is set.
 - `hosts/{desktop,laptop}/settings.nix` — `graphics.affinity = false`.
 - `README.md` — already lists Affinity in the Graphics row and the flake inputs table.
 

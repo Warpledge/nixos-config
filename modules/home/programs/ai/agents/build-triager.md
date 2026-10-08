@@ -33,12 +33,12 @@ run `nixm`, `nixos-rebuild` or `nh os` (activation is the user's), and never run
      option if the trace names them.
    - **dependency**: `dependencies couldn't be built`; report only the root failures.
 5. Route each failure to the fix this repo already has:
-   - anything under `shared/modules/home/programs/media/moku/`, a `pnpmHash` or a
+   - anything under `modules/home/programs/media/moku/`, a `pnpmHash` or a
      `vendorHash`: the `moku-bump` skill
    - an upstream nixpkgs package breaking after a flake update: the `disable-package`
      skill, with the root nixpkgs revision from
      `nix flake metadata --json | jq -r '.locks as $l | $l.nodes[$l.nodes.root.inputs.nixpkgs].locked.rev[0:7]'`
-   - anything under `shared/modules/nixos/security/apparmor/`: the `apparmor-check` skill
+   - anything under `modules/nixos/security/apparmor/`: the `apparmor-check` skill
    - otherwise: say so and give the file most likely at fault
 
 Report, per host: `ok <out path>` or one block per root failure with derivation, class,

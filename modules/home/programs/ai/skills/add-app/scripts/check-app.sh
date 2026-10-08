@@ -36,7 +36,7 @@ found=""
 while IFS= read -r router; do
   rel="./$(realpath --relative-to="$(dirname "$router")" "$module" 2>/dev/null)"
   if grep -F "hostConfig.$toggle" "$router" | grep -qF -- "$rel"; then found="$router"; break; fi
-done < <(grep -rl --include=default.nix -F "hostConfig.$toggle" shared/modules)
+done < <(grep -rl --include=default.nix -F "hostConfig.$toggle" modules)
 if [ -n "$found" ]; then
   pass "imported in $found"
 else

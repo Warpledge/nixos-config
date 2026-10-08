@@ -4,8 +4,8 @@ Rocksmith 2014 Edition Remastered (Steam app 221680) reads the guitar from the K
 
 ## What the repo handles
 
-- **`gaming.rocksmith`** gates `shared/modules/home/programs/gaming/games/rocksmith.nix`, which writes `RS_ASIO.ini` into the game folder and `~/.config/pipeasio/config.ini`. Both are read-only symlinks, so the PipeASIO settings panel can't save over them.
-- **The Katana's driver priority** is lowered by a WirePlumber rule in `shared/modules/nixos/services/hardware/sound.nix`. See the troubleshooting section for why.
+- **`gaming.rocksmith`** gates `modules/home/programs/gaming/games/rocksmith.nix`, which writes `RS_ASIO.ini` into the game folder and `~/.config/pipeasio/config.ini`. Both are read-only symlinks, so the PipeASIO settings panel can't save over them.
+- **The Katana's driver priority** is lowered by a WirePlumber rule in `modules/nixos/services/hardware/sound.nix`. See the troubleshooting section for why.
 
 ## Manual steps on a fresh install
 

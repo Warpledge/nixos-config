@@ -28,7 +28,7 @@ LC_ALL=ja_JP.UTF-8
 
 **Notes:** Linux equivalent of Locale Emulator / AppLocale on Windows. The
 `ja_JP.UTF-8` locale is already enabled system-wide in
-`shared/modules/nixos/system/language/locale.nix`, so these just need to be set on the
+`modules/nixos/system/language/locale.nix`, so these just need to be set on the
 game's process. Proton-GE inherits them and feeds the correct codepage to the
 game. Set per-game, not globally: you don't want every title in a JP locale.
 

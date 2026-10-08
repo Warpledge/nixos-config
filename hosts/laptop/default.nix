@@ -100,7 +100,7 @@
       ./hardware/hardware-configuration.nix
       ./hardware/swapfile.nix
 
-      ../../shared
+      ../../modules
     ]
     ++ (lib.optional (hostConfig.windowManager == "hyprland") ./wm/hyprland.nix)
     ++ (lib.optional (hostConfig.windowManager == "niri") ./wm/niri.nix);

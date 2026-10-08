@@ -1,7 +1,7 @@
 # AppArmor profiles
 
 Added 2026-09-23 (AppArmor 5.0.2). The profiles live in
-`shared/modules/nixos/security/apparmor/`, one file per app, and every one starts in
+`modules/nixos/security/apparmor/`, one file per app, and every one starts in
 `complain` mode: nothing gets blocked, and anything the profile would have denied is
 logged as `apparmor="ALLOWED"`.
 

@@ -15,9 +15,9 @@ home-manager, Niri WM, Stylix theming (Catppuccin Mocha).
 3. **Stylix owns all theming.** Never set colors, fonts, or wallpaper in a
    module. Stylix targets already configure them; hardcoded values conflict
    with the theme or silently override it. Enable a program's theming and let
-   Stylix supply the palette. catppuccin/nix (`shared/modules/theme/catppuccin.nix`)
+   Stylix supply the palette. catppuccin/nix (`modules/theme/catppuccin.nix`)
    also auto-enables its ports; where both theme an app, one target is switched
-   off in `shared/modules/theme/`.
+   off in `modules/theme/`.
 4. **Set only what was asked for.** Do not add extra options, defaults, or
    "nice to have" settings beyond the request.
 5. **Surgical edits only.** Never rewrite a whole file. Never delete content
@@ -96,7 +96,7 @@ If that returns a path, read it and use `programs.<pkg>` instead.
 
 `hostConfig` (from `hosts/<host>/settings.nix`) is threaded through
 `specialArgs`, so every module can read it. Conditional imports in
-`shared/modules/home/programs/default.nix` decide what actually loads —
+`modules/home/programs/default.nix` decide what actually loads —
 it is the router under `programs/`, except `gaming/default.nix`, which routes the
 `gaming.*` launchers, games and tools, and `audio/guitar/default.nix`, which
 routes the guitar apps. Most subdirectories are flat `.nix` files, but
@@ -109,8 +109,8 @@ goes in `audio/guitar/default.nix`, and its toggle joins that folder's gate in
 
 | Scope | Path |
 | --- | --- |
-| Shared user config | `shared/modules/home/` |
-| Shared system config | `shared/modules/nixos/` |
+| Shared user config | `modules/home/` |
+| Shared system config | `modules/nixos/` |
 | Per-host toggles | `hosts/{desktop,laptop}/settings.nix` |
 
 **Desktop and laptop hostConfig stay symmetrical.** Every toggle you add goes
@@ -119,7 +119,7 @@ in both files with the same value unless told otherwise.
 ## Adding an application
 
 1. Add the toggle to **both** host configs, in the group it belongs to
-2. Create the module under `shared/modules/home/programs/<group>/`.
+2. Create the module under `modules/home/programs/<group>/`.
    Check for a home-manager module first (see above) — prefer
    `programs.<pkg>.enable` over `home.packages = [pkgs.<pkg>]`
 3. Add the conditional import to `programs/default.nix`:

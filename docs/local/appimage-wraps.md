@@ -96,7 +96,7 @@ Build a module on its own without a full rebuild:
 ```bash
 nix build --impure --no-link --print-out-paths --expr '
 let pkgs = import <nixpkgs> {};
-    m = import ./shared/modules/home/programs/media/streamlink-twitch-gui.nix { inherit pkgs; };
+    m = import ./modules/home/programs/media/streamlink-twitch-gui.nix { inherit pkgs; };
 in builtins.head m.home.packages'
 ```
 

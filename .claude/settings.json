@@ -80,7 +80,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/shared/modules/home/programs/ai/hooks/post-edit.sh\"",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/modules/home/programs/ai/hooks/post-edit.sh\"",
             "statusMessage": "Formatting"
           }
         ]

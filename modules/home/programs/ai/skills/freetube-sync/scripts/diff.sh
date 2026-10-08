@@ -6,7 +6,7 @@ set -euo pipefail
 
 repo="${1:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
 db="$HOME/.config/FreeTube/settings.db"
-nix="$repo/shared/modules/home/programs/media/freetube/blocked-channels.nix"
+nix="$repo/modules/home/programs/media/freetube/blocked-channels.nix"
 
 if pgrep -f -- '-freetube-[0-9]' >/dev/null; then
   echo "WARNING: FreeTube is running; settings.db is only current after it exits." >&2

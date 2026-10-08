@@ -5,7 +5,7 @@ description: Bump or repair the source-built Moku manga reader and its Tsunagu b
 
 # Moku bump
 
-Moku is built from source in `shared/modules/home/programs/media/moku/`, pinned
+Moku is built from source in `modules/home/programs/media/moku/`, pinned
 twice: the `moku` and `tsunagu` flake inputs in `flake.nix`, which must move together
 (Tsunagu is the backend each Moku release ships with). The comments in `default.nix`
 explain every override; this skill is the order of work.

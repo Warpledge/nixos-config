@@ -3,7 +3,7 @@
 set -euo pipefail
 
 repo="${1:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
-mod="$repo/shared/modules/home/programs/media/moku/default.nix"
+mod="$repo/modules/home/programs/media/moku/default.nix"
 token="$HOME/.nixos-config-mcp/github"
 auth=()
 [ -s "$token" ] && auth=(-H "Authorization: Bearer $(tr -d '[:space:]' <"$token")")

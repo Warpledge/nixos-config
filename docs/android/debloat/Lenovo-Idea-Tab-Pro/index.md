@@ -279,7 +279,7 @@ No camera, browser, clock/alarm, calculator, contacts or calendar. Fill from F-D
 Copying wallpapers over:
 
 ```bash
-adb push shared/modules/theme/wallpapers/. /sdcard/Pictures/Wallpapers/
+adb push modules/theme/wallpapers/. /sdcard/Pictures/Wallpapers/
 ```
 
 MediaStore indexes them automatically via FUSE, no manual scan needed. `com.zui.wallpapersetting` and `com.android.wallpapercropper` survive the debloat, so Settings > Wallpaper still works.

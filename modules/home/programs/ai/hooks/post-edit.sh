@@ -15,7 +15,7 @@ case $f in */hosts/*/settings.nix)
 $(diff "$r"/hosts/{desktop,laptop}/settings.nix | grep '^[<>].*=')") ;;
 esac
 if [[ $f == *.nix && $f != */modules/theme/* ]] && grep -qE '"#[0-9a-fA-F]{6}|rgba?\(' <<<"$new"; then
-  msg+=("New color literal outside shared/modules/theme/: Stylix owns theming (CLAUDE.md rule 5). Enable the program's Stylix target unless this is a deliberate override.")
+  msg+=("New color literal outside modules/theme/: Stylix owns theming (CLAUDE.md rule 5). Enable the program's Stylix target unless this is a deliberate override.")
 fi
 ((${#msg[@]})) && jq -n --arg c "$(printf '%s\n' "${msg[@]}")" '{hookSpecificOutput:{hookEventName:"PostToolUse",additionalContext:$c}}'
 exit 0

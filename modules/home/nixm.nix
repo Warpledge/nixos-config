@@ -212,7 +212,7 @@
 
       #-- Palette
       #--- Truecolor escapes built from the Stylix base16 scheme, so the
-      #--- menu tracks the theme set in shared/modules/theme/stylix.nix.
+      #--- menu tracks the theme set in modules/theme/stylix.nix.
       E=$'\e'
       R="''${E}[0m"
       C_NIX="''${E}[38;2;${rgb "base0D"}m"

@@ -29,8 +29,8 @@ that catches the step that usually gets missed.
 1. **Toggle on both hosts**, same value and comment, in the matching attribute set of
    `hosts/{desktop,laptop}/settings.nix` (they stay byte-identical apart from the
    listed deliberate differences).
-2. **Module** in `shared/modules/home/programs/<category>/` (system services:
-   `shared/modules/nixos/services/<category>/`). L1 header, short comments per Comment Style.
+2. **Module** in `modules/home/programs/<category>/` (system services:
+   `modules/nixos/services/<category>/`). L1 header, short comments per Comment Style.
 3. **Import** in the router, `programs/default.nix` (`gaming.*` apps: `programs/gaming/default.nix`;
    services: `nixos/default.nix`):
    `++ lib.optionals hostConfig.<category>.<app> [./<category>/<app>.nix]`.

@@ -5,7 +5,7 @@ set -euo pipefail
 export LC_ALL=C
 
 repo="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-nix="$repo/shared/modules/home/programs/media/freetube/blocked-channels.nix"
+nix="$repo/modules/home/programs/media/freetube/blocked-channels.nix"
 mode="${1:-check}"
 
 entries="$(grep -E '^\s*\(mk "' "$nix")"
