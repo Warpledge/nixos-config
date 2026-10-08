@@ -11,7 +11,6 @@
       "Bash(nix flake check)",
       "Bash(nix flake show)",
       "Bash(nix flake metadata)",
-      "Bash(nix log:*)",
       "Bash(nix-store -q:*)",
       "Bash(journalctl:*)",
       "Bash(lspci:*)",
