@@ -22,7 +22,8 @@
       credential.helper = "gpg";
       merge.conflictstyle = "diff3";
       diff.colorMoved = "default";
-      commit.template = "${./git-commit-template}"; # Conventional Commits guide shown in the editor; mirrors the commit skill
+      # Conventional Commits guide shown in the editor; mirrors the commit skill
+      commit.template = "${./git-commit-template}";
     };
 
     ignores = [

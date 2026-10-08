@@ -35,7 +35,7 @@
       initrd.enable = true; # Load AMDGPU driver in initrd for early GPU access
       opencl.enable = true;
     };
-    enableRedistributableFirmware = true; # Enable proprietary firmware for hardware compatibility
+    enableRedistributableFirmware = true; # Proprietary firmware blobs
     cpu.amd.updateMicrocode = true;
   };
 
@@ -47,7 +47,7 @@
     #--- Prevents AMDVLK from being picked for games—critical for performance
     AMD_VULKAN_ICD = "RADV";
 
-    #--- Force RADV driver usage; include both 64-bit and 32-bit ICDs so 32-bit Proton games work
+    #--- Force RADV; both 64- and 32-bit ICDs so 32-bit Proton games work
     VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/radeon_icd.x86_64.json:/run/opengl-driver-32/share/vulkan/icd.d/radeon_icd.i686.json";
 
     #--- RDNA 3 specific tweaks
@@ -57,8 +57,10 @@
     RADV_FORCE_VRS = "2x2"; # Variable rate shading for better perf
 
     #--- AMD Radeon specific settings (RDNA 4 - RX 9070 XT)
-    RADV_PERFTEST = "aco,nggc,sam,rt,gpl"; # ACO compiler, NGG culling, SAM, RT, Graphics Pipeline Library
-    RADV_DEBUG = "novrsflatshading,zerovram"; # Disable VRS flat shading & optimize VRAM usage
+    # ACO compiler, NGG culling, SAM, RT, Graphics Pipeline Library
+    RADV_PERFTEST = "aco,nggc,sam,rt,gpl";
+    # Disable VRS flat shading & optimize VRAM usage
+    RADV_DEBUG = "novrsflatshading,zerovram";
 
     #--- Disable shader disk cache size limit (useful for large game libraries)
     AMD_SHADER_DISK_CACHE_SIZE = "10737418240"; # 10GB shader cache

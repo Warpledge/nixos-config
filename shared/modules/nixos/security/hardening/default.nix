@@ -56,12 +56,15 @@
   #--------------------------------------------------------------------#
   #-- GNOME Keyring
   #--------------------------------------------------------------------#
-  services.gnome.gcr-ssh-agent.enable = false; # disabled: conflicts with gpg-agent's SSH support (cyclic gpg-agent-ssh.socket dependency)
+  # Conflicts with gpg-agent's SSH support (cyclic gpg-agent-ssh.socket dep)
+  services.gnome.gcr-ssh-agent.enable = false;
   programs = {
     seahorse.enable = true; # GUI for managing keyring credentials
     gnupg.agent = {
       enable = true;
-      enableSSHSupport = false; # owned by home-manager's services.gpg-agent to avoid a cyclic gpg-agent-ssh.socket dependency
+      # Owned by home-manager's services.gpg-agent, avoiding a cyclic
+      # gpg-agent-ssh.socket dependency
+      enableSSHSupport = false;
     };
     #--- Disable SSH UseRoaming vulnerability
     ssh.extraConfig = ''

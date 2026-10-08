@@ -16,8 +16,9 @@
     kernelParams = [
       "nvidia-drm.modeset=1" # Enable direct mode setting for better Wayland support
       "nvidia_drm.fbdev=1" # Enable framebuffer device support
-      "nvidia.NVreg_PreserveVideoMemoryAllocations=1" # Keep video memory allocations across suspend/resume
-      "nvidia.NVreg_UsePageAttributeTable=1" # Enable CPU Page Attribute Table for better memory management
+      # Keep video memory allocations across suspend/resume
+      "nvidia.NVreg_PreserveVideoMemoryAllocations=1"
+      "nvidia.NVreg_UsePageAttributeTable=1" # CPU Page Attribute Table (PAT)
     ];
   };
 

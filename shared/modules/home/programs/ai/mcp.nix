@@ -42,7 +42,8 @@ in {
   #--------------------------------------------------------------------#
   #-- Token Placeholders
   #--------------------------------------------------------------------#
-  # Creates the folder and empty owner-only files on a fresh host; never overwrites a token
+  # Creates the folder and empty owner-only files on a fresh host;
+  # never overwrites a token
   home.activation.mcpTokenFiles = lib.hm.dag.entryAfter ["writeBoundary"] ''
     run install -d -m 700 "${tokenDir}"
     for f in github context7; do

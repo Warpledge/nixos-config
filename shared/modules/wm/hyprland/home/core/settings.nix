@@ -55,7 +55,7 @@
           zoom_factor = 1;
           zoom_rigid = false;
           hotspot_padding = 1;
-          inactive_timeout = 3; # Hide cursor after 3 seconds of inactivity (OLED burn-in prevention)
+          inactive_timeout = 3; # Hide cursor after 3s idle (OLED burn-in)
         };
         master = {
           new_status = "master";
@@ -161,7 +161,7 @@
           hide_special_on_workspace_change = true;
         };
         render = {
-          cm_auto_hdr = 0; # HDR only via toggle_hdr (Mod+H), never auto-switched by fullscreen apps
+          cm_auto_hdr = 0; # HDR only via toggle_hdr (Mod+H); no fullscreen auto
         };
       };
     };

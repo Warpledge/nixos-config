@@ -29,7 +29,8 @@
     };
 
     #--- Formatter (nix fmt)
-    formatter.x86_64-linux = inputs.alejandra.defaultPackage.x86_64-linux; # `nix fmt .` - 3.0.0 reads stdin when given no path
+    # `nix fmt .`: alejandra 3.0.0 reads stdin when given no path
+    formatter.x86_64-linux = inputs.alejandra.defaultPackage.x86_64-linux;
   };
 
   #--------------------------------------------------------------------#
@@ -48,12 +49,15 @@
     };
 
     #--- System Utilities & Tools
-    alejandra.url = "github:kamadorueda/alejandra/3.0.0"; # own nixpkgs: 3.0.0 vendors a mimalloc that GCC 15 rejects
-    nix-flatpak.url = "github:gmodena/nix-flatpak"; # no nixpkgs input to follow (modules only)
-    claude-code.url = "github:sadjow/claude-code-nix"; # own nixpkgs: following ours misses claude-code.cachix.org
+    # Own nixpkgs: 3.0.0 vendors a mimalloc that GCC 15 rejects
+    alejandra.url = "github:kamadorueda/alejandra/3.0.0";
+    nix-flatpak.url = "github:gmodena/nix-flatpak"; # has no nixpkgs input
+    # Own nixpkgs: following ours misses claude-code.cachix.org
+    claude-code.url = "github:sadjow/claude-code-nix";
 
     #--- Applications
-    affinity-nix.url = "github:mrshmllow/affinity-nix"; # own nixpkgs: following ours misses cache.forall.systems
+    # Own nixpkgs: following ours misses cache.forall.systems
+    affinity-nix.url = "github:mrshmllow/affinity-nix";
     nixcord = {
       url = "github:kaylorben/nixcord";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -71,11 +75,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     tsunagu = {
-      url = "github:moku-project/Tsunagu/v0.4.1"; # the backend Moku 0.13.1 ships with; bump with `moku`
+      # The backend Moku 0.13.1 ships with; bump with `moku`
+      url = "github:moku-project/Tsunagu/v0.4.1";
       flake = false;
     };
     moku = {
-      url = "github:moku-project/Moku/v0.13.1"; # built in home-manager media/moku; bump with `tsunagu`
+      # Built in home-manager media/moku; bump with `tsunagu`
+      url = "github:moku-project/Moku/v0.13.1";
       flake = false;
     };
 

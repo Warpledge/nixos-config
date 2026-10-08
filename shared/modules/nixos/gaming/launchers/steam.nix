@@ -39,6 +39,7 @@
   #-- Environment Variables
   #--------------------------------------------------------------------#
   environment.sessionVariables = {
-    STEAM_EXTRA_COMPAT_TOOLS_PATHS = "\${HOME}/.steam/root/compatibilitytools.d"; # Custom Proton tools
+    # Custom Proton tools
+    STEAM_EXTRA_COMPAT_TOOLS_PATHS = "\${HOME}/.steam/root/compatibilitytools.d";
   };
 }

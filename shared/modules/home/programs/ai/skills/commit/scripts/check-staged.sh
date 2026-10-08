@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Run `nix flake check` on exactly what is staged, before committing it.
-# Builds a throwaway commit object from the index (HEAD, branch and working tree untouched)
-# and checks that revision, so a split commit can't leave the repo unbuildable.
+# Builds a throwaway commit object from the index (HEAD, branch and working
+# tree untouched) and checks that revision, so a split commit can't leave the
+# repo unbuildable.
 set -euo pipefail
 
 repo="$(git rev-parse --show-toplevel)"

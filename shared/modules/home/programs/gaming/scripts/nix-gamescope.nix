@@ -28,7 +28,8 @@
       # gamescope's --expose-wayland socket, so Proton uses gamescope's Xwayland
       export PROTON_ENABLE_WAYLAND=0
 
-      # %command% never starts with a dash, so a `--` inside the game's own args is left alone
+      # %command% never starts with a dash, so a `--` in the game's own args
+      # is left alone
       extra=()
       if [[ $1 == -* ]]; then
         while [[ $# -gt 0 && $1 != -- ]]; do

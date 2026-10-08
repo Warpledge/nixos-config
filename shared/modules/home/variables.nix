@@ -13,7 +13,8 @@
 
     #--- Qt configuration
     QT_AUTO_SCREEN_SCALE_FACTOR = "1"; # Qt scales UIs from the monitor's reported DPI
-    QT_QPA_PLATFORM = "wayland;xcb"; # Fallback matters: a Qt app with no wayland plugin aborts without it
+    # Keep the xcb fallback: a Qt app with no wayland plugin aborts without it
+    QT_QPA_PLATFORM = "wayland;xcb";
     QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
 
     #--- Wayland application support
@@ -25,7 +26,7 @@
     #--- Graphics and rendering
     SDL_VIDEODRIVER = "wayland";
     CLUTTER_BACKEND = "wayland"; # Use Wayland for Clutter toolkit
-    GDK_BACKEND = "wayland,x11"; # X11-only GTK/JUCE apps cannot start without the fallback
+    GDK_BACKEND = "wayland,x11"; # X11-only GTK/JUCE apps need the fallback
 
     #--- WLR backend (for Niri and other wlroots compositors)
     WLR_BACKEND = "vulkan";
@@ -33,7 +34,7 @@
 
     #--- Development and tools
     DIRENV_LOG_FORMAT = ""; # Disable direnv logging format
-    EDITOR = "zeditor --wait"; # Default editor (for git, /memory, etc.); binary is zeditor, not zed
+    EDITOR = "zeditor --wait"; # For git, /memory etc.; the binary is zeditor
     VISUAL = "zeditor --wait";
 
     #--- Gaming

@@ -21,7 +21,8 @@
   "match:namespace hyprlock, blur on, ignore_alpha 0"
 
   #--- Blur: Noctalia Shell
-  # quickshell (background, full-screen container) intentionally no blur — specific quickshell:* components have their own rules
+  # quickshell (background, full-screen container) gets no blur on purpose;
+  # specific quickshell:* components have their own rules
   # "match:namespace ^quickshell$, blur on, ignore_alpha 0.85"
   "match:namespace noctalia-bar, blur on, ignore_alpha 0.85"
   "match:namespace ^noctalia-bar-content.*, blur on, ignore_alpha 0.85"

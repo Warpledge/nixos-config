@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Pre-commit checks for this public repo: gitleaks over the staged changes, plus reminders
-# for files that need a human look. Exit 1 when gitleaks finds anything.
+# Pre-commit checks for this public repo: gitleaks over the staged changes,
+# plus reminders for files that need a human look. Exit 1 when gitleaks finds
+# anything.
 set -uo pipefail
 
 repo="$(git rev-parse --show-toplevel)" || exit 1

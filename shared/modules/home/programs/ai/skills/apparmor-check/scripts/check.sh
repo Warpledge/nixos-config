@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Compile every AppArmor policy a host defines, without loading anything (no root needed).
+# Compile every AppArmor policy a host defines; loads nothing, needs no root.
 # Usage: check.sh [desktop|laptop] [repo-path]
 set -uo pipefail
 

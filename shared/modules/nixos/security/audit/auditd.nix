@@ -27,7 +27,7 @@
       wantedBy = ["timers.target"];
       timerConfig = {
         OnCalendar = "daily";
-        Persistent = true; # Run on next boot if the machine was off at the scheduled time
+        Persistent = true; # Catch up after a missed run (machine off)
       };
     };
 

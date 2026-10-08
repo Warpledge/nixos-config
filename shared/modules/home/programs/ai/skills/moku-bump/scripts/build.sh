@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Build only the Moku package (and the Tsunagu pieces it pulls in), not the whole system.
-# On a hash mismatch, prints the derivation and the `got:` hash to paste into default.nix.
+# Build only the Moku package (and the Tsunagu pieces it pulls in), not the
+# whole system. On a hash mismatch, prints the derivation and the `got:` hash
+# to paste into default.nix.
 set -uo pipefail
 
 repo="${1:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"

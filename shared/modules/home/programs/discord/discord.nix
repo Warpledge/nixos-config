@@ -49,14 +49,15 @@
         unlockedAvatarZoom.enable = true;
         viewIcons.enable = true;
         volumeBooster.enable = true;
-        webRichPresence.enable = true; # WebRichPresence (arRPC): read game presence from standalone arRPC service
+        # WebRichPresence (arRPC): read game presence from standalone arRPC service
+        webRichPresence.enable = true;
         youtubeAdblock.enable = true;
         messageClickActions = {
           enable = true;
           enableDeleteOnClick = true; # Hold Backspace + click to delete (default: true)
           enableDoubleClickToEdit = true; # Double-click to edit (default: true)
           enableDoubleClickToReply = true; # Double-click to reply (default: true)
-          requireModifier = false; # No need for Shift/Ctrl on double-click (default: false)
+          requireModifier = false; # Double-click without Shift/Ctrl (default)
         };
       };
     };

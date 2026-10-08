@@ -38,7 +38,8 @@ in {
 
     plugins = [
       {
-        # Must be before plugins that wrap widgets, such as zsh-autosuggestions or fast-syntax-highlighting
+        # Must load before widget-wrapping plugins (zsh-autosuggestions,
+        # fast-syntax-highlighting)
         name = "fzf-tab";
         src = "${pkgs.zsh-fzf-tab}/share/fzf-tab";
       }
@@ -265,7 +266,8 @@ in {
 
       wireguard-import = "nmcli connection import type wireguard file";
 
-      notes = "cd ~/nextcloud/Notes && hx index.md"; # cd first so Helix's space-f picker scopes to the notes dir
+      # cd first so Helix's space-f picker scopes to the notes dir
+      notes = "cd ~/nextcloud/Notes && hx index.md";
       note = "notes";
 
       y = "yazi";
@@ -292,7 +294,7 @@ in {
       gbr = "git branch";
 
       #--- Nix
-      cleanup = "nh clean all --keep 5"; # keeps the last 5 generations so rollbacks survive
+      cleanup = "nh clean all --keep 5"; # keep 5 generations for rollbacks
       listgen = "sudo nix-env -p /nix/var/nix/profiles/system --list-generations";
       nixremove = "nix-store --gc";
       bloat = "nix path-info -Sh /run/current-system";

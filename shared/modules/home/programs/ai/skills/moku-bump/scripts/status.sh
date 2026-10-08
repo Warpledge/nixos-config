@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Show the pinned Moku / Tsunagu / Kototoro versions next to upstream's latest. Read-only.
+# Show pinned Moku / Tsunagu / Kototoro versions beside upstream's. Read-only.
 set -euo pipefail
 
 repo="${1:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"

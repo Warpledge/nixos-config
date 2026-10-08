@@ -20,14 +20,16 @@
       accent = "mauve";
 
       gtk.icon.enable = false;
-      cursors.enable = false; # keep stylix Bibata-Modern-Ice cursor (avoids pointerCursor conflict)
+      cursors.enable = false; # keep Stylix's cursor (pointerCursor conflict)
       kvantum = {
         enable = true;
         apply = true; # Auto-apply theme via kvantum.kvconfig
       };
       zed.enable = false;
       opencode.enable = false; # stylix's opencode target owns tui.theme
-      hyprland.enable = false; # emits Lua-only colors that break configType = "hyprlang"; stylix's hyprland target owns them
+      # Emits Lua-only colors that break configType = "hyprlang"; Stylix's
+      # hyprland target owns them
+      hyprland.enable = false;
     };
   };
 
@@ -39,6 +41,8 @@
     autoEnable = true; # auto-enroll all ports
     flavor = "mocha";
     accent = "mauve";
-    tty.enable = false; # stylix's console target owns console.colors; both set means 32 values the kernel rejects
+    # Stylix's console target owns console.colors; with both set there are 32
+    # values, which the kernel rejects
+    tty.enable = false;
   };
 }

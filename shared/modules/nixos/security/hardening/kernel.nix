@@ -33,10 +33,12 @@
 
       #--- Held back: never active, and each changes behaviour on first boot
       # "lockdown=integrity" # Blocks unsigned module loads, which kills v4l2loopback
-      # "lsm=landlock,lockdown,yama,integrity,apparmor,bpf,tomoyo,selinux" # Overrides the LSM set NixOS derives from security.apparmor
+      # Overrides the LSM set NixOS derives from security.apparmor:
+      # "lsm=landlock,lockdown,yama,integrity,apparmor,bpf,tomoyo,selinux"
       # "sysrq_always_enabled=0" # kernel.sysrq = 0 below already does this
       # "rootflags=noatime" # Mount option; belongs in hardware-configuration.nix
-      # "nvme_core.default_ps_max_latency_us=0" # Disables NVMe power saving, costs laptop battery
+      # Disables NVMe power saving, costs laptop battery:
+      # "nvme_core.default_ps_max_latency_us=0"
       # "fbcon=nodefer" # Cosmetic, not security
     ];
     #--------------------------------------------------------------------#
@@ -46,13 +48,13 @@
       sysctl = {
         "kernel.sysrq" = 0; # Disable magic SysRq key
         "net.ipv4.icmp_ignore_bogus_error_responses" = 1;
-        "net.ipv4.conf.default.rp_filter" = 1; # Reverse path filtering (IP spoofing mitigation)
+        "net.ipv4.conf.default.rp_filter" = 1; # Drop spoofed source addresses
         "net.ipv4.conf.all.rp_filter" = 1;
         "net.ipv4.conf.all.accept_source_route" = 0;
         "net.ipv6.conf.all.accept_source_route" = 0;
         "net.ipv4.conf.all.send_redirects" = 0;
         "net.ipv4.conf.default.send_redirects" = 0;
-        "net.ipv4.conf.all.accept_redirects" = 0; # Reject ICMP redirects (MITM mitigation)
+        "net.ipv4.conf.all.accept_redirects" = 0; # No ICMP redirects (MITM)
         "net.ipv4.conf.default.accept_redirects" = 0;
         "net.ipv4.conf.all.secure_redirects" = 0;
         "net.ipv4.conf.default.secure_redirects" = 0;
@@ -62,7 +64,7 @@
         "net.ipv4.tcp_rfc1337" = 1; # TIME-WAIT assassination protection
         "net.ipv4.tcp_fastopen" = 3; # TCP Fast Open (both directions)
         "net.ipv4.tcp_congestion_control" = "bbr";
-        "net.core.default_qdisc" = "cake"; # CAKE queue discipline (bufferbloat mitigation)
+        "net.core.default_qdisc" = "cake"; # CAKE qdisc, against bufferbloat
         "net.core.rmem_default" = 262144; # Default RX buffer
         "net.core.rmem_max" = 134217728; # Max RX buffer
         "net.core.wmem_default" = 262144; # Default TX buffer
@@ -90,7 +92,7 @@
         "fs.protected_regular" = 2; # Protect regular files from untrusted writers
         "fs.suid_dumpable" = 0; # Disable core dumps for setuid programs
         "net.core.bpf_jit_harden" = 2; # Harden BPF JIT compiler
-        "kernel.unprivileged_bpf_disabled" = 1; # No BPF for unprivileged users (LPE surface)
+        "kernel.unprivileged_bpf_disabled" = 1; # No unprivileged BPF (LPE risk)
         "kernel.core_uses_pid" = 1; # Append PID to core filenames
         "kernel.randomize_va_space" = 2; # Full ASLR
         "vm.mmap_rnd_bits" = 32; # ASLR entropy for mmap

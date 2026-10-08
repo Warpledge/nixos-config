@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Compare FreeTube's live blocklist with blocked-channels.nix. Read-only.
-# Prints entries to add as ready-made (mk "UC…" "Name") lines, and ids only the module has.
+# Prints entries to add as ready-made (mk "UC…" "Name") lines, and the ids
+# only the module has.
 set -euo pipefail
 
 repo="${1:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"

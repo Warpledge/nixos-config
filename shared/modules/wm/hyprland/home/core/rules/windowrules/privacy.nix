@@ -8,13 +8,15 @@ let
 in [
   "match:class ^(org\\.gnome\\.seahorse\\.Application)$, ${hide}"
   "match:class ^(bitwarden)$, ${hide}"
-  "match:class ^(zen-beta)$, match:title ^Extension: \\(Bitwarden.*, ${hide}" # Bitwarden extension popup (Zen)
+  # Bitwarden extension popup (Zen)
+  "match:class ^(zen-beta)$, match:title ^Extension: \\(Bitwarden.*, ${hide}"
   "match:class ^(mullvad-vpn)$, ${hide}"
   "match:class ^(Mullvad Browser)$, ${hide}"
   "match:class ^(helium)$, ${hide}"
   "match:class ^(chrome-localhost__-Default)$, ${hide}" # Suwayomi (Helium app window)
-  "match:class ^(chrome-127\\.0\\.0\\.1__-Default)$, ${hide}" # Seanime (Helium app window)
-  "match:class ^(chrome-127\\.0\\.0\\.1__index\\.html-Default)$, ${hide}" # Syncthing (Helium app window)
+  "match:class ^(chrome-127\\.0\\.0\\.1__-Default)$, ${hide}" # Seanime (Helium app)
+  # Syncthing (Helium app window)
+  "match:class ^(chrome-127\\.0\\.0\\.1__index\\.html-Default)$, ${hide}"
   "match:class ^(moku)$, ${hide}"
   "match:class ^(boorusama)$, ${hide}"
   "match:class ^(thunderbird)$, ${hide}"

@@ -52,8 +52,10 @@
   #--------------------------------------------------------------------#
 
   #--- Fingerprinting Protection
-  # Base set covers canvas randomization; granularOverrides extends to WebGL, screen, fonts, concurrency
-  # Keys must be firstPartyDomain/thirdPartyDomain — wrong names silently drop the override
+  # Base set covers canvas randomization; granularOverrides extends to WebGL,
+  # screen, fonts, concurrency
+  # Keys must be firstPartyDomain/thirdPartyDomain — wrong names silently drop
+  # the override
   "privacy.fingerprintingProtection" = true;
   "privacy.fingerprintingProtection.granularOverrides" = ''[{"overrides":"+AllTargets","firstPartyDomain":"*","thirdPartyDomain":"*"}]'';
 
@@ -278,9 +280,11 @@
   #--- Language
   "intl.accept_languages" = "en-US, en";
 
-  #--- Translations (on-device models — page text never leaves the machine, unlike TWP)
-  # alwaysTranslateLanguages is a comma-separated BCP-47 list; ja pages translate on load
-  # ai.control.translations pinned available — browser.ai.control.default above is "blocked"
+  #--- Translations (on-device models: page text stays local, unlike TWP)
+  # alwaysTranslateLanguages is a comma-separated BCP-47 list; ja pages
+  # translate on load
+  # ai.control.translations pinned available, since
+  # browser.ai.control.default above is "blocked"
   "browser.translations.enable" = true;
   "browser.translations.select.enable" = true;
   "browser.translations.automaticallyPopup" = true;

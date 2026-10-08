@@ -38,7 +38,8 @@ in {
           (bind "SUPER + Q" "hl.dsp.window.close()") # Close window
           (exec "SUPER + Space" "toggle_float") # Toggle Floating
           (bind "SUPER + F" "hl.dsp.window.fullscreen()") # Toggle Fullscreen
-          (bind "SUPER + D" ''hl.dsp.window.fullscreen({ mode = "maximized" })'') # Toggle Maximize
+          # Toggle Maximize
+          (bind "SUPER + D" ''hl.dsp.window.fullscreen({ mode = "maximized" })'')
 
           (exec "SUPER + T" "toggle_opacity") # Toggle Opacity
           (exec "SUPER + H" "toggle_hdr") # Toggle HDR on the main monitor

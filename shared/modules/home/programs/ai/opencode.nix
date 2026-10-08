@@ -22,7 +22,8 @@
       settings.mcp.context7 = {
         type = "local";
         command = [(lib.getExe pkgs.context7-mcp)];
-        environment.CONTEXT7_API_KEY = "{file:${config.home.homeDirectory}/.nixos-config-mcp/context7}"; # tokenDir in mcp.nix
+        # Same file as tokenDir in mcp.nix
+        environment.CONTEXT7_API_KEY = "{file:${config.home.homeDirectory}/.nixos-config-mcp/context7}";
         enabled = false;
       };
 

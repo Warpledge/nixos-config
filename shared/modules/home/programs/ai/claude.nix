@@ -15,7 +15,8 @@
       enable = true;
       enableMcpIntegration = true;
 
-      #--- Plugins from the official marketplace repo, pinned (installed as plugin dirs, not via settings.json)
+      #--- Official marketplace plugins, pinned; installed as plugin dirs,
+      #--- not via settings.json
       plugins = let
         official = pkgs.fetchFromGitHub {
           owner = "anthropics";
@@ -75,7 +76,8 @@
       };
     };
 
-    #--- gitleaks: the commit skill's secret scan; python3: the claude-security plugin's scripts
+    #--- gitleaks: the commit skill's secret scan
+    #--- python3: the claude-security plugin's scripts
     home.packages = [pkgs.gitleaks pkgs.python3];
   };
 }

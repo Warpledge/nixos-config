@@ -43,6 +43,8 @@
     pkgs.networkmanagerapplet # NetworkManager GUI applet
   ];
   hardware.wirelessRegulatoryDatabase = true; # Wireless regulatory info
-  systemd.services.NetworkManager-wait-online.serviceConfig.ExecStart = ["" "${pkgs.networkmanager}/bin/nm-online -q"]; # Don't wait for network
-  systemd.network.config.networkConfig.IPv6PrivacyExtensions = "kernel"; # "kernel" leaves the sysctl value in place
+  # Don't wait for network
+  systemd.services.NetworkManager-wait-online.serviceConfig.ExecStart = ["" "${pkgs.networkmanager}/bin/nm-online -q"];
+  # "kernel" leaves the sysctl value in place
+  systemd.network.config.networkConfig.IPv6PrivacyExtensions = "kernel";
 }

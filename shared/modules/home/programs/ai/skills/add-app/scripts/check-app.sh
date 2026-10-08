@@ -29,8 +29,9 @@ else
   fail "$module does not exist"
 fi
 
-# Several routers can mention the same toggle (AppArmor gates mpv's profile on media.mpv),
-# so require the import line to carry the module's path relative to that router
+# Several routers can mention the same toggle (AppArmor gates mpv's profile
+# on media.mpv), so require the import line to carry the module's path
+# relative to that router
 found=""
 while IFS= read -r router; do
   rel="./$(realpath --relative-to="$(dirname "$router")" "$module" 2>/dev/null)"

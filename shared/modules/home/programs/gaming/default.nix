@@ -17,7 +17,8 @@
     file = {
       ".cache/mesa_shader_cache/.keep".text = "";
       ".cache/radv_builtin_shaders64/.keep".text = "";
-      #- Raise OpenAL source limit to prevent audio popping in sound-heavy games (e.g. tModLoader + Calamity)
+      #- Raise OpenAL's source limit; sound-heavy games (e.g. tModLoader +
+      #- Calamity) pop without it
       ".alsoftrc".text = ''
         [general]
         sources = 512
@@ -123,7 +124,7 @@
   #-- MangoHud Overlay
   #--------------------------------------------------------------------#
   #--- FPS-only overlay, top-right corner (stylix target disabled in theme/stylix.nix)
-  #--- font_file references the themed JetBrainsMono Nerd Font (Mono cut → fixed-width digits)
+  #--- font_file: themed JetBrainsMono Nerd Font, Mono cut for fixed-width digits
   xdg.configFile."MangoHud/MangoHud.conf".text = ''
     fps_only
     position=top-right

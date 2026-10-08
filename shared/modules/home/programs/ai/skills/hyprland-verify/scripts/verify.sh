@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Build a host's generated Hyprland Lua config and run Hyprland's own verifier on it.
 # Usage: verify.sh [desktop|laptop] [repo-path]
-# Works whichever WM the host runs: windowManager is overridden to "hyprland" in memory only.
+# Works under any WM: windowManager is overridden to "hyprland" in memory only.
 set -euo pipefail
 
 host="${1:-desktop}"
@@ -28,8 +28,9 @@ chmod -R u+w "$scratch"
 echo "host: $host"
 echo "files: $(cd "$scratch" && find hypr -name '*.lua' | sort | tr '\n' ' ')"
 
+# Hyprland exits non-zero on errors; print them first
 result="$(cd "$scratch" && XDG_CONFIG_HOME="$scratch" "$out/Hyprland" --verify-config -c "$scratch/hypr/hyprland.lua" 2>&1 \
-  | sed -n '/Config parsing result/,$p' | sed '/^\s*$/d' || true)" # Hyprland exits non-zero on errors; print them first
+  | sed -n '/Config parsing result/,$p' | sed '/^\s*$/d' || true)"
 echo "$result"
 echo "scratch: $scratch"
 

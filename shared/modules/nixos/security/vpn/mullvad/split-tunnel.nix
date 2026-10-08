@@ -54,7 +54,7 @@
     claude = {
       home = true;
       enable = hostConfig.claude.enable;
-      # The package programs.claude-code installs, plugin wrapper included when it adds one
+      # The package programs.claude-code installs, incl. any plugin wrapper
       bin = "${hm.programs.claude-code.finalPackage}/bin/claude";
     };
     opencode = {

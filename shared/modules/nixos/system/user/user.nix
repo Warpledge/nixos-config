@@ -29,7 +29,8 @@
         "libvirtd" # Virtual machine management
         "adbusers" # Android Debug Bridge access
         "kvm" # Kernel virtual machine access
-        "gamemode" # GameMode's polkit rule only lets this group change governor/GPU clocks
+        # GameMode's polkit rule only lets this group change governor/GPU clocks
+        "gamemode"
       ]
       #--- Root-equivalent while docker runs: a member can bind-mount the host
       #--- filesystem into a container, so it is granted only with the daemon

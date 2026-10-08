@@ -12,7 +12,7 @@ result-*
 .vscode/
 .idea/
 
-# Claude Code: share settings.json; settings.local.json (saved approvals) and other local state stay out
+# Claude Code: share settings.json; local approvals and state stay out
 .claude/*
 !.claude/settings.json
 

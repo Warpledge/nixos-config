@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# PostToolUse (Write|Edit): format .nix, then hand Claude the repo checks it would otherwise have to remember.
+# PostToolUse (Write|Edit): format .nix, then hand Claude the repo checks
+# it would otherwise have to remember.
 in=$(cat)
 f=$(jq -r '.tool_input.file_path // .tool_response.filePath // empty' <<<"$in")
 new=$(jq -r '.tool_input.new_string // .tool_input.content // empty' <<<"$in")

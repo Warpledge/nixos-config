@@ -18,7 +18,8 @@ in {
       extraConfig = ''
         Defaults lecture = never # Don't show sudo lecture on first use
         Defaults pwfeedback # Show password input feedback (asterisks)
-        Defaults env_keep += "EDITOR DISPLAY" # PATH deliberately excluded: keeping it defeats secure_path
+        # PATH deliberately excluded: keeping it defeats secure_path
+        Defaults env_keep += "EDITOR DISPLAY"
         Defaults timestamp_timeout = 5 # Cache password for 5 minutes
       '';
       extraRules = let

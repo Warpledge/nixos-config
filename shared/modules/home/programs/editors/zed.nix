@@ -76,7 +76,7 @@
   #--- Settings template for merging with Zed's writable settings.json
   #--- Avoids making settings read-only, so AI models can be switched from GUI
 
-  #--- Script to manage Zed settings: write declarative template and merge with user settings
+  #--- Zed settings: write the declarative template, merge with user settings
   home.activation.zedSettings = lib.hm.dag.entryAfter ["writeBoundary"] (
     let
       #--- Extract font names from Stylix config
@@ -283,7 +283,7 @@
               exit 0
             fi
 
-            # Merge: declarative settings take precedence (add declarative second in jq -s 'add')
+            # Declarative settings win: they're second in jq -s 'add'
             ${pkgs.jq}/bin/jq -s 'add' \
               "$settings_file" \
               "$declarative_file" \

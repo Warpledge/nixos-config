@@ -25,8 +25,9 @@
 
   tsunagu = import "${inputs.tsunagu}/nix/packages.nix" {inherit pkgs lib;};
 
-  #--- The only Kototoro plugin the sandbox runs (TSUNAGU_KOTOTORO_JAR), whatever jar a repo index
-  #--- lists; kototoroApi is its dex turned back into JVM classes for compiling the bridge
+  #--- The only Kototoro plugin the sandbox runs (TSUNAGU_KOTOTORO_JAR),
+  #--- whatever jar a repo index lists; kototoroApi is its dex turned back
+  #--- into JVM classes for compiling the bridge
   kototoroPlugin = pkgs.fetchurl {
     url = "https://raw.githubusercontent.com/skepsun/kototoro-parsers/58950ebc43b53cbfd8d4523544e870fd96b0c1cc/apk/plugin.jar"; # v1.0.134
     hash = "sha256-F0s6i606OsqGaoEA9CTdTTCZHbqml6DLsuCu0KQaWro=";
@@ -45,8 +46,10 @@
     hash = "sha256-cLNZJOS6vN/6N9Dlde4DnFai2XEjNCYkxItgMjNwQ0E=";
   };
 
-  #--- Upstream's vendorHash is stale at v0.4.1. server.patch expands a Kototoro repo on sync (from
-  #--- the pinned plugin, never the index's jar) and retries a failed cover download through the extension's own client
+  #--- Upstream's vendorHash is stale at v0.4.1. server.patch expands a
+  #--- Kototoro repo on sync (from the pinned plugin, never the index's jar)
+  #--- and retries a failed cover download through the extension's own
+  #--- client
   tsunaguServer = tsunagu.tsunagu-server.overrideAttrs (old: {
     vendorHash = "sha256-rPtZJzXAuctkAWPGX/89a7Z9Cr+py510g5QCArOOTJE=";
     patches = (old.patches or []) ++ [./tsunagu/server.patch];
@@ -57,13 +60,15 @@
       '';
   });
 
-  #--- sandbox.patch loads the Kototoro bridge. tsunagu-fixes.patch: popular/latest go through the
-  #--- suspend getters (extensions-lib 1.6 sources leave the Rx fetchers unimplemented), ProtoBuf
-  #--- joins the DI graph as Mihon registers it, and an installed extension still loads after its
-  #--- jar-cache copy is cleared
+  #--- sandbox.patch loads the Kototoro bridge. tsunagu-fixes.patch:
+  #--- popular/latest go through the suspend getters (extensions-lib 1.6
+  #--- sources leave the Rx fetchers unimplemented), ProtoBuf joins the DI
+  #--- graph as Mihon registers it, and an installed extension still loads
+  #--- after its jar-cache copy is cleared
   tsunaguSandbox = tsunagu.tsunagu-sandbox.overrideAttrs (old: {
     patches = (old.patches or []) ++ [./tsunagu/sandbox.patch ./tsunagu-fixes.patch];
-    #--- Nested jars are named *.lib: Shadow would unpack a *.jar into the sandbox classpath
+    #--- Nested jars are named *.lib, since Shadow would unpack a *.jar into
+    #--- the sandbox classpath
     postPatch =
       old.postPatch
       + ''
@@ -91,7 +96,8 @@
     exec ${tsunaguServer}/bin/tsunagu "$@"
   '';
 
-  #--- Mirrors the runtime lists in upstream's flake.nix, which moku.nix takes as arguments
+  #--- Mirrors the runtime lists in upstream's flake.nix, which moku.nix
+  #--- takes as arguments
   gstPlugins = with pkgs.gst_all_1; [
     gstreamer
     gst-plugins-base
@@ -131,10 +137,12 @@
       tsunaguBin = "${server}/bin/tsunagu";
     })
     .overrideAttrs (old: {
-      #--- A per-source filter panel in the source browser, and a filterOptions query the server accepts
+      #--- A per-source filter panel in the source browser, and a
+      #--- filterOptions query the server accepts
       patches = (old.patches or []) ++ [./source-filters.patch];
 
-      #--- 0.13.1's `contain` shrinks WebKitGTK's keyword-search cards below their 2:3 covers, so rows overlap
+      #--- 0.13.1's `contain` shrinks WebKitGTK's keyword-search cards below
+      #--- their 2:3 covers, so rows overlap
       postPatch =
         (old.postPatch or "")
         + ''

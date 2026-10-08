@@ -9,7 +9,7 @@
   programs.fzf = {
     enable = true;
     enableZshIntegration = true;
-    historyWidget.zsh.command = ""; # let Atuin own Ctrl-R for zsh (avoids double-binding)
+    historyWidget.zsh.command = ""; # Atuin owns Ctrl-R (avoids double-binding)
     colors = lib.mkForce {
       "fg+" = "#89b4fa";
       "bg+" = "-1";

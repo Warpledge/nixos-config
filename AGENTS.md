@@ -174,6 +174,8 @@ Only take the arguments you use: a module that sets no packages does not need
 
 Comments are short and explain *why*, not *what*. No session narrative, no
 restating the code, no listing alternatives that were not chosen.
+Keep comment lines within 89 columns (trailing comments too); shorten the
+wording or move the comment above the code.
 
 ## Writing style
 

@@ -35,7 +35,7 @@
         helix.enable = false;
         micro.enable = false;
         starship.enable = false;
-        rofi.enable = false; # rofi is not installed; the target defines a renamed HM option
+        rofi.enable = false; # not installed; target uses a renamed HM option
         yazi.enable = false; # themed by Catppuccin port
         firefox.enable = false;
         floorp.enable = false;
@@ -43,7 +43,9 @@
         zen-browser.enable = false;
 
         dank-material-shell.enable = false;
-        gnome.image.enable = false; # DMS owns the wallpaper; the rest of the target (dark mode, fonts) is read by GTK apps
+        # DMS owns the wallpaper; the rest of the target (dark mode, fonts) is
+        # read by GTK apps
+        gnome.image.enable = false;
 
         vscode.profileNames = ["default"];
         zen-browser.profileNames = ["default"];

@@ -42,7 +42,8 @@ in {
   systemd.user.services.seanime = {
     Unit.Description = "Seanime media server";
     Service = {
-      #--- Torrent streaming and the torrent auto-downloader stay off regardless of in-app settings
+      #--- Torrent streaming and the torrent auto-downloader stay off, even if
+      #--- enabled in-app
       ExecStart = "${seanime}/bin/seanime --port ${toString port} --disable-features TorrentStreaming,ViewAutoDownloader,ManageAutoDownloader";
       Restart = "on-failure";
     };

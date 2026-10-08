@@ -13,7 +13,7 @@
 
     systemd = {
       enable = true; # Systemd service for auto-start
-      restartIfChanged = true; # Auto-restart dms.service when dank-material-shell changes
+      restartIfChanged = true; # Restart dms.service when DMS changes
     };
 
     #--- Plugins
@@ -73,7 +73,7 @@
     enableVPN = true; # VPN management widget
     enableDynamicTheming = false; # Wallpaper-based theming (matugen)
     enableAudioWavelength = true; # Audio visualizer (cava)
-    enableCalendarEvents = false; # Calendar integration (khal) - disabled: khal-0.13.0 broken in nixpkgs
+    enableCalendarEvents = false; # khal calendar: 0.13.0 broken in nixpkgs
     enableClipboardPaste = true; # Pasting items from the clipboard (wtype)
   };
 
@@ -109,7 +109,8 @@
     (dms "SUPER + Print" "quickCapture screenshot window edit") # Focused Window
     (dms "SUPER + SHIFT + Print" "quickCapture screenshot full edit") # Focused Output
     (dms "CTRL + Print" "quickCapture screenshot all edit") # All Outputs
-    (dms "SUPER + CTRL + Print" "quickCapture screenshot scroll edit") # Scrolling Capture
+    # Scrolling Capture
+    (dms "SUPER + CTRL + Print" "quickCapture screenshot scroll edit")
 
     #--- Quick Capture: recording
     # portal only: the gpu-screen-recorder screen/region modes capture via KMS,

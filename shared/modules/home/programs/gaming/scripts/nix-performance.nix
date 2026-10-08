@@ -8,8 +8,8 @@
 #-   unset LD_PRELOAD drops Steam's overlay hook; must run before gamemoderun
 #-   gamemoderun      governor, AMD GPU clocks, renice, screensaver inhibit
 #-                    (settings in nixos/gaming/performance/gamemode.nix)
-#-   mangohud         FPS overlay (config in gaming/default.nix); skipped inside gamescope,
-#-                    which takes --mangoapp instead
+#-   mangohud         FPS overlay (config in gaming/default.nix); skipped
+#-                    inside gamescope, which takes --mangoapp instead
 #-   nvidia-offload   laptop only: route the game to the RTX 4070
 #-   PROTON_*_UPGRADE newest FSR4 (desktop, RDNA4) or DLSS (laptop) DLL, fetched
 #-                    by GE/CachyOS/DW Proton; a launch-option value wins, `=0` opts out

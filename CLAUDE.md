@@ -332,6 +332,8 @@ When reformatting an existing file: add headers, normalize spacing, convert inli
 
 **Keep comments short. A comment earns its place by saving the next reader a trip to the docs, not by narrating.** One or two lines is normal; a paragraph is a smell.
 
+**Keep every comment line within 89 columns**, trailing `# ...` comments included. The user reads files in Zed at half-screen width, where a longer line wraps onto a second row. Shorten the wording first (a detail kept elsewhere, such as a doc, can be pointed at instead), and if it still doesn't fit, move the comment onto its own line above the code. Check with `awk 'length>89' <file>`.
+
 Write comments for someone reading this file cold in six months:
 
 - **Do** name what a non-obvious option or value does, flag a constraint the type system won't catch (`margin` must be 0 when `anchor_gap` is false), and point at where a value came from when it must be kept in sync.

@@ -26,7 +26,7 @@
   #--------------------------------------------------------------------#
   wayland.windowManager.hyprland = {
     enable = true;
-    configType = "lua"; # Settings use the Lua shapes (hl.config, hl.bind, hl.window_rule, ...)
+    configType = "lua"; # Lua shapes: hl.config, hl.bind, hl.window_rule, ...
     # Required before the settings, so general.layout = "quad" resolves
     extraLuaFiles."layouts.quad" = ./layouts/quad.lua;
     xwayland.enable = true;

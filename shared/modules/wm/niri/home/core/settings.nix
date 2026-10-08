@@ -38,8 +38,10 @@
       #--- Startup Applications
       spawn-at-startup =
         [
-          {command = ["bash" "-c" "wl-paste --watch cliphist store &"];} # Clipboard History
-          {command = ["xrdb" "-merge" "/home/${username}/.Xresources"];} # Xwayland cursor theme
+          # Clipboard History
+          {command = ["bash" "-c" "wl-paste --watch cliphist store &"];}
+          # Xwayland cursor theme
+          {command = ["xrdb" "-merge" "/home/${username}/.Xresources"];}
         ]
         #--- Japanese input method daemon (controlled by hostConfig)
         ++ lib.optional hostConfig.japanese.ime {command = ["fcitx5" "-d" "-r"];};
@@ -58,7 +60,7 @@
           scroll-method = "two-finger";
           tap = true;
           tap-button-map = "left-right-middle";
-          middle-emulation = true; # emulate middle mouse button by pressing left and right buttons simultaneously
+          middle-emulation = true; # left+right click together = middle click
           accel-profile = "adaptive";
         };
         mouse = {
@@ -69,7 +71,8 @@
           max-scroll-amount = "90%";
         };
         warp-mouse-to-focus.enable = false; # automatically move cursor to focused window
-        workspace-auto-back-and-forth = true; # re-pressing the active workspace's key returns to the previous one
+        # re-pressing the active workspace's key returns to the previous one
+        workspace-auto-back-and-forth = true;
       };
 
       #--- Screenshot Configuration

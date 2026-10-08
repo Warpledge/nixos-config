@@ -12,7 +12,8 @@
   "match:title ^(Volume Control)$, pin on"
   "match:class ^(io.github.alainm23.planify)$, pin on"
 
-  #--- DMS Quick Capture editor: a tiled window opened under a fullscreen one stays hidden behind it
+  #--- DMS Quick Capture editor: tiled under a fullscreen window, it stays
+  #--- hidden behind it
   "match:class ^(com\\.danklinux\\.dms)$, match:title ^(Quick Capture)$, float on, pin on"
 
   #--- Picture-in-Picture

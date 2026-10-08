@@ -75,7 +75,7 @@
     enableVPN = true; # VPN management widget
     enableDynamicTheming = false; # Wallpaper-based theming (matugen)
     enableAudioWavelength = true; # Audio visualizer (cava)
-    enableCalendarEvents = false; # Calendar integration (khal) - disabled: khal-0.13.0 broken in nixpkgs
+    enableCalendarEvents = false; # khal calendar: 0.13.0 broken in nixpkgs
     enableClipboardPaste = true; # Clipboard pasting via wtype
   };
 
@@ -101,10 +101,13 @@
 
     #--- Quick Capture: screenshots open in its editor
     "Print".action.spawn = dms "quickCapture screenshot region edit"; # Region Select
-    "Mod+Print".action.spawn = dms "quickCapture screenshot window edit"; # Focused Window
-    "Mod+Shift+Print".action.spawn = dms "quickCapture screenshot full edit"; # Focused Output
+    # Focused Window
+    "Mod+Print".action.spawn = dms "quickCapture screenshot window edit";
+    # Focused Output
+    "Mod+Shift+Print".action.spawn = dms "quickCapture screenshot full edit";
     "Ctrl+Print".action.spawn = dms "quickCapture screenshot all edit"; # All Outputs
-    "Mod+Ctrl+Print".action.spawn = dms "quickCapture screenshot scroll edit"; # Scrolling Capture
+    # Scrolling Capture
+    "Mod+Ctrl+Print".action.spawn = dms "quickCapture screenshot scroll edit";
 
     #--- Quick Capture: recording
     # portal only: the gpu-screen-recorder screen/region modes capture via KMS,
@@ -119,7 +122,8 @@
 
     #--- Brightness controls
     "XF86MonBrightnessUp".action.spawn = dms "brightness increment 5"; # Brightness Up
-    "XF86MonBrightnessDown".action.spawn = dms "brightness decrement 5"; # Brightness Down
+    # Brightness Down
+    "XF86MonBrightnessDown".action.spawn = dms "brightness decrement 5";
   };
 
   #--------------------------------------------------------------------#
