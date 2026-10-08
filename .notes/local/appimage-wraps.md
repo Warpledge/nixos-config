@@ -54,6 +54,26 @@ fixed = pkgs.runCommand "${pname}-${version}-extracted-fixed" {} ''
 installs `bin/`, a desktop entry and an icon can still fail to launch; only
 executing it catches this class of problem.
 
+## A DwarFS payload
+
+Newer AppImages built with uruntime (pkgforge's sharun bundles, such as
+Harbor's) carry a DwarFS image instead of squashfs, and `appimageTools.extract`
+fails with `Can't find a valid SQUASHFS superblock`. Check with
+`grep -obUa DWARFS <file>.AppImage | head -1`. The fix is to unpack with
+`dwarfsextract` and hand the tree to `wrapAppImage` (worked for Harbor 0.9.127,
+whose module was removed 2026-10-07):
+
+```nix
+contents = pkgs.runCommand "${pname}-${version}-extracted" {nativeBuildInputs = [pkgs.dwarfs];} ''
+  mkdir $out
+  dwarfsextract -i ${src} -O auto -o $out
+'';
+```
+
+A sharun bundle ships its own glibc, Mesa and libraries, but `dlopen`ed ones can
+still be missing: Harbor 0.9.127 panics at start without
+`libayatana-appindicator`, which goes in `extraPkgs`.
+
 ## Bumping a version
 
 Change `version`, then get the new hash. `nix store prefetch-file` fails on this
