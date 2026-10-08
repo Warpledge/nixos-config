@@ -21,6 +21,12 @@
   rgb = n: "${c."${n}-rgb-r"};${c."${n}-rgb-g"};${c."${n}-rgb-b"}";
   hex = n: "#${c.${n}}";
 
+  #--- sudo runs this only when no terminal is attached (`! nixm rebuild`
+  #--- inside Claude Code); a real terminal keeps its normal prompt
+  sudoAskpass = pkgs.writeShellScript "nixm-askpass" ''
+    exec ${pkgs.zenity}/bin/zenity --password --title="nixm: sudo password"
+  '';
+
   #--- Turns moz_bookmarks rows into a Netscape bookmark file, the format
   #--- every browser's "import bookmarks from HTML" reads. Tags and
   #--- place: queries are Firefox-only, so they are left out.
@@ -348,6 +354,7 @@
       # Get current hostname to determine which system to rebuild
       HOSTNAME=$(hostname)
       FLAKE_PATH="/home/${username}/nixos-config"
+      export SUDO_ASKPASS=${sudoAskpass}
 
       #--- Kept outside the repo: subscriptions, bookmarks and history are
       #--- personal data and this flake is public. Per-host folders, since
