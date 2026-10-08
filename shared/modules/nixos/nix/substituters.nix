@@ -18,7 +18,7 @@
       "https://ghostty.cachix.org" # Ghostty terminal
       "https://moku.cachix.org" # Moku manga/anime reader + Tsunagu backend
       # "https://cache.garnix.io" # Garnix cache for affinity-nix
-      "https://attic.xuyh0120.win/lantian" # CachyOS kernel prebuilt cache
+      # "https://attic.xuyh0120.win/lantian" # CachyOS kernel prebuilt cache; disabled 2026-10-07, server refusing connections
     ];
     trusted-public-keys = [
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
