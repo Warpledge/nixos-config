@@ -10,9 +10,9 @@
     ./core
 
     #--- Scripts
-    ./scripts/scripts.nix
+    ./scripts
 
     #--- Shell & Services
-    ./shell/dms
+    ./dms
   ];
 }

@@ -31,6 +31,6 @@ The verifier stops short of runtime behaviour, so say so when reporting a pass:
 - Layout names (`general.layout = "quad"`) are not checked; a typo falls back silently.
 - Rule *values* are parsed when applied, not at verify time. A rule like
   `blur on ignorealpha 0.85` passes but leaves blur off.
-- Placement logic in `core/layouts/*.lua` only runs live.
+- Placement logic in `core/quad.lua` only runs live.
 
 For those, the user has to rebuild and look.

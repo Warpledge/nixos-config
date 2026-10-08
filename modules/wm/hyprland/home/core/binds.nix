@@ -77,7 +77,7 @@ in {
           (exec "XF86AudioPrev" "playerctl previous")
           (exec "XF86AudioStop" "playerctl stop")
 
-          #--- Screenshot binds live with the other DMS commands in shell/dms/core.nix
+          #--- Screenshot binds live with the other DMS commands in dms/default.nix
 
           #================= Extra =====================================
           #--- Workspaces

@@ -81,7 +81,7 @@ Gotchas. Grep the option name before assuming which file owns it:
 
 - **`boot.kernelModules` silently swallows kernel parameters.** modprobe cannot resolve them, `systemd-modules-load.service` logs `Failed to find module '<param>'` and still exits 0, so the hardening looks applied and is not. Eleven params sat there until 2026-09-22. Check with `grep <param> /proc/cmdline`, not by reading the module. An assertion in `security/hardening/kernel.nix` now fails the build on any `kernelModules` entry containing `=`; a bare flag like `slab_nomerge` still gets through.
 - `gaming.steam` is wired in `modules/nixos/gaming/default.nix` and `gaming.hytale` only gates Flatpak in `nixos/default.nix`; the rest of `gaming.*` is wired in `home/programs/gaming/default.nix`.
-- `media.moku` loads from both trees: the home-manager bundle plus `nixos/services/servers/flaresolverr.nix`. `suwayomi.enable`, `syncthing.enable` and `mullvad.enable` each load one NixOS module (`nixos/services/servers/{suwayomi,syncthing}.nix`, `nixos/security/vpn/mullvad/`) that sets its home-manager half through `home-manager.users.${username}`.
+- `media.moku` loads from both trees: the home-manager bundle plus `nixos/services/servers/flaresolverr.nix`. `suwayomi.enable`, `syncthing.enable` and `mullvad.enable` each load one NixOS module (`nixos/services/servers/{suwayomi,syncthing}.nix`, `nixos/security/mullvad/`) that sets its home-manager half through `home-manager.users.${username}`.
 - `nixos/services/runtimes/flatpak.nix` (nix-flatpak) loads only while a Flatpak app's toggle is on, today `gaming.hytale`, the one Flatpak left. Hytale isn't on Flathub: its launcher is Hypixel's own bundle, installed by hand, so `services.flatpak.packages` stays empty for it. A new Flatpak app adds its toggle to that condition in `nixos/default.nix`, or `services.flatpak.packages` doesn't exist for it to set.
 - `hostConfig.kernel` is read in `system/bootloader.nix` (and `modules/default.nix` for the CachyOS overlay); `gaming/performance/kernel.nix` only holds gaming sysctls and boot params.
 - `alejandra`, `claude-code`, `affinity-nix` and `cachyos-kernel` keep their own nixpkgs on purpose (the comments in `flake.nix` say why: a GCC 15 build failure, binary caches that only match their own pin, and CachyOS patches that must match their pin's kernel version), and `nix-flatpak` has no nixpkgs input. Don't add `inputs.nixpkgs.follows` to them.
@@ -95,7 +95,7 @@ Gotchas. Grep the option name before assuming which file owns it:
 
 ```nix
 # Single boolean
-++ lib.optionals hostConfig.clamav.enable [./security/av/clamav.nix]
+++ lib.optionals hostConfig.clamav.enable [./security/clamav.nix]
 
 # Attribute-set item
 ++ lib.optionals hostConfig.browsers.zen [./browsers/zen]
@@ -115,7 +115,7 @@ Gotchas. Grep the option name before assuming which file owns it:
 
 ### Module layout
 
-- `modules/nixos/` — system: `gaming/` (default, `launchers/` steam, `performance/` esync + gamemode + kernel, `tools/` gamescope + java), `network/` (default, blockers, dns, firewall, networkmanager), `nix/` (default, nh, nixpkgs, substituters), `security/` (`apparmor/`, `audit/` auditd, `auth/` keyring + sudo, `av/` clamav, `hardening/` default + kernel, `vpn/mullvad/`), `services/` (desktop, `hardware/` adb + keyd + power + sound, `runtimes/` docker + flatpak + runners, `servers/` flaresolverr + suwayomi + syncthing, ssh), `system/` (bootloader, documentation, packages, `desktop/` input + wayland, `language/` locale + japanese-ime, `tuning/` tweaks + zram, `user/` shell + user)
+- `modules/nixos/` — system: `gaming/` (default, steam, `performance/` esync + gamemode + kernel, `tools/` gamescope + java), `network/` (default, blockers, dns, firewall, networkmanager), `nix/` (default, nh, nixpkgs, substituters), `security/` (auditd, clamav, `apparmor/`, `auth/` keyring + sudo, `hardening/` default + kernel, `mullvad/`), `services/` (desktop, `hardware/` adb + keyd + power + sound, `runtimes/` docker + flatpak + runners, `servers/` flaresolverr + suwayomi + syncthing, ssh), `system/` (bootloader, documentation, packages, `desktop/` input + wayland, `language/` locale + japanese-ime, `tuning/` tweaks + zram, `user/` shell + user)
 - `modules/home/` — user: `programs/` (browsers, terminals, editors, ai, shell, fetch, file-browsers, graphics, audio, media, office, security, gaming (`launchers/`, `games/`, `tools/`, `scripts/`), git (`git.nix` + the commit template), utilities (`utilities.nix`, the general package list), android, discord, plus `options.nix` at its root). `mime.nix`, `nixm.nix`, `services.nix` and `variables.nix` are single files at that level, not directories
   - Wrappers for prebuilt bundles in `~/.local/opt/` (`media/tonkatsu-box.nix`, `gaming/tools/relink-mod-organizer.nix`, `audio/guitar/katana-floorboard.nix`) sit in the folder for what the app is; the payload is intentionally not in the repo. `gaming/tools/reloaded-ii-gbfr.nix` is the exception: a Windows `.exe` its installer puts in `~/Desktop/Reloaded-II - Granblue Fantasy Relink/`, run in GBFR's Proton prefix through `protontricks-launch`
   - `programs/ai/skills/<name>/` and `programs/ai/agents/<name>.md` — Claude Code skills and subagents kept in the repo so every host gets them, registered in `ai/claude.nix` under `programs.claude-code.{skills,agents}`, beside the pinned plugins and LSP servers. New ones (including what skill-creator writes to `~/.claude/skills/`) move here. Commits go through the user-only `commit` skill, which runs `gitleaks` on the staged diff and the `public-repo-auditor` subagent
@@ -126,7 +126,7 @@ Gotchas. Grep the option name before assuming which file owns it:
   - `programs/media/freetube/` — `settings.nix` (mirrored from the app), `blocked-channels.nix` (~870 channel ids in one flat list, sorted by lowercased name under `LC_ALL=C`) and `youtube-dispatch.nix`, the link handler `mime.nix` points `webLinks` at. The first two are **mirrored**: the home-manager module copies `hm_settings.db` over `settings.db` **only when the declared content changes**, and FreeTube rewrites that file from memory when it exits, so close FreeTube before rebuilding, or the copy is clobbered and stays clobbered until the module changes again. Blocklist entries are emitted with a `preferredName` and a placeholder `icon`, because FreeTube re-resolves every entry missing either one, at one API call each. Subscriptions, profiles, playlists and history are **not** in the repo: they are personal data and this flake is public. `nixm freetube-backup` exports them to a dated folder under `~/SyncBackups/<hostname>/FreeTube` instead, in FreeTube's own Export format so its Import reads them back.
 - `modules/wm/{hyprland,niri}/` — each has `session.nix` (NixOS: turns the WM on, login screen, keyring unlock) and `home/` (home-manager, everything else, including DankMaterialShell (DMS))
 - `modules/theme/` — stylix, catppuccin, fonts, plus `gtk.nix` and `qt.nix`, the toolkit theming targets rule 5 routes through. No module sets the wallpaper: DMS picks it at runtime (`Mod+W`) and `theme/wallpapers/` holds the images
-- `modules/nixos/security/vpn/mullvad/` — `daemon.nix` (daemon settings), `gui.nix` (tray app, a home-manager module) and `split-tunnel.nix` (system and home wrappers). Imported from `nixos/default.nix`, gated on `hostConfig.mullvad.enable`
+- `modules/nixos/security/mullvad/` — `daemon.nix` (daemon settings), `gui.nix` (tray app, a home-manager module) and `split-tunnel.nix` (system and home wrappers). Imported from `nixos/default.nix`, gated on `hostConfig.mullvad.enable`
 - `hosts/{hostname}/` — `default.nix` (host entry), `settings.nix`, `hardware/` (`gpu.nix`, `hardware-configuration.nix`), `wm/<wm>.nix` (per-WM host overrides: GPU env vars, autostart, Hyprland monitors)
 - `hosts/laptop/` also has `hardware/swapfile.nix` and `minecraft-servers/` (GTNH + TerraFirmaGreg server definitions, plus `mcservers.nix`, an fzf picker over them). `minecraft-servers/` is a **home-manager** module injected from `hosts/laptop/default.nix` via `home-manager.users.${username}.imports`, not a NixOS module, and the only place in the repo that reaches into HM from a host entry file.
 
@@ -139,7 +139,7 @@ Gotchas. Grep the option name before assuming which file owns it:
 | Per-host hardware/entry | `hosts/{hostname}/` |
 | Per-host toggle | `hosts/{hostname}/settings.nix` |
 | WM internals | `modules/wm/{wm}/` |
-| Mullvad VPN | `modules/nixos/security/vpn/mullvad/` |
+| Mullvad VPN | `modules/nixos/security/mullvad/` |
 | Per-host WM overrides | `hosts/{hostname}/wm/{wm}.nix` (`hyprland.nix` / `niri.nix`) |
 
 ## Workflows
@@ -147,7 +147,7 @@ Gotchas. Grep the option name before assuming which file owns it:
 **Add an application** (the `add-app` skill runs these steps, then checks the wiring):
 1. Add the toggle to **both** host configs (keep them symmetrical)
 2. Create the module in the right subdir (`modules/home/programs/...`)
-3. Add the conditional import to `modules/home/programs/default.nix`, the router under `programs/`; a `gaming.*` app goes in `programs/gaming/default.nix`, which routes its own launchers, games and tools, and a guitar app goes in `audio/guitar/default.nix`, with its toggle added to that folder's gate in `programs/default.nix`. The other nested `default.nix` files (`browsers/{zen,mullvad,helium}/`, `media/{freetube,moku}/`) are multi-file module bundles, not routers
+3. Add the conditional import to `modules/home/programs/default.nix`, the router under `programs/`; a `gaming.*` app goes in `programs/gaming/default.nix`, which routes its own launchers, games and tools, and a guitar app goes in `audio/guitar/default.nix`, with its toggle added to that folder's gate in `programs/default.nix`. The other nested `default.nix` files (`browsers/zen/`, `media/{freetube,moku}/`) are multi-file module bundles, not routers
 4. `alejandra .` → `git add` new files → `nix flake check` (do not rebuild; hand it back)
 5. Give any prose the task wrote or edited a cut-only revision pass before handing back: remove words, add none. No new information, no new claims, no rephrasing that smuggles either in. See **Writing Style**.
 6. Add it to the matching `<details>` table under **Components** in `README.md` (plus `## Structure` for a new directory, `## Flake Inputs` for a new input), and its link-reference definition at the bottom: the README is the public-facing doc and drifts easily.
@@ -208,7 +208,7 @@ programs.niri.settings.binds = {
 
 A string like `"dms ipc call spotlight"` in Niri only runs `dms` and drops the rest, so use `["dms" "ipc" "call"] ++ lib.splitString " " action`. An assertion in `niri/home/core/binds.nix` fails the build on a `spawn` string containing a space.
 
-**DMS** (DankMaterialShell): Niri and Hyprland only. Declarative config lives at `modules/wm/{wm}/home/shell/dms/`. Both have `default.nix`, `settings.json` and `clsettings.json`; Niri additionally has `niri-cheatsheet.json`. The DMS keybind helper differs per WM (an `hl.dsp.exec_cmd` Lua helper for Hyprland, list concat for Niri).
+**DMS** (DankMaterialShell): Niri and Hyprland only. Declarative config lives at `modules/wm/{wm}/home/dms/`. Both have `default.nix`, `settings.json` and `clsettings.json`; Niri additionally has `niri-cheatsheet.json`. The DMS keybind helper differs per WM (an `hl.dsp.exec_cmd` Lua helper for Hyprland, list concat for Niri).
 
 DMS runs as a systemd user service (`systemd.enable`, `niri.enableSpawn = false`), so it inherits the **systemd user manager** environment (`modules/home/variables.nix`), not niri's `programs.niri.settings.environment` block. It launches every app with `systemd-run --user --scope`, so those session variables, and not niri's, govern anything started from the spotlight. Keep the two sets compatible: `QT_QPA_PLATFORM` and `GDK_BACKEND` must keep their X11 fallbacks (`wayland;xcb`, `wayland,x11`) or X11-only apps die instantly from the launcher while still working from a terminal: a Qt app with no wayland plugin aborts in ~50 ms, a JUCE/GTK one exits with "cannot open display". Diagnose by diffing `tr '\0' '\n' < /proc/$(pgrep -x .quickshell-wra)/environ` against `env`, then replaying with `env -i "${DMS_ENV[@]}" <app>`. A rebuild alone does not fix a bad value: the running manager keeps the old import, so `systemctl --user set-environment` then restart `dms.service`, or log out.
 
@@ -216,8 +216,8 @@ DMS runs as a systemd user service (`systemd.enable`, `niri.enableSpawn = false`
 
 **Login:** Niri and Hyprland start from the DMS greeter (greetd, through the `dank-greeter` input, set up in `<wm>/session.nix`).
 
-**Hyprland-only directories:** `core/animations.nix`, `core/layouts/`, `core/variables.nix`, `core/rules/` (`luaRule.nix`, `windowrules/`, `layerrules/`), `scripts/`.
-**Niri-only directories:** `core/monitors.nix`, `core/portals.nix`, `core/rules.nix`, `core/xwayland.nix`, `addons/`.
+**Hyprland-only directories:** `core/animations.nix`, `core/quad.lua`, `core/variables.nix`, `core/rules/` (`luaRule.nix`, `windowrules/`, `layerrules/`), `scripts/`.
+**Niri-only directories:** `core/monitors.nix`, `core/portals.nix`, `core/rules.nix`, `core/xwayland.nix`, `niriswitcher.nix`.
 
 Per-host WM overrides exist where needed:
 - `hosts/laptop/wm/{hyprland,niri}.nix` — hybrid-GPU env (`WLR_DRM_DEVICES`), Solaar autostart; the niri one also turns off DMS auto-lock
@@ -235,7 +235,7 @@ These are only imported when the WM is active, e.g. `lib.optional (hostConfig.wi
 - DNS: systemd-resolved (stub listener on 127.0.0.53, opportunistic DNS-over-TLS, no fallback servers) + NetworkManager
 - WiFi: iwd, IPv6 privacy, random MAC
 - Firewall: TCP 22 (open; sshd only runs when `hostConfig.ssh.enable` is set), 80, 443, 25566 (Minecraft), 7777 (Terraria), 5555 (ADB); UDP 27000–27009, 27015, 27031–27036 and 4380 (Steam). Defined in `modules/nixos/network/firewall.nix`. When `hostConfig.syncthing.enable` is set, the Syncthing module also opens TCP/UDP 22000 and UDP 21027.
-- Mullvad: `hostConfig.mullvad.enable` (WireGuard, quantum resistance, multihop, DAITA; lockdown mode cuts all traffic while the tunnel is down), `modules/nixos/security/vpn/mullvad/`: `daemon.nix` (daemon settings), `gui.nix` (tray app) and `split-tunnel.nix`. Settings are applied with the `mullvad` CLI from a oneshot unit, not by templating `settings.json`, which the daemon rewrites. Relay and entry selection are deliberately unmanaged so exits can be switched by hand. `hostConfig.mullvad.splitTunnel` names apps routed around the VPN; `split-tunnel.nix` puts each wrapper in the profile its app is installed in, since the home profile outranks `/run/current-system/sw/bin` in PATH and a system wrapper for an HM package is silently shadowed.
+- Mullvad: `hostConfig.mullvad.enable` (WireGuard, quantum resistance, multihop, DAITA; lockdown mode cuts all traffic while the tunnel is down), `modules/nixos/security/mullvad/`: `daemon.nix` (daemon settings), `gui.nix` (tray app) and `split-tunnel.nix`. Settings are applied with the `mullvad` CLI from a oneshot unit, not by templating `settings.json`, which the daemon rewrites. Relay and entry selection are deliberately unmanaged so exits can be switched by hand. `hostConfig.mullvad.splitTunnel` names apps routed around the VPN; `split-tunnel.nix` puts each wrapper in the profile its app is installed in, since the home profile outranks `/run/current-system/sw/bin` in PATH and a system wrapper for an HM package is silently shadowed.
 - `network/blockers.nix` — hosts-level blocklists, always imported
 
 ## Security

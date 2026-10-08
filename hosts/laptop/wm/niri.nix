@@ -13,7 +13,7 @@
     #--- Disable auto-lock on laptop (server runs unattended)
     home.file.".config/DankMaterialShell/settings.json" = lib.mkForce {
       text = builtins.toJSON (
-        (lib.importJSON ../../../modules/wm/niri/home/shell/dms/settings.json)
+        (lib.importJSON ../../../modules/wm/niri/home/dms/settings.json)
         // {acLockTimeout = 0;}
       );
     };

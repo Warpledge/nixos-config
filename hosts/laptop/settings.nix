@@ -24,7 +24,7 @@
 
   #--- Mullvad VPN
   mullvad.enable = true;
-  # Apps always routed around the VPN (see nixos/security/vpn/mullvad/)
+  # Apps always routed around the VPN (see nixos/security/mullvad/)
   mullvad.splitTunnel = [
     "steam"
     "heroic"

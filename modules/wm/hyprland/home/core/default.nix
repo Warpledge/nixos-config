@@ -28,7 +28,7 @@
     enable = true;
     configType = "lua"; # Lua shapes: hl.config, hl.bind, hl.window_rule, ...
     # Required before the settings, so general.layout = "quad" resolves
-    extraLuaFiles."layouts.quad" = ./layouts/quad.lua;
+    extraLuaFiles."layouts.quad" = ./quad.lua;
     xwayland.enable = true;
     systemd = {
       enable = true;

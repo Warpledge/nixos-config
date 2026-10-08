@@ -100,7 +100,7 @@ If that returns a path, read it and use `programs.<pkg>` instead.
 it is the router under `programs/`, except `gaming/default.nix`, which routes the
 `gaming.*` launchers, games and tools, and `audio/guitar/default.nix`, which
 routes the guitar apps. Most subdirectories are flat `.nix` files, but
-`browsers/{zen,mullvad,helium}/` and `media/{freetube,moku}/` each have a
+`browsers/zen/` and `media/{freetube,moku}/` each have a
 `default.nix` of their own — those are multi-file module bundles, not routers,
 so a new toggle's import still goes in `programs/default.nix` (or
 `programs/gaming/default.nix` for a `gaming.*` app). A new guitar app's import

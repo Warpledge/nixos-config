@@ -63,7 +63,7 @@
           mfact = 0.5;
         };
         general = {
-          layout = "quad"; # core/layouts/quad.lua
+          layout = "quad"; # core/quad.lua
           resize_on_border = false;
 
           gaps_in = 4;

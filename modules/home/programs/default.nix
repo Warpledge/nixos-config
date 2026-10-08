@@ -37,15 +37,15 @@
       ./gaming
       ./git/git.nix
       ./options.nix
-      ./utilities/utilities.nix
+      ./utilities.nix
     ]
     #--- File Browsers (controlled by hostConfig)
     ++ lib.optionals hostConfig.fileBrowsers.nautilus [./file-browsers/nautilus.nix]
     ++ lib.optionals hostConfig.fileBrowsers.yazi [./file-browsers/yazi.nix]
     #--- Browsers (controlled by hostConfig)
     ++ lib.optionals hostConfig.browsers.zen [./browsers/zen]
-    ++ lib.optionals hostConfig.browsers.mullvad [./browsers/mullvad]
-    ++ lib.optionals hostConfig.browsers.helium [./browsers/helium]
+    ++ lib.optionals hostConfig.browsers.mullvad [./browsers/mullvad.nix]
+    ++ lib.optionals hostConfig.browsers.helium [./browsers/helium.nix]
     ++ lib.optionals hostConfig.browsers.ferdium [./browsers/ferdium.nix]
     #--- Editors (controlled by hostConfig)
     ++ lib.optionals hostConfig.editors.helix [./editors/helix.nix]

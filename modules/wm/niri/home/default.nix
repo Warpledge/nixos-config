@@ -9,7 +9,7 @@
     inputs.niri.homeModules.niri
 
     #--- Addons
-    ./addons/niriswitcher.nix
+    ./niriswitcher.nix
 
     #--- Core Configuration
     ./core/binds.nix
@@ -20,6 +20,6 @@
     ./core/xwayland.nix
 
     #--- Shell & Services
-    ./shell/dms
+    ./dms
   ];
 }

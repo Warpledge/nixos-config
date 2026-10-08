@@ -110,7 +110,7 @@ in {
     assertions = [
       {
         assertion = unknown == [];
-        message = "mullvad.splitTunnel: no wrapper defined for ${lib.concatStringsSep ", " unknown}. Add it to `targets` in security/vpn/mullvad/split-tunnel.nix.";
+        message = "mullvad.splitTunnel: no wrapper defined for ${lib.concatStringsSep ", " unknown}. Add it to `targets` in security/mullvad/split-tunnel.nix.";
       }
     ];
 

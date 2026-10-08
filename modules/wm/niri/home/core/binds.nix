@@ -17,7 +17,7 @@
     "XF86AudioNext".action.spawn = ["playerctl" "next"];
 
     #--- Applications
-    # Screenshot binds live with the other DMS commands in shell/dms/core.nix
+    # Screenshot binds live with the other DMS commands in dms/default.nix
     "Mod+Return".action.spawn = ["kitty"];
 
     "Mod+Q".action.close-window = {};

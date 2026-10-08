@@ -22,7 +22,7 @@
 
       #--- Security & Hardening
       ./security/apparmor
-      ./security/audit/auditd.nix
+      ./security/auditd.nix
       ./security/auth/keyring.nix
       ./security/auth/sudo.nix
       ./security/hardening
@@ -48,9 +48,9 @@
       ./system/user/user.nix
     ]
     #--- Mullvad VPN, system and home-manager halves (controlled by hostConfig)
-    ++ lib.optionals hostConfig.mullvad.enable [./security/vpn/mullvad]
+    ++ lib.optionals hostConfig.mullvad.enable [./security/mullvad]
     #--- ClamAV Antivirus (controlled by hostConfig)
-    ++ lib.optionals hostConfig.clamav.enable [./security/av/clamav.nix]
+    ++ lib.optionals hostConfig.clamav.enable [./security/clamav.nix]
     #--- Docker (controlled by hostConfig)
     ++ lib.optionals hostConfig.docker.enable [./services/runtimes/docker.nix]
     #--- Flatpak (controlled by hostConfig; loaded for the Flatpak apps: hytale)

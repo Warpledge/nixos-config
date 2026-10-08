@@ -18,5 +18,5 @@
       ./tools/java.nix
     ]
     #--- Game Launchers (controlled by hostConfig)
-    ++ lib.optionals hostConfig.gaming.steam [./launchers/steam.nix];
+    ++ lib.optionals hostConfig.gaming.steam [./steam.nix];
 }
