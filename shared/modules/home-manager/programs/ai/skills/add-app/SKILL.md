@@ -13,10 +13,12 @@ that catches the step that usually gets missed.
 - Look up the package with the nixos MCP tool, and check for a home-manager module
   (`find /nix/store -maxdepth 4 -path '*/modules/programs/<pkg>.nix'`); `programs.<pkg>`
   beats `home.packages` when it exists.
-- Not in nixpkgs: a Tauri/WebKitGTK app tries upstream's Flatpak first (its own module
-  gated on a toggle, not an inline entry in `flatpak.nix`); an AppImage goes through
-  `appimageTools` in the folder for what the app *is* (`.notes/local/appimage-wraps.md`);
-  a prebuilt bundle in `~/.local/opt` goes under `programs/local/` with a `local.*` toggle
+- Not in nixpkgs: prefer upstream's AppImage over its Flatpak whenever one exists (the
+  user's call, after repeated Flatpak trouble on NixOS). It goes through `appimageTools` in
+  the folder for what the app *is* (`.notes/local/appimage-wraps.md`). A Flatpak is the
+  fallback when there's no AppImage, or the AppImage's bundled libraries clash with the
+  host; it gets its own module gated on a toggle, not an inline entry in `flatpak.nix`.
+  A prebuilt bundle in `~/.local/opt` goes under `programs/local/` with a `local.*` toggle
   and an entry in `.notes/local/local-binary-installs.md`.
 - Set only what the user asked for; Stylix owns colors and fonts, so enable the program's
   theming target instead of setting any.
