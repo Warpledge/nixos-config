@@ -20,8 +20,9 @@ home-manager, Niri WM, Stylix theming (Catppuccin Mocha).
    off in `shared/modules/theme/`.
 4. **Set only what was asked for.** Do not add extra options, defaults, or
    "nice to have" settings beyond the request.
-5. **Surgical edits only.** Never rewrite a whole file. Never delete existing
-   content, including commented-out code and disabled options.
+5. **Surgical edits only.** Never rewrite a whole file. Never delete content
+   the task didn't ask you to remove, including commented-out code and
+   disabled options.
 6. **Public repo.** No passwords, API keys, tokens, or secrets.
 7. **No agent attribution in commits.** Commits you make use the repo's
    configured git identity (the user's), and every commit message or PR
@@ -97,11 +98,14 @@ If that returns a path, read it and use `programs.<pkg>` instead.
 `specialArgs`, so every module can read it. Conditional imports in
 `shared/modules/home/programs/default.nix` decide what actually loads —
 it is the router under `programs/`, except `gaming/default.nix`, which routes the
-`gaming.*` launchers, games and tools. Most subdirectories are flat `.nix`
-files, but `browsers/{zen,mullvad,helium}/` and `media/freetube/` each have a
+`gaming.*` launchers, games and tools, and `audio/guitar/default.nix`, which
+routes the guitar apps. Most subdirectories are flat `.nix` files, but
+`browsers/{zen,mullvad,helium}/` and `media/{freetube,moku}/` each have a
 `default.nix` of their own — those are multi-file module bundles, not routers,
 so a new toggle's import still goes in `programs/default.nix` (or
-`programs/gaming/default.nix` for a `gaming.*` app).
+`programs/gaming/default.nix` for a `gaming.*` app). A new guitar app's import
+goes in `audio/guitar/default.nix`, and its toggle joins that folder's gate in
+`programs/default.nix`.
 
 | Scope | Path |
 | --- | --- |
@@ -131,7 +135,7 @@ in both files with the same value unless told otherwise.
 6. Add it to the matching list under **Components** in `README.md`, including
    the link reference definition at the bottom of that file
 
-   **`README.md` is ~34 KB — never read it in full.** Locate the two regions
+   **`README.md` is ~32 KB — never read it in full.** Locate the two regions
    you need with grep, then edit those lines directly:
 
    ```bash

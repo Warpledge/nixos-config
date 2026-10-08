@@ -105,6 +105,7 @@
     };
 
     #--- Kernels
+    # Own nixpkgs: upstream says an override can mismatch patches and kernel
     cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
 
     #--- Theme

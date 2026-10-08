@@ -15,10 +15,11 @@ NixOS flake managing **Desktop** (Ryzen 5800X3D + RX 9070 XT, 280Hz OLED + 144Hz
 5. **Stylix owns theming.** Never set colors, fonts, or wallpaper in a module: enable the program's theming target and let Stylix supply the palette. Hardcoded values conflict with or silently override the theme. catppuccin/nix (`theme/catppuccin.nix`) auto-enables its ports beside Stylix; where both theme an app, one target is switched off in `theme/`. Apps neither covers carry upstream's Catppuccin file (Zen's `userChrome.css`/`userContent.css`).
 6. **No agent attribution in commits.** Commits you make use the repo's configured git identity (the user's), and every commit message or PR description carries no `Co-Authored-By:` trailer, no "Generated with" line, and no mention of Claude or any agent. The user is the sole author of every commit. Messages use Conventional Commits, `type(scope): subject` plus a bullet body (types, scopes and examples in the `commit` skill; the git commit template mirrors them).
 7. **No desktop screenshots without permission.** Never capture the screen, a window, or the desktop (screenshot tools, `grim`, niri's screenshot actions, computer-use captures) unless the user has said yes to that specific capture first.
+8. **Set only what was asked for.** No extra options, defaults, or "nice to have" settings beyond the request.
 
 `AGENTS.md` at the repo root is a second, shorter ruleset for other agents (opencode reads it *instead of* `CLAUDE.md`). The two must not contradict each other: when a rule here changes, check whether `AGENTS.md` says the same.
 
-Only `.claude/settings.json` is tracked (public); the rest of `.claude/` is gitignored, including `settings.local.json`, where "always allow" approvals land and can capture a secret. **Maintenance check:** before committing a `settings.json` change, and in any CLAUDE.md audit, read both files for tokens, keys, credentialed URLs or private paths; nothing secret goes in `settings.json`, and stale or sensitive local approvals get pruned. Bash allow rules stay read-only, since in auto mode a matching allow rule skips the safety classifier (`autoMode.classifyAllShell` is off by default). `alejandra` is the one writer (the edit hook runs it anyway). `deadnix --no-lambda-arg` (with or without ` .`) and `nix flake check`/`show`/`metadata` are exact rules, because a prefix rule would also let risky flags through (deadnix's `--edit`). `nix build`/`nix eval` stay off: `--impure --expr` reads and sends out any file, and `--option` can enable `builtins.exec`. Deny rules enforce rules 1 and 7 (rebuild, activation, boot, upgrade, rollback and screenshot commands), so an approved capture runs on the user's side with `!`. The `PostToolUse` hook, `shared/modules/home/programs/ai/hooks/post-edit.sh`, runs `alejandra` on each edited `.nix` file and flags three things: a new `---` line in `README.md`, a color literal outside `theme/` (rule 5), and host toggle drift after a `settings.nix` edit.
+Only `.claude/settings.json` is tracked (public); the rest of `.claude/` is gitignored, including `settings.local.json`, where "always allow" approvals land and can capture a secret. **Maintenance check:** before committing a `settings.json` change, and in any CLAUDE.md audit, read both files for tokens, keys, credentialed URLs or private paths; nothing secret goes in `settings.json`, and stale or sensitive local approvals get pruned. Bash allow rules stay read-only, since in auto mode a matching allow rule skips the safety classifier (`autoMode.classifyAllShell` is off by default). `alejandra` is the one writer (the edit hook runs it anyway). `deadnix --no-lambda-arg` (with or without ` .`) and `nix flake check`/`show`/`metadata` are exact rules, because a prefix rule would also let risky flags through (deadnix's `--edit`). `nix build`/`nix eval`/`nix log` stay off: `--impure --expr` reads and sends out any file, and `--option` can enable `builtins.exec`. Deny rules enforce rules 1 and 7 (rebuild, activation, boot, upgrade, rollback and screenshot commands), so an approved capture runs on the user's side with `!`. The `PostToolUse` hook, `shared/modules/home/programs/ai/hooks/post-edit.sh`, runs `alejandra` on each edited `.nix` file and flags three things: a new `---` line in `README.md`, a color literal outside `theme/` (rule 5), and host toggle drift after a `settings.nix` edit. The hook matches `Write|Edit` only, so a file changed through Bash (`sed`, a heredoc) skips the formatting and all three checks; edit tracked files with Edit or Write.
 
 ## Commands
 
@@ -37,7 +38,7 @@ nixm upgrade            # Update flake inputs + rebuild
 nixm flake-update       # Update flake inputs only (no rebuild)
 nixm dryrun             # Rebuild without applying
 nixm gc                 # GC, keep last 5 generations
-nixm rollback           # Roll back to the previous generation
+nixm rollback           # Pick a generation and switch to it (interactive)
 nixm backup             # Back up FreeTube (subs, playlists, history) and Zen bookmarks (as bookmarks.html) to dated ~/SyncBackups folders
 nixm freetube-backup    # FreeTube only (app must be closed)
 nixm zen-backup         # Zen only
@@ -83,7 +84,7 @@ Gotchas. Grep the option name before assuming which file owns it:
 - `media.moku` loads from both trees: the home-manager bundle plus `nixos/services/servers/flaresolverr.nix`. `suwayomi.enable`, `syncthing.enable` and `mullvad.enable` each load one NixOS module (`nixos/services/servers/{suwayomi,syncthing}.nix`, `nixos/security/vpn/mullvad/`) that sets its home-manager half through `home-manager.users.${username}`.
 - `nixos/services/runtimes/flatpak.nix` (nix-flatpak) loads only while a Flatpak app's toggle is on, today `gaming.hytale`, the one Flatpak left. Hytale isn't on Flathub: its launcher is Hypixel's own bundle, installed by hand, so `services.flatpak.packages` stays empty for it. A new Flatpak app adds its toggle to that condition in `nixos/default.nix`, or `services.flatpak.packages` doesn't exist for it to set.
 - `hostConfig.kernel` is read in `system/bootloader.nix` (and `shared/default.nix` for the CachyOS overlay); `gaming/performance/kernel.nix` only holds gaming sysctls and boot params.
-- `alejandra`, `claude-code` and `affinity-nix` keep their own nixpkgs on purpose (the comments in `flake.nix` say why: a GCC 15 build failure, and binary caches that only match their own pin), and `nix-flatpak` has no nixpkgs input. Don't add `inputs.nixpkgs.follows` to them.
+- `alejandra`, `claude-code`, `affinity-nix` and `cachyos-kernel` keep their own nixpkgs on purpose (the comments in `flake.nix` say why: a GCC 15 build failure, binary caches that only match their own pin, and CachyOS patches that must match their pin's kernel version), and `nix-flatpak` has no nixpkgs input. Don't add `inputs.nixpkgs.follows` to them.
 - `audio/guitar/` loads when any of `audio.{guitarix,tone3000,katanaFloorboard}` is on; its `default.nix` holds the shared cab IR, tuner and patchbay packages plus the plugin paths, then gates each app on its own toggle.
 - `ai/{claude,opencode,lmstudio}.nix` are conditionally imported **and** wrap their body in `config = lib.mkIf hostConfig.<toggle> {...}`, so the inner guard never fires on its own. New modules take the conditional import alone.
 - Module *loading* goes through `lib.optionals` in a `default.nix`; config *logic* inside a module uses `if/then/else`. Mixing them up is why an option looks wired but has no effect.
@@ -110,14 +111,15 @@ Gotchas. Grep the option name before assuming which file owns it:
 ++ (lib.optional (hostConfig.windowManager == "niri") ./wm/niri.nix)
 ```
 
-`shared/default.nix` is also where the overlay list is assembled, where `nixpkgs.config` sets `allowUnfree` and `android_sdk.accept_license`, and where `home-manager.backupFileExtension = "bak"` is set. One overlay lives in that list: the CachyOS kernel one, applied when `hostConfig.kernel == "cachyos"` (`inputs.cachyos-kernel.overlays.pinned`). A new overlay is appended to the same list. Both `system.stateVersion` and `home.stateVersion` are pinned to `25.11`, marked DO NOT CHANGE.
+`shared/default.nix` is also where `nixpkgs.config` sets `allowUnfree` and `android_sdk.accept_license`, and where `home-manager.backupFileExtension = "bak"` is set. Overlays come from two lists the module system merges: `shared/default.nix` holds the CachyOS kernel one, applied when `hostConfig.kernel == "cachyos"` (`inputs.cachyos-kernel.overlays.pinned`), and `shared/modules/nixos/nix/nixpkgs.nix` holds the unconditional ones (NUR, claude-code, affinity-nix), where a new overlay goes unless a toggle gates it. That file also sets `allowBroken`, so a package nixpkgs marks broken still passes `nix flake check` and only a build shows the failure, and `permittedInsecurePackages`, whose entries name exact versions: an update that moves one to a new version fails eval as insecure until the entry matches. Both `system.stateVersion` and `home.stateVersion` are pinned to `25.11`, marked DO NOT CHANGE.
 
 ### Module layout
 
 - `shared/modules/nixos/` — system: `gaming/` (default, `launchers/` steam, `performance/` esync + gamemode + kernel, `tools/` gamescope + java), `network/` (default, blockers, dns, firewall, networkmanager), `nix/` (default, nh, nixpkgs, substituters), `security/` (`apparmor/`, `audit/` auditd, `auth/` keyring + sudo, `av/` clamav, `hardening/` default + kernel, `vpn/mullvad/`), `services/` (desktop, `hardware/` adb + keyd + power + sound, `runtimes/` docker + flatpak + runners, `servers/` flaresolverr + suwayomi + syncthing, ssh), `system/` (bootloader, documentation, packages, `desktop/` input + wayland, `language/` locale + japanese-ime, `tuning/` tweaks + zram, `user/` shell + user)
 - `shared/modules/home/` — user: `programs/` (browsers, terminals, editors, ai, shell, fetch, file-browsers, graphics, audio, media, office, security, gaming (`launchers/`, `games/`, `tools/`, `scripts/`), git (`git.nix` + the commit template), utilities (`utilities.nix`, the general package list), android, discord, plus `options.nix` at its root). `mime.nix`, `nixm.nix`, `services.nix` and `variables.nix` are single files at that level, not directories
-  - Wrappers for prebuilt bundles in `~/.local/opt/` (`media/tonkatsu-box.nix`, `gaming/tools/{relink-mod-organizer,reloaded-ii-gbfr}.nix`, `audio/guitar/katana-floorboard.nix`) sit in the folder for what the app is; the payload is intentionally not in the repo
+  - Wrappers for prebuilt bundles in `~/.local/opt/` (`media/tonkatsu-box.nix`, `gaming/tools/relink-mod-organizer.nix`, `audio/guitar/katana-floorboard.nix`) sit in the folder for what the app is; the payload is intentionally not in the repo. `gaming/tools/reloaded-ii-gbfr.nix` is the exception: a Windows `.exe` its installer puts in `~/Desktop/Reloaded-II - Granblue Fantasy Relink/`, run in GBFR's Proton prefix through `protontricks-launch`
   - `programs/ai/skills/<name>/` and `programs/ai/agents/<name>.md` — Claude Code skills and subagents kept in the repo so every host gets them, registered in `ai/claude.nix` under `programs.claude-code.{skills,agents}`, beside the pinned plugins and LSP servers. New ones (including what skill-creator writes to `~/.claude/skills/`) move here. Commits go through the user-only `commit` skill, which runs `gitleaks` on the staged diff and the `public-repo-auditor` subagent
+  - Subagents: `build-triager` builds one host's closure and reports only what failed (hand it a build that failed rather than reading the log inline; a clean build never needs it, so the flake-update skill builds inline first); `prose-reviewer` is the cut-only pass in step 5 of **Add an application**; `docs-drift-auditor` checks CLAUDE.md, AGENTS.md and README.md against the tree, before doc commits and in any CLAUDE.md audit
   - `programs/ai/mcp.nix` — MCP servers shared by Claude Code and opencode. API keys are read at launch from owner-only files in `~/.nixos-config-mcp/`, so they never reach the repo or the store; a new server that needs a key does the same
   - AppImage wraps (`appimageTools`) sit in the folder for what the app is, not how it is packaged: `gaming/games/feedback.nix`, `media/streamlink-twitch-gui.nix`, `media/boorusama.nix`. The payload is hash-pinned into the store, so unlike the `~/.local/opt` wrappers nothing lives outside git (see `docs/local/appimage-wraps.md`)
   - `default.nix` carries a `clearStaleBackups` activation hook that deletes `*.bak` under `~/.config`, `~/.local/{share,state}` before `checkLinkTargets`. This is why HM activation never fails on leftover backups. Don't remove it when debugging a "file exists" error; find the real conflicting file instead.
@@ -142,10 +144,10 @@ Gotchas. Grep the option name before assuming which file owns it:
 
 ## Workflows
 
-**Add an application:**
+**Add an application** (the `add-app` skill runs these steps, then checks the wiring):
 1. Add the toggle to **both** host configs (keep them symmetrical)
 2. Create the module in the right subdir (`shared/modules/home/programs/...`)
-3. Add the conditional import to `shared/modules/home/programs/default.nix`, the router under `programs/`; a `gaming.*` app goes in `programs/gaming/default.nix`, which routes its own launchers, games and tools. The nested `default.nix` files (`browsers/{zen,mullvad,helium}/`, `media/freetube/`) are multi-file module bundles, not routers
+3. Add the conditional import to `shared/modules/home/programs/default.nix`, the router under `programs/`; a `gaming.*` app goes in `programs/gaming/default.nix`, which routes its own launchers, games and tools, and a guitar app goes in `audio/guitar/default.nix`, with its toggle added to that folder's gate in `programs/default.nix`. The other nested `default.nix` files (`browsers/{zen,mullvad,helium}/`, `media/{freetube,moku}/`) are multi-file module bundles, not routers
 4. `alejandra .` → `git add` new files → `nix flake check` (do not rebuild; hand it back)
 5. Give any prose the task wrote or edited a cut-only revision pass before handing back: remove words, add none. No new information, no new claims, no rephrasing that smuggles either in. See **Writing Style**.
 6. Add it to the matching `<details>` table under **Components** in `README.md` (plus `## Structure` for a new directory, `## Flake Inputs` for a new input), and its link-reference definition at the bottom: the README is the public-facing doc and drifts easily.
@@ -174,6 +176,8 @@ with the same `_id` wins, so reduce it before reading:
 inside it as `channelsHidden`, a JSON **string** needing `fromjson`. A `nixm freetube-backup`
 folder is restored through the app's Settings → Data Settings → Import, not by copying files
 into place.
+
+**Update flake inputs:** the user-only `flake-update` skill (`/flake-update [input…]`) does what `nixm upgrade` does, minus the rebuild. It builds this host without activating it, fixes or switches off failures and rechecks disabled packages, then hands back the rebuild command. Asked to update the flake, point the user at it.
 
 **Add a system service:** same flow, but `shared/modules/nixos/services/<category>/<name>.nix` and import in `shared/modules/nixos/default.nix`.
 
@@ -212,8 +216,8 @@ DMS runs as a systemd user service (`systemd.enable`, `niri.enableSpawn = false`
 
 **Login:** Niri and Hyprland start from the DMS greeter (greetd, through the `dank-greeter` input, set up in `<wm>/session.nix`).
 
-**Hyprland-only directories:** `core/animations.nix`, `core/layouts/`, `core/variables.nix`, `core/rules/{windowrules,layerrules}/`, `scripts/`.
-**Niri-only directories:** `core/monitors.nix`, `core/rules.nix`, `core/xwayland.nix`, `addons/`.
+**Hyprland-only directories:** `core/animations.nix`, `core/layouts/`, `core/variables.nix`, `core/rules/` (`luaRule.nix`, `windowrules/`, `layerrules/`), `scripts/`.
+**Niri-only directories:** `core/monitors.nix`, `core/portals.nix`, `core/rules.nix`, `core/xwayland.nix`, `addons/`.
 
 Per-host WM overrides exist where needed:
 - `hosts/laptop/wm/{hyprland,niri}.nix` — hybrid-GPU env (`WLR_DRM_DEVICES`), Solaar autostart; the niri one also turns off DMS auto-lock
@@ -223,7 +227,7 @@ These are only imported when the WM is active, e.g. `lib.optional (hostConfig.wi
 
 ## Hardware
 
-**Desktop:** AMD-only (RX 9070 XT direct rendering), `sched_migration_cost_ns=5ms`, performance governor, cachyos kernel. Suspend is disabled because the RX 9070 XT doesn't resume cleanly.
+**Desktop:** AMD-only (RX 9070 XT direct rendering), `sched_migration_cost_ns=5ms`, performance governor. Suspend is disabled because the RX 9070 XT doesn't resume cleanly.
 **Laptop:** TLP power mgmt, hybrid GPU defaults to AMD 680M; route apps to RTX 4070 with `nvidia-offload <app>`. WM-specific GPU vars live in `hosts/laptop/wm/`. It doubles as the Minecraft server host, so sleep, suspend and hibernate are off, the lid and power key are ignored, and DMS auto-lock is off under niri.
 
 ## Network
@@ -368,7 +372,7 @@ Common errors:
 | Need | Use |
 | --- | --- |
 | Package metadata | `nix eval --raw nixpkgs#<pkg>.meta.homepage` |
-| nixpkgs packages / NixOS + home-manager options | the **nixos-mcp** tool (over `nix search` or scraping `search.nixos.org`) |
+| nixpkgs packages / NixOS + home-manager options | the **nixos** MCP tool (over `nix search` or scraping `search.nixos.org`) |
 | Library / SDK / API docs | the **context7** tool (over web search) |
 | Upstream releases, tags, issues, files | the **github** MCP tool, read-only (over fetching github.com) |
 | How an upstream repo works when context7 has little on it (DMS, niri-flake, stylix, Tsunagu) | the **deepwiki** MCP tool |
@@ -412,11 +416,11 @@ Android device notes live under `docs/android/`:
 Local (non-nixpkgs) binary installs live under `docs/local/`:
 
 - `local/local-binary-installs.md` — the `~/.local/opt` wrapper pattern for prebuilt third-party bundles kept out of git; restore steps for fresh installs / the laptop. **Add an entry here for each new local app.**
-- `local/appimage-wraps.md` — the `appimageTools.wrapType2` pattern for upstream AppImages. Hash-pinned into the store, so nothing to restore by hand; covers the per-app `Exec`/icon fixups, a non-executable `AppRun`, how to get a new hash when `nix store prefetch-file` hits the daemon's DNS timeout, and building one module without a rebuild.
+- `local/appimage-wraps.md` — the `appimageTools.wrapType2` pattern for upstream AppImages. Hash-pinned into the store, so nothing to restore by hand; covers the per-app `Exec`/icon fixups, a non-executable `AppRun`, a DwarFS payload `appimageTools.extract` can't open (unpack with `dwarfsextract`), how to get a new hash when `nix store prefetch-file` hits the daemon's DNS timeout, and building one module without a rebuild.
 
 nixpkgs update notes live under `docs/nixpkgs/`:
 
-- `nixpkgs/disabled-packages.md` — packages switched off because a flake update broke them, with the date, the nixpkgs rev and how to tell a fix has landed. **Add a row whenever an update forces a package off, and remove it on re-enable.**
+- `nixpkgs/disabled-packages.md` — packages switched off because a flake update broke them, with the date, the nixpkgs rev and how to tell a fix has landed. **Add a row whenever an update forces a package off, and remove it on re-enable.** The `disable-package` skill does both.
 
 Window manager notes live under `docs/wm/`:
 
