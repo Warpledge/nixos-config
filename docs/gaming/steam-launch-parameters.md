@@ -146,6 +146,24 @@ Installed to `~/.local/share/Steam/steamapps/common/Wuthering Waves/Client/Saved
 
 ---
 
+## System40.exe
+
+```
+bash -c 'exec "${@/GAME.exe/System40.exe}"' -- %command%
+```
+
+Under gamescope:
+
+```
+nix-gamescope bash -c 'exec "${@/GAME.exe/System40.exe}"' -- %command%
+```
+
+**Notes:** Replace `GAME.exe` with the exe Steam launches. Steam starts the game's own exe, but a fan mod for it needs the stock engine exe, `System40.exe`, in the same folder. The `bash` wrapper swaps the exe name inside `%command%`, so Proton and the prefix stay as Steam sets them, and a Steam update or file verify can't undo it the way overwriting the exe would. The engine reads the `.ini` named after its own exe (`System40.ini`). Use `nix-gamescope` rather than a bare `gamescope`: with the global `PROTON_ENABLE_WAYLAND=1` the game starts to a black screen in gamescope, and the wrapper switches that off and keeps Steam's overlay out of gamescope.
+
+**Requires GE-Proton9-27**, forced under Compatibility (tested 2026-10-08). GE-Proton11-5 to 11-7 froze the screen and input for 2 to 6 s after clicking a map node, with the same freeze under gamescope and under Proton's Wayland driver. A `PROTON_LOG=1` run with `WINEDEBUG=+timestamp,+tid,+cursor,+win` showed the cause: the game glides the cursor to its target with about 200 `SetCursorPos` calls, one per millisecond, and newer Wine queues a mouse-move message for each, which the main thread then works through one by one (every waypoint hit-tested 70 to 80 times) before it draws or takes input again. A ProtonDB report for the game describes the same freeze and the same GE-Proton9-27 fix.
+
+---
+
 ## Template
 
 Use this format when adding new games:
