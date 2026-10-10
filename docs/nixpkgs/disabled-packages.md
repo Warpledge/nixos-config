@@ -4,7 +4,7 @@ Packages switched off because they stopped building after a flake update. Add a 
 
 | Package | Disabled in | Date | Broken at nixpkgs | Reason |
 | --- | --- | --- | --- | --- |
-| REAPER | `audio.reaper = false` in both `settings.nix` files | 2026-10-03 | `c59305b` (2026-10-01), last good `e158d9e` (2026-09-26); still broken at `151fa4e` (2026-10-06) | REAPER itself builds; its SWS and ReaPack extensions fail on GCC 16. ReaPack: `implicit capture of 'this' via '[=]' is deprecated in C++20` under `-Werror=deprecated`. SWS: `g_actions` in `BR_ContextualToolbars.cpp` is a non-literal `constexpr` |
+| REAPER | `audio.reaper = false` in both `settings.nix` files | 2026-10-03 | `c59305b` (2026-10-01), last good `e158d9e` (2026-09-26); still broken at `e7439b6` (2026-10-08) | REAPER itself builds; its SWS and ReaPack extensions fail on GCC 16. ReaPack: `implicit capture of 'this' via '[=]' is deprecated in C++20` under `-Werror=deprecated`. SWS: `g_actions` in `BR_ContextualToolbars.cpp` is a non-literal `constexpr`; at `e7439b6` the same table fails with `could not convert '{48, ContextAction::MIDI, ...}' ... to 'const ContextAction'` |
 
 ## Checking whether a fix has landed
 
