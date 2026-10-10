@@ -22,7 +22,7 @@
     #--------------------------------------------------------------------#
     #-- Kernel Parameters
     #--------------------------------------------------------------------#
-    #- These sat in kernelModules until 2026-09-23, where modprobe could not
+    #- These sat in kernelModules until 2026-09-22, where modprobe could not
     #- resolve them and dropped them silently.
     kernelParams = [
       "randomize_kstack_offset=on" # Randomize kernel stack (exploit mitigation)

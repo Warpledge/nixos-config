@@ -222,6 +222,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | **Secrets** | [GNOME Keyring][gnome-keyring] |
 | **Passwords** | [KeePassXC][keepassxc], with the vault file synced between devices by [Syncthing][syncthing] |
 | **Antivirus** | [ClamAV][clamav] (off by default) |
+| **Remote Access** | [OpenSSH][openssh] with key-only login and no root login, plus [fail2ban][fail2ban], which bans an address for 12 hours after 3 failed attempts (off by default) |
 | **Cleanup** | [BleachBit][bleachbit] clears caches, logs and browser leftovers when run by hand; nothing runs on a schedule |
 
 </details>
@@ -342,9 +343,8 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [daita]: https://mullvad.net/en/vpn/daita
 [arkenfox]: https://github.com/arkenfox/user.js
 [securefox]: https://github.com/yokoffing/Betterfox
-[nix-ld]: https://github.com/nix-community/nix-ld
-[delta]: https://github.com/dandavison/delta
-[gh]: https://cli.github.com
+[openssh]: https://www.openssh.com/
+[fail2ban]: https://www.fail2ban.org/
 [gamescope]: https://github.com/ValveSoftware/gamescope
 
 ## Shell Shortcuts
