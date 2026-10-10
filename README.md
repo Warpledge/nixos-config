@@ -2,14 +2,6 @@
 
 The NixOS configuration behind my desktop and laptop, both daily driven since 2022.
 
-Everything here is shaped around these two machines and how I use them, so cloning the repo and running it won't get you far. It works better as a reference: a look at how a whole setup fits together, and somewhere to borrow an idea or a module from.
-
-New to NixOS? The short version: the entire operating system is written down in text files instead of being set up by hand. Installing a program, changing a setting, even swapping the whole desktop for a different one, is an edit and a rebuild rather than a series of clicks you'll have forgotten about in six months.
-
-That's what separates this from a dotfiles backup. Every package version is pinned in a lock file, so a rebuild lands on the exact versions I had before. If a drive dies or I wipe a machine, I install NixOS, point it at this repo, and it comes back with the same apps, keybinds, theme and settings as it had. Adding another machine means a new folder under `hosts/`, which is how the desktop and laptop stay in sync while still differing where the hardware forces it.
-
-Rebuilds stack up rather than overwrite each other: the old one stays on disk and in the boot menu, so when an update breaks something I reboot into the previous entry and I'm back where I was.
-
 ## Contents
 
 - [Overview](#overview)
@@ -24,17 +16,6 @@ Rebuilds stack up rather than overwrite each other: the old one stays on disk an
 - [Flake Inputs](#flake-inputs)
 - [Inspiration](#inspiration)
 
-## Overview
-
-- **One config, two machines:** both build from the same files. Each one has its own settings file ([`settings.nix`](./hosts/desktop/settings.nix)) where I flip features on and off, so they only differ where I want them to.
-- **The same theme everywhere:** [Catppuccin][catppuccin] Mocha Mauve, set once with [Stylix][stylix] and handed down to everything that can take it, with [catppuccin/nix][catppuccin-nix] alongside it covering the apps that have a proper Catppuccin port of their own.
-- **Private by default:** full-disk encryption ([LUKS][luks]), [AppArmor][apparmor], kernel hardening settings, an always-on [Mullvad][mullvad] VPN, and [Zen][zen] locked down with [Arkenfox][arkenfox] and [Securefox][securefox].
-- **Runs the awkward stuff:** [AppImages](./docs/local/appimage-wraps.md), Flatpaks ([nix-flatpak][nix-flatpak]), and the normal Linux programs Nix usually won't run ([nix-ld][nix-ld]).
-- **The tools I actually work in:** [Docker][docker], [tmux][tmux], [Zed][zed] and [Helix][helix], git with nicer diffs ([delta][delta]) and the [gh][gh] CLI.
-- **Built for gaming:** [Steam][steam] and Gamescope, [GameMode][gamemode] and [MangoHud][mangohud], plus kernel and GPU tweaks per machine.
-- **Nix commands behind a menu:** [`nixm`](./modules/home/nixm.nix) (short for "nix menu") puts rebuilds, cleanup, rollbacks and updates one keypress away, so I'm not looking commands up.
-- **Where AI comes in:** I've written and maintained this config myself for about two years, across several private repos before this one. Since early 2026 I've used [Claude Code][claude-code] as an assistant for the time-consuming parts: flake updates, build failures, docs upkeep and commit prep. Its skills and settings live in [`modules/home/programs/ai/`](./modules/home/programs/ai/).
-
 ## Host Machines
 
 - **Desktop:** Ryzen 5800X3D + RX 9070 XT (AMD-only), 280Hz OLED + 144Hz secondary
@@ -48,24 +29,23 @@ Rebuilds stack up rather than overwrite each other: the old one stays on disk an
 
 ## Theming
 
-Everything on the system uses one color scheme: [Catppuccin][catppuccin] Mocha Mauve, a dark theme with purple highlights. I pick it in one place and it spreads out from there, so the terminal, the file manager, the text editor and everything else match without me theming each app by hand.
+Everything on the system uses [Catppuccin][catppuccin] Mocha Mauve. I pick it in one place and it spreads out from there, so the terminal, the file manager, the text editor and everything else match without me theming each app by hand.
 
 Two tools split the job:
 
-- **[Stylix][stylix] does most of it.** It takes the color scheme, the fonts and the mouse cursor and pushes them into every program that will accept them. Nothing keeps a private copy of the colors, so nothing goes stale when I change the theme.
-- **[catppuccin/nix][catppuccin-nix] covers the rest.** Some programs have an official Catppuccin port written by the Catppuccin project, and that fits better than a close-enough palette generated from the color scheme.
-
-Both tools would happily theme the same app and fight over it, so for each one I keep whichever does the better job and switch the other off. A couple, like the code editor and Spotify, I leave to theme themselves.
+- **[Stylix][stylix]** It takes the color scheme, the fonts and the mouse cursor and pushes them into every program that it supports automatically.
+- **[catppuccin/nix][catppuccin-nix]** Some programs have an official Catppuccin port written by the Catppuccin project, I typically use this as a higher priority than Stylix in most cases because BASE16 can be a but limiting compared to an official catppuccin port.
+- 
 
 ## System Management TUI Script
 
 ![nixm top level menu](./docs/screenshots/nixm-tui-main.png)
 
-The top level is a set of categories. Pick one and it opens into its own menu of sub-commands, so you never have to remember the command names:
+The top level is a set of categories. Pick one and it opens into its own menu of sub-commands that I use often.
 
 ![nixm NixOS submenu](./docs/screenshots/nixm-tui-nixos.png)
 
-`nixm` is the script I use to manage the system day to day (it lives in [`modules/home/nixm.nix`](./modules/home/nixm.nix)). Run it on its own for a TUI (terminal UI) menu, or pass a subcommand to jump straight to it. It started out as a script from [anotherhadi's NixOS config](https://github.com/anotherhadi/nixy), and I've reworked and extended it a lot since.
+`nixm` is the script I use to manage the system day to day (it lives in [`modules/home/nixm.nix`](./modules/home/nixm.nix)).
 
 <details>
 <summary>📋 All nixm commands</summary>
@@ -435,7 +415,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 
 ## Keybinds
 
-`Mod` is the Super (Windows) key. Every window manager here is set up to be driven from the keyboard, so I barely reach for the mouse.
+`Mod` is the Super (Windows) key.
 
 >**Note:** `Mod+/` opens a keybind overlay cheatsheet in both WMs.
 
@@ -672,12 +652,3 @@ The main things this config pulls in from outside the standard NixOS package set
 | [`claude-code`](https://github.com/sadjow/claude-code-nix) | Claude Code, packaged so it updates without waiting on nixpkgs |
 | [`alejandra`](https://github.com/kamadorueda/alejandra) (pinned 3.0.0) | Nix formatter |
 | [`affinity-nix`](https://github.com/mrshmllow/affinity-nix) | Affinity Suite v3 (Photo, Designer, Publisher) via Wine |
-
-## Inspiration
-
-The configs I learned the most from.
-
-- [ryan4yin/nix-config](https://github.com/ryan4yin/nix-config)
-- [linuxmobile/shin](https://github.com/linuxmobile/shin)
-- [anotherhadi/nixy](https://github.com/anotherhadi/nixy)
-- [Frost-Phoenix/nixos-config](https://github.com/Frost-Phoenix/nixos-config)
