@@ -14,11 +14,11 @@
   #--- and cannot be wrapped). Missing libcurl kills tone downloads.
   tone3000 = pkgs.stdenv.mkDerivation (finalAttrs: {
     pname = "tone3000";
-    version = "0.0.11";
+    version = "0.0.12";
 
     src = pkgs.fetchurl {
       url = "https://github.com/tone-3000/tone3000-plugin/releases/download/v${finalAttrs.version}/TONE3000-v${finalAttrs.version}-linux-x64.tar.gz";
-      hash = "sha256-0W38+KAHdJ9nItgqnN2FNeETSQLq53P5LDOcgT79kYU=";
+      hash = "sha256-xF6l1k5u75kbFPGIOkJJ7RqIMlPbGp2fBgXgVAq6X8c=";
     };
 
     nativeBuildInputs = with pkgs; [autoPatchelfHook copyDesktopItems];
