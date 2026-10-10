@@ -33,6 +33,7 @@ Rebuilds stack up rather than overwrite each other: the old one stays on disk an
 - **The tools I actually work in:** [Docker][docker], [tmux][tmux], [Zed][zed] and [Helix][helix], git with nicer diffs ([delta][delta]) and the [gh][gh] CLI.
 - **Built for gaming:** [Steam][steam] and Gamescope, [GameMode][gamemode] and [MangoHud][mangohud], plus kernel and GPU tweaks per machine.
 - **Nix commands behind a menu:** [`nixm`](./modules/home/nixm.nix) (short for "nix menu") puts rebuilds, cleanup, rollbacks and updates one keypress away, so I'm not looking commands up.
+- **Where AI comes in:** I've written and maintained this config myself for about two years, across several private repos before this one. Since early 2026 I've used [Claude Code][claude-code] as an assistant for the time-consuming parts: flake updates, build failures, docs upkeep and commit prep. Its skills and settings live in [`modules/home/programs/ai/`](./modules/home/programs/ai/).
 
 ## Host Machines
 

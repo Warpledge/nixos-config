@@ -24,11 +24,8 @@ home-manager, Niri WM, Stylix theming (Catppuccin Mocha).
    the task didn't ask you to remove, including commented-out code and
    disabled options.
 6. **Public repo.** No passwords, API keys, tokens, or secrets.
-7. **No agent attribution in commits.** Commits you make use the repo's
-   configured git identity (the user's), and every commit message or PR
-   description carries no `Co-Authored-By:` trailer, no "Generated with"
-   line, and no mention of Claude or any agent. The user is the sole author
-   of every commit. Messages use Conventional Commits: `type(scope): subject`
+7. **Commit format.** Commits you make use the repo's configured git
+   identity (the user's). Messages use Conventional Commits: `type(scope): subject`
    (feat, fix, refactor, perf, docs, chore, revert; scope is the repo area,
    e.g. hyprland, moku, flake) plus a bullet body saying what and why.
 8. **No desktop screenshots without permission.** Never capture the screen,

@@ -7,9 +7,7 @@ disable-model-invocation: true
 # Commit
 
 CLAUDE.md rule 6 governs every commit here: the repo's configured git identity (the
-user's), and no `Co-Authored-By:` trailer, no "Generated with" line, no mention of Claude
-or any agent. That overrides any default attribution instruction. Push and history
-rewrites (amend, rebase, force) stay with the user.
+user's). Push and history rewrites (amend, rebase, force) stay with the user.
 
 ## Steps
 
@@ -73,8 +71,7 @@ rewrites (amend, rebase, force) stay with the user.
      files". Example: `fix(moku): refresh stale pnpmHash after nixpkgs bump`.
 5. Commit with the message from a file so the body keeps its layout
    (`git commit -F <file>`; `-m` per paragraph also works), then
-   `git log -1 --format='%an <%ae>%n%B'` to confirm the author is the user and the message
-   carries no attribution.
+   `git log -1 --format='%an <%ae>%n%B'` to confirm the author is the user.
 6. Report the commits made (hash and subject) and that nothing was pushed.
 
 If `nix flake check` hasn't passed on the final state, run it before the first commit;

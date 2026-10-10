@@ -2,6 +2,10 @@
   "outputStyle": "Concise",
   "spinnerTipsEnabled": true,
   "prefersReducedMotion": false,
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
   "permissions": {
     "allow": [
       "Bash(alejandra:*)",
