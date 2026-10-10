@@ -4,7 +4,6 @@ The NixOS configuration behind my desktop and laptop, both daily driven since 20
 
 ## Contents
 
-- [Overview](#overview)
 - [Host Machines](#host-machines)
 - [Screenshots](#screenshots)
 - [Theming](#theming)
@@ -14,7 +13,6 @@ The NixOS configuration behind my desktop and laptop, both daily driven since 20
 - [Keybinds](#keybinds)
 - [Structure](#structure)
 - [Flake Inputs](#flake-inputs)
-- [Inspiration](#inspiration)
 
 ## Host Machines
 
@@ -33,9 +31,8 @@ Everything on the system uses [Catppuccin][catppuccin] Mocha Mauve. I pick it in
 
 Two tools split the job:
 
-- **[Stylix][stylix]** It takes the color scheme, the fonts and the mouse cursor and pushes them into every program that it supports automatically.
-- **[catppuccin/nix][catppuccin-nix]** Some programs have an official Catppuccin port written by the Catppuccin project, I typically use this as a higher priority than Stylix in most cases because BASE16 can be a but limiting compared to an official catppuccin port.
-- 
+- **[Stylix][stylix]:** It takes the color scheme, the fonts and the mouse cursor and pushes them into every program that it supports automatically.
+- **[catppuccin/nix][catppuccin-nix]:** Some programs have an official Catppuccin port written by the Catppuccin project. I typically use this as a higher priority than Stylix in most cases because Base16 can be a bit limiting compared to an official Catppuccin port.
 
 ## System Management TUI Script
 

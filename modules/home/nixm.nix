@@ -6,10 +6,6 @@
 #- Run `nixm` for the interactive menu, or `nixm <command>` to skip
 #- straight to one. An unknown command prints the full list.
 #-
-#- Frequent NixOS actions sit at the top level; the rest open as
-#- submenus. Esc backs out of a submenu, exits from the top.
-#-
-#- Credits: original pre-modified script from https://github.com/anotherhadi/nixy
 {
   config,
   pkgs,

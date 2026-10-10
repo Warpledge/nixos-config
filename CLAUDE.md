@@ -16,6 +16,7 @@ NixOS flake managing **Desktop** (Ryzen 5800X3D + RX 9070 XT, 280Hz OLED + 144Hz
 6. **Commit format.** Commits you make use the repo's configured git identity (the user's). Messages use Conventional Commits, `type(scope): subject` plus a bullet body (types, scopes and examples in the `commit` skill; the git commit template mirrors them).
 7. **No desktop screenshots without permission.** Never capture the screen, a window, or the desktop (screenshot tools, `grim`, niri's screenshot actions, computer-use captures) unless the user has said yes to that specific capture first.
 8. **Set only what was asked for.** No extra options, defaults, or "nice to have" settings beyond the request.
+9. **Ask before writing new docs or long comments.** A new `.md` file, a new section or note in an existing one, or a new comment longer than a line or two needs the user's yes first; propose it in a sentence and wait. Keeping existing docs accurate needs no approval: CLAUDE.md, AGENTS.md, README rows and links, and the rows and entries a workflow below or a skill keeps current. Neither does a one-line comment where the code would otherwise be unclear.
 
 `AGENTS.md` at the repo root is a second, shorter ruleset for other agents (opencode reads it *instead of* `CLAUDE.md`). The two must not contradict each other: when a rule here changes, check whether `AGENTS.md` says the same.
 
