@@ -13,7 +13,7 @@ in {
   #-- Packages & Configuration
   #--------------------------------------------------------------------#
   home = {
-    packages = with pkgs; [bat ripgrep tldr sesh];
+    packages = with pkgs; [bat ripgrep tldr];
     sessionPath = ["$HOME/go/bin" "$HOME/.local/bin"];
     sessionVariables = {
       SHELL = "${pkgs.zsh}/bin/zsh";

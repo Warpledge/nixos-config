@@ -5,6 +5,7 @@ Packages switched off because they stopped building after a flake update. Add a 
 | Package | Disabled in | Date | Broken at nixpkgs | Reason |
 | --- | --- | --- | --- | --- |
 | REAPER | `audio.reaper = false` in both `settings.nix` files | 2026-10-03 | `c59305b` (2026-10-01), last good `e158d9e` (2026-09-26); still broken at `e7439b6` (2026-10-08) | REAPER itself builds; its SWS and ReaPack extensions fail on GCC 16. ReaPack: `implicit capture of 'this' via '[=]' is deprecated in C++20` under `-Werror=deprecated`. SWS: `g_actions` in `BR_ContextualToolbars.cpp` is a non-literal `constexpr`; at `e7439b6` the same table fails with `could not convert '{48, ContextAction::MIDI, ...}' ... to 'const ContextAction'` |
+| sesh | dropped from `home.packages` in `modules/home/programs/shell/zsh.nix` (the `sesh-sessions` widget and its `Alt+S` binds stay) | 2026-10-12 | `6510408` (2026-10-10), last good `e7439b6` (2026-10-08) | sesh 2.32.0 builds with `buildGo127Module` and runs `mockery` in `preBuild`, with go-mockery 3.8.0 overridden to Go 1.27. mockery can't read Go 1.27 export data: `could not import context (... cannot decode "context", export data version 5 is greater than maximum supported version 4)`, so its `test.ci` checks fail and sesh's build would hit the same error |
 
 ## Checking whether a fix has landed
 
