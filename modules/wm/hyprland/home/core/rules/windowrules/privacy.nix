@@ -22,5 +22,5 @@ in [
   "match:class ^(thunderbird)$, ${hide}"
   "match:class ^(md\\.obsidian\\.Obsidian)$, ${hide}"
   "match:class ^(homebank)$, ${hide}"
-  "match:class ^(vesktop)$, ${hide}"
+  "match:class (?i)goofcord$, ${hide}"
 ]

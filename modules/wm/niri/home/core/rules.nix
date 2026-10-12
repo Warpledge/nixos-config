@@ -24,7 +24,7 @@ let
         {app-id = "^thunderbird$";}
         {app-id = "^md\\.obsidian\\.Obsidian$";}
         {app-id = "^homebank$";}
-        {app-id = "^vesktop$";}
+        {app-id = "(?i)goofcord$";}
       ];
       block-out-from = "screen-capture";
     }
@@ -50,7 +50,7 @@ let
         {app-id = "org.quickshell";}
         {app-id = "Revolt";}
         {app-id = "discord";}
-        {app-id = "vesktop";}
+        {app-id = "(?i)goofcord$";}
         {app-id = "heroic";}
         {app-id = "spotify";}
         {app-id = "org.prismlauncher.PrismLauncher";}

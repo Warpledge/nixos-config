@@ -89,7 +89,7 @@
 
     #--- Apps
     "Mod+Shift+S".action.spawn = ["steam"];
-    "Mod+Shift+D".action.spawn = ["vesktop"];
+    "Mod+Shift+D".action.spawn = ["goofcord"];
     "Mod+Shift+H".action.spawn = ["heroic"];
     "Mod+Shift+G".action.spawn = ["lutris"];
     "Mod+Shift+Y".action.spawn = ["freetube"];

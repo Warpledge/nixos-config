@@ -28,7 +28,7 @@ in {
 
           #--- Gaming & XWayland Apps
           (exec "SUPER + SHIFT + S" "steam")
-          (exec "SUPER + SHIFT + D" "vesktop") # Nixcord
+          (exec "SUPER + SHIFT + D" "goofcord") # Nixcord
           (exec "SUPER + SHIFT + H" "heroic") # Epic / GoG Launcher
           (exec "SUPER + SHIFT + G" "lutris") # Game Launcher
           (exec "SUPER + SHIFT + M" "spotify") # Spicetify

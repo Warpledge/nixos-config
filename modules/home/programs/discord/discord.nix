@@ -1,7 +1,16 @@
 #=====================================================================#
 # DISCORD CONFIGURATION (NIXCORD)
 #=====================================================================#
-{inputs, ...}: {
+{
+  config,
+  options,
+  inputs,
+  ...
+}: let
+  #--- Same theme file the catppuccin/nix Vesktop port loads
+  inherit (config.catppuccin) flavor accent;
+  catppuccinTheme = "catppuccin-${flavor}-${accent}.theme";
+in {
   imports = [inputs.nixcord.homeModules.nixcord];
 
   #--------------------------------------------------------------------#
@@ -10,8 +19,24 @@
   #- https://kaylorben.github.io/nixcord/
   programs.nixcord = {
     enable = true;
-    discord.enable = false; # disable default Discord, use Vesktop instead
-    vesktop.enable = true;
+    #--- GoofCord asserts nixcord's pinned Node version, which our nixpkgs lacks
+    useGlobalPkgs = false;
+    discord.enable = false; # disable default Discord, use GoofCord instead
+    vesktop.enable = false; # replaced by GoofCord
+    #--- arRPC is off by default: the standalone arrpc service owns port 1337
+    goofcord.enable = true;
+    #--- Electron can't map XDG_CURRENT_DESKTOP=niri to a keyring and falls back
+    #--- to plain text; point safeStorage at gnome-keyring's Secret Service
+    goofcord.package = options.programs.nixcord.goofcord.package.default.overrideAttrs (old: {
+      postInstall =
+        (old.postInstall or "")
+        + ''
+          wrapProgramShell $out/bin/goofcord --add-flags "--password-store=gnome-libsecret"
+        '';
+    });
+    #--- Written wholesale to settings.json on every activation, like vesktop.settings
+    #--- Reports the OS as Windows so Discord accepts logins over the VPN
+    goofcord.settings.spoofWindows = true;
 
     #--- Written wholesale to ~/.config/vesktop/settings.json (a copy, not a
     #--- merge), so every key must be declared or it is dropped.
@@ -32,6 +57,11 @@
     };
     config = {
       frameless = true; # set some Vencord options
+      #--- Stylix's nixcord target skips GoofCord: load Catppuccin's upstream theme
+      themes.${catppuccinTheme} = ''
+        @import url("https://catppuccin.github.io/discord/dist/${catppuccinTheme}.css");
+      '';
+      enabledThemes = ["${catppuccinTheme}.css"];
       plugins = {
         biggerStreamPreview.enable = true;
         fakeNitro.enable = true;

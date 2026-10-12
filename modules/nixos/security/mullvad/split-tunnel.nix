@@ -79,13 +79,6 @@
       # RateYourMusic and similar sites reject Mullvad exit IPs
       bin = "${pkgs.ferdium}/bin/ferdium";
     };
-    # discord/discord.nix is imported unconditionally, so no toggle to gate on.
-    # nixcord builds its own Vesktop; pkgs.vesktop is a different derivation.
-    vesktop = {
-      home = true;
-      enable = true;
-      bin = "${hm.programs.nixcord.finalPackage.vesktop}/bin/vesktop";
-    };
   };
 
   unknown = lib.subtractLists (lib.attrNames targets) wanted;

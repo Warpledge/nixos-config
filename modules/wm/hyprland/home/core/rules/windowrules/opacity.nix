@@ -36,7 +36,7 @@ in [
   "match:class ^(Spotify)$, ${opacityRule}"
   "match:class ^(spotify)$, ${opacityRule}"
   "match:class ^(discord)$, ${opacityRule}"
-  "match:class ^(vesktop)$, ${opacityRule}"
+  "match:class (?i)goofcord$, ${opacityRule}"
   "match:class ^(heroic)$, ${opacityRule}"
   "match:class ^(Root)$, ${opacityRule}"
   "match:class ^(org.prismlauncher.PrismLauncher)$, ${opacityRule}"

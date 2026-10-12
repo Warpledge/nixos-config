@@ -7,5 +7,5 @@
   "match:class ^(spotify)$, workspace 8"
   "match:class ^(discord)$, workspace 9"
   "match:class ^(WebCord)$, workspace 9"
-  "match:class ^(vesktop)$, workspace 9"
+  "match:class (?i)goofcord$, workspace 9"
 ]

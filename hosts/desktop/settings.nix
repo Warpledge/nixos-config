@@ -175,7 +175,7 @@
   };
 
   #--- Discord Rich Presence (arRPC)
-  # Standalone arRPC server for Steam/Proton game detection in Vesktop
+  # Standalone arRPC server for Steam/Proton game detection in GoofCord
   discord.arrpc.enable = true;
 
   #--- AI Tools
