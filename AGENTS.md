@@ -201,6 +201,9 @@ covered under **Formatting** above.
   description in a list (`` `path/` — what it holds ``) is structure and stays.
 - In `docs/`, give absolute dates and versions (not "recently"), name the
   condition behind a "sometimes", and cite where a claim came from.
+- A reply that names packages, projects or upstream sources ends with a
+  **Sources** list linking each one, taken from `meta.homepage` or the flake
+  input's repo, never from memory.
 
 Prose only. Code blocks, command output, quotes and table cells are left
 alone.

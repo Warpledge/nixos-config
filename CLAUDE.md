@@ -303,6 +303,11 @@ colon, a comma, parentheses, or two sentences all work. This applies to dashes
 inside a sentence. A dash separating a label from its description in a list
 (`` `path/` — what it holds ``) is structure, not prose, and stays.
 
+When a chat reply names packages, projects or upstream sources, end it with a
+**Sources** list linking each one. Take the links from the lookups under
+**Looking things up** (a package's `meta.homepage`, the flake input's repo),
+not from memory.
+
 Structure is not the problem and should stay. The bold-label bullet listing
 (`**Short label:** description`) is the house style for `README.md` and stays
 even when the wording around it gets loosened up.
