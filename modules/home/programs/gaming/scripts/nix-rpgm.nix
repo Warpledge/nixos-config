@@ -1,5 +1,5 @@
 #=====================================================================#
-# NIX-RPGM - RPG MAKER SUPER-XBR UPSCALE WRAPPER
+# NIX-RPGM - RPG MAKER UPSCALE WRAPPER
 #=====================================================================#
 #- `nix-rpgm %command%` (Heroic: `nix-rpgm` in the wrapper field) reads the
 #- RPG Maker version from the game's folder and runs it through nix-vn at

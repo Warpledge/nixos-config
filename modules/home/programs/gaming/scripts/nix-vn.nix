@@ -1,9 +1,10 @@
 #=====================================================================#
-# NIX-VN - VISUAL NOVEL SUPER-XBR UPSCALE WRAPPER
+# NIX-VN - VISUAL NOVEL UPSCALE WRAPPER
 #=====================================================================#
 #- `nix-vn -r 1280x720 %command%` runs the game in gamescope (nix-gamescope)
-#- at its own resolution and upscales it to the monitor with Super-xBR
-#- (`-F xbr`, patched in nixos/gaming/tools/gamescope). Super+H toggles it.
+#- at its own resolution and upscales it to the monitor with Anime4K
+#- (`-F anime4k`, patched in nixos/gaming/tools/gamescope). Super+H cycles
+#- Anime4K, Super-xBR and linear.
 #- Presets fix the resolution, e.g. `nix-vn-720p %command%`. The vn-setup
 #- skill finds a game's resolution and picks one.
 {
@@ -36,7 +37,7 @@
       h=''${BASH_REMATCH[2]}
       shift 2
 
-      exec nix-gamescope -w "$w" -h "$h" -F xbr -- "$@"
+      exec nix-gamescope -w "$w" -h "$h" -F anime4k -- "$@"
     '';
 
   preset = name: res:

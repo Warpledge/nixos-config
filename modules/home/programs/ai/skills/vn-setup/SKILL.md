@@ -1,12 +1,12 @@
 ---
 name: vn-setup
-description: Set up a visual novel or other 2D game to run upscaled with Super-xBR through gamescope on this machine - find its own resolution from the running window, pick the nix-vn preset and hand back the launch option. Use when the user asks to set up a VN, make one look sharper or less blurry, upscale a 2D game, or names a VN and asks for its gamescope/xBR launch option.
+description: Set up a visual novel or other 2D game to run upscaled with Anime4K through gamescope on this machine - find its own resolution from the running window, pick the nix-vn preset and hand back the launch option. Use when the user asks to set up a VN, make one look sharper or less blurry, upscale a 2D game, or names a VN and asks for its gamescope/xBR launch option.
 ---
 
 # VN setup
 
-`nix-vn` runs a game in gamescope at its own resolution and upscales it with Super-xBR
-(`-F xbr`, patched into gamescope in `nixos/gaming/tools/gamescope/`). The only
+`nix-vn` runs a game in gamescope at its own resolution and upscales it with Anime4K
+(`-F anime4k`, patched into gamescope in `nixos/gaming/tools/gamescope/`). The only
 per-game fact needed is that resolution, so this skill measures it and picks a preset.
 
 | Game resolution | Launch option |
@@ -64,12 +64,13 @@ no `%command%`.
 After the user relaunches with it:
 
 ```bash
-pgrep -a gamescope | grep -- '-F xbr'   # shows -w/-h as chosen
+pgrep -a gamescope | grep -- '-F '   # shows -w/-h and the filter as chosen
 ```
 
 The picture should fill the screen height, centred. Cropped or wrongly stretched means
-the resolution is wrong: measure again. Super+H switches xBR off and on with a
-notification; if it does nothing, Super+G makes gamescope grab the keyboard first.
+the resolution is wrong: measure again. Super+H cycles Anime4K, Super-xBR and linear,
+naming each in a notification; if it does nothing, Super+G makes gamescope grab the
+keyboard first.
 
 ## 5. Record it
 

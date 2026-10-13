@@ -100,7 +100,7 @@ Prefer `PROTON_ENABLE_WAYLAND=0` over the wrapper for pure-Proton games; use the
 RPG Maker comes in two different runtimes, so identify which before tweaking.
 
 `nix-rpgm %command%` (in Heroic: `nix-rpgm` as the wrapper, no arguments) upscales
-any RPG Maker game with Super-xBR through `nix-vn`. It reads the version from the
+any RPG Maker game with Anime4K through `nix-vn`. It reads the version from the
 game folder: the RGSS library in `Game.ini` gives XP (640x480) or VX / VX Ace
 (544x416), `package.json` gives an MV / MZ game's window size, and `RPG_RT` files
 mean 2000/2003 (320x240). A game that resizes its own window (Hat World, a VX game,
@@ -220,12 +220,13 @@ nix-vn-720p %command%
 nix-vn -r 1366x768 %command%
 ```
 **What it does:** Runs a visual novel in gamescope (through `nix-gamescope`) at
-its own resolution and upscales it to the monitor with Super-xBR (`-F xbr`, a
-filter this repo patches into gamescope 3.16.31). Text and line art come out
-sharp instead of blurred. Super+H switches between xBR and linear and shows a
-notification. Presets cover the common sizes: `nix-vn-600p` (800x600),
-`nix-vn-768p` (1024x768), `nix-vn-720p` (1280x720), `nix-vn-900p` (1600x900)
-and `nix-vn-1080p` (1920x1080); anything else goes through `nix-vn -r WxH`. The
+its own resolution and upscales it to the monitor with Anime4K's CNN x2 (M)
+upscaler (`-F anime4k`, a filter this repo patches into gamescope 3.16.31 beside
+Super-xBR's `-F xbr`). Text and line art come out sharp instead of blurred.
+Super+H cycles Anime4K, Super-xBR and linear, and names each in a notification.
+Presets cover the common sizes: `nix-vn-600p` (800x600), `nix-vn-768p`
+(1024x768), `nix-vn-720p` (1280x720), `nix-vn-900p` (1600x900) and
+`nix-vn-1080p` (1920x1080); anything else goes through `nix-vn -r WxH`. The
 resolution must be the game's own, not the monitor's. The `vn-setup` skill
 reads it from the running game's window and picks the preset. Defined in
 `home/programs/gaming/scripts/nix-vn.nix`.

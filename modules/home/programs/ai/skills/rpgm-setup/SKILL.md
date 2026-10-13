@@ -1,12 +1,12 @@
 ---
 name: rpgm-setup
-description: Set up an RPG Maker game (2000/2003, XP, VX, VX Ace, MV, MZ) to run upscaled with Super-xBR through gamescope via nix-rpgm, usually in Heroic - identify the engine, pick the preset, set the Heroic wrapper and settings, and fix a black screen. Use when the user asks to set up an RPGM game, make one sharper, adds one to Heroic, or reports a black screen with sound in one.
+description: Set up an RPG Maker game (2000/2003, XP, VX, VX Ace, MV, MZ) to run upscaled with Anime4K through gamescope via nix-rpgm, usually in Heroic - identify the engine, pick the preset, set the Heroic wrapper and settings, and fix a black screen. Use when the user asks to set up an RPGM game, make one sharper, adds one to Heroic, or reports a black screen with sound in one.
 ---
 
 # RPGM setup
 
 `nix-rpgm` runs an RPG Maker game in gamescope at its own resolution and upscales it
-with Super-xBR (via `nix-vn`, `-F xbr`). Without arguments it guesses the resolution
+with Anime4K (via `nix-vn`, `-F anime4k`). Without arguments it guesses the resolution
 from the engine; presets override a game that resizes its own window.
 
 | Engine (how to tell) | Default | Preset |
@@ -51,7 +51,7 @@ The engine default is a guess: many VX / VX Ace games resize to 640x480 with a s
 | Wrapper command | `nix-rpgm` or a preset, arguments empty (`-r WxH` for odd sizes) |
 | Old `/usr/bin/env -u WAYLAND_DISPLAY` wrapper | remove: gamescope keeps Proton on X11, and listed first it hides niri's socket from gamescope |
 | Enable Wine-Wayland | off |
-| Enable HDR, Enable FSR Hack | off (HDR input makes xBR step aside; FSR hack competes with it) |
+| Enable HDR, Enable FSR Hack | off (HDR input makes Anime4K step aside; FSR hack competes with it) |
 | `LANG` / `LC_ALL` = `ja_JP.UTF-8`, `PROTON_USE_WINED3D=1` | keep; they pass through gamescope |
 
 The user can set these in Heroic, or, with Heroic closed (`pgrep -f heroic` empty),
@@ -66,7 +66,7 @@ Steam takes the same commands as a launch option: `nix-rpgm-480p %command%`.
 With the game running:
 
 ```bash
-pgrep -a gamescope | grep -- '-F xbr'      # the -w/-h actually used (the last pair wins)
+pgrep -a gamescope | grep -- '-F anime4k'  # the -w/-h actually used (the last pair wins)
 pid=$(pgrep -f -i 'Game\.exe' | tail -1)   # the Windows process (X:\...\Game.exe)
 D=$(tr '\0' '\n' < /proc/$pid/environ | sed -n 's/^DISPLAY=//p')
 nix shell nixpkgs#xwininfo -c xwininfo -root -tree -display "$D" | grep -v 'has no name'
@@ -75,7 +75,8 @@ nix shell nixpkgs#xwininfo -c xwininfo -root -tree -display "$D" | grep -v 'has 
 The game's titled window shows its real size, with no Wine frame inside gamescope.
 **Black screen with sound** means that window is bigger than gamescope's `-w/-h` and
 sits off its edge (Hat World: `640x480+-48+-17` on 544x416). Switch to the preset that
-matches the window and restart the game. Super+H toggles xBR with a notification;
+matches the window and restart the game. Super+H cycles Anime4K, Super-xBR and linear
+with a notification;
 Super+G grabs the keyboard if Super+H doesn't reach gamescope.
 
 ## 5. Record it
