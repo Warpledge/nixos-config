@@ -27,7 +27,8 @@ engine). Heroic settings and the black-screen check there apply to VNs in Heroic
   `grep -l "<name>" ~/.local/share/Steam/steamapps/appmanifest_*.acf`.
 - Check memory for a recorded setup first (the `vn-setups` entry).
 - Check the engine before reaching for gamescope (see the game-troubleshooting skill,
-  step 6): a System 4 game runs on `xsystem4`, which has its own Super-xBR; RPG Maker
+  step 6): a System 4 game runs on `xsystem4`, wrapped as `nix-vn-<size> xsystem4
+  "<game dir>" # %command%` with the size from `System40.ini`'s `ViewWidth`; RPG Maker
   2000/2003 runs on EasyRPG; a native Linux Ren'Py build renders at the window's size
   and gains nothing from this.
 

@@ -16,10 +16,6 @@
       hash = "sha256-l5F1Vdx0Jl+Q/kZcrs6rtnIlAaLWaPhLZv0hA1fEOQA=";
     };
 
-    #--- Final frame upscaled with Super-xBR (the original engine's SuperXBR
-    #--- filter), shaders ported from libretro; Alt+N cycles xBR/nearest/linear
-    patches = [./super-xbr.patch];
-
     #--- No cursor auto-move: the engine's "Auto-move Mouse Cursor" turned off
     postPatch = ''
       substituteInPlace src/input.c \

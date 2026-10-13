@@ -82,15 +82,15 @@ engine and that project's compatibility list. In this repo:
 
 - `gaming.xsystem4`: Wonderland Soft's System 4 (Lance 7, added 2026-10-13 after a
   freeze on every Proton setup). Steam launch option
-  `xsystem4 "<game dir>" # %command%`. Saves go to
-  `~/.xsystem4/<GameName from System40.ini>/<SaveFolder>/`, not the game folder; copy
-  them over with the game closed. Keys: F11 fullscreen, Alt+S screenshot, Alt+N
-  cycles the final-frame scaling (Super-xBR by default, our patch in
-  `launchers/xsystem4/`). Cursor auto-move is patched out.
+  `nix-vn-720p xsystem4 "<game dir>" # %command%`: gamescope upscales it with
+  Anime4K, so the preset must match `ViewWidth`/`ViewHeight` in `System40.ini`.
+  Saves go to `~/.xsystem4/<GameName from System40.ini>/<SaveFolder>/`, not the game
+  folder; copy them over with the game closed. Keys: F11 fullscreen, Alt+S
+  screenshot. Cursor auto-move is patched out.
 - `gaming.easyrpg`: RPG Maker 2000/2003.
 
 A 2D game or visual novel that only looks blurry when scaled to the monitor can run
-under gamescope with Super-xBR instead: the `vn-setup` skill.
+under gamescope with Anime4K instead: the `vn-setup` skill.
 
 A new one goes in through the `add-app` skill.
 
