@@ -40,8 +40,11 @@
         disable-package = ./skills/disable-package;
         flake-update = ./skills/flake-update;
         freetube-sync = ./skills/freetube-sync;
+        game-troubleshooting = ./skills/game-troubleshooting;
         hyprland-verify = ./skills/hyprland-verify;
         moku-bump = ./skills/moku-bump;
+        rpgm-setup = ./skills/rpgm-setup;
+        vn-setup = ./skills/vn-setup;
       };
       agents = {
         public-repo-auditor = ./agents/public-repo-auditor.md;

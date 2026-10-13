@@ -371,6 +371,8 @@ Common errors:
 
 **Laptop GPU:** `lspci | grep -i vga`, `env | grep -E 'DRI|VDPAU|LIBVA|VK'`. Configs: `hosts/laptop/hardware/gpu.nix` and `hosts/laptop/wm/{hyprland,niri}.nix`. Verify offload with `nvidia-offload glxinfo | grep "OpenGL renderer"`.
 
+**A game crashes, freezes or won't start:** the `game-troubleshooting` skill has the logging, hang-vs-crash and native-engine steps, and indexes the per-game notes in `docs/gaming/`.
+
 ## Looking things up
 
 **Never write a package homepage, description, or option name from memory.**
@@ -406,7 +408,7 @@ Security/privacy notes live under `docs/security/`:
 - `security/android-quic-vpn-leak.md` — QUIC VPN bypass (CVE, May 2026): mitigation via `adb shell device_config put tethering close_quic_connection -1`; re-apply after Android updates
 - `security/apparmor.md` — the per-app AppArmor profiles: what each attaches to, reading `apparmor="ALLOWED"` log lines, moving a profile to enforce, and what breaks first when you do
 
-Game-specific notes live under `docs/gaming/`:
+Game-specific notes live under `docs/gaming/` (the `game-troubleshooting` skill indexes them):
 
 - `gaming/tmodloader-debugging.md` — tModLoader paths and log locations
 - `gaming/steam-launch-parameters.md` — per-game Steam launch flags; documents the `tml-prelaunch` script (`modules/home/programs/gaming/scripts/tml-prelaunch.nix`)
