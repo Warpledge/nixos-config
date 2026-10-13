@@ -8,7 +8,7 @@ NixOS flake managing **Desktop** (Ryzen 5800X3D + RX 9070 XT, 280Hz OLED + 144Hz
 
 ## Critical Rules
 
-1. **Never run `nixm rebuild` or `nixos-rebuild`.** Stop and ask instead. Validation you SHOULD run yourself before reporting done: `alejandra .` → `git add <new files>` → `nix flake check`. Commit only when asked (see rule 6); pushing and history rewrites stay with the user.
+1. **Never run `nixm rebuild` or `nixos-rebuild`.** Stop and ask instead. When handing back a rebuild, give the user the token-light form to run with `!`: `! nixm rebuild 2>&1 | grep -E "error|Error|failed|Failed" || echo "✓"` (same for `nixm boot`). Validation you SHOULD run yourself before reporting done: `alejandra .` → `git add <new files>` → `nix flake check`. Commit only when asked (see rule 6); pushing and history rewrites stay with the user.
 2. **`git add` new files before `nix flake check`** — the flake won't see untracked files.
 3. **Edit existing files in place; don't rewrite them whole.** A rewrite drops commented-out code and disabled options without showing it in review.
 4. **Public repo:** no passwords, API keys, tokens, or secrets.
