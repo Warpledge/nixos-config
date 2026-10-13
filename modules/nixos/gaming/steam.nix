@@ -1,7 +1,11 @@
 #=====================================================================#
 # STEAM CONFIGURATION
 #=====================================================================#
-{pkgs, ...}: {
+{
+  config,
+  pkgs,
+  ...
+}: {
   #--------------------------------------------------------------------#
   #-- Steam Program Configuration
   #--------------------------------------------------------------------#
@@ -17,7 +21,7 @@
         pkgs.proton-ge-bin # GE-Proton (improved game compatibility)
       ];
       extraPackages = with pkgs; [
-        gamescope # Gamescope compositor
+        config.programs.gamescope.package # Gamescope (patched, tools/gamescope)
         pipewire # Audio server
         libXcursor # X11 cursor library
         libXi # X11 input library

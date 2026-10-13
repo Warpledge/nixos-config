@@ -4,7 +4,7 @@
 #- `nix-gamescope %command%` runs the game fullscreen in gamescope at the
 #- focused monitor's resolution and refresh (read from niri or Hyprland;
 #- nested gamescope can't detect them and falls back to 1280x720), under
-#- nix-performance. Base flags come from nixos/gaming/tools/gamescope.nix.
+#- nix-performance. Base flags come from nixos/gaming/tools/gamescope/.
 #- Extra gamescope flags go before `--` and override the detected ones:
 #-   nix-gamescope -w 1920 -h 1080 -F fsr -- %command%
 #- --force-grab-cursor locks the pointer to the game; add it only where it escapes.

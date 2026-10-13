@@ -14,7 +14,7 @@
       ./performance/esync.nix
       ./performance/gamemode.nix
       ./performance/kernel.nix
-      ./tools/gamescope.nix
+      ./tools/gamescope
       ./tools/java.nix
     ]
     #--- Game Launchers (controlled by hostConfig)
