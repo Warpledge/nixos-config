@@ -142,6 +142,7 @@
       ./scripts/nix-gamescope.nix
       ./scripts/nix-performance.nix
       ./scripts/nix-vn.nix
+      ./scripts/nix-rpgm.nix
       ./scripts/tml-prelaunch.nix
     ]
     #--- Launchers (steam is in nixos/gaming; hytale is a hand-installed Flatpak)

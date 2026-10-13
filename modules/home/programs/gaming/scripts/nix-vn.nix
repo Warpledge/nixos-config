@@ -1,31 +1,50 @@
 #=====================================================================#
-# NIX-VN - VISUAL NOVEL FSR UPSCALE WRAPPER
+# NIX-VN - VISUAL NOVEL SUPER-XBR UPSCALE WRAPPER
 #=====================================================================#
-#- `nix-vn %command%` upscales a fullscreen Proton game running below
-#- native resolution with Wine's fullscreen-hack FSR (GE-Proton). Set the
-#- game to fullscreen at its own resolution; windowed games are not scaled.
-#- Vulkan paths only (DXVK/VKD3D), so WineD3D/DirectDraw titles get nothing.
-#-   PROTON_ENABLE_WAYLAND=0        fullscreen hack exists only in the X11 driver;
-#-                                  overrides the global =1 in variables.nix
-#-   WINE_FULLSCREEN_FSR_STRENGTH   0 sharpest .. 5 softest; 5 keeps sharpening
-#-                                  halos off line art and text
-#- Launch-option values win, e.g. `WINE_FULLSCREEN_FSR_STRENGTH=3 nix-vn %command%`.
-{pkgs, ...}: let
+#- `nix-vn -r 1280x720 %command%` runs the game in gamescope (nix-gamescope)
+#- at its own resolution and upscales it to the monitor with Super-xBR
+#- (`-F xbr`, patched in nixos/gaming/tools/gamescope). Super+H toggles it.
+#- Presets fix the resolution, e.g. `nix-vn-720p %command%`. The vn-setup
+#- skill finds a game's resolution and picks one.
+{
+  lib,
+  pkgs,
+  ...
+}: let
+  #--- Preset suffix -> the game's own resolution
+  presets = {
+    "600p" = "800x600";
+    "768p" = "1024x768";
+    "720p" = "1280x720";
+    "900p" = "1600x900";
+    "1080p" = "1920x1080";
+  };
+
   nix-vn =
     pkgs.writeShellScriptBin "nix-vn"
     # bash
     ''
-      if [[ $# -eq 0 ]]; then
-        echo "usage: nix-vn <command> [args...]" >&2
+      if [[ $1 != -r || $# -lt 3 ]]; then
+        echo "usage: nix-vn -r WIDTHxHEIGHT <command> [args...]" >&2
         exit 1
       fi
+      if [[ ! $2 =~ ^([0-9]+)x([0-9]+)$ ]]; then
+        echo "nix-vn: resolution must look like 1280x720, got '$2'" >&2
+        exit 1
+      fi
+      w=''${BASH_REMATCH[1]}
+      h=''${BASH_REMATCH[2]}
+      shift 2
 
-      export PROTON_ENABLE_WAYLAND=0
-      export WINE_FULLSCREEN_FSR="''${WINE_FULLSCREEN_FSR:-1}"
-      export WINE_FULLSCREEN_FSR_STRENGTH="''${WINE_FULLSCREEN_FSR_STRENGTH:-5}"
+      exec nix-gamescope -w "$w" -h "$h" -F xbr -- "$@"
+    '';
 
-      exec "$@"
+  preset = name: res:
+    pkgs.writeShellScriptBin "nix-vn-${name}"
+    # bash
+    ''
+      exec ${nix-vn}/bin/nix-vn -r ${res} "$@"
     '';
 in {
-  home.packages = [nix-vn];
+  home.packages = [nix-vn] ++ lib.mapAttrsToList preset presets;
 }

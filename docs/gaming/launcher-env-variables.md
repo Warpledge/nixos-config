@@ -99,6 +99,21 @@ Prefer `PROTON_ENABLE_WAYLAND=0` over the wrapper for pure-Proton games; use the
 
 RPG Maker comes in two different runtimes, so identify which before tweaking.
 
+`nix-rpgm %command%` (in Heroic: `nix-rpgm` as the wrapper, no arguments) upscales
+any RPG Maker game with Super-xBR through `nix-vn`. It reads the version from the
+game folder: the RGSS library in `Game.ini` gives XP (640x480) or VX / VX Ace
+(544x416), `package.json` gives an MV / MZ game's window size, and `RPG_RT` files
+mean 2000/2003 (320x240). A game that resizes its own window (Hat World, a VX game,
+runs at 640x480) needs a preset or `nix-rpgm -r WxH`: `nix-rpgm-240p`, `-416p`,
+`-480p`, `-624p`, `-720p` and `-768p` cover 320x240 up to 1024x768. A black screen
+with sound means the window is bigger than the resolution used: gamescope's screen
+is too small and the window lands off its edge. When nothing matches, it starts the
+game unscaled and shows a notification. The `rpgm-setup` skill does the engine
+check, the Heroic settings and the black-screen fix.
+The env vars below still apply, set beside it. An `env -u WAYLAND_DISPLAY` wrapper
+isn't needed with it, because `nix-gamescope` already keeps Proton on X11. Placed
+before `nix-rpgm`, it also hides niri's Wayland socket from gamescope.
+
 ### RPG Maker 2000/2003, XP, VX, VX Ace (RGSS, old and Windows-only)
 Use a JP locale + WineD3D; these use DirectDraw / Direct3D8 which DXVK handles
 poorly, and most raw releases are Shift-JIS.
@@ -194,41 +209,31 @@ Extra gamescope flags go before a `--` and override the detected ones:
 upscales with FSR1. For the FPS overlay use `nix-gamescope --mangoapp --
 %command%` instead of `mangohud`. Defined in
 `home/programs/gaming/scripts/nix-gamescope.nix`; the always-on flags
-(`--rt --expose-wayland`) come from `nixos/gaming/tools/gamescope.nix`. Add
+(`--rt --expose-wayland`) come from `nixos/gaming/tools/gamescope/`. Add
 `--force-grab-cursor` per game only if the cursor escapes during mouse-look: it
 locks the pointer inside gamescope until you switch workspaces. Wine is forced
 onto gamescope's Xwayland (`PROTON_ENABLE_WAYLAND=0`), since its Wayland driver
 hangs on gamescope's `--expose-wayland` socket.
 
 ```
-nix-vn
+nix-vn-720p %command%
+nix-vn -r 1366x768 %command%
 ```
-**What it does:** Upscales visual novels with the FSR 1 pass built into
-GE-Proton's fullscreen hack. Set the game to **fullscreen** at its own
-resolution; Wine renders there and FSR scales it to the monitor. It sets
-`PROTON_ENABLE_WAYLAND=0` (the fullscreen hack only exists in Wine's X11
-driver), `WINE_FULLSCREEN_FSR=1` and `WINE_FULLSCREEN_FSR_STRENGTH=5`. Strength
-runs 0 (sharpest) to 5 (softest), GE-Proton's own default is 2; 5 keeps
-sharpening halos off line art and text. A launch-option value wins:
-`WINE_FULLSCREEN_FSR_STRENGTH=3 nix-vn %command%`. Per the GE-Proton README
-(checked 2026-09-24) it only works on Vulkan paths (DXVK, VKD3D-Proton), so
-DirectDraw-era titles or games run with `PROTON_USE_WINED3D=1` aren't scaled.
-For a 1280x720 VN on a 1440p screen (exactly 2x),
-`PROTON_ENABLE_WAYLAND=0 WINE_FULLSCREEN_INTEGER_SCALING=1 %command%` keeps the
-art pixel-exact instead. Defined in `home/programs/gaming/scripts/nix-vn.nix`.
+**What it does:** Runs a visual novel in gamescope (through `nix-gamescope`) at
+its own resolution and upscales it to the monitor with Super-xBR (`-F xbr`, a
+filter this repo patches into gamescope 3.16.31). Text and line art come out
+sharp instead of blurred. Super+H switches between xBR and linear and shows a
+notification. Presets cover the common sizes: `nix-vn-600p` (800x600),
+`nix-vn-768p` (1024x768), `nix-vn-720p` (1280x720), `nix-vn-900p` (1600x900)
+and `nix-vn-1080p` (1920x1080); anything else goes through `nix-vn -r WxH`. The
+resolution must be the game's own, not the monitor's. The `vn-setup` skill
+reads it from the running game's window and picks the preset. Defined in
+`home/programs/gaming/scripts/nix-vn.nix`.
 
 ---
 
 ## Debugging
 
-```
-PROTON_LOG=1
-```
-**What it does:** Writes a `steam-<appid>.log` (Steam) or Proton log to `$HOME`
-for diagnosing Wine/DXVK errors. Disable when done: it's noisy and slows launch.
-
-```
-WINEDEBUG=-all
-```
-**What it does:** Silences Wine's debug channels for a small performance/log-noise
-win once a game is known-good.
+Logging (`PROTON_LOG`, `WINEDEBUG` channels) and the steps for a game that crashes or
+freezes are in the `game-troubleshooting` skill,
+`modules/home/programs/ai/skills/game-troubleshooting/SKILL.md`.
