@@ -118,6 +118,12 @@ Each run drops a `YYYY-MM-DD_HH-MM-SS` folder into `~/SyncBackups/<hostname>/Fre
 | `nixm vpn-edit` | Edit that allowlist in `$EDITOR`, applies after the device reboots |
 | `nixm debloater` | Launch Universal Android Debloater |
 
+#### Proton
+
+| Command | Description |
+| --- | --- |
+| `nixm launch-params` | Pick a game launch option (the `nix-vn` and `nix-rpgm` presets and other wrappers) and copy it to the clipboard |
+
 </details>
 
 ## Components

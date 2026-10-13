@@ -221,6 +221,7 @@
       #--- Same slot as C_WRN, kept separate because it does not mean danger
       C_BAK="''${E}[38;2;${rgb "base08"}m"
       C_AND="''${E}[38;2;${rgb "base07"}m"
+      C_PRO="''${E}[38;2;${rgb "base0F"}m"
       C_DIM="''${E}[38;2;${rgb "base03"}m"
 
       #-------------------------------------------------------------------#
@@ -244,6 +245,7 @@
         "@menu:network|''${C_NET}󰤨 Network''${R} ''${C_DIM}▸''${R}"
         "@menu:monitor|''${C_MON}󰊡 Monitoring''${R} ''${C_DIM}▸''${R}"
         "@menu:android|''${C_AND}󰀲 Android''${R} ''${C_DIM}▸''${R}"
+        "@menu:proton|''${C_PRO}󰓓 Proton''${R} ''${C_DIM}▸''${R}"
       )
 
       MENU_NIXOS=(
@@ -299,6 +301,10 @@
         "nixm debloater|''${C_AND}󰤱''${R} Android Debloater"
       )
 
+      MENU_PROTON=(
+        "nixm launch-params|''${C_PRO}󰆏''${R} Copy Launch Params"
+      )
+
       #-------------------------------------------------------------------#
 
       #-- Menu Engine
@@ -328,6 +334,7 @@
             network)  cmd=$(pick "network> "  "''${MENU_NETWORK[@]}" "$BACK") ;;
             monitor)  cmd=$(pick "monitor> "  "''${MENU_MONITOR[@]}" "$BACK") ;;
             android)  cmd=$(pick "android> "  "''${MENU_ANDROID[@]}" "$BACK") ;;
+            proton)   cmd=$(pick "proton> "   "''${MENU_PROTON[@]}" "$BACK") ;;
           esac
 
           case $cmd in
@@ -478,6 +485,52 @@
         # --- Gaming & Performance ---
         vulkan)
           ${pkgs.vulkan-tools}/bin/vulkaninfo | head -50
+          ;;
+
+        # --- Proton ---
+        #--- The vn/rpgm presets are read off PATH, so the list follows
+        #--- nix-vn.nix and nix-rpgm.nix without a copy kept here
+        launch-params)
+          params=() descs=() rows=()
+          add_param() {
+            params+=("$1")
+            descs+=("$2")
+          }
+          add_presets() {
+            local c res
+            while read -r _ _ c res; do
+              add_param "$c" "$2 at $res"
+            #--- No compgen: nixpkgs' non-interactive bash leaves it out
+            done < <(IFS=: && for d in $PATH; do
+              for f in "$d/$1"-*; do
+                [[ -x $f ]] && echo "''${f##*/}"
+              done
+            done | sort -u | while read -r c; do
+              res=$(grep -o -- '-r [0-9]*x[0-9]*' "$(command -v "$c")" | cut -c4-)
+              [[ -n $res ]] && echo "''${res%x*} ''${res#*x} $c $res"
+            done | sort -n -k1,1 -k2,2)
+          }
+          add_param "nix-performance" "GameMode, MangoHud, FSR4/DLSS upgrade"
+          add_param "nix-gamescope" "Fullscreen gamescope at the monitor's res"
+          add_param "nix-vn -r WxH" "VN at a custom res, Anime4K (edit WxH)"
+          add_presets nix-vn "VN, Anime4K upscale"
+          add_param "nix-rpgm" "RPG Maker, res from the engine, Anime4K"
+          add_presets nix-rpgm "RPG Maker forced"
+          add_param "tml-prelaunch && DOTNET_DefaultStackSize=51200000 gamemoderun" \
+            "tModLoader runtimeconfig patch"
+          #--- Longer rows (the tModLoader one) overflow instead of widening all
+          width=0
+          for p in "''${params[@]}"; do
+            ((''${#p} > width && ''${#p} <= 40)) && width=''${#p}
+          done
+          for i in "''${!params[@]}"; do
+            rows+=("''${params[i]}|$(printf '%-*s  ' "$width" "''${params[i]}")''${C_DIM}''${descs[i]}''${R}")
+          done
+          sel=$(pick "launch> " "''${rows[@]}")
+          [[ -z $sel ]] && exit 0
+          printf '%s' "$sel" | ${pkgs.wl-clipboard}/bin/wl-copy
+          echo "Copied: $sel"
+          echo "Steam launch options need %command% after it."
           ;;
 
         # --- Android ---
@@ -693,6 +746,9 @@
           echo "  vpn-list          - Show the VPN lockdown allowlist"
           echo "  vpn-edit          - Edit the VPN lockdown allowlist"
           echo "  debloater         - Android Debloater Next Gen"
+          echo ""
+          echo "Proton:"
+          echo "  launch-params     - Pick a game launch option, copied to the clipboard"
           ;;
       esac
     '';

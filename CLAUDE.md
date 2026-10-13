@@ -45,6 +45,7 @@ nixm freetube-backup    # FreeTube only (app must be closed)
 nixm zen-backup         # Zen only
 nixm vpn-list           # Show the Android VPN lockdown allowlist on an adb device
 nixm vpn-edit           # Edit that allowlist in $EDITOR (adb-writable, no device owner; applies on reboot)
+nixm launch-params      # Pick a game launch option (nix-vn/nix-rpgm presets read off PATH) and copy it
 nix flake update <name> # Bump a single input
 run <pkg> [args]        # Ad-hoc launch a nixpkgs package without installing it (zsh function)
 ```
