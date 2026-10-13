@@ -14,7 +14,6 @@
     pkgs.nixd
 
     #--- Language Servers
-    pkgs.typescript-language-server
     pkgs.typescript
     pkgs.biome
     pkgs.nil
