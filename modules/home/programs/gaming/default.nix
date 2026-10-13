@@ -150,6 +150,7 @@
     ++ lib.optionals hostConfig.gaming.lutris [./launchers/lutris.nix]
     ++ lib.optionals hostConfig.gaming.faugus [./launchers/faugus.nix]
     ++ lib.optionals hostConfig.gaming.easyrpg [./launchers/easyrpg.nix]
+    ++ lib.optionals hostConfig.gaming.xsystem4 [./launchers/xsystem4]
     ++ lib.optionals hostConfig.gaming.twintail [./launchers/twintail.nix]
     #--- Games
     ++ lib.optionals hostConfig.gaming.feedback [./games/feedback.nix]

@@ -1,0 +1,499 @@
+diff --git a/include/gfx/gfx.h b/include/gfx/gfx.h
+index 3ae2abc..7a472dd 100644
+--- a/include/gfx/gfx.h
++++ b/include/gfx/gfx.h
+@@ -80,6 +80,7 @@ void gfx_set_window_logical_size(int w, int h);
+ bool gfx_set_fullscreen(bool enable);
+ bool gfx_is_fullscreen(void);
+ void gfx_toggle_fullscreen(void);
++void gfx_cycle_scale_mode(void);
+ void gfx_update_screen_scale(void);
+ void gfx_set_wait_vsync(bool wait);
+ float gfx_get_frame_rate(void);
+diff --git a/shaders/superxbr.f.glsl b/shaders/superxbr.f.glsl
+new file mode 100644
+index 0000000..8a9d648
+--- /dev/null
++++ b/shaders/superxbr.f.glsl
+@@ -0,0 +1,205 @@
++/*
++ * Super-xBR, fragment stage ("Normal" mode). Ported from libretro's glsl-shaders
++ * (xbr/shaders/super-xbr/super-xbr-pass{0,1,2}.glsl). XBR_PASS selects the pass:
++ *   0: source -> 1x, 1: 1x -> 2x (also reads the original frame), 2: 2x -> 2x
++ *
++ * Copyright (c) 2015 Hyllian - sergiogdb@gmail.com
++ *
++ * Permission is hereby granted, free of charge, to any person obtaining a copy
++ * of this software and associated documentation files (the "Software"), to deal
++ * in the Software without restriction, including without limitation the rights
++ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++ * copies of the Software, and to permit persons to whom the Software is
++ * furnished to do so, subject to the following conditions:
++ *
++ * The above copyright notice and this permission notice shall be included in
++ * all copies or substantial portions of the Software.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
++ * THE SOFTWARE.
++ */
++
++uniform sampler2D tex;  // output of the previous pass
++uniform sampler2D orig; // the original frame (pass 1 only)
++uniform vec2 source_size;
++
++in vec2 tex_coord;
++#if XBR_PASS != 1
++in vec4 t1;
++in vec4 t2;
++in vec4 t3;
++in vec4 t4;
++#endif
++out vec4 frag_color;
++
++#define XBR_EDGE_STR 0.6
++#define XBR_WEIGHT 1.0
++#define XBR_ANTI_RINGING 1.0
++#define mul(a,b) (b*a)
++
++const vec3 Y = vec3(.2126, .7152, .0722);
++
++float RGBtoYUV(vec3 color)
++{
++	return dot(color, Y);
++}
++
++float df(float A, float B)
++{
++	return abs(A-B);
++}
++
++/*
++                              P1
++     |P0|B |C |P1|         C     F4          |a0|b1|c2|d3|
++     |D |E |F |F4|      B     F     I4       |b0|c1|d2|e3|   |e1|i1|i2|e2|
++     |G |H |I |I4|   P0    E  A  I     P3    |c0|d1|e2|f3|   |e3|i3|i4|e4|
++     |P2|H5|I5|P3|      D     H     I5       |d0|e1|f2|g3|
++                           G     H5
++                              P2
++*/
++
++float d_wd(float wp1, float wp2, float wp3, float wp4, float wp5, float wp6,
++	   float b0, float b1, float c0, float c1, float c2, float d0, float d1,
++	   float d2, float d3, float e1, float e2, float e3, float f2, float f3)
++{
++	return (wp1*(df(c1,c2) + df(c1,c0) + df(e2,e1) + df(e2,e3))
++		+ wp2*(df(d2,d3) + df(d0,d1)) + wp3*(df(d1,d3) + df(d0,d2))
++		+ wp4*df(d1,d2) + wp5*(df(c0,c2) + df(e1,e3)) + wp6*(df(b0,b1) + df(f2,f3)));
++}
++
++float hv_wd(float wp1, float wp2, float wp3, float wp4, float wp5, float wp6,
++	    float i1, float i2, float i3, float i4, float e1, float e2, float e3, float e4)
++{
++	return (wp4*(df(i1,i2)+df(i3,i4)) + wp1*(df(i1,e1)+df(i2,e2)+df(i3,e3)+df(i4,e4))
++		+ wp3*(df(i1,e2)+df(i3,e4)+df(e1,i2)+df(e3,i4)));
++}
++
++vec3 min4(vec3 a, vec3 b, vec3 c, vec3 d)
++{
++	return min(a, min(b, min(c, d)));
++}
++
++vec3 max4(vec3 a, vec3 b, vec3 c, vec3 d)
++{
++	return max(a, max(b, max(c, d)));
++}
++
++void main()
++{
++#if XBR_PASS == 0
++	const float wp1 = 2.0, wp2 = 1.0, wp3 = -1.0, wp4 = 4.0, wp5 = -1.0, wp6 = 1.0;
++	const float weight1 = XBR_WEIGHT*1.29633/10.0;
++	const float weight2 = XBR_WEIGHT*1.75068/10.0/2.0;
++#elif XBR_PASS == 1
++	const float wp1 = 8.0, wp2 = 0.0, wp3 = 0.0, wp4 = 0.0, wp5 = 0.0, wp6 = 0.0;
++	const float weight1 = XBR_WEIGHT*1.75068/10.0;
++	const float weight2 = XBR_WEIGHT*1.29633/10.0/2.0;
++#else
++	const float wp1 = 1.0, wp2 = 0.0, wp3 = 2.0, wp4 = 3.0, wp5 = -2.0, wp6 = 1.0;
++	const float weight1 = XBR_WEIGHT*1.29633/10.0;
++	const float weight2 = XBR_WEIGHT*1.75068/10.0/2.0;
++#endif
++
++#if XBR_PASS == 1
++	// Skip pixels on the wrong grid
++	vec2 fp = fract(tex_coord * source_size);
++	vec2 dir = fp - vec2(0.5, 0.5);
++	if ((dir.x*dir.y) > 0.0) {
++		frag_color = (fp.x > 0.5) ? texture(tex, tex_coord) : texture(orig, tex_coord);
++		return;
++	}
++
++	vec2 g1 = (fp.x > 0.5) ? vec2(0.5/source_size.x, 0.0) : vec2(0.0, 0.5/source_size.y);
++	vec2 g2 = (fp.x > 0.5) ? vec2(0.0, 0.5/source_size.y) : vec2(0.5/source_size.x, 0.0);
++
++	vec3 P0 = texture(orig, tex_coord -3.0*g1        ).xyz;
++	vec3 P1 = texture(tex,  tex_coord         -3.0*g2).xyz;
++	vec3 P2 = texture(tex,  tex_coord         +3.0*g2).xyz;
++	vec3 P3 = texture(orig, tex_coord +3.0*g1        ).xyz;
++
++	vec3  B = texture(tex,  tex_coord -2.0*g1     -g2).xyz;
++	vec3  C = texture(orig, tex_coord     -g1 -2.0*g2).xyz;
++	vec3  D = texture(tex,  tex_coord -2.0*g1     +g2).xyz;
++	vec3  E = texture(orig, tex_coord     -g1        ).xyz;
++	vec3  F = texture(tex,  tex_coord             -g2).xyz;
++	vec3  G = texture(orig, tex_coord     -g1 +2.0*g2).xyz;
++	vec3  H = texture(tex,  tex_coord             +g2).xyz;
++	vec3  I = texture(orig, tex_coord     +g1        ).xyz;
++
++	vec3 F4 = texture(orig, tex_coord     +g1 -2.0*g2).xyz;
++	vec3 I4 = texture(tex,  tex_coord +2.0*g1     -g2).xyz;
++	vec3 H5 = texture(orig, tex_coord     +g1 +2.0*g2).xyz;
++	vec3 I5 = texture(tex,  tex_coord +2.0*g1     +g2).xyz;
++#else
++	vec3 P0 = texture(tex, t1.xy).xyz;
++	vec3 P1 = texture(tex, t1.zy).xyz;
++	vec3 P2 = texture(tex, t1.xw).xyz;
++	vec3 P3 = texture(tex, t1.zw).xyz;
++
++	vec3  B = texture(tex, t2.xy).xyz;
++	vec3  C = texture(tex, t2.zy).xyz;
++	vec3 H5 = texture(tex, t2.xw).xyz;
++	vec3 I5 = texture(tex, t2.zw).xyz;
++
++	vec3  D = texture(tex, t3.xy).xyz;
++	vec3 F4 = texture(tex, t3.zy).xyz;
++	vec3  G = texture(tex, t3.xw).xyz;
++	vec3 I4 = texture(tex, t3.zw).xyz;
++
++	vec3  E = texture(tex, t4.xy).xyz;
++	vec3  F = texture(tex, t4.zy).xyz;
++	vec3  H = texture(tex, t4.xw).xyz;
++	vec3  I = texture(tex, t4.zw).xyz;
++#endif
++
++	float b = RGBtoYUV( B );
++	float c = RGBtoYUV( C );
++	float d = RGBtoYUV( D );
++	float e = RGBtoYUV( E );
++	float f = RGBtoYUV( F );
++	float g = RGBtoYUV( G );
++	float h = RGBtoYUV( H );
++	float i = RGBtoYUV( I );
++
++	float i4 = RGBtoYUV( I4 ); float p0 = RGBtoYUV( P0 );
++	float i5 = RGBtoYUV( I5 ); float p1 = RGBtoYUV( P1 );
++	float h5 = RGBtoYUV( H5 ); float p2 = RGBtoYUV( P2 );
++	float f4 = RGBtoYUV( F4 ); float p3 = RGBtoYUV( P3 );
++
++	/* Calc edgeness in diagonal directions. */
++	float d_edge  = (d_wd( wp1, wp2, wp3, wp4, wp5, wp6, d, b, g, e, c, p2, h, f, p1, h5, i, f4, i5, i4 )
++		       - d_wd( wp1, wp2, wp3, wp4, wp5, wp6, c, f4, b, f, i4, p0, e, i, p3, d, h, i5, g, h5 ));
++
++	/* Calc edgeness in horizontal/vertical directions. */
++	float hv_edge = (hv_wd(wp1, wp2, wp3, wp4, wp5, wp6, f, i, e, h, c, i5, b, h5)
++		       - hv_wd(wp1, wp2, wp3, wp4, wp5, wp6, e, f, h, i, d, f4, g, i4));
++
++	float limits = XBR_EDGE_STR + 0.000001;
++	float edge_strength = smoothstep(0.0, limits, abs(d_edge));
++
++	/* Filter weights. Two taps only. */
++	vec4 w1 = vec4(-weight1, weight1+0.5, weight1+0.5, -weight1);
++	vec4 w2 = vec4(-weight2, weight2+0.25, weight2+0.25, -weight2);
++	vec3 c3 = mul(w2, mat4x3(D+G, E+H, F+I, F4+I4));
++	vec3 c4 = mul(w2, mat4x3(C+B, F+E, I+H, I5+H5));
++
++	/* Filtering and normalization in four direction generating four colors. */
++	vec3 c1 = mul(w1, mat4x3( P2,   H,   F,   P1 ));
++	vec3 c2 = mul(w1, mat4x3( P0,   E,   I,   P3 ));
++
++	/* Smoothly blends the two strongest directions (one in diagonal and the other in vert/horiz direction). */
++	vec3 color = mix(mix(c1, c2, step(0.0, d_edge)), mix(c3, c4, step(0.0, hv_edge)), 1. - edge_strength);
++
++	/* Anti-ringing code. */
++	vec3 min_sample = min4( E, F, H, I ) + (1.-XBR_ANTI_RINGING)*mix((P2-H)*(F-P1), (P0-E)*(I-P3), step(0.0, d_edge));
++	vec3 max_sample = max4( E, F, H, I ) - (1.-XBR_ANTI_RINGING)*mix((P2-H)*(F-P1), (P0-E)*(I-P3), step(0.0, d_edge));
++	color = clamp(color, min_sample, max_sample);
++
++	frag_color = vec4(color, 1.0);
++}
+diff --git a/shaders/superxbr.v.glsl b/shaders/superxbr.v.glsl
+new file mode 100644
+index 0000000..3751f58
+--- /dev/null
++++ b/shaders/superxbr.v.glsl
+@@ -0,0 +1,58 @@
++/*
++ * Super-xBR, vertex stage. Ported from libretro's glsl-shaders
++ * (xbr/shaders/super-xbr/super-xbr-pass{0,1,2}.glsl). XBR_PASS selects the pass.
++ *
++ * Copyright (c) 2015 Hyllian - sergiogdb@gmail.com
++ *
++ * Permission is hereby granted, free of charge, to any person obtaining a copy
++ * of this software and associated documentation files (the "Software"), to deal
++ * in the Software without restriction, including without limitation the rights
++ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++ * copies of the Software, and to permit persons to whom the Software is
++ * furnished to do so, subject to the following conditions:
++ *
++ * The above copyright notice and this permission notice shall be included in
++ * all copies or substantial portions of the Software.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
++ * THE SOFTWARE.
++ */
++
++uniform mat4 world_transform;
++uniform mat4 view_transform;
++uniform vec2 source_size;
++
++in vec4 vertex_pos;
++in vec2 vertex_uv;
++out vec2 tex_coord;
++#if XBR_PASS != 1
++out vec4 t1;
++out vec4 t2;
++out vec4 t3;
++out vec4 t4;
++#endif
++
++void main() {
++	gl_Position = view_transform * world_transform * vertex_pos;
++	tex_coord = vertex_uv * 1.0001;
++#if XBR_PASS != 1
++	float dx = 1.0 / source_size.x;
++	float dy = 1.0 / source_size.y;
++#if XBR_PASS == 0
++	t1 = tex_coord.xyxy + vec4(-dx, -dy, 2.0*dx, 2.0*dy);
++	t2 = tex_coord.xyxy + vec4(0.0, -dy,     dx, 2.0*dy);
++	t3 = tex_coord.xyxy + vec4(-dx, 0.0, 2.0*dx,     dy);
++	t4 = tex_coord.xyxy + vec4(0.0, 0.0,     dx,     dy);
++#else
++	t1 = tex_coord.xyxy + vec4(-2.0*dx, -2.0*dy,  dx,  dy);
++	t2 = tex_coord.xyxy + vec4(    -dx, -2.0*dy, 0.0,  dy);
++	t3 = tex_coord.xyxy + vec4(-2.0*dx,     -dy,  dx, 0.0);
++	t4 = tex_coord.xyxy + vec4(    -dx,     -dy, 0.0, 0.0);
++#endif
++#endif
++}
+diff --git a/src/input.c b/src/input.c
+index 86bcf73..91a65e8 100644
+--- a/src/input.c
++++ b/src/input.c
+@@ -657,6 +657,11 @@ void handle_events(void)
+ 				if (e.key.keysym.mod & (KMOD_LALT | KMOD_RALT)) {
+ 					screenshot_save();
+ 				}
++			} else if (e.key.keysym.scancode == SDL_SCANCODE_N) {
++				if (e.key.keysym.mod & (KMOD_LALT | KMOD_RALT)) {
++					gfx_cycle_scale_mode();
++					gfx_swap();
++				}
+ 			}
+ 			// fallthrough
+ 		case SDL_KEYUP:
+diff --git a/src/video.c b/src/video.c
+index e1ebcd9..badcebf 100644
+--- a/src/video.c
++++ b/src/video.c
+@@ -133,6 +133,164 @@ void gfx_load_shader(struct shader *dst, const char *vertex_shader_path, const c
+ 	dst->prepare = NULL;
+ }
+ 
++/*
++ * Scaling of the final frame to the window. Alt+N cycles the modes.
++ * SCALE_XBR runs Super-xBR (shaders/superxbr.*.glsl) to 2x, then scales linearly.
++ */
++enum scale_mode { SCALE_XBR, SCALE_NEAREST, SCALE_LINEAR };
++static enum scale_mode scale_mode = SCALE_XBR;
++
++struct xbr_shader {
++	struct shader s;
++	GLint source_size;
++	GLint orig;
++};
++
++struct xbr_pass_data {
++	struct xbr_shader *shader;
++	GLfloat source_w, source_h;
++	GLuint orig;
++};
++
++static struct xbr_shader xbr_shaders[3];
++static bool xbr_loaded;
++// 0: pass 0 output (1x), 1: pass 1 output (2x), 2: pass 2 output (2x, presented)
++static struct texture xbr_tex[3];
++static GLuint xbr_fb[3];
++static int xbr_w, xbr_h;
++
++static void xbr_prepare(struct gfx_render_job *job, void *data)
++{
++	struct xbr_pass_data *d = data;
++	glUniform2f(d->shader->source_size, d->source_w, d->source_h);
++	if (d->orig) {
++		glActiveTexture(GL_TEXTURE1);
++		glBindTexture(GL_TEXTURE_2D, d->orig);
++		glUniform1i(d->shader->orig, 1);
++		glActiveTexture(GL_TEXTURE0);
++	}
++}
++
++static void xbr_load_shader(struct xbr_shader *dst, int pass)
++{
++	char defines[32];
++	snprintf(defines, sizeof(defines), "#define XBR_PASS %d\n", pass);
++
++	GLuint program = glCreateProgram();
++	glAttachShader(program, gfx_load_shader_file("shaders/superxbr.v.glsl", GL_VERTEX_SHADER, defines));
++	glAttachShader(program, gfx_load_shader_file("shaders/superxbr.f.glsl", GL_FRAGMENT_SHADER, defines));
++	glLinkProgram(program);
++
++	GLint link_success;
++	glGetProgramiv(program, GL_LINK_STATUS, &link_success);
++	if (!link_success)
++		ERROR("Failed to link Super-xBR shader (pass %d)", pass);
++
++	dst->s.program = program;
++	dst->s.world_transform = glGetUniformLocation(program, "world_transform");
++	dst->s.view_transform = glGetUniformLocation(program, "view_transform");
++	dst->s.texture = glGetUniformLocation(program, "tex");
++	dst->s.vertex_pos = glGetAttribLocation(program, "vertex_pos");
++	dst->s.vertex_uv = glGetAttribLocation(program, "vertex_uv");
++	dst->s.prepare = xbr_prepare;
++	dst->source_size = glGetUniformLocation(program, "source_size");
++	dst->orig = glGetUniformLocation(program, "orig");
++}
++
++static void xbr_texture_init(int i, int w, int h, GLint filter)
++{
++	gfx_delete_texture(&xbr_tex[i]);
++	glGenTextures(1, &xbr_tex[i].handle);
++	glBindTexture(GL_TEXTURE_2D, xbr_tex[i].handle);
++	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
++	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
++	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
++	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
++	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
++	glBindTexture(GL_TEXTURE_2D, 0);
++	xbr_tex[i].w = w;
++	xbr_tex[i].h = h;
++
++	if (!xbr_fb[i])
++		glGenFramebuffers(1, &xbr_fb[i]);
++	glBindFramebuffer(GL_FRAMEBUFFER, xbr_fb[i]);
++	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, xbr_tex[i].handle, 0);
++}
++
++static void xbr_pass(int pass, GLuint src, int src_w, int src_h, GLuint orig)
++{
++	static mat4 identity = GLM_MAT4_IDENTITY_INIT;
++	// Unit quad -> clip space without the y-flip, so each pass keeps the orientation
++	static mat4 pass_transform = MAT4(
++		2, 0, 0, -1,
++		0, 2, 0, -1,
++		0, 0, 1,  0,
++		0, 0, 0,  1);
++	struct xbr_pass_data data = {
++		.shader = &xbr_shaders[pass],
++		.source_w = src_w,
++		.source_h = src_h,
++		.orig = orig
++	};
++	struct gfx_render_job job = {
++		.shader = &xbr_shaders[pass].s,
++		.shape = GFX_RECTANGLE,
++		.texture = src,
++		.world_transform = identity[0],
++		.view_transform = pass_transform[0],
++		.data = &data
++	};
++	glBindFramebuffer(GL_FRAMEBUFFER, xbr_fb[pass]);
++	glViewport(0, 0, xbr_tex[pass].w, xbr_tex[pass].h);
++	gfx_render(&job);
++}
++
++static void set_filter(GLuint texture, GLint filter)
++{
++	glBindTexture(GL_TEXTURE_2D, texture);
++	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
++	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
++	glBindTexture(GL_TEXTURE_2D, 0);
++}
++
++// Returns the texture holding the 2x Super-xBR image of the current view.
++static GLuint xbr_upscale(void)
++{
++	if (!xbr_loaded) {
++		for (int i = 0; i < 3; i++)
++			xbr_load_shader(&xbr_shaders[i], i);
++		xbr_loaded = true;
++	}
++	int w = view->w, h = view->h;
++	if (w != xbr_w || h != xbr_h) {
++		xbr_texture_init(0, w, h, GL_NEAREST);
++		xbr_texture_init(1, w * 2, h * 2, GL_NEAREST);
++		xbr_texture_init(2, w * 2, h * 2, GL_LINEAR);
++		xbr_w = w;
++		xbr_h = h;
++	}
++
++	glDisable(GL_BLEND);
++	set_filter(view->handle, GL_NEAREST);
++	xbr_pass(0, view->handle, w, h, 0);
++	xbr_pass(1, xbr_tex[0].handle, w, h, view->handle);
++	xbr_pass(2, xbr_tex[1].handle, w * 2, h * 2, 0);
++	set_filter(view->handle, GL_LINEAR);
++	glActiveTexture(GL_TEXTURE1);
++	glBindTexture(GL_TEXTURE_2D, 0);
++	glActiveTexture(GL_TEXTURE0);
++	glEnable(GL_BLEND);
++
++	return xbr_tex[2].handle;
++}
++
++void gfx_cycle_scale_mode(void)
++{
++	static const char *names[] = { "Super-xBR", "nearest", "linear" };
++	scale_mode = (scale_mode + 1) % 3;
++	NOTICE("Scale filter: %s", names[scale_mode]);
++}
++
+ static int gl_initialize(void)
+ {
+ 	gfx_load_shader(&default_shader, "shaders/render.v.glsl", "shaders/render.f.glsl");
+@@ -423,6 +581,8 @@ static void gfx_update_frame_rate_counter(void)
+ 
+ void gfx_swap(void)
+ {
++	GLuint present = scale_mode == SCALE_XBR ? xbr_upscale() : view->handle;
++
+ 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+ 	glViewport(sdl.viewport.x, sdl.viewport.y, sdl.viewport.w, sdl.viewport.h);
+ 	gfx_clear();
+@@ -435,12 +595,16 @@ void gfx_swap(void)
+ 	struct gfx_render_job job = {
+ 		.shader = &default_shader,
+ 		.shape = GFX_RECTANGLE,
+-		.texture = view->handle,
++		.texture = present,
+ 		.world_transform = mw_transform[0],
+ 		.view_transform = wv_transform[0],
+ 		.data = view
+ 	};
++	if (scale_mode == SCALE_NEAREST)
++		set_filter(present, GL_NEAREST);
+ 	gfx_render(&job);
++	if (scale_mode == SCALE_NEAREST)
++		set_filter(present, GL_LINEAR);
+ 
+ 	SDL_GL_SwapWindow(sdl.window);
+ 	glBindFramebuffer(GL_FRAMEBUFFER, main_surface_fb);
