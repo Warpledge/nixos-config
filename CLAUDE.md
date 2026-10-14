@@ -233,6 +233,8 @@ These are only imported when the WM is active, e.g. `lib.optional (hostConfig.wi
 
 ## Hardware
 
+**Which machine:** run `hostname` (`desktop` or `laptop`) before diagnosing anything machine-specific, and read that host's `hosts/<hostname>/` and `settings.nix`; the two differ in GPU, power management and the toggles listed under hostConfig.
+
 **Desktop:** AMD-only (RX 9070 XT direct rendering), `sched_migration_cost_ns=5ms`, performance governor. Suspend is disabled because the RX 9070 XT doesn't resume cleanly.
 **Laptop:** TLP power mgmt, hybrid GPU defaults to AMD 680M; route apps to RTX 4070 with `nvidia-offload <app>`. WM-specific GPU vars live in `hosts/laptop/wm/`. It doubles as the Minecraft server host, so sleep, suspend and hibernate are off, the lid and power key are ignored, and DMS auto-lock is off under niri.
 
