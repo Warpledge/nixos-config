@@ -632,7 +632,7 @@ flake.nix
 | [`nixpkgs`](https://github.com/NixOS/nixpkgs) (`nixos-unstable`) | Main package set |
 | [`home-manager`](https://github.com/nix-community/home-manager) | User environment management |
 | [`nur`](https://github.com/nix-community/NUR) | NixOS User Repository |
-| [`niri`](https://github.com/sodiboo/niri-flake) (sodiboo/niri-flake) | Niri WM |
+| [`niri`](https://github.com/epireyn/niri-flake) (epireyn/niri-flake) | Niri WM |
 | [`dms`](https://github.com/AvengeMedia/DankMaterialShell) (AvengeMedia, stable) | DankMaterialShell |
 | [`dms-plugin-registry`](https://github.com/AvengeMedia/dms-plugin-registry) | DankMaterialShell plugins (AI usage overview, Quick Capture, AMD GPU monitor) |
 | [`dank-greeter`](https://github.com/AvengeMedia/dank-greeter) | Login screen that matches DankMaterialShell |
