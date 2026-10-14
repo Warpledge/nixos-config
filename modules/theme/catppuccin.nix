@@ -27,6 +27,7 @@
       };
       zed.enable = false;
       opencode.enable = false; # stylix's opencode target owns tui.theme
+      mpv.enable = false; # its include overrides Stylix's black background-color
       # Emits Lua-only colors that break configType = "hyprlang"; Stylix's
       # hyprland target owns them
       hyprland.enable = false;
