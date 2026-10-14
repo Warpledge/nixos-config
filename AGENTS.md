@@ -6,10 +6,12 @@ home-manager, Niri WM, Stylix theming (Catppuccin Mocha).
 ## Rules
 
 1. **Never run `nixm rebuild` or `nixos-rebuild`.** Stop and ask instead.
-   Validation you SHOULD run yourself before reporting done:
-   `alejandra .` then `git add <new files>` then `nix flake check`.
-   Commit only when asked (see rule 7); pushing and history rewrites stay
-   with the user.
+   Run `alejandra .` after editing Nix. Run `nix flake check`, and a host
+   build even more rarely, only when you can't tell whether a change breaks
+   evaluation or the build (a new module or import, an unfamiliar option, an
+   input or package change); a value change in a working option, or a JSON,
+   Markdown or comment edit, needs neither. Commit only when asked (see
+   rule 7); pushing and history rewrites stay with the user.
 2. **`git add` new files before `nix flake check`** — the flake ignores
    untracked files and the check fails with "file is not available".
 3. **Stylix owns all theming.** Never set colors, fonts, or wallpaper in a
@@ -125,7 +127,8 @@ in both files with the same value unless told otherwise.
    ```
    The conditional belongs in `default.nix`. Do **not** wrap the module body
    in `lib.mkIf` instead.
-4. `alejandra .`, `git add` the new file, `nix flake check`
+4. `alejandra .`, `git add` the new file, `nix flake check` (a new module
+   and import are the uncertain case rule 1 means)
 5. Give any prose the task wrote or edited a cut-only revision pass before
    handing back: remove words, add none. No new information, no new claims.
    See **Writing style**.

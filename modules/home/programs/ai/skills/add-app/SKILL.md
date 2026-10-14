@@ -35,7 +35,8 @@ that catches the step that usually gets missed.
    services: `nixos/default.nix`):
    `++ lib.optionals hostConfig.<category>.<app> [./<category>/<app>.nix]`.
    `gaming.steam` is the exception, wired in `nixos/gaming/default.nix`.
-4. `alejandra .` → `git add <new files>` → `nix flake check`.
+4. `git add <new files>` → `nix flake check` (a new module and import are the
+   uncertain case CLAUDE.md rule 1 keeps the check for).
 5. **README**: grep, never read it whole (`grep -n '^| \*\*' README.md`,
    `grep -n '^\[.*\]: http' README.md`), add the app to its Components row and a
    `[label]: url` link (homepage from `nix eval --raw nixpkgs#<pkg>.meta.homepage`). No

@@ -28,8 +28,8 @@ reasoning is under **Update FreeTube state** in CLAUDE.md; this skill is the run
 4. **Validate**: `check.sh` (no flag) must print `ok`: no duplicate ids, every entry named,
    sorted by lowercased name under `LC_ALL=C` with the id as tie-breaker. Confirm the entry
    count moved by exactly the delta.
-5. `alejandra .` → `nix flake check`, then hand back for the rebuild with FreeTube still
-   closed.
+5. Hand back for the rebuild with FreeTube still closed. Skip `nix flake check` unless
+   the Nix around the list changed (CLAUDE.md rule 1).
 
 Settings changes (not the blocklist) go in `settings.nix` the same way: reduce `settings.db`
 with `jq -rs 'reduce .[] as $x ({}; .[$x._id] = $x.value)'` and mirror the changed keys.

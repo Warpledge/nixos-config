@@ -27,7 +27,8 @@ The record lives in `docs/nixpkgs/disabled-packages.md`; read it first, since it
 3. **Add a row** to the table: Package | Disabled in (the exact place, e.g. `audio.reaper =
    false` in both `settings.nix` files) | Date (absolute, YYYY-MM-DD) | Broken at
    nixpkgs (short rev and date, plus last good) | Reason (the actual error, not "broke").
-4. `alejandra .` → `nix flake check`, hand back for the rebuild.
+4. Hand back for the rebuild. A toggle flip needs no `nix flake check`; run it only if
+   the change went beyond that (CLAUDE.md rule 1).
 
 ## Re-enabling
 

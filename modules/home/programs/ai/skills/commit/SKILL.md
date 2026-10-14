@@ -30,7 +30,8 @@ user's). Push and history rewrites (amend, rebase, force) stay with the user.
      Two topics inside one hunk can't be split; put that hunk with the larger topic.
    - Propose the grouping to the user (one line per planned commit) before committing
      when there are more than three or four.
-3. For each group, `git add <paths>` (or stage hunks), then **check and scan**:
+3. For each group, `git add <paths>` (or stage hunks), then **check** (only when the
+   note at the end calls for it) **and scan**:
    ```bash
    bash <skill-dir>/scripts/check-staged.sh
    ```
@@ -74,5 +75,6 @@ user's). Push and history rewrites (amend, rebase, force) stay with the user.
    `git log -1 --format='%an <%ae>%n%B'` to confirm the author is the user.
 6. Report the commits made (hash and subject) and that nothing was pushed.
 
-If `nix flake check` hasn't passed on the final state, run it before the first commit;
-a commit that breaks evaluation is worse than one big commit.
+Run `check-staged.sh` only for a group split by hunk or one that leaves out a file the
+staged ones might reference; a group of whole files from an already-working tree skips
+it (CLAUDE.md rule 1). A commit that breaks evaluation is worse than one big commit.
