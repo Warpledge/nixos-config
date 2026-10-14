@@ -101,7 +101,6 @@
     videoTrimmer = true;
     moku = false; # Manga, novel and anime reader (source build with UI fixes)
     streamlinkTwitchGui = true; # Twitch browser via streamlink + mpv (AppImage)
-    seanime = false; # Anime/manga media server, opens as a Helium app window
     boorusama = false; # Booru image board browser (AppImage)
 
     # Local (~/.local/opt bundles, kept out of git)

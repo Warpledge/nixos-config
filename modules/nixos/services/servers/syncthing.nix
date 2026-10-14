@@ -47,7 +47,6 @@
   home-manager.users.${username}.xdg.desktopEntries.syncthing-ui = {
     name = "Syncthing";
     comment = "File synchronization";
-    #--- /index.html keeps the app-id apart from Seanime's (same host, root path)
     exec = "helium --app=http://${config.services.syncthing.guiAddress}/index.html";
     icon = "syncthing";
     terminal = false;

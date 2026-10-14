@@ -14,7 +14,6 @@ in [
   "match:class ^(Mullvad Browser)$, ${hide}"
   "match:class ^(helium)$, ${hide}"
   "match:class ^(chrome-localhost__-Default)$, ${hide}" # Suwayomi (Helium app window)
-  "match:class ^(chrome-127\\.0\\.0\\.1__-Default)$, ${hide}" # Seanime (Helium app)
   # Syncthing (Helium app window)
   "match:class ^(chrome-127\\.0\\.0\\.1__index\\.html-Default)$, ${hide}"
   "match:class ^(moku)$, ${hide}"
