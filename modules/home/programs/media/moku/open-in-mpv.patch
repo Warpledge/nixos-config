@@ -1,0 +1,95 @@
+diff -ruN a/src/lib/components/media/anime/AnimePlayer.svelte b/src/lib/components/media/anime/AnimePlayer.svelte
+--- a/src/lib/components/media/anime/AnimePlayer.svelte
++++ b/src/lib/components/media/anime/AnimePlayer.svelte
+@@ -4,8 +4,9 @@
+   import {
+     Play, Pause, FastForward, Rewind, Speedometer, CaretDown, CaretLeft,
+     SpeakerSimpleHigh, SpeakerSimpleLow, SpeakerSimpleX, CircleNotch,
+-    SkipBack, SkipForward, ClosedCaptioning, Stack, Sparkle,
++    SkipBack, SkipForward, ClosedCaptioning, Stack, Sparkle, ArrowSquareOut,
+   } from "phosphor-svelte";
++  import { invoke } from "@tauri-apps/api/core";
+   import type HlsType from "hls.js";
+   import type { MediaPlayerClass } from "dashjs";
+   import { seriesState, setPreviewManga } from "$lib/state/series.svelte";
+@@ -824,6 +825,23 @@
+   let upscaleOpen = $state(false);
+   let upscaleHideTimer: ReturnType<typeof setTimeout> | null = null;
+ 
++  // Hands the current stream (served by Tsunagu, headers already applied) to system mpv
++  async function openInMpv() {
++    if (!aps.videoUrl) return;
++    const start = videoEl?.currentTime || aps.resumeAt || 0;
++    videoEl?.pause();
++    try {
++      await invoke("open_in_mpv", {
++        url: aps.videoUrl,
++        subtitles: aps.subtitles.map((s) => s.url),
++        start,
++        title: [manga?.title, episodeLabel].filter(Boolean).join(" · "),
++      });
++    } catch (err) {
++      addToast({ kind: "error", title: "Couldn't open mpv", body: String(err) });
++    }
++  }
++
+ 
+   $effect(() => {
+     void aps.videoUrl;
+@@ -1157,6 +1175,11 @@
+           {/if}
+         </div>
+ 
++        <button class="abtn" data-tip="Open in mpv" aria-label="Open in mpv"
++          onclick={openInMpv} disabled={!aps.videoUrl}>
++          <ArrowSquareOut size={16} />
++        </button>
++
+         {#if upscaleEnabled}
+         <div
+           class="vol"
+diff -ruN a/src-tauri/src/commands/system.rs b/src-tauri/src/commands/system.rs
+--- a/src-tauri/src/commands/system.rs
++++ b/src-tauri/src/commands/system.rs
+@@ -50,6 +50,30 @@
+ }
+ 
+ #[tauri::command]
++pub fn open_in_mpv(url: String, subtitles: Vec<String>, start: f64, title: String) -> Result<(), String> {
++    let mut cmd = std::process::Command::new("mpv");
++    // Moku's wrapper sets these for WebKitGTK; mpv would load the wrong libraries
++    for var in ["LD_LIBRARY_PATH", "GST_PLUGIN_SYSTEM_PATH_1_0", "GIO_EXTRA_MODULES"] {
++        cmd.env_remove(var);
++    }
++    // A stream with no video track would otherwise play as invisible audio
++    cmd.arg("--force-window=yes");
++    cmd.arg(format!("--start={}", start.max(0.0)));
++    if !title.is_empty() {
++        cmd.arg(format!("--force-media-title={title}"));
++    }
++    for sub in &subtitles {
++        cmd.arg(format!("--sub-file={sub}"));
++    }
++    cmd.arg("--").arg(url);
++    let mut child = cmd.spawn().map_err(|e| e.to_string())?;
++    std::thread::spawn(move || {
++        let _ = child.wait();
++    });
++    Ok(())
++}
++
++#[tauri::command]
+ pub async fn pick_downloads_folder(app: tauri::AppHandle) -> Option<String> {
+     use tauri_plugin_dialog::DialogExt;
+     app.dialog()
+diff -ruN a/src-tauri/src/lib.rs b/src-tauri/src/lib.rs
+--- a/src-tauri/src/lib.rs
++++ b/src-tauri/src/lib.rs
+@@ -91,6 +91,7 @@
+             commands::system::exit_app,
+             commands::system::clear_moku_cache,
+             commands::system::open_path,
++            commands::system::open_in_mpv,
+             commands::system::pick_downloads_folder,
+             commands::system::list_system_fonts,
+             commands::backup::export_app_data,

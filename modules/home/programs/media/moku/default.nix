@@ -2,11 +2,11 @@
 # MOKU CONFIGURATION
 #=====================================================================#
 #- Manga, novel and anime reader, built from the pinned `moku` flake
-#- input with upstream's nix/moku.nix and two UI fixes, running the
-#- Tsunagu backend from the `tsunagu` input with a bridge that turns each
-#- parser in a Kototoro plugin repo into its own extension (sources in
-#- ./tsunagu). Library, settings and extensions live in
-#- ~/.local/share/{tsunagu,io.github.MokuProject.Moku}.
+#- input with upstream's nix/moku.nix, two UI fixes and an "Open in mpv"
+#- player button, running the Tsunagu backend from the `tsunagu` input with
+#- a bridge that turns each parser in a Kototoro plugin repo into its own
+#- extension (sources in ./tsunagu). Library, settings and extensions live
+#- in ~/.local/share/{tsunagu,io.github.MokuProject.Moku}.
 {
   pkgs,
   lib,
@@ -139,7 +139,8 @@
     .overrideAttrs (old: {
       #--- A per-source filter panel in the source browser, and a
       #--- filterOptions query the server accepts
-      patches = (old.patches or []) ++ [./source-filters.patch];
+      #--- open-in-mpv.patch adds a player button that hands the stream to mpv
+      patches = (old.patches or []) ++ [./source-filters.patch ./open-in-mpv.patch];
 
       #--- 0.13.1's `contain` shrinks WebKitGTK's keyword-search cards below
       #--- their 2:3 covers, so rows overlap

@@ -32,9 +32,11 @@ the `repo` branch of skepsun/kototoro-parsers by deploy commits).
    builds. Upstream's own `pnpmHash` matches upstream's nixpkgs, not ours, so it never works
    as-is.
 3. Patches: a failed `--replace-fail` (the `KeywordTab.svelte` substitution) means upstream
-   fixed it, so drop it. A failed hunk in `source-filters.patch` means regenerating it
-   against the new source. For `tsunagu-fixes.patch` and `tsunagu/server.patch`, drop each
-   part upstream now contains. What each part fixes, to test against the new release:
+   fixed it, so drop it. A failed hunk in `source-filters.patch` or `open-in-mpv.patch`
+   means regenerating it against the new source. `open-in-mpv.patch` also adds a Rust
+   command (`open_in_mpv` in `src-tauri/src/commands/system.rs`, registered in `lib.rs`).
+   For `tsunagu-fixes.patch` and `tsunagu/server.patch`, drop each part upstream now
+   contains. What each part fixes, to test against the new release:
    - `tsunagu-fixes.patch`: popular and latest listings go through the suspend getters
      (0.4.1 and main at `9ab4475` called the Rx fetchers, which extensions-lib 1.6 sources
      leave unimplemented, so those pages came back empty); `ProtoBuf` is registered in the
