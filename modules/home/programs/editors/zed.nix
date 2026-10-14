@@ -89,6 +89,14 @@
         icon_theme = "Catppuccin Mocha";
         base_keymap = "VSCode";
         vim_mode = false;
+        window_decorations = "client";
+        fullscreen_mode = "native";
+        accessible_mode = false;
+        bottom_dock_layout = "contained";
+        active_pane_modifiers = {
+          border_size = 0.0;
+          inactive_opacity = 1.0;
+        };
 
         #--- Fonts (sourced from Stylix)
         ui_font_family = uiFontFamily;
@@ -105,6 +113,8 @@
           shell = {
             program = "zsh";
           };
+          starts_open = false;
+          button = false;
           blinking = "off";
           font_family = terminalFontFamily;
           font_size = 15;
@@ -118,10 +128,71 @@
         tab_size = 2;
         soft_wrap = "editor_width";
         cursor_blink = false;
+        restore_on_startup = "last_workspace";
+        cli_default_open_behavior = "existing_window";
+        close_panel_on_toggle = false;
+        focus_follows_mouse.enabled = false;
+        preview_tabs.enabled = true;
 
+        #--- Panels
         project_panel = {
+          auto_open.on_create = true;
+          sort_order = "default";
+          sort_mode = "directories_first";
+          hide_hidden = false;
+          hide_root = true;
+          drag_and_drop = false;
+          indent_guides.show = "always";
+          sticky_scroll = true;
+          git_status_indicator = false;
+          diagnostic_badges = true;
+          show_diagnostics = "all";
+          scrollbar = {
+            horizontal_scroll = true;
+            show = "system";
+          };
+          bold_folder_labels = true;
+          starts_open = true;
+          auto_reveal_entries = true;
+          indent_size = 15.0;
+          git_status = true;
+          folder_indicator = "chevron";
+          file_icons = true;
+          entry_spacing = "standard";
+          hide_gitignore = false;
+          title_tooltip_delay = "default";
+          default_width = 250.0;
+          button = true;
           auto_fold_dirs = false;
           dock = "left";
+        };
+        outline_panel = {
+          multi_buffer_hide_symbols = false;
+          indent_guides.show = "always";
+          auto_fold_dirs = false;
+          indent_size = 15.0;
+          git_status = true;
+          folder_indicator = "icon";
+          file_icons = true;
+          dock = "right";
+        };
+        git_panel = {
+          show_count_badge = false;
+          entry_primary_click_action = "project_diff";
+          diff_stats = true;
+          folder_indicator = "chevron";
+          file_icons = true;
+          tree_view = true;
+          collapse_untracked_diff = false;
+          group_by = "status";
+          sort_by = "path";
+          status_style = "label_color";
+          button = true;
+          dock = "right";
+        };
+        debugger = {
+          dock = "bottom";
+          button = false;
         };
 
         #--- Visual Indicators
@@ -134,6 +205,9 @@
 
         #--- Git Integration
         git = {
+          enable_diff = true;
+          enable_status = true;
+          disable_git = false;
           git_gutter = "tracked_files";
           inline_blame = {
             enabled = true;
@@ -146,9 +220,53 @@
         };
         middle_click_paste = false;
         tab_bar = {
-          show_nav_history_buttons = true;
+          show_pinned_tabs_in_separate_row = false;
+          show = true;
+          show_nav_history_buttons = false;
           show_tab_bar_buttons = true;
         };
+        tabs = {
+          show_close_button = "hover";
+          show_diagnostics = "off";
+          activate_on_close = "history";
+          close_position = "right";
+          file_icons = true;
+          git_status = true;
+        };
+        title_bar = {
+          button_layout = "";
+          show_menus = false;
+          show_user_picture = true;
+          show_user_menu = true;
+          show_sign_in = true;
+          show_onboarding_banner = true;
+          show_project_items = true;
+          show_worktree_name = true;
+          show_branch_name = true;
+          show_branch_status_icon = true;
+        };
+        status_bar = {
+          show_active_file = false;
+          pending_keystrokes_indicator = true;
+          active_encoding_button = "non_utf8";
+          active_language_button = true;
+          cursor_position_button = false;
+          line_endings_button = false;
+        };
+        search.button = true;
+        diagnostics.button = true;
+
+        #--- AI
+        disable_ai = true;
+        agent = {
+          button = true;
+          dock = "right";
+          favorite_models = [];
+          model_parameters = [];
+        };
+
+        #--- Network
+        proxy = "";
 
         #--- Telemetry
         telemetry = {
