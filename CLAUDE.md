@@ -149,7 +149,7 @@ Gotchas. Grep the option name before assuming which file owns it:
 **Add an application** (the `add-app` skill runs these steps, then checks the wiring):
 1. Add the toggle to **both** host configs (keep them symmetrical)
 2. Create the module in the right subdir (`modules/home/programs/...`)
-3. Add the conditional import to `modules/home/programs/default.nix`, the router under `programs/`; a `gaming.*` app goes in `programs/gaming/default.nix`, which routes its own launchers, games and tools, and a guitar app goes in `audio/guitar/default.nix`, with its toggle added to that folder's gate in `programs/default.nix`. The other nested `default.nix` files (`browsers/zen/`, `media/{freetube,moku}/`) are multi-file module bundles, not routers
+3. Add the conditional import to `modules/home/programs/default.nix`, the router under `programs/`; a `gaming.*` app goes in `programs/gaming/default.nix`, which routes its own launchers, games and tools, and a guitar app goes in `audio/guitar/default.nix`, with its toggle added to that folder's gate in `programs/default.nix`. The other nested `default.nix` files (`browsers/zen/`, `media/{freetube,moku}/`, and `gaming/launchers/xsystem4/` with one module) are module bundles, not routers
 4. `alejandra .` → `git add` new files → `nix flake check` (do not rebuild; hand it back)
 5. Give any prose the task wrote or edited a cut-only revision pass before handing back: remove words, add none. No new information, no new claims, no rephrasing that smuggles either in. See **Writing Style**.
 6. Add it to the matching `<details>` table under **Components** in `README.md` (plus `## Structure` for a new directory, `## Flake Inputs` for a new input), and its link-reference definition at the bottom: the README is the public-facing doc and drifts easily.
@@ -373,6 +373,8 @@ Common errors:
 **Laptop GPU:** `lspci | grep -i vga`, `env | grep -E 'DRI|VDPAU|LIBVA|VK'`. Configs: `hosts/laptop/hardware/gpu.nix` and `hosts/laptop/wm/{hyprland,niri}.nix`. Verify offload with `nvidia-offload glxinfo | grep "OpenGL renderer"`.
 
 **A game crashes, freezes or won't start:** the `game-troubleshooting` skill has the logging, hang-vs-crash and native-engine steps, and indexes the per-game notes in `docs/gaming/`.
+
+**Upscaling a VN or RPG Maker game:** the `vn-setup` and `rpgm-setup` skills pick the nix-vn/nix-rpgm preset and hand back the launch option.
 
 ## Looking things up
 
