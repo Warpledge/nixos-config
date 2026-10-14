@@ -1,7 +1,7 @@
 #=====================================================================#
 # NIRI WINDOW RULES
 #=====================================================================#
-let
+{lib, ...}: let
   windowRules = [
     #--- Privacy Rules (blocked from both screenshots and screen recording)
     {
@@ -154,6 +154,16 @@ let
       ];
       open-floating = true;
       open-focused = true;
+    }
+
+    #--- Resources task manager (Ctrl+Alt+Delete); floating stays above tiled
+    #--- windows, and with no position set niri centers it. Its maximize
+    #--- request is refused in the raw KDL at the bottom of this file
+    {
+      matches = [{app-id = "^org\\.gnome\\.Resources$";}];
+      open-floating = true;
+      default-column-width = {proportion = 0.6;};
+      default-window-height = {proportion = 0.7;};
     }
 
     #--- Calculator
@@ -355,4 +365,16 @@ in {
       }
     ];
   };
+
+  #--------------------------------------------------------------------#
+  #-- Raw KDL Rules
+  #--------------------------------------------------------------------#
+  #- For rule options niri-flake doesn't expose yet, appended to the
+  #- config.kdl DMS generates (a lines option, so definitions merge)
+  xdg.configFile.niri-config-dms.text = lib.mkAfter ''
+    window-rule {
+        match app-id="^org\\.gnome\\.Resources$"
+        open-maximized-to-edges false
+    }
+  '';
 }

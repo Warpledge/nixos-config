@@ -438,6 +438,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | `Mod+Shift+G` | Lutris |
 | `Mod+Shift+M` | Spotify |
 | `Mod+Shift+Y` | FreeTube |
+| `Ctrl+Alt+Delete` | Task manager (Resources) |
 
 #### Shell (DankMaterialShell)
 

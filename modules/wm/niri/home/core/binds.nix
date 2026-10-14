@@ -97,6 +97,7 @@
     "Mod+B".action.spawn = ["zen-beta"];
     "Mod+E".action.spawn = ["nautilus"];
     "Mod+Shift+M".action.spawn = ["spotify"];
+    "Ctrl+Alt+Delete".action.spawn = ["resources"];
   };
 
   #--------------------------------------------------------------------#
