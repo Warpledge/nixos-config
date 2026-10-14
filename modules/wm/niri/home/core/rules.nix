@@ -53,6 +53,7 @@
         {app-id = "heroic";}
         {app-id = "spotify";}
         {app-id = "org.prismlauncher.PrismLauncher";}
+        {app-id = "^org\\.gnome\\.Resources$";}
         {title = "Volume Control";}
         {title = "Open File";}
         {title = "File Upload";}
