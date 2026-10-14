@@ -100,7 +100,7 @@ Prefer `PROTON_ENABLE_WAYLAND=0` over the wrapper for pure-Proton games; use the
 RPG Maker comes in two different runtimes, so identify which before tweaking.
 
 `nix-rpgm %command%` (in Heroic: `nix-rpgm` as the wrapper, no arguments) upscales
-any RPG Maker game with Anime4K through `nix-vn`. It reads the version from the
+any RPG Maker game with the NVL CNN through `nix-vn`. It reads the version from the
 game folder: the RGSS library in `Game.ini` gives XP (640x480) or VX / VX Ace
 (544x416), `package.json` gives an MV / MZ game's window size, and `RPG_RT` files
 mean 2000/2003 (320x240). A game that resizes its own window (Hat World, a VX game,
@@ -220,10 +220,14 @@ nix-vn-720p %command%
 nix-vn -r 1366x768 %command%
 ```
 **What it does:** Runs a visual novel in gamescope (through `nix-gamescope`) at
-its own resolution and upscales it to the monitor with Anime4K's CNN x2 (M)
-upscaler (`-F anime4k`, a filter this repo patches into gamescope 3.16.31 beside
-Super-xBR's `-F xbr`). Text and line art come out sharp instead of blurred.
-Super+H cycles Anime4K, Super-xBR and linear, and names each in a notification.
+its own resolution and upscales it to the monitor with the NVL CNN (4x16,
+`-F nvl`), one of the filters this repo patches into gamescope 3.16.31. NVL
+became the default on 2026-10-13, looking slightly better than Anime4K
+(`-F anime4k`) in games. The pixel-art filters `-F mmpx` and `-F sharpbilinear`
+replaced Super-xBR's `-F xbr` the same day; xBRZ was tried too and dropped, since
+it posterized painted RPG Maker art. Text and line art come out sharp instead of
+blurred. Super+H cycles NVL, Anime4K, MMPX, sharp bilinear and linear, and names
+each in a notification.
 Presets cover the common sizes: `nix-vn-600p` (800x600), `nix-vn-768p`
 (1024x768), `nix-vn-720p` (1280x720), `nix-vn-900p` (1600x900) and
 `nix-vn-1080p` (1920x1080); anything else goes through `nix-vn -r WxH`. The

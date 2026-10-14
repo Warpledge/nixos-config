@@ -1,196 +1,214 @@
 diff --git a/src/Backends/DRMBackend.cpp b/src/Backends/DRMBackend.cpp
-index 15cc9ce..7a35222 100644
+index 9aaab7b..b0287ac 100644
 --- a/src/Backends/DRMBackend.cpp
 +++ b/src/Backends/DRMBackend.cpp
-@@ -3928,6 +3928,7 @@ namespace gamescope
+@@ -3927,6 +3927,7 @@ namespace gamescope
+ 			bNeedsFullComposite |= pFrameInfo->useFSRLayer0;
  			bNeedsFullComposite |= pFrameInfo->useNISLayer0;
  			bNeedsFullComposite |= pFrameInfo->useSGSRLayer0;
- 			bNeedsFullComposite |= pFrameInfo->useXBRLayer0;
 +			bNeedsFullComposite |= pFrameInfo->useAnime4KLayer0;
  			bNeedsFullComposite |= pFrameInfo->blurLayer0;
  			bNeedsFullComposite |= bNeedsCompositeFromFilter;
  			bNeedsFullComposite |= !cv_drm_cursor_plane && bDrewCursor;
 diff --git a/src/Backends/OpenVRBackend.cpp b/src/Backends/OpenVRBackend.cpp
-index 704b4c8..04b7074 100644
+index 9172bf5..cd120cc 100644
 --- a/src/Backends/OpenVRBackend.cpp
 +++ b/src/Backends/OpenVRBackend.cpp
-@@ -1853,6 +1853,7 @@ namespace gamescope
+@@ -1852,6 +1852,7 @@ namespace gamescope
+         bNeedsFullComposite |= pFrameInfo->useFSRLayer0;
          bNeedsFullComposite |= pFrameInfo->useNISLayer0;
          bNeedsFullComposite |= pFrameInfo->useSGSRLayer0;
-         bNeedsFullComposite |= pFrameInfo->useXBRLayer0;
 +        bNeedsFullComposite |= pFrameInfo->useAnime4KLayer0;
          bNeedsFullComposite |= pFrameInfo->blurLayer0;
          bNeedsFullComposite |= bNeedsCompositeFromFilter;
          bNeedsFullComposite |= g_bColorSliderInUse;
 diff --git a/src/Backends/SDLBackend.cpp b/src/Backends/SDLBackend.cpp
-index 7353751..32bbfca 100644
+index 58af150..32bbfca 100644
 --- a/src/Backends/SDLBackend.cpp
 +++ b/src/Backends/SDLBackend.cpp
-@@ -782,9 +782,7 @@ namespace gamescope
+@@ -781,6 +781,9 @@ namespace gamescope
+ 								g_wantedUpscaleFilter = (g_wantedUpscaleFilter == GamescopeUpscaleFilter::NIS) ? 
  									GamescopeUpscaleFilter::LINEAR : GamescopeUpscaleFilter::NIS;
  								break;
- 							case KEY_H:
--								g_wantedUpscaleFilter = (g_wantedUpscaleFilter == GamescopeUpscaleFilter::XBR) ?
--									GamescopeUpscaleFilter::LINEAR : GamescopeUpscaleFilter::XBR;
--								NotifyXbrToggle( g_wantedUpscaleFilter == GamescopeUpscaleFilter::XBR );
++							case KEY_H:
 +								CycleArtUpscaleFilter();
- 								break;
++								break;
  							case KEY_I:
  								g_upscaleFilterSharpness = std::min(20, g_upscaleFilterSharpness + 1);
+ 								break;
 diff --git a/src/Backends/WaylandBackend.cpp b/src/Backends/WaylandBackend.cpp
-index a92f69c..ce29f8a 100644
+index d53c2c4..601278e 100644
 --- a/src/Backends/WaylandBackend.cpp
 +++ b/src/Backends/WaylandBackend.cpp
-@@ -1078,6 +1078,7 @@ namespace gamescope
+@@ -1077,6 +1077,7 @@ namespace gamescope
+             bNeedsFullComposite |= pFrameInfo->useFSRLayer0;
              bNeedsFullComposite |= pFrameInfo->useNISLayer0;
              bNeedsFullComposite |= pFrameInfo->useSGSRLayer0;
-             bNeedsFullComposite |= pFrameInfo->useXBRLayer0;
 +            bNeedsFullComposite |= pFrameInfo->useAnime4KLayer0;
              bNeedsFullComposite |= pFrameInfo->blurLayer0;
              bNeedsFullComposite |= bNeedsCompositeFromFilter;
              bNeedsFullComposite |= g_bColorSliderInUse;
-@@ -3004,9 +3005,7 @@ namespace gamescope
-                 {
-                     if ( !bPressed )
-                     {
--                        g_wantedUpscaleFilter = ( g_wantedUpscaleFilter == GamescopeUpscaleFilter::XBR ) ?
--                            GamescopeUpscaleFilter::LINEAR : GamescopeUpscaleFilter::XBR;
--                        NotifyXbrToggle( g_wantedUpscaleFilter == GamescopeUpscaleFilter::XBR );
-+                        CycleArtUpscaleFilter();
-                     }
+@@ -2999,6 +3000,15 @@ namespace gamescope
                      return;
                  }
+ 
++                case KEY_H:
++                {
++                    if ( !bPressed )
++                    {
++                        CycleArtUpscaleFilter();
++                    }
++                    return;
++                }
++
+                 case KEY_I:
+                 {
+                     if ( !bPressed )
 diff --git a/src/commit.cpp b/src/commit.cpp
-index 14ce203..302fad8 100644
+index c9d0001..a516a5c 100644
 --- a/src/commit.cpp
 +++ b/src/commit.cpp
-@@ -149,7 +149,7 @@ bool commit_t::ShouldPreemptivelyUpscale( GamescopeUpscaleFilter eFilter, Gamesc
+@@ -148,7 +148,8 @@ bool commit_t::ShouldPreemptivelyUpscale( GamescopeUpscaleFilter eFilter, Gamesc
+     calc_scale_factor( eScaler, flScaleX, flScaleY, vulkanTex->width(), vulkanTex->height() );
  
      // The pre-emptive paint forces the global scale to one, so judge magnification without it and on both axes like the paint path.
-     const GamescopeUpscaleFilter eResolvedFilter = ResolveUpscaleFilter( eFilter, colorspace(), vulkanTex->isYcbcr() );
--    if ( eResolvedFilter == GamescopeUpscaleFilter::SGSR || eResolvedFilter == GamescopeUpscaleFilter::XBR )
-+    if ( eResolvedFilter == GamescopeUpscaleFilter::SGSR || eResolvedFilter == GamescopeUpscaleFilter::XBR || eResolvedFilter == GamescopeUpscaleFilter::ANIME4K )
+-    if ( ResolveUpscaleFilter( eFilter, colorspace(), vulkanTex->isYcbcr() ) == GamescopeUpscaleFilter::SGSR )
++    const GamescopeUpscaleFilter eResolvedFilter = ResolveUpscaleFilter( eFilter, colorspace(), vulkanTex->isYcbcr() );
++    if ( eResolvedFilter == GamescopeUpscaleFilter::SGSR || eResolvedFilter == GamescopeUpscaleFilter::ANIME4K )
      {
          float flUpscaleX = 1.0f;
          float flUpscaleY = 1.0f;
 diff --git a/src/main.cpp b/src/main.cpp
-index 782b85b..f47ba83 100644
+index 6a0fdb1..489cf79 100644
 --- a/src/main.cpp
 +++ b/src/main.cpp
-@@ -176,11 +176,12 @@ const char usage[] =
+@@ -176,10 +176,11 @@ const char usage[] =
  	"  -r, --nested-refresh           game refresh rate (frames per second)\n"
  	"  -m, --max-scale                maximum scale factor\n"
  	"  -S, --scaler                   upscaler type (auto, integer, fit, fill, stretch)\n"
--	"  -F, --filter                   upscaler filter (linear, nearest, fsr, nis, pixel, sgsr, xbr)\n"
-+	"  -F, --filter                   upscaler filter (linear, nearest, fsr, nis, pixel, sgsr, xbr, anime4k)\n"
+-	"  -F, --filter                   upscaler filter (linear, nearest, fsr, nis, pixel, sgsr)\n"
++	"  -F, --filter                   upscaler filter (linear, nearest, fsr, nis, pixel, sgsr, anime4k)\n"
  	"                                     fsr => AMD FidelityFX™ Super Resolution 1.0\n"
  	"                                     nis => NVIDIA Image Scaling v1.0.3\n"
  	"                                     sgsr => Snapdragon™ Game Super Resolution 1 with RCAS\n"
- 	"                                     xbr => Super-xBR 2x (Hyllian), for 2D art\n"
 +	"                                     anime4k => Anime4K CNN 2x (M), for anime line art\n"
  	"  --sharpness, --fsr-sharpness   upscaler sharpness from 0 (max) to 20 (min)\n"
  	"  --expose-wayland               support wayland clients using xdg-shell\n"
  	"  -s, --mouse-sensitivity        multiply mouse movement by given decimal number\n"
-@@ -287,7 +288,7 @@ const char usage[] =
+@@ -286,6 +287,7 @@ const char usage[] =
  	"  Super + N                      toggle nearest neighbour filtering\n"
  	"  Super + U                      toggle FSR upscaling\n"
  	"  Super + Y                      toggle NIS upscaling\n"
--	"  Super + H                      toggle Super-xBR upscaling\n"
-+	"  Super + H                      cycle Anime4K, Super-xBR and linear\n"
++	"  Super + H                      cycle Anime4K and linear\n"
  	"  Super + I                      increase FSR sharpness by 1\n"
  	"  Super + O                      decrease FSR sharpness by 1\n"
  	"  Super + S                      take a screenshot\n"
-@@ -316,8 +317,24 @@ float g_mouseSensitivity = 1.0;
+@@ -313,6 +315,59 @@ bool g_bGrabbed = false;
+ float g_mouseSensitivity = 1.0;
  
  GamescopeUpscaleFilter g_wantedUpscaleFilter = GamescopeUpscaleFilter::LINEAR;
- 
--void NotifyXbrToggle( bool bEnabled )
-+void CycleArtUpscaleFilter()
- {
-+	using enum GamescopeUpscaleFilter;
-+	// Taken on the first press, so it is still the -F filter.
-+	static const GamescopeUpscaleFilter s_eFirst = g_wantedUpscaleFilter == XBR ? XBR : ANIME4K;
-+	const GamescopeUpscaleFilter eSecond = s_eFirst == XBR ? ANIME4K : XBR;
 +
-+	if ( g_wantedUpscaleFilter == s_eFirst )
-+		g_wantedUpscaleFilter = eSecond;
-+	else if ( g_wantedUpscaleFilter == eSecond )
-+		g_wantedUpscaleFilter = LINEAR;
-+	else
-+		g_wantedUpscaleFilter = s_eFirst;
++void CycleArtUpscaleFilter()
++{
++	using enum GamescopeUpscaleFilter;
++	static constexpr GamescopeUpscaleFilter k_eCycle[] = { ANIME4K };
++	constexpr uint32_t k_uCount = std::size( k_eCycle );
++	// Taken on the first press, so it is still the -F filter.
++	static const uint32_t s_uFirst = []
++	{
++		for ( uint32_t i = 0; i < k_uCount; i++ )
++		{
++			if ( k_eCycle[ i ] == g_wantedUpscaleFilter )
++				return i;
++		}
++		return 0u;
++	}();
++
++	// The cycle starts at the -F filter, takes the others in order, then linear.
++	auto eAt = [&]( uint32_t i ) { return i == k_uCount ? LINEAR : k_eCycle[ ( s_uFirst + i ) % k_uCount ]; };
++	uint32_t uNext = 0;
++	for ( uint32_t i = 0; i <= k_uCount; i++ )
++	{
++		if ( eAt( i ) == g_wantedUpscaleFilter )
++			uNext = ( i + 1 ) % ( k_uCount + 1 );
++	}
++	g_wantedUpscaleFilter = eAt( uNext );
 +	// A still frame keeps its old upscale until something repaints it.
 +	hasRepaint = true;
 +
-+	const char *pszName = g_wantedUpscaleFilter == XBR ? "Super-xBR" : g_wantedUpscaleFilter == ANIME4K ? "Anime4K" : "Linear";
++	const char *pszName = "Linear";
++	switch ( g_wantedUpscaleFilter )
++	{
++		case ANIME4K:        pszName = "Anime4K"; break;
++		default:             break;
++	}
 +
- 	// @notifySend@ is replaced with libnotify's path at build time.
- 	char *argv[] = {
- 		(char *)"@notifySend@",
-@@ -325,10 +342,15 @@ void NotifyXbrToggle( bool bEnabled )
- 		(char *)"--expire-time=2000",
- 		(char *)"--transient",
- 		(char *)"gamescope",
--		(char *)( bEnabled ? "Super-xBR on" : "Super-xBR off" ),
++	// @notifySend@ is replaced with libnotify's path at build time.
++	char *argv[] = {
++		(char *)"@notifySend@",
++		(char *)"--app-name=gamescope",
++		(char *)"--expire-time=2000",
++		(char *)"--transient",
++		(char *)"gamescope",
 +		(char *)pszName,
- 		nullptr
- 	};
--	gamescope::Process::SpawnProcess( argv, nullptr, true );
++		nullptr
++	};
 +	// Steam's runtime libraries would shadow libnotify's own.
 +	gamescope::Process::SpawnProcess( argv, []
 +	{
 +		unsetenv( "LD_LIBRARY_PATH" );
 +		unsetenv( "LD_PRELOAD" );
 +	}, true );
- }
++}
  GamescopeUpscaleScaler g_wantedUpscaleScaler = GamescopeUpscaleScaler::AUTO;
  int g_upscaleFilterSharpness = 2;
+ 
 diff --git a/src/main.hpp b/src/main.hpp
-index d713050..5026d0d 100644
+index b2a169f..edac77c 100644
 --- a/src/main.hpp
 +++ b/src/main.hpp
-@@ -46,6 +46,7 @@ enum class GamescopeUpscaleFilter : uint32_t
+@@ -45,6 +45,7 @@ enum class GamescopeUpscaleFilter : uint32_t
+     NIS,
      PIXEL,
      SGSR,
-     XBR,
 +    ANIME4K,
  
      FROM_VIEW = 0xF, // internal
  };
-@@ -66,14 +67,14 @@ static constexpr bool SgsrSupportsInput( GamescopeAppTextureColorspace eColorspa
+@@ -65,11 +66,15 @@ static constexpr bool SgsrSupportsInput( GamescopeAppTextureColorspace eColorspa
  // Sharp ran FSR before SGSR existed, so HDR keeps that rather than losing the sharpening. Neither pre-pass reads the YCbCr slot.
  static constexpr GamescopeUpscaleFilter ResolveUpscaleFilter( GamescopeUpscaleFilter eFilter, GamescopeAppTextureColorspace eColorspace, bool bYcbcr )
  {
--    // Super-xBR has the same input limits as SGSR.
--    if ( ( eFilter != GamescopeUpscaleFilter::SGSR && eFilter != GamescopeUpscaleFilter::XBR ) || SgsrSupportsInput( eColorspace, bYcbcr ) )
-+    // Super-xBR and Anime4K have the same input limits as SGSR.
-+    if ( ( eFilter != GamescopeUpscaleFilter::SGSR && eFilter != GamescopeUpscaleFilter::XBR && eFilter != GamescopeUpscaleFilter::ANIME4K ) || SgsrSupportsInput( eColorspace, bYcbcr ) )
+-    if ( eFilter != GamescopeUpscaleFilter::SGSR || SgsrSupportsInput( eColorspace, bYcbcr ) )
++    // The art upscalers have the same input limits as SGSR.
++    if ( ( eFilter != GamescopeUpscaleFilter::SGSR && eFilter != GamescopeUpscaleFilter::ANIME4K ) || SgsrSupportsInput( eColorspace, bYcbcr ) )
          return eFilter;
      return bYcbcr ? GamescopeUpscaleFilter::LINEAR : GamescopeUpscaleFilter::FSR;
  }
  
--// Desktop notification for the Super+H toggle.
--void NotifyXbrToggle( bool bEnabled );
-+// Super+H: cycles the starting filter (Anime4K unless -F xbr), the other one, then linear.
++// Super+H: cycles the art upscalers from the -F one (the first otherwise), then linear.
 +void CycleArtUpscaleFilter();
- 
++
  static constexpr bool DoesHardwareSupportUpscaleFilter( GamescopeUpscaleFilter eFilter )
  {
-@@ -124,6 +125,7 @@ inline std::optional<GamescopeUpscaleFilter> ParseUpscaleFilter( std::string_vie
+     // Could do nearest someday... AMDGPU DC supports custom tap placement to an extent.
+@@ -118,6 +123,7 @@ inline std::optional<GamescopeUpscaleFilter> ParseUpscaleFilter( std::string_vie
+         { "nis",     GamescopeUpscaleFilter::NIS },
          { "pixel",   GamescopeUpscaleFilter::PIXEL },
          { "sgsr",    GamescopeUpscaleFilter::SGSR },
-         { "xbr",     GamescopeUpscaleFilter::XBR },
 +        { "anime4k", GamescopeUpscaleFilter::ANIME4K },
      };
      for ( const auto &[svFilterName, eFilter] : k_Filters )
      {
 diff --git a/src/meson.build b/src/meson.build
-index 16db9a6..12084cb 100644
+index ae3ac16..389e140 100644
 --- a/src/meson.build
 +++ b/src/meson.build
-@@ -75,6 +75,15 @@ shader_src = [
-   'shaders/cs_xbr_pass1.comp',
-   'shaders/cs_xbr_pass2.comp',
-   'shaders/cs_xbr_resample.comp',
+@@ -71,6 +71,16 @@ shader_src = [
+   'shaders/cs_nis_fp16.comp',
+   'shaders/cs_rgb_to_nv12.comp',
+   'shaders/cs_sgsr.comp',
++  'shaders/cs_upscale_resample.comp',
 +  'shaders/cs_anime4k_m_pass0.comp',
 +  'shaders/cs_anime4k_m_pass1.comp',
 +  'shaders/cs_anime4k_m_pass2.comp',
@@ -204,13 +222,14 @@ index 16db9a6..12084cb 100644
  
  spirv_shaders = glsl_generator.process(shader_src)
 diff --git a/src/rendervulkan.cpp b/src/rendervulkan.cpp
-index a0ce55f..f740e67 100644
+index 54e4efc..fbced0f 100644
 --- a/src/rendervulkan.cpp
 +++ b/src/rendervulkan.cpp
-@@ -54,6 +54,15 @@
- #include "cs_xbr_pass1.h"
- #include "cs_xbr_pass2.h"
- #include "cs_xbr_resample.h"
+@@ -50,6 +50,16 @@
+ #include "cs_nis_fp16.h"
+ #include "cs_rgb_to_nv12.h"
+ #include "cs_sgsr.h"
++#include "cs_upscale_resample.h"
 +#include "cs_anime4k_m_pass0.h"
 +#include "cs_anime4k_m_pass1.h"
 +#include "cs_anime4k_m_pass2.h"
@@ -223,10 +242,11 @@ index a0ce55f..f740e67 100644
  
  #define A_CPU
  #include "shaders/ffx_a.h"
-@@ -993,6 +1002,15 @@ bool CVulkanDevice::createShaders()
- 	SHADER(XBR_PASS1, cs_xbr_pass1);
- 	SHADER(XBR_PASS2, cs_xbr_pass2);
- 	SHADER(XBR_RESAMPLE, cs_xbr_resample);
+@@ -985,6 +995,16 @@ bool CVulkanDevice::createShaders()
+ 	}
+ 	SHADER(RGB_TO_NV12, cs_rgb_to_nv12);
+ 	SHADER(SGSR, cs_sgsr);
++	SHADER(UPSCALE_RESAMPLE, cs_upscale_resample);
 +	SHADER(ANIME4K_PASS0, cs_anime4k_m_pass0);
 +	SHADER(ANIME4K_PASS1, cs_anime4k_m_pass1);
 +	SHADER(ANIME4K_PASS2, cs_anime4k_m_pass2);
@@ -239,10 +259,11 @@ index a0ce55f..f740e67 100644
  #undef SHADER
  
  	for (uint32_t i = 0; i < shaderInfos.size(); i++)
-@@ -1228,6 +1246,15 @@ void CVulkanDevice::compileAllPipelines(std::stop_token st)
- 	SHADER(XBR_PASS1, 1, 1, 1);
- 	SHADER(XBR_PASS2, 1, 1, 1);
- 	SHADER(XBR_RESAMPLE, 1, 1, 1);
+@@ -1216,6 +1236,16 @@ void CVulkanDevice::compileAllPipelines(std::stop_token st)
+ 	SHADER(NIS, 1, 1, 1);
+ 	SHADER(RGB_TO_NV12, 1, 1, 1);
+ 	SHADER(SGSR, 1, 1, 1);
++	SHADER(UPSCALE_RESAMPLE, 1, 1, 1);
 +	SHADER(ANIME4K_PASS0, 1, 1, 1);
 +	SHADER(ANIME4K_PASS1, 1, 1, 1);
 +	SHADER(ANIME4K_PASS2, 1, 1, 1);
@@ -255,7 +276,7 @@ index a0ce55f..f740e67 100644
  #undef SHADER
  
  	for (auto& info : pipelineInfos) {
-@@ -3620,6 +3647,32 @@ static void update_xbr_images( uint32_t width, uint32_t height )
+@@ -3583,6 +3613,32 @@ static void update_tmp_images( uint32_t width, uint32_t height )
  	}
  }
  
@@ -288,21 +309,41 @@ index a0ce55f..f740e67 100644
  
  static bool init_nis_data()
  {
-@@ -4231,6 +4284,7 @@ namespace
+@@ -3958,6 +4014,19 @@ struct SgsrPushData_t
+ 	}
+ };
+ 
++struct UpscalePushData_t
++{
++	uint32_t u_srcWidth;
++	uint32_t u_srcHeight;
++	uint32_t u_dstWidth;
++	uint32_t u_dstHeight;
++
++	UpscalePushData_t(uint32_t srcX, uint32_t srcY, uint32_t dstX, uint32_t dstY)
++		: u_srcWidth(srcX), u_srcHeight(srcY), u_dstWidth(dstX), u_dstHeight(dstY)
++	{
++	}
++};
++
+ struct RcasPushData_t
+ {
+ 	uvec2_t u_layer0Offset;
+@@ -4180,6 +4249,7 @@ namespace
+ 			case GamescopeUpscaleFilter::NIS:     return "nis";
  			case GamescopeUpscaleFilter::PIXEL:   return "pixel";
  			case GamescopeUpscaleFilter::SGSR:    return "sgsr";
- 			case GamescopeUpscaleFilter::XBR:     return "xbr";
 +			case GamescopeUpscaleFilter::ANIME4K: return "anime4k";
  			default:                              return "view";
  		}
  	}
-@@ -4514,6 +4568,79 @@ std::optional<uint64_t> vulkan_composite( struct FrameInfo_t *frameInfo, gamesco
+@@ -4403,6 +4473,79 @@ std::optional<uint64_t> vulkan_composite( struct FrameInfo_t *frameInfo, gamesco
  
  		cmdBuffer->dispatch(div_roundup(currentOutputWidth, pixelsPerGroup), div_roundup(currentOutputHeight, pixelsPerGroup));
  	}
 +	else if ( frameInfo->useAnime4KLayer0 )
 +	{
-+		// Anime4K CNN x2 (M) passes, then the same resample and blit as Super-xBR.
++		// Anime4K CNN x2 (M) passes, then a resample and the regular blit.
 +		uint32_t inputX = frameInfo->layers.get( 0 ).tex->width();
 +		uint32_t inputY = frameInfo->layers.get( 0 ).tex->height();
 +
@@ -332,7 +373,7 @@ index a0ce55f..f740e67 100644
 +				cmdBuffer->setSamplerNearest(uSlot, !( bLinearFirst && uSlot == 0 ));
 +				uSlot++;
 +			}
-+			cmdBuffer->uploadConstants<XbrPushData_t>(inputX, inputY, dstX, dstY);
++			cmdBuffer->uploadConstants<UpscalePushData_t>(inputX, inputY, dstX, dstY);
 +
 +			cmdBuffer->dispatch(div_roundup(dstX, pixelsPerGroup), div_roundup(dstY, pixelsPerGroup));
 +		};
@@ -349,13 +390,13 @@ index a0ce55f..f740e67 100644
 +		// The residual is added to a bilinear 2x of the input.
 +		anime4kPass( SHADER_TYPE_ANIME4K_PASS8, a[8], { pInput, a[7] }, true );
 +
-+		cmdBuffer->bindPipeline(g_device.pipeline(SHADER_TYPE_XBR_RESAMPLE));
++		cmdBuffer->bindPipeline(g_device.pipeline(SHADER_TYPE_UPSCALE_RESAMPLE));
 +		cmdBuffer->bindTarget(g_output.tmpOutput);
 +		cmdBuffer->bindTexture(0, a[8]);
 +		cmdBuffer->setTextureSrgb(0, true);
 +		cmdBuffer->setSamplerUnnormalized(0, false);
 +		cmdBuffer->setSamplerNearest(0, false);
-+		cmdBuffer->uploadConstants<XbrPushData_t>(inputX * 2, inputY * 2, tempX, tempY);
++		cmdBuffer->uploadConstants<UpscalePushData_t>(inputX * 2, inputY * 2, tempX, tempY);
 +		cmdBuffer->dispatch(div_roundup(tempX, pixelsPerGroup), div_roundup(tempY, pixelsPerGroup));
 +
 +		if ( oTimingSlot )
@@ -376,47 +417,32 @@ index a0ce55f..f740e67 100644
  	else if ( frameInfo->useNISLayer0 )
  	{
  		uint32_t inputX = frameInfo->layers.get( 0 ).tex->width();
-@@ -4660,20 +4787,22 @@ std::optional<uint64_t> vulkan_composite( struct FrameInfo_t *frameInfo, gamesco
- 	if ( oTimingSlot )
- 	{
- 		// Keys are stable buffers so the accumulator can hash the pointer.
--		static char szKeys[ 3 ][ 2 ][ 8 ][ 32 ];
-+		static char szKeys[ 3 ][ 2 ][ 9 ][ 32 ];
- 		GamescopeUpscaleFilter eFilter = frameInfo->layers.count() ? frameInfo->layers.get( 0 ).filter : GamescopeUpscaleFilter::LINEAR;
+@@ -4554,6 +4697,8 @@ std::optional<uint64_t> vulkan_composite( struct FrameInfo_t *frameInfo, gamesco
  		// Label the pass that ran, including HDR fallback and cached frames.
  		if ( frameInfo->useSGSRLayer0 )
  			eFilter = GamescopeUpscaleFilter::SGSR;
- 		else if ( frameInfo->useXBRLayer0 )
- 			eFilter = GamescopeUpscaleFilter::XBR;
 +		else if ( frameInfo->useAnime4KLayer0 )
 +			eFilter = GamescopeUpscaleFilter::ANIME4K;
  		else if ( frameInfo->useFSRLayer0 )
  			eFilter = GamescopeUpscaleFilter::FSR;
  		else if ( frameInfo->useNISLayer0 )
- 			eFilter = GamescopeUpscaleFilter::NIS;
- 		else if ( UpscaleFilterUsesSharpness( eFilter ) )
- 			eFilter = GamescopeUpscaleFilter::LINEAR;
--		const uint32_t uFilter = std::min<uint32_t>( uint32_t( eFilter ), 7u );
-+		const uint32_t uFilter = std::min<uint32_t>( uint32_t( eFilter ), 8u );
- 		const char *pszMode = bPreemptiveUpscale ? "preupscale" : "composite";
- 		char *pszKey = szKeys[ 0 ][ bPreemptiveUpscale ][ uFilter ];
- 		char *pszKeyPre = szKeys[ 1 ][ bPreemptiveUpscale ][ uFilter ];
 diff --git a/src/rendervulkan.hpp b/src/rendervulkan.hpp
-index 0c9dd35..33660f6 100644
+index fa519db..17f246a 100644
 --- a/src/rendervulkan.hpp
 +++ b/src/rendervulkan.hpp
-@@ -287,6 +287,7 @@ struct FrameInfo_t
+@@ -286,6 +286,7 @@ struct FrameInfo_t
+ 	bool useFSRLayer0;
  	bool useNISLayer0;
  	bool useSGSRLayer0;
- 	bool useXBRLayer0;
 +	bool useAnime4KLayer0;
  	// Upscale settings for this frame.
  	GamescopeUpscaleFilter eUpscaleFilter = GamescopeUpscaleFilter::LINEAR;
  	GamescopeUpscaleScaler eUpscaleScaler = GamescopeUpscaleScaler::AUTO;
-@@ -623,6 +624,15 @@ enum ShaderType {
- 	SHADER_TYPE_XBR_PASS1,
- 	SHADER_TYPE_XBR_PASS2,
- 	SHADER_TYPE_XBR_RESAMPLE,
+@@ -618,6 +619,16 @@ enum ShaderType {
+ 	SHADER_TYPE_NIS,
+ 	SHADER_TYPE_RGB_TO_NV12,
+ 	SHADER_TYPE_SGSR,
++	SHADER_TYPE_UPSCALE_RESAMPLE,
 +	SHADER_TYPE_ANIME4K_PASS0,
 +	SHADER_TYPE_ANIME4K_PASS1,
 +	SHADER_TYPE_ANIME4K_PASS2,
@@ -1320,48 +1346,83 @@ index 0000000..e6dae39
 +    g_uv = (vec2(pos) + 0.5) / vec2(u_dstWidth, u_dstHeight);
 +    imageStore(dst, ivec2(pos), vec4(clamp(hook().rgb, 0.0, 1.0), 1.0));
 +}
+diff --git a/src/shaders/cs_upscale_resample.comp b/src/shaders/cs_upscale_resample.comp
+new file mode 100644
+index 0000000..a649f6e
+--- /dev/null
++++ b/src/shaders/cs_upscale_resample.comp
+@@ -0,0 +1,29 @@
++#version 460
++
++#extension GL_GOOGLE_include_directive : require
++#extension GL_EXT_scalar_block_layout : require
++
++#include "descriptor_set.h"
++
++layout(
++  local_size_x = 8,
++  local_size_y = 8,
++  local_size_z = 1) in;
++
++layout(binding = 0, scalar)
++uniform layers_t {
++    uint u_srcWidth;
++    uint u_srcHeight;
++    uint u_dstWidth;
++    uint u_dstHeight;
++};
++
++// Scales a 2x upscale to the layer's on-screen size (bilinear sampler).
++void main()
++{
++    uvec2 pos = gl_GlobalInvocationID.xy;
++    if (pos.x >= u_dstWidth || pos.y >= u_dstHeight)
++        return;
++    vec2 uv = (vec2(pos) + 0.5) / vec2(u_dstWidth, u_dstHeight);
++    imageStore(dst, ivec2(pos), vec4(textureLod(s_samplers[0], uv, 0.0).rgb, 1));
++}
 diff --git a/src/steamcompmgr.cpp b/src/steamcompmgr.cpp
-index a9a097a..f3ad4ec 100644
+index 2ff296b..8631662 100644
 --- a/src/steamcompmgr.cpp
 +++ b/src/steamcompmgr.cpp
-@@ -3237,6 +3237,7 @@ paint_all( global_focus_t *pFocus, bool async )
+@@ -3236,6 +3236,7 @@ paint_all( global_focus_t *pFocus, bool async )
+ 					frameInfo.useFSRLayer0 = eLayer0Filter == GamescopeUpscaleFilter::FSR && needsScaling;
  					frameInfo.useNISLayer0 = eLayer0Filter == GamescopeUpscaleFilter::NIS && needsScaling;
  					frameInfo.useSGSRLayer0 = eLayer0Filter == GamescopeUpscaleFilter::SGSR && needsScaling;
- 					frameInfo.useXBRLayer0 = eLayer0Filter == GamescopeUpscaleFilter::XBR && needsScaling;
 +					frameInfo.useAnime4KLayer0 = eLayer0Filter == GamescopeUpscaleFilter::ANIME4K && needsScaling;
  				}
  				if ( pFocus == GetCurrentMouseFocus() )
  					update_touch_scaling( &frameInfo );
-@@ -3411,6 +3412,7 @@ paint_all( global_focus_t *pFocus, bool async )
+@@ -3409,6 +3410,7 @@ paint_all( global_focus_t *pFocus, bool async )
+ 		frameInfo.useFSRLayer0 = false;
  		frameInfo.useNISLayer0 = false;
  		frameInfo.useSGSRLayer0 = false;
- 		frameInfo.useXBRLayer0 = false;
 +		frameInfo.useAnime4KLayer0 = false;
  	}
  
  	pFocus->eActiveUpscaler = GamescopeUpscaleFilter::LINEAR;
-@@ -3422,6 +3424,8 @@ paint_all( global_focus_t *pFocus, bool async )
+@@ -3418,6 +3420,8 @@ paint_all( global_focus_t *pFocus, bool async )
+ 		pFocus->eActiveUpscaler = GamescopeUpscaleFilter::NIS;
+ 	else if ( frameInfo.useSGSRLayer0 )
  		pFocus->eActiveUpscaler = GamescopeUpscaleFilter::SGSR;
- 	else if ( frameInfo.useXBRLayer0 )
- 		pFocus->eActiveUpscaler = GamescopeUpscaleFilter::XBR;
 +	else if ( frameInfo.useAnime4KLayer0 )
 +		pFocus->eActiveUpscaler = GamescopeUpscaleFilter::ANIME4K;
  	// A full blur draws layer 0 from the blurred image, so its filter never runs.
  	else if ( frameInfo.layers.count() && !frameInfo.layers.get( 0 ).isScreenSize() && frameInfo.blurLayer0 != BLUR_MODE_ALWAYS )
  	{
-@@ -7341,7 +7345,7 @@ handle_property_notify(xwayland_ctx_t *ctx, XPropertyEvent *ev)
+@@ -7337,7 +7341,7 @@ handle_property_notify(xwayland_ctx_t *ctx, XPropertyEvent *ev)
  	{
  		uint32_t uScalingFilter = get_prop( ctx, ctx->root, ctx->atoms.gamescopeNewScalingFilter, 0 );
  
--		if ( uScalingFilter > uint32_t( GamescopeUpscaleFilter::XBR ) )
+-		if ( uScalingFilter > uint32_t( GamescopeUpscaleFilter::SGSR ) )
 +		if ( uScalingFilter > uint32_t( GamescopeUpscaleFilter::ANIME4K ) )
  			xwm_log.errorf( "Unknown scaling filter %u, keeping %u", uScalingFilter, uint32_t( g_wantedUpscaleFilter ) );
  		else if ( g_wantedUpscaleFilter != GamescopeUpscaleFilter( uScalingFilter ) )
  		{
-@@ -8454,6 +8458,7 @@ void update_wayland_res(CommitDoneList_t *doneCommits, steamcompmgr_win_t *w, Re
+@@ -8449,6 +8453,7 @@ void update_wayland_res(CommitDoneList_t *doneCommits, steamcompmgr_win_t *w, Re
+ 		upscaledFrameInfo.useFSRLayer0 = eLayer0Filter == GamescopeUpscaleFilter::FSR;
  		upscaledFrameInfo.useNISLayer0 = eLayer0Filter == GamescopeUpscaleFilter::NIS;
  		upscaledFrameInfo.useSGSRLayer0 = eLayer0Filter == GamescopeUpscaleFilter::SGSR;
- 		upscaledFrameInfo.useXBRLayer0 = eLayer0Filter == GamescopeUpscaleFilter::XBR;
 +		upscaledFrameInfo.useAnime4KLayer0 = eLayer0Filter == GamescopeUpscaleFilter::ANIME4K;
  		globalScaleRatio = flOldGlobalScale;
  		zoomScaleRatio = flOldZoomScale;

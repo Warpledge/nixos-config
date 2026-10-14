@@ -512,9 +512,9 @@
           }
           add_param "nix-performance" "GameMode, MangoHud, FSR4/DLSS upgrade"
           add_param "nix-gamescope" "Fullscreen gamescope at the monitor's res"
-          add_param "nix-vn -r WxH" "VN at a custom res, Anime4K (edit WxH)"
-          add_presets nix-vn "VN, Anime4K upscale"
-          add_param "nix-rpgm" "RPG Maker, res from the engine, Anime4K"
+          add_param "nix-vn -r WxH" "VN at a custom res, NVL (edit WxH)"
+          add_presets nix-vn "VN, NVL upscale"
+          add_param "nix-rpgm" "RPG Maker, res from the engine, NVL"
           add_presets nix-rpgm "RPG Maker forced"
           add_param "tml-prelaunch && DOTNET_DefaultStackSize=51200000 gamemoderun" \
             "tModLoader runtimeconfig patch"
