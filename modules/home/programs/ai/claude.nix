@@ -82,5 +82,8 @@
     #--- gitleaks: the commit skill's secret scan
     #--- python3: the claude-security plugin's scripts
     home.packages = [pkgs.gitleaks pkgs.python3];
+
+    #--- Turn off Claude-drafted feedback (the SendFeedback tool)
+    home.sessionVariables.CLAUDE_CODE_SEND_FEEDBACK = "0";
   };
 }
