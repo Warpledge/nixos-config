@@ -21,7 +21,10 @@
 
       #--- Keybinds
       binds = {
-        "Mod+0".action.spawn = ["nirius" "scratchpad-toggle"];
+        # Show or hide every scratchpad window, floating over the current workspace
+        "Mod+0".action.spawn = ["nirius" "scratchpad-show-all"];
+        # Move the focused window into the scratchpad, or back out
+        "Mod+Shift+0".action.spawn = ["nirius" "scratchpad-toggle"];
       };
     };
   };

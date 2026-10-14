@@ -505,7 +505,8 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | --- | --- |
 | `Mod+1–9` | Focus workspace N |
 | `Mod+Shift+1–9` | Move window to workspace N |
-| `Mod+0` | Move window to / out of the scratchpad (nirius) |
+| `Mod+0` | Show / hide the scratchpad windows over the current workspace (nirius) |
+| `Mod+Shift+0` | Move window to / out of the scratchpad (nirius) |
 
 #### Media & Capture
 
