@@ -23,29 +23,29 @@ the `repo` branch of skepsun/kototoro-parsers by deploy commits).
 
 1. Update both URLs in `flake.nix` (`github:moku-project/Moku/vX`,
    `github:moku-project/Tsunagu/vY`), then `nix flake update moku tsunagu`.
-2. Set `frontend.pnpmHash` and Tsunagu's `vendorHash` to
-   `"sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="` and build:
+2. Set `frontend.pnpmHash` to `"sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="`
+   and build:
    ```bash
    bash <skill-dir>/scripts/build.sh
    ```
    It builds only Moku and prints each `got:` hash; paste it in, rebuild, repeat until it
    builds. Upstream's own `pnpmHash` matches upstream's nixpkgs, not ours, so it never works
-   as-is.
+   as-is. Tsunagu's `vendorHash` comes from upstream's `packages.nix` (correct at 0.5.0); on
+   a Go hash mismatch, add a `vendorHash` override to `tsunaguServer` with the `got:` value.
 3. Patches: a failed `--replace-fail` (the `KeywordTab.svelte` substitution) means upstream
    fixed it, so drop it. A failed hunk in `source-filters.patch` or `open-in-mpv.patch`
    means regenerating it against the new source. `open-in-mpv.patch` also adds a Rust
    command (`open_in_mpv` in `src-tauri/src/commands/system.rs`, registered in `lib.rs`).
    For `tsunagu-fixes.patch`, `tsunagu/server.patch` and `tsunagu/hls-audio.patch`, drop
    each part upstream now contains. What each part fixes, to test against the new release:
-   - `tsunagu-fixes.patch`: popular and latest listings go through the suspend getters
-     (0.4.1 and main at `9ab4475` called the Rx fetchers, which extensions-lib 1.6 sources
-     leave unimplemented, so those pages came back empty); `ProtoBuf` is registered in the
-     sandbox's Koin module as Mihon does (some sources fail at class init without it); and
-     an installed extension loads from `extensions/` when its `jar-cache` file is gone
-     (Moku's "Clear extension jar cache" otherwise breaks every source until reinstalled).
-   - `tsunagu/server.patch`: a failed cover download is retried through the extension's
-     own client, since some extensions hand out cover URLs only their interceptor can
-     resolve.
+   - `tsunagu-fixes.patch`: `ProtoBuf` is registered in the sandbox's Koin module as
+     Mihon does (some sources fail at class init without it); and an installed extension
+     loads from `extensions/` when its `jar-cache` file is gone (Moku's "Clear extension
+     jar cache" otherwise breaks every source until reinstalled). The suspend-getter fix
+     for popular/latest it used to carry is upstream as of 0.5.0.
+   - `tsunagu/server.patch`: wires the Kototoro repo expansion into sync
+     (`syncer.SetSandbox` in `main.go`, `expandBundles` in `sync.go`). Its old cover
+     fallback is upstream as of 0.5.0.
    - `tsunagu/hls-audio.patch`: when a source returns a video-only HLS playlist with its
      audio as separate tracks (some anime sources), `/video` serves a master playlist
      joining them; without it those episodes play silent in Moku and in mpv.

@@ -1,6 +1,6 @@
-diff --git a/src/lib/components/browse/lib/searchFilter.ts b/src/lib/components/browse/lib/searchFilter.ts
---- a/src/lib/components/browse/lib/searchFilter.ts	2026-09-27 01:55:51.949923759 -0500
-+++ b/src/lib/components/browse/lib/searchFilter.ts	2026-09-27 01:55:51.991491521 -0500
+diff -ruN a/src/lib/components/browse/lib/searchFilter.ts b/src/lib/components/browse/lib/searchFilter.ts
+--- a/src/lib/components/browse/lib/searchFilter.ts
++++ b/src/lib/components/browse/lib/searchFilter.ts
 @@ -132,6 +132,21 @@
    return { inputs: walk(nodes), matched };
  }
@@ -23,9 +23,9 @@ diff --git a/src/lib/components/browse/lib/searchFilter.ts b/src/lib/components/
  export function filterSourceCache(
    sourceCache: Map<string, CachedManga>,
    tags:        string[],
-diff --git a/src/lib/components/browse/SourceTab.svelte b/src/lib/components/browse/SourceTab.svelte
---- a/src/lib/components/browse/SourceTab.svelte	2026-09-27 01:55:51.956648984 -0500
-+++ b/src/lib/components/browse/SourceTab.svelte	2026-09-27 01:55:51.991599902 -0500
+diff -ruN a/src/lib/components/browse/SourceTab.svelte b/src/lib/components/browse/SourceTab.svelte
+--- a/src/lib/components/browse/SourceTab.svelte
++++ b/src/lib/components/browse/SourceTab.svelte
 @@ -1,7 +1,7 @@
  <script lang="ts">
    import { onDestroy, untrack } from "svelte";
@@ -253,12 +253,12 @@ diff --git a/src/lib/components/browse/SourceTab.svelte b/src/lib/components/bro
    .tagGrid            { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: var(--sp-4); padding: var(--sp-4); overflow-y: auto; flex: 1; align-content: start; }
    .card               { background: none; border: none; padding: 0; cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: var(--sp-2); }
    .coverWrap          { position: relative; aspect-ratio: 2/3; border-radius: var(--radius-md); clip-path: inset(0 round var(--radius-md)); background: var(--bg-raised); border: 1px solid var(--border-dim); }
-diff --git a/src/lib/server-adapters/tsunagu/discovery.ts b/src/lib/server-adapters/tsunagu/discovery.ts
---- a/src/lib/server-adapters/tsunagu/discovery.ts	2026-09-27 01:55:51.945088165 -0500
-+++ b/src/lib/server-adapters/tsunagu/discovery.ts	2026-09-27 01:56:01.306278230 -0500
+diff -ruN a/src/lib/server-adapters/tsunagu/discovery.ts b/src/lib/server-adapters/tsunagu/discovery.ts
+--- a/src/lib/server-adapters/tsunagu/discovery.ts
++++ b/src/lib/server-adapters/tsunagu/discovery.ts
 @@ -1,23 +1,42 @@
  import { gql, baseUrl } from './gql'
- import type { SearchResponse, SourceDetails, PreviewChapter, RecentChapter, FilterNode, FilterInput, SourcePreference, MangaInfo, LibraryUpdateStatus } from '$lib/server-adapters/types'
+ import type { SearchResponse, SourceDetails, PreviewChapter, RecentChapter, FilterNode, FilterInput, SourcePreference, MangaInfo, LibraryUpdateStatus, LibraryUpdateTrigger } from '$lib/server-adapters/types'
  
 +// GraphQL rejects a fragment that spreads itself, so groups are expanded two levels deep, and
 +// `state` differs in type per filter kind, so each kind aliases it and withState() renames it back.

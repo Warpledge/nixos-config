@@ -640,16 +640,16 @@
     "moku": {
       "flake": false,
       "locked": {
-        "lastModified": 1789869323,
-        "narHash": "sha256-oG9TqCcv6Db4RmJZSBW+oFhzFZRmdPSfW56glFXvLso=",
+        "lastModified": 1791819173,
+        "narHash": "sha256-1Am7dRRjOkR4PYANQcUXUqACvSnC8DNjoKYrh4h8MY0=",
         "owner": "moku-project",
         "repo": "Moku",
-        "rev": "fd26324ab2c0530ef888d8ef13c6a4759bf34abd",
+        "rev": "2d0697e1ed98d8849c844d3bc1e0bd7d1196c989",
         "type": "github"
       },
       "original": {
         "owner": "moku-project",
-        "ref": "v0.13.1",
+        "ref": "v0.14.0",
         "repo": "Moku",
         "type": "github"
       }
@@ -1315,16 +1315,16 @@
     "tsunagu": {
       "flake": false,
       "locked": {
-        "lastModified": 1789868806,
-        "narHash": "sha256-nM68R7ALR37R1cTbVAYh5Y0jLlUEyn6qsF9r4e1vBN4=",
+        "lastModified": 1791815014,
+        "narHash": "sha256-PqQMzj1ly7K4QPhPQhOyDpJXHu3NWMMcotIe6u4cQ94=",
         "owner": "moku-project",
         "repo": "Tsunagu",
-        "rev": "ca03daac0ed9bf4e26a9d9dedf1553edf53fce15",
+        "rev": "f8a50c47c464fd628e4561a752aeea30cccefdfa",
         "type": "github"
       },
       "original": {
         "owner": "moku-project",
-        "ref": "v0.4.1",
+        "ref": "v0.5.0",
         "repo": "Tsunagu",
         "type": "github"
       }

@@ -20,7 +20,7 @@
   versions =
     upstreamVersions
     // {
-      frontend.pnpmHash = "sha256-77nWx3b8XkaCPzfdXemJBOpUFKSTiRTi/bsgnoB3k4M=";
+      frontend.pnpmHash = "sha256-/MzQnRvMTtQD8f3/b2OTgp6QlSl6Twvejyohpwc8Xxk=";
     };
 
   tsunagu = import "${inputs.tsunagu}/nix/packages.nix" {inherit pkgs lib;};
@@ -29,8 +29,8 @@
   #--- whatever jar a repo index lists; kototoroApi is its dex turned back
   #--- into JVM classes for compiling the bridge
   kototoroPlugin = pkgs.fetchurl {
-    url = "https://raw.githubusercontent.com/skepsun/kototoro-parsers/58950ebc43b53cbfd8d4523544e870fd96b0c1cc/apk/plugin.jar"; # v1.0.134
-    hash = "sha256-F0s6i606OsqGaoEA9CTdTTCZHbqml6DLsuCu0KQaWro=";
+    url = "https://raw.githubusercontent.com/skepsun/kototoro-parsers/82ed4c767c0b4ae15a639fe6a08819c0df15d223/apk/plugin.jar"; # v1.0.137
+    hash = "sha256-CCbIyR1nH6Ki/JYeJ0ziVC8qEkyLKUS2kMs7M2tLBCI=";
   };
   kototoroApi = pkgs.runCommand "kototoro-api.jar" {} ''
     ${pkgs.dex2jar}/bin/d2j-dex2jar -o $out ${kototoroPlugin}
@@ -46,13 +46,10 @@
     hash = "sha256-cLNZJOS6vN/6N9Dlde4DnFai2XEjNCYkxItgMjNwQ0E=";
   };
 
-  #--- Upstream's vendorHash is stale at v0.4.1. server.patch expands a
-  #--- Kototoro repo on sync (from the pinned plugin, never the index's jar)
-  #--- and retries a failed cover download through the extension's own
-  #--- client. hls-audio.patch serves a master playlist joining a video-only
-  #--- HLS stream with its separate audio tracks
+  #--- server.patch expands a Kototoro repo on sync (from the pinned plugin,
+  #--- never the index's jar). hls-audio.patch serves a master playlist
+  #--- joining a video-only HLS stream with its separate audio tracks
   tsunaguServer = tsunagu.tsunagu-server.overrideAttrs (old: {
-    vendorHash = "sha256-rPtZJzXAuctkAWPGX/89a7Z9Cr+py510g5QCArOOTJE=";
     patches =
       (old.patches or [])
       ++ [./tsunagu/server.patch ./tsunagu/hls-audio.patch];
@@ -63,11 +60,9 @@
       '';
   });
 
-  #--- sandbox.patch loads the Kototoro bridge. tsunagu-fixes.patch:
-  #--- popular/latest go through the suspend getters (extensions-lib 1.6
-  #--- sources leave the Rx fetchers unimplemented), ProtoBuf joins the DI
-  #--- graph as Mihon registers it, and an installed extension still loads
-  #--- after its jar-cache copy is cleared
+  #--- sandbox.patch loads the Kototoro bridge. tsunagu-fixes.patch: ProtoBuf
+  #--- joins the DI graph as Mihon registers it, and an installed extension
+  #--- still loads after its jar-cache copy is cleared
   tsunaguSandbox = tsunagu.tsunagu-sandbox.overrideAttrs (old: {
     patches = (old.patches or []) ++ [./tsunagu/sandbox.patch ./tsunagu-fixes.patch];
     #--- Nested jars are named *.lib, since Shadow would unpack a *.jar into
@@ -145,7 +140,7 @@
       #--- open-in-mpv.patch adds a player button that hands the stream to mpv
       patches = (old.patches or []) ++ [./source-filters.patch ./open-in-mpv.patch];
 
-      #--- 0.13.1's `contain` shrinks WebKitGTK's keyword-search cards below
+      #--- 0.14.0's `contain` shrinks WebKitGTK's keyword-search cards below
       #--- their 2:3 covers, so rows overlap
       postPatch =
         (old.postPatch or "")

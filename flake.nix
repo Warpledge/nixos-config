@@ -75,13 +75,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     tsunagu = {
-      # The backend Moku 0.13.1 ships with; bump with `moku`
-      url = "github:moku-project/Tsunagu/v0.4.1";
+      # The backend Moku 0.14.0 ships with; bump with `moku`
+      url = "github:moku-project/Tsunagu/v0.5.0";
       flake = false;
     };
     moku = {
       # Built in home-manager media/moku; bump with `tsunagu`
-      url = "github:moku-project/Moku/v0.13.1";
+      url = "github:moku-project/Moku/v0.14.0";
       flake = false;
     };
 
