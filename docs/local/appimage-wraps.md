@@ -117,3 +117,24 @@ fails outright or writes a copy into the data dir that shadows the packaged one,
 and the config stops describing what actually runs. Bump the `version` and
 `hash` in the module instead.
 
+## Blank text in a Chromium-based wrap
+
+On 2026-10-03 Streamlink Twitch GUI (NW.js, Chromium 120) opened with every
+text label blank while images and underlines still drew. Mesa and fontconfig
+hadn't changed across the last three lock updates, and a second instance on a
+copied profile without its GPU caches rendered fine, so stale shader caches in
+the profile were the cause. The `/etc/fonts` warnings Steam's journal shows
+are unrelated.
+
+With the app closed, move these out of `~/.config/streamlink-twitch-gui/`; it
+rebuilds them on the next launch:
+
+- `GrShaderCache`
+- `ShaderCache`
+- `GraphiteDawnCache`
+- `Default/GPUCache`
+
+Another Chromium or Electron app with the same symptom likely needs the same
+fix. Test with `--user-data-dir=<copy of the profile, minus the caches>` before
+touching fonts or the module.
+

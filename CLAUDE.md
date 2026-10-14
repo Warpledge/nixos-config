@@ -149,10 +149,12 @@ Gotchas. Grep the option name before assuming which file owns it:
 ## Workflows
 
 **Add an application** (the `add-app` skill runs these steps, then checks the wiring):
+For an app not in nixpkgs, wrap upstream's AppImage (`appimageTools`) or patch its `.deb` or tarball with `autoPatchelfHook` first; a Flatpak is the last resort (Flatpak runtimes update under the app with no way to pin them), and the user wants Flatpak gone once Hytale has another route.
+
 1. Add the toggle to **both** host configs (keep them symmetrical)
 2. Create the module in the right subdir (`modules/home/programs/...`)
 3. Add the conditional import to `modules/home/programs/default.nix`, the router under `programs/`; a `gaming.*` app goes in `programs/gaming/default.nix`, which routes its own launchers, games and tools, and a guitar app goes in `audio/guitar/default.nix`, with its toggle added to that folder's gate in `programs/default.nix`. The other nested `default.nix` files (`browsers/zen/`, `media/{freetube,moku}/`, and `gaming/launchers/xsystem4/` with one module) are module bundles, not routers
-4. `alejandra .` → `git add` new files → `nix flake check` (do not rebuild; hand it back)
+4. `git add` new files → `nix flake check` (a new module and its import are what rule 1 means by uncertain; do not rebuild; hand it back)
 5. Give any prose the task wrote or edited a cut-only revision pass before handing back: remove words, add none. No new information, no new claims, no rephrasing that smuggles either in. See **Writing Style**.
 6. Add it to the matching `<details>` table under **Components** in `README.md` (plus `## Structure` for a new directory, `## Flake Inputs` for a new input), and its link-reference definition at the bottom: the README is the public-facing doc and drifts easily.
 
@@ -239,7 +241,7 @@ These are only imported when the WM is active, e.g. `lib.optional (hostConfig.wi
 - DNS: systemd-resolved (stub listener on 127.0.0.53, opportunistic DNS-over-TLS, no fallback servers) + NetworkManager
 - WiFi: iwd, IPv6 privacy, random MAC
 - Firewall: TCP 22 (open; sshd only runs when `hostConfig.ssh.enable` is set), 80, 443, 25566 (Minecraft), 7777 (Terraria), 5555 (ADB); UDP 27000–27009, 27015, 27031–27036 and 4380 (Steam). Defined in `modules/nixos/network/firewall.nix`. When `hostConfig.syncthing.enable` is set, the Syncthing module also opens TCP/UDP 22000 and UDP 21027.
-- Mullvad: `hostConfig.mullvad.enable` (WireGuard, quantum resistance, multihop, DAITA; lockdown mode cuts all traffic while the tunnel is down), `modules/nixos/security/mullvad/`: `daemon.nix` (daemon settings), `gui.nix` (tray app) and `split-tunnel.nix`. Settings are applied with the `mullvad` CLI from a oneshot unit, not by templating `settings.json`, which the daemon rewrites. Relay and entry selection are deliberately unmanaged so exits can be switched by hand. `hostConfig.mullvad.splitTunnel` names apps routed around the VPN; `split-tunnel.nix` puts each wrapper in the profile its app is installed in, since the home profile outranks `/run/current-system/sw/bin` in PATH and a system wrapper for an HM package is silently shadowed.
+- Mullvad: `hostConfig.mullvad.enable` (WireGuard, quantum resistance, multihop, DAITA; lockdown mode cuts all traffic while the tunnel is down), `modules/nixos/security/mullvad/`: `daemon.nix` (daemon settings), `gui.nix` (tray app) and `split-tunnel.nix`. Settings are applied with the `mullvad` CLI from a oneshot unit, not by templating `settings.json`, which the daemon rewrites. Relay and entry selection are deliberately unmanaged so exits can be switched by hand. `hostConfig.mullvad.splitTunnel` names apps routed around the VPN; `split-tunnel.nix` puts each wrapper in the profile its app is installed in, since the home profile outranks `/run/current-system/sw/bin` in PATH and a system wrapper for an HM package is silently shadowed. Steam sets `no_new_privs` on what it launches, which blocks the setuid `mullvad-exclude` helper, so the wrapper skips the helper when `/proc/self/cgroup` already shows `mullvad-exclusions` (Steam is split-tunnelled itself). If a Steam shortcut to a split-tunnelled app closes instantly with nothing in the app's logs, its stderr is in `~/.local/share/Steam/logs/console-linux.txt`, and `gameprocess_log.txt` beside it has the spawned command line; reproduce with `setpriv --no-new-privs <wrapper> true`. Why DataPacket exits read as London, and the relay to pick instead, is in `docs/security/mullvad.md`.
 - `network/blockers.nix` — hosts-level blocklists, always imported
 
 ## Security
@@ -410,6 +412,7 @@ Security/privacy notes live under `docs/security/`:
 
 - `security/blocklists.md` — uBlock Origin filter lists
 - `security/ublock-filters.md` — custom uBlock cosmetic filters (paste into uBlock → My Filters)
+- `security/mullvad.md` — DataPacket-hosted relays read as London to registry-based services (Steam); pick a Tzulo relay in the same city
 - `security/android-quic-vpn-leak.md` — QUIC VPN bypass (CVE, May 2026): mitigation via `adb shell device_config put tethering close_quic_connection -1`; re-apply after Android updates
 - `security/apparmor.md` — the per-app AppArmor profiles: what each attaches to, reading `apparmor="ALLOWED"` log lines, moving a profile to enforce, and what breaks first when you do
 
@@ -420,6 +423,12 @@ Game-specific notes live under `docs/gaming/` (the `game-troubleshooting` skill 
 - `gaming/launcher-env-variables.md` — common env vars + wrappers for Heroic/Lutris/Faugus/umu/Steam (JP locale, Proton WineD3D, XWayland wrapper, RPG Maker, perf wrappers)
 - `gaming/steam-client-menu-bug.md` — Steam's menus self-dismiss on niri because xwayland-satellite 0.8.2 focuses override-redirect windows; fixed in v0.8.3 (upstream `add2795`, PR #494), which nixpkgs ships, so `niri/home/core/xwayland.nix` uses the nixpkgs build again
 - `gaming/rocksmith-2014.md` — Rocksmith 2014 on Proton 11 + WOW64 with the Katana DI via PipeASIO and RS_ASIO: the manual install steps the `gaming.rocksmith` module can't do, the Katana driver-priority stall, why calibration is skipped, which CDLC enabler build works (the CustomsForge v4.0 one, not the newer GitHub build), and the optional RSMods setup
+- `gaming/feedback.md` — feedBack's working audio settings and the Guitar Pro import order (import without audio, constant offset, never auto-sync)
+- `gaming/arknights-endfield.md` — "Unable to start ACE Setup (1-1700-2)" after Epic updates: copy `ACE-Setup64.exe` back; recurs, and repair doesn't fix it
+
+Audio hardware notes live under `docs/audio/`:
+
+- `audio/katana-mk2.md` — the Katana MkII as an interface: 44.1 kHz only, four fixed channels, dry DI on capture channels 3 and 4, `front:` refusing 2-channel playback, the driver-priority rule
 - `gaming/minecraft_servers/{GTNH,TerraFirmaGreg-Modern}/` — each pack has `index.md` listing its sub-files (server setup, mods, config tweaks, etc.). **Update the relevant sub-file when that pack's config, mods, or settings change.** The matching declarative modules live at `hosts/laptop/minecraft-servers/{gtnh-server,tfg-server}.nix` (add a new server by creating a `.nix` there, importing it in that dir's `default.nix`, and adding a line to the hardcoded pack list in `mcservers.nix`, the fzf picker that names each pack with its version and dispatches to that server's command).
 
 Android device notes live under `docs/android/`:
@@ -429,7 +438,7 @@ Android device notes live under `docs/android/`:
 Local (non-nixpkgs) binary installs live under `docs/local/`:
 
 - `local/local-binary-installs.md` — the `~/.local/opt` wrapper pattern for prebuilt third-party bundles kept out of git; restore steps for fresh installs / the laptop. **Add an entry here for each new local app.**
-- `local/appimage-wraps.md` — the `appimageTools.wrapType2` pattern for upstream AppImages. Hash-pinned into the store, so nothing to restore by hand; covers the per-app `Exec`/icon fixups, a non-executable `AppRun`, a DwarFS payload `appimageTools.extract` can't open (unpack with `dwarfsextract`), how to get a new hash when `nix store prefetch-file` hits the daemon's DNS timeout, and building one module without a rebuild.
+- `local/appimage-wraps.md` — the `appimageTools.wrapType2` pattern for upstream AppImages. Hash-pinned into the store, so nothing to restore by hand; covers the per-app `Exec`/icon fixups, a non-executable `AppRun`, a DwarFS payload `appimageTools.extract` can't open (unpack with `dwarfsextract`), how to get a new hash when `nix store prefetch-file` hits the daemon's DNS timeout, building one module without a rebuild, and blank text in a Chromium-based wrap (stale GPU shader caches in its profile).
 
 nixpkgs update notes live under `docs/nixpkgs/`:
 

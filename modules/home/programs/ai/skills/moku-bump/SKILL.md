@@ -66,3 +66,9 @@ pin stale without any Moku change (first seen 2026-10-06).
 
 Finish with `alejandra .` → `nix flake check`. Never touch the user's library or
 extensions in `~/.local/share/{tsunagu,io.github.MokuProject.Moku}`.
+
+Test a Tsunagu change on an empty data dir, with ports off 6007 and 50051. A copy of
+the real dir isn't isolated: each extension's `jar_path` in its database is an
+absolute path into the real `jar-cache`, so rewrite those in the copy first. If every
+source fails after a restart, compare `jar-cache` against
+`select jar_path from extensions where installed=1` before suspecting anything else.

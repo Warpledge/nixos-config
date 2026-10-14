@@ -101,6 +101,8 @@ A new one goes in through the `add-app` skill.
 | Launch options for Morimens, Risk of Rain 2, tModLoader, No Rest for the Wicked, Arknights Endfield, Wuthering Waves, `System40.exe` mods | `docs/gaming/steam-launch-parameters.md` |
 | tModLoader paths and log queries | `docs/gaming/tmodloader-debugging.md` |
 | Rocksmith 2014 (Katana DI, RS_ASIO) | `docs/gaming/rocksmith-2014.md` |
+| feedBack audio settings, Guitar Pro import | `docs/gaming/feedback.md` |
+| Arknights Endfield "Unable to start ACE Setup" | `docs/gaming/arknights-endfield.md` |
 | Steam client menus vanish under niri | `docs/gaming/steam-client-menu-bug.md` |
 | Minecraft servers (GTNH, TerraFirmaGreg) | `docs/gaming/minecraft_servers/<pack>/index.md` |
 

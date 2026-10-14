@@ -66,7 +66,7 @@ The AUX DI pair the module points PipeASIO at is `alsa_input.usb-BOSS_KATANA-01.
 
 **Calibration drives the input to nothing.** The game sets its input volume through RS_ASIO's endpoint volume. During the palm-mute step it walked that volume down to the 0.01 floor (one `SetMasterVolumeLevelScalar` line per step in `RS_ASIO-log.txt`) and the following loud step never brought it back, so the meter flatlined. `EnableSoftwareEndpointVolumeControl=0` on `[Asio.Input.0]` makes RS_ASIO ignore those calls. The meter still reads nothing after that change, which is why step 6 skips calibration.
 
-**Input level.** Hard strums on the Katana DI peak around 0.06 of full scale. `SoftwareMasterVolumePercent=490` (RS_ASIO accepts 0 to 1000, per `Configurator.cpp`) brings hard strums to roughly half scale. If notes clip or sound crunchy, lower it; if quiet notes go unread, raise it. Measure a source instead of guessing:
+**Input level.** Hard strums on the Katana DI peak around 0.06 of full scale. `SoftwareMasterVolumePercent=490` (RS_ASIO accepts 0 to 1000, per `Configurator.cpp`) brings hard strums to roughly half scale. If notes clip or sound crunchy, lower it; if quiet notes go unread, raise it. Keep the Line4 source's own `wpctl` volume at 1.0: a `wpctl` boost stacks on top of this one, and `wpctl` volume is cubic (2.0 is 8x linear). Measure a source instead of guessing:
 
 ```bash
 timeout 5 pw-record --target alsa_input.usb-BOSS_KATANA-01.HiFi__Line4__source --channels 2 /run/user/1000/strum.wav
