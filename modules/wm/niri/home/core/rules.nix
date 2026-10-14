@@ -24,6 +24,7 @@
         {app-id = "^md\\.obsidian\\.Obsidian$";}
         {app-id = "^homebank$";}
         {app-id = "(?i)goofcord$";}
+        {app-id = "^mpv$";}
       ];
       block-out-from = "screen-capture";
     }
@@ -361,6 +362,9 @@ in {
         matches = [
           {namespace = "^dms:clipboard$";}
           {namespace = "^dms:notification-popup$";}
+          # ClipBoard+ panel, emoji picker and item context menu
+          {namespace = "^dms-clipboardPlus-";}
+          {namespace = "^dms-selection-menu-";}
         ];
         block-out-from = "screen-capture";
       }
