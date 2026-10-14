@@ -76,6 +76,8 @@
     #--- Security (controlled by hostConfig)
     ++ lib.optionals hostConfig.security.bleachbit [./security/bleachbit.nix]
     ++ lib.optionals hostConfig.security.keepassxc [./security/keepassxc.nix]
+    #--- System Tools (controlled by hostConfig)
+    ++ lib.optionals hostConfig.system.resources [./system/resources.nix]
     #--- Android Screen Mirroring (controlled by hostConfig)
     ++ lib.optionals hostConfig.scrcpy.enable [./android/scrcpy.nix]
     #--- AI Tools (controlled by hostConfig)

@@ -143,6 +143,12 @@
     keepassxc = true; # Offline password manager (vault synced with Syncthing)
   };
 
+  #--- System Tools Selection
+  # Enable the system monitoring applications you want installed
+  system = {
+    resources = true; # GNOME system and process monitor
+  };
+
   #--- Android Screen Mirroring (scrcpy)
   # Mirror/control an Android device over USB or wifi; nothing is installed
   # on the device, so it works on de-Googled phones/tablets

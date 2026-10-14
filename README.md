@@ -184,6 +184,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | **Image Boards** | [Boorusama][boorusama] browses booru sites; it's the desktop build of the Android client, wrapped from the upstream AppImage with `appimageTools` since it is not in nixpkgs. Its data, cache and backups sit in a [gocryptfs][gocryptfs] vault that the launcher unlocks with a password and locks again on exit |
 | **Finance** | [HomeBank][homebank] (personal accounting with labeled transactions and a running balance) |
 | **Collection Tracking** | [Tonkatsu Box][tonkatsu-box] (games, film, anime, manga, visual novels, books and music in one local database, imports from Steam and AniList; a prebuilt bundle kept in `~/.local/opt/` instead of nixpkgs) |
+| **Task Manager** | [Resources][resources] (system and process monitor) |
 | **Japanese** | [fcitx5][fcitx5] + [Mozc][mozc] for typing hiragana, katakana and kanji, plus [innoextract][innoextract], [cabextract][cabextract] and [mdf2iso][mdf2iso] for unpacking raw Japanese visual novels (off by default) |
 </details>
 
@@ -289,6 +290,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [suwayomi]: https://github.com/Suwayomi/Suwayomi-Server
 [boorusama]: https://github.com/khoadng/Boorusama
 [gocryptfs]: https://nuetzlich.net/gocryptfs/
+[resources]: https://gitlab.gnome.org/GNOME/Incubator/resources
 [streamlink-twitch-gui]: https://github.com/streamlink/streamlink-twitch-gui
 [feedback]: https://github.com/got-feedBack/feedBack-desktop
 [rocksmith]: https://store.steampowered.com/app/221680/
