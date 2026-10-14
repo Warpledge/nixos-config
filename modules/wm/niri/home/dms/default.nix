@@ -68,6 +68,20 @@
           color_palette_preset = "catppuccin";
         };
       };
+
+      # A bar widget: its IPC target only exists while it sits in a bar
+      # (rightWidgets in settings.json).
+      clipboardPlus = {
+        enable = true;
+        settings = {
+          backgroundOpacity = 80; # dim behind the panel, 0-80
+          panelOpacityClipboard = 80;
+          panelOpacityPinned = 80;
+          emojiUnicodeEnabled = false;
+        };
+      };
+
+      wallpaperCarousel.enable = true;
     };
 
     #--- Core features
@@ -87,12 +101,12 @@
   in {
     #--- DankMaterialShell Controls
     "Mod+A".action.spawn = dms "spotlight toggle"; # Application Launcher
-    "Mod+V".action.spawn = dms "clipboard toggle"; # Clipboard Manager
+    "Mod+V".action.spawn = dms "clipboardPlus togglePanel"; # Clipboard Manager
     "Mod+P".action.spawn = dms "processlist toggle"; # Task Manager
     "Mod+Comma".action.spawn = dms "settings toggle"; # Settings
     "Mod+N".action.spawn = dms "notepad toggle"; # Notepad
     "Mod+K".action.spawn = dms "powermenu toggle"; # Power Menu
-    "Mod+W".action.spawn = dms "dankdash wallpaper"; # Browse Wallpapers
+    "Mod+W".action.spawn = dms "wallpaperCarousel toggle"; # Browse Wallpapers
     "Mod+Shift+N".action.spawn = dms "night toggle"; # Night Mode Toggle
     "Mod+L".action.spawn = dms "lock lock"; # Toggle lock screen
     "Mod+I".action.spawn = dms "inhibit toggle"; # Toggle idle inhibit

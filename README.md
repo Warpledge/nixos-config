@@ -173,6 +173,8 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | **Media Player** | [mpv][mpv], [Spotify][spotify] via [spicetify-nix][spicetify], [FreeTube][freetube] |
 | **Twitch** | [Streamlink Twitch GUI][streamlink-twitch-gui] browses Twitch and hands the stream to [Streamlink][streamlink], which plays it in mpv, so there are no ads and the follow list stays local with no Twitch account attached; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs |
 | **Screenshot / Recording** | [Quick Capture][quick-capture] (Niri, Hyprland), [gpu-screen-recorder][gpu-screen-recorder] |
+| **Clipboard** | [ClipBoard+][clipboard-plus] (Niri) |
+| **Wallpaper Picker** | [Wallpaper Carousel][wallpaper-carousel] (Niri) |
 | **Graphics** | [Blender][blender], [Krita][krita], [Affinity Suite v3][affinity-nix] (via Wine), all off by default |
 | **Audio** | [Reaper][reaper] (DAW, with [SWS][sws] and [ReaPack][reapack]) |
 | **Guitar** | [TONE3000][tone3000] (official NAM player, browses its capture and IR library in-app), [Guitarix][guitarix] (modular amp rig), [ir.lv2][ir-lv2] for cabinet IRs, [qpwgraph][qpwgraph] for patching, plus [FxFloorBoard][katana-fxfloorboard] to edit patches on the Boss Katana itself |
@@ -265,6 +267,8 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [freetube]: https://freetubeapp.io
 [gpu-screen-recorder]: https://git.dec05eba.com/gpu-screen-recorder
 [quick-capture]: https://github.com/hthienloc/dms-plugins
+[clipboard-plus]: https://github.com/Dadangdut33/dms-plugins
+[wallpaper-carousel]: https://github.com/motor-dev/wallpaperCarousel
 [blender]: https://www.blender.org
 [krita]: https://krita.org
 [affinity-nix]: https://github.com/mrshmllow/affinity-nix
@@ -637,7 +641,7 @@ flake.nix
 | [`nur`](https://github.com/nix-community/NUR) | NixOS User Repository |
 | [`niri`](https://github.com/epireyn/niri-flake) (epireyn/niri-flake) | Niri WM |
 | [`dms`](https://github.com/AvengeMedia/DankMaterialShell) (AvengeMedia, stable) | DankMaterialShell |
-| [`dms-plugin-registry`](https://github.com/AvengeMedia/dms-plugin-registry) | DankMaterialShell plugins (AI usage overview, Quick Capture, AMD GPU monitor) |
+| [`dms-plugin-registry`](https://github.com/AvengeMedia/dms-plugin-registry) | DankMaterialShell plugins (AI usage overview, Quick Capture, AMD GPU monitor, ClipBoard+, Wallpaper Carousel) |
 | [`dank-greeter`](https://github.com/AvengeMedia/dank-greeter) | Login screen that matches DankMaterialShell |
 | [`stylix`](https://github.com/nix-community/stylix) | System-wide theming |
 | [`catppuccin`](https://github.com/catppuccin/nix) | Catppuccin theme module |
