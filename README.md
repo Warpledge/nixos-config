@@ -139,6 +139,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | **Color Scheme** | [Catppuccin][catppuccin] Mocha Mauve applied globally via [Stylix][stylix] + [catppuccin/nix][catppuccin-nix] |
 | **Fonts** | [JetBrains Mono Nerd Font][nerd-fonts], Monaspace, Roboto, Nerd Fonts Symbols |
 | **Window Switcher** | [niriswitcher][niriswitcher] (Niri only) |
+| **Scratchpad** | [nirius][nirius] (Niri only) |
 </details>
 
 <details>
@@ -340,6 +341,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [alejandra]: https://github.com/kamadorueda/alejandra
 [nh]: https://github.com/nix-community/nh
 [niriswitcher]: https://github.com/isaksamsten/niriswitcher
+[nirius]: https://git.sr.ht/~tsdh/nirius
 [pipewire]: https://pipewire.org
 [nix-flatpak]: https://github.com/gmodena/nix-flatpak
 [apparmor]: https://apparmor.net
@@ -499,6 +501,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | --- | --- |
 | `Mod+1–9` | Focus workspace N |
 | `Mod+Shift+1–9` | Move window to workspace N |
+| `Mod+0` | Move window to / out of the scratchpad (nirius) |
 
 #### Media & Capture
 

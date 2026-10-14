@@ -9,6 +9,7 @@
     inputs.niri.homeModules.niri
 
     #--- Addons
+    ./nirius.nix
     ./niriswitcher.nix
 
     #--- Core Configuration
