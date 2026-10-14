@@ -27,8 +27,6 @@ The NixOS configuration behind my desktop and laptop, both daily driven since 20
 
 ## Theming
 
-Everything on the system uses [Catppuccin][catppuccin] Mocha Mauve. I pick it in one place and it spreads out from there, so the terminal, the file manager, the text editor and everything else match without me theming each app by hand.
-
 Two tools split the job:
 
 - **[Stylix][stylix]:** It takes the color scheme, the fonts and the mouse cursor and pushes them into every program that it supports automatically.
@@ -615,8 +613,6 @@ modules/
 docs/                           # personal notes I share between devices
 ```
 
-**How it loads:** the flake picks a machine, reads that host's toggles, and loads only the modules they enable:
-
 ```
 flake.nix
   → hosts/{hostname}/default.nix             # Pick the machine
@@ -626,11 +622,7 @@ flake.nix
       → modules/wm/${windowManager}/         # Load only the active window manager
 ```
 
-That one file per host decides the window manager and the kernel, which browsers, terminals and editors get installed, and which services run.
-
 ## Flake Inputs
-
-The main things this config pulls in from outside the standard NixOS package set:
 
 | Input | Purpose |
 | --- | --- |
