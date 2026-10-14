@@ -1,0 +1,46 @@
+diff -ruN a/backend/internal/api/rest/content.go b/backend/internal/api/rest/content.go
+--- a/backend/internal/api/rest/content.go
++++ b/backend/internal/api/rest/content.go
+@@ -312,6 +312,10 @@
+ 			http.Error(w, "stream url rejected", http.StatusBadGateway)
+ 			return
+ 		}
++		if audio := info.GetAudioTracks(); len(audio) > 0 {
++			writeAudioMaster(w, tgt.String(), audio, headers)
++			return
++		}
+ 		h.streamHLS(w, r, tgt, headers, chapterID)
+ 		return
+ 	}
+@@ -954,6 +958,31 @@
+ 	return "hls?u=" + u + "&h=" + hdrParam
+ }
+ 
++// Some sources return a video-only HLS playlist and its audio as separate
++// tracks; a master playlist joining them lets every player find the audio.
++func writeAudioMaster(w http.ResponseWriter, videoURL string, audio []*sandboxv1.AudioTrack, headers map[string]string) {
++	hdrParam := encodeHeaderParam(headers)
++	var b strings.Builder
++	b.WriteString("#EXTM3U\n#EXT-X-INDEPENDENT-SEGMENTS\n")
++	for i, t := range audio {
++		name := strings.ReplaceAll(t.GetLang(), `"`, "")
++		if name == "" {
++			name = fmt.Sprintf("Audio %d", i+1)
++		}
++		def := "NO"
++		if i == 0 {
++			def = "YES"
++		}
++		fmt.Fprintf(&b, "#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID=\"audio\",NAME=\"%s\",DEFAULT=%s,AUTOSELECT=YES,URI=\"%s\"\n",
++			name, def, proxiedRef(t.GetUrl(), hdrParam))
++	}
++	b.WriteString("#EXT-X-STREAM-INF:BANDWIDTH=1000000,AUDIO=\"audio\"\n")
++	b.WriteString(proxiedRef(videoURL, hdrParam) + "\n")
++	w.Header().Set("Content-Type", "application/vnd.apple.mpegurl")
++	w.Header().Set("Cache-Control", "no-store")
++	_, _ = w.Write([]byte(b.String()))
++}
++
+ func looksHLS(rawURL string) bool {
+ 	u := strings.ToLower(rawURL)
+ 	return strings.Contains(u, ".m3u8") || strings.Contains(u, ".m3u")

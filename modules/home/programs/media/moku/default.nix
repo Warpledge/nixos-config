@@ -49,10 +49,13 @@
   #--- Upstream's vendorHash is stale at v0.4.1. server.patch expands a
   #--- Kototoro repo on sync (from the pinned plugin, never the index's jar)
   #--- and retries a failed cover download through the extension's own
-  #--- client
+  #--- client. hls-audio.patch serves a master playlist joining a video-only
+  #--- HLS stream with its separate audio tracks
   tsunaguServer = tsunagu.tsunagu-server.overrideAttrs (old: {
     vendorHash = "sha256-rPtZJzXAuctkAWPGX/89a7Z9Cr+py510g5QCArOOTJE=";
-    patches = (old.patches or []) ++ [./tsunagu/server.patch];
+    patches =
+      (old.patches or [])
+      ++ [./tsunagu/server.patch ./tsunagu/hls-audio.patch];
     postPatch =
       (old.postPatch or "")
       + ''
