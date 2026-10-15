@@ -55,6 +55,7 @@
     ++ lib.optionals hostConfig.media.spotify [./media/spotify.nix]
     ++ lib.optionals hostConfig.media.freetube [./media/freetube]
     ++ lib.optionals hostConfig.media.videoTrimmer [./media/video-trimmer.nix]
+    ++ lib.optionals hostConfig.media.constrict [./media/constrict.nix]
     ++ lib.optionals hostConfig.media.streamlinkTwitchGui [./media/streamlink-twitch-gui.nix]
     ++ lib.optionals hostConfig.media.moku [./media/moku]
     ++ lib.optionals hostConfig.media.boorusama [./media/boorusama.nix]

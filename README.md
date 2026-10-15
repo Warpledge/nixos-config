@@ -182,7 +182,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | **Chat / Productivity** | [GoofCord][goofcord] via [nixcord][nixcord] (Vencord, with [arRPC][arrpc] running alongside it so Steam and Proton games show up as rich presence), [Ferdium][ferdium] (all your web messengers in one window), [Thunderbird][thunderbird], [Obsidian][obsidian] |
 | **AI Tooling** | [Claude Code][claude-code], [OpenCode][opencode], [LM Studio][lmstudio] |
 | **Android** | [scrcpy][scrcpy] (mirror and control a device over USB or wifi, nothing to install on the phone) |
-| **Video Trimming** | [Video Trimmer][video-trimmer] (cut a clip out of a video without re-encoding it) |
+| **Video Trimming** | [Video Trimmer][video-trimmer] (cut a clip out of a video without re-encoding it), [Constrict][constrict] (re-encode a video to fit a chosen file size) |
 | **Manga / Anime Reader** | [Suwayomi][suwayomi] is a local manga reader, opened from the launcher as a [Helium][helium] app window (`localhost:4567`) after a password prompt. [Moku][moku] covers manga, light novels and anime, built from source with a fix for overlapping search results, a per-source filter panel and a button that opens the current episode in mpv, with a local [FlareSolverr][flaresolverr] for Cloudflare-protected sources |
 | **Image Boards** | [Boorusama][boorusama] browses booru sites; it's the desktop build of the Android client, wrapped from the upstream AppImage with `appimageTools` since it is not in nixpkgs. Its data, cache and backups sit in a [gocryptfs][gocryptfs] vault that the launcher unlocks with a password and locks again on exit |
 | **Finance** | [HomeBank][homebank] (personal accounting with labeled transactions and a running balance) |
@@ -290,6 +290,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [yazi]: https://github.com/sxyazi/yazi
 [arrpc]: https://arrpc.openasar.dev
 [video-trimmer]: https://gitlab.gnome.org/YaLTeR/video-trimmer
+[constrict]: https://gitlab.gnome.org/World/Constrict
 [moku]: https://github.com/moku-project/Moku
 [flaresolverr]: https://github.com/FlareSolverr/FlareSolverr
 [suwayomi]: https://github.com/Suwayomi/Suwayomi-Server

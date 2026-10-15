@@ -99,6 +99,7 @@
     spotify = true;
     freetube = true;
     videoTrimmer = true;
+    constrict = true; # Compress a video to a target file size
     moku = true; # Manga, novel and anime reader (source build with UI fixes)
     streamlinkTwitchGui = true; # Twitch browser via streamlink + mpv (AppImage)
     boorusama = true; # Booru image board browser (AppImage)
