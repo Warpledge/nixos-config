@@ -118,7 +118,7 @@
   #--- Audio Software Selection
   # Enable the music and audio applications you want installed
   audio = {
-    reaper = false; # SWS + ReaPack broken on GCC 16, see disabled-packages.md
+    reaper = true;
 
     # Guitar rig (Katana DI); any guitar toggle adds shared IR/tuner plugins
     guitarix = true; # Modular amp sim
