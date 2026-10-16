@@ -79,6 +79,18 @@
       open-fullscreen = true;
     }
 
+    #--- Variable Refresh Rate (outputs set "on-demand" in core/monitors.nix)
+    #--- Proton app-ids: <game>.exe on native Wayland, steam_app_<id> on X11
+    {
+      matches = [
+        {app-id = "^gamescope$";}
+        {app-id = "^steam_app_";}
+        {app-id = "\\.exe$";}
+        {app-id = "^Minecraft";}
+      ];
+      variable-refresh-rate = true;
+    }
+
     #--- Full Width Rules
     {
       matches = [

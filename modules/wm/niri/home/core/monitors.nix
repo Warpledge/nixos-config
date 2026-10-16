@@ -16,6 +16,7 @@
         y = 0;
       };
       scale = 1.0;
+      variable-refresh-rate = "on-demand"; # VRR only for windows matched in rules.nix
     };
 
     #--- Secondary monitor - LG ULTRAGEAR (2560x1440@143.973Hz)
@@ -30,6 +31,7 @@
         y = 0;
       };
       scale = 1.0;
+      variable-refresh-rate = "on-demand";
     };
   };
 
