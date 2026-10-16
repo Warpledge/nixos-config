@@ -104,10 +104,6 @@
       PROTON_LOG = "0"; # Disable logging for performance
       PROTON_DUMP_DEBUG_COMMANDS = "0"; # No debug overhead
 
-      #--- Better frame pacing
-      vblank_mode = "0"; # Let game control vsync
-      __GL_SYNC_TO_VBLANK = "0"; # Nvidia equivalent
-
       # Better shader caching
       MESA_SHADER_CACHE_DIR = "${config.home.homeDirectory}/.cache/mesa_shader_cache";
       RADV_BUILTIN_CACHE_PATH = "${config.home.homeDirectory}/.cache/radv_builtin_shaders64";
