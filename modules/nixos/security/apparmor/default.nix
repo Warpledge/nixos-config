@@ -86,6 +86,7 @@
       owner @{HOME}/.local/state/mpv{,/**} rwk,
       owner @{HOME}/.cache/{mpv,yt-dlp}{,/**} rwk,
       owner @{HOME}/.config/yt-dlp/** r,
+      owner @{HOME}/.cache/nvl-convert/** r, # NVL CNN shaders
     '';
 
     #--- Outbound networking
@@ -109,5 +110,8 @@
     ++ lib.optionals hostConfig.media.mpv [./mpv.nix]
     ++ lib.optionals hostConfig.media.streamlinkTwitchGui [./streamlink.nix]
     ++ lib.optionals hostConfig.office.obsidian [./obsidian.nix]
-    ++ lib.optionals hostConfig.gaming.prismlauncher [./prismlauncher.nix];
+    ++ lib.optionals hostConfig.gaming.prismlauncher [./prismlauncher.nix]
+    ++ lib.optionals hostConfig.media.moku [./tsunagu.nix]
+    ++ lib.optionals hostConfig.media.tonkatsuBox [./tonkatsu-box.nix]
+    ++ lib.optionals hostConfig.audio.katanaFloorboard [./katana-floorboard.nix];
 }

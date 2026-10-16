@@ -14,6 +14,9 @@ logged as `apparmor="ALLOWED"`.
 | `file-roller`, `unrar` | the GUI and the `unrar` CLI | always |
 | `obsidian` | the `obsidian` launcher script | `office.obsidian` |
 | `prismlauncher` | the real Prism binary, behind the mullvad-exclude wrapper | `gaming.prismlauncher` |
+| `tsunagu` | Moku's Go backend; the extension JVM and ffmpeg it starts inherit it | `media.moku` |
+| `tonkatsu-box` | the prebuilt binary in `~/.local/opt/tonkatsu-box` | `media.tonkatsuBox` |
+| `katana-floorboard` | the prebuilt binary in `~/.local/opt/katana-fxfloorboard` | `audio.katanaFloorboard` |
 
 ## Checking it works
 
