@@ -1,8 +1,11 @@
 {
+  config,
   username,
   pkgs,
   ...
-}: {
+}: let
+  inherit (config.stylix) fonts;
+in {
   home-manager.users.${username} = {
     home.sessionVariables = {
       #--- Qt Theme Session Variables
@@ -23,6 +26,11 @@
       qt6ctSettings = {
         Appearance = {
           icon_theme = "Papirus-Dark";
+        };
+        # Stylix's qt target (off) writes these; same format as its module
+        Fonts = {
+          general = ''"${fonts.sansSerif.name},${toString fonts.sizes.applications}"'';
+          fixed = ''"${fonts.monospace.name},${toString fonts.sizes.applications}"'';
         };
       };
     };
