@@ -59,6 +59,10 @@
   # Peer-to-peer sync, web UI at http://127.0.0.1:8384
   syncthing.enable = true;
 
+  #--- Sunshine Game Streaming
+  # Streams games to Moonlight clients on the LAN, web UI at https://localhost:47990
+  sunshine.enable = false;
+
   #--------------------------------------------------------------------#
   #-- Home (home-manager modules)
   #--------------------------------------------------------------------#

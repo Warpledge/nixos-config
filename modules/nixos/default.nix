@@ -61,6 +61,8 @@
     ++ lib.optionals hostConfig.suwayomi.enable [./services/servers/suwayomi.nix]
     #--- Syncthing File Sync (controlled by hostConfig)
     ++ lib.optionals hostConfig.syncthing.enable [./services/servers/syncthing.nix]
+    #--- Sunshine Game Streaming (controlled by hostConfig)
+    ++ lib.optionals hostConfig.sunshine.enable [./services/servers/sunshine.nix]
     #--- FlareSolverr for Moku's Cloudflare-protected sources (controlled by hostConfig)
     ++ lib.optionals hostConfig.media.moku [./services/servers/flaresolverr.nix]
     #--- Japanese Input Method (controlled by hostConfig)
