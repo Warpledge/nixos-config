@@ -523,7 +523,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 
 | Keybind | Action |
 | --- | --- |
-| `Mod+1–9` | Focus workspace N |
+| `Mod+1–9` | Focus workspace N (desktop: 1–6 on the main monitor, 7–9 on the second; Steam opens on 6, Spotify on 8, GoofCord on 9) |
 | `Mod+Shift+1–9` | Move window to workspace N |
 | `Mod+0` | Show / hide the scratchpad windows over the current workspace (nirius) |
 | `Mod+Shift+0` | Move window to / out of the scratchpad (nirius) |
