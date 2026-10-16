@@ -91,6 +91,7 @@ in {
       cursor = {
         inherit (config.stylix.cursor) size;
         theme = config.stylix.cursor.name;
+        hide-when-typing = true;
       };
 
       #--- Recent Windows Switcher (Alt+Tab)
@@ -122,6 +123,7 @@ in {
           {proportion = 1.0;}
         ];
         default-column-width = {proportion = 0.5;};
+        always-center-single-column = true;
 
         preset-window-heights = [
           {proportion = 0.33333;}
@@ -151,43 +153,106 @@ in {
       };
 
       #--- Animation Configuration
-      animations.window-resize.custom-shader = ''
-        vec4 resize_color(vec3 coords_curr_geo, vec3 size_curr_geo) {
-          vec3 coords_next_geo = niri_curr_geo_to_next_geo * coords_curr_geo;
+      animations = {
+        window-resize.custom-shader = ''
+          vec4 resize_color(vec3 coords_curr_geo, vec3 size_curr_geo) {
+            vec3 coords_next_geo = niri_curr_geo_to_next_geo * coords_curr_geo;
 
-          vec3 coords_stretch = niri_geo_to_tex_next * coords_curr_geo;
-          vec3 coords_crop = niri_geo_to_tex_next * coords_next_geo;
+            vec3 coords_stretch = niri_geo_to_tex_next * coords_curr_geo;
+            vec3 coords_crop = niri_geo_to_tex_next * coords_next_geo;
 
-          // We can crop if the current window size is smaller than the next window
-          // size. One way to tell is by comparing to 1.0 the X and Y scaling
-          // coefficients in the current-to-next transformation matrix.
-          bool can_crop_by_x = niri_curr_geo_to_next_geo[0][0] <= 1.0;
-          bool can_crop_by_y = niri_curr_geo_to_next_geo[1][1] <= 1.0;
+            // We can crop if the current window size is smaller than the next window
+            // size. One way to tell is by comparing to 1.0 the X and Y scaling
+            // coefficients in the current-to-next transformation matrix.
+            bool can_crop_by_x = niri_curr_geo_to_next_geo[0][0] <= 1.0;
+            bool can_crop_by_y = niri_curr_geo_to_next_geo[1][1] <= 1.0;
 
-          vec3 coords = coords_stretch;
-          if (can_crop_by_x)
-              coords.x = coords_crop.x;
-          if (can_crop_by_y)
-              coords.y = coords_crop.y;
+            vec3 coords = coords_stretch;
+            if (can_crop_by_x)
+                coords.x = coords_crop.x;
+            if (can_crop_by_y)
+                coords.y = coords_crop.y;
 
-          vec4 color = texture2D(niri_tex_next, coords.st);
+            vec4 color = texture2D(niri_tex_next, coords.st);
 
-          // However, when we crop, we also want to crop out anything outside the
-          // current geometry. This is because the area of the shader is unspecified
-          // and usually bigger than the current geometry, so if we don't fill pixels
-          // outside with transparency, the texture will leak out.
-          //
-          // When stretching, this is not an issue because the area outside will
-          // correspond to client-side decoration shadows, which are already supposed
-          // to be outside.
-          if (can_crop_by_x && (coords_curr_geo.x < 0.0 || 1.0 < coords_curr_geo.x))
-              color = vec4(0.0);
-          if (can_crop_by_y && (coords_curr_geo.y < 0.0 || 1.0 < coords_curr_geo.y))
-              color = vec4(0.0);
+            // However, when we crop, we also want to crop out anything outside the
+            // current geometry. This is because the area of the shader is unspecified
+            // and usually bigger than the current geometry, so if we don't fill pixels
+            // outside with transparency, the texture will leak out.
+            //
+            // When stretching, this is not an issue because the area outside will
+            // correspond to client-side decoration shadows, which are already supposed
+            // to be outside.
+            if (can_crop_by_x && (coords_curr_geo.x < 0.0 || 1.0 < coords_curr_geo.x))
+                color = vec4(0.0);
+            if (can_crop_by_y && (coords_curr_geo.y < 0.0 || 1.0 < coords_curr_geo.y))
+                color = vec4(0.0);
 
-          return color;
-        }
-      '';
+            return color;
+          }
+        '';
+
+        #--- Expanding circle, from niri's docs/wiki/examples/open_custom_shader.frag
+        window-open = {
+          kind.easing = {
+            duration-ms = 250;
+            curve = "ease-out-expo";
+          };
+          custom-shader = ''
+            vec4 open_color(vec3 coords_geo, vec3 size_geo) {
+              vec3 coords_tex = niri_geo_to_tex * coords_geo;
+              vec4 color = texture2D(niri_tex, coords_tex.st);
+
+              vec2 coords = (coords_geo.xy - vec2(0.5, 0.5)) * size_geo.xy * 2.0;
+              coords = coords / length(size_geo.xy);
+              float p = niri_clamped_progress;
+              if (p * p <= dot(coords, coords))
+                  color = vec4(0.0);
+
+              return color;
+            }
+          '';
+        };
+
+        #--- Fall and rotate, from niri's docs/wiki/examples/close_custom_shader.frag
+        # The example asks for a linear curve
+        window-close = {
+          kind.easing = {
+            duration-ms = 150;
+            curve = "linear";
+          };
+          custom-shader = ''
+            vec4 close_color(vec3 coords_geo, vec3 size_geo) {
+              // Simulate an accelerated fall: square the (linear) progress.
+              float progress = niri_clamped_progress * niri_clamped_progress;
+
+              // Rotation pivot at the bottom center of the window.
+              vec2 coords = (coords_geo.xy - vec2(0.5, 1.0)) * size_geo.xy;
+
+              // Move the window down to simulate a fall.
+              coords.y -= progress * 200.0;
+
+              // Randomize rotation direction and maximum angle.
+              float random = (niri_random_seed - 0.5) / 2.0;
+              random = sign(random) - random;
+              float max_angle = 0.05 * random;
+
+              // Rotate the window around the pivot point.
+              float angle = progress * max_angle;
+              mat2 rotate = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
+              coords = rotate * coords;
+
+              // Transform the coordinates back.
+              coords_geo = vec3(coords / size_geo.xy + vec2(0.5, 1.0), 1.0);
+
+              // Sample the window texture and fade it out.
+              vec3 coords_tex = niri_geo_to_tex * coords_geo;
+              vec4 color = texture2D(niri_tex, coords_tex.st);
+              return color * (1.0 - niri_clamped_progress);
+            }
+          '';
+        };
+      };
 
       #--------------------------------------------------------------------#
       #-- MISC --#
