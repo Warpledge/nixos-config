@@ -152,6 +152,7 @@
     #--- Tools
     ++ lib.optionals hostConfig.gaming.r2modman [./tools/r2modman.nix]
     ++ lib.optionals hostConfig.gaming.pathOfBuilding [./tools/path-of-building.nix]
+    ++ lib.optionals hostConfig.gaming.ludusavi [./tools/ludusavi.nix]
     ++ lib.optionals hostConfig.gaming.granblueRelinkMods [./tools/relink-mod-organizer.nix ./tools/reloaded-ii-gbfr.nix]
     ++ lib.optionals hostConfig.japanese.vn [./tools/japanese-vn.nix];
 }
