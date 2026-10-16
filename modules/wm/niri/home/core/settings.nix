@@ -2,12 +2,15 @@
 # NIRI SETTINGS
 #=====================================================================#
 {
+  config,
   pkgs,
   username,
   lib,
   hostConfig,
   ...
-}: {
+}: let
+  colors = config.lib.stylix.colors.withHashtag;
+in {
   #--------------------------------------------------------------------#
   #-- Packages
   #--------------------------------------------------------------------#
@@ -86,8 +89,8 @@
       };
       gestures = {hot-corners.enable = true;};
       cursor = {
-        size = 24;
-        theme = "Bibata-Modern-Ice";
+        inherit (config.stylix.cursor) size;
+        theme = config.stylix.cursor.name;
       };
 
       #--- Recent Windows Switcher (Alt+Tab)
@@ -99,15 +102,15 @@
         focus-ring = {
           enable = true; # displays around windows
           width = 2;
-          active.color = "#45475a"; # Surface 1
-          inactive.color = "#181825"; # Mantle
-          urgent.color = "#f38ba8"; # Red
+          active.color = colors.base04; # Surface 2
+          inactive.color = colors.base01; # Mantle
+          urgent.color = colors.base08; # Red
         };
         border = {
           enable = false; # displays inside windows
           width = 2;
-          active.color = "#585b70"; # Surface 2
-          inactive.color = "#181825"; # Mantle
+          active.color = colors.base04; # Surface 2
+          inactive.color = colors.base01; # Mantle
         };
         shadow = {
           enable = false;

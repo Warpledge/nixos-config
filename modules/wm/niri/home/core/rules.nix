@@ -1,7 +1,13 @@
 #=====================================================================#
 # NIRI WINDOW RULES
 #=====================================================================#
-{lib, ...}: let
+{
+  config,
+  lib,
+  ...
+}: let
+  colors = config.lib.stylix.colors.withHashtag;
+
   windowRules = [
     #--- Privacy Rules (blocked from both screenshots and screen recording)
     {
@@ -279,18 +285,18 @@
         }
       ];
       focus-ring = {
-        active.color = "#cba6f7"; # Catppuccin Mocha Mauve (Mauve)3
-        inactive.color = "#1e1e2e"; # Dark base for inactive windows
+        active.color = colors.base0E; # Mauve
+        inactive.color = colors.base00; # Dark base for inactive windows
       };
       border = {
-        inactive.color = "#1e1e2e"; # Same dark base for border inactive
+        inactive.color = colors.base00; # Same dark base for border inactive
       };
       shadow = {
-        color = "#1e1e2e70"; # Transparent dark shadow
+        color = "${colors.base00}70"; # Transparent dark shadow
       };
       tab-indicator = {
-        active.color = "#cba6f7";
-        inactive.color = "#1e1e2e";
+        active.color = colors.base0E;
+        inactive.color = colors.base00;
       };
     }
 
