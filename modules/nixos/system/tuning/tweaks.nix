@@ -20,6 +20,13 @@
   };
 
   #--------------------------------------------------------------------#
+  #-- Out-of-Memory Killer
+  #--------------------------------------------------------------------#
+  #--- Kills the app behind sustained memory pressure before the desktop stalls;
+  #--- DMS starts each app in its own scope, so that's one app, not the session
+  systemd.oomd.enableUserSlices = true;
+
+  #--------------------------------------------------------------------#
   #-- Journald Logging Configuration
   #--------------------------------------------------------------------#
   services.journald.settings.Journal = {
