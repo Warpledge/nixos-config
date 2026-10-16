@@ -373,7 +373,8 @@ in {
     window-rules = windowRules;
     layer-rules = [
       {
-        matches = [{namespace = "^swww$";}];
+        # DMS's blurred wallpaper copy (blurredWallpaperLayer in dms/settings.json)
+        matches = [{namespace = "^dms:blurwallpaper$";}];
         place-within-backdrop = true;
       }
       {
