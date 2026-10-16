@@ -11,6 +11,10 @@
     #--------------------------------------------------------------------#
     #-- Package Installation
     #--------------------------------------------------------------------#
+    #--- An env var, not settings.env: setting programs.claude-code.settings makes
+    #--- ~/.claude/settings.json read-only. DISABLE_TELEMETRY would drop feature flags.
+    home.sessionVariables.DISABLE_ERROR_REPORTING = "1";
+
     programs.claude-code = {
       enable = true;
       enableMcpIntegration = true;

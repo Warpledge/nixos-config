@@ -15,6 +15,7 @@
     programs.opencode = {
       enable = true;
       enableMcpIntegration = true;
+      settings.share = "disabled"; # No /share uploads to opencode.ai
 
       #--- Off for the local model: context7 indexes JS/Python framework docs, and its
       #--- ~4.9KB of tool schemas ship in every request (nixos is ~6.7KB).
