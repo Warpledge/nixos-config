@@ -24,7 +24,7 @@
     ELECTRON_OZONE_PLATFORM_HINT = "wayland"; # Force Wayland for Electron apps
 
     #--- Graphics and rendering
-    SDL_VIDEODRIVER = "wayland";
+    SDL_VIDEODRIVER = "wayland,x11"; # SDL builds without Wayland need the fallback
     CLUTTER_BACKEND = "wayland"; # Use Wayland for Clutter toolkit
     GDK_BACKEND = "wayland,x11"; # X11-only GTK/JUCE apps need the fallback
 
