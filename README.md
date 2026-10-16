@@ -147,10 +147,10 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 
 | | |
 | --- | --- |
-| **Shell** | [Zsh][zsh] with the [Starship][starship] prompt ([Powerlevel10k][p10k] is installed too, but Starship loads last and wins), plus [atuin][atuin], [fzf][fzf], [zoxide][zoxide], [eza][eza] |
+| **Shell** | [Zsh][zsh] with the [Powerlevel10k][p10k] prompt ([Starship][starship] is configured too, but zsh doesn't load it), plus [atuin][atuin], [fzf][fzf], [zoxide][zoxide], [eza][eza], and [direnv][direnv] with [nix-direnv][nix-direnv] for per-project dev shells |
 | **Terminal Emulator** | [Kitty][kitty] / [Ghostty][ghostty] (off by default) |
 | **Terminal Multiplexer** | [tmux][tmux] (run many terminals in one window) |
-| **Quick Run** | `run <pkg>`: try a package one time without installing it (`nix run` wrapper) |
+| **Quick Run** | `run <pkg>`: try a package one time without installing it (`nix run` wrapper). `, <cmd>` ([comma][comma]) does the same by command name, and typing a command that isn't installed prints the package that has it ([nix-index-database][nix-index-database]) |
 </details>
 
 <details>
@@ -253,6 +253,10 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [fzf]: https://github.com/junegunn/fzf
 [zoxide]: https://github.com/ajeetdsouza/zoxide
 [eza]: https://github.com/eza-community/eza
+[direnv]: https://direnv.net
+[nix-direnv]: https://github.com/nix-community/nix-direnv
+[comma]: https://github.com/nix-community/comma
+[nix-index-database]: https://github.com/nix-community/nix-index-database
 [kitty]: https://sw.kovidgoyal.net/kitty
 [ghostty]: https://ghostty.org
 [tmux]: https://github.com/tmux/tmux
@@ -665,5 +669,6 @@ flake.nix
 | [`cachyos-kernel`](https://github.com/xddxdd/nix-cachyos-kernel) | CachyOS kernel |
 | [`nix-flatpak`](https://github.com/gmodena/nix-flatpak) | Declarative Flatpak management |
 | [`claude-code`](https://github.com/sadjow/claude-code-nix) | Claude Code, packaged so it updates without waiting on nixpkgs |
+| [`nix-index-database`](https://github.com/nix-community/nix-index-database) | Prebuilt weekly nix-index database for comma and the command-not-found hint |
 | [`alejandra`](https://github.com/kamadorueda/alejandra) (pinned 3.0.0) | Nix formatter |
 | [`affinity-nix`](https://github.com/mrshmllow/affinity-nix) | Affinity Suite v3 (Photo, Designer, Publisher) via Wine |

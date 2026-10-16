@@ -54,6 +54,10 @@
     nix-flatpak.url = "github:gmodena/nix-flatpak"; # has no nixpkgs input
     # Own nixpkgs: following ours misses claude-code.cachix.org
     claude-code.url = "github:sadjow/claude-code-nix";
+    nix-index-database = {
+      url = "github:nix-community/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     #--- Applications
     # Own nixpkgs: following ours misses cache.forall.systems

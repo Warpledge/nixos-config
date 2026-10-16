@@ -23,8 +23,10 @@
       #--- Shell
       ./shell/p10k/p10k.nix
       ./shell/atuin.nix
+      ./shell/direnv.nix
       ./shell/eza.nix
       ./shell/fzf.nix
+      ./shell/nix-index.nix
       ./shell/skim.nix
       ./shell/starship.nix
       ./shell/tmux.nix

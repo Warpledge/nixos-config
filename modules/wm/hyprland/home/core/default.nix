@@ -16,7 +16,6 @@
     wayland-utils
     wayland-protocols
     wayland
-    direnv
     meson
     hyprlock
   ];
