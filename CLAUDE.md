@@ -77,7 +77,7 @@ The authoritative list of toggles is **`hosts/{hostname}/settings.nix`**. Read i
 - `~/.local/opt` bundles (kept out of git) have no category of their own: `media.tonkatsuBox`, `gaming.granblueRelinkMods` and `audio.katanaFloorboard` wrap them; see `docs/local/local-binary-installs.md`
 - AI tools: `claude.enable`, `opencode.enable`, `lmstudio.enable`
 
-Desktop and laptop should stay byte-identical apart from the header comment and a short list of deliberate differences. As of 2026-10-15 those are true on desktop and false on laptop: `gaming.{heroic,easyrpg,xsystem4,hytale,r2modman,pathOfBuilding}`, `discord.arrpc.enable`, `suwayomi.enable`, `sunshine.enable`, `media.{moku,boorusama,tonkatsuBox}`. Verify with `diff hosts/desktop/settings.nix hosts/laptop/settings.nix` before assuming.
+Desktop and laptop should stay byte-identical apart from the header comment and a short list of deliberate differences. As of 2026-10-16 those are true on desktop and false on laptop: `gaming.{heroic,easyrpg,xsystem4,hytale,r2modman,pathOfBuilding}`, `discord.arrpc.enable`, `suwayomi.enable`, `media.{moku,boorusama,tonkatsuBox}`. Verify with `diff hosts/desktop/settings.nix hosts/laptop/settings.nix` before assuming.
 
 Gotchas. Grep the option name before assuming which file owns it:
 

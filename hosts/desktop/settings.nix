@@ -61,7 +61,7 @@
 
   #--- Sunshine Game Streaming
   # Streams games to Moonlight clients on the LAN, web UI at https://localhost:47990
-  sunshine.enable = true;
+  sunshine.enable = false;
 
   #--------------------------------------------------------------------#
   #-- Home (home-manager modules)
