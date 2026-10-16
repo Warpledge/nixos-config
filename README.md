@@ -169,7 +169,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | | |
 | --- | --- |
 | **Browsers** | [Zen][zen] / [Mullvad Browser][mullvad-browser] / [Helium][helium] |
-| **File Manager** | [Nautilus][nautilus], [Yazi][yazi] (terminal file manager) |
+| **File Manager** | [Nautilus][nautilus] (with an open-in-Kitty menu entry from [nautilus-open-any-terminal][nautilus-open-any-terminal]), [Yazi][yazi] (terminal file manager) |
 | **Media Player** | [mpv][mpv], [Spotify][spotify] via [spicetify-nix][spicetify], [FreeTube][freetube] |
 | **Twitch** | [Streamlink Twitch GUI][streamlink-twitch-gui] browses Twitch and hands the stream to [Streamlink][streamlink], which plays it in mpv, so there are no ads and the follow list stays local with no Twitch account attached; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs |
 | **Screenshot / Recording** | [Quick Capture][quick-capture] (Niri, Hyprland), [gpu-screen-recorder][gpu-screen-recorder] |
@@ -267,6 +267,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [mullvad-browser]: https://mullvad.net/en/browser
 [helium]: https://github.com/schembriaiden/helium-browser-nix-flake
 [nautilus]: https://apps.gnome.org/Nautilus
+[nautilus-open-any-terminal]: https://github.com/Stunkymonkey/nautilus-open-any-terminal
 [mpv]: https://mpv.io
 [spotify]: https://www.spotify.com
 [spicetify]: https://github.com/Gerg-L/spicetify-nix
