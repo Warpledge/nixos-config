@@ -10,7 +10,8 @@
   #-- Kernel Security Hardening
   #--------------------------------------------------------------------#
   security = {
-    forcePageTableIsolation = true; # Mitigate Meltdown CPU vulnerability
+    # Both hosts are AMD (Meltdown "Not affected"); forcing PTI only adds syscall cost
+    # forcePageTableIsolation = true;
     protectKernelImage = true;
     apparmor = {
       enable = true; # Mandatory access control framework

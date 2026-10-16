@@ -28,7 +28,7 @@
       "randomize_kstack_offset=on" # Randomize kernel stack (exploit mitigation)
       "vsyscall=none" # Disable legacy syscall interface
       "slab_nomerge" # Disable slab merging (heap attack hardening)
-      "page_poison=1" # Poison freed memory (use-after-free detection)
+      # "page_poison=1" # Turns off the default init_on_alloc, which also zeroes slab
       "page_alloc.shuffle=1" # Randomize page allocator
 
       #--- Held back: never active, and each changes behaviour on first boot
@@ -93,6 +93,7 @@
         "fs.suid_dumpable" = 0; # Disable core dumps for setuid programs
         "net.core.bpf_jit_harden" = 2; # Harden BPF JIT compiler
         "kernel.unprivileged_bpf_disabled" = 1; # No unprivileged BPF (LPE risk)
+        "kernel.io_uring_disabled" = 2; # LPE risk; libuv falls back to plain epoll
         "kernel.core_uses_pid" = 1; # Append PID to core filenames
         "kernel.randomize_va_space" = 2; # Full ASLR
         "vm.mmap_rnd_bits" = 32; # ASLR entropy for mmap
