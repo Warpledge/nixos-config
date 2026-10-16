@@ -53,20 +53,8 @@
     #--- RDNA 3 specific tweaks
     DISABLE_LAYER_AMD_SWITCHABLE_GRAPHICS_1 = "1";
 
-    #--- Force PCIe 4.0 x16 (make sure your motherboard supports it)
-    RADV_FORCE_VRS = "2x2"; # Variable rate shading for better perf
-
-    #--- AMD Radeon specific settings (RDNA 4 - RX 9070 XT)
-    # ACO compiler, NGG culling, SAM, RT, Graphics Pipeline Library
-    RADV_PERFTEST = "aco,nggc,sam,rt,gpl";
-    # Disable VRS flat shading & optimize VRAM usage
-    RADV_DEBUG = "novrsflatshading,zerovram";
-
     #--- Disable shader disk cache size limit (useful for large game libraries)
     AMD_SHADER_DISK_CACHE_SIZE = "10737418240"; # 10GB shader cache
-
-    #--- Desktop CPU topology (Ryzen 7 5800X3D - 8 cores)
-    WINE_CPU_TOPOLOGY = "8:8";
   };
 
   #--- Kernel Tweaks
