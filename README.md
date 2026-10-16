@@ -481,6 +481,9 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | --- | --- |
 | `Mod+Q` | Close window |
 | `Mod+Space` | Toggle floating |
+| `Mod+Shift+Space` | Switch focus between floating and tiled windows |
+| `Mod+O` | Turn the window's opacity rule off and on |
+| `Mod+Escape` | Take shortcuts back from an app that inhibits them |
 | `Mod+F` | Maximize column |
 | `Mod+Shift+F` | Fullscreen |
 | `Mod+Tab` | Toggle overview |
@@ -498,9 +501,9 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | Keybind | Action |
 | --- | --- |
 | `Mod+←/→` | Focus column left/right |
-| `Mod+↑/↓` | Focus workspace up/down |
+| `Mod+↑/↓` | Focus the window above/below in the column, then the workspace above/below |
 | `Mod+Shift+←/→` | Move column left/right |
-| `Mod+Shift+↑/↓` | Move column to the workspace above/below |
+| `Mod+Shift+↑/↓` | Move the window up/down in its column, then to the workspace above/below |
 | `Mod+Alt+←/→` | Focus monitor left/right |
 | `Mod+Alt+Shift+←/→` | Move column to the monitor left/right |
 | `Mod+Scroll` | Focus column left/right |

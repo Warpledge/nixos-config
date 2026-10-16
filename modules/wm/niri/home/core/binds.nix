@@ -34,6 +34,14 @@
     "Mod+Shift+F".action.fullscreen-window = {};
     "Mod+G".action.maximize-window-to-edges = {};
     "Mod+Space".action.toggle-window-floating = {};
+    "Mod+Shift+Space".action.switch-focus-between-floating-and-tiling = {};
+    # Turn the window's opacity rule (rules.nix) off and on
+    "Mod+O".action.toggle-window-rule-opacity = {};
+    # Takes shortcuts back from an app that inhibits them
+    "Mod+Escape" = {
+      action.toggle-keyboard-shortcuts-inhibit = {};
+      allow-inhibiting = false;
+    };
 
     "Mod+Alt+1".action.set-column-width = "33.333%";
     "Mod+Alt+2".action.set-column-width = "50%";
@@ -52,14 +60,15 @@
     #--- Focus Window
     "Mod+Left".action.focus-column-left = {};
     "Mod+Right".action.focus-column-right = {};
-    "Mod+Up".action.focus-workspace-up = {};
-    "Mod+Down".action.focus-workspace-down = {};
+    # Walk the windows of a stacked or tabbed column before leaving the workspace
+    "Mod+Up".action.focus-window-or-workspace-up = {};
+    "Mod+Down".action.focus-window-or-workspace-down = {};
 
     #--- Window Movement
     "Mod+Shift+Left".action.move-column-left = {};
     "Mod+Shift+Right".action.move-column-right = {};
-    "Mod+Shift+Up".action.move-column-to-workspace-up = {};
-    "Mod+Shift+Down".action.move-column-to-workspace-down = {};
+    "Mod+Shift+Up".action.move-window-up-or-to-workspace-up = {};
+    "Mod+Shift+Down".action.move-window-down-or-to-workspace-down = {};
 
     #--- Monitors
     "Mod+Alt+Left".action.focus-monitor-left = {};
