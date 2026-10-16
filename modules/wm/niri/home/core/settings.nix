@@ -31,15 +31,13 @@
         NIXOS_OZONE_WL = "1";
         QT_QPA_PLATFORM = "wayland;xcb";
         QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
-        SDL_VIDEODRIVER = "wayland";
+        SDL_VIDEODRIVER = "wayland,x11";
         QML_IMPORT_PATH = "${pkgs.qt6.qt5compat}/lib/qt-6/qml";
       };
 
       #--- Startup Applications
       spawn-at-startup =
         [
-          # Clipboard History
-          {command = ["bash" "-c" "wl-paste --watch cliphist store &"];}
           # Xwayland cursor theme
           {command = ["xrdb" "-merge" "/home/${username}/.Xresources"];}
         ]
