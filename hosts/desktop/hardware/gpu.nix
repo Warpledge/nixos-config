@@ -71,9 +71,7 @@
 
       #--- Gaming Performance Optimizations
       "transparent_hugepage=always" # Enable transparent huge pages
-      "hugepagesz=1G" # 1GB huge pages for modern games
       "split_lock_detect=off" # Disable split lock detection
-      "processor.max_cstate=1" # Limit CPU C-states for lower latency
 
       #--- AMD GPU Optimizations
       "amdgpu.gpu_recovery=1" # Enable GPU recovery from hangs
