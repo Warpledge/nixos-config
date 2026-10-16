@@ -57,6 +57,11 @@
         # Audio codec power saving
         SOUND_POWER_SAVE_ON_BAT = 1;
         SOUND_POWER_SAVE_CONTROLLER = "Y";
+
+        # Lenovo conservation mode: stops charging at 60 or 80% (by model);
+        # START is a dummy value on non-ThinkPads
+        START_CHARGE_THRESH_BAT0 = 0;
+        STOP_CHARGE_THRESH_BAT0 = 1;
       };
     };
 
