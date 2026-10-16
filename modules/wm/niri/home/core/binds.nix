@@ -35,9 +35,9 @@
     "Mod+G".action.maximize-window-to-edges = {};
     "Mod+Space".action.toggle-window-floating = {};
 
-    "Mod+Alt+1".action.set-column-width = "3333%";
+    "Mod+Alt+1".action.set-column-width = "33.333%";
     "Mod+Alt+2".action.set-column-width = "50%";
-    "Mod+Alt+3".action.set-column-width = "66667%";
+    "Mod+Alt+3".action.set-column-width = "66.667%";
 
     "Mod+Minus".action.set-column-width = "-10%";
     "Mod+Plus".action.set-column-width = "+10%";
@@ -98,7 +98,7 @@
     "Mod+Shift+S".action.spawn = ["steam"];
     "Mod+Shift+D".action.spawn = ["goofcord"];
     "Mod+Shift+H".action.spawn = ["heroic"];
-    "Mod+Shift+G".action.spawn = ["lutris"];
+    "Mod+Shift+G" = lib.mkIf hostConfig.gaming.lutris {action.spawn = ["lutris"];};
     "Mod+Shift+Y".action.spawn = ["freetube"];
     "Mod+Z".action.spawn = ["zeditor"];
     "Mod+B".action.spawn = ["zen-beta"];

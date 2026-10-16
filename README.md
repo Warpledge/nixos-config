@@ -453,7 +453,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | `Mod+Shift+S` | Steam |
 | `Mod+Shift+D` | Discord (GoofCord) |
 | `Mod+Shift+H` | Heroic |
-| `Mod+Shift+G` | Lutris |
+| `Mod+Shift+G` | Lutris (only while it's turned on) |
 | `Mod+Shift+M` | Spotify |
 | `Mod+Shift+Y` | FreeTube |
 | `Ctrl+Alt+Delete` | Task manager (Resources) |
