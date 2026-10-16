@@ -28,8 +28,9 @@
         natEnabled = false; # UPnP would announce the home IP past Mullvad
         globalAnnounceEnabled = false; # devices only find each other on the LAN
         localAnnounceEnabled = true;
-        relaysEnabled = true;
+        relaysEnabled = false; # unreachable without global discovery
         urAccepted = -1; # usage reporting declined
+        crashReportingEnabled = false; # default on; panics go to crash.syncthing.net
         startBrowser = false;
       };
       gui = {
