@@ -10,7 +10,6 @@
 
     #--- Addons
     ./nirius.nix
-    ./niriswitcher.nix
 
     #--- Core Configuration
     ./core/binds.nix

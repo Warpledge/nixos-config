@@ -138,7 +138,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | **Display Manager** | [dms-greeter][dms-greeter] via [greetd][greetd] |
 | **Color Scheme** | [Catppuccin][catppuccin] Mocha Mauve applied globally via [Stylix][stylix] + [catppuccin/nix][catppuccin-nix] |
 | **Fonts** | [JetBrains Mono Nerd Font][nerd-fonts], Monaspace, Roboto, Nerd Fonts Symbols |
-| **Window Switcher** | [niriswitcher][niriswitcher] (Niri only) |
+| **Window Switcher** | Niri's built-in recent-windows switcher |
 | **Scratchpad** | [nirius][nirius] (Niri only) |
 </details>
 
@@ -358,7 +358,6 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [scx]: https://github.com/sched-ext/scx
 [alejandra]: https://github.com/kamadorueda/alejandra
 [nh]: https://github.com/nix-community/nh
-[niriswitcher]: https://github.com/isaksamsten/niriswitcher
 [nirius]: https://git.sr.ht/~tsdh/nirius
 [pipewire]: https://pipewire.org
 [nix-flatpak]: https://github.com/gmodena/nix-flatpak
@@ -545,8 +544,8 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 
 | Keybind | Action |
 | --- | --- |
-| `Alt+Tab` | Window switcher (niriswitcher) |
-| `Alt+Tilde` | Workspace switcher (niriswitcher) |
+| `Alt+Tab` | Recent windows switcher; `Shift` goes back, `S` narrows it to the workspace or monitor |
+| `Alt+Tilde` | The same switcher, limited to the focused app's windows |
 
 </details>
 

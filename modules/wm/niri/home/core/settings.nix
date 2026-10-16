@@ -90,6 +90,10 @@
         theme = "Bibata-Modern-Ice";
       };
 
+      #--- Recent Windows Switcher (Alt+Tab)
+      # Matches the window corner radius in rules.nix
+      recent-windows.highlight.corner-radius = 12;
+
       #--- Layout Configuration
       layout = {
         focus-ring = {
