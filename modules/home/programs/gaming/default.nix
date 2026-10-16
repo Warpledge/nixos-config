@@ -149,6 +149,7 @@
     #--- Games
     ++ lib.optionals hostConfig.gaming.feedback [./games/feedback.nix]
     ++ lib.optionals hostConfig.gaming.rocksmith [./games/rocksmith.nix]
+    ++ lib.optionals hostConfig.gaming.easyrpg [./games/tobira-no-densetsu.nix]
     #--- Tools
     ++ lib.optionals hostConfig.gaming.r2modman [./tools/r2modman.nix]
     ++ lib.optionals hostConfig.gaming.pathOfBuilding [./tools/path-of-building.nix]
