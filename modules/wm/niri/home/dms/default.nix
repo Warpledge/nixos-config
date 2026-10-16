@@ -4,7 +4,10 @@
   hostname,
   hostConfig,
   ...
-}: {
+}: let
+  settings = lib.importJSON ./settings.json;
+  mainBar = builtins.head settings.barConfigs;
+in {
   #--------------------------------------------------------------------#
   #-- DankMaterialShell SETTINGS --#
   #--------------------------------------------------------------------#
@@ -154,7 +157,25 @@
     # into settings.json, or the save fails on every start. Connected frame mode
     # is one such rewriter — it forces squareCorners and shadowIntensity off.
     ".config/DankMaterialShell/settings.json" = {
-      text = builtins.toJSON (lib.importJSON ./settings.json);
+      text = builtins.toJSON (settings
+        // lib.optionalAttrs (hostname == "desktop") {
+          # The OLED (DP-2) gets an auto-hiding copy of the main bar
+          barConfigs = [
+            (mainBar
+              // {
+                screenPreferences = ["DP-3"];
+                showOnLastDisplay = false;
+              })
+            (mainBar
+              // {
+                id = "oled";
+                name = "OLED Bar";
+                autoHide = true;
+                screenPreferences = ["DP-2"];
+                showOnLastDisplay = false;
+              })
+          ];
+        });
     };
 
     #--- DMS Clipboard Settings
