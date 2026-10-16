@@ -17,4 +17,13 @@
     "threadirqs" # Run IRQ handlers in threads (lower latency)
     "nowatchdog" # Disable watchdog (lower overhead)
   ];
+
+  #--------------------------------------------------------------------#
+  #-- CPU Scheduler (sched_ext)
+  #--------------------------------------------------------------------#
+  #--- scx_lavd: BPF scheduler built for gaming latency on single-CCX CPUs
+  services.scx = {
+    enable = true;
+    scheduler = "scx_lavd";
+  };
 }

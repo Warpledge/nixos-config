@@ -213,7 +213,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | **Key Remapping** | [keyd][keyd] |
 | **GPU Tuning** | [LACT][lact] for the desktop's RX 9070 XT, with amdgpu overdrive on so it can undervolt |
 | **Bootloader** | [systemd-boot][systemd-boot] |
-| **Kernel** | [CachyOS kernel][cachyos-kernel] (selectable: zen / latest / xanmod / cachyos) |
+| **Kernel** | [CachyOS kernel][cachyos-kernel] (selectable: zen / latest / xanmod / cachyos), with the [scx_lavd][scx] sched_ext scheduler |
 </details>
 
 <details>
@@ -346,6 +346,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [luks]: https://gitlab.com/cryptsetup/cryptsetup
 [systemd-boot]: https://www.freedesktop.org/software/systemd/man/systemd-boot.html
 [cachyos-kernel]: https://github.com/CachyOS/linux-cachyos
+[scx]: https://github.com/sched-ext/scx
 [alejandra]: https://github.com/kamadorueda/alejandra
 [nh]: https://github.com/nix-community/nh
 [niriswitcher]: https://github.com/isaksamsten/niriswitcher
