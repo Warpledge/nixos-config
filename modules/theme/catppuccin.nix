@@ -19,7 +19,7 @@
       flavor = "mocha";
       accent = "mauve";
 
-      gtk.icon.enable = false;
+      gtk.icon.enable = true; # Papirus-Dark with Mauve folders
       cursors.enable = false; # keep Stylix's cursor (pointerCursor conflict)
       kvantum = {
         enable = true;

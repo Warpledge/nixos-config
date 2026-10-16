@@ -57,6 +57,11 @@
         gtk = {
           enable = true;
           flatpakSupport.enable = true;
+          # Stylix's GTK accent is base0D (blue); match DMS and Kvantum's Mauve
+          extraCss = with config.lib.stylix.colors.withHashtag; ''
+            @define-color accent_color ${base0E};
+            @define-color accent_bg_color ${base0E};
+          '';
         };
       };
     };
@@ -89,8 +94,8 @@
 
     #--- Cursor
     cursor = {
-      package = pkgs.bibata-cursors;
-      name = "Bibata-Modern-Ice";
+      package = pkgs.catppuccin-cursors.mochaMauve;
+      name = "catppuccin-mocha-mauve-cursors";
       size = 24;
     };
 

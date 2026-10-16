@@ -2,6 +2,7 @@
 # GTK THEME & ICON CONFIGURATION
 #=====================================================================#
 {
+  config,
   pkgs,
   username,
   ...
@@ -10,32 +11,25 @@
     #--------------------------------------------------------------------#
     #-- Icon Theme (for Quickshell & other apps)
     #--------------------------------------------------------------------#
-    gtk = {
-      enable = true;
-      iconTheme = {
-        name = "Papirus-Dark";
-        package = pkgs.papirus-icon-theme;
-      };
-    };
+    # Papirus-Dark with Mauve folders comes from catppuccin's gtk.icon port
+    gtk.enable = true;
 
     #--------------------------------------------------------------------#
     #-- Icon Theme Packages
     #--------------------------------------------------------------------#
     home.packages = with pkgs; [
-      papirus-icon-theme
-      papirus-folders
       adwaita-icon-theme
     ];
 
     #--------------------------------------------------------------------#
     #-- Icon Theme Symlink for Quickshell & Shells
     #--------------------------------------------------------------------#
-    # Write index.theme instead of symlinking whole dir — allows cursor theme
-    # (Bibata-Modern-Ice) to be found by Xwayland alongside Papirus-Dark icons
+    # Write index.theme instead of symlinking whole dir — allows the Stylix
+    # cursor theme to be found by Xwayland alongside Papirus-Dark icons
     home.file.".icons/default/index.theme".text = ''
       [Icon Theme]
       Name=Default
-      Inherits=Bibata-Modern-Ice,Papirus-Dark,hicolor
+      Inherits=${config.stylix.cursor.name},Papirus-Dark,hicolor
     '';
   };
 }
