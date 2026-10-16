@@ -78,4 +78,10 @@
       "amdgpu.dpm=1" # Enable dynamic power management
     ];
   };
+
+  #--------------------------------------------------------------------#
+  #-- GameMode
+  #--------------------------------------------------------------------#
+  #--- DRM card of the RX 9070 XT; simpledrm takes card0 during boot
+  programs.gamemode.settings.gpu.gpu_device = 1;
 }

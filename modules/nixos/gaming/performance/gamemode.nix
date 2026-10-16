@@ -1,7 +1,11 @@
 #=====================================================================#
 # GAMEMODE CONFIGURATION
 #=====================================================================#
-{pkgs, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   #--------------------------------------------------------------------#
   #-- Packages
   #--------------------------------------------------------------------#
@@ -24,7 +28,7 @@
       };
       gpu = {
         apply_gpu_optimisations = "accept-responsibility"; # Apply GPU tweaks
-        gpu_device = 0; # GPU device to optimize
+        gpu_device = lib.mkDefault 0; # cardN in /sys/class/drm; set per host in gpu.nix
         amd_performance_level = "high"; # AMD GPU higher clock level
       };
       custom = {
