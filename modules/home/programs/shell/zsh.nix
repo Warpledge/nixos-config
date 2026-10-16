@@ -300,7 +300,6 @@ in {
       bloat = "nix path-info -Sh /run/current-system";
 
       #--- System
-      grep = "rg";
       cleanram = "sudo sh -c 'sync; echo 3 > /proc/sys/vm/drop_caches'";
       trimall = "sudo fstrim -va";
       temp = "cd /tmp/";

@@ -425,7 +425,6 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | Shortcut | Runs |
 | --- | --- |
 | `c` / `e` | `clear` / `exit` |
-| `grep` | `rg` (ripgrep) |
 | `us` / `rs` | `systemctl --user` / `sudo systemctl` |
 | `cleanram` | drop filesystem caches |
 | `fetch` | `fastfetch` |
