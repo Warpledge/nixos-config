@@ -12,7 +12,10 @@
   programs = {
     steam = {
       enable = true;
-      gamescopeSession.enable = true;
+      gamescopeSession = {
+        enable = true;
+        args = ["--hdr-enabled"]; # The HDR route: niri has no HDR output
+      };
       remotePlay.openFirewall = true;
       dedicatedServer.openFirewall = false;
       extest.enable = true; # Enable Wayland input support (critical)
