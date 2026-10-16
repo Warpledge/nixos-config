@@ -4,6 +4,7 @@
 {
   lib,
   hostConfig,
+  username,
   ...
 }: {
   #--------------------------------------------------------------------#
@@ -11,9 +12,15 @@
   #--------------------------------------------------------------------#
   networking.hostName = "desktop";
 
-  #--- Bluetooth
-  hardware.bluetooth.enable = true;
-  hardware.bluetooth.powerOnBoot = true;
+  hardware = {
+    #--- Bluetooth
+    bluetooth.enable = true;
+    bluetooth.powerOnBoot = true;
+
+    #--- DDC/CI monitor brightness, for DMS's brightness slider and keys
+    i2c.enable = true;
+  };
+  users.users.${username}.extraGroups = ["i2c"]; # access to /dev/i2c-* (above)
 
   #--- Optimize for L3 cache
   boot.kernel.sysctl = {
