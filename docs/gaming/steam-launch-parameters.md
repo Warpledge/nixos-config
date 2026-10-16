@@ -89,18 +89,21 @@ PROTON_FSR4_RDNA3_UPGRADE=1 PROTON_FSR4_INDICATOR=1 PROTON_ENABLE_WAYLAND=1 game
 
 ## Arknights Endfield
 
-**Launched via Heroic (Epic Games Store) using umu-run/Proton, not native Steam.** Environment variables are set per-game in Heroic → Game Settings → Advanced → Environment Variables (not a `%command%` launch string).
+Steam version (app 4732690), on `dwproton-11.0-14` (as of 2026-10-15).
 
 ```
-PROTON_USE_NTSYNC=1
-STEAMOS=1
-STEAMDECK=1
-WEBKIT_DISABLE_COMPOSITING_MODE=1
-PROTON_ENABLE_WAYLAND=0
-WINEDLLOVERRIDES=winewayland.drv=
+ENABLE_LAYER_MESA_ANTI_LAG=1 nix-performance %command%
 ```
 
-**Notes:** `PROTON_USE_NTSYNC=1` enables NT sync primitives via the `ntsync` kernel module (loaded in `security/hardening/kernel.nix`). Fixes 5-20 min freezes introduced in the 1.2 patch. `STEAMOS=1`/`STEAMDECK=1` force Steam Deck identity, needed for some Proton compatibility paths. `WEBKIT_DISABLE_COMPOSITING_MODE=1` avoids rendering issues in the CEF/WebView login screen. `PROTON_ENABLE_WAYLAND=0` + `WINEDLLOVERRIDES=winewayland.drv=` force XWayland instead of Wine's native Wayland driver, which fixes a fatal crash (`xdg_wm_base#N: error 4: wrong configure serial`, `waylanddrv:wayland_read_events_thread Failed to read events from the compositor, terminating process`) where Niri kills the wine process outright when the native Wayland driver acks a stale configure serial while the main game window is setting up its D3D resources. The Heroic per-game "Enable Wine Wayland" checkbox did not reliably force this off, hence the explicit env vars. Requires GE-Proton or equivalent (set in compatibility tool settings). Do not enable in-game Reflex: it crashes on AMD.
+**Notes:**
+- `ENABLE_LAYER_MESA_ANTI_LAG=1`: Mesa Anti-Lag Vulkan layer, the same as for Wuthering Waves
+- `nix-performance` clears `LD_PRELOAD`, which drops the Steam overlay. In-game purchases go through the overlay, so launch with plain `%command%` to buy anything
+- NTSYNC comes from the global `PROTON_USE_NTSYNC=1` in `home/variables.nix`; it fixed the 5 to 20 minute freezes from the 1.2 patch
+- Do not enable in-game Reflex: it crashes on AMD
+
+**Previously used, dropped** (Epic copy in Heroic, before the move to Steam):
+- `PROTON_ENABLE_WAYLAND=0 WINEDLLOVERRIDES=winewayland.drv=` forced XWayland, fixing a crash where niri killed Wine (`xdg_wm_base#N: error 4: wrong configure serial`). Re-add if that error comes back
+- `STEAMOS=1 STEAMDECK=1` for Steam Deck identity, and `WEBKIT_DISABLE_COMPOSITING_MODE=1` for the login screen
 
 Separately, the game's kernel-mode anti-cheat driver (Tencent "Anti-Cheat Expert", `ace-base.sys`) fails to load under Wine (`unimplemented function ntoskrnl.exe.PsGetProcessExitStatus`). This doesn't appear to be fatal to launching/playing, but the anti-cheat isn't actually running correctly as a result.
 
