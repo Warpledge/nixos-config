@@ -1,7 +1,5 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Project
 
 NixOS flake managing **Desktop** (Ryzen 5800X3D + RX 9070 XT, 280Hz OLED + 144Hz) and **Laptop** (Legion Slim 5, Ryzen 7735HS + hybrid AMD 680M/RTX 4070, 1600p@165Hz). Nixpkgs unstable, Catppuccin Mocha Mauve via Stylix. Active WM: Niri; a Hyprland module also exists.
@@ -27,7 +25,7 @@ Only `.claude/settings.json` is tracked (public); the rest of `.claude/` is giti
 ## Commands
 
 ```bash
-nix flake check         # Validate syntax (run first, fastest feedback)
+nix flake check         # Evaluate all outputs, no build (rule 1 says when)
 nix build .#nixosConfigurations.<host>.config.system.build.toplevel --no-link  # Full build, no activation: catches hash and patch failures that flake check (eval only) misses
 alejandra .             # Format all Nix files (v3.0.0 is the standard)
 nix fmt .               # Same formatter through the flake; a bare `nix fmt` leaves alejandra 3.0.0 waiting on stdin
@@ -75,7 +73,7 @@ The authoritative list of toggles is **`hosts/{hostname}/settings.nix`**. Read i
 - `windowManager` — `"hyprland" | "niri"`
 - `kernel` — `"zen" | "latest" | "xanmod" | "cachyos"`
 - Service toggles: `mullvad.enable` (plus `mullvad.splitTunnel`, a list of command names routed around the VPN), `clamav.enable`, `docker.enable`, `discord.arrpc.enable`, `scrcpy.enable`, `ssh.enable`, `suwayomi.enable`, `syncthing.enable`
-- Attribute-set toggles: `browsers.{zen,mullvad,helium,ferdium}`, `terminals.{kitty,ghostty}`, `editors.{helix,zed}`, `fileBrowsers.{nautilus,yazi}`, `media.{mpv,spotify,freetube,videoTrimmer,moku,streamlinkTwitchGui,boorusama,tonkatsuBox}`, `graphics.{blender,krita,affinity}`, `audio.{reaper,guitarix,tone3000,katanaFloorboard}`, `office.{thunderbird,obsidian,homebank}`, `security.{bleachbit,keepassxc}`, `system.{resources}`, `gaming.{steam,heroic,prismlauncher,lutris,faugus,twintail,hytale,easyrpg,xsystem4,feedback,rocksmith,r2modman,pathOfBuilding,granblueRelinkMods}`, `japanese.{ime,vn}`
+- Attribute-set toggles: `browsers.{zen,mullvad,helium,ferdium}`, `terminals.{kitty,ghostty}`, `editors.{helix,zed}`, `fileBrowsers.{nautilus,yazi}`, `media.{mpv,spotify,freetube,videoTrimmer,constrict,moku,streamlinkTwitchGui,boorusama,tonkatsuBox}`, `graphics.{blender,krita,affinity}`, `audio.{reaper,guitarix,tone3000,katanaFloorboard}`, `office.{thunderbird,obsidian,homebank}`, `security.{bleachbit,keepassxc}`, `system.{resources}`, `gaming.{steam,heroic,prismlauncher,lutris,faugus,twintail,hytale,easyrpg,xsystem4,feedback,rocksmith,r2modman,pathOfBuilding,granblueRelinkMods}`, `japanese.{ime,vn}`
 - `~/.local/opt` bundles (kept out of git) have no category of their own: `media.tonkatsuBox`, `gaming.granblueRelinkMods` and `audio.katanaFloorboard` wrap them; see `docs/local/local-binary-installs.md`
 - AI tools: `claude.enable`, `opencode.enable`, `lmstudio.enable`
 
@@ -120,7 +118,7 @@ Gotchas. Grep the option name before assuming which file owns it:
 ### Module layout
 
 - `modules/nixos/` — system: `gaming/` (default, steam, `performance/` esync + gamemode + kernel, `tools/` gamescope + java), `network/` (default, blockers, dns, firewall, networkmanager), `nix/` (default, nh, nixpkgs, substituters), `security/` (auditd, clamav, `apparmor/`, `auth/` keyring + sudo, `hardening/` default + kernel, `mullvad/`), `services/` (desktop, `hardware/` adb + keyd + power + sound, `runtimes/` docker + flatpak + runners, `servers/` flaresolverr + suwayomi + syncthing, ssh), `system/` (bootloader, documentation, packages, `desktop/` input + wayland, `language/` locale + japanese-ime, `tuning/` tweaks + zram, `user/` shell + user)
-- `modules/home/` — user: `programs/` (browsers, terminals, editors, ai, shell, fetch, file-browsers, graphics, audio, media, office, security, gaming (`launchers/`, `games/`, `tools/`, `scripts/`), git (`git.nix` + the commit template), android, discord, plus `options.nix` and `utilities.nix` (the general package list) at its root). `mime.nix`, `nixm.nix`, `services.nix` and `variables.nix` are single files at that level, not directories
+- `modules/home/` — user: `programs/` (browsers, terminals, editors, ai, shell, fetch, file-browsers, graphics, audio, media, office, security, system, gaming (`launchers/`, `games/`, `tools/`, `scripts/`), git (`git.nix` + the commit template), android, discord, plus `options.nix` and `utilities.nix` (the general package list) at its root). `mime.nix`, `nixm.nix`, `services.nix` and `variables.nix` are single files at that level, not directories
   - Wrappers for prebuilt bundles in `~/.local/opt/` (`media/tonkatsu-box.nix`, `gaming/tools/relink-mod-organizer.nix`, `audio/guitar/katana-floorboard.nix`) sit in the folder for what the app is; the payload is intentionally not in the repo. `gaming/tools/reloaded-ii-gbfr.nix` is the exception: a Windows `.exe` its installer puts in `~/Desktop/Reloaded-II - Granblue Fantasy Relink/`, run in GBFR's Proton prefix through `protontricks-launch`
   - `programs/ai/skills/<name>/` and `programs/ai/agents/<name>.md` — Claude Code skills and subagents kept in the repo so every host gets them, registered in `ai/claude.nix` under `programs.claude-code.{skills,agents}`, beside the pinned plugins and LSP servers. New ones (including what skill-creator writes to `~/.claude/skills/`) move here. Commits go through the user-only `commit` skill, which runs `gitleaks` on the staged diff and the `public-repo-auditor` subagent
   - Subagents: `build-triager` builds one host's closure and reports only what failed (hand it a build that failed rather than reading the log inline; a clean build never needs it, so the flake-update skill builds inline first); `prose-reviewer` is the cut-only pass in step 5 of **Add an application**; `docs-drift-auditor` checks CLAUDE.md, AGENTS.md and README.md against the tree, before doc commits and in any CLAUDE.md audit
@@ -223,7 +221,7 @@ DMS runs as a systemd user service (`systemd.enable`, `niri.enableSpawn = false`
 **Login:** Niri and Hyprland start from the DMS greeter (greetd, through the `dank-greeter` input, set up in `<wm>/session.nix`).
 
 **Hyprland-only directories:** `core/animations.nix`, `core/quad.lua`, `core/variables.nix`, `core/rules/` (`luaRule.nix`, `windowrules/`, `layerrules/`), `scripts/`.
-**Niri-only directories:** `core/monitors.nix`, `core/portals.nix`, `core/rules.nix`, `core/xwayland.nix`, `niriswitcher.nix`.
+**Niri-only directories:** `core/monitors.nix`, `core/portals.nix`, `core/rules.nix`, `core/xwayland.nix`, `niriswitcher.nix`, `nirius.nix`.
 
 Per-host WM overrides exist where needed:
 - `hosts/laptop/wm/{hyprland,niri}.nix` — hybrid-GPU env (`WLR_DRM_DEVICES`), Solaar autostart; the niri one also turns off DMS auto-lock
@@ -243,7 +241,7 @@ These are only imported when the WM is active, e.g. `lib.optional (hostConfig.wi
 - DNS: systemd-resolved (stub listener on 127.0.0.53, opportunistic DNS-over-TLS, no fallback servers) + NetworkManager
 - WiFi: iwd, IPv6 privacy, random MAC
 - Firewall: TCP 22 (open; sshd only runs when `hostConfig.ssh.enable` is set), 80, 443, 25566 (Minecraft), 7777 (Terraria), 5555 (ADB); UDP 27000–27009, 27015, 27031–27036 and 4380 (Steam). Defined in `modules/nixos/network/firewall.nix`. When `hostConfig.syncthing.enable` is set, the Syncthing module also opens TCP/UDP 22000 and UDP 21027.
-- Mullvad: `hostConfig.mullvad.enable` (WireGuard, quantum resistance, multihop, DAITA; lockdown mode cuts all traffic while the tunnel is down), `modules/nixos/security/mullvad/`: `daemon.nix` (daemon settings), `gui.nix` (tray app) and `split-tunnel.nix`. Settings are applied with the `mullvad` CLI from a oneshot unit, not by templating `settings.json`, which the daemon rewrites. Relay and entry selection are deliberately unmanaged so exits can be switched by hand. `hostConfig.mullvad.splitTunnel` names apps routed around the VPN; `split-tunnel.nix` puts each wrapper in the profile its app is installed in, since the home profile outranks `/run/current-system/sw/bin` in PATH and a system wrapper for an HM package is silently shadowed. Steam sets `no_new_privs` on what it launches, which blocks the setuid `mullvad-exclude` helper, so the wrapper skips the helper when `/proc/self/cgroup` already shows `mullvad-exclusions` (Steam is split-tunnelled itself). If a Steam shortcut to a split-tunnelled app closes instantly with nothing in the app's logs, its stderr is in `~/.local/share/Steam/logs/console-linux.txt`, and `gameprocess_log.txt` beside it has the spawned command line; reproduce with `setpriv --no-new-privs <wrapper> true`. Why DataPacket exits read as London, and the relay to pick instead, is in `docs/security/mullvad.md`.
+- Mullvad: `hostConfig.mullvad.enable` (WireGuard, quantum resistance, multihop, DAITA; lockdown mode cuts all traffic while the tunnel is down). Settings are applied with the `mullvad` CLI from a oneshot unit, not by templating `settings.json`, which the daemon rewrites. Relay and entry selection are deliberately unmanaged so exits can be switched by hand. `hostConfig.mullvad.splitTunnel` names apps routed around the VPN; `split-tunnel.nix` puts each wrapper in the profile its app is installed in, since the home profile outranks `/run/current-system/sw/bin` in PATH and a system wrapper for an HM package is silently shadowed. Steam sets `no_new_privs` on what it launches, which blocks the setuid `mullvad-exclude` helper, so the wrapper skips the helper when `/proc/self/cgroup` already shows `mullvad-exclusions` (Steam is split-tunnelled itself). If a Steam shortcut to a split-tunnelled app closes instantly with nothing in the app's logs, its stderr is in `~/.local/share/Steam/logs/console-linux.txt`, and `gameprocess_log.txt` beside it has the spawned command line; reproduce with `setpriv --no-new-privs <wrapper> true`. Why DataPacket exits read as London, and the relay to pick instead, is in `docs/security/mullvad.md`.
 - `network/blockers.nix` — hosts-level blocklists, always imported
 
 ## Security
@@ -363,7 +361,7 @@ This applies to generated scripts and inline strings too, not just Nix attribute
 ## Troubleshooting
 
 ```bash
-nix flake check                  # Syntax (fastest)
+nix flake check                  # Eval errors (fastest)
 nixm rebuild --show-trace        # Full trace (ask the user to run this)
 journalctl -xeu <service>        # Service logs
 journalctl -b -p err             # Errors this boot
@@ -374,7 +372,7 @@ Common errors:
 - `attribute missing` → option not declared in the active host's hostConfig
 - Slow / hung → check `df -h`; try `nix build --offline`
 
-**Rollback:** `sudo nixos-rebuild switch --rollback`, or pick a generation from the bootloader.
+**Rollback:** the user runs `nixm rollback` (rule 1), or picks a generation from the bootloader.
 
 **Laptop GPU:** `lspci | grep -i vga`, `env | grep -E 'DRI|VDPAU|LIBVA|VK'`. Configs: `hosts/laptop/hardware/gpu.nix` and `hosts/laptop/wm/{hyprland,niri}.nix`. Verify offload with `nvidia-offload glxinfo | grep "OpenGL renderer"`.
 
@@ -426,12 +424,12 @@ Game-specific notes live under `docs/gaming/` (the `game-troubleshooting` skill 
 - `gaming/steam-client-menu-bug.md` — Steam's menus self-dismiss on niri because xwayland-satellite 0.8.2 focuses override-redirect windows; fixed in v0.8.3 (upstream `add2795`, PR #494), which nixpkgs ships, so `niri/home/core/xwayland.nix` uses the nixpkgs build again
 - `gaming/rocksmith-2014.md` — Rocksmith 2014 on Proton 11 + WOW64 with the Katana DI via PipeASIO and RS_ASIO: the manual install steps the `gaming.rocksmith` module can't do, the Katana driver-priority stall, why calibration is skipped, which CDLC enabler build works (the CustomsForge v4.0 one, not the newer GitHub build), and the optional RSMods setup
 - `gaming/feedback.md` — feedBack's working audio settings and the Guitar Pro import order (import without audio, constant offset, never auto-sync)
-- `gaming/arknights-endfield.md` — "Unable to start ACE Setup (1-1700-2)" after Epic updates: copy `ACE-Setup64.exe` back; recurs, and repair doesn't fix it
+- `gaming/arknights-endfield.md` — the Steam copy, and "Unable to start ACE Setup (1-1700-2)": `ACE-Setup64.exe` missing from `AntiCheatExpert/`; Steam's verify restores it, the old Epic copy needed it copied back
+- `gaming/minecraft_servers/{GTNH,TerraFirmaGreg-Modern}/` — each pack has `index.md` listing its sub-files (server setup, mods, config tweaks, etc.). **Update the relevant sub-file when that pack's config, mods, or settings change.** The matching declarative modules live at `hosts/laptop/minecraft-servers/{gtnh-server,tfg-server}.nix` (add a new server by creating a `.nix` there, importing it in that dir's `default.nix`, and adding a line to the hardcoded pack list in `mcservers.nix`, the fzf picker that names each pack with its version and dispatches to that server's command).
 
 Audio hardware notes live under `docs/audio/`:
 
 - `audio/katana-mk2.md` — the Katana MkII as an interface: 44.1 kHz only, four fixed channels, dry DI on capture channels 3 and 4, `front:` refusing 2-channel playback, the driver-priority rule
-- `gaming/minecraft_servers/{GTNH,TerraFirmaGreg-Modern}/` — each pack has `index.md` listing its sub-files (server setup, mods, config tweaks, etc.). **Update the relevant sub-file when that pack's config, mods, or settings change.** The matching declarative modules live at `hosts/laptop/minecraft-servers/{gtnh-server,tfg-server}.nix` (add a new server by creating a `.nix` there, importing it in that dir's `default.nix`, and adding a line to the hardcoded pack list in `mcservers.nix`, the fzf picker that names each pack with its version and dispatches to that server's command).
 
 Android device notes live under `docs/android/`:
 

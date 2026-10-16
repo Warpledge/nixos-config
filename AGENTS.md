@@ -41,9 +41,9 @@ home-manager, Niri WM, Stylix theming (Catppuccin Mocha).
 | Need | Use |
 | --- | --- |
 | Package metadata | `nix eval --raw nixpkgs#<pkg>.meta.homepage` |
-| nixpkgs / NixOS options | the `nixos` MCP tool |
+| nixpkgs / NixOS + home-manager options | the `nixos` MCP tool |
 | An app's own config syntax | `nix-shell -p <pkg> --run 'man <name>'` |
-| A home-manager option | read the module in the locked HM input |
+| A home-manager option the MCP tool lacks | read the module in the locked HM input |
 
 **Do not guess documentation URLs.** Fetching the web for upstream docs is a
 last resort; if two fetches fail, stop and use a local source instead.
