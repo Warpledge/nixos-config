@@ -21,6 +21,8 @@
       cursor_shape = "Underline";
       cursor_underline_thickness = 3;
       window_padding_width = 10;
+      # Notify when a command over 10 s finishes in a window you can't see
+      notify_on_cmd_finish = "invisible 10.0";
 
       #--- Font configuration with CJK support
       font_family = "${config.stylix.fonts.monospace.name}";
