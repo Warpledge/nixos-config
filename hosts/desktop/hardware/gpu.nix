@@ -84,4 +84,16 @@
   #--------------------------------------------------------------------#
   #--- DRM card of the RX 9070 XT; simpledrm takes card0 during boot
   programs.gamemode.settings.gpu.gpu_device = 1;
+
+  #--------------------------------------------------------------------#
+  #-- GPU Tuning (LACT)
+  #--------------------------------------------------------------------#
+  #--- Overdrive unlocks LACT's voltage, clock and fan-curve controls. The mask
+  #--- is the kernel default 0xfff7bfff plus the overdrive bit 0x4000; the
+  #--- module's default mask also changes GFXOFF, stutter mode and GFX DCS
+  services.lact.enable = true;
+  hardware.amdgpu.overdrive = {
+    enable = true;
+    ppfeaturemask = "0xfff7ffff";
+  };
 }

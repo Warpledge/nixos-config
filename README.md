@@ -211,6 +211,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | **Flatpak** | [nix-flatpak][nix-flatpak] (declarative Flatpak management) |
 | **Networking** | [systemd-resolved][resolved] + [NetworkManager][networkmanager] (iwd), and [Mullvad][mullvad] over WireGuard with multihop, [DAITA][daita] and a kill switch that blocks traffic while the tunnel is down |
 | **Key Remapping** | [keyd][keyd] |
+| **GPU Tuning** | [LACT][lact] for the desktop's RX 9070 XT, with amdgpu overdrive on so it can undervolt |
 | **Bootloader** | [systemd-boot][systemd-boot] |
 | **Kernel** | [CachyOS kernel][cachyos-kernel] (selectable: zen / latest / xanmod / cachyos) |
 </details>
@@ -340,6 +341,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [keepassxc]: https://keepassxc.org/
 [syncthing]: https://syncthing.net/
 [keyd]: https://github.com/rvaiya/keyd
+[lact]: https://github.com/ilya-zlobintsev/LACT
 [gnome-keyring]: https://wiki.gnome.org/Projects/GnomeKeyring
 [luks]: https://gitlab.com/cryptsetup/cryptsetup
 [systemd-boot]: https://www.freedesktop.org/software/systemd/man/systemd-boot.html
