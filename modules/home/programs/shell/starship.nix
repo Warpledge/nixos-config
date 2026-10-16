@@ -9,6 +9,7 @@
 
   programs.starship = {
     enable = true;
+    enableZshIntegration = false; # zsh draws its prompt with powerlevel10k
     enableTransience = true;
     settings = {
       add_newline = true;
