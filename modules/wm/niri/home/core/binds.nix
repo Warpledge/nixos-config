@@ -58,8 +58,20 @@
     #--- Window Movement
     "Mod+Shift+Left".action.move-column-left = {};
     "Mod+Shift+Right".action.move-column-right = {};
-    "Mod+Shift+Up".action.focus-workspace-up = {};
-    "Mod+Shift+Down".action.focus-workspace-down = {};
+    "Mod+Shift+Up".action.move-column-to-workspace-up = {};
+    "Mod+Shift+Down".action.move-column-to-workspace-down = {};
+
+    #--- Monitors
+    "Mod+Alt+Left".action.focus-monitor-left = {};
+    "Mod+Alt+Right".action.focus-monitor-right = {};
+    "Mod+Alt+Shift+Left".action.move-column-to-monitor-left = {};
+    "Mod+Alt+Shift+Right".action.move-column-to-monitor-right = {};
+
+    #--- Column Stacking
+    # Pull the neighbouring window into this column, or push this one out of it
+    "Mod+BracketLeft".action.consume-or-expel-window-left = {};
+    "Mod+BracketRight".action.consume-or-expel-window-right = {};
+    "Mod+T".action.toggle-column-tabbed-display = {};
 
     #--- Window Resize
     "Mod+Ctrl+Left".action.set-column-width = "-80";

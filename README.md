@@ -490,6 +490,8 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | `Mod+X` | Cycle window height presets |
 | `Mod+Shift+Z` | Reset window height |
 | `Mod+G` | Maximize window to screen edges |
+| `Mod+[` / `Mod+]` | Pull the window on the left/right into this column, or push this one out |
+| `Mod+T` | Toggle tabs for the column |
 
 #### Focus & Movement
 
@@ -498,6 +500,9 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | `Mod+←/→` | Focus column left/right |
 | `Mod+↑/↓` | Focus workspace up/down |
 | `Mod+Shift+←/→` | Move column left/right |
+| `Mod+Shift+↑/↓` | Move column to the workspace above/below |
+| `Mod+Alt+←/→` | Focus monitor left/right |
+| `Mod+Alt+Shift+←/→` | Move column to the monitor left/right |
 | `Mod+Scroll` | Focus column left/right |
 | `Mod+Shift+Scroll` | Focus workspace up/down |
 
