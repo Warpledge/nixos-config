@@ -530,10 +530,10 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | `Ctrl+Print` | All outputs screenshot |
 | `Mod+Ctrl+Print` | Scrolling capture |
 | `Mod+End` | Toggle screen recording (portal) |
-| `Volume Up/Down/Mute` | Volume, routed through DMS so the on-screen indicator shows |
-| `Mic Mute` | Mute the microphone |
+| `Volume Up/Down/Mute` | Volume, routed through DMS so the on-screen indicator shows; works on the lock screen |
+| `Mic Mute` | Mute the microphone; works on the lock screen |
 | `Brightness Up/Down` | Screen brightness |
-| `Play/Pause`, `Stop`, `Prev`, `Next` | Media controls (playerctl) |
+| `Play/Pause`, `Stop`, `Prev`, `Next` | Media controls for the player used last (playerctl); work on the lock screen |
 
 #### Window Switcher
 

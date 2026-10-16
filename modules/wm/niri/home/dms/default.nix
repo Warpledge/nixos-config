@@ -98,6 +98,11 @@
   #--------------------------------------------------------------------#
   programs.niri.settings.binds = let
     dms = action: ["dms" "ipc" "call"] ++ (lib.splitString " " action);
+    # Same, but still fires while the lock screen is up
+    dmsLocked = action: {
+      action.spawn = dms action;
+      allow-when-locked = true;
+    };
   in {
     #--- DankMaterialShell Controls
     "Mod+A".action.spawn = dms "spotlight toggle"; # Application Launcher
@@ -129,10 +134,10 @@
     "Mod+End".action.spawn = dms "quickCapture recordToggle portal"; # Toggle Recording
 
     #--- Audio controls
-    "XF86AudioRaiseVolume".action.spawn = dms "audio increment 3"; # Volume Up
-    "XF86AudioLowerVolume".action.spawn = dms "audio decrement 3"; # Volume Down
-    "XF86AudioMute".action.spawn = dms "audio mute"; # Mute Audio
-    "XF86AudioMicMute".action.spawn = dms "audio micmute"; # Mute Microphone
+    "XF86AudioRaiseVolume" = dmsLocked "audio increment 3"; # Volume Up
+    "XF86AudioLowerVolume" = dmsLocked "audio decrement 3"; # Volume Down
+    "XF86AudioMute" = dmsLocked "audio mute"; # Mute Audio
+    "XF86AudioMicMute" = dmsLocked "audio micmute"; # Mute Microphone
 
     #--- Brightness controls
     "XF86MonBrightnessUp".action.spawn = dms "brightness increment 5"; # Brightness Up

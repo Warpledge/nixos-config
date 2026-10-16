@@ -4,17 +4,24 @@
 {
   config,
   lib,
+  hostConfig,
   ...
 }: {
   #--------------------------------------------------------------------#
   #-- Niri Keybindings
   #--------------------------------------------------------------------#
-  programs.niri.settings.binds = {
+  programs.niri.settings.binds = let
+    # A spawn bind that still fires while the DMS lock screen is up
+    locked = cmd: {
+      action.spawn = cmd;
+      allow-when-locked = true;
+    };
+  in {
     #--- Media Player Controls
-    "XF86AudioPlay".action.spawn = ["playerctl" "play-pause"];
-    "XF86AudioStop".action.spawn = ["playerctl" "pause"];
-    "XF86AudioPrev".action.spawn = ["playerctl" "previous"];
-    "XF86AudioNext".action.spawn = ["playerctl" "next"];
+    "XF86AudioPlay" = locked ["playerctl" "play-pause"];
+    "XF86AudioStop" = locked ["playerctl" "pause"];
+    "XF86AudioPrev" = locked ["playerctl" "previous"];
+    "XF86AudioNext" = locked ["playerctl" "next"];
 
     #--- Applications
     # Screenshot binds live with the other DMS commands in dms/default.nix
