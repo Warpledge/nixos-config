@@ -66,7 +66,6 @@
 
       #--- Other Dependencies
       lua5
-      game-devices-udev-rules
       corefonts
       alsa-lib
       libGL
