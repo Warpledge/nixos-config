@@ -64,8 +64,8 @@
       settings = {
         Login = {
           HandlePowerKey = "ignore"; # Ignore power button (prevent accidental suspend)
-          LidSwitch = "ignore";
-          LidSwitchExternalPower = "ignore";
+          HandleLidSwitch = "ignore";
+          HandleLidSwitchExternalPower = "ignore";
           IdleAction = "ignore"; # Prevent idle suspend while server is running
           IdleActionSec = "0";
         };
