@@ -4,7 +4,6 @@
 {
   config,
   pkgs,
-  username,
   lib,
   hostConfig,
   ...
@@ -39,13 +38,8 @@ in {
       };
 
       #--- Startup Applications
-      spawn-at-startup =
-        [
-          # Xwayland cursor theme
-          {command = ["xrdb" "-merge" "/home/${username}/.Xresources"];}
-        ]
-        #--- Japanese input method daemon (controlled by hostConfig)
-        ++ lib.optional hostConfig.japanese.ime {command = ["fcitx5" "-d" "-r"];};
+      # Japanese input method daemon (controlled by hostConfig)
+      spawn-at-startup = lib.optional hostConfig.japanese.ime {command = ["fcitx5" "-d" "-r"];};
 
       #--- Input Configuration
       input = {

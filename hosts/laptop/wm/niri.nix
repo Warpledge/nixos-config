@@ -31,11 +31,10 @@
       #--- GPU Configuration (Laptop-Specific)
       # Hybrid AMD/NVIDIA setup for Lenovo Legion 83EX
       environment = {
-        # GPU Configuration - Use AMD iGPU for Niri on laptop
+        # VA-API and GBM drivers for apps niri spawns; niri picks its own GPU with
+        # debug.render-drm-device (WLR_DRM_DEVICES is wlroots-only)
         LIBVA_DRIVER_NAME = "radeonsi";
         GBM_BACKEND = "mesa";
-        # AMD iGPU is card1, NVIDIA is card0 on laptop
-        WLR_DRM_DEVICES = "/dev/dri/card1:/dev/dri/card0";
 
         # Global NVIDIA offload, left off: route individual apps with nvidia-offload
         # __NV_PRIME_RENDER_OFFLOAD = "1";

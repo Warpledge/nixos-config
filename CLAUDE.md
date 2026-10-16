@@ -224,7 +224,7 @@ DMS runs as a systemd user service (`systemd.enable`, `niri.enableSpawn = false`
 **Niri-only directories:** `core/monitors.nix`, `core/portals.nix`, `core/rules.nix`, `core/xwayland.nix`, `nirius.nix`.
 
 Per-host WM overrides exist where needed:
-- `hosts/laptop/wm/{hyprland,niri}.nix` — hybrid-GPU env (`WLR_DRM_DEVICES`), Solaar autostart; the niri one also turns off DMS auto-lock
+- `hosts/laptop/wm/{hyprland,niri}.nix` — hybrid-GPU env (`WLR_DRM_DEVICES` only in the Hyprland one; niri ignores it), Solaar autostart; the niri one also turns off DMS auto-lock
 - `hosts/desktop/wm/hyprland.nix` — monitor layout, workspace assignment (`desktop/wm/niri.nix` is an empty stub)
 
 These are only imported when the WM is active, e.g. `lib.optional (hostConfig.windowManager == "niri") ./wm/niri.nix`.
