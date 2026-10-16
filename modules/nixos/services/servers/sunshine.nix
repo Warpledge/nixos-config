@@ -10,7 +10,13 @@
   #--- The module also enables uinput, plus Avahi so clients can find the host
   services.sunshine = {
     enable = true;
-    openFirewall = true; # TCP 47984, 47989-47990, 48010; UDP 47998-48000, 48002, 48010
+    openFirewall = false; # Would also open 47990, the web UI; stream ports below
     capSysAdmin = true; # KMS capture; niri lacks the wlr-export-dmabuf protocol
+  };
+
+  #--- The module's openFirewall list without 47990, so the web UI stays local
+  networking.firewall = {
+    allowedTCPPorts = [47984 47989 48010];
+    allowedUDPPorts = [47998 47999 48000 48002 48010];
   };
 }

@@ -13,6 +13,9 @@
   #--------------------------------------------------------------------#
   networking.hostName = "laptop";
 
+  #--- Minecraft servers (minecraft-servers/ is home-manager, so the port opens here)
+  networking.firewall.allowedTCPPorts = [25566];
+
   #--- Logitech Mouse
   hardware.logitech.wireless.enable = true;
   environment.systemPackages = with pkgs; [

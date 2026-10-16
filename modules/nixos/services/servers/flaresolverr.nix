@@ -9,4 +9,5 @@
   #-- FlareSolverr
   #--------------------------------------------------------------------#
   services.flaresolverr.enable = true;
+  systemd.services.flaresolverr.environment.HOST = "127.0.0.1"; # Default is 0.0.0.0
 }

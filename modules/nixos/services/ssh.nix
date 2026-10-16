@@ -1,8 +1,8 @@
 #=====================================================================#
 # SSH SERVER (OPENSSH + FAIL2BAN)
 #=====================================================================#
-#- Key-only access for one user. Port 22 is opened in network/firewall.nix,
-#- not here, so the firewall list stays in one place.
+#- Key-only access for one user. Port 22 opens with this module, so only on
+#- hosts with hostConfig.ssh.enable set.
 #-
 #- Enabling this without a key in authorizedKeys below leaves no way in:
 #- password and keyboard-interactive auth are both off.
@@ -17,7 +17,7 @@
   #--------------------------------------------------------------------#
   services.openssh = {
     enable = true;
-    openFirewall = false;
+    openFirewall = true;
 
     #--- Host keys: ed25519 only, no RSA
     hostKeys = [
