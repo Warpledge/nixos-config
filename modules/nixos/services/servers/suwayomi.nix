@@ -79,13 +79,37 @@ in {
     });
 
     settings.server = {
+      ip = "127.0.0.1"; # Module default 0.0.0.0
       port = 4567; # Module default 8080 is taken by Steam's webhelper
     };
   };
 
-  #--- Its scratch dir is /tmp/Tachidesk, which a user-run instance can own
-  #--- first and lock the service out of
-  systemd.services.suwayomi-server.serviceConfig.PrivateTmp = true;
+  systemd.services.suwayomi-server.serviceConfig = {
+    #--- Its scratch dir is /tmp/Tachidesk, which a user-run instance can own
+    #--- first and lock the service out of
+    PrivateTmp = true;
+
+    #--- Sandboxing for the third-party extension code it runs. No
+    #--- SystemCallFilter, MemoryDenyWriteExecute or RestrictNamespaces: KCEF's
+    #--- Chromium sandbox needs chroot and user namespaces, the JIT needs W+X pages
+    NoNewPrivileges = true;
+    ProtectSystem = "strict"; # The module's StateDirectory stays writable
+    ProtectHome = true;
+    PrivateDevices = true;
+    ProtectKernelTunables = true;
+    ProtectKernelModules = true;
+    ProtectKernelLogs = true;
+    ProtectControlGroups = true;
+    ProtectClock = true;
+    ProtectHostname = true;
+    ProtectProc = "invisible";
+    RestrictSUIDSGID = true;
+    RestrictRealtime = true;
+    LockPersonality = true;
+    CapabilityBoundingSet = "";
+    RestrictAddressFamilies = ["AF_UNIX" "AF_INET" "AF_INET6" "AF_NETLINK"];
+    SystemCallArchitectures = "native";
+  };
 
   #--------------------------------------------------------------------#
   #-- App Window (home-manager)
