@@ -27,7 +27,28 @@ with lib; let
   };
 
   mimeMap = {
-    text = ["text/plain"];
+    #--- code and markup types listed so micro, Helix and the DMS notepad don't take them
+    text = [
+      "text/plain"
+      "application/sql"
+      "application/x-perl"
+      "application/x-php"
+      "application/x-shellscript"
+      "application/xml"
+      "text/css"
+      "text/markdown"
+      "text/x-c++hdr"
+      "text/x-c++src"
+      "text/x-chdr"
+      "text/x-csrc"
+      "text/x-java"
+      "text/x-makefile"
+      "text/x-patch"
+      "text/x-python"
+      "text/x-python3"
+      "text/x-shellscript"
+      "text/x-tex"
+    ];
     image = [
       "image/bmp"
       "image/gif"
@@ -48,15 +69,26 @@ with lib; let
       "audio/webm"
       "audio/x-matroska"
     ];
+    #--- Constrict and Video Trimmer claim video types too; any left out opens in them
     video = [
+      "video/3gpp"
+      "video/3gpp2"
+      "video/dv"
+      "video/matroska"
       "video/mp2t"
       "video/mp4"
       "video/mpeg"
       "video/ogg"
+      "video/quicktime"
+      "video/vnd.rn-realvideo"
       "video/webm"
+      "video/x-flic"
       "video/x-flv"
       "video/x-matroska"
+      "video/x-mjpeg"
+      "video/x-ms-wmv"
       "video/x-msvideo"
+      "video/x-ogm+ogg"
     ];
     directory = ["inode/directory"];
     browser = [
@@ -121,6 +153,12 @@ in {
       extraConfig = {
         SCREENSHOTS = "${config.xdg.userDirs.pictures}/Screenshots";
       };
+    };
+
+    #--- GIO can't launch Terminal=true apps (micro, Helix) in kitty without this
+    terminal-exec = {
+      enable = true;
+      settings.default = ["kitty.desktop"];
     };
   };
 
