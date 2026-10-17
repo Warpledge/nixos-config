@@ -32,7 +32,6 @@
     consoleLogLevel = 0; # Suppress kernel boot messages
     kernelParams = [
       "quiet" # Suppress kernel messages on boot & shutdown
-      "splash" # Show splash screen on boot & shutdown
       "rd.systemd.show_status=false" # Hide systemd status during initrd
       "rd.udev.log_level=3" # Reduce udev initrd logging
       "udev.log_priority=3" # Reduce udev boot logging

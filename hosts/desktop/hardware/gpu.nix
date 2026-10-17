@@ -62,9 +62,6 @@
     kernelParams = [
       #--- AMD CPU Optimizations
       "amd_pstate=active" # Enable AMD P-state CPU scaling driver
-      "amd_pstate.shared_mem=1" # Enable shared memory for P-state (Zen 3+)
-      "amd_prefcore=enable" # Enable preferred core detection
-      "amd_iommu=on" # Enable AMD IOMMU ("force" can cause issues)
       "clocksource=tsc" # Use TSC for better gaming performance
       "tsc=reliable" # Trust TSC clocksource
       "iommu=pt" # Passthrough mode for better performance
