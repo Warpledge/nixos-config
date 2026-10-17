@@ -15,7 +15,10 @@
     initrd = {
       availableKernelModules = ["nvme" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod"];
       kernelModules = [];
-      luks.devices."luks-87aa6dd8-4e74-4a6a-92a0-6d3d8df96a71".device = "/dev/disk/by-uuid/87aa6dd8-4e74-4a6a-92a0-6d3d8df96a71";
+      luks.devices."luks-87aa6dd8-4e74-4a6a-92a0-6d3d8df96a71" = {
+        device = "/dev/disk/by-uuid/87aa6dd8-4e74-4a6a-92a0-6d3d8df96a71";
+        allowDiscards = true;
+      };
     };
     kernelModules = ["kvm-amd"];
     extraModulePackages = [];
