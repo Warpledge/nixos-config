@@ -95,7 +95,9 @@
       mv "$f.tmp" "$f"
 
       if [[ ''${1:-} != --refresh ]]; then
-        notify-send -a Niri -t 2000 "Blur preset" "''${names[i]} ($((i + 1))/''${#names[@]})"
+        # Silent, and transient so it stays out of the DMS notification history
+        notify-send -a Niri -t 2000 -e -h boolean:suppress-sound:true \
+          "Blur preset" "''${names[i]} ($((i + 1))/''${#names[@]})"
       fi
     '';
   };
