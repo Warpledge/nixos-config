@@ -1,11 +1,7 @@
 #=====================================================================#
 # GAMEMODE CONFIGURATION
 #=====================================================================#
-{
-  pkgs,
-  lib,
-  ...
-}: {
+{pkgs, ...}: {
   #--------------------------------------------------------------------#
   #-- Packages
   #--------------------------------------------------------------------#
@@ -26,11 +22,8 @@
         desiredgov = "performance";
         inhibit_screensaver = 1; # Disable screensaver during gaming
       };
-      gpu = {
-        apply_gpu_optimisations = "accept-responsibility"; # Apply GPU tweaks
-        gpu_device = lib.mkDefault 0; # cardN in /sys/class/drm; set per host in gpu.nix
-        amd_performance_level = "high"; # AMD GPU higher clock level
-      };
+      #--- No gpu section: amd_performance_level = "high" pins the RX 9070 XT
+      #--- to its 2400 MHz game clock, so it never boosts (docs/todo/gpu-undervolt.md)
       custom = {
         start = "${pkgs.libnotify}/bin/notify-send 'GameMode' 'Optimizations activated'";
         end = "${pkgs.libnotify}/bin/notify-send 'GameMode' 'Optimizations deactivated'";

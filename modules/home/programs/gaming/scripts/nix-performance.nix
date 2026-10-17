@@ -6,7 +6,7 @@
 #- Global tuning env vars already live in gaming/default.nix; this adds the parts
 #- that must stay per-game:
 #-   unset LD_PRELOAD drops Steam's overlay hook; must run before gamemoderun
-#-   gamemoderun      governor, AMD GPU clocks, renice, screensaver inhibit
+#-   gamemoderun      governor, renice, screensaver inhibit
 #-                    (settings in nixos/gaming/performance/gamemode.nix)
 #-   mangohud         FPS overlay (config in gaming/default.nix); skipped
 #-                    inside gamescope, which takes --mangoapp instead

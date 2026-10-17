@@ -80,12 +80,6 @@
   };
 
   #--------------------------------------------------------------------#
-  #-- GameMode
-  #--------------------------------------------------------------------#
-  #--- DRM card of the RX 9070 XT; simpledrm takes card0 during boot
-  programs.gamemode.settings.gpu.gpu_device = 1;
-
-  #--------------------------------------------------------------------#
   #-- GPU Tuning (LACT)
   #--------------------------------------------------------------------#
   #--- Overdrive unlocks LACT's voltage, clock and fan-curve controls. The mask
