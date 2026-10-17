@@ -485,7 +485,8 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | `Mod+Q` | Close window |
 | `Mod+Space` | Toggle floating |
 | `Mod+Shift+Space` | Switch focus between floating and tiled windows |
-| `Mod+O` | Turn the window's opacity rule off and on |
+| `Mod+Shift+T` | Turn the window's opacity rule off and on |
+| `Mod+T` | Cycle blur presets (Subtle, Default, Clear) |
 | `Mod+Escape` | Take shortcuts back from an app that inhibits them |
 | `Mod+F` | Maximize column |
 | `Mod+Shift+F` | Fullscreen |
@@ -497,7 +498,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | `Mod+Shift+Z` | Reset window height |
 | `Mod+G` | Maximize window to screen edges |
 | `Mod+[` / `Mod+]` | Pull the window on the left/right into this column, or push this one out |
-| `Mod+T` | Toggle tabs for the column |
+| `Mod+\` | Toggle tabs for the column |
 
 #### Focus & Movement
 

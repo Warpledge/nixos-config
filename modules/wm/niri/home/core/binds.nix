@@ -36,7 +36,9 @@
     "Mod+Space".action.toggle-window-floating = {};
     "Mod+Shift+Space".action.switch-focus-between-floating-and-tiling = {};
     # Turn the window's opacity rule (rules.nix) off and on
-    "Mod+O".action.toggle-window-rule-opacity = {};
+    "Mod+Shift+T".action.toggle-window-rule-opacity = {};
+    # Cycle the blur and translucency presets (blur-presets.nix)
+    "Mod+T".action.spawn = "niri-blur-preset";
     # Takes shortcuts back from an app that inhibits them
     "Mod+Escape" = {
       action.toggle-keyboard-shortcuts-inhibit = {};
@@ -80,7 +82,7 @@
     # Pull the neighbouring window into this column, or push this one out of it
     "Mod+BracketLeft".action.consume-or-expel-window-left = {};
     "Mod+BracketRight".action.consume-or-expel-window-right = {};
-    "Mod+T".action.toggle-column-tabbed-display = {};
+    "Mod+Backslash".action.toggle-column-tabbed-display = {};
 
     #--- Window Resize
     "Mod+Ctrl+Left".action.set-column-width = "-80";

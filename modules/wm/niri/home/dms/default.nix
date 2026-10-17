@@ -230,25 +230,9 @@ in {
     };
 
     ".config/niri/dms/wpblur.kdl" = {
+      # Blur and translucency come from the Mod+T preset (core/blur-presets.nix)
       text = ''
-        // Wallpaper blur configuration (DMS)
-        blur {
-            passes 4
-            offset 4.0
-            noise 0.0
-            saturation 1.2
-        }
-
-        // Catch-all: every window gets the wallpaper blur behind it.
-        // Excluded app-ids opt out entirely (Steam renders its own opaque chrome).
-        window-rule {
-            exclude app-id="^steam$"
-
-            background-effect {
-                blur true
-                xray true
-            }
-        }
+        include optional=true "${config.xdg.configHome}/niri/dms/blur-preset.kdl"
       '';
     };
   };
