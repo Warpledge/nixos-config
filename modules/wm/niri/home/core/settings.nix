@@ -64,7 +64,7 @@ in {
         };
         focus-follows-mouse = {
           enable = true;
-          max-scroll-amount = "90%";
+          max-scroll-amount = "0%"; # hovering a part-hidden window won't scroll to it
         };
         warp-mouse-to-focus.enable = false; # automatically move cursor to focused window
         # re-pressing the active workspace's key returns to the previous one
