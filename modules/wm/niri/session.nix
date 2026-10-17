@@ -7,19 +7,25 @@
   inputs,
   username,
   ...
-}: {
+}: let
+  # niri-flake's git build, for 10-bit output (docs/todo/niri-10-bit.md)
+  niri = inputs.niri.packages.${pkgs.stdenv.hostPlatform.system}.niri-unstable;
+in {
   imports = [inputs.dank-greeter.nixosModules.default];
 
   #--------------------------------------------------------------------#
   #-- Window Manager
   #--------------------------------------------------------------------#
-  programs.niri.enable = true;
+  programs.niri = {
+    enable = true;
+    package = niri;
+  };
 
   #--------------------------------------------------------------------#
   #-- Display Manager
   #--------------------------------------------------------------------#
   services = {
-    displayManager.sessionPackages = [pkgs.niri];
+    displayManager.sessionPackages = [niri];
     greetd = {
       enable = true;
       # command is set by programs.dms-greeter (mkDefault) below

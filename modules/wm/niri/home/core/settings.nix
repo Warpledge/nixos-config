@@ -3,6 +3,7 @@
 #=====================================================================#
 {
   config,
+  osConfig,
   pkgs,
   lib,
   hostConfig,
@@ -23,7 +24,7 @@ in {
   #--------------------------------------------------------------------#
   programs.niri = {
     enable = true;
-    package = pkgs.niri;
+    package = osConfig.programs.niri.package; # set in niri/session.nix
     settings = {
       #--- Environment Variables
       environment = {
