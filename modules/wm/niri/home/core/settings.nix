@@ -95,6 +95,9 @@ in {
 
       #--- Layout Configuration
       layout = {
+        # Shows the backdrop wallpaper (rules.nix) through workspaces
+        background-color =
+          lib.mkIf (hostConfig.media.wallpaperEngine or false) "transparent";
         focus-ring = {
           enable = true; # displays around windows
           width = 2;

@@ -1,4 +1,6 @@
 {
+  config,
+  pkgs,
   inputs,
   lib,
   hostname,
@@ -7,6 +9,11 @@
 }: let
   settings = lib.importJSON ./settings.json;
   mainBar = builtins.head settings.barConfigs;
+  # Same shape the DMS module would link read-only (distro/nix/home.nix)
+  pluginSettings = (pkgs.formats.json {}).generate "plugin_settings.json" (
+    lib.mapAttrs (_: p: {enabled = p.enable;} // p.settings)
+    (lib.filterAttrs (_: p: p.enable) config.programs.dank-material-shell.plugins)
+  );
 in {
   #--------------------------------------------------------------------#
   #-- DankMaterialShell SETTINGS --#
@@ -22,8 +29,9 @@ in {
     niri.enableSpawn = false;
 
     #--- Plugins
-    # Any `settings` here makes plugin_settings.json a read-only store link, so
-    # changes in a plugin's settings page no longer save: mirror them back here.
+    # plugin_settings.json is written as a normal file (dmsPluginSettings below):
+    # `settings` here win on each rebuild, keys a plugin saves itself are kept.
+    managePluginSettings = false;
     plugins = {
       # The variant pins the desktop's GPU by PCI address; the bar widget id
       # in settings.json (amdGpuMonitor:<id>) must match it.
@@ -85,6 +93,9 @@ in {
       };
 
       wallpaperCarousel.enable = true;
+
+      # Runs linux-wallpaperengine itself; picks are saved in plugin_settings.json
+      linuxWallpaperEngine.enable = hostConfig.media.wallpaperEngine or false;
     };
 
     #--- Core features
@@ -114,7 +125,12 @@ in {
     "Mod+Comma".action.spawn = dms "settings toggle"; # Settings
     "Mod+N".action.spawn = dms "notepad toggle"; # Notepad
     "Mod+K".action.spawn = dms "powermenu toggle"; # Power Menu
-    "Mod+W".action.spawn = dms "wallpaperCarousel toggle"; # Browse Wallpapers
+    # Browse Wallpapers
+    "Mod+W".action.spawn = dms (
+      if hostConfig.media.wallpaperEngine or false
+      then "linuxWallpaperEngine picker"
+      else "wallpaperCarousel toggle"
+    );
     "Mod+Shift+N".action.spawn = dms "night toggle"; # Night Mode Toggle
     "Mod+L".action.spawn = dms "lock lock"; # Toggle lock screen
     "Mod+I".action.spawn = dms "inhibit toggle"; # Toggle idle inhibit
@@ -175,6 +191,11 @@ in {
                 showOnLastDisplay = false;
               })
           ];
+        }
+        # linux-wallpaperengine draws the wallpaper instead
+        // lib.optionalAttrs (hostConfig.media.wallpaperEngine or false) {
+          screenPreferences.wallpaper = [];
+          blurredWallpaperLayer = false;
         });
     };
 
@@ -231,6 +252,24 @@ in {
       '';
     };
   };
+
+  #--- DMS Plugin Settings
+  # Declared settings merged over the live file, so plugins can still save
+  home.activation.dmsPluginSettings = lib.hm.dag.entryAfter ["linkGeneration"] ''
+    f="${config.xdg.configHome}/DankMaterialShell/plugin_settings.json"
+    if [[ -v DRY_RUN ]]; then
+      echo "Would merge ${pluginSettings} into $f"
+    else
+      if [[ -s "$f" ]]; then
+        merged="$(${lib.getExe pkgs.jq} -s '.[0] * .[1]' "$f" ${pluginSettings})"
+      else
+        merged="$(cat ${pluginSettings})"
+      fi
+      rm -f "$f"
+      mkdir -p "$(dirname "$f")"
+      printf '%s\n' "$merged" > "$f"
+    fi
+  '';
 
   #--------------------------------------------------------------------#
   #-- Imports

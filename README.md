@@ -175,6 +175,7 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 | **Screenshot / Recording** | [Quick Capture][quick-capture] (Niri, Hyprland), [gpu-screen-recorder][gpu-screen-recorder] |
 | **Clipboard** | [ClipBoard+][clipboard-plus] (Niri) |
 | **Wallpaper Picker** | [Wallpaper Carousel][wallpaper-carousel] (Niri) |
+| **Animated Wallpaper** | [linux-wallpaperengine][linux-wallpaperengine] plays Wallpaper Engine scenes and videos from the Steam Workshop, in place of DMS's wallpaper; the [Linux Wallpaper Engine][dms-wallpaperengine] DMS plugin picks them (desktop) |
 | **Graphics** | [Blender][blender], [Krita][krita], [Affinity Suite v3][affinity-nix] (via Wine), all off by default |
 | **Audio** | [Reaper][reaper] (DAW, with [SWS][sws] and [ReaPack][reapack]) |
 | **Guitar** | [TONE3000][tone3000] (official NAM player, browses its capture and IR library in-app), [Guitarix][guitarix] (modular amp rig), [ir.lv2][ir-lv2] for cabinet IRs, [qpwgraph][qpwgraph] for patching, plus [FxFloorBoard][katana-fxfloorboard] to edit patches on the Boss Katana itself |
@@ -276,6 +277,8 @@ Most of what's below is optional per machine, set in its `hostConfig` file.
 [quick-capture]: https://github.com/hthienloc/dms-plugins
 [clipboard-plus]: https://github.com/Dadangdut33/dms-plugins
 [wallpaper-carousel]: https://github.com/motor-dev/wallpaperCarousel
+[linux-wallpaperengine]: https://github.com/Almamu/linux-wallpaperengine
+[dms-wallpaperengine]: https://github.com/sgtaziz/dms-wallpaperengine
 [blender]: https://www.blender.org
 [krita]: https://krita.org
 [affinity-nix]: https://github.com/mrshmllow/affinity-nix
@@ -663,7 +666,7 @@ flake.nix
 | [`nur`](https://github.com/nix-community/NUR) | NixOS User Repository |
 | [`niri`](https://github.com/epireyn/niri-flake) (epireyn/niri-flake) | Niri WM |
 | [`dms`](https://github.com/AvengeMedia/DankMaterialShell) (AvengeMedia, stable) | DankMaterialShell |
-| [`dms-plugin-registry`](https://github.com/AvengeMedia/dms-plugin-registry) | DankMaterialShell plugins (AI usage overview, Quick Capture, AMD GPU monitor, ClipBoard+, Wallpaper Carousel) |
+| [`dms-plugin-registry`](https://github.com/AvengeMedia/dms-plugin-registry) | DankMaterialShell plugins (AI usage overview, Quick Capture, AMD GPU monitor, ClipBoard+, Wallpaper Carousel, Linux Wallpaper Engine) |
 | [`dank-greeter`](https://github.com/AvengeMedia/dank-greeter) | Login screen that matches DankMaterialShell |
 | [`stylix`](https://github.com/nix-community/stylix) | System-wide theming |
 | [`catppuccin`](https://github.com/catppuccin/nix) | Catppuccin theme module |

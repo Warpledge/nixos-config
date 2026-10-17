@@ -61,6 +61,7 @@
     ++ lib.optionals hostConfig.media.streamlinkTwitchGui [./media/streamlink-twitch-gui.nix]
     ++ lib.optionals hostConfig.media.moku [./media/moku]
     ++ lib.optionals hostConfig.media.boorusama [./media/boorusama.nix]
+    ++ lib.optionals hostConfig.media.wallpaperEngine [./media/wallpaper-engine.nix]
     ++ lib.optionals hostConfig.media.tonkatsuBox [./media/tonkatsu-box.nix]
     #--- Terminals (controlled by hostConfig)
     ++ lib.optionals hostConfig.terminals.kitty [./terminals/kitty.nix]

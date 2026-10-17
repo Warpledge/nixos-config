@@ -107,6 +107,7 @@
     moku = false; # Manga, novel and anime reader (source build with UI fixes)
     streamlinkTwitchGui = true; # Twitch browser via streamlink + mpv (AppImage)
     boorusama = false; # Booru image board browser (AppImage)
+    wallpaperEngine = false; # Animated Steam Workshop wallpapers (DP-2/DP-3)
 
     # Local (~/.local/opt bundles, kept out of git)
     tonkatsuBox = false; # Collection manager (games, film, anime, manga, books)

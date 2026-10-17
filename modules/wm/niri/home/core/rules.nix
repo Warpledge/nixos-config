@@ -373,8 +373,12 @@ in {
     window-rules = windowRules;
     layer-rules = [
       {
-        # DMS's blurred wallpaper copy (blurredWallpaperLayer in dms/settings.json)
-        matches = [{namespace = "^dms:blurwallpaper$";}];
+        # DMS's blurred wallpaper copy (blurredWallpaperLayer in dms/settings.json),
+        # or linux-wallpaperengine when media.wallpaperEngine replaces it
+        matches = [
+          {namespace = "^dms:blurwallpaper$";}
+          {namespace = "^linux-wallpaperengine$";}
+        ];
         place-within-backdrop = true;
       }
       {
