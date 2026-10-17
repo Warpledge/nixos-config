@@ -25,5 +25,6 @@
   services.scx = {
     enable = true;
     scheduler = "scx_lavd";
+    extraArgs = ["--performance"]; # Default autopilot packs light loads onto fewer cores
   };
 }
