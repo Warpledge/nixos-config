@@ -27,5 +27,5 @@ old path, and Heroic's repair couldn't bring it back. The fix there was copying
 it into `games/EndField Game/AntiCheatExpert/` (md5
 `673476ae6a94da69d28d75f2d60cb1fb`).
 
-If ACE misbehaves after a Proton update, try `PROTON_USE_NTSYNC=0` in the launch
-options first; `home/variables.nix` turns it on for every game.
+If ACE misbehaves after a Proton update, try `PROTON_NO_NTSYNC=1` in the launch
+options first; `dwproton-11.0-14` turns NTSync on by default.

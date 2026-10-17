@@ -98,7 +98,7 @@ ENABLE_LAYER_MESA_ANTI_LAG=1 nix-performance %command%
 **Notes:**
 - `ENABLE_LAYER_MESA_ANTI_LAG=1`: Mesa Anti-Lag Vulkan layer, the same as for Wuthering Waves
 - `nix-performance` clears `LD_PRELOAD`, which drops the Steam overlay. In-game purchases go through the overlay, so launch with plain `%command%` to buy anything
-- NTSYNC comes from the global `PROTON_USE_NTSYNC=1` in `home/variables.nix`; it fixed the 5 to 20 minute freezes from the 1.2 patch
+- NTSync is on by default in `dwproton-11.0-14` (its Proton log shows `ntsync: up and running`); it fixed the 5 to 20 minute freezes from the 1.2 patch
 - Do not enable in-game Reflex: it crashes on AMD
 
 **Previously used, dropped** (Epic copy in Heroic, before the move to Steam):

@@ -54,16 +54,20 @@ PROTON_NO_D3D12=1
 an older renderer. Needed for games that misdetect capabilities.
 
 ```
-PROTON_ENABLE_NVAPI=1
+PROTON_FORCE_NVAPI=1
 ```
-**What it does:** Exposes NVIDIA NVAPI (DLSS, Reflex, GPU info). Relevant on the
-**laptop's RTX 4070** when routing a game to the dGpu; harmless/ignored on AMD.
+**What it does:** Loads NVIDIA NVAPI (DLSS, Reflex, GPU info) even in games the
+Proton build turns it off for. GE, DW and CachyOS Proton load it by default, and
+`PROTON_DISABLE_NVAPI=1` turns it off; none of them reads `PROTON_ENABLE_NVAPI`
+(their `proton` scripts, checked 2026-10-17). Relevant on the **laptop's RTX 4070**
+when routing a game to the dGPU. On AMD it can break Proton's FSR4 upgrade
+(low_latency_layer README).
 
 ```
 DXVK_ASYNC=1
 ```
-**What it does:** Async shader compilation to reduce first-run stutter. Already
-set globally in `home/programs/gaming/default.nix`, but useful to know per-game.
+**What it does:** Nothing with the installed Proton builds: none of their DXVK
+DLLs contains the variable (checked 2026-10-17), and the repo doesn't set it.
 
 ---
 

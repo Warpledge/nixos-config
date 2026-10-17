@@ -44,17 +44,8 @@
   #--------------------------------------------------------------------#
 
   environment.variables = {
-    #--- Prevents AMDVLK from being picked for games—critical for performance
-    AMD_VULKAN_ICD = "RADV";
-
     #--- Force RADV; both 64- and 32-bit ICDs so 32-bit Proton games work
     VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/radeon_icd.x86_64.json:/run/opengl-driver-32/share/vulkan/icd.d/radeon_icd.i686.json";
-
-    #--- RDNA 3 specific tweaks
-    DISABLE_LAYER_AMD_SWITCHABLE_GRAPHICS_1 = "1";
-
-    #--- Disable shader disk cache size limit (useful for large game libraries)
-    AMD_SHADER_DISK_CACHE_SIZE = "10737418240"; # 10GB shader cache
   };
 
   #--- Kernel Tweaks
