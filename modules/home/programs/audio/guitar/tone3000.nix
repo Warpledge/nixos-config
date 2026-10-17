@@ -42,7 +42,10 @@
         libxrandr
         libxscrnsaver
       ]))
-      ++ ["/run/opengl-driver/lib"];
+      #--- PipeWire's libjack for the JACK backend: ALSA splits capture and
+      #--- playback onto two clocks (Katana vs onboard) and the sound drops out.
+      #--- Not getLib: that would return pipewire's `lib` output, not `jack`.
+      ++ ["${pkgs.pipewire.jack}/lib" "/run/opengl-driver/lib"];
 
     #--- install.sh is for FHS distros; place the formats by hand instead so
     #--- LV2_PATH/CLAP_PATH/VST3_PATH below pick them up out of the profile.
