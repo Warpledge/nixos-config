@@ -4,15 +4,11 @@
 #- RPG Maker 2000 game (English patch) run on native EasyRPG in gamescope
 #- at 320x240, starting on sharp bilinear (Super+H cycles the others). The
 #- game folder is kept outside the repo.
-{
-  config,
-  pkgs,
-  ...
-}: let
-  gameDir = "$HOME/Games/Visual Novels/+RPGM/Tobira no Densetsu English/Tobiden";
+{pkgs, ...}: let
+  gameDir = "/mnt/games/Visual Novels/+RPGM/Tobira no Densetsu English/Tobiden";
 
   #--- Extracted from RPG_RT.exe (wrestool + icotool, icoutils)
-  icon = "${config.home.homeDirectory}/Games/Visual Novels/+RPGM/Tobira no Densetsu English/icon.png";
+  icon = "/mnt/games/Visual Novels/+RPGM/Tobira no Densetsu English/icon.png";
 
   #--- Fullscreen makes EasyRPG fill gamescope's 320x240 instead of a scaled window
   tobira-no-densetsu =
