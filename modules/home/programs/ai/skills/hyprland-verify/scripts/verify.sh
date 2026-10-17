@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Build a host's generated Hyprland Lua config and run Hyprland's own verifier on it.
-# Usage: verify.sh [desktop|laptop] [repo-path]
+# Build a machine's generated Hyprland Lua config (its main user's) and run
+# Hyprland's own verifier on it.
+# Usage: verify.sh [desktop|laptop|<machine>] [repo-path]
 # Works under any WM: windowManager is overridden to "hyprland" in memory only.
 set -euo pipefail
 
@@ -14,9 +15,9 @@ out="$(nix build --no-link --print-out-paths --impure --expr "
   let
     f = builtins.getFlake (toString $repo);
     d = f.nixosConfigurations.$host;
-    hc = d._module.specialArgs.hostConfig // { windowManager = \"hyprland\"; };
-    e = d.extendModules { specialArgs = { hostConfig = hc; }; };
-    hm = e.config.home-manager.users.\${hc.username};
+    m = d._module.specialArgs.machine // { windowManager = \"hyprland\"; };
+    e = d.extendModules { specialArgs = { machine = m; }; };
+    hm = e.config.home-manager.users.\${m.mainUser};
     files = builtins.filter (n: builtins.match \"hypr/.*\\\\.lua\" n != null) (builtins.attrNames hm.xdg.configFile);
   in e.pkgs.linkFarm \"hyprland-verify\" (
     map (n: { name = n; path = hm.xdg.configFile.\${n}.source; }) files

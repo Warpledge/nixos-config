@@ -4,10 +4,10 @@
 {
   lib,
   pkgs,
-  hostConfig,
+  user,
   ...
 }: {
-  config = lib.mkIf hostConfig.claude.enable {
+  config = lib.mkIf user.claude.enable {
     #--------------------------------------------------------------------#
     #-- Package Installation
     #--------------------------------------------------------------------#

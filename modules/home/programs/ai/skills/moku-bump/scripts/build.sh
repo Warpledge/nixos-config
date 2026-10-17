@@ -11,7 +11,7 @@ nix build --no-link --print-out-paths --impure -L --expr "
   let
     f = builtins.getFlake (toString $repo);
     d = f.nixosConfigurations.desktop;
-    hm = d.config.home-manager.users.\${d._module.specialArgs.hostConfig.username};
+    hm = d.config.home-manager.users.\${d._module.specialArgs.machine.mainUser};
   in builtins.head (builtins.filter (p: (p.pname or \"\") == \"moku\") hm.home.packages)" >"$log" 2>&1
 status=$?
 

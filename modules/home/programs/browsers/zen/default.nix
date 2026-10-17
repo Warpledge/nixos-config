@@ -2,8 +2,8 @@
 # ZEN BROWSER CONFIGURATION
 #=====================================================================#
 {
+  config,
   inputs,
-  username,
   ...
 }: {
   programs.zen-browser = {
@@ -16,7 +16,7 @@
     #--------------------------------------------------------------------#
     profiles."default" = {
       id = 0;
-      name = "${username}";
+      name = config.home.username;
       isDefault = true;
 
       #--- Settings

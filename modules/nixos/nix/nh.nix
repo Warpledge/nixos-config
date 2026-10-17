@@ -3,7 +3,7 @@
 #=====================================================================#
 {
   pkgs,
-  username,
+  machine,
   ...
 }: {
   #--------------------------------------------------------------------#
@@ -15,7 +15,7 @@
       enable = true;
       extraArgs = "--keep-since 5d --keep 5"; # Keep 5 days + 5 generations
     };
-    flake = "/home/${username}/nixos-config";
+    flake = machine.flakePath; # flakePath in the machine's settings.nix
   };
 
   #--------------------------------------------------------------------#

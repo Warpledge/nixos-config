@@ -3,15 +3,16 @@
   pkgs,
   inputs,
   lib,
-  hostname,
-  hostConfig,
+  user,
   ...
 }: let
-  settings = lib.importJSON ./settings.json;
-  mainBar = builtins.head settings.barConfigs;
+  # The theme path in the mirrored file names one home folder; point it at this user's
+  settings =
+    lib.importJSON ./settings.json
+    // {customThemeFile = "${config.xdg.configHome}/DankMaterialShell/themes/catppuccin/theme.json";};
   # Same shape the DMS module would link read-only (distro/nix/home.nix)
   pluginSettings = (pkgs.formats.json {}).generate "plugin_settings.json" (
-    lib.mapAttrs (_: p: {enabled = p.enable;} // p.settings)
+    lib.mapAttrs (name: p: {enabled = p.enable;} // config.dms.pluginSettings.${name} or {})
     (lib.filterAttrs (_: p: p.enable) config.programs.dank-material-shell.plugins)
   );
 in {
@@ -29,73 +30,23 @@ in {
     niri.enableSpawn = false;
 
     #--- Plugins
-    # plugin_settings.json is written as a normal file (dmsPluginSettings below):
-    # `settings` here win on each rebuild, keys a plugin saves itself are kept.
+    # plugin_settings.json is written as a normal file (dmsPluginSettings below),
+    # from dms.pluginSettings: those win on each rebuild, keys a plugin saves
+    # itself are kept.
     managePluginSettings = false;
     plugins = {
-      # The variant pins the desktop's GPU by PCI address; the bar widget id
-      # in settings.json (amdGpuMonitor:<id>) must match it.
-      amdGpuMonitor = {
-        enable = hostname == "desktop";
-        settings = {
-          popoutStyle = "default";
-          minimumWidth = true;
-          variants = [
-            {
-              id = "variant_1791177076814";
-              name = "AMD Radeon RX 9070 XT";
-              originalName = "AMD Radeon RX 9070 XT";
-              description = "Monitor your discrete AMD Radeon RX 9070 XT";
-              gpuPci = "0000:09:00.0";
-              gpuType = "dGPU";
-              icon = "memory";
-            }
-          ];
-        };
-      };
-
-      # The plugin stores its options as strings, booleans included.
-      aiOverviewControl = {
-        enable = hostConfig.claude.enable;
-        settings = {
-          providerSelection = "claude";
-          pillProviders = "claude";
-          languageOverride = "en_US";
-          densityMode = "comfortable";
-          pillMode = "auto";
-          pillTooltip = "true";
-          pillCompact = "false";
-          showAntigravityModelDetails = "false";
-          notifyThreshold = "85";
-        };
-      };
-
-      quickCapture = {
-        enable = true;
-        settings = {
-          toolbarPosition = "bottom";
-          showToolbarBorder = false;
-          show_shortcut_hints = true;
-          color_palette_preset = "catppuccin";
-        };
-      };
+      # amdGpuMonitor is per machine: machines/desktop/hardware/gpu.nix
+      aiOverviewControl.enable = user.claude.enable;
+      quickCapture.enable = true;
 
       # A bar widget: its IPC target only exists while it sits in a bar
       # (rightWidgets in settings.json).
-      clipboardPlus = {
-        enable = true;
-        settings = {
-          backgroundOpacity = 80; # dim behind the panel, 0-80
-          panelOpacityClipboard = 80;
-          panelOpacityPinned = 80;
-          emojiUnicodeEnabled = false;
-        };
-      };
+      clipboardPlus.enable = true;
 
       wallpaperCarousel.enable = true;
 
       # Runs linux-wallpaperengine itself; picks are saved in plugin_settings.json
-      linuxWallpaperEngine.enable = hostConfig.media.wallpaperEngine or false;
+      linuxWallpaperEngine.enable = user.media.wallpaperEngine;
     };
 
     #--- Core features
@@ -105,6 +56,37 @@ in {
     enableAudioWavelength = true; # Audio visualizer (cava)
     enableCalendarEvents = false; # khal calendar: 0.13.0 broken in nixpkgs
     enableClipboardPaste = true; # Clipboard pasting via wtype
+  };
+
+  #--- Plugin settings, here rather than in plugins.<name>.settings, which DMS
+  #--- warns it ignores while managePluginSettings is off
+  dms.pluginSettings = {
+    # The plugin stores its options as strings, booleans included.
+    aiOverviewControl = {
+      providerSelection = "claude";
+      pillProviders = "claude";
+      languageOverride = "en_US";
+      densityMode = "comfortable";
+      pillMode = "auto";
+      pillTooltip = "true";
+      pillCompact = "false";
+      showAntigravityModelDetails = "false";
+      notifyThreshold = "85";
+    };
+
+    quickCapture = {
+      toolbarPosition = "bottom";
+      showToolbarBorder = false;
+      show_shortcut_hints = true;
+      color_palette_preset = "catppuccin";
+    };
+
+    clipboardPlus = {
+      backgroundOpacity = 80; # dim behind the panel, 0-80
+      panelOpacityClipboard = 80;
+      panelOpacityPinned = 80;
+      emojiUnicodeEnabled = false;
+    };
   };
 
   #--------------------------------------------------------------------#
@@ -127,7 +109,7 @@ in {
     "Mod+K".action.spawn = dms "powermenu toggle"; # Power Menu
     # Browse Wallpapers
     "Mod+W".action.spawn = dms (
-      if hostConfig.media.wallpaperEngine or false
+      if user.media.wallpaperEngine
       then "linuxWallpaperEngine picker"
       else "wallpaperCarousel toggle"
     );
@@ -174,29 +156,13 @@ in {
     # is one such rewriter — it forces squareCorners and shadowIntensity off.
     ".config/DankMaterialShell/settings.json" = {
       text = builtins.toJSON (settings
-        // lib.optionalAttrs (hostname == "desktop") {
-          # The OLED (DP-2) gets an auto-hiding copy of the main bar
-          barConfigs = [
-            (mainBar
-              // {
-                screenPreferences = ["DP-3"];
-                showOnLastDisplay = false;
-              })
-            (mainBar
-              // {
-                id = "oled";
-                name = "OLED Bar";
-                autoHide = true;
-                screenPreferences = ["DP-2"];
-                showOnLastDisplay = false;
-              })
-          ];
-        }
         # linux-wallpaperengine draws the wallpaper instead
-        // lib.optionalAttrs (hostConfig.media.wallpaperEngine or false) {
+        // lib.optionalAttrs user.media.wallpaperEngine {
           screenPreferences.wallpaper = [];
           blurredWallpaperLayer = false;
-        });
+        }
+        # A machine's own keys (bars per monitor, lock timeout), from its wm/niri.nix
+        // config.dms.extraSettings);
     };
 
     #--- DMS Clipboard Settings
@@ -262,5 +228,20 @@ in {
     inputs.dms.homeModules.dank-material-shell
     inputs.dms.homeModules.niri
     inputs.dms-plugin-registry.homeModules.default
+    {
+      # Not DMS's own programs.dank-material-shell.settings, which would write
+      # the same file
+      options.dms.extraSettings = lib.mkOption {
+        type = lib.types.attrs;
+        default = {};
+        description = "Keys merged over settings.json on one machine.";
+      };
+      # Hyprland's DMS module declares the same option
+      options.dms.pluginSettings = lib.mkOption {
+        type = lib.types.attrsOf lib.types.attrs;
+        default = {};
+        description = "Settings per plugin name, merged into plugin_settings.json.";
+      };
+    }
   ];
 }

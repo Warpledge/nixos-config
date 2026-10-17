@@ -3,7 +3,7 @@
 #=====================================================================#
 {
   lib,
-  hostConfig,
+  machine,
   ...
 }: {
   #--------------------------------------------------------------------#
@@ -14,6 +14,6 @@
       ./daemon.nix
       ./gui.nix
     ]
-    #--- Split tunnel (controlled by hostConfig.mullvad.splitTunnel)
-    ++ lib.optionals ((hostConfig.mullvad.splitTunnel or []) != []) [./split-tunnel.nix];
+    #--- Split tunnel (controlled by mullvad.splitTunnel in machine settings)
+    ++ lib.optionals (machine.mullvad.splitTunnel != []) [./split-tunnel.nix];
 }

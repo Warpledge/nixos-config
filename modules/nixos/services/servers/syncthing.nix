@@ -1,11 +1,12 @@
 #=====================================================================#
 # SYNCTHING
 #=====================================================================#
-#- Peer-to-peer file sync, run as the main user. Web UI at
-#- http://127.0.0.1:8384, where devices and folders are paired.
+#- Peer-to-peer file sync, run as the main user (mainUser in the machine's
+#- settings.nix). Web UI at http://127.0.0.1:8384, where devices and folders
+#- are paired.
 {
   config,
-  username,
+  machine,
   ...
 }: {
   #--------------------------------------------------------------------#
@@ -13,8 +14,8 @@
   #--------------------------------------------------------------------#
   services.syncthing = {
     enable = true;
-    user = username;
-    dataDir = "/home/${username}";
+    user = machine.mainUser;
+    dataDir = "/home/${machine.mainUser}";
     openDefaultPorts = true; # TCP/UDP 22000 sync, UDP 21027 LAN discovery
 
     #--- Nothing is declared in Nix, so these must stay false or every
@@ -45,7 +46,7 @@
   #--------------------------------------------------------------------#
   #- Opens the web UI as a Helium app window. Needs browsers.helium. Shares
   #- the stock entry's name, so it replaces the one that opens the default browser.
-  home-manager.users.${username}.xdg.desktopEntries.syncthing-ui = {
+  home-manager.users.${machine.mainUser}.xdg.desktopEntries.syncthing-ui = {
     name = "Syncthing";
     comment = "File synchronization";
     exec = "helium --app=http://${config.services.syncthing.guiAddress}/index.html";

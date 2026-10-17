@@ -4,10 +4,10 @@
 {
   lib,
   pkgs,
-  hostConfig,
+  user,
   ...
 }: {
-  config = lib.mkIf hostConfig.lmstudio.enable {
+  config = lib.mkIf user.lmstudio.enable {
     #--------------------------------------------------------------------#
     #-- Package Installation
     #--------------------------------------------------------------------#

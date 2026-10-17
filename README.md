@@ -5,6 +5,7 @@ The NixOS configuration behind my desktop and laptop, both daily driven since 20
 ## Contents
 
 - [Host Machines](#host-machines)
+- [Use It on Your Machine](#use-it-on-your-machine)
 - [Screenshots](#screenshots)
 - [Theming](#theming)
 - [System Management TUI Script](#system-management-tui-script)
@@ -18,6 +19,25 @@ The NixOS configuration behind my desktop and laptop, both daily driven since 20
 
 - **Desktop:** Ryzen 5800X3D + RX 9070 XT (AMD-only), 280Hz OLED + 144Hz secondary
 - **Laptop:** Legion Slim 5, Ryzen 7735HS + hybrid AMD 680M / RTX 4070, 1600p@165Hz
+
+## Use It on Your Machine
+
+Install NixOS first. The graphical installer works, disk encryption included, as long as the computer boots with UEFI. Then, logged in as the account the installer made:
+
+```bash
+nix-shell -p git --run "git clone https://github.com/Warpledge/nixos-config ~/nixos-config"
+cd ~/nixos-config
+./setup.sh
+```
+
+`setup.sh` asks what to call the computer and who will use it, copies `machines/_template` and `users/_template` into a folder for each, and fills them in: the hardware config, the time zone, language and keyboard picked in the installer, drivers for the graphics card it finds, and the lines an encrypted disk needs to unlock. Everyone starts with Zen, kitty, Helix, Zed, Nautilus, yazi, mpv and Steam and picks extras from a list. The new files are staged with git, since a flake ignores untracked files, and the system is built to start on the next boot.
+
+Afterwards:
+
+- **Apps:** each person's `users/<name>/settings.nix`, then `nixm rebuild`
+- **Services and hardware:** the machine's `machines/<name>/settings.nix` and `default.nix`
+- **Another person:** `./setup.sh add-user`
+- **Every setting:** listed with a comment in the two `_template/settings.nix` files; anything your copy leaves out is off
 
 ## Screenshots
 
@@ -126,7 +146,7 @@ Each run drops a `YYYY-MM-DD_HH-MM-SS` folder into `~/SyncBackups/<hostname>/Fre
 
 ## Components
 
-Most of what's below is optional per machine, set in its `hostConfig` file.
+Most of what's below is optional: apps are switched on per person in `users/<name>/settings.nix`, services per machine in `machines/<name>/settings.nix`.
 
 <details>
 <summary>🖥️ Desktop Environment</summary>
@@ -633,15 +653,22 @@ Same binds as the Niri table, `Mod+A` through `Mod+R`.
 **Layout:** top-level directories and what lives in each:
 
 ```
-flake.nix
-hosts/{desktop,laptop}/
-  ├── settings.nix                # per-host toggles and options
-  ├── default.nix                 # host entry
-  ├── hardware/                   # hardware-configuration.nix, GPU, swapfile (laptop)
-  ├── wm/                         # per-host WM overrides
-  └── minecraft-servers/          # GTNH + TerraFirmaGreg servers (laptop)
+flake.nix                         # one system per folder in machines/
+setup.sh                          # sets up a new computer, or adds a person
+lib/settings.nix                  # reads and checks the settings files
+machines/
+  ├── _template/                  # copied for a new computer
+  └── {desktop,laptop}/
+        ├── settings.nix          # machine toggles, and who logs in
+        ├── default.nix           # machine entry
+        ├── hardware/             # hardware-configuration.nix, GPU, swapfile (laptop)
+        ├── wm/                   # per-machine WM settings, monitors included
+        └── minecraft-servers/    # GTNH + TerraFirmaGreg servers (laptop)
+users/
+  ├── _template/                  # copied for a new person
+  └── warpledge/                  # my apps, on every machine
 modules/
-  ├── default.nix                 # NixOS + home-manager wiring
+  ├── default.nix                 # NixOS + one home-manager config per user
   ├── nixos/                      # system modules
   ├── home/                       # user modules
   ├── theme/                      # stylix, catppuccin, fonts, GTK, QT
@@ -651,9 +678,9 @@ docs/                           # personal notes I share between devices
 
 ```
 flake.nix
-  → hosts/{hostname}/default.nix             # Pick the machine
-    → hosts/{hostname}/settings.nix          # Read its on/off switches
-    → modules/default.nix                    # Wire up system + user config
+  → lib/settings.nix                         # Read the machine's settings and its users'
+  → machines/<name>/default.nix              # Pick the machine
+    → modules/default.nix                    # Wire up the system + each user's config
       → modules/{nixos,home}/                # Load only the enabled modules
       → modules/wm/${windowManager}/         # Load only the active window manager
 ```

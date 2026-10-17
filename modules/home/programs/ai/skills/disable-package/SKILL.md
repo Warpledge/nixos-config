@@ -18,14 +18,15 @@ The record lives in `docs/nixpkgs/disabled-packages.md`; read it first, since it
      | "\(.rev[0:7]) (\(.lastModified | todate | .[0:10]))"'
    ```
 2. **Switch it off the least invasive way**:
-   - The app has a hostConfig toggle: set it to `false` in **both**
-     `hosts/{desktop,laptop}/settings.nix` with a short trailing comment saying why,
+   - The app has a toggle: set it to `false` in `users/warpledge/settings.nix`, which
+     covers every machine, with a short trailing comment saying why,
      e.g. `reaper = false; # broken in nixpkgs c59305b, see disabled-packages.md`.
+     A system service's toggle is in each `machines/<name>/settings.nix` instead.
    - No toggle (a plain package list entry): drop it from that list and leave everything
      else in the module alone.
    - Don't comment the package out inside its module; the toggle is the switch.
 3. **Add a row** to the table: Package | Disabled in (the exact place, e.g. `audio.reaper =
-   false` in both `settings.nix` files) | Date (absolute, YYYY-MM-DD) | Broken at
+   false` in `users/warpledge/settings.nix`) | Date (absolute, YYYY-MM-DD) | Broken at
    nixpkgs (short rev and date, plus last good) | Reason (the actual error, not "broke").
 4. Hand back for the rebuild. A toggle flip needs no `nix flake check`; run it only if
    the change went beyond that (CLAUDE.md rule 1).

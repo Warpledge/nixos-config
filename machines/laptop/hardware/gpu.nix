@@ -22,6 +22,10 @@
     ];
   };
 
+  #--- hardware.nvidia below does nothing without "nvidia" here, Wayland
+  #--- included; X itself stays off (system/desktop/input.nix)
+  services.xserver.videoDrivers = ["nvidia"];
+
   hardware = {
     enableRedistributableFirmware = true;
     graphics = {
@@ -60,7 +64,7 @@
       prime = {
         #--- GPU switching offload - AMD iGPU for display, NVIDIA for compute
         offload.enable = true;
-        offload.enableOffloadCmd = true;
+        offload.enableOffloadCmd = true; # The nvidia-offload command
         #--- NVIDIA GeForce RTX 4070 Max-Q
         nvidiaBusId = "PCI:1:0:0";
         #--- AMD Radeon 680M (integrated)
@@ -77,10 +81,10 @@
       #--- Use AMD iGPU for display (Niri compatibility)
       LIBVA_DRIVER_NAME = "radeonsi";
       GBM_BACKEND = "mesa";
-      #--- Let applications detect both GPUs
-      #--- Enable NVIDIA offload for CUDA applications
-      __NV_PRIME_RENDER_OFFLOAD = "1";
-      __NV_PRIME_RENDER_OFFLOAD_PROVIDER = "NVIDIA-G0";
+      #--- Global offload, left off as in wm/niri.nix: it puts every EGL and
+      #--- Vulkan app on the 4070; nvidia-offload routes one app
+      # __NV_PRIME_RENDER_OFFLOAD = "1";
+      # __NV_PRIME_RENDER_OFFLOAD_PROVIDER = "NVIDIA-G0";
       # NOTE: CUDA_PATH disabled — re-enable if CUDA is needed
       # CUDA_PATH = "${pkgs.cudaPackages.cudatoolkit}";
     };
@@ -103,15 +107,6 @@
       # cudaPackages.cudatoolkit
       # cudaPackages.cudnn
       # cudaPackages.nccl
-
-      #--- Helper script for NVIDIA offload
-      (pkgs.writeShellScriptBin "nvidia-offload" ''
-        export __NV_PRIME_RENDER_OFFLOAD=1
-        export __NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0
-        export __GLX_VENDOR_LIBRARY_NAME=nvidia
-        export __VK_LAYER_NV_optimus=NVIDIA_only
-        exec "$@"
-      '')
     ];
   };
 

@@ -7,7 +7,7 @@ description: Compile-test this repo's AppArmor profiles before handing back. Use
 
 `nix flake check` builds the module but never parses the profile text, so a missing comma
 or a bad rule only shows up at boot, when `apparmor.service` fails to load the policy.
-This compiles every policy the host defines with `apparmor_parser`, without loading
+This compiles every policy the machine defines with `apparmor_parser`, without loading
 anything into the kernel, so no root is needed.
 
 ## Run it
@@ -18,8 +18,8 @@ bash <skill-dir>/scripts/check.sh desktop   # or: laptop
 
 - `git add` new profile files first; the flake ignores untracked files.
 - Each policy prints `ok` or `FAIL` with the parser's message; exit code 1 on any failure.
-- Check both hosts when a toggle gates the profile (`media.mpv`, `office.obsidian`, …),
-  since a host with the toggle off doesn't build that profile at all.
+- Check both machines when a toggle gates the profile (`media.mpv`, `office.obsidian`, …):
+  a profile is only built on a machine where some user has the app on (`anyUser`).
 
 ## Before and after
 

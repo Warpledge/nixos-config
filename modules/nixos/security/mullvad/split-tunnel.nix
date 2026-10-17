@@ -25,68 +25,73 @@
   config,
   lib,
   pkgs,
-  hostConfig,
-  username,
+  machine,
+  anyUser,
   ...
 }: let
-  wanted = hostConfig.mullvad.splitTunnel or [];
-  hm = config.home-manager.users.${username};
+  wanted = machine.mullvad.splitTunnel;
 
   #--- Command name -> the real binary it shadows. `home` picks the profile
   #--- the wrapper goes in; `enable` follows the app's own toggle so a shared
   #--- splitTunnel list cannot pull an app onto a host that does not install it.
-  targets = {
+  #--- Home entries follow `user`'s toggles and home; steam is system-wide.
+  targetsFor = user: let
+    hm = config.home-manager.users.${user.name};
+  in {
     steam = {
       home = false;
-      enable = hostConfig.gaming.steam;
+      enable = anyUser.gaming.steam;
       bin = "${config.programs.steam.package}/bin/steam";
     };
     heroic = {
       home = true;
-      enable = hostConfig.gaming.heroic;
+      enable = user.gaming.heroic;
       bin = "${pkgs.heroic}/bin/heroic";
     };
     prismlauncher = {
       home = true;
-      enable = hostConfig.gaming.prismlauncher;
+      enable = user.gaming.prismlauncher;
       bin = "${pkgs.prismlauncher}/bin/prismlauncher";
     };
     claude = {
       home = true;
-      enable = hostConfig.claude.enable;
+      enable = user.claude.enable;
       # The package programs.claude-code installs, incl. any plugin wrapper
       bin = "${hm.programs.claude-code.finalPackage}/bin/claude";
     };
     opencode = {
       home = true;
-      enable = hostConfig.opencode.enable;
+      enable = user.opencode.enable;
       bin = "${pkgs.opencode}/bin/opencode";
     };
     freetube = {
       home = true;
-      enable = hostConfig.media.freetube;
+      enable = user.media.freetube;
       bin = "${pkgs.freetube}/bin/freetube";
     };
     spotify = {
       home = true;
-      enable = hostConfig.media.spotify;
+      enable = user.media.spotify;
       # spicetify-nix builds its own Spotify; pkgs.spotify is the wrong one
       bin = "${hm.programs.spicetify.spicedSpotify}/bin/spotify";
     };
     ferdium = {
       home = true;
-      enable = hostConfig.browsers.ferdium;
+      enable = user.browsers.ferdium;
       # RateYourMusic and similar sites reject Mullvad exit IPs
       bin = "${pkgs.ferdium}/bin/ferdium";
     };
   };
 
-  unknown = lib.subtractLists (lib.attrNames targets) wanted;
-  active = lib.filter (n: targets ? ${n} && targets.${n}.enable) wanted;
+  #--- The system entries are the same in every user's table
+  systemTargets = targetsFor machine.users.${machine.mainUser};
+
+  unknown = lib.subtractLists (lib.attrNames systemTargets) wanted;
+  active = targets: lib.filter (n: targets ? ${n} && targets.${n}.enable) wanted;
 
   #--- Falls back to running unwrapped if the setuid helper is absent,
   #--- so disabling Mullvad cannot leave an unlaunchable app behind.
-  wrapperFor = name:
+  wrapperFor = targets: name:
     lib.hiPrio (pkgs.writeShellScriptBin name ''
       real=${lib.escapeShellArg targets.${name}.bin}
       # Steam sets no_new_privs on the processes it launches, which neuters the
@@ -97,17 +102,17 @@
       fi
       exec "$real" "$@"
     '');
-  wrappers = home: map wrapperFor (lib.filter (n: targets.${n}.home == home) active);
+  wrappers = targets: home: map (wrapperFor targets) (lib.filter (n: targets.${n}.home == home) (active targets));
 in {
   config = lib.mkIf (wanted != []) {
     assertions = [
       {
         assertion = unknown == [];
-        message = "mullvad.splitTunnel: no wrapper defined for ${lib.concatStringsSep ", " unknown}. Add it to `targets` in security/mullvad/split-tunnel.nix.";
+        message = "mullvad.splitTunnel: no wrapper defined for ${lib.concatStringsSep ", " unknown}. Add it to `targetsFor` in security/mullvad/split-tunnel.nix.";
       }
     ];
 
-    environment.systemPackages = wrappers false;
-    home-manager.users.${username}.home.packages = wrappers true;
+    environment.systemPackages = wrappers systemTargets false;
+    home-manager.users = lib.mapAttrs (_: user: {home.packages = wrappers (targetsFor user) true;}) machine.users;
   };
 }

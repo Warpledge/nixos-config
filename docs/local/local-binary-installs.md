@@ -3,7 +3,7 @@
 Prebuilt third-party apps that aren't in nixpkgs and aren't worth packaging.
 They live under `~/.local/opt/` (out of git), and a thin wrapper module puts
 them on PATH with whatever runtime env they need. The module sits in the folder
-for what the app is, and its toggle in the matching `hostConfig` category.
+for what the app is, and its toggle in the matching category of the user settings.
 
 ## The pattern
 
@@ -12,9 +12,10 @@ for what the app is, and its toggle in the matching `hostConfig` category.
 - **Wrapper:** `programs/<category>/<name>.nix` wraps the binary with
   `writeShellScriptBin`, sets any runtime env, and `exec`s it. nix-ld handles
   the ELF interpreter for foreign dynamically linked binaries.
-- **Toggle:** `hostConfig.<category>.<name>` in both host configs, imported by
-  that category's router (`programs/default.nix`, or `programs/gaming/default.nix`
-  for `gaming.*`).
+- **Toggle:** `<category>.<name>`, off in `users/_template/settings.nix` and on in
+  the user's own `settings.nix`, imported by that category's router
+  (`programs/default.nix`, or `programs/gaming/default.nix` for `gaming.*`).
+  `setup.sh` doesn't offer these, since the repo can't supply the bundle.
 
 ## Restore on a fresh install / laptop
 

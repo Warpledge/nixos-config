@@ -1,13 +1,16 @@
 #=====================================================================#
 # GAMING ENVIRONMENT CONFIGURATION
 #=====================================================================#
-{
+#- `user` comes in through `import ./gaming user` (programs/default.nix),
+#- since the imports below read it
+user: {
   pkgs,
   config,
   lib,
-  hostConfig,
   ...
 }: {
+  _file = ./default.nix; # Error messages name this file, not the importer
+
   #--------------------------------------------------------------------#
   #-- Gaming Configuration
   #--------------------------------------------------------------------#
@@ -116,21 +119,21 @@
       ./scripts/tml-prelaunch.nix
     ]
     #--- Launchers (steam is in nixos/gaming; hytale is a hand-installed Flatpak)
-    ++ lib.optionals hostConfig.gaming.heroic [./launchers/heroic.nix]
-    ++ lib.optionals hostConfig.gaming.prismlauncher [./launchers/prismlauncher.nix]
-    ++ lib.optionals hostConfig.gaming.lutris [./launchers/lutris.nix]
-    ++ lib.optionals hostConfig.gaming.faugus [./launchers/faugus.nix]
-    ++ lib.optionals hostConfig.gaming.easyrpg [./launchers/easyrpg.nix]
-    ++ lib.optionals hostConfig.gaming.xsystem4 [./launchers/xsystem4]
-    ++ lib.optionals hostConfig.gaming.twintail [./launchers/twintail.nix]
+    ++ lib.optionals user.gaming.heroic [./launchers/heroic.nix]
+    ++ lib.optionals user.gaming.prismlauncher [./launchers/prismlauncher.nix]
+    ++ lib.optionals user.gaming.lutris [./launchers/lutris.nix]
+    ++ lib.optionals user.gaming.faugus [./launchers/faugus.nix]
+    ++ lib.optionals user.gaming.easyrpg [./launchers/easyrpg.nix]
+    ++ lib.optionals user.gaming.xsystem4 [./launchers/xsystem4]
+    ++ lib.optionals user.gaming.twintail [./launchers/twintail.nix]
     #--- Games
-    ++ lib.optionals hostConfig.gaming.feedback [./games/feedback.nix]
-    ++ lib.optionals hostConfig.gaming.rocksmith [./games/rocksmith.nix]
-    ++ lib.optionals hostConfig.gaming.easyrpg [./games/tobira-no-densetsu.nix]
+    ++ lib.optionals user.gaming.feedback [./games/feedback.nix]
+    ++ lib.optionals user.gaming.rocksmith [./games/rocksmith.nix]
+    ++ lib.optionals user.gaming.easyrpg [./games/tobira-no-densetsu.nix]
     #--- Tools
-    ++ lib.optionals hostConfig.gaming.r2modman [./tools/r2modman.nix]
-    ++ lib.optionals hostConfig.gaming.pathOfBuilding [./tools/path-of-building.nix]
-    ++ lib.optionals hostConfig.gaming.ludusavi [./tools/ludusavi.nix]
-    ++ lib.optionals hostConfig.gaming.granblueRelinkMods [./tools/relink-mod-organizer.nix ./tools/reloaded-ii-gbfr.nix]
-    ++ lib.optionals hostConfig.japanese.vn [./tools/japanese-vn.nix];
+    ++ lib.optionals user.gaming.r2modman [./tools/r2modman.nix]
+    ++ lib.optionals user.gaming.pathOfBuilding [./tools/path-of-building.nix]
+    ++ lib.optionals user.gaming.ludusavi [./tools/ludusavi.nix]
+    ++ lib.optionals user.gaming.granblueRelinkMods [./tools/relink-mod-organizer.nix ./tools/reloaded-ii-gbfr.nix]
+    ++ lib.optionals user.japanese.vn [./tools/japanese-vn.nix];
 }

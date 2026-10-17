@@ -11,22 +11,24 @@
     nixpkgs,
     ...
   }: let
+    inherit (nixpkgs) lib;
+    settings = import ./lib/settings.nix {inherit lib;};
+
     #--- System builder function
-    mkSystem = hostname: let
-      hostConfig = import "${self}/hosts/${hostname}/settings.nix";
-      inherit (hostConfig) username;
+    mkSystem = name: let
+      inherit (settings.forMachine name) machine anyUser;
     in {
-      modules = [./hosts/${hostname}];
+      modules = [./machines/${name}];
       specialArgs = {
-        inherit self inputs username hostname hostConfig;
+        inherit self inputs machine anyUser;
       };
     };
+
+    #--- Every folder in machines/ is a machine, except _template
+    machines = lib.filterAttrs (name: type: type == "directory" && !lib.hasPrefix "_" name) (builtins.readDir ./machines);
   in {
     #--- NixOS Configurations
-    nixosConfigurations = {
-      desktop = nixpkgs.lib.nixosSystem (mkSystem "desktop");
-      laptop = nixpkgs.lib.nixosSystem (mkSystem "laptop");
-    };
+    nixosConfigurations = lib.mapAttrs (name: _: nixpkgs.lib.nixosSystem (mkSystem name)) machines;
 
     #--- Formatter (nix fmt)
     # `nix fmt .`: alejandra 3.0.0 reads stdin when given no path

@@ -5,71 +5,74 @@
   pkgs,
   config,
   lib,
-  username,
+  machine,
   ...
 }: {
   #--------------------------------------------------------------------#
   #-- Home Manager Theme
   #--------------------------------------------------------------------#
-  home-manager.users.${username} = {
-    stylix = lib.mkDefault {
-      enable = true;
-      autoEnable = true;
+  #--- Every user on the machine
+  home-manager.users =
+    lib.mapAttrs (_: _: {
+      stylix = lib.mkDefault {
+        enable = true;
+        autoEnable = true;
 
-      #--- Disable version mismatch warnings
-      enableReleaseChecks = true;
+        #--- Disable version mismatch warnings
+        enableReleaseChecks = true;
 
-      targets = {
-        #--- Enable targets
-        vesktop.enable = true;
-        mpv.enable = true;
+        targets = {
+          #--- Enable targets
+          vesktop.enable = true;
+          mpv.enable = true;
 
-        #--- Disable targets
-        spicetify.enable = false; # have custom theme setup
-        waybar.enable = false; # conflicts
-        zed.enable = false; # handled by app
-        kde.enable = false; # breaks KDE apps / Desktop
-        forge.enable = false; # GNOME Shell extension, not installed
-        hyprlock.enable = false; # have custom theme
-        mangohud.enable = false; # managed via programs.mangohud
-        helix.enable = false;
-        micro.enable = false;
-        starship.enable = false;
-        rofi.enable = false; # not installed; target uses a renamed HM option
-        yazi.enable = false; # themed by Catppuccin port
-        firefox.enable = false;
-        floorp.enable = false;
-        librewolf.enable = false;
-        zen-browser.enable = false;
+          #--- Disable targets
+          spicetify.enable = false; # have custom theme setup
+          waybar.enable = false; # conflicts
+          zed.enable = false; # handled by app
+          kde.enable = false; # breaks KDE apps / Desktop
+          forge.enable = false; # GNOME Shell extension, not installed
+          hyprlock.enable = false; # have custom theme
+          mangohud.enable = false; # managed via programs.mangohud
+          helix.enable = false;
+          micro.enable = false;
+          starship.enable = false;
+          rofi.enable = false; # not installed; target uses a renamed HM option
+          yazi.enable = false; # themed by Catppuccin port
+          firefox.enable = false;
+          floorp.enable = false;
+          librewolf.enable = false;
+          zen-browser.enable = false;
 
-        dank-material-shell.enable = false;
-        # DMS owns the wallpaper; the rest of the target (dark mode, fonts) is
-        # read by GTK apps
-        gnome.image.enable = false;
+          dank-material-shell.enable = false;
+          # DMS owns the wallpaper; the rest of the target (dark mode, fonts) is
+          # read by GTK apps
+          gnome.image.enable = false;
 
-        vscode.profileNames = ["default"];
-        zen-browser.profileNames = ["default"];
-        firefox.profileNames = ["default"];
-        floorp.profileNames = ["default"];
-        librewolf.profileNames = ["default"];
+          vscode.profileNames = ["default"];
+          zen-browser.profileNames = ["default"];
+          firefox.profileNames = ["default"];
+          floorp.profileNames = ["default"];
+          librewolf.profileNames = ["default"];
 
-        qt.enable = false;
-        gtk = {
-          enable = true;
-          flatpakSupport.enable = true;
-          # Stylix's GTK accent is base0D (blue); match DMS and Kvantum's Mauve
-          extraCss = with config.lib.stylix.colors.withHashtag; ''
-            @define-color accent_color ${base0E};
-            @define-color accent_bg_color ${base0E};
-          '';
+          qt.enable = false;
+          gtk = {
+            enable = true;
+            flatpakSupport.enable = true;
+            # Stylix's GTK accent is base0D (blue); match DMS and Kvantum's Mauve
+            extraCss = with config.lib.stylix.colors.withHashtag; ''
+              @define-color accent_color ${base0E};
+              @define-color accent_bg_color ${base0E};
+            '';
+          };
         };
       };
-    };
 
-    #--- Cursor
-    # Explicit enable; relying on home.pointerCursor's implicit enable is deprecated.
-    home.pointerCursor.enable = true;
-  };
+      #--- Cursor
+      # Explicit enable; relying on home.pointerCursor's implicit enable is deprecated.
+      home.pointerCursor.enable = true;
+    })
+    machine.users;
   #--------------------------------------------------------------------#
   #-- System Theme
   #--------------------------------------------------------------------#

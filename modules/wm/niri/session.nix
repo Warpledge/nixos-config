@@ -5,7 +5,7 @@
   pkgs,
   lib,
   inputs,
-  username,
+  machine,
   ...
 }: let
   # niri-flake's git build, for 10-bit output (docs/todo/niri-10-bit.md)
@@ -34,12 +34,12 @@ in {
   };
 
   #--- DMS Greeter
-  # Theme, wallpaper and settings are copied out of configHome into
-  # /var/lib/dms-greeter on each greetd start, so they lag one restart.
+  # Theme, wallpaper and settings are copied out of configHome (the main
+  # user's) into /var/lib/dms-greeter on each greetd start, so they lag one restart.
   programs.dms-greeter = {
     enable = true;
     compositor.name = "niri";
-    configHome = "/home/${username}";
+    configHome = "/home/${machine.mainUser}";
   };
 
   #--- The module's preStart chowns `*`, which skips dotfiles, so dirs left by an
@@ -55,14 +55,14 @@ in {
   #--------------------------------------------------------------------#
   #--- Unlock GPG keyring on login
   security.pam.services.greetd.enableGnomeKeyring = true;
-  security.pam.services.${username}.enableGnomeKeyring = true;
+  security.pam.services.${machine.mainUser}.enableGnomeKeyring = true;
 
   #--------------------------------------------------------------------#
   #-- Auto Login
   #--------------------------------------------------------------------#
   services.displayManager.autoLogin = {
     enable = false;
-    user = "${username}";
+    user = machine.mainUser;
   };
 
   #--------------------------------------------------------------------#

@@ -3,7 +3,7 @@
 #=====================================================================#
 {
   inputs,
-  username,
+  machine,
   ...
 }: {
   imports = [inputs.dank-greeter.nixosModules.default];
@@ -28,12 +28,12 @@
   };
 
   #--- DMS Greeter (mirrors niri/session.nix)
-  # Theme, wallpaper and settings are copied out of configHome into
-  # /var/lib/dms-greeter on each greetd start, so they lag one restart.
+  # Theme, wallpaper and settings are copied out of configHome (the main
+  # user's) into /var/lib/dms-greeter on each greetd start, so they lag one restart.
   programs.dms-greeter = {
     enable = true;
     compositor.name = "hyprland";
-    configHome = "/home/${username}";
+    configHome = "/home/${machine.mainUser}";
   };
 
   #--- The module's preStart chowns `*`, which skips dotfiles, so dirs left by an
@@ -48,5 +48,5 @@
   #--------------------------------------------------------------------#
   #--- Unlock GPG keyring on login
   security.pam.services.greetd.enableGnomeKeyring = true;
-  security.pam.services.${username}.enableGnomeKeyring = true;
+  security.pam.services.${machine.mainUser}.enableGnomeKeyring = true;
 }

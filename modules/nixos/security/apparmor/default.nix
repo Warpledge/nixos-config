@@ -6,7 +6,7 @@
 {
   lib,
   pkgs,
-  hostConfig,
+  anyUser,
   ...
 }: {
   #--------------------------------------------------------------------#
@@ -106,12 +106,12 @@
       ./evince.nix
       ./yt-dlp.nix
     ]
-    #--- Per-app profiles (controlled by hostConfig)
-    ++ lib.optionals hostConfig.media.mpv [./mpv.nix]
-    ++ lib.optionals hostConfig.media.streamlinkTwitchGui [./streamlink.nix]
-    ++ lib.optionals hostConfig.office.obsidian [./obsidian.nix]
-    ++ lib.optionals hostConfig.gaming.prismlauncher [./prismlauncher.nix]
-    ++ lib.optionals hostConfig.media.moku [./tsunagu.nix]
-    ++ lib.optionals hostConfig.media.tonkatsuBox [./tonkatsu-box.nix]
-    ++ lib.optionals hostConfig.audio.katanaFloorboard [./katana-floorboard.nix];
+    #--- Per-app profiles (once any user on the machine has the app)
+    ++ lib.optionals anyUser.media.mpv [./mpv.nix]
+    ++ lib.optionals anyUser.media.streamlinkTwitchGui [./streamlink.nix]
+    ++ lib.optionals anyUser.office.obsidian [./obsidian.nix]
+    ++ lib.optionals anyUser.gaming.prismlauncher [./prismlauncher.nix]
+    ++ lib.optionals anyUser.media.moku [./tsunagu.nix]
+    ++ lib.optionals anyUser.media.tonkatsuBox [./tonkatsu-box.nix]
+    ++ lib.optionals anyUser.audio.katanaFloorboard [./katana-floorboard.nix];
 }

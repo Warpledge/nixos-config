@@ -4,7 +4,7 @@
 
 - **Runtime:** OpenJDK 25 — installed via `pkgs.jdk25` in `modules/nixos/gaming/tools/java.nix`
 - GTNH recommends Java 25 for 2.8.x
-- **JVM Arguments:** ZGC with full arg set — managed via `hosts/laptop/minecraft-servers/gtnh-server.nix`, not `startserver-java9.sh`
+- **JVM Arguments:** ZGC with full arg set — managed via `machines/laptop/minecraft-servers/gtnh-server.nix`, not `startserver-java9.sh`
   - `-XX:+UseZGC -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -XX:+PerfDisableSharedMem -XX:+UseTransparentHugePages`
   - Memory: `-Xms12G -Xmx12G`
 

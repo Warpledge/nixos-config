@@ -7,7 +7,7 @@
   #--------------------------------------------------------------------#
   networking.firewall = {
     enable = true;
-    #--- SSH (services/ssh.nix), Minecraft (hosts/laptop) and Steam open their own
+    #--- SSH (services/ssh.nix), Minecraft (machines/laptop) and Steam open their own
     allowedTCPPorts = [
       7777 # Terraria server
     ];

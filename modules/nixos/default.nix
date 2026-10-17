@@ -3,7 +3,8 @@
 #=====================================================================#
 {
   lib,
-  hostConfig,
+  machine,
+  anyUser,
   ...
 }: {
   #--------------------------------------------------------------------#
@@ -47,24 +48,26 @@
       ./system/user/shell.nix
       ./system/user/user.nix
     ]
-    #--- Mullvad VPN, system and home-manager halves (controlled by hostConfig)
-    ++ lib.optionals hostConfig.mullvad.enable [./security/mullvad]
-    #--- ClamAV Antivirus (controlled by hostConfig)
-    ++ lib.optionals hostConfig.clamav.enable [./security/clamav.nix]
-    #--- Docker (controlled by hostConfig)
-    ++ lib.optionals hostConfig.docker.enable [./services/runtimes/docker.nix]
-    #--- Flatpak (controlled by hostConfig; loaded for the Flatpak apps: hytale)
-    ++ lib.optionals hostConfig.gaming.hytale [./services/runtimes/flatpak.nix]
-    #--- SSH Server (controlled by hostConfig)
-    ++ lib.optionals hostConfig.ssh.enable [./services/ssh.nix]
-    #--- Suwayomi Manga Server (controlled by hostConfig)
-    ++ lib.optionals hostConfig.suwayomi.enable [./services/servers/suwayomi.nix]
-    #--- Syncthing File Sync (controlled by hostConfig)
-    ++ lib.optionals hostConfig.syncthing.enable [./services/servers/syncthing.nix]
-    #--- Sunshine Game Streaming (controlled by hostConfig)
-    ++ lib.optionals hostConfig.sunshine.enable [./services/servers/sunshine.nix]
-    #--- FlareSolverr for Moku's Cloudflare-protected sources (controlled by hostConfig)
-    ++ lib.optionals hostConfig.media.moku [./services/servers/flaresolverr.nix]
-    #--- Japanese Input Method (controlled by hostConfig)
-    ++ lib.optionals hostConfig.japanese.ime [./system/language/japanese-ime.nix];
+    #--- Graphics drivers (controlled by machine settings; null: the machine's own files)
+    ++ lib.optionals (machine.gpu.type != null) [./services/hardware/gpu.nix]
+    #--- Mullvad VPN, system and home-manager halves (controlled by machine settings)
+    ++ lib.optionals machine.mullvad.enable [./security/mullvad]
+    #--- ClamAV Antivirus (controlled by machine settings)
+    ++ lib.optionals machine.clamav.enable [./security/clamav.nix]
+    #--- Docker (controlled by machine settings)
+    ++ lib.optionals machine.docker.enable [./services/runtimes/docker.nix]
+    #--- Flatpak (any user with a Flatpak app: hytale)
+    ++ lib.optionals anyUser.gaming.hytale [./services/runtimes/flatpak.nix]
+    #--- SSH Server (controlled by machine settings)
+    ++ lib.optionals machine.ssh.enable [./services/ssh.nix]
+    #--- Suwayomi Manga Server (controlled by machine settings)
+    ++ lib.optionals machine.suwayomi.enable [./services/servers/suwayomi.nix]
+    #--- Syncthing File Sync (controlled by machine settings)
+    ++ lib.optionals machine.syncthing.enable [./services/servers/syncthing.nix]
+    #--- Sunshine Game Streaming (controlled by machine settings)
+    ++ lib.optionals machine.sunshine.enable [./services/servers/sunshine.nix]
+    #--- FlareSolverr for Moku's Cloudflare-protected sources (any user with Moku)
+    ++ lib.optionals anyUser.media.moku [./services/servers/flaresolverr.nix]
+    #--- Japanese Input Method (any user with japanese.ime)
+    ++ lib.optionals anyUser.japanese.ime [./system/language/japanese-ime.nix];
 }

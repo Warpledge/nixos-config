@@ -8,8 +8,9 @@
 #-
 {
   config,
+  lib,
   pkgs,
-  username,
+  machine,
   ...
 }: let
   #--- Menu colours follow the Stylix base16 scheme
@@ -354,9 +355,11 @@
 
       [[ $1 == "" ]] && ui
 
-      # Get current hostname to determine which system to rebuild
+      #--- The system to rebuild is this machine's folder in machines/,
+      #--- whatever the hostname; the hostname names the backup folders
+      MACHINE=${lib.escapeShellArg machine.name}
       HOSTNAME=$(hostname)
-      FLAKE_PATH="/home/${username}/nixos-config"
+      FLAKE_PATH=${lib.escapeShellArg machine.flakePath}
       export SUDO_ASKPASS=${sudoAskpass}
 
       #--- Kept outside the repo: subscriptions, bookmarks and history are
@@ -371,11 +374,11 @@
       case $1 in
         # --- NixOS Operations ---
         rebuild)
-          nh os switch "$FLAKE_PATH#nixosConfigurations.$HOSTNAME"
+          nh os switch "$FLAKE_PATH#nixosConfigurations.$MACHINE"
           ;;
         #--- Nothing is activated live; use after glibc/systemd bumps
         boot)
-          nh os boot "$FLAKE_PATH#nixosConfigurations.$HOSTNAME" &&
+          nh os boot "$FLAKE_PATH#nixosConfigurations.$MACHINE" &&
             echo "Reboot to switch to the new generation."
           ;;
         lint)
@@ -386,7 +389,7 @@
           ${pkgs.statix}/bin/statix check "$FLAKE_PATH" || true
           ;;
         upgrade)
-          nh os switch --update "$FLAKE_PATH#nixosConfigurations.$HOSTNAME"
+          nh os switch --update "$FLAKE_PATH#nixosConfigurations.$MACHINE"
           ;;
         flake-update)
           echo "Updating flake inputs..."
@@ -394,7 +397,7 @@
           ;;
         dryrun)
           echo "Running dry-run rebuild (no changes will be made)..."
-          nh os switch --dry "$FLAKE_PATH#nixosConfigurations.$HOSTNAME"
+          nh os switch --dry "$FLAKE_PATH#nixosConfigurations.$MACHINE"
           ;;
         gc)
           nh clean all --keep 5

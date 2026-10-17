@@ -5,10 +5,10 @@
 #- Syncthing carries. Settings are declared here, so GUI changes don't persist.
 {
   config,
-  hostname,
+  machine,
   ...
 }: let
-  backups = "${config.home.homeDirectory}/SyncBackups/${hostname}/Ludusavi";
+  backups = "${config.home.homeDirectory}/SyncBackups/${machine.hostName}/Ludusavi";
 in {
   #--------------------------------------------------------------------#
   #-- Ludusavi Service

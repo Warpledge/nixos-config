@@ -2,8 +2,10 @@
 # GIT CONFIGURATION
 #=====================================================================#
 {
+  config,
+  lib,
   pkgs,
-  username,
+  user,
   ...
 }: {
   #--------------------------------------------------------------------#
@@ -13,10 +15,15 @@
     enable = true;
 
     settings = {
-      user = {
-        name = "${username}";
-        email = "168894871+Warpledge@users.noreply.github.com";
-      };
+      #--- git.name and git.email from the user's settings.nix
+      user =
+        {
+          name =
+            if user.git.name != null
+            then user.git.name
+            else config.home.username;
+        }
+        // lib.optionalAttrs (user.git.email != null) {inherit (user.git) email;};
       init.defaultBranch = "main";
       pull.rebase = true;
       credential.helper = "gpg";

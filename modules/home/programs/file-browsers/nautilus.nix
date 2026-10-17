@@ -2,8 +2,8 @@
 # NAUTILUS FILE BROWSER CONFIGURATION
 #=====================================================================#
 {
+  config,
   pkgs,
-  username,
   ...
 }: {
   #--------------------------------------------------------------------#
@@ -16,14 +16,14 @@
   ];
 
   gtk.gtk3.bookmarks = [
-    "file:///home/${username}/Downloads Downloads"
-    "file:///home/${username}/Documents Documents"
-    "file:///home/${username}/Pictures Pictures"
-    "file:///home/${username}/Videos Videos"
-    "file:///home/${username}/Games Games"
-    "file:///home/${username}/.local/share Local"
-    "file:///home/${username}/.local/share/Steam/steamapps/common Steam"
-    "file:///home/${username}/.local/share/Terraria/tModLoader tModLoader"
+    "file://${config.home.homeDirectory}/Downloads Downloads"
+    "file://${config.home.homeDirectory}/Documents Documents"
+    "file://${config.home.homeDirectory}/Pictures Pictures"
+    "file://${config.home.homeDirectory}/Videos Videos"
+    "file://${config.home.homeDirectory}/Games Games"
+    "file://${config.home.homeDirectory}/.local/share Local"
+    "file://${config.home.homeDirectory}/.local/share/Steam/steamapps/common Steam"
+    "file://${config.home.homeDirectory}/.local/share/Terraria/tModLoader tModLoader"
   ];
 
   #--------------------------------------------------------------------#

@@ -3,7 +3,8 @@
 #=====================================================================#
 {
   lib,
-  hostConfig,
+  machine,
+  user,
   ...
 }: {
   #--------------------------------------------------------------------#
@@ -37,8 +38,8 @@
             #--- System tray and services
             "nm-applet"
           ]
-          #--- Japanese input method daemon (controlled by hostConfig)
-          ++ lib.optional hostConfig.japanese.ime "fcitx5 -d -r";
+          #--- Japanese input method daemon (controlled by user settings)
+          ++ lib.optional user.japanese.ime "fcitx5 -d -r";
         toLua = lib.generators.toLua {};
       in [
         {
@@ -143,7 +144,7 @@
           middle_click_paste = false;
         };
         input = {
-          kb_layout = "us";
+          kb_layout = machine.keyboardLayout;
           follow_mouse = 1;
           sensitivity = 0;
           force_no_accel = 1;

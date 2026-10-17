@@ -1,15 +1,14 @@
 #=====================================================================#
 # SSH SERVER (OPENSSH + FAIL2BAN)
 #=====================================================================#
-#- Key-only access for one user. Port 22 opens with this module, so only on
-#- hosts with hostConfig.ssh.enable set.
+#- Key-only access for the machine's users. Port 22 opens with this module,
+#- so only on machines with ssh.enable set in their settings.nix.
 #-
-#- Enabling this without a key in authorizedKeys below leaves no way in:
-#- password and keyboard-interactive auth are both off.
+#- Enabling this without a key in some user's ssh.authorizedKeys leaves no
+#- way in: password and keyboard-interactive auth are both off.
 {
-  config,
   lib,
-  username,
+  machine,
   ...
 }: {
   #--------------------------------------------------------------------#
@@ -37,7 +36,7 @@
       MaxAuthTries = 3;
       MaxSessions = 4;
       LoginGraceTime = "30s";
-      AllowUsers = [username];
+      AllowUsers = lib.attrNames machine.users;
 
       #--- Forwarding
       X11Forwarding = false;
@@ -51,10 +50,9 @@
     };
   };
 
-  #--- Public keys allowed to log in; a public key is not a secret, so it
-  #--- belongs in the repo. Empty means nobody can connect.
-  users.users.${username}.openssh.authorizedKeys.keys = [
-  ];
+  #--- Public keys allowed to log in, from ssh.authorizedKeys in each user's
+  #--- settings.nix. Empty means that user cannot connect.
+  users.users = lib.mapAttrs (_: user: {openssh.authorizedKeys.keys = user.ssh.authorizedKeys;}) machine.users;
 
   #--------------------------------------------------------------------#
   #-- Fail2ban
@@ -81,8 +79,8 @@
   #--------------------------------------------------------------------#
   assertions = [
     {
-      assertion = lib.length config.users.users.${username}.openssh.authorizedKeys.keys > 0;
-      message = "ssh.enable is on but no key is listed in services/ssh.nix; you would be locked out.";
+      assertion = lib.any (user: user.ssh.authorizedKeys != []) (lib.attrValues machine.users);
+      message = "ssh.enable is on but no user lists a key in ssh.authorizedKeys; you would be locked out.";
     }
   ];
 }

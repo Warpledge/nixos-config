@@ -6,7 +6,8 @@
   osConfig,
   pkgs,
   lib,
-  hostConfig,
+  machine,
+  user,
   ...
 }: let
   colors = config.lib.stylix.colors.withHashtag;
@@ -39,13 +40,13 @@ in {
       };
 
       #--- Startup Applications
-      # Japanese input method daemon (controlled by hostConfig)
-      spawn-at-startup = lib.optional hostConfig.japanese.ime {command = ["fcitx5" "-d" "-r"];};
+      # Japanese input method daemon (controlled by user settings)
+      spawn-at-startup = lib.optional user.japanese.ime {command = ["fcitx5" "-d" "-r"];};
 
       #--- Input Configuration
       input = {
         keyboard = {
-          xkb.layout = "us";
+          xkb.layout = machine.keyboardLayout;
           numlock = true;
         };
         touchpad = {
@@ -74,8 +75,8 @@ in {
       #--- Screenshot Configuration
       screenshot-path = "~/Pictures/Screenshots/Screenshot-from-%Y-%m-%d-%H-%M-%S.png";
 
-      #--- Monitor Configuration (Host-Specific)
-      # Per-host, in hosts/{desktop,laptop}/wm/niri.nix
+      #--- Monitor Configuration (Machine-Specific)
+      # Per machine, in machines/<name>/wm/niri.nix
 
       #--- UI & Appearance
       overview = {
@@ -97,7 +98,7 @@ in {
       layout = {
         # Shows the backdrop wallpaper (rules.nix) through workspaces
         background-color =
-          lib.mkIf (hostConfig.media.wallpaperEngine or false) "transparent";
+          lib.mkIf user.media.wallpaperEngine "transparent";
         focus-ring = {
           enable = true; # displays around windows
           width = 2;

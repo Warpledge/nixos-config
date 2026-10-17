@@ -212,7 +212,7 @@ adb shell pm uninstall --user 0 com.motorola.mobiledesktop.core
 adb shell 'sleep 25; sync'
 ```
 
-It runs two always-on foreground services holding Bluetooth scan/advertise plus wifi control. Removing it costs desktop mode on an external monitor and phone/PC pairing. Screen mirroring to the NixOS box is better handled by `scrcpy` anyway (`hostConfig.scrcpy.enable`), which needs nothing installed on the tablet.
+It runs two always-on foreground services holding Bluetooth scan/advertise plus wifi control. Removing it costs desktop mode on an external monitor and phone/PC pairing. Screen mirroring to the NixOS box is better handled by `scrcpy` anyway (`scrcpy.enable` in a user's `settings.nix`), which needs nothing installed on the tablet.
 
 ---
 

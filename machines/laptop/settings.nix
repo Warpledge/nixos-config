@@ -1,0 +1,92 @@
+#=====================================================================#
+# LAPTOP MACHINE SETTINGS
+#=====================================================================#
+#- Machine-wide settings for the laptop. Apps are chosen per user in
+#- users/<name>/settings.nix; machines/_template/settings.nix lists every
+#- setting this file can hold.
+{
+  #--------------------------------------------------------------------#
+  #-- Users
+  #--------------------------------------------------------------------#
+  users = {
+    #--- Off on this machine, on in users/warpledge/settings.nix
+    warpledge = {
+      media = {
+        moku = false;
+        boorusama = false;
+        wallpaperEngine = false;
+        tonkatsuBox = false;
+      };
+      gaming = {
+        heroic = false;
+        hytale = false;
+        easyrpg = false;
+        xsystem4 = false;
+        r2modman = false;
+        pathOfBuilding = false;
+      };
+      discord.arrpc.enable = false;
+    };
+  };
+
+  #--------------------------------------------------------------------#
+  #-- System (NixOS modules)
+  #--------------------------------------------------------------------#
+  #--- DO NOT CHANGE
+  stateVersion = "25.11";
+
+  #--- Language & Keyboard
+  timeZone = "America/Chicago";
+  locale = "en_US.UTF-8";
+  keyboardLayout = "us";
+  consoleKeyMap = "us";
+
+  #--- Window Manager Selection
+  # Options: "hyprland" | "niri"
+  windowManager = "niri";
+
+  #--- Kernel Selection
+  # Options: "zen" | "latest" | "xanmod" | "cachyos"
+  kernel = "zen";
+
+  #--- Mullvad VPN
+  mullvad.enable = true;
+  # Apps always routed around the VPN (see nixos/security/mullvad/)
+  mullvad.splitTunnel = [
+    "steam"
+    "heroic"
+    "prismlauncher"
+    "opencode"
+    "claude"
+    "spotify"
+    "freetube"
+    "ferdium"
+  ];
+
+  #--- SSH Server
+  # Key-only openssh + fail2ban. Add a public key to ssh.authorizedKeys in
+  # users/<name>/settings.nix before enabling, or there is no way in.
+  ssh.enable = false;
+
+  #--- ClamAV Antivirus
+  # Enable ClamAV daemon, freshclam auto-updater, and ClamTK GUI
+  clamav.enable = false;
+
+  #--- Docker Containerization
+  # Enable Docker and Docker Compose for container management
+  docker = {
+    enable = false;
+  };
+
+  #--- Suwayomi Manga Server
+  # Local manga reader, web UI at http://localhost:4567
+  suwayomi.enable = false;
+
+  #--- Syncthing File Sync
+  # Peer-to-peer sync, web UI at http://127.0.0.1:8384
+  syncthing.enable = true;
+
+  #--- Sunshine Game Streaming
+  # Streams games to Moonlight clients on the LAN, web UI at https://localhost:47990
+  sunshine.enable = false;
+}

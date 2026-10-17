@@ -4,6 +4,7 @@
 {
   pkgs,
   lib,
+  machine,
   ...
 }: {
   #--------------------------------------------------------------------#
@@ -85,7 +86,11 @@
   #--------------------------------------------------------------------#
   #-- Nix Configuration
   #--------------------------------------------------------------------#
-  nix.settings.allowed-users = lib.mkForce ["@wheel"]; # Only wheel users can use nix
+  #--- Only wheel users can use nix, plus any non-admin user on the machine:
+  #--- home-manager's activation runs nix-env as that user
+  nix.settings.allowed-users =
+    lib.mkForce (["@wheel"]
+      ++ lib.attrNames (lib.filterAttrs (_: user: !user.admin) machine.users));
 
   #--------------------------------------------------------------------#
   #-- DBus Configuration

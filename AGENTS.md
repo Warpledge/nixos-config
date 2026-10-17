@@ -1,6 +1,7 @@
 # AGENTS.md
 
-NixOS flake managing two hosts: **desktop** and **laptop**. Nixpkgs unstable,
+NixOS flake managing two machines: **desktop** and **laptop** (one folder each in
+`machines/`), with each person's apps in `users/`. Nixpkgs unstable,
 home-manager, Niri WM, Stylix theming (Catppuccin Mocha).
 
 ## Rules
@@ -93,8 +94,14 @@ If that returns a path, read it and use `programs.<pkg>` instead.
 
 ## Architecture
 
-`hostConfig` (from `hosts/<host>/settings.nix`) is threaded through
-`specialArgs`, so every module can read it. Conditional imports in
+`lib/settings.nix` reads `machines/<name>/settings.nix` and the
+`users/<name>/settings.nix` of each user it lists, and passes them on: NixOS
+modules get `machine` (machine settings, users' final settings in
+`machine.users`) and `anyUser` (each user toggle, on if any user has it); home
+modules get `machine` and `user`. The two `_template/settings.nix` files list
+every setting; anything a file leaves out is off. Home routers read `user` in
+`imports`, so they take it as a first argument (`user: {lib, ...}: {...}`,
+imported with `(import ./gaming user)`). Conditional imports in
 `modules/home/programs/default.nix` decide what actually loads —
 it is the router under `programs/`, except `gaming/default.nix`, which routes the
 `gaming.*` launchers, games and tools, and `audio/guitar/default.nix`, which
@@ -110,20 +117,25 @@ goes in `audio/guitar/default.nix`, and its toggle joins that folder's gate in
 | --- | --- |
 | Shared user config | `modules/home/` |
 | Shared system config | `modules/nixos/` |
-| Per-host toggles | `hosts/{desktop,laptop}/settings.nix` |
+| Machine toggles (services, kernel, WM) | `machines/<name>/settings.nix` |
+| User toggles (apps) | `users/<name>/settings.nix` |
+| One user's change on one machine | `users.<name>` block in `machines/<machine>/settings.nix` |
 
-**Desktop and laptop hostConfig stay symmetrical.** Every toggle you add goes
-in both files with the same value unless told otherwise.
+**A new toggle goes in its template first.** `users/_template/settings.nix`
+(`false` unless every new user should get it) or `machines/_template/settings.nix`,
+then on in `users/warpledge/settings.nix` or the machine's file, and in
+`setup.sh`'s `apps` or `services` list.
 
 ## Adding an application
 
-1. Add the toggle to **both** host configs, in the group it belongs to
+1. Add the toggle to `users/_template/settings.nix` and `users/warpledge/settings.nix`,
+   in the group it belongs to, and to the `apps` list in `setup.sh`
 2. Create the module under `modules/home/programs/<group>/`.
    Check for a home-manager module first (see above) — prefer
    `programs.<pkg>.enable` over `home.packages = [pkgs.<pkg>]`
 3. Add the conditional import to `programs/default.nix`:
    ```nix
-   ++ lib.optionals hostConfig.media.foo [./media/foo.nix]
+   ++ lib.optionals user.media.foo [./media/foo.nix]
    ```
    The conditional belongs in `default.nix`. Do **not** wrap the module body
    in `lib.mkIf` instead.

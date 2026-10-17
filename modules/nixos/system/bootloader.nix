@@ -4,21 +4,21 @@
 {
   config,
   pkgs,
-  hostConfig,
+  machine,
   ...
 }: {
   #--------------------------------------------------------------------#
-  #-- Kernel Selection (controlled by hostConfig.kernel)
+  #-- Kernel Selection (controlled by kernel in machine settings)
   #--------------------------------------------------------------------#
   #--- "cachyos" is the x86-64-v3 build, so the host CPU must support x86-64-v3 (AVX2)
   boot.kernelPackages =
-    if hostConfig.kernel == "zen"
+    if machine.kernel == "zen"
     then pkgs.linuxPackages_zen
-    else if hostConfig.kernel == "latest"
+    else if machine.kernel == "latest"
     then pkgs.linuxPackages_latest
-    else if hostConfig.kernel == "xanmod"
+    else if machine.kernel == "xanmod"
     then pkgs.linuxPackages_xanmod
-    else if hostConfig.kernel == "cachyos"
+    else if machine.kernel == "cachyos"
     then pkgs.cachyosKernels.linuxPackages-cachyos-latest-x86_64-v3
     else pkgs.linuxPackages_zen; # Default fallback
 

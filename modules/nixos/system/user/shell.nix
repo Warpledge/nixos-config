@@ -2,13 +2,14 @@
 # SHELL CONFIGURATION (ZSH, FISH)
 #=====================================================================#
 {
+  lib,
   pkgs,
-  username,
+  machine,
   ...
 }: {
-  #--- Default Shell
+  #--- Default Shell, for every user
   programs.zsh.enable = true;
-  users.users.${username}.shell = pkgs.zsh;
+  users.users = lib.mapAttrs (_: _: {shell = pkgs.zsh;}) machine.users;
 
   #--- Shell Packages
   environment.systemPackages = with pkgs; [

@@ -4,7 +4,7 @@
 {
   config,
   lib,
-  hostConfig,
+  user,
   ...
 }: {
   #--------------------------------------------------------------------#
@@ -121,7 +121,7 @@
     "Mod+Shift+S".action.spawn = ["steam"];
     "Mod+Shift+D".action.spawn = ["goofcord"];
     "Mod+Shift+H".action.spawn = ["heroic"];
-    "Mod+Shift+G" = lib.mkIf hostConfig.gaming.lutris {action.spawn = ["lutris"];};
+    "Mod+Shift+G" = lib.mkIf user.gaming.lutris {action.spawn = ["lutris"];};
     "Mod+Shift+Y".action.spawn = ["freetube"];
     "Mod+Z".action.spawn = ["zeditor"];
     "Mod+B".action.spawn = ["zen-beta"];

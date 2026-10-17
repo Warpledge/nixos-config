@@ -1,13 +1,16 @@
 #=====================================================================#
 # GUITAR AMP MODELING CONFIGURATION
 #=====================================================================#
-{
+#- `user` comes in through `import ./audio/guitar user` (programs/default.nix),
+#- since the imports below read it
+user: {
   pkgs,
   config,
   lib,
-  hostConfig,
   ...
 }: {
+  _file = ./default.nix; # Error messages name this file, not the importer
+
   #--------------------------------------------------------------------#
   #-- Plugin Packages
   #--------------------------------------------------------------------#
@@ -41,7 +44,7 @@
   #-- Imports
   #--------------------------------------------------------------------#
   imports =
-    lib.optionals hostConfig.audio.guitarix [./guitarix.nix]
-    ++ lib.optionals hostConfig.audio.tone3000 [./tone3000.nix]
-    ++ lib.optionals hostConfig.audio.katanaFloorboard [./katana-floorboard.nix];
+    lib.optionals user.audio.guitarix [./guitarix.nix]
+    ++ lib.optionals user.audio.tone3000 [./tone3000.nix]
+    ++ lib.optionals user.audio.katanaFloorboard [./katana-floorboard.nix];
 }

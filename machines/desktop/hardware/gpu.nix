@@ -1,7 +1,12 @@
 #=====================================================================#
 # AMD GPU CONFIGURATION (RX 9070 XT)
 #=====================================================================#
-{pkgs, ...}: {
+{
+  lib,
+  machine,
+  pkgs,
+  ...
+}: {
   #--------------------------------------------------------------------#
   #-- Drivers & Packages
   #--------------------------------------------------------------------#
@@ -78,4 +83,31 @@
     enable = true;
     ppfeaturemask = "0xfff7ffff";
   };
+
+  #--------------------------------------------------------------------#
+  #-- DMS GPU Widget
+  #--------------------------------------------------------------------#
+  #--- For every user, under niri or Hyprland. The variant pins this GPU by PCI
+  #--- address; the bar widget id in settings.json (amdGpuMonitor:<id>) must match it.
+  home-manager.users =
+    lib.mapAttrs (_: _: {
+      programs.dank-material-shell.plugins.amdGpuMonitor.enable = true;
+      #--- Through dms.pluginSettings, which both WMs' DMS modules read
+      dms.pluginSettings.amdGpuMonitor = {
+        popoutStyle = "default";
+        minimumWidth = true;
+        variants = [
+          {
+            id = "variant_1791177076814";
+            name = "AMD Radeon RX 9070 XT";
+            originalName = "AMD Radeon RX 9070 XT";
+            description = "Monitor your discrete AMD Radeon RX 9070 XT";
+            gpuPci = "0000:09:00.0";
+            gpuType = "dGPU";
+            icon = "memory";
+          }
+        ];
+      };
+    })
+    machine.users;
 }

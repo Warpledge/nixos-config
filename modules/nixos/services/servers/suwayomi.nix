@@ -3,15 +3,16 @@
 #=====================================================================#
 #- Local manga reader server. The web UI is at http://localhost:4567.
 #-
-#- The home-manager half adds a launcher entry that opens the web UI as a
-#- Helium app window, with no tabs or address bar. Needs browsers.helium.
+#- The home-manager half gives every user a launcher entry that opens the web
+#- UI as a Helium app window, with no tabs or address bar. Needs browsers.helium.
 #- The launcher asks for a password first. Its hash lives outside the
 #- repo, set with suwayomi-set-password. The server itself stays open
 #- on localhost to anything else.
 {
   config,
+  lib,
   pkgs,
-  username,
+  machine,
   ...
 }: let
   server = config.services.suwayomi-server;
@@ -114,16 +115,18 @@ in {
   #--------------------------------------------------------------------#
   #-- App Window (home-manager)
   #--------------------------------------------------------------------#
-  home-manager.users.${username} = {
-    xdg.desktopEntries.suwayomi = {
-      name = "Suwayomi";
-      comment = "Local manga reader";
-      exec = "${launcher}/bin/suwayomi";
-      icon = "${icon}";
-      terminal = false;
-      categories = ["Graphics" "Viewer"];
-    };
+  home-manager.users =
+    lib.mapAttrs (_: _: {
+      xdg.desktopEntries.suwayomi = {
+        name = "Suwayomi";
+        comment = "Local manga reader";
+        exec = "${launcher}/bin/suwayomi";
+        icon = "${icon}";
+        terminal = false;
+        categories = ["Graphics" "Viewer"];
+      };
 
-    home.packages = [setPassword];
-  };
+      home.packages = [setPassword];
+    })
+    machine.users;
 }

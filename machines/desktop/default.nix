@@ -3,14 +3,13 @@
 #=====================================================================#
 {
   lib,
-  hostConfig,
-  username,
+  machine,
   ...
 }: {
   #--------------------------------------------------------------------#
   #-- Desktop Settings (Top Level)
   #--------------------------------------------------------------------#
-  networking.hostName = "desktop";
+  #--- The hostname comes from settings.nix (hostName, else the folder name)
 
   hardware = {
     #--- Bluetooth
@@ -20,7 +19,8 @@
     #--- DDC/CI monitor brightness, for DMS's brightness slider and keys
     i2c.enable = true;
   };
-  users.users.${username}.extraGroups = ["i2c"]; # access to /dev/i2c-* (above)
+  #--- Every user: access to /dev/i2c-* (above)
+  users.users = lib.mapAttrs (_: _: {extraGroups = ["i2c"];}) machine.users;
 
   #--- CPU Frequency Scaling Optimization for Ryzen 7 5800X3D
   #--- The 5800X3D benefits from staying in performance mode during gaming
@@ -47,6 +47,6 @@
 
       ../../modules
     ]
-    ++ (lib.optional (hostConfig.windowManager == "hyprland") ./wm/hyprland.nix)
-    ++ (lib.optional (hostConfig.windowManager == "niri") ./wm/niri.nix);
+    ++ (lib.optional (machine.windowManager == "hyprland") ./wm/hyprland.nix)
+    ++ (lib.optional (machine.windowManager == "niri") ./wm/niri.nix);
 }

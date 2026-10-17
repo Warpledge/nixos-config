@@ -1,7 +1,11 @@
 #=====================================================================#
 # ESYNC/FSYNC OPTIMIZATION FOR WINE/PROTON
 #=====================================================================#
-{username, ...}: {
+{
+  lib,
+  machine,
+  ...
+}: {
   #--------------------------------------------------------------------#
   #-- System File Descriptor Limits
   #--------------------------------------------------------------------#
@@ -22,18 +26,19 @@
   #--------------------------------------------------------------------#
   #-- User File Descriptor Limits
   #--------------------------------------------------------------------#
-  security.pam.loginLimits = [
+  #--- For each user on the machine
+  security.pam.loginLimits = lib.concatMap (name: [
     {
-      domain = "${username}";
+      domain = name;
       type = "hard";
       item = "nofile";
       value = "1048576"; # Hard limit: 1M file descriptors
     }
     {
-      domain = "${username}";
+      domain = name;
       type = "soft";
       item = "nofile";
       value = "1048576"; # Soft limit: 1M file descriptors
     }
-  ];
+  ]) (lib.attrNames machine.users);
 }

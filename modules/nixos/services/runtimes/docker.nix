@@ -2,8 +2,9 @@
 # DOCKER CONTAINERIZATION
 #=====================================================================#
 {
+  lib,
   pkgs,
-  username,
+  machine,
   ...
 }: {
   #--------------------------------------------------------------------#
@@ -28,9 +29,9 @@
   #--------------------------------------------------------------------#
   #-- User Configuration
   #--------------------------------------------------------------------#
-  # Add user to docker group for docker command access
+  # Add admins to docker group for docker command access
   # Note: Rootless mode is preferred over group-based access for security
   users.groups.docker = {
-    members = ["${username}"];
+    members = lib.attrNames (lib.filterAttrs (_: user: user.admin) machine.users);
   };
 }

@@ -1,6 +1,6 @@
 ---
 name: hyprland-verify
-description: Verify this NixOS repo's Hyprland config with Hyprland's own checker before handing back. Use after any change under modules/wm/hyprland/, hosts/*/wm/hyprland.nix, Hyprland binds, window or layer rules, monitors, the quad layout, or the Hyprland theming targets, and whenever the user asks whether the Hyprland config is valid, even if the host currently runs niri. nix flake check does not catch Lua config errors; this does.
+description: Verify this NixOS repo's Hyprland config with Hyprland's own checker before handing back. Use after any change under modules/wm/hyprland/, machines/*/wm/hyprland.nix, Hyprland binds, window or layer rules, monitors, the quad layout, or the Hyprland theming targets, and whenever the user asks whether the Hyprland config is valid, even if the machine currently runs niri. nix flake check does not catch Lua config errors; this does.
 ---
 
 # Hyprland verify
@@ -16,12 +16,12 @@ home-manager would write and runs `Hyprland --verify-config` on it.
 bash <skill-dir>/scripts/verify.sh desktop   # or: laptop
 ```
 
-- Works when the host runs niri: `windowManager` is overridden to `"hyprland"` in
-  memory only, nothing in the repo changes.
+- Works when the machine runs niri: `windowManager` is overridden to `"hyprland"` in
+  memory only, nothing in the repo changes. It checks the machine's main user's config.
 - `git add` new files first; the flake ignores untracked files.
 - Exit code 0 and `config ok` means it passed. Otherwise each error line names the
   generated file and line; map it back to the Nix module that produced it.
-- Check both hosts when a change touches shared modules, since the laptop has its
+- Check both machines when a change touches shared modules, since the laptop has its
   own monitor, env and autostart overrides.
 
 ## What it does not catch

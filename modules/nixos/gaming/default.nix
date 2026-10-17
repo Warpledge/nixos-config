@@ -3,7 +3,7 @@
 #=====================================================================#
 {
   lib,
-  hostConfig,
+  anyUser,
   ...
 }: {
   #--------------------------------------------------------------------#
@@ -17,6 +17,6 @@
       ./tools/gamescope
       ./tools/java.nix
     ]
-    #--- Game Launchers (controlled by hostConfig)
-    ++ lib.optionals hostConfig.gaming.steam [./steam.nix];
+    #--- Game Launchers (system-wide once any user has gaming.steam)
+    ++ lib.optionals anyUser.gaming.steam [./steam.nix];
 }

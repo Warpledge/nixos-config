@@ -1,8 +1,8 @@
 {
+  config,
   inputs,
   lib,
-  hostname,
-  hostConfig,
+  user,
   ...
 }: {
   #--------------------------------------------------------------------#
@@ -20,30 +20,11 @@
     # Mirrors the niri module. Any `settings` here makes plugin_settings.json a
     # read-only store link, so changes in a plugin's settings page no longer save.
     plugins = {
-      # The variant pins the desktop's GPU by PCI address; the bar widget id
-      # in settings.json (amdGpuMonitor:<id>) must match it.
-      amdGpuMonitor = {
-        enable = hostname == "desktop";
-        settings = {
-          popoutStyle = "default";
-          minimumWidth = true;
-          variants = [
-            {
-              id = "variant_1791177076814";
-              name = "AMD Radeon RX 9070 XT";
-              originalName = "AMD Radeon RX 9070 XT";
-              description = "Monitor your discrete AMD Radeon RX 9070 XT";
-              gpuPci = "0000:09:00.0";
-              gpuType = "dGPU";
-              icon = "memory";
-            }
-          ];
-        };
-      };
+      # amdGpuMonitor is per machine: machines/desktop/hardware/gpu.nix
 
       # The plugin stores its options as strings, booleans included.
       aiOverviewControl = {
-        enable = hostConfig.claude.enable;
+        enable = user.claude.enable;
         settings = {
           providerSelection = "claude";
           pillProviders = "claude";
@@ -134,9 +115,12 @@
   home.file = {
     #--- DMS Main Settings
     # Mirrors niri's settings.json; read-only store link, so anything DMS
-    # rewrites at runtime must be baked in here.
+    # rewrites at runtime must be baked in here. The theme path points at
+    # this user's home, not the one the mirrored file names.
     ".config/DankMaterialShell/settings.json" = {
-      text = builtins.toJSON (lib.importJSON ./settings.json);
+      text =
+        builtins.toJSON (lib.importJSON ./settings.json
+          // {customThemeFile = "${config.xdg.configHome}/DankMaterialShell/themes/catppuccin/theme.json";});
     };
 
     #--- DMS Clipboard Settings
@@ -151,5 +135,16 @@
   imports = [
     inputs.dms.homeModules.dank-material-shell
     inputs.dms-plugin-registry.homeModules.default
+    {
+      # Shared with the niri module, so a machine sets a plugin's settings
+      # once for both WMs (the desktop's GPU widget); here DMS links them
+      options.dms.pluginSettings = lib.mkOption {
+        type = lib.types.attrsOf lib.types.attrs;
+        default = {};
+        description = "Settings per plugin name, passed to its plugins.<name>.settings.";
+      };
+      config.programs.dank-material-shell.plugins =
+        lib.mapAttrs (_: settings: {inherit settings;}) config.dms.pluginSettings;
+    }
   ];
 }

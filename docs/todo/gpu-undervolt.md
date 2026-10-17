@@ -10,7 +10,7 @@ The card is an XFX Quicksilver RX 9070 XT Gaming Edition, model `RX-97TQICKB9` (
 
 ## What's already in the repo
 
-- `hosts/desktop/hardware/gpu.nix` turns on `services.lact` (the `lactd` daemon plus the LACT app) and amdgpu overdrive with `ppfeaturemask = "0xfff7ffff"`: the kernel's default mask `0xfff7bfff` (`amdgpu_drv.c`) plus the overdrive bit `0x4000` (`amd_shared.h`). Overdrive unlocks clock and voltage settings, a power cap above the default, and fan control on RDNA3 and newer (LACT wiki, "Overclocking (AMD)").
+- `machines/desktop/hardware/gpu.nix` turns on `services.lact` (the `lactd` daemon plus the LACT app) and amdgpu overdrive with `ppfeaturemask = "0xfff7ffff"`: the kernel's default mask `0xfff7bfff` (`amdgpu_drv.c`) plus the overdrive bit `0x4000` (`amd_shared.h`). Overdrive unlocks clock and voltage settings, a power cap above the default, and fan control on RDNA3 and newer (LACT wiki, "Overclocking (AMD)").
 - No LACT settings are declared in Nix, so LACT writes `/etc/lact/config.yaml` itself and its changes persist across reboots.
 - With overdrive on, amdgpu logs `Overdrive is enabled, please disable it before reporting any bugs unrelated to overdrive.` at boot (a string in the amdgpu module). It matters only when reporting a GPU bug.
 - GameMode's `gpu` section was removed on 2026-10-17 (see "GameMode clock cap" below), so `nix-performance` no longer changes the card's performance level.

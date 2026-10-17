@@ -5,10 +5,10 @@
   config,
   lib,
   pkgs,
-  hostConfig,
+  user,
   ...
 }: {
-  config = lib.mkIf hostConfig.opencode.enable {
+  config = lib.mkIf user.opencode.enable {
     #--------------------------------------------------------------------#
     #-- Package Installation
     #--------------------------------------------------------------------#

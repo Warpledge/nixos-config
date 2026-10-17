@@ -3,20 +3,18 @@
 #=====================================================================#
 {
   inputs,
-  username,
-  hostname,
   lib,
-  hostConfig,
+  machine,
   ...
 }: let
   #--- Apply CachyOS kernel overlay if using cachyos kernel
-  overlays = lib.optional (hostConfig.kernel == "cachyos") inputs.cachyos-kernel.overlays.pinned;
+  overlays = lib.optional (machine.kernel == "cachyos") inputs.cachyos-kernel.overlays.pinned;
 in {
   #--------------------------------------------------------------------#
   #-- System ---> /modules/nixos
   #--------------------------------------------------------------------#
-  #--- DO NOT CHANGE
-  system.stateVersion = "25.11";
+  #--- DO NOT CHANGE (set once per machine, in its settings.nix)
+  system.stateVersion = machine.stateVersion;
 
   #--- Nixpkgs Configuration
   nixpkgs = {
@@ -34,23 +32,30 @@ in {
     useGlobalPkgs = true;
     useUserPackages = true;
     backupFileExtension = "bak";
-    extraSpecialArgs = {inherit hostname inputs username hostConfig;};
-    users.${username} = {
-      imports = [
-        #--- Home System
-        ./home
-        #--- Home Desktop (controlled by hostConfig)
-        ./wm/${hostConfig.windowManager}/home
-      ];
-      home = {
-        username = lib.mkDefault "${username}";
-        homeDirectory = "/home/${username}";
+    extraSpecialArgs = {inherit inputs machine;};
+    #--- One home per user the machine lists
+    users =
+      lib.mapAttrs (name: user: {
+        imports = [
+          #--- Home System, handed `user` first: the routers read it in `imports`.
+          #--- Not lib.modules.importApply: its extra nesting reorders the home
+          #--- modules, which flips options that keep the last definition.
+          (import ./home user)
+          #--- Home Desktop (controlled by machine settings)
+          ./wm/${machine.windowManager}/home
+        ];
+        #--- This user's settings, for every other home module (`user.media.mpv`)
+        _module.args.user = user;
+        home = {
+          username = lib.mkDefault name;
+          homeDirectory = "/home/${name}";
 
-        #--- DO NOT CHANGE
-        stateVersion = "25.11";
-      };
-      programs.home-manager.enable = true;
-    };
+          #--- DO NOT CHANGE (set once per machine, in its settings.nix)
+          inherit (machine) stateVersion;
+        };
+        programs.home-manager.enable = true;
+      })
+      machine.users;
   };
 
   #--------------------------------------------------------------------#
@@ -65,7 +70,7 @@ in {
     #--- System Modules
     ./nixos
     ./theme
-    #--- Desktop Environment (controlled by hostConfig)
-    ./wm/${hostConfig.windowManager}/session.nix
+    #--- Desktop Environment (controlled by machine settings)
+    ./wm/${machine.windowManager}/session.nix
   ];
 }

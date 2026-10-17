@@ -4,35 +4,38 @@
 {
   lib,
   inputs,
-  username,
+  machine,
   ...
 }: {
   #--------------------------------------------------------------------#
   #-- Home Manager Theme
   #--------------------------------------------------------------------#
-  home-manager.users.${username} = {
-    imports = [inputs.catppuccin.homeModules.catppuccin];
-    catppuccin = lib.mkForce {
-      #--- Global Settings
-      enable = true;
-      autoEnable = true; # auto-enroll all ports
-      flavor = "mocha";
-      accent = "mauve";
-
-      gtk.icon.enable = true; # Papirus-Dark with Mauve folders
-      cursors.enable = false; # keep Stylix's cursor (pointerCursor conflict)
-      kvantum = {
+  #--- Every user on the machine
+  home-manager.users =
+    lib.mapAttrs (_: _: {
+      imports = [inputs.catppuccin.homeModules.catppuccin];
+      catppuccin = lib.mkForce {
+        #--- Global Settings
         enable = true;
-        apply = true; # Auto-apply theme via kvantum.kvconfig
+        autoEnable = true; # auto-enroll all ports
+        flavor = "mocha";
+        accent = "mauve";
+
+        gtk.icon.enable = true; # Papirus-Dark with Mauve folders
+        cursors.enable = false; # keep Stylix's cursor (pointerCursor conflict)
+        kvantum = {
+          enable = true;
+          apply = true; # Auto-apply theme via kvantum.kvconfig
+        };
+        zed.enable = false;
+        opencode.enable = false; # stylix's opencode target owns tui.theme
+        mpv.enable = false; # its include overrides Stylix's black background-color
+        # Emits Lua-only colors that break configType = "hyprlang"; Stylix's
+        # hyprland target owns them
+        hyprland.enable = false;
       };
-      zed.enable = false;
-      opencode.enable = false; # stylix's opencode target owns tui.theme
-      mpv.enable = false; # its include overrides Stylix's black background-color
-      # Emits Lua-only colors that break configType = "hyprlang"; Stylix's
-      # hyprland target owns them
-      hyprland.enable = false;
-    };
-  };
+    })
+    machine.users;
 
   #--------------------------------------------------------------------#
   #-- System Theme

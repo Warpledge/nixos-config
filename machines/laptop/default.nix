@@ -4,14 +4,13 @@
 {
   lib,
   pkgs,
-  username,
-  hostConfig,
+  machine,
   ...
 }: {
   #--------------------------------------------------------------------#
   #-- Laptop Settings (Top Level)
   #--------------------------------------------------------------------#
-  networking.hostName = "laptop";
+  #--- The hostname comes from settings.nix (hostName, else the folder name)
 
   #--- Minecraft servers (minecraft-servers/ is home-manager, so the port opens here)
   networking.firewall.allowedTCPPorts = [25566];
@@ -110,11 +109,12 @@
 
       ../../modules
     ]
-    ++ (lib.optional (hostConfig.windowManager == "hyprland") ./wm/hyprland.nix)
-    ++ (lib.optional (hostConfig.windowManager == "niri") ./wm/niri.nix);
+    ++ (lib.optional (machine.windowManager == "hyprland") ./wm/hyprland.nix)
+    ++ (lib.optional (machine.windowManager == "niri") ./wm/niri.nix);
 
-  #--- Laptop-specific home-manager modules
-  home-manager.users.${username}.imports = [
+  #--- Laptop-specific home-manager modules (the servers live in the main
+  #--- user's ~/Documents)
+  home-manager.users.${machine.mainUser}.imports = [
     ./minecraft-servers
   ];
 }

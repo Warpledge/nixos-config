@@ -14,7 +14,6 @@
     #--- Core Configuration
     ./core/binds.nix
     ./core/blur-presets.nix
-    ./core/monitors.nix
     ./core/portals.nix
     ./core/rules.nix
     ./core/settings.nix

@@ -1,70 +1,27 @@
 #=====================================================================#
-# LAPTOP SYSTEM VARIABLES
+# WARPLEDGE'S USER SETTINGS
 #=====================================================================#
+#- Apps and account settings for warpledge, on every machine that lists
+#- this user. A machine's own settings.nix can change any of these for
+#- that machine only (the laptop turns several off).
 {
   #--------------------------------------------------------------------#
-  #-- Configuration Options
+  #-- Account
   #--------------------------------------------------------------------#
-  # This file contains all host-specific configuration for the laptop system.
-  # Edit these values to customize the laptop build.
+  admin = true;
 
-  #--- Username
-  username = "warpledge";
-
-  #--------------------------------------------------------------------#
-  #-- System (NixOS modules)
-  #--------------------------------------------------------------------#
-  #--- Window Manager Selection
-  # Options: "hyprland" | "niri"
-  windowManager = "niri";
-
-  #--- Kernel Selection
-  # Options: "zen" | "latest" | "xanmod" | "cachyos"
-  kernel = "cachyos";
-
-  #--- Mullvad VPN
-  mullvad.enable = true;
-  # Apps always routed around the VPN (see nixos/security/mullvad/)
-  mullvad.splitTunnel = [
-    "steam"
-    "heroic"
-    "prismlauncher"
-    "opencode"
-    "claude"
-    "spotify"
-    "freetube"
-    "ferdium"
-  ];
-
-  #--- SSH Server
-  # Key-only openssh + fail2ban. Add a public key in nixos/services/ssh.nix
-  # before enabling, or there is no way in.
-  ssh.enable = false;
-
-  #--- ClamAV Antivirus
-  # Enable ClamAV daemon, freshclam auto-updater, and ClamTK GUI
-  clamav.enable = false;
-
-  #--- Docker Containerization
-  # Enable Docker and Docker Compose for container management
-  docker = {
-    enable = false;
+  git = {
+    name = "warpledge";
+    email = "168894871+Warpledge@users.noreply.github.com";
   };
 
-  #--- Suwayomi Manga Server
-  # Local manga reader, web UI at http://localhost:4567
-  suwayomi.enable = false;
-
-  #--- Syncthing File Sync
-  # Peer-to-peer sync, web UI at http://127.0.0.1:8384
-  syncthing.enable = true;
-
-  #--- Sunshine Game Streaming
-  # Streams games to Moonlight clients on the LAN, web UI at https://localhost:47990
-  sunshine.enable = false;
+  #--- Public keys allowed to log in while a machine has ssh.enable on; a
+  #--- public key is not a secret, so it belongs in the repo
+  ssh.authorizedKeys = [
+  ];
 
   #--------------------------------------------------------------------#
-  #-- Home (home-manager modules)
+  #-- Apps
   #--------------------------------------------------------------------#
   #--- Browser Selection
   # Enable the browsers you want installed
@@ -104,13 +61,13 @@
     freetube = true;
     videoTrimmer = true;
     constrict = true; # Compress a video to a target file size
-    moku = false; # Manga, novel and anime reader (source build with UI fixes)
+    moku = true; # Manga, novel and anime reader (source build with UI fixes)
     streamlinkTwitchGui = true; # Twitch browser via streamlink + mpv (AppImage)
-    boorusama = false; # Booru image board browser (AppImage)
-    wallpaperEngine = false; # Animated Steam Workshop wallpapers (DP-2/DP-3)
+    boorusama = true; # Booru image board browser (AppImage)
+    wallpaperEngine = true; # Animated Steam Workshop wallpapers (DP-2/DP-3)
 
     # Local (~/.local/opt bundles, kept out of git)
-    tonkatsuBox = false; # Collection manager (games, film, anime, manga, books)
+    tonkatsuBox = true; # Collection manager (games, film, anime, manga, books)
   };
 
   #--- Graphics Software Selection
@@ -165,22 +122,22 @@
   gaming = {
     # Launchers
     steam = true; # NixOS programs.steam + GE-Proton
-    heroic = false; # Epic / GOG / Amazon
+    heroic = true; # Epic / GOG / Amazon
     prismlauncher = true; # Minecraft
     lutris = false; # Wine launcher
     faugus = true; # UMU/Proton launcher
     twintail = false; # Gacha game launcher
-    hytale = false; # Enables Flatpak; official launcher installed by hand
-    easyrpg = false; # RPG Maker 2000/2003 game interpreter
-    xsystem4 = false; # Wonderland Soft System 4 engine (Lance 7), native
+    hytale = true; # Enables Flatpak; official launcher installed by hand
+    easyrpg = true; # RPG Maker 2000/2003 game interpreter
+    xsystem4 = true; # Wonderland Soft System 4 engine (Lance 7), native
 
     # Games
     feedback = true; # Guitar rhythm game, reads Guitar Pro tabs (AppImage)
     rocksmith = true; # Rocksmith 2014 (Steam), RS_ASIO + PipeASIO on Katana DI
 
     # Tools
-    r2modman = false; # Thunderstore mod manager
-    pathOfBuilding = false; # Path of Exile build planner (Rusty PoB)
+    r2modman = true; # Thunderstore mod manager
+    pathOfBuilding = true; # Path of Exile build planner (Rusty PoB)
     ludusavi = true; # Daily game save backups to ~/SyncBackups/<host>/Ludusavi
 
     # Local (~/.local/opt bundles, kept out of git)
@@ -189,7 +146,7 @@
 
   #--- Discord Rich Presence (arRPC)
   # Standalone arRPC server for Steam/Proton game detection in GoofCord
-  discord.arrpc.enable = false;
+  discord.arrpc.enable = true;
 
   #--- AI Tools
   claude = {enable = true;};

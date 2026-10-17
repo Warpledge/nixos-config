@@ -3,14 +3,14 @@
 #=====================================================================#
 {
   pkgs,
-  hostname,
+  machine,
   ...
 }: {
   #--------------------------------------------------------------------#
   #-- NetworkManager Configuration
   #--------------------------------------------------------------------#
   networking = {
-    hostName = "${hostname}";
+    inherit (machine) hostName; # settings.nix hostName, else the folder name
     useDHCP = false;
     useNetworkd = true;
     usePredictableInterfaceNames = true;
