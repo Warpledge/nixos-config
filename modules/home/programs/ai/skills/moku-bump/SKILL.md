@@ -49,6 +49,10 @@ the `repo` branch of skepsun/kototoro-parsers by deploy commits).
    - `tsunagu/hls-audio.patch`: when a source returns a video-only HLS playlist with its
      audio as separate tracks (some anime sources), `/video` serves a master playlist
      joining them; without it those episodes play silent in Moku and in mpv.
+
+   To regenerate a patch, build the `a/` and `b/` trees under a literal path in the
+   scratchpad (`mkdir -p /tmp/claude-1000/.../scratchpad/moku-patch/a/src/...`), never
+   `$W/...`: an empty variable or a failed `cd` puts the tree in the repo root as `src/`.
 4. Kototoro: bump the `plugin.jar` URL commit, its `hash` and the `# vX` comment together
    when status shows a newer build or the sandbox log has `NoSuchMethodError` naming
    `org.skepsun.`; jsoup and collection stay at the versions that plugin is built against.
