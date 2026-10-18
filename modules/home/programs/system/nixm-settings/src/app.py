@@ -1,5 +1,6 @@
 """nixm Settings: pick apps and system options from menus, then rebuild."""
 
+import grp
 import json
 import os
 import re
@@ -268,16 +269,66 @@ class Window(Adw.ApplicationWindow):
             err = backend.SettingsError(
                 f"{self.cfg.user} isn't listed in machines/{self.cfg.machine}/settings.nix")
         if err is not None:
-            retry = Gtk.Button(label="Try Again", halign=Gtk.Align.CENTER, css_classes=["pill", "suggested-action"])
-            retry.connect("clicked", lambda _: self.reload())
-            self._bare(Adw.StatusPage(icon_name="dialog-error-symbolic", title="Couldn't read the settings",
-                                      description=GLib.markup_escape_text(str(err)), child=retry))
+            self._failed(err)
             return
         self.state = state
         self.changes = {}
         self.build()
         if toast:
             self.toasts.add_toast(Adw.Toast(title=toast))
+
+    def _failed(self, err):
+        """The error page; offers to drop settings the templates no longer have."""
+        try:
+            stale = backend.stale_settings(self.cfg)
+        except Exception:  # noqa: BLE001
+            stale = []
+        try:
+            in_wheel = grp.getgrnam("wheel").gr_gid in os.getgroups()
+        except KeyError:
+            in_wheel = False
+        direct = in_wheel and backend.writable(self.cfg)
+        helper = os.path.realpath(HELPER) if os.path.exists(HELPER) else None
+        mine = [i for i in stale if direct or i[0] != "machine"]
+        where = {"user": f"users/{self.cfg.user}/settings.nix",
+                 "override": f"machines/{self.cfg.machine}/settings.nix, your block",
+                 "machine": f"machines/{self.cfg.machine}/settings.nix"}
+
+        buttons = Gtk.Box(spacing=12, halign=Gtk.Align.CENTER)
+        retry = Gtk.Button(label="Try Again", css_classes=["pill"])
+        retry.connect("clicked", lambda _: self.reload())
+        buttons.append(retry)
+        text = str(err)
+        if stale:
+            text = "These settings aren't in the templates any more, so the files can't be read:\n" + \
+                "\n".join(f"• {'.'.join(p)}  ({where[w]})" for w, p in stale)
+            if len(mine) < len(stale):
+                text += "\n\nAn admin needs to remove the computer-wide ones."
+        if mine and (direct or helper):
+            remove = Gtk.Button(label="Remove Them", css_classes=["pill", "suggested-action"])
+            remove.connect("clicked", lambda _: self._clean(mine, direct, helper))
+            buttons.append(remove)
+        self._bare(Adw.StatusPage(icon_name="dialog-error-symbolic", title="Couldn't read the settings",
+                                  description=GLib.markup_escape_text(text), child=buttons))
+
+    def _clean(self, items, direct, helper):
+        if direct:
+            run_async(lambda: backend.remove_stale(self.cfg, items),
+                      lambda _, err: self.reload(None if err else "Old settings removed"))
+            return
+        dialog = RebuildDialog(lambda: None)
+        dialog.status("Removing old settings…", "Type your own password when asked.")
+        dialog.present(self)
+
+        def done(ok, code):
+            if ok:
+                dialog.finish(True, "Done", "")
+                dialog.close()
+                self.reload("Old settings removed")
+            else:
+                dialog.finish(False, "Nothing was removed", "The details below say why.")
+        dialog.run([GLib.find_program_in_path("pkexec") or "pkexec", helper,
+                    json.dumps({"clean": True})], done)
 
     #--- Layout
     def build(self):
@@ -294,7 +345,19 @@ class Window(Adw.ApplicationWindow):
         self.sidebar.set_header_func(self._sidebar_header)
         self.stack = Gtk.Stack(transition_type=Gtk.StackTransitionType.CROSSFADE)
         self.colors = theme_colors()
-        self.row_page, self.counts = {}, []
+        self.row_page, self.counts, self.page_rows = {}, [], []
+        self.new_items = [(s, value) for path, value in state.new
+                          for page in state.pages for g in page.groups for s in g.settings
+                          if s.domain == "user" and s.path == path]
+        if self.new_items:
+            box = Gtk.Box(spacing=10, margin_top=4, margin_bottom=4)
+            box.append(Gtk.Image(icon_name="starred-symbolic", css_classes=["accent"]))
+            box.append(Gtk.Label(label="What's New", xalign=0, hexpand=True))
+            box.append(Gtk.Label(label=str(len(self.new_items)), css_classes=["accent", "caption", "numeric"]))
+            row = Gtk.ListBoxRow(child=box)
+            row.domain, row.page_index = "new", None
+            self.sidebar.append(row)
+            self.stack.add_named(self._new_page(), "new")
         for i, page in enumerate(state.pages):
             box = Gtk.Box(spacing=10, margin_top=4, margin_bottom=4)
             box.append(Gtk.Image(icon_name=page_icon(page)))
@@ -304,7 +367,8 @@ class Window(Adw.ApplicationWindow):
             box.append(count)
             self.counts.append((page, count))
             row = Gtk.ListBoxRow(child=box)
-            row.domain = page.domain
+            row.domain, row.page_index = page.domain, i
+            self.page_rows.append(row)
             self.sidebar.append(row)
             self.page_index_now = i
             self.stack.add_named(self._page(page), str(i))
@@ -347,11 +411,13 @@ class Window(Adw.ApplicationWindow):
         if self.toasts.get_child() is not self.split:
             self.toasts.set_child(self.split)
 
-        self.sidebar.select_row(self.sidebar.get_row_at_index(min(self.page_index, len(state.pages) - 1)))
+        self.sidebar.select_row(self.page_rows[min(self.page_index, len(state.pages) - 1)])
         self._update()
 
     def _sidebar_header(self, row, before):
-        if before is None or before.domain != row.domain:
+        if row.domain == "new":
+            row.set_header(None)
+        elif before is None or before.domain != row.domain:
             title = "This Computer" if row.domain == "machine" else "Your Apps and Account"
             label = Gtk.Label(label=title, xalign=0, css_classes=["heading", "dim-label"],
                               margin_start=12, margin_top=12 if before else 6, margin_bottom=6)
@@ -362,7 +428,12 @@ class Window(Adw.ApplicationWindow):
     def _select(self, _, row):
         if row is None:
             return
-        self.page_index = row.get_index()
+        if row.page_index is None:
+            self.stack.set_visible_child_name("new")
+            self.content_page.set_title("What's New")
+            self.split.set_show_content(True)
+            return
+        self.page_index = row.page_index
         self.stack.set_visible_child_name(str(self.page_index))
         self.content_page.set_title(self.state.pages[self.page_index].title)
         self.split.set_show_content(True)
@@ -411,12 +482,56 @@ class Window(Adw.ApplicationWindow):
         """Opens the page holding a search hit and puts focus on its row."""
         self.search.set_text("")
         self.page_index = i
-        self.sidebar.select_row(self.sidebar.get_row_at_index(i))
-        self._select(self.sidebar, self.sidebar.get_row_at_index(i))
+        self.sidebar.select_row(self.page_rows[i])
+        self._select(self.sidebar, self.page_rows[i])
         row = self.rows[key][0]
         if isinstance(row, Adw.ExpanderRow):
             row.set_expanded(True)
         GLib.idle_add(row.grab_focus)
+
+    def _new_page(self):
+        prefs = Adw.PreferencesPage()
+        hero = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        hero.append(Gtk.Image(icon_name="starred-symbolic", pixel_size=56, css_classes=["accent"]))
+        hero.append(Gtk.Label(label="What's New", css_classes=["title-1"]))
+        hero.append(Gtk.Label(
+            label="These settings were added after your settings file was made, so it doesn't "
+                  "mention them yet and every switch here counts as off. Add them with the "
+                  "values they come with, or set them one by one on their own pages.",
+            css_classes=["dim-label"], wrap=True, justify=Gtk.Justification.CENTER))
+        add = Gtk.Button(label="Add Them With Their Defaults", halign=Gtk.Align.CENTER,
+                         css_classes=["pill", "suggested-action"], margin_top=6)
+        add.connect("clicked", self._adopt)
+        hero.append(add)
+        top = Adw.PreferencesGroup()
+        top.add(hero)
+        prefs.add(top)
+        group = Adw.PreferencesGroup()
+        index = {(s.domain, s.path): i for i, p in enumerate(self.state.pages)
+                 for g in p.groups for s in g.settings}
+        for s, value in self.new_items:
+            i = index[(s.domain, s.path)]
+            row = Adw.ActionRow(title=GLib.markup_escape_text(s.title),
+                                subtitle=GLib.markup_escape_text(self.state.pages[i].title),
+                                activatable=True)
+            row.add_prefix(Gtk.Image(icon_name=page_icon(self.state.pages[i])))
+            row.add_suffix(Gtk.Label(label=f"Default: {shown(s, value)}", css_classes=["dim-label"]))
+            row.add_suffix(Gtk.Image(icon_name="go-next-symbolic"))
+            row.connect("activated", lambda _, i=i, key=(s.domain, s.path): self._jump(i, key))
+            group.add(row)
+        prefs.add(group)
+        return prefs
+
+    def _adopt(self, _):
+        """Stages every new setting at its template value, even where that matches
+        what the missing line already means, so Apply writes it into the file."""
+        for s, value in self.new_items:
+            key = (s.domain, s.path)
+            self.changes[key] = value
+            self.rows[key][1].set_visible(True)
+            self._count(self.row_page[key])
+        self._update()
+        self.toasts.add_toast(Adw.Toast(title="Press Apply to save them"))
 
     def _page(self, page):
         prefs = Adw.PreferencesPage()
@@ -615,12 +730,19 @@ class Window(Adw.ApplicationWindow):
         self.build()
 
     def _confirm(self, _):
-        lines, restart, user_changes = [], False, False
+        lines, restart, user_changes, recorded = [], False, False, 0
         for key, value in self.changes.items():
             s = self.settings[key]
-            lines.append(f"{s.title}: {shown(s, self.state.value(self.cfg, s))} → {shown(s, value)}")
+            before = shown(s, self.state.value(self.cfg, s))
+            if before == shown(s, value):
+                recorded += 1
+            else:
+                lines.append(f"{s.title}: {before} → {shown(s, value)}")
             restart |= (s.domain, ".".join(s.path)) in schema.RESTART
             user_changes |= s.domain == "user"
+        if recorded:
+            lines.append(f"Plus {recorded} new setting{'s' if recorded != 1 else ''} "
+                         "saved into your file unchanged")
         body = "\n".join(lines)
         if user_changes and self.multi:
             where = f"this computer ({self.cfg.machine}) only" if self.this_only else "all your computers"

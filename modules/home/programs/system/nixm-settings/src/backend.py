@@ -88,6 +88,84 @@ def dig(data, path):
     return data
 
 
+def lookup(tree, path):
+    """(True, value) when `path` is set in `tree`, else (False, None)."""
+    for key in path:
+        if not isinstance(tree, dict) or key not in tree:
+            return False, None
+        tree = tree[key]
+    return True, tree
+
+
+def leaf_paths(tree, prefix=()):
+    for key, value in tree.items():
+        path = prefix + (key,)
+        if isinstance(value, dict):
+            yield from leaf_paths(value, path)
+        else:
+            yield path, value
+
+
+def known(template, path):
+    """Whether lib/settings.nix accepts `path`: a template key, or under a null one."""
+    for key in path:
+        if template is None:
+            return True
+        if not isinstance(template, dict) or key not in template:
+            return False
+        template = template[key]
+    return True
+
+
+def read_tree(path):
+    with open(path) as f:
+        return nixfile.to_python(nixfile.parse(f.read()).root)
+
+
+def new_settings(cfg, overrides):
+    """Template settings that this user's file and this machine's block both leave
+    out, with the template's value: what was added since the file was made."""
+    template = read_tree(os.path.join(cfg.flake, "users", "_template", "settings.nix"))
+    own = read_tree(cfg.file("user"))
+    return [(path, value) for path, value in leaf_paths(template)
+            if path[0] not in schema.HIDDEN and not lookup(own, path)[0]
+            and not lookup(overrides, path)[0]]
+
+
+def stale_settings(cfg):
+    """Settings the templates no longer have, as (where, path): "user" is this user's
+    file, "override" their block in this machine's file, "machine" the machine's own."""
+    user_t = read_tree(os.path.join(cfg.flake, "users", "_template", "settings.nix"))
+    machine_t = read_tree(os.path.join(cfg.flake, "machines", "_template", "settings.nix"))
+    machine = read_tree(cfg.file("machine"))
+    block = dig(machine, ["users", cfg.user]) or {}
+    machine_own = {k: v for k, v in machine.items() if k != "users"}
+    return ([("user", p) for p, _ in leaf_paths(read_tree(cfg.file("user"))) if not known(user_t, p)]
+            + [("override", p) for p, _ in leaf_paths(block) if not known(user_t, p)]
+            + [("machine", p) for p, _ in leaf_paths(machine_own) if not known(machine_t, p)])
+
+
+def remove_stale(cfg, items):
+    """Deletes the given stale settings from the files; returns the files' old text."""
+    files = {d: cfg.file(d) for d in ("machine", "user")}
+    old = {d: open(f).read() for d, f in files.items()}
+    text = dict(old)
+    for where, path in items:
+        path = list(path)
+        if where == "user":
+            text["user"] = nixfile.remove_value(text["user"], path)
+        elif where == "override":
+            text["machine"] = nixfile.remove_value(text["machine"], ["users", cfg.user] + path, keep=2)
+        else:
+            text["machine"] = nixfile.remove_value(text["machine"], path)
+    changed = [d for d in files if text[d] != old[d]]
+    for d in changed:
+        save(files[d], text[d])
+    if shutil.which("alejandra") and changed:
+        subprocess.run(["alejandra", "-q"] + [files[d] for d in changed], capture_output=True)
+    return old
+
+
 @dataclass
 class State:
     """Everything the window shows, loaded in one go."""
@@ -96,6 +174,7 @@ class State:
     overrides: dict  # this machine's users.<user> block, as Python
     user_machines: list
     timezones: list
+    new: list  # (path, template value) for settings added since the user's file was made
 
     def value(self, cfg, setting):
         if setting.domain == "machine":
@@ -130,8 +209,9 @@ def load(cfg):
         zones = subprocess.run(["timedatectl", "list-timezones"], capture_output=True, text=True).stdout.split()
     except FileNotFoundError:
         zones = []
-    return State(pages, data["resolved"], dig(machine_doc, ["users", cfg.user]) or {},
-                 data["userMachines"], zones)
+    overrides = dig(machine_doc, ["users", cfg.user]) or {}
+    return State(pages, data["resolved"], overrides, data["userMachines"], zones,
+                 new_settings(cfg, overrides))
 
 
 def writable(cfg):
