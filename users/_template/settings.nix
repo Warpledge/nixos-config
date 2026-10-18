@@ -67,6 +67,7 @@
   # Enable the file browsers you want installed
   fileBrowsers = {
     nautilus = true;
+    dolphin = false; # KDE's file manager
     yazi = true;
   };
 

@@ -9,7 +9,7 @@
 in {
   #--- Every user on the machine
   home-manager.users =
-    lib.mapAttrs (_: _: {
+    lib.mapAttrs (_: u: {config, ...}: {
       home.sessionVariables = {
         #--- Qt Theme Session Variables
         QT_STYLE_OVERRIDE = "kvantum";
@@ -42,6 +42,24 @@ in {
       home.packages = with pkgs; [
         qt6Packages.qt6ct
       ];
+
+      #--- KDE Colour Scheme
+      # KDE apps (Dolphin) take colours and icons from kdeglobals, not qt6ct;
+      # upstream's Catppuccin scheme, in the flavour and accent Kvantum uses
+      xdg.configFile."kdeglobals" = lib.mkIf u.fileBrowsers.dolphin {
+        source = let
+          inherit (config.catppuccin) flavor accent;
+          scheme = pkgs.catppuccin-kde.override {
+            flavour = [flavor];
+            accents = [accent];
+          };
+          name = "Catppuccin${lib.toSentenceCase flavor}${lib.toSentenceCase accent}";
+        in
+          pkgs.runCommand "kdeglobals" {} ''
+            cat ${scheme}/share/color-schemes/${name}.colors > $out
+            printf '\n[Icons]\nTheme=Papirus-Dark\n' >> $out
+          '';
+      };
     })
     machine.users;
 }

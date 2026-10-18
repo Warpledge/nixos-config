@@ -12,6 +12,12 @@
   #-- Niri Keybindings
   #--------------------------------------------------------------------#
   programs.niri.settings.binds = let
+    # Dolphin when it's the user's file manager, else Nautilus
+    chosen = (import ../../../../../lib/default-apps.nix {inherit lib;}).forUser user;
+    files =
+      if chosen.fileManager.name == "dolphin"
+      then "dolphin"
+      else "nautilus";
     # The title is what the Mod+/ cheatsheet (DMS) shows for the bind
     bind = title: action: {
       inherit action;
@@ -157,7 +163,7 @@
       ];
     };
     "Mod+B" = bind "Zen browser" {spawn = ["zen-beta"];};
-    "Mod+E" = bind "Files" {spawn = ["nautilus"];};
+    "Mod+E" = bind "Files" {spawn = [files];};
     "Mod+Shift+M" = bind "Spotify" {spawn = ["spotify"];};
     "Ctrl+Alt+Delete" = bind "Resources (system monitor)" {spawn = ["resources"];};
     #--- Focuses NixOS Settings, or opens it

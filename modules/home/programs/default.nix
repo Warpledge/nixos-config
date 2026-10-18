@@ -45,6 +45,7 @@ user: {lib, ...}: {
     ]
     #--- File Browsers (controlled by user settings)
     ++ lib.optionals user.fileBrowsers.nautilus [./file-browsers/nautilus.nix]
+    ++ lib.optionals user.fileBrowsers.dolphin [./file-browsers/dolphin.nix]
     ++ lib.optionals user.fileBrowsers.yazi [./file-browsers/yazi.nix]
     #--- Browsers (controlled by user settings)
     ++ lib.optionals user.browsers.zen [./browsers/zen]
