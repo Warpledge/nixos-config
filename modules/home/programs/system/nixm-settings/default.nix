@@ -46,7 +46,7 @@ in {
     genericName = "System Settings";
     comment = "Pick apps and system options, then rebuild";
     exec = "nixm-settings";
-    icon = "preferences-system";
+    icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
     terminal = false;
     categories = ["Settings" "System"];
     settings.StartupWMClass = "dev.nixm.Settings";
