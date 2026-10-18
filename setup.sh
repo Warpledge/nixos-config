@@ -418,6 +418,119 @@ installer_boot_lines() {
   ' "$nixos_dir/configuration.nix"
 }
 
+#--- Sets monitors=("connector|width|height|width in cm"), one per connected
+#--- screen, from sysfs: its preferred resolution (0 when unreadable) and the
+#--- physical width its EDID reports (0 when it doesn't)
+detect_monitors() {
+  local c mode cm w h
+  monitors=()
+  for c in /sys/class/drm/card*-*; do
+    [[ -r $c/status && $(<"$c/status") == connected ]] || continue
+    mode=$(head -n1 "$c/modes" 2>/dev/null || true)
+    w=0 h=0
+    [[ $mode =~ ^([0-9]+)x([0-9]+) ]] && w=${BASH_REMATCH[1]} h=${BASH_REMATCH[2]}
+    cm=$(od -An -tu1 -j21 -N1 "$c/edid" 2>/dev/null | tr -d ' ' || true)
+    monitors+=("${c#*/card*-}|$w|$h|${cm:-0}")
+  done
+}
+
+#--- suggested_scale <width px> <width cm>: from the pixel density, on the
+#--- small side (a 16" 2560x1600 panel gets 1.25; niri's own guess is larger)
+suggested_scale() {
+  local dpi
+  (($1 > 0 && $2 > 0)) || {
+    echo 1
+    return
+  }
+  dpi=$(($1 * 254 / ($2 * 100)))
+  if ((dpi < 160)); then
+    echo 1
+  elif ((dpi < 180)); then
+    echo 1.1
+  elif ((dpi < 210)); then
+    echo 1.25
+  elif ((dpi < 240)); then
+    echo 1.5
+  elif ((dpi < 280)); then
+    echo 1.75
+  else
+    echo 2
+  fi
+}
+
+#--- Asks how big everything should look on each monitor; sets scales=()
+pick_scales() {
+  local m name w h cm s suggested lw lh items
+  scales=()
+  for m in "${monitors[@]}"; do
+    IFS='|' read -r name w h cm <<<"$m"
+    suggested=$(suggested_scale "$w" "$cm")
+    items=()
+    for s in 1 1.1 1.25 1.5 1.75 2; do
+      if ((w > 0)); then
+        read -r lw lh < <(awk -v w="$w" -v h="$h" -v s="$s" 'BEGIN { printf "%d %d\n", w / s + 0.5, h / s + 0.5 }')
+        items+=("$s|${s}x: as much room as a ${lw}x${lh} screen")
+      else
+        items+=("$s|${s}x")
+      fi
+      [[ $s == "$suggested" ]] && items[-1]+=" (suggested)"
+    done
+    if ((w > 0)); then
+      choose s "How big things look on $name (${w}x${h}$( ((cm > 0)) && printf ', %s cm wide' "$cm")); bigger scale, bigger bar and text:" "$suggested" "${items[@]}"
+    else
+      choose s "How big things look on $name (its resolution couldn't be read):" "$suggested" "${items[@]}"
+    fi
+    scales+=("$s")
+  done
+}
+
+#--- write_monitors <name> <wm>: the monitors and their scales into
+#--- machines/<name>/wm/<wm>.nix, placed left to right
+write_monitors() {
+  local name=$1 wm=$2 file=machines/$1/wm/$2.nix i x=0 n w h cm s block="" mode
+  ((${#monitors[@]})) || return 0
+  for i in "${!monitors[@]}"; do
+    IFS='|' read -r n w h cm <<<"${monitors[i]}"
+    s=${scales[i]}
+    [[ $s == *.* ]] || s=$s.0
+    if [[ $wm == niri ]]; then
+      mode=""
+      ((w > 0)) && mode="
+            mode = {
+              width = $w;
+              height = $h;
+            };"
+      block+="          \"$n\" = {$mode
+            position = {
+              x = $x;
+              y = 0;
+            };
+            scale = $s;
+          };
+"
+    else
+      block+="          {
+            output = \"$n\";
+            mode = \"highrr\";
+            position = \"${x}x0\";
+            scale = $s;
+          }
+"
+    fi
+    ((w > 0)) && x=$((x + $(awk -v w="$w" -v s="$s" 'BEGIN { printf "%d", w / s + 0.5 }')))
+  done
+  if [[ $wm == niri ]]; then
+    add_line_after "$file" '^      programs\.niri\.settings = \{' "        #--- Found by setup.sh; with no refresh niri picks each one's highest
+        outputs = {
+${block}        };"
+  else
+    add_line_after "$file" '^      wayland\.windowManager\.hyprland\.settings = \{' "        #--- Found by setup.sh; highrr is the highest refresh rate, which can
+        #--- mean a lower resolution: \`hyprctl monitors\` lists exact modes
+        monitor = [
+${block}        ];"
+  fi
+}
+
 #--- 0000:01:00.0 -> PCI:1:0:0, the form hardware.nvidia.prime wants
 pci_bus_id() {
   local rest=${1#*:}
@@ -689,6 +802,13 @@ new_machine() {
     confirm "Set up drivers for that?" y || gpu_type=""
   fi
 
+  detect_monitors
+  if ((${#monitors[@]})); then
+    pick_scales
+  else
+    say "No monitor found to read; $wm picks each screen's size itself (machines/$name/wm/$wm.nix can set it)."
+  fi
+
   section "People"
   say "Who will log in here? The first person owns the config and can change the system."
   people=() written=()
@@ -710,6 +830,7 @@ new_machine() {
   cp -r machines/_template "machines/$name"
   sed -i "2s/(TEMPLATE)/(${name^^})/" "$f" "machines/$name/default.nix"
   write_hardware "$name"
+  write_monitors "$name" "$wm"
 
   set_setting "$f" stateVersion "$(nix_string "$state_version")"
   set_setting "$f" timeZone "$(nix_string "$tz")"
