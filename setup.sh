@@ -851,6 +851,10 @@ services=(
   "Services|clamav.enable|ClamAV virus scanner"
   "Services|suwayomi.enable|Suwayomi manga server"
   "Services|ssh.enable|SSH server (key login only)"
+  "Services|bluetooth.enable|Bluetooth"
+  "Services|printing.enable|Printing (CUPS, finds network printers)"
+  "Services|blocklist.enable|Ad and tracker blocking (Steven Black hosts list)"
+  "Services|capsLockRemap|Caps Lock: Escape when tapped, Ctrl when held"
 )
 
 valid_username() {

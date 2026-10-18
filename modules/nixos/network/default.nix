@@ -1,7 +1,12 @@
 #=====================================================================#
 # NETWORKING (DIAGNOSTIC TOOLS + MODULE IMPORTS)
 #=====================================================================#
-{pkgs, ...}: {
+{
+  lib,
+  pkgs,
+  machine,
+  ...
+}: {
   #--------------------------------------------------------------------#
   #-- Diagnostic Tools
   #--------------------------------------------------------------------#
@@ -16,10 +21,12 @@
   #--------------------------------------------------------------------#
   #-- Imports
   #--------------------------------------------------------------------#
-  imports = [
-    ./blockers.nix
-    ./dns.nix
-    ./firewall.nix
-    ./networkmanager.nix
-  ];
+  imports =
+    [
+      ./dns.nix
+      ./firewall.nix
+      ./networkmanager.nix
+    ]
+    #--- Hosts blocklist (controlled by machine settings)
+    ++ lib.optionals machine.blocklist.enable [./blockers.nix];
 }

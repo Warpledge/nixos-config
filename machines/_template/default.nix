@@ -13,7 +13,7 @@
   #-- Machine Settings
   #--------------------------------------------------------------------#
   #--- NixOS options for this machine only go here, for example:
-  # hardware.bluetooth.enable = true;
+  # hardware.i2c.enable = true;
 
   #--------------------------------------------------------------------#
   #-- Imports

@@ -25,8 +25,14 @@
     windowManager = ["niri" "hyprland"];
     kernel = ["zen" "latest" "xanmod" "cachyos"];
     cursor = ["bibata" "catppuccin"];
+    cursorSize = [24 32 48 64];
     "gpu.type" = [null "amd" "intel" "nvidia" "amd+nvidia" "intel+nvidia"];
   };
+  #--- Lists whose items must come from a known set
+  listChoices = {
+    "blocklist.extra" = ["fakenews" "gambling" "porn" "social"];
+  };
+  portLists = ["firewall.openTCPPorts" "firewall.openUDPPorts"];
   userChoices =
     {
       wallpaper = ["carousel" "engine"];
@@ -74,6 +80,26 @@
       lib.optional (!(lib.elem value allowed)) "`${path}` is ${builtins.toJSON value}; use one of ${show}")
     choices);
 
+  #--- One line per list setting holding an item it can't take
+  listAt = path: set: let
+    value = lib.attrByPath (lib.splitString "." path) [] set;
+  in
+    if lib.isList value
+    then value
+    else [];
+  badLists = set:
+    lib.concatLists (lib.mapAttrsToList (path: allowed: let
+      wrong = lib.filter (v: !(lib.elem v allowed)) (listAt path set);
+    in
+      lib.optional (wrong != [])
+      "`${path}` has ${builtins.toJSON wrong}; use only ${lib.concatMapStringsSep ", " builtins.toJSON allowed}")
+    listChoices)
+    ++ lib.concatMap (path: let
+      wrong = lib.filter (v: !(lib.isInt v && v >= 1 && v <= 65535)) (listAt path set);
+    in
+      lib.optional (wrong != []) "`${path}` has ${builtins.toJSON wrong}; use port numbers from 1 to 65535")
+    portLists;
+
   #--- Stops evaluation with every problem found in `file`
   report = file: lines:
     lib.assertMsg (lines == []) "\n${file}:\n${lib.concatMapStrings (line: "  - ${line}\n") lines}";
@@ -87,7 +113,7 @@
     else null;
 in {
   #--- The allowed values, for tools that edit the settings files
-  inherit choices userChoices;
+  inherit choices userChoices listChoices;
 
   #--------------------------------------------------------------------#
   #-- Machine
@@ -141,7 +167,8 @@ in {
       ++ lib.optional (mainUser == null && names != []) "several users are listed, so set mainUser to the one who owns this config"
       ++ lib.optional (mainUser != null && !(listed ? ${mainUser})) "mainUser `${toString mainUser}` is not listed in `users`"
       ++ lib.optional (!lib.isString merged.stateVersion) "set stateVersion (in quotes) to the system.stateVersion line in /etc/nixos/configuration.nix"
-      ++ badChoices choices merged;
+      ++ badChoices choices merged
+      ++ badLists merged;
   in
     assert report file machineProblems;
     assert lib.all (user: report (userFile user) (problems userDefaults (import ../users/${user}/settings.nix) [])) names;

@@ -11,11 +11,8 @@
   #--------------------------------------------------------------------#
   #--- The hostname comes from settings.nix (hostName, else the folder name)
 
+  #--- Bluetooth is bluetooth.enable in settings.nix
   hardware = {
-    #--- Bluetooth
-    bluetooth.enable = true;
-    bluetooth.powerOnBoot = true;
-
     #--- DDC/CI monitor brightness, for DMS's brightness slider and keys
     i2c.enable = true;
   };

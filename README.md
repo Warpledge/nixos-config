@@ -233,7 +233,9 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | **Containers** | [Docker][docker], off by default |
 | **Flatpak** | [nix-flatpak][nix-flatpak] (declarative Flatpak management) |
 | **Networking** | [systemd-resolved][resolved] + [NetworkManager][networkmanager] (iwd), and [Mullvad][mullvad] over WireGuard with multihop, [DAITA][daita] and a kill switch that blocks traffic while the tunnel is down |
-| **Key Remapping** | [keyd][keyd] |
+| **Key Remapping** | [keyd][keyd] makes Caps Lock Escape on tap and Ctrl on hold (`capsLockRemap`) |
+| **Bluetooth** | [BlueZ][bluez], per machine (`bluetooth.enable`) |
+| **Printing** | [CUPS][cups], with [Avahi][avahi] finding network printers (`printing.enable`, off by default) |
 | **GPU Tuning** | [LACT][lact] for the desktop's RX 9070 XT, with amdgpu overdrive on so it can undervolt |
 | **Bootloader** | [systemd-boot][systemd-boot] |
 | **Kernel** | [CachyOS kernel][cachyos-kernel] (selectable: zen / latest / xanmod / cachyos), with the [scx_lavd][scx] sched_ext scheduler |
@@ -249,7 +251,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | **Kernel Hardening** | Boot settings that make the system harder to attack: the core of the OS refuses to be modified while running, memory is placed unpredictably so an attacker cannot count on where things are, kernel memory is zeroed before it's handed out, and io_uring, a kernel interface behind many recent exploits, is switched off |
 | **Network Hardening** | The usual anti-spoofing settings: packets claiming to come from an address they cannot have come from get dropped, requests to reroute traffic are ignored, and the machine stays up under a basic flood attack |
 | **Auditing** | [auditd][auditd], with a daily timer to keep the log from growing forever |
-| **Hosts Blocklists** | [StevenBlack][stevenblack] (the base ads and malware list, plus fake news and gambling), from the nixpkgs package |
+| **Hosts Blocklists** | [StevenBlack][stevenblack] (the base ads and malware list, plus the categories a machine's `blocklist.extra` names, fake news and gambling on both), from the nixpkgs package |
 | **Browser** | [Zen][zen] with [Arkenfox][arkenfox] and [Securefox][securefox] tweaks, plus [Mullvad Browser][mullvad-browser] |
 | **Secrets** | [GNOME Keyring][gnome-keyring] |
 | **Passwords** | [KeePassXC][keepassxc], with the vault file synced between devices by [Syncthing][syncthing] |
@@ -370,6 +372,9 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 [mullvad]: https://mullvad.net
 [resolved]: https://www.freedesktop.org/software/systemd/man/systemd-resolved.html
 [networkmanager]: https://networkmanager.dev
+[bluez]: https://bluez.github.io/
+[cups]: https://openprinting.github.io/cups/
+[avahi]: http://avahi.org
 [clamav]: https://www.clamav.net
 [bleachbit]: https://bleachbit.sourceforge.net
 [keepassxc]: https://keepassxc.org/

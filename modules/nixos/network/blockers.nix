@@ -1,7 +1,11 @@
 #=====================================================================#
 # HOST BLOCKLISTS AND FILTERING
 #=====================================================================#
-{pkgs, ...}: {
+{
+  pkgs,
+  machine,
+  ...
+}: {
   #--------------------------------------------------------------------#
   #-- Steven Black Host Blocklist
   #--------------------------------------------------------------------#
@@ -18,10 +22,7 @@
             sed -i -E '/^[^#[:space:]]+[[:space:]]+localhost$/d' $out/hosts $ads/hosts
           '';
       });
-      block = [
-        "fakenews"
-        "gambling"
-      ];
+      block = machine.blocklist.extra; # The machine's settings.nix
     };
   };
 }

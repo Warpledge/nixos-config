@@ -31,7 +31,6 @@
       #--- System Services
       ./services/desktop.nix
       ./services/hardware/adb.nix
-      ./services/hardware/keyd.nix
       ./services/hardware/power.nix
       ./services/hardware/sound.nix
       ./services/runtimes/runners.nix
@@ -52,6 +51,10 @@
     ]
     #--- Graphics drivers (controlled by machine settings; null: the machine's own files)
     ++ lib.optionals (machine.gpu.type != null) [./services/hardware/gpu.nix]
+    #--- Caps Lock remap, Bluetooth and printing (controlled by machine settings)
+    ++ lib.optionals machine.capsLockRemap [./services/hardware/keyd.nix]
+    ++ lib.optionals machine.bluetooth.enable [./services/hardware/bluetooth.nix]
+    ++ lib.optionals machine.printing.enable [./services/hardware/printing.nix]
     #--- Mullvad VPN, system and home-manager halves (controlled by machine settings)
     ++ lib.optionals machine.mullvad.enable [./security/mullvad]
     #--- ClamAV Antivirus (controlled by machine settings)

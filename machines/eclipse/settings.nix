@@ -24,6 +24,9 @@
   keyboardLayout = "us";
   consoleKeyMap = "us";
 
+  #--- Caps Lock: Escape when tapped, Ctrl when held
+  capsLockRemap = true;
+
   #--- Window Manager Selection
   # Options: "hyprland" | "niri"
   windowManager = "niri";
@@ -35,6 +38,23 @@
   #--- Mouse Cursor
   # Options: "bibata" | "catppuccin"
   cursor = "bibata";
+  cursorSize = 24;
+
+  #--- Bluetooth
+  bluetooth.enable = true;
+
+  #--- Printing (CUPS)
+  printing.enable = false;
+
+  #--- Firewall: ports other devices may connect to
+  firewall.openTCPPorts = [
+    7777 # Terraria server
+  ];
+  firewall.openUDPPorts = [];
+
+  #--- Ad & Tracker Blocking (Steven Black hosts list)
+  blocklist.enable = true;
+  blocklist.extra = ["fakenews" "gambling"];
 
   #--- Mullvad VPN
   mullvad.enable = true;

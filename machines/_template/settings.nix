@@ -53,6 +53,7 @@
   #--- Mouse Cursor
   # Options: "bibata" (Bibata-Modern-Ice) | "catppuccin" (Catppuccin Mocha Mauve)
   cursor = "bibata";
+  cursorSize = 24; # Pixels: 24, 32, 48 or 64
 
   #--- Graphics Drivers
   # "amd", "intel" or "nvidia" for one graphics chip. A laptop with an AMD or
@@ -74,6 +75,33 @@
   # Same layout for the text console and the disk password prompt; a few
   # are named differently there ("uk" for "gb")
   consoleKeyMap = "us";
+
+  #--- Caps Lock: Escape when tapped, Ctrl when held (keyd)
+  capsLockRemap = false;
+
+  #--------------------------------------------------------------------#
+  #-- Devices
+  #--------------------------------------------------------------------#
+  #--- Bluetooth, powered on at boot
+  bluetooth.enable = false;
+
+  #--- Printing (CUPS); Avahi finds network printers and opens UDP 5353
+  printing.enable = false;
+
+  #--------------------------------------------------------------------#
+  #-- Network & Firewall
+  #--------------------------------------------------------------------#
+  #--- Open Ports
+  # Ports other devices may connect to, e.g. a game server. SSH, Syncthing,
+  # Sunshine, Steam and printing open their own while they're on.
+  firewall.openTCPPorts = [];
+  firewall.openUDPPorts = [];
+
+  #--- Ad & Tracker Blocking
+  # Steven Black's hosts list, for every app on this computer
+  blocklist.enable = false;
+  # Extra categories to block. Known names: fakenews, gambling, porn, social
+  blocklist.extra = [];
 
   #--------------------------------------------------------------------#
   #-- Services

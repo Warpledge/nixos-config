@@ -116,11 +116,15 @@
   #--- DMS Main and Clipboard Settings
   # Mirrors niri's settings.json, merged into files the settings GUI can save
   # to (wm/dms-mutable.nix). The theme path points at this user's home, not
-  # the one the mirrored file names.
-  dms.mutableFiles = {
-    "settings.json" =
-      pkgs.writeText "dms-settings.json" (builtins.toJSON (lib.importJSON ./settings.json
-          // {customThemeFile = "${config.xdg.configHome}/DankMaterialShell/themes/catppuccin/theme.json";}));
+  # the one the mirrored file names; the cursor size follows Stylix.
+  dms.mutableFiles = let
+    mirrored = lib.importJSON ./settings.json;
+  in {
+    "settings.json" = pkgs.writeText "dms-settings.json" (builtins.toJSON (mirrored
+      // {
+        customThemeFile = "${config.xdg.configHome}/DankMaterialShell/themes/catppuccin/theme.json";
+        cursorSettings = mirrored.cursorSettings // {inherit (config.stylix.cursor) size;};
+      }));
     "clsettings.json" = ./clsettings.json;
   };
 

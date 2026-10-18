@@ -111,7 +111,7 @@
       .${
         machine.cursor
       }
-      // {size = 24;};
+      // {size = machine.cursorSize;};
 
     fonts = {
       monospace = {
