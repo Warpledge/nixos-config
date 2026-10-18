@@ -91,6 +91,11 @@
       enable = true; # in every user's gaming packages, no toggle
       bin = "${pkgs.protonplus}/bin/protonplus";
     };
+    gitkraken = {
+      home = true;
+      enable = user.editors.gitkraken;
+      bin = "${pkgs.gitkraken}/bin/gitkraken";
+    };
   };
 
   #--- The system entries are the same in every user's table
