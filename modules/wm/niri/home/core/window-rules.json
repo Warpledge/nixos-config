@@ -245,22 +245,6 @@
     "open-floating": true
   },
   {
-    "name": "GitKraken",
-    "note": "Sized like NixOS Settings.",
-    "default-column-width": {
-      "fixed": 1080
-    },
-    "default-window-height": {
-      "proportion": 0.88
-    },
-    "matches": [
-      {
-        "app-id": "(?i)^gitkraken$"
-      }
-    ],
-    "open-floating": true
-  },
-  {
     "name": "Flatseal",
     "note": "Sized like NixOS Settings.",
     "default-column-width": {

@@ -100,7 +100,6 @@
     "ferdium"
     "nixos-settings"
     "protonplus"
-    "gitkraken"
   ];
 
   #--- SSH Server

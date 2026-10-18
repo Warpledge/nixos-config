@@ -179,7 +179,6 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | | |
 | --- | --- |
 | **Editors / IDE** | [Zed][zed], [Helix][helix], [micro][micro] (quick edits) |
-| **Git Client** | [GitKraken][gitkraken] (opens this config from NixOS Settings) |
 | **Formatter** | [alejandra][alejandra] v3.0.0 |
 | **Rebuild Wrapper** | [`nixm`](./modules/home/nixm.nix) (fzf menu over [nh][nh]) |
 </details>
@@ -288,7 +287,6 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 [zed]: https://zed.dev
 [helix]: https://helix-editor.com
 [micro]: https://micro-editor.github.io
-[gitkraken]: https://www.gitkraken.com/git-client
 [zen]: https://zen-browser.app
 [mullvad-browser]: https://mullvad.net/en/browser
 [helium]: https://github.com/schembriaiden/helium-browser-nix-flake
