@@ -19,6 +19,7 @@ import backend  # noqa: E402
 import closure  # noqa: E402
 import dms  # noqa: E402
 import schema  # noqa: E402
+import session  # noqa: E402
 import system  # noqa: E402
 import ui  # noqa: E402
 from flatpaks import FlatpakPage  # noqa: E402
@@ -112,6 +113,7 @@ class Window(Adw.ApplicationWindow):
         self.admin = False
         self.direct = False
         self.helper = None
+        self.session = None  # the root helper, kept while the window is open
         self.run_view = None
         self.run_undo = None
         self.page_key = "overview"
@@ -345,20 +347,17 @@ class Window(Adw.ApplicationWindow):
         self._bare(Adw.StatusPage(title="Removing old settings…",
                                   description="Type your own password when asked.", child=spinner), "loading")
         try:
-            proc = Gio.Subprocess.new([GLib.find_program_in_path("pkexec") or "pkexec", helper,
-                                       json.dumps({"clean": True})],
-                                      Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_MERGE)
-        except GLib.Error as e:
-            self._failed(backend.SettingsError(e.message))
+            proc = self._root(helper).request({"clean": True})
+        except OSError as e:
+            self._failed(backend.SettingsError(str(e)))
             return
 
-        def done(p, res):
-            ok, out, _ = p.communicate_utf8_finish(res)
-            if p.get_exit_status() == 0:
+        def done(code, out):
+            if code == 0:
                 self.reload("Old settings removed")
             else:
-                self._failed(backend.SettingsError("Nothing was removed.\n\n" + (out or "").strip()))
-        proc.communicate_utf8_async(None, None, done)
+                self._failed(backend.SettingsError("Nothing was removed.\n\n" + out.strip()))
+        proc.communicate(done)
 
     #--------------------------------------------------------------------#
     #-- Layout
@@ -1065,8 +1064,16 @@ class Window(Adw.ApplicationWindow):
         dialog.present(self)
 
     def _pkexec(self, request):
-        return [GLib.find_program_in_path("pkexec") or "/run/wrappers/bin/pkexec", self.helper,
-                json.dumps(request)]
+        """What RunView.run starts: `request` on this window's root helper."""
+        return lambda: self._root(self.helper).request(request)
+
+    def _root(self, helper):
+        """This window's session with `helper`, so one password covers every run."""
+        if self.session is None or self.session.helper != helper:
+            if self.session is not None:
+                self.session.close()
+            self.session = session.Session(helper)
+        return self.session
 
     def _start(self, title, steps, message, titles=None):
         self.run_message = message

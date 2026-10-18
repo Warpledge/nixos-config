@@ -10,7 +10,7 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gdk, Gio, GLib, Gtk, Pango  # noqa: E402
+from gi.repository import Adw, Gdk, GLib, Gtk, Pango  # noqa: E402
 
 import closure  # noqa: E402
 import nixlog  # noqa: E402
@@ -292,16 +292,17 @@ class RunView(Gtk.Box):
     #--------------------------------------------------------------------#
     #-- Running the helper
     #--------------------------------------------------------------------#
-    def run(self, argv, first_step="auth"):
+    def run(self, start, first_step="auth"):
+        """`start` returns the helper's process (session.Run)."""
         self.step(first_step, "running")
         self.cancel_button.set_visible(False)
-        flags = (Gio.SubprocessFlags.STDIN_PIPE | Gio.SubprocessFlags.STDOUT_PIPE
-                 | Gio.SubprocessFlags.STDERR_MERGE)
+        self.exit_code = None
         try:
-            self.proc = Gio.Subprocess.new(argv, flags)
-        except GLib.Error as e:
-            self._append("error", e.message)
-            self._finish("failed", "Couldn't start the rebuild", e.message)
+            self.proc = start()
+        except (OSError, GLib.Error) as e:
+            message = getattr(e, "message", None) or str(e)
+            self._append("error", message)
+            self._finish("failed", "Couldn't start the rebuild", message)
             return
         self.stdin = self.proc.get_stdin_pipe()
         self.pending = bytearray()
@@ -397,6 +398,8 @@ class RunView(Gtk.Box):
         if "error" in e:
             self.errors.append(e["error"])
             self._append("error", e["error"])
+        if "exit" in e:
+            self.exit_code = e["exit"]
         if "result" in e:
             self.result = e
             if e.get("mode"):
@@ -408,6 +411,8 @@ class RunView(Gtk.Box):
             code = proc.get_exit_status() if proc.get_if_exited() else -1
         except GLib.Error:
             code = -1
+        if self.exit_code is not None:
+            code = self.exit_code
         result = self.result.get("result")
         if self.cleaned is not None and result == "ok":
             freed = self.cleaned.get("freed")
