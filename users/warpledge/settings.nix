@@ -44,7 +44,6 @@
   editors = {
     helix = true;
     zed = true;
-    gitkraken = true;
   };
 
   #--- File Browser Selection
