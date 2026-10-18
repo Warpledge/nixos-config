@@ -90,16 +90,6 @@
     };
   };
 
-  #--- Screen timeout on AC power (server-optimized)
-  environment.etc."X11/xorg.conf.d/80-nohide.conf".text = ''
-    Section "ServerFlags"
-      Option "BlankTime" "0"
-      Option "StandbyTime" "0"
-      Option "SuspendTime" "0"
-      Option "OffTime" "0"
-    EndSection
-  '';
-
   #--------------------------------------------------------------------#
   #-- Imports
   #--------------------------------------------------------------------#
