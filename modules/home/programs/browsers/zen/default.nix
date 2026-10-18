@@ -51,8 +51,8 @@
 
         #--- profiles.ini
         profilesIniPath="$HOME/.zen/profiles.ini"
-        if [ -f "$profilesIniPath" ]; then
-          if ! grep -q "^Path=default$" "$profilesIniPath"; then
+        mkdir -p "$zenProfile"
+        if ! grep -qs "^Path=default$" "$profilesIniPath"; then
             $DRY_RUN_CMD cat > "$profilesIniPath" << 'EOF'
     [Profile0]
     Name=default
@@ -65,11 +65,9 @@
     Version=2
     EOF
             echo "✓ Fixed Zen Browser profiles.ini"
-          fi
         fi
 
         #--- user.js (settings & hardening prefs)
-        mkdir -p "$zenProfile"
         if [ -L "$hmProfile/user.js" ] || [ -f "$hmProfile/user.js" ]; then
           $DRY_RUN_CMD ln -sf "$hmProfile/user.js" "$zenProfile/user.js"
           echo "✓ Linked Zen user.js"
