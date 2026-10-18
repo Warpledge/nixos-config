@@ -27,7 +27,7 @@
   {app-id = "spotify";}
   {app-id = "org.prismlauncher.PrismLauncher";}
   {app-id = "^org\\.gnome\\.Resources$";}
-  {app-id = "^dev\\.nixm\\.Settings$";}
+  {app-id = "^dev\\.nixosconfig\\.Settings$";}
   {title = "Volume Control";}
   {title = "Open File";}
   {title = "File Upload";}

@@ -1,5 +1,5 @@
 #=====================================================================#
-# NIXM SETTINGS CONFIGURATION
+# NIXOS SETTINGS CONFIGURATION
 #=====================================================================#
 #- GTK4/libadwaita app for the settings files: pick apps and machine
 #- options from menus, and Apply writes them, checks them with

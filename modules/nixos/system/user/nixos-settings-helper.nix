@@ -1,7 +1,7 @@
 #=====================================================================#
-# NIXM SETTINGS HELPER
+# NIXOS SETTINGS HELPER
 #=====================================================================#
-#- Lets a user who isn't an admin apply their own app settings from nixm
+#- Lets a user who isn't an admin apply their own app settings from NixOS
 #- Settings: pkexec runs nixos-settings-apply as root after that user types
 #- their own password. The script is src/helper.py beside the app.
 {
