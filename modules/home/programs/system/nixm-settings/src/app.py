@@ -562,8 +562,11 @@ class Window(Adw.ApplicationWindow):
         prefs.add(top)
         if page.domain == "user" and self.multi:
             group = Adw.PreferencesGroup()
-            row = Adw.ComboRow(title="Change for", model=Gtk.StringList.new(
-                ["All my computers", f"Only this computer ({self.cfg.machine})"]),
+            everywhere = ", ".join(self.state.user_machines)
+            row = Adw.ComboRow(
+                title="Change for",
+                subtitle=f"Your settings on all of {everywhere}, or on this one alone",
+                model=Gtk.StringList.new(["All my computers", f"Only this one ({self.cfg.machine})"]),
                 selected=int(self.this_only))
             row.connect("notify::selected", self._scope)
             self.scope_rows.append(row)
