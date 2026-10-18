@@ -61,7 +61,9 @@ row.nixm-plain image.expander-row-arrow { opacity: 0; }
 
 
 def page_icon(page):
-    name = ICONS.get(page.groups[0].settings[0].path[0], FALLBACK_ICON)
+    # First setting with a known icon, since pages are sorted by name, not by key
+    keys = [s.path[0] for g in page.groups for s in g.settings]
+    name = page.icon or next((ICONS[k] for k in keys if k in ICONS), FALLBACK_ICON)
     display = Gdk.Display.get_default()
     return name if display and Gtk.IconTheme.get_for_display(display).has_icon(name) else FALLBACK_ICON
 
@@ -560,7 +562,7 @@ class Window(Adw.ApplicationWindow):
         top = Adw.PreferencesGroup()
         top.add(hero)
         prefs.add(top)
-        if page.domain == "user" and self.multi:
+        if self.multi and any(s.domain == "user" for g in page.groups for s in g.settings):
             group = Adw.PreferencesGroup()
             everywhere = ", ".join(self.state.user_machines)
             row = Adw.ComboRow(
@@ -571,6 +573,16 @@ class Window(Adw.ApplicationWindow):
             row.connect("notify::selected", self._scope)
             self.scope_rows.append(row)
             group.add(row)
+            prefs.add(group)
+        if page.links:
+            group = Adw.PreferencesGroup()
+            for title, tab, subtitle in page.links:
+                row = Adw.ActionRow(title=title, subtitle=subtitle)
+                button = Gtk.Button(label="Open", valign=Gtk.Align.CENTER)
+                button.connect("clicked", lambda _, tab=tab: self._open_dms(tab))
+                row.add_suffix(button)
+                row.set_activatable_widget(button)
+                group.add(row)
             prefs.add(group)
         locked = [g for g in page.groups
                   if not self.direct and any(s.domain == "machine" for s in g.settings)]
@@ -591,6 +603,18 @@ class Window(Adw.ApplicationWindow):
                 group.add(self._row(s))
             prefs.add(group)
         return prefs
+
+    def _open_dms(self, tab):
+        """Opens DankMaterialShell's settings window on one tab."""
+        dms = GLib.find_program_in_path("dms")
+        if dms is None:
+            self.toasts.add_toast(Adw.Toast(title="DankMaterialShell isn't installed here"))
+            return
+        try:
+            Gio.Subprocess.new([dms, "ipc", "call", "settings", "openWith", tab],
+                               Gio.SubprocessFlags.STDOUT_SILENCE | Gio.SubprocessFlags.STDERR_SILENCE)
+        except GLib.Error as e:
+            self.toasts.add_toast(Adw.Toast(title=f"Couldn't open DankMaterialShell: {e.message}"))
 
     def _scope(self, row, _):
         self.this_only = row.get_selected() == 1

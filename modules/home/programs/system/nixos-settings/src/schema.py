@@ -26,6 +26,13 @@ MOVES = {  # setting -> (page, group on that page)
     ("japanese", "vn"): ("Gaming", "Japanese Visual Novels"),
 }
 
+#--- DankMaterialShell settings tabs the Desktop page opens: (title, tab id from
+#--- `dms ipc call settings tabs`, subtitle)
+DMS_TABS = [
+    ("Monitors", "display_config", "Resolution, refresh rate, scale and layout"),
+    ("Keyboard Shortcuts", "keybinds", "Add or change keybinds"),
+]
+
 SETUP_ENTRY = re.compile(r'^\s*"([^"|]+)\|([^"|]+)\|([^"]+)"\s*$', re.M)
 
 
@@ -57,6 +64,8 @@ class Page:
     description: str = ""
     groups: list = field(default_factory=list)
     section: str = ""  # sidebar group: computer, personal or apps (set by arrange)
+    icon: str = ""  # overrides the icon picked from the page's first setting
+    links: list = field(default_factory=list)  # DMS_TABS entries, for the Desktop page
 
 
 def humanize(key):
@@ -253,5 +262,10 @@ def arrange(pages):
             page.section = "apps"
         else:
             page.section = "personal"
+    pages.append(Page(
+        "user", "Desktop", section="personal", icon="video-display-symbolic", links=DMS_TABS,
+        description="These open DankMaterialShell's own settings. Under niri, monitor and "
+                    "shortcut changes made there are kept on this computer across rebuilds, "
+                    "but they aren't saved in the repo."))
     order = {"computer": 0, "personal": 1, "apps": 2}
     return sorted(pages, key=lambda p: (order[p.section], p.title.casefold()))
