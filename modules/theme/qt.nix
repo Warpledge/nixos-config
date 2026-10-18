@@ -45,21 +45,29 @@ in {
 
       #--- KDE Colour Scheme
       # KDE apps (Dolphin) take colours and icons from kdeglobals, not qt6ct;
-      # upstream's Catppuccin scheme, in the flavour and accent Kvantum uses
-      xdg.configFile."kdeglobals" = lib.mkIf u.fileBrowsers.dolphin {
-        source = let
-          inherit (config.catppuccin) flavor accent;
-          scheme = pkgs.catppuccin-kde.override {
-            flavour = [flavor];
-            accents = [accent];
-          };
-          name = "Catppuccin${lib.toSentenceCase flavor}${lib.toSentenceCase accent}";
-        in
-          pkgs.runCommand "kdeglobals" {} ''
-            cat ${scheme}/share/color-schemes/${name}.colors > $out
-            printf '\n[Icons]\nTheme=Papirus-Dark\n' >> $out
-          '';
-      };
+      # upstream's Catppuccin scheme, in the flavour and accent Kvantum uses.
+      # [UiSettings] picks it by name: unset, KDE apps outside Plasma fall back
+      # to Breeze Light. Alternate rows are made transparent (no banding).
+      xdg = lib.mkIf u.fileBrowsers.dolphin (let
+        inherit (config.catppuccin) flavor accent;
+        name = "Catppuccin${lib.toSentenceCase flavor}${lib.toSentenceCase accent}";
+        upstream = pkgs.catppuccin-kde.override {
+          flavour = [flavor];
+          accents = [accent];
+        };
+        scheme = pkgs.runCommand "${name}.colors" {} ''
+          awk '/^\[/ { view = ($0 == "[Colors:View]") }
+               view && /^BackgroundAlternate=/ { $0 = $0 ",0" } 1' \
+            ${upstream}/share/color-schemes/${name}.colors > $out
+        '';
+      in {
+        dataFile."color-schemes/${name}.colors".source = scheme;
+        configFile."kdeglobals".source = pkgs.runCommand "kdeglobals" {} ''
+          cat ${scheme} > $out
+          printf '\n[Icons]\nTheme=Papirus-Dark\n' >> $out
+          printf '\n[UiSettings]\nColorScheme=${name}\n' >> $out
+        '';
+      });
     })
     machine.users;
 }
