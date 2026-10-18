@@ -2,6 +2,7 @@
   config,
   inputs,
   lib,
+  pkgs,
   user,
   ...
 }: {
@@ -112,21 +113,15 @@
   #--------------------------------------------------------------------#
   #-- DECLARATIVE DankMaterialShell SETTINGS --#
   #--------------------------------------------------------------------#
-  home.file = {
-    #--- DMS Main Settings
-    # Mirrors niri's settings.json; read-only store link, so anything DMS
-    # rewrites at runtime must be baked in here. The theme path points at
-    # this user's home, not the one the mirrored file names.
-    ".config/DankMaterialShell/settings.json" = {
-      text =
-        builtins.toJSON (lib.importJSON ./settings.json
-          // {customThemeFile = "${config.xdg.configHome}/DankMaterialShell/themes/catppuccin/theme.json";});
-    };
-
-    #--- DMS Clipboard Settings
-    ".config/DankMaterialShell/clsettings.json" = {
-      source = ./clsettings.json;
-    };
+  #--- DMS Main and Clipboard Settings
+  # Mirrors niri's settings.json, merged into files the settings GUI can save
+  # to (wm/dms-mutable.nix). The theme path points at this user's home, not
+  # the one the mirrored file names.
+  dms.mutableFiles = {
+    "settings.json" =
+      pkgs.writeText "dms-settings.json" (builtins.toJSON (lib.importJSON ./settings.json
+          // {customThemeFile = "${config.xdg.configHome}/DankMaterialShell/themes/catppuccin/theme.json";}));
+    "clsettings.json" = ./clsettings.json;
   };
 
   #--------------------------------------------------------------------#
@@ -135,6 +130,7 @@
   imports = [
     inputs.dms.homeModules.dank-material-shell
     inputs.dms-plugin-registry.homeModules.default
+    ../../../dms-mutable.nix
     {
       # Shared with the niri module, so a machine sets a plugin's settings
       # once for both WMs (the desktop's GPU widget); here DMS links them
