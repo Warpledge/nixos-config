@@ -116,7 +116,7 @@
     "Mod+Ctrl+Down" = bind "Grow height" {set-window-height = "+80";};
 
     "Mod+Tab" = bind "Overview" {toggle-overview = {};};
-    "Mod+C" = bind "Center column" {center-column = {};};
+    "Mod+H" = bind "Center column" {center-column = {};};
     "Mod+X" = bind "Cycle window height" {switch-preset-window-height = {};};
     "Mod+Shift+Z" = bind "Reset window height" {reset-window-height = {};};
 
@@ -167,7 +167,7 @@
     "Mod+Shift+M" = bind "Spotify" {spawn = ["spotify"];};
     "Ctrl+Alt+Delete" = bind "Resources (system monitor)" {spawn = ["resources"];};
     #--- Focuses NixOS Settings, or opens it
-    "Mod+Shift+C" = bind "NixOS Settings" {
+    "Mod+C" = bind "NixOS Settings" {
       spawn = ["nirius" "focus-or-spawn" "--app-id" "^dev\\.nixosconfig\\.Settings$" "nixos-settings"];
     };
   };

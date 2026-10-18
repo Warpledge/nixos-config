@@ -158,7 +158,7 @@
       default-window-height = {proportion = 0.7;};
     }
 
-    #--- NixOS Settings (Mod+Shift+C): floating and centered, as wide as its
+    #--- NixOS Settings (Mod+C): floating and centered, as wide as its
     #--- pages' fixed content width
     {
       matches = [{app-id = "^dev\\.nixosconfig\\.Settings$";}];
