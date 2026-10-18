@@ -81,7 +81,7 @@
       files=(${lib.concatMapStringsSep " " (p: "${mkPreset p}") presets})
 
       current=$(sed -n '1s|^// preset: ||p' "$f" 2>/dev/null || true)
-      i=1 # Default
+      i=2 # Clear, until Mod+T picks another
       for k in "''${!names[@]}"; do
         if [[ ''${names[k]} == "$current" ]]; then
           i=$k
