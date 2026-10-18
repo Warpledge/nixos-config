@@ -33,7 +33,7 @@
   #-- System (NixOS modules)
   #--------------------------------------------------------------------#
   #--- DO NOT CHANGE
-  stateVersion = "25.11";
+  stateVersion = "26.05";
 
   #--- Language & Keyboard
   timeZone = "America/Chicago";
