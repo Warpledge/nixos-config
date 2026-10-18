@@ -4,43 +4,58 @@
 #- Tidies an ES-DE / RetroDECK game library: pruning, metadata,
 #- artwork, renames and imports.
 #-
-#- Not in nixpkgs, so this is the upstream AppImage. The asset's version
-#- lags its release tag by one (tag v2026.10.12.17).
-{pkgs, ...}: let
-  pname = "retroshelf";
-  version = "2026.1012.16";
+#- Built from the `retroshelf` input (main), so a flake update brings the
+#- new version with no hash to bump. Run unpackaged, the app finds its
+#- Python helper through RETROSHELF_PYTHON and its updater stays off.
+{
+  pkgs,
+  inputs,
+  ...
+}: let
+  src = inputs.retroshelf;
 
-  src = pkgs.fetchurl {
-    url = "https://github.com/votex09/retroshelf/releases/download/v2026.10.12.17/RetroShelf-${version}-linux-x86_64.AppImage";
-    hash = "sha256-wFhjj7WMnt3KW8iuCftBH03cg6LlLNodWKCN8y9Y3cY=";
-  };
+  #--- Matches the major in app/package.json
+  electron = pkgs.electron_44;
 
-  #-- Unpacked only to lift out the icon and desktop entry
-  contents = pkgs.appimageTools.extract {inherit pname version src;};
+  #--- cryptography decrypts PS3 / PSP packages (as in upstream's build)
+  python = pkgs.python3.withPackages (ps: [ps.cryptography]);
 
-  retroshelf = pkgs.appimageTools.wrapType2 {
-    inherit pname version src;
+  retroshelf = pkgs.stdenvNoCC.mkDerivation {
+    pname = "retroshelf";
+    version = "0-unstable-${builtins.substring 0 8 src.lastModifiedDate}";
+    inherit src;
 
-    #--- The self-updater would replace the AppImage, which lives in the store
-    profile = ''
-      export RETROSHELF_NO_UPDATES=1
-    '';
+    nativeBuildInputs = [pkgs.makeWrapper pkgs.copyDesktopItems];
 
-    #--- Upstream Exec is `AppRun --no-sandbox %U`; the flag stays
-    #--- (chrome-sandbox cannot be setuid in the store)
-    extraInstallCommands = ''
-      install -Dm444 ${contents}/${pname}.desktop -t $out/share/applications
-      cp -r ${contents}/usr/share/icons $out/share/icons
-      chmod -R u+w $out/share/icons
-      substituteInPlace $out/share/applications/${pname}.desktop \
-        --replace-fail 'Exec=AppRun' 'Exec=${pname}'
+    desktopItems = [
+      (pkgs.makeDesktopItem {
+        name = "retroshelf";
+        desktopName = "RetroShelf";
+        comment = "Tidy up an ES-DE / RetroDECK game library";
+        exec = "retroshelf %U";
+        icon = "retroshelf";
+        categories = ["Game"];
+      })
+    ];
+
+    #--- The helper imports lib/ from the repo root, so the tree stays whole
+    installPhase = ''
+      runHook preInstall
+      mkdir -p $out/share/retroshelf
+      cp -r app lib vendor assets $out/share/retroshelf/
+      install -Dm444 assets/icon-256.png \
+        $out/share/icons/hicolor/256x256/apps/retroshelf.png
+      makeWrapper ${electron}/bin/electron $out/bin/retroshelf \
+        --add-flags $out/share/retroshelf/app \
+        --set RETROSHELF_PYTHON ${python}/bin/python3
+      runHook postInstall
     '';
 
     meta = {
       description = "Tidy up an ES-DE / RetroDECK game library";
       homepage = "https://github.com/votex09/retroshelf";
       platforms = ["x86_64-linux"];
-      mainProgram = pname;
+      mainProgram = "retroshelf";
     };
   };
 in {

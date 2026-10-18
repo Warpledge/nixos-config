@@ -1073,6 +1073,24 @@
         "type": "github"
       }
     },
+    "retroshelf": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1791811132,
+        "narHash": "sha256-vR028P8BKDhSmMl45Ru73rBEjwRlL8uywy1CPFm6aEc=",
+        "ref": "main",
+        "rev": "076152fa3fb75b1cf61dfbd44549ad8379d96906",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/votex09/retroshelf"
+      },
+      "original": {
+        "ref": "main",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/votex09/retroshelf"
+      }
+    },
     "root": {
       "inputs": {
         "affinity-nix": "affinity-nix",
@@ -1092,6 +1110,7 @@
         "nixcord": "nixcord",
         "nixpkgs": "nixpkgs_7",
         "nur": "nur",
+        "retroshelf": "retroshelf",
         "spicetify-nix": "spicetify-nix",
         "stylix": "stylix",
         "tsunagu": "tsunagu",
