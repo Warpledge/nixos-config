@@ -1,11 +1,18 @@
 #=====================================================================#
 # YOUTUBE-DISPATCH - SEND YOUTUBE LINKS TO FREETUBE
 #=====================================================================#
-#- Registered as the http/https handler in mime.nix instead of Zen.
+#- Registered as the http/https handler in mime.nix instead of the browser.
 #- YouTube hosts are handed to FreeTube through its freetube:// deep
-#- link, anything else falls through to Zen. music.youtube.com is
-#- deliberately not matched: FreeTube has no YouTube Music support.
-{pkgs, ...}: let
+#- link, anything else falls through to the user's default browser.
+#- music.youtube.com is deliberately not matched: FreeTube has no YouTube
+#- Music support.
+{
+  pkgs,
+  lib,
+  user,
+  ...
+}: let
+  browser = ((import ../../../../../lib/default-apps.nix {inherit lib;}).forUser user).browser;
   youtube-dispatch =
     pkgs.writeShellScriptBin "youtube-dispatch"
     # bash
@@ -26,7 +33,7 @@
           ;;
       esac
 
-      exec zen-beta "$@"
+      exec ${browser.bin} "$@"
     '';
 in {
   home.packages = [youtube-dispatch];

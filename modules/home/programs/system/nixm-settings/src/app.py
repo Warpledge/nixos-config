@@ -37,6 +37,7 @@ ICONS = {
     "terminals": "utilities-terminal-symbolic",
     "editors": "accessories-text-editor-symbolic",
     "fileBrowsers": "folder-symbolic",
+    "defaultApps": "emblem-default-symbolic",
     "media": "applications-multimedia-symbolic",
     "wallpaper": "preferences-desktop-wallpaper-symbolic",
     "graphics": "applications-graphics-symbolic",

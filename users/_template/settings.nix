@@ -60,6 +60,16 @@
     yazi = true;
   };
 
+  #--- Default Apps
+  # Which app opens web links, text files, terminal programs and folders. One
+  # that's turned off above is skipped for the first of its kind that's on.
+  defaultApps = {
+    browser = "zen";
+    textEditor = "zed";
+    terminal = "kitty";
+    fileManager = "nautilus";
+  };
+
   #--- Media Selection
   # Enable the media applications you want installed
   media = {

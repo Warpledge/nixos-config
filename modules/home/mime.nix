@@ -4,26 +4,34 @@
 {
   lib,
   config,
+  user,
   ...
 }:
 with lib; let
   #--------------------------------------------------------------------#
   #-- Default Applications
   #--------------------------------------------------------------------#
+  #--- The user's defaultApps settings, resolved to apps they have on
+  chosen = (import ../../lib/default-apps.nix {inherit lib;}).forUser user;
+
   defaultApps = {
-    browser = ["zen-beta.desktop"];
-    text = ["dev.zed.Zed.desktop"];
+    browser = [chosen.browser.desktop];
+    text = [chosen.textEditor.desktop];
     image = ["org.gnome.Loupe.desktop"];
     audio = ["mpv.desktop"];
     video = ["mpv.desktop"];
-    directory = ["org.gnome.Nautilus.desktop"];
+    directory = [chosen.fileManager.desktop];
     office = ["libreoffice.desktop"];
     pdf = ["org.gnome.Evince.desktop"];
-    terminal = ["kitty.desktop"];
+    terminal = [chosen.terminal.desktop];
     archive = ["org.gnome.FileRoller.desktop"];
     discord = ["discord.desktop"];
     freetube = ["freetube.desktop"];
-    webLinks = ["youtube-dispatch.desktop"];
+    #--- youtube-dispatch exists only with FreeTube on
+    webLinks =
+      if user.media.freetube
+      then ["youtube-dispatch.desktop"]
+      else [chosen.browser.desktop];
   };
 
   mimeMap = {
@@ -155,10 +163,10 @@ in {
       };
     };
 
-    #--- GIO can't launch Terminal=true apps (micro, Helix) in kitty without this
+    #--- GIO can't launch Terminal=true apps (micro, Helix) in a terminal without this
     terminal-exec = {
       enable = true;
-      settings.default = ["kitty.desktop"];
+      settings.default = [chosen.terminal.desktop];
     };
   };
 

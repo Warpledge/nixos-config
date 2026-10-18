@@ -27,9 +27,13 @@
     cursor = ["bibata" "catppuccin"];
     "gpu.type" = [null "amd" "intel" "nvidia" "amd+nvidia" "intel+nvidia"];
   };
-  userChoices = {
-    wallpaper = ["carousel" "engine"];
-  };
+  userChoices =
+    {
+      wallpaper = ["carousel" "engine"];
+    }
+    #--- defaultApps.<kind>: the app names lib/default-apps.nix lists
+    // lib.mapAttrs' (kind: candidates: lib.nameValuePair "defaultApps.${kind}" (map (c: c.name) candidates))
+    (import ./default-apps.nix {inherit lib;}).apps;
 
   #--------------------------------------------------------------------#
   #-- Checks

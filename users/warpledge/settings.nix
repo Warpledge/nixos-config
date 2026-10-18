@@ -53,6 +53,14 @@
     yazi = true;
   };
 
+  #--- Default Apps
+  defaultApps = {
+    browser = "zen";
+    textEditor = "zed";
+    terminal = "kitty";
+    fileManager = "nautilus";
+  };
+
   #--- Media Selection
   # Enable the media applications you want installed
   media = {
