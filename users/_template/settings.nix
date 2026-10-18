@@ -71,12 +71,17 @@
     moku = false; # Manga, novel and anime reader (built from source: slow)
     streamlinkTwitchGui = false; # Twitch browser via streamlink + mpv (AppImage)
     boorusama = false; # Booru image board browser (AppImage)
-    wallpaperEngine = false; # Animated wallpapers from Wallpaper Engine (Steam)
 
     # Need a prebuilt bundle in ~/.local/opt that this repo doesn't ship
     # (docs/local/local-binary-installs.md)
     tonkatsuBox = false; # Collection manager (games, film, anime, manga, books)
   };
+
+  #--- Wallpaper Picker (Mod+W)
+  # "carousel": DMS draws still images from modules/theme/wallpapers
+  # "engine": animated Wallpaper Engine wallpapers subscribed on the Steam
+  #   Workshop; needs Wallpaper Engine bought and installed in Steam
+  wallpaper = "carousel";
 
   #--- Graphics Software Selection
   # Enable the graphic design applications you want installed

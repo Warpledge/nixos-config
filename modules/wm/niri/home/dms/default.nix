@@ -43,10 +43,10 @@ in {
       # (rightWidgets in settings.json).
       clipboardPlus.enable = true;
 
-      wallpaperCarousel.enable = true;
+      wallpaperCarousel.enable = user.wallpaper == "carousel";
 
       # Runs linux-wallpaperengine itself; picks are saved in plugin_settings.json
-      linuxWallpaperEngine.enable = user.media.wallpaperEngine;
+      linuxWallpaperEngine.enable = user.wallpaper == "engine";
     };
 
     #--- Core features
@@ -81,6 +81,8 @@ in {
       color_palette_preset = "catppuccin";
     };
 
+    wallpaperCarousel.wallpaperDirectory = "${../../../../theme/wallpapers}";
+
     clipboardPlus = {
       backgroundOpacity = 80; # dim behind the panel, 0-80
       panelOpacityClipboard = 80;
@@ -109,7 +111,7 @@ in {
     "Mod+K".action.spawn = dms "powermenu toggle"; # Power Menu
     # Browse Wallpapers
     "Mod+W".action.spawn = dms (
-      if user.media.wallpaperEngine
+      if user.wallpaper == "engine"
       then "linuxWallpaperEngine picker"
       else "wallpaperCarousel toggle"
     );
@@ -157,7 +159,7 @@ in {
     ".config/DankMaterialShell/settings.json" = {
       text = builtins.toJSON (settings
         # linux-wallpaperengine draws the wallpaper instead
-        // lib.optionalAttrs user.media.wallpaperEngine {
+        // lib.optionalAttrs (user.wallpaper == "engine") {
           screenPreferences.wallpaper = [];
           blurredWallpaperLayer = false;
         }

@@ -27,6 +27,9 @@
     cursor = ["bibata" "catppuccin"];
     "gpu.type" = [null "amd" "intel" "nvidia" "amd+nvidia" "intel+nvidia"];
   };
+  userChoices = {
+    wallpaper = ["carousel" "engine"];
+  };
 
   #--------------------------------------------------------------------#
   #-- Checks
@@ -59,7 +62,7 @@
       else [])
     set);
 
-  badChoices = set:
+  badChoices = choices: set:
     lib.concatLists (lib.mapAttrsToList (path: allowed: let
       value = lib.attrByPath (lib.splitString "." path) null set;
       show = lib.concatMapStringsSep ", " builtins.toJSON allowed;
@@ -131,10 +134,11 @@ in {
       ++ lib.optional (mainUser == null && names != []) "several users are listed, so set mainUser to the one who owns this config"
       ++ lib.optional (mainUser != null && !(listed ? ${mainUser})) "mainUser `${toString mainUser}` is not listed in `users`"
       ++ lib.optional (!lib.isString merged.stateVersion) "set stateVersion (in quotes) to the system.stateVersion line in /etc/nixos/configuration.nix"
-      ++ badChoices merged;
+      ++ badChoices choices merged;
   in
     assert report file machineProblems;
     assert lib.all (user: report (userFile user) (problems userDefaults (import ../users/${user}/settings.nix) [])) names;
+    assert lib.all (user: report (userFile user) (badChoices userChoices machine.users.${user})) names;
     assert report file (lib.optional (!machine.users.${mainUser}.admin)
       "the main user `${mainUser}` needs admin = true (in ${userFile mainUser}), or nobody here can rebuild the system"); {
       inherit machine;

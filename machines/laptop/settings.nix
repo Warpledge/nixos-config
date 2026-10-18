@@ -14,9 +14,9 @@
       media = {
         moku = false;
         boorusama = false;
-        wallpaperEngine = false;
         tonkatsuBox = false;
       };
+      wallpaper = "carousel";
       gaming = {
         heroic = false;
         hytale = false;

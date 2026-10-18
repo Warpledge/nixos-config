@@ -98,7 +98,7 @@ in {
       layout = {
         # Shows the backdrop wallpaper (rules.nix) through workspaces
         background-color =
-          lib.mkIf user.media.wallpaperEngine "transparent";
+          lib.mkIf (user.wallpaper == "engine") "transparent";
         focus-ring = {
           enable = true; # displays around windows
           width = 2;

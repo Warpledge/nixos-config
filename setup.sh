@@ -219,7 +219,6 @@ apps=(
   "Media|media.moku|Moku manga and anime reader (built from source, slow)"
   "Media|media.streamlinkTwitchGui|Streamlink Twitch GUI"
   "Media|media.boorusama|Boorusama image board browser"
-  "Media|media.wallpaperEngine|Wallpaper Engine wallpapers (needs it on Steam)"
   "Chat|discord.goofcord|GoofCord: Discord with Vencord (built from source, slow)"
   "Graphics|graphics.blender|Blender"
   "Graphics|graphics.krita|Krita"
@@ -294,6 +293,10 @@ new_user_file() {
   for item in "${picked[@]}"; do
     set_setting "$file" "${item%%|*}" true
   done
+  say "Wallpapers: still images from the repo, or animated ones from Wallpaper Engine."
+  if confirm "Use Wallpaper Engine for $name (needs it bought and installed on Steam)?" n; then
+    set_setting "$file" wallpaper '"engine"'
+  fi
   written+=("$file")
 }
 

@@ -60,7 +60,7 @@ user: {lib, ...}: {
     ++ lib.optionals user.media.streamlinkTwitchGui [./media/streamlink-twitch-gui.nix]
     ++ lib.optionals user.media.moku [./media/moku]
     ++ lib.optionals user.media.boorusama [./media/boorusama.nix]
-    ++ lib.optionals user.media.wallpaperEngine [./media/wallpaper-engine.nix]
+    ++ lib.optionals (user.wallpaper == "engine") [./media/wallpaper-engine.nix]
     ++ lib.optionals user.media.tonkatsuBox [./media/tonkatsu-box.nix]
     #--- Terminals (controlled by user settings)
     ++ lib.optionals user.terminals.kitty [./terminals/kitty.nix]

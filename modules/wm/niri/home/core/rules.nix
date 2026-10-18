@@ -346,7 +346,7 @@ in {
     layer-rules = [
       {
         # DMS's blurred wallpaper copy (blurredWallpaperLayer in dms/settings.json),
-        # or linux-wallpaperengine when media.wallpaperEngine replaces it
+        # or linux-wallpaperengine when wallpaper = "engine" replaces it
         matches = [
           {namespace = "^dms:blurwallpaper$";}
           {namespace = "^linux-wallpaperengine$";}
