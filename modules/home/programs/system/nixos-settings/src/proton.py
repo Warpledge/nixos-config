@@ -1,4 +1,4 @@
-"""The Proton Params page: launch options to copy into a game's Steam launch
+"""The Proton page (Docs tab): launch options to copy into a game's Steam launch
 options, or Heroic's and Lutris's environment and wrapper fields. This
 config's wrappers come first; the nix-vn and nix-rpgm presets are read off
 PATH, as `nixm launch-params` does, so the list follows nix-vn.nix and
@@ -128,7 +128,7 @@ class ProtonPage(Adw.PreferencesPage):
         self.window = window
 
         top = Adw.PreferencesGroup()
-        top.add(ui.hero(ui.first_icon("input-gaming-symbolic", "applications-games-symbolic"), "Proton Params",
+        top.add(ui.hero(ui.first_icon("input-gaming-symbolic", "applications-games-symbolic"), "Proton",
                         "Launch options for Steam, Heroic and Lutris. Click one to copy it."))
         self.add(top)
 

@@ -50,13 +50,22 @@
     '';
   };
 in {
-  home.packages = [nixos-settings];
+  #--- Read by the Mullvad split tunnel (nixos/security/mullvad/split-tunnel.nix)
+  options.nixos-settings.package = lib.mkOption {
+    type = lib.types.package;
+    readOnly = true;
+    description = "The NixOS Settings build in home.packages.";
+  };
+
+  config.nixos-settings.package = nixos-settings;
+
+  config.home.packages = [nixos-settings];
 
   #--------------------------------------------------------------------#
   #-- Desktop Entry
   #--------------------------------------------------------------------#
 
-  xdg.desktopEntries.nixos-settings = {
+  config.xdg.desktopEntries.nixos-settings = {
     name = "NixOS Settings";
     genericName = "System Settings";
     comment = "Pick apps and system options, rebuild and update";

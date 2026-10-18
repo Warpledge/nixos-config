@@ -25,6 +25,7 @@ from flatpaks import FlatpakPage  # noqa: E402
 from overview import Overview  # noqa: E402
 from proton import ProtonPage  # noqa: E402
 from runview import RunView, fill_diff  # noqa: E402
+from windowrules import WindowRulesPage  # noqa: E402
 
 #--- The root helper every rebuild goes through (nixos/system/user/nixos-settings-helper.nix)
 HELPER = "/run/current-system/sw/bin/nixos-settings-apply"
@@ -36,10 +37,15 @@ VERSION = "2.0"
 OWNED = {"Cursor Theme": "cursor", "Cursor Size": "cursorSize", "Icon Theme": "",
          "Dark Mode Icon Theme": "", "Light Mode Icon Theme": "", "Normal Font": "", "Monospace Font": ""}
 
-#--- The pages above the sidebar's sections: key, title and icons to try
-TOP = [("overview", "Overview", ("computer-symbolic",)),
-       ("proton", "Proton Params", ("input-gaming-symbolic", "applications-games-symbolic")),
-       ("flatpaks", "Flatpaks", ("flatpak-symbolic", "system-software-install-symbolic"))]
+#--- The tabs under the search entry, each with its own sidebar
+TABS = [("main", "Main"), ("niri", "Niri"), ("docs", "Docs")]
+
+#--- Each tab's pages above its sidebar sections: key, title and icons to try
+TOP = {"main": [("overview", "Overview", ("computer-symbolic",)),
+                ("flatpaks", "Flatpaks", ("flatpak-symbolic", "system-software-install-symbolic"))],
+       "niri": [("windowrules", "Window Rules",
+                 ("window-new-symbolic", "preferences-system-windows-symbolic"))],
+       "docs": [("proton", "Proton", ("input-gaming-symbolic", "applications-games-symbolic"))]}
 
 
 def shown(setting, value):
@@ -109,7 +115,11 @@ class Window(Adw.ApplicationWindow):
         self.run_view = None
         self.run_undo = None
         self.page_key = "overview"
-        self.keys = []
+        self.tab = "main"
+        self.tab_keys = {tab: [] for tab, _ in TABS}  # each tab's sidebar keys, in order
+        self.tab_of = {}  # sidebar key -> its tab
+        self.tab_page = {}  # tab -> the page last shown in it
+        self.switching = False
         self.colors = {}
         self.building = False
         self.run_message = None
@@ -128,9 +138,21 @@ class Window(Adw.ApplicationWindow):
     #-- Skeleton (made once; build() fills it)
     #--------------------------------------------------------------------#
     def _skeleton(self):
-        self.sidebar = Adw.Sidebar()
-        self.sidebar.connect("notify::selected", self._selected)
-        self.sidebar.connect("activated", lambda *_: self.split.set_show_content(True))
+        self.sidebars = {}
+        self.side_stack = Gtk.Stack(transition_type=Gtk.StackTransitionType.CROSSFADE,
+                                    transition_duration=150, vexpand=True)
+        for tab, _ in TABS:
+            sidebar = Adw.Sidebar()
+            sidebar.connect("notify::selected", self._selected, tab)
+            sidebar.connect("activated", lambda *_: self.split.set_show_content(True))
+            self.sidebars[tab] = sidebar
+            self.side_stack.add_named(sidebar, tab)
+        self.tabs = Adw.ToggleGroup(margin_start=10, margin_end=10, margin_bottom=8,
+                                    css_classes=["round"], homogeneous=True)
+        for tab, title in TABS:
+            self.tabs.add(Adw.Toggle(name=tab, label=title))
+        self.tabs.set_active_name(self.tab)
+        self.tabs.connect("notify::active-name", self._tab_changed)
         self.search = Gtk.SearchEntry(placeholder_text="Search settings", margin_start=10, margin_end=10,
                                       margin_top=2, margin_bottom=8)
         self.search.connect("search-changed", self._search)
@@ -138,8 +160,8 @@ class Window(Adw.ApplicationWindow):
         self.search.set_key_capture_widget(self)  # typing anywhere starts a search
         side_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         side_box.append(self.search)
-        side_box.append(self.sidebar)
-        self.sidebar.set_vexpand(True)
+        side_box.append(self.tabs)
+        side_box.append(self.side_stack)
         menu = Gio.Menu()
         section = Gio.Menu()
         section.append("Reload Settings", "win.reload")
@@ -190,7 +212,8 @@ class Window(Adw.ApplicationWindow):
         narrow = Adw.Breakpoint.new(Adw.BreakpointCondition.parse("max-width: 640sp"))
         narrow.add_setter(self.split, "collapsed", True)
         mode = GObject.Value(Adw.SidebarMode, Adw.SidebarMode.PAGE)
-        narrow.add_setter(self.sidebar, "mode", mode)
+        for sidebar in self.sidebars.values():
+            narrow.add_setter(sidebar, "mode", mode)
         self.add_breakpoint(narrow)
         self.root.add_named(self.split, "main")
 
@@ -377,27 +400,32 @@ class Window(Adw.ApplicationWindow):
             following = child.get_next_sibling()
             self.stack.remove(child)
             child = following
-        self.sidebar.remove_all()
-        self.keys = []
+        for sidebar in self.sidebars.values():
+            sidebar.remove_all()
+        self.tab_keys = {tab: [] for tab, _ in TABS}
+        self.tab_of = {}
 
-        #--- Overview, Proton Params, Flatpaks (whose switch is a schema page's
-        #--- setting) and What's New
+        #--- Overview, Flatpaks (whose switch is a schema page's setting) and
+        #--- What's New on Main, then the Niri and Docs tabs' pages
         flatpak_page = next((p for p in state.pages if p.section == "top"), None)
         makers = {"overview": lambda: Overview(self, self.info, self.wm, self.links),
-                  "proton": lambda: ProtonPage(self),
-                  "flatpaks": lambda: FlatpakPage(self, flatpak_page)}
-        top = Adw.SidebarSection()
-        for key, title, icons in TOP:
-            self._sidebar_item(top, key, title, ui.first_icon(*icons))
-            self.builders[key] = makers[key]
+                  "flatpaks": lambda: FlatpakPage(self, flatpak_page),
+                  "windowrules": lambda: WindowRulesPage(self),
+                  "proton": lambda: ProtonPage(self)}
+        tops = {}
+        for tab, _ in TABS:
+            tops[tab] = Adw.SidebarSection()
+            for key, title, icons in TOP[tab]:
+                self._sidebar_item(tab, tops[tab], key, title, ui.first_icon(*icons))
+                self.builders[key] = makers[key]
         for g in flatpak_page.groups if flatpak_page else []:
             for s in g.settings:
                 self.page_of[(s.domain, s.path)] = "flatpaks"
         if self.new_items:
             badge = ui.chip(str(len(self.new_items)), "accent")
-            self._sidebar_item(top, "new", "What's New", "starred-symbolic", suffix=badge)
+            self._sidebar_item("main", tops["main"], "new", "What's New", "starred-symbolic", suffix=badge)
             self.builders["new"] = self._new_page
-        self.sidebar.append(top)
+        self.sidebars["main"].append(tops["main"])
 
         sections = {}
         for key, title in schema.SECTIONS:
@@ -409,7 +437,7 @@ class Window(Adw.ApplicationWindow):
             key = f"page:{page.title}"
             count = Gtk.Label(css_classes=["dim-label", "caption", "numeric"])
             self.counts[key] = (page, count)
-            self._sidebar_item(section, key, page.title, page.icon, suffix=count)
+            self._sidebar_item("main", section, key, page.title, page.icon, suffix=count)
             self.builders[key] = lambda page=page, key=key: self._page(page, key)
             for g in page.groups:
                 for s in g.settings:
@@ -417,7 +445,9 @@ class Window(Adw.ApplicationWindow):
             self._count(key)
         for key, _ in schema.SECTIONS:
             if sections[key].get_items().get_n_items():
-                self.sidebar.append(sections[key])
+                self.sidebars["main"].append(sections[key])
+        for tab, _ in TABS[1:]:
+            self.sidebars[tab].append(tops[tab])
 
         self.banner.set_title("")
         if not self.helper:
@@ -432,36 +462,65 @@ class Window(Adw.ApplicationWindow):
         self.stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
         self._update()
 
-    def _sidebar_item(self, section, key, title, icon, suffix=None):
+    def _sidebar_item(self, tab, section, key, title, icon, suffix=None):
         item = Adw.SidebarItem(title=title, icon_name=ui.first_icon(icon, schema.FALLBACK_ICON))
         if suffix is not None:
             item.set_suffix(suffix)
         section.append(item)
-        self.keys.append(key)
+        self.tab_keys[tab].append(key)
+        self.tab_of[key] = tab
 
-    def _selected(self, *_):
-        if self.building:
+    def _selected(self, sidebar, _, tab):
+        if self.building or self.switching or tab != self.tab:
             return
-        index = self.sidebar.get_selected()
-        if 0 <= index < len(self.keys):
+        keys = self.tab_keys[tab]
+        index = sidebar.get_selected()
+        if 0 <= index < len(keys):
             if self.search.get_text():
                 self.search.set_text("")
-            self._show(self.keys[index], from_sidebar=True)
+            self._show(keys[index], from_sidebar=True)
+
+    def _tab_changed(self, *_):
+        tab = self.tabs.get_active_name()
+        if self.switching or tab not in self.tab_keys:
+            return
+        self._set_tab(tab)
+        keys = self.tab_keys[tab]
+        if self.search.get_text():
+            self.search.set_text("")
+        if keys:
+            self._show(self.tab_page.get(tab) if self.tab_page.get(tab) in keys else keys[0])
+
+    def _set_tab(self, tab):
+        """Shows `tab`'s sidebar, without opening a page."""
+        self.tab = tab
+        self.side_stack.set_visible_child_name(tab)
+        if self.tabs.get_active_name() != tab:
+            self.switching = True
+            self.tabs.set_active_name(tab)
+            self.switching = False
 
     def _ensure(self, key):
         if self.stack.get_child_by_name(key) is None and key in self.builders:
             self.stack.add_named(self.builders[key](), key)
 
     def _show(self, key, from_sidebar=False):
-        if key not in self.keys and key != "search":
+        if key not in self.tab_of and key != "search":
             key = "overview"
         if key != "search":
+            tab = self.tab_of[key]
             self.page_key = key
+            self.tab_page[tab] = key
             self._ensure(key)
+            if tab != self.tab:
+                self._set_tab(tab)
             if not from_sidebar:
-                self.sidebar.set_selected(self.keys.index(key))
+                self.switching = True
+                self.sidebars[tab].set_selected(self.tab_keys[tab].index(key))
+                self.switching = False
         self.stack.set_visible_child_name(key)
-        titles = {key: title for key, title, _ in TOP} | {"new": "What's New", "search": "Search"}
+        titles = {key: title for top in TOP.values() for key, title, _ in top} | \
+            {"new": "What's New", "search": "Search"}
         self.content_page.set_title(titles.get(key, key.removeprefix("page:")))
 
     #--------------------------------------------------------------------#
@@ -605,6 +664,7 @@ class Window(Adw.ApplicationWindow):
                 subtitle="Which of your computers these app settings are saved for",
                 model=Gtk.StringList.new(labels),
                 selected=self.scopes.index(self.scope))
+            row.set_factory(self._full_label_factory())
             row.add_prefix(Gtk.Image(icon_name=ui.first_icon("computer-symbolic"), valign=Gtk.Align.CENTER))
             row.connect("notify::selected", self._scope)
             self.scope_rows.append(row)
@@ -769,6 +829,13 @@ class Window(Adw.ApplicationWindow):
                 row.add_css_class("nixm-plain")
         self.rows[key] = (row, marker)
         return row
+
+    def _full_label_factory(self):
+        """Labels that keep their full text instead of the default ellipsized ones."""
+        factory = Gtk.SignalListItemFactory()
+        factory.connect("setup", lambda _, item: item.set_child(Gtk.Label(xalign=0)))
+        factory.connect("bind", lambda _, item: item.get_child().set_label(item.get_item().get_string()))
+        return factory
 
     def _dropdown(self, options, selected, search):
         """A dropdown showing each option's label; the button shows the part

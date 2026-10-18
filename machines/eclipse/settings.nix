@@ -9,7 +9,7 @@
   #-- Users
   #--------------------------------------------------------------------#
   users = {
-    warpledge = {};
+    warpledge = {gaming.retroshelf = false;};
   };
 
   #--------------------------------------------------------------------#
@@ -68,6 +68,7 @@
     "spotify"
     "freetube"
     "ferdium"
+    "nixos-settings"
   ];
 
   #--- SSH Server
