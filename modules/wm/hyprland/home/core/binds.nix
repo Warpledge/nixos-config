@@ -1,7 +1,11 @@
 #=====================================================================#
 # HYPRLAND KEYBINDS
 #=====================================================================#
-{lib, ...}: let
+{
+  lib,
+  machine,
+  ...
+}: let
   lua = lib.generators.mkLuaInline;
   str = lib.generators.toLua {};
   bind = keys: dsp: {_args = [keys (lua dsp)];};
@@ -22,7 +26,7 @@ in {
 
           #--- Applications
           (exec "SUPER + Return" "kitty") # Terminal
-          (exec "SUPER + Z" "zeditor") # Code Editor
+          (exec "SUPER + Z" "zeditor ${machine.flakePath}") # Zed on the config
           (exec "SUPER + B" "zen-beta") # Web Browser
           (exec "SUPER + E" "nautilus") # Files
 

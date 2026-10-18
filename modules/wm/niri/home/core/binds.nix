@@ -4,6 +4,7 @@
 {
   config,
   lib,
+  machine,
   user,
   ...
 }: {
@@ -123,7 +124,17 @@
     "Mod+Shift+H".action.spawn = ["heroic"];
     "Mod+Shift+G" = lib.mkIf user.gaming.lutris {action.spawn = ["lutris"];};
     "Mod+Shift+Y".action.spawn = ["freetube"];
-    "Mod+Z".action.spawn = ["zeditor"];
+    #--- Focuses the Zed window on the config, or opens one
+    "Mod+Z".action.spawn = [
+      "nirius"
+      "focus-or-spawn"
+      "--app-id"
+      "^dev\\.zed\\.Zed$"
+      "--title"
+      (lib.escapeRegex (baseNameOf machine.flakePath))
+      "zeditor"
+      machine.flakePath
+    ];
     "Mod+B".action.spawn = ["zen-beta"];
     "Mod+E".action.spawn = ["nautilus"];
     "Mod+Shift+M".action.spawn = ["spotify"];
