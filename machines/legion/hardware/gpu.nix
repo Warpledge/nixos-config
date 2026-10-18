@@ -40,7 +40,6 @@
       modesetting.enable = true;
       powerManagement.enable = true;
       powerManagement.finegrained = true;
-      dynamicBoost.enable = true; # nvidia-powerd shifts CPU power to the 4070
       nvidiaSettings = false;
       prime = {
         #--- GPU switching offload - AMD iGPU for display, NVIDIA for compute

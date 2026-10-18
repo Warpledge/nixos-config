@@ -25,7 +25,10 @@
 
   #--- Power Management
   boot.kernelModules = ["battery" "ac"];
-  boot.kernelParams = ["consoleblank=600"]; # Blank TTY screen after 10 minutes idle
+  boot.kernelParams = [
+    "consoleblank=600" # Blank TTY screen after 10 minutes idle
+    "amd_pstate=active" # EPP mode, which CPU_ENERGY_PERF_POLICY below needs
+  ];
 
   #--- Prevent sleep/suspend when running server
   systemd.targets = {
@@ -40,9 +43,14 @@
     tlp = {
       enable = true;
       settings = {
-        # Legion platform profile — controls Fn+Q LED (balanced=white, low-power=blue)
-        PLATFORM_PROFILE_ON_AC = "balanced";
+        # Legion platform profile, shown by the Fn+Q LED (performance=red,
+        # balanced=white, low-power=blue); performance lifts the CPU power limit
+        PLATFORM_PROFILE_ON_AC = "performance";
         PLATFORM_PROFILE_ON_BAT = "low-power";
+
+        # amd-pstate EPP: clock up at once for the server tick (TLP default is
+        # balance_performance)
+        CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
 
         # Aggressive PCIe link power states on battery (covers RTX 4070 PCI slot)
         PCIE_ASPM_ON_BAT = "powersupersave";
