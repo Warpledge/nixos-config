@@ -4,7 +4,6 @@
 {
   config,
   lib,
-  pkgs,
   user,
   ...
 }: {
@@ -57,5 +56,7 @@
     };
   };
 
-  home.packages = [pkgs.gh]; # pkgs.git-lfs
+  # Also sets gh as git's credential helper for github.com
+  programs.gh.enable = true;
+  # home.packages = [pkgs.git-lfs];
 }
