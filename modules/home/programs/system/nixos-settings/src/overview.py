@@ -7,7 +7,7 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gtk  # noqa: E402
+from gi.repository import Adw, Gio, GLib, Gtk  # noqa: E402
 
 import closure  # noqa: E402
 import ui  # noqa: E402
@@ -116,6 +116,14 @@ class Overview(Adw.PreferencesPage):
         folder.add_suffix(Gtk.Image(icon_name=ui.link_icon(), valign=Gtk.Align.CENTER, css_classes=["dim-label"]))
         folder.connect("activated", lambda _: window.open_folder())
         group.add(folder)
+        if GLib.find_program_in_path("gitkraken"):
+            git = Adw.ActionRow(title="Manage Git", activatable=True,
+                                subtitle="Pull, commit and push the config folder in GitKraken")
+            git.add_prefix(Gtk.Image(icon_name=ui.first_icon("gitkraken", "vcs-normal", "folder-remote-symbolic"),
+                                     valign=Gtk.Align.CENTER))
+            git.add_suffix(Gtk.Image(icon_name=ui.link_icon(), valign=Gtk.Align.CENTER, css_classes=["dim-label"]))
+            git.connect("activated", lambda _: self._open_gitkraken())
+            group.add(git)
         self.add(group)
 
         #--- Earlier versions
@@ -157,6 +165,12 @@ class Overview(Adw.PreferencesPage):
                     row.add_suffix(use)
                 group.add(row)
             self.add(group)
+
+    def _open_gitkraken(self):
+        try:
+            Gio.Subprocess.new(["gitkraken", "--path", self.window.cfg.flake], Gio.SubprocessFlags.NONE)
+        except GLib.Error as e:
+            self.window.toast(f"Couldn't open GitKraken: {e.message}")
 
     #--------------------------------------------------------------------#
     #-- Update check
