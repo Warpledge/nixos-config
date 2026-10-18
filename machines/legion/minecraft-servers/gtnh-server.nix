@@ -20,7 +20,7 @@
 
   startScript = pkgs.writeShellScript "gtnh-start" ''
       while true; do
-          java \
+          ${pkgs.jdk25}/bin/java \
               -Xms10G \
               -Xmx12G \
               -XX:+UseG1GC \

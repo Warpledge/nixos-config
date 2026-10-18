@@ -2,11 +2,11 @@
 
 ## Java Runtime
 
-- **Runtime:** OpenJDK 25 — installed via `pkgs.jdk25` in `modules/nixos/gaming/tools/java.nix`
+- **Runtime:** OpenJDK 25, called as `${pkgs.jdk25}/bin/java` in `machines/legion/minecraft-servers/gtnh-server.nix`. A bare `java` on PATH is JDK 21 (checked 2026-10-18): `modules/nixos/gaming/tools/java.nix` installs both, and JDK 21's `bin/java` wins the collision
 - GTNH recommends Java 25 for 2.8.x
-- **JVM Arguments:** ZGC with full arg set — managed via `machines/legion/minecraft-servers/gtnh-server.nix`, not `startserver-java9.sh`
-  - `-XX:+UseZGC -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -XX:+PerfDisableSharedMem -XX:+UseTransparentHugePages`
-  - Memory: `-Xms12G -Xmx12G`
+- **JVM Arguments:** Aikar-style G1 set, managed via `machines/legion/minecraft-servers/gtnh-server.nix`, not `startserver-java9.sh`
+  - `-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -XX:+PerfDisableSharedMem -XX:+UseTransparentHugePages` plus the G1 sizing flags in the module
+  - Memory: `-Xms10G -Xmx12G`
 
 ## lwjgl3ify
 
