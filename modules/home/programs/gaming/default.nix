@@ -134,6 +134,7 @@ user: {
     ++ lib.optionals user.gaming.r2modman [./tools/r2modman.nix]
     ++ lib.optionals user.gaming.pathOfBuilding [./tools/path-of-building.nix]
     ++ lib.optionals user.gaming.ludusavi [./tools/ludusavi.nix]
+    ++ lib.optionals user.gaming.retroshelf [./tools/retroshelf.nix]
     ++ lib.optionals user.gaming.granblueRelinkMods [./tools/relink-mod-organizer.nix ./tools/reloaded-ii-gbfr.nix]
     ++ lib.optionals user.japanese.vn [./tools/japanese-vn.nix];
 }

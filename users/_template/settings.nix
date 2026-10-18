@@ -162,6 +162,7 @@
     r2modman = false; # Thunderstore mod manager
     pathOfBuilding = false; # Path of Exile build planner (Rusty PoB)
     ludusavi = false; # Daily game save backups to ~/SyncBackups/<host>/Ludusavi
+    retroshelf = false; # ES-DE / RetroDECK library tidier (AppImage)
 
     # Needs prebuilt bundles outside the repo (docs/local/local-binary-installs.md)
     granblueRelinkMods = false; # GBFR mods: RelinkModOrganizer + Reloaded-II
