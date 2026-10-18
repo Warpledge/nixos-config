@@ -254,6 +254,78 @@ choose() {
   done
 }
 
+#--- search_pick <var> <question> <default> <list function>: the function
+#--- prints "value|label" lines. Enter keeps the default, an exact value is
+#--- taken as is, and anything else searches the labels.
+search_pick() {
+  local -n _pick=$1
+  local question=$2 default=$3 reply item list=() matches=()
+  mapfile -t list < <("$4")
+  say "$question"
+  if ((${#list[@]} == 0)); then
+    ask _pick "  Type it" "$default"
+    return
+  fi
+  while true; do
+    read -r -p "  Enter keeps ${default:-(none)}; or type part of a name to search: " reply || die "no answer, stopping"
+    if [[ -z $reply ]]; then
+      [[ -n $default ]] && _pick=$default && break
+      continue
+    fi
+    matches=()
+    for item in "${list[@]}"; do
+      [[ ${item%%|*} == "$reply" ]] && matches=("$item") && break
+      [[ ${item,,} == *"${reply,,}"* ]] && matches+=("$item")
+    done
+    if ((${#matches[@]} == 1)) && [[ ${matches[0]%%|*} == "$reply" ]]; then
+      _pick=$reply
+      break
+    fi
+    if ((${#matches[@]} == 0)); then
+      say "  Nothing matches \"$reply\"; try a shorter or different word."
+      continue
+    fi
+    if ((${#matches[@]} > 40)); then
+      say "  ${#matches[@]} matches, showing the first 40; type more letters to narrow it."
+      matches=("${matches[@]:0:40}")
+    fi
+    choose _pick "  Matches for \"$reply\":" "${matches[0]%%|*}" "${matches[@]}" "again|None of these, search again"
+    [[ $_pick == again ]] || break
+  done
+  say "  -> $_pick"
+}
+
+#--- First path in the store matching a glob, e.g. 'kbd-*/share/keymaps'
+store_file() {
+  local f
+  for f in /nix/store/*-$1; do
+    [[ -e $f ]] && printf '%s\n' "$f" && return
+  done
+  return 0
+}
+
+#--- "value|label" lists for search_pick, from what this install already has
+list_timezones() { timedatectl list-timezones 2>/dev/null | sed 's/.*/&|&/'; }
+list_locales() {
+  local f
+  f=$(store_file 'glibc-locales-*/share/i18n/SUPPORTED')
+  [[ -n $f ]] && sed -n 's#^\([^/ ]*\.UTF-8\)/UTF-8.*#\1|\1#p' "$f"
+  return 0
+}
+list_layouts() {
+  local f
+  f=$(store_file 'xkeyboard-config-*/share/X11/xkb/rules/base.lst')
+  [[ -n $f ]] && awk '/^! layout/ { on = 1; next } /^!/ { on = 0 }
+    on && NF { name = $1; $1 = ""; sub(/^ +/, ""); print name "|" name ": " $0 }' "$f"
+  return 0
+}
+list_keymaps() {
+  local loadkeys
+  loadkeys=$(readlink -f "$(command -v loadkeys)" 2>/dev/null) || return 0
+  find "${loadkeys%/bin/*}/share/keymaps" -name '*.map.gz' -printf '%f\n' 2>/dev/null |
+    sed 's/\.map\.gz$//' | sort -u | sed 's/.*/&|&/'
+}
+
 #--------------------------------------------------------------------#
 #-- Editing settings.nix
 #--------------------------------------------------------------------#
@@ -588,16 +660,19 @@ new_machine() {
   [[ $state_version =~ ^[0-9]{2}\.[0-9]{2}$ ]] || die "\"$state_version\" doesn't look like a NixOS version (e.g. 26.05)"
 
   section "Language and keyboard"
-  say "From the choices made in the installer:"
+  say "The defaults are what you picked in the installer."
   tz=$(installer_value timeZone)
   [[ -n $tz ]] || tz=$(timedatectl show --property=Timezone --value 2>/dev/null || true)
-  ask tz "Time zone" "${tz:-UTC}"
+  search_pick tz "Time zone (e.g. Europe/Berlin, America/New_York):" "${tz:-UTC}" list_timezones
   locale=$(installer_value defaultLocale)
-  ask locale "Language (locale)" "${locale:-en_US.UTF-8}"
+  search_pick locale "Language and formats (locale, e.g. en_GB.UTF-8, de_DE.UTF-8):" \
+    "${locale:-en_US.UTF-8}" list_locales
   layout=$(installer_value layout)
-  ask layout "Keyboard layout" "${layout:-us}"
+  search_pick layout "Keyboard layout on the desktop (e.g. us, gb, de; or search a language):" \
+    "${layout:-us}" list_layouts
   keymap=$(installer_value keyMap)
-  ask keymap "Keyboard layout on the text console and disk password prompt" "${keymap:-$layout}"
+  search_pick keymap "Keyboard layout on the text console and disk password prompt (e.g. us, uk, de):" \
+    "${keymap:-$layout}" list_keymaps
 
   section "Desktop"
   choose wm "Window manager, for everyone on this computer:" niri \
