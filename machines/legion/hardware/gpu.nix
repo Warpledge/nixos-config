@@ -10,17 +10,9 @@
   #-- Drivers & Packages
   #--------------------------------------------------------------------#
   #--- Load AMD GPU drivers
-  boot = {
-    initrd.kernelModules = ["amdgpu"];
-    blacklistedKernelModules = ["nouveau"];
-    kernelParams = [
-      "nvidia-drm.modeset=1" # Enable direct mode setting for better Wayland support
-      "nvidia_drm.fbdev=1" # Enable framebuffer device support
-      # Keep video memory allocations across suspend/resume
-      "nvidia.NVreg_PreserveVideoMemoryAllocations=1"
-      "nvidia.NVreg_UsePageAttributeTable=1" # CPU Page Attribute Table (PAT)
-    ];
-  };
+  #--- hardware.nvidia sets nvidia-drm modeset/fbdev, PreserveVideoMemoryAllocations
+  #--- and the nouveau blacklist itself
+  boot.initrd.kernelModules = ["amdgpu"];
 
   #--- hardware.nvidia below does nothing without "nvidia" here, Wayland
   #--- included; X itself stays off (system/desktop/input.nix)
@@ -31,29 +23,18 @@
     graphics = {
       enable = true;
       enable32Bit = true;
+      #--- Mesa is the default package; hardware.nvidia adds nvidia-vaapi-driver
+      #--- and the EGL Wayland/GBM platforms
       extraPackages = with pkgs; [
-        #--- NVIDIA packages
-        nvidia-vaapi-driver # Video acceleration for NVIDIA GPUs
-        libva-vdpau-driver # Bridge between VA-API and VDPAU for video decoding
         libvdpau-va-gl # VDPAU driver with OpenGL/VA-API backend
-        egl-wayland # EGL support for Wayland
-        nv-codec-headers-12 # Headers for NVIDIA video codec SDK
-
-        #--- AMD packages
-        mesa # Open source 3D graphics library (includes AMD drivers)
         rocmPackages.clr.icd # AMD GPU compute runtime
-
-        #--- Common packages
-        vulkan-loader # Vulkan driver loader
-        vulkan-validation-layers # Debug/development tools for Vulkan
       ];
       extraPackages32 = with pkgs.pkgsi686Linux; [
-        libva-vdpau-driver
-        mesa
         libvdpau-va-gl
       ];
     };
     nvidia = {
+      moduleParams.nvidia.NVreg_UsePageAttributeTable = 1; # CPU Page Attribute Table
       open = true;
       package = config.boot.kernelPackages.nvidiaPackages.stable;
       modesetting.enable = true;
@@ -80,7 +61,6 @@
     variables = {
       #--- Use AMD iGPU for display (Niri compatibility)
       LIBVA_DRIVER_NAME = "radeonsi";
-      GBM_BACKEND = "mesa";
       #--- Global offload, left off as in wm/niri.nix: it puts every EGL and
       #--- Vulkan app on the 4070; nvidia-offload routes one app
       # __NV_PRIME_RENDER_OFFLOAD = "1";
@@ -90,12 +70,11 @@
     };
 
     systemPackages = with pkgs; [
-      nvtopPackages.v3d # GPU monitoring tool (supports both AMD and NVIDIA)
+      nvtopPackages.full # GPU monitor, AMD and NVIDIA (v3d is Raspberry Pi only)
 
       #--- Video Acceleration/Decoding
       libva # Video Acceleration API
       libva-utils # Tools for VA-API
-      libva-vdpau-driver # VDPAU backend for VA-API
 
       #--- Vulkan Development/Debug Tools
       vulkan-tools # Vulkan development utilities

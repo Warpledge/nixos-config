@@ -245,7 +245,7 @@ DMS runs as a systemd user service (`systemd.enable`, `niri.enableSpawn = false`
 **Niri-only directories:** `core/blur-presets.nix`, `core/portals.nix`, `core/rules.nix`, `core/translucent-apps.nix`, `core/xwayland.nix`, `nirius.nix`.
 
 Per-machine WM overrides exist where needed, each applied to every user on the machine:
-- `machines/legion/wm/{hyprland,niri}.nix` — hybrid-GPU env (`WLR_DRM_DEVICES` only in the Hyprland one; niri ignores it), Solaar autostart; the niri one also sets the internal panel's outputs and turns off DMS auto-lock
+- `machines/legion/wm/{hyprland,niri}.nix` — hybrid-GPU env (`AQ_DRM_DEVICES` only in the Hyprland one; niri ignores it), Solaar autostart; the niri one also sets the internal panel's outputs and turns off DMS auto-lock
 - `machines/eclipse/wm/{hyprland,niri}.nix` — monitor layout and workspace assignment (1–6 on DP-2, 7–9 on DP-3); the niri one also the app placement Hyprland keeps in `windowrules/workspaces.nix`, and the DMS bars (an auto-hiding copy of the main bar on the OLED)
 - `machines/_template/wm/{hyprland,niri}.nix` — commented monitor examples; with no outputs set, both WMs use each monitor's preferred mode
 

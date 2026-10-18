@@ -35,8 +35,8 @@
         env = map (kv: {_args = lib.splitString "," kv;}) [
           # GPU Configuration - Use AMD iGPU for Hyprland on laptop
           "LIBVA_DRIVER_NAME,radeonsi"
-          "GBM_BACKEND,mesa"
-          "WLR_DRM_DEVICES,/dev/dri/card1:/dev/dri/card0"
+          # Aquamarine reads AQ_*, not WLR_DRM_DEVICES
+          "AQ_DRM_DEVICES,/dev/dri/card1:/dev/dri/card0"
 
           # Global NVIDIA offload, left off: route individual apps with nvidia-offload
           # "__NV_PRIME_RENDER_OFFLOAD,1"
