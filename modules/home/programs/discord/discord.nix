@@ -10,6 +10,9 @@
   #--- Same theme file the catppuccin/nix Vesktop port loads
   inherit (config.catppuccin) flavor accent;
   catppuccinTheme = "catppuccin-${flavor}-${accent}.theme";
+  # Stylix's base00 in place of the theme's Base (modules/theme/stylix.nix)
+  base = config.lib.stylix.colors.withHashtag.base00;
+  inherit (config.lib.stylix.colors) base00-rgb-r base00-rgb-g base00-rgb-b;
 in {
   imports = [inputs.nixcord.homeModules.nixcord];
 
@@ -52,7 +55,7 @@ in {
       enableMenu = false;
       tray = true;
       splashColor = "rgb(239, 239, 241)";
-      splashBackground = "rgb(30, 30, 46)";
+      splashBackground = "rgb(${base00-rgb-r}, ${base00-rgb-g}, ${base00-rgb-b})";
       spellCheckLanguages = ["en-US" "en"];
     };
     config = {
@@ -60,6 +63,20 @@ in {
       #--- Stylix's nixcord target skips GoofCord: load Catppuccin's upstream theme
       themes.${catppuccinTheme} = ''
         @import url("https://catppuccin.github.io/discord/dist/${catppuccinTheme}.css");
+
+        .visual-refresh.theme-dark,
+        .visual-refresh .theme-dark {
+          --background-secondary-alt: ${base} !important;
+          --background-surface-high: ${base} !important;
+          --background-base-low: ${base} !important;
+          --background-gradient-highest: ${base} !important;
+          --home-background: ${base} !important;
+          --chat-background: ${base} !important;
+          --chat-background-default: ${base} !important;
+          --modal-background: ${base} !important;
+          --modal-footer-background: ${base} !important;
+          --background-code: ${base} !important;
+        }
       '';
       enabledThemes = ["${catppuccinTheme}.css"];
       plugins = {

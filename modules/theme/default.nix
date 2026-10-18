@@ -7,6 +7,7 @@
   #--------------------------------------------------------------------#
   imports = [
     ./catppuccin.nix
+    ./dms.nix
     ./gtk.nix
     ./stylix.nix
     ./fonts.nix

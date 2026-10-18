@@ -2,11 +2,14 @@
 # HYPRLAND SETTINGS
 #=====================================================================#
 {
+  config,
   lib,
   machine,
   user,
   ...
-}: {
+}: let
+  colors = config.lib.stylix.colors;
+in {
   #--------------------------------------------------------------------#
   #-- Shell Aliases
   #--------------------------------------------------------------------#
@@ -71,7 +74,7 @@
           gaps_out = 8;
           border_size = 2;
 
-          "col.inactive_border" = lib.mkForce "rgb(1e1e2e)"; # Base
+          "col.inactive_border" = lib.mkForce "rgb(${colors.base00})";
           "col.active_border" = lib.mkForce "rgb(cba6f7)"; # Mauve
 
           snap = {

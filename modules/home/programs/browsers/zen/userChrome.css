@@ -15,12 +15,12 @@
 		--toolbar-color: #cdd6f4 !important;
 		--newtab-text-primary-color: #cdd6f4 !important;
 		--arrowpanel-color: #cdd6f4 !important;
-		--arrowpanel-background: #1e1e2e !important;
+		--arrowpanel-background: #11111b !important;
 		--sidebar-text-color: #cdd6f4 !important;
 		--lwt-sidebar-text-color: #cdd6f4 !important;
 		--lwt-sidebar-background-color: #11111b !important;
 		--toolbar-bgcolor: #313244 !important;
-		--newtab-background-color: #1e1e2e !important;
+		--newtab-background-color: #11111b !important;
 		--zen-themed-toolbar-bg: #181825 !important;
 		--zen-main-browser-background: #181825 !important;
 		--toolbox-bgcolor-inactive: #181825 !important;
@@ -31,11 +31,11 @@
 	}
 
 	.sidebar-placesTree {
-		background-color: #1e1e2e !important;
+		background-color: #11111b !important;
 	}
 
 	#zen-workspaces-button {
-		background-color: #1e1e2e !important;
+		background-color: #11111b !important;
 	}
 
 	#TabsToolbar {
@@ -43,11 +43,11 @@
 	}
 
 	.urlbar-background {
-		background-color: #1e1e2e !important;
+		background-color: #11111b !important;
 	}
 
 	.content-shortcuts {
-		background-color: #1e1e2e !important;
+		background-color: #11111b !important;
 		border-color: #cba6f7 !important;
 	}
 

@@ -60,17 +60,9 @@
             enable = true;
             flatpakSupport.enable = true;
             # Stylix's GTK accent is base0D (blue); match DMS and Kvantum's Mauve
-            # Backgrounds a step darker than Stylix's, for contrast with the
-            # wallpaper behind translucent windows
             extraCss = with config.lib.stylix.colors.withHashtag; ''
               @define-color accent_color ${base0E};
               @define-color accent_bg_color ${base0E};
-              @define-color window_bg_color shade(${base01}, 0.75);
-              @define-color view_bg_color shade(${base01}, 0.75);
-              @define-color dialog_bg_color shade(${base01}, 0.75);
-              @define-color headerbar_bg_color ${base01};
-              @define-color sidebar_bg_color ${base01};
-              @define-color secondary_sidebar_bg_color ${base01};
             '';
           };
         };
@@ -148,7 +140,10 @@
 
     #--- Catppuccin Custom
     base16Scheme = {
-      base00 = "1e1e2e"; # Default Background
+      # Default Background: Crust, not Mocha's Base (1e1e2e), so translucent
+      # windows contrast with the wallpaper. Apps themed outside Stylix
+      # read base00 for the same swap.
+      base00 = "11111b";
       base01 = "181825"; # Lighter Background (Used for status bars, line numbers)
       base02 = "313244"; # Selection Background
       base03 = "6c7086"; # Comments, Invisibles, Line Highlighting

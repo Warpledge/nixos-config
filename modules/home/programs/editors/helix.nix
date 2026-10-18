@@ -1,7 +1,12 @@
 #=====================================================================#
 # HELIX EDITOR CONFIGURATION
 #=====================================================================#
-{pkgs, ...}: {
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
   #--------------------------------------------------------------------#
   #-- Editor Configuration
   #--------------------------------------------------------------------#
@@ -19,6 +24,13 @@
   programs.helix = {
     enable = true;
     defaultEditor = false; # Zed is default
+
+    #--- catppuccin/nix's Mocha with Base swapped for Stylix's base00
+    settings.theme = lib.mkForce "catppuccin-mocha-stylix";
+    themes.catppuccin-mocha-stylix = {
+      inherits = "catppuccin-mocha";
+      palette.base = config.lib.stylix.colors.withHashtag.base00;
+    };
 
     #--- Editor Settings
     settings = {

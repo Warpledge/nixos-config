@@ -55,8 +55,11 @@ in {
           flavour = [flavor];
           accents = [accent];
         };
+        # Base (30,30,46) becomes Stylix's base00, as in stylix.nix
+        base00 = with config.lib.stylix.colors; "${base00-rgb-r},${base00-rgb-g},${base00-rgb-b}";
         scheme = pkgs.runCommand "${name}.colors" {} ''
           awk '/^\[/ { view = ($0 == "[Colors:View]") }
+               /=30,30,46$/ { sub(/30,30,46$/, "${base00}") }
                view && /^BackgroundAlternate=/ { $0 = $0 ",0" } 1' \
             ${upstream}/share/color-schemes/${name}.colors > $out
         '';

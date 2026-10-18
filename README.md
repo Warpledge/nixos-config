@@ -682,7 +682,7 @@ modules/
   ├── default.nix                 # NixOS + one home-manager config per user
   ├── nixos/                      # system modules
   ├── home/                       # user modules
-  ├── theme/                      # stylix, catppuccin, fonts, GTK, QT
+  ├── theme/                      # stylix, catppuccin, fonts, GTK, QT, DMS
   └── wm/                         # window managers
 docs/                           # personal notes I share between devices
 ```

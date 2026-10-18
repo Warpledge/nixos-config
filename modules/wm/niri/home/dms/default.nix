@@ -12,7 +12,8 @@
   settings =
     mirrored
     // {
-      customThemeFile = "${config.xdg.configHome}/DankMaterialShell/themes/catppuccin/theme.json";
+      currentThemeCategory = "custom";
+      customThemeFile = "${config.xdg.configHome}/DankMaterialShell/themes/stylix/theme.json";
       cursorSettings = mirrored.cursorSettings // {inherit (config.stylix.cursor) size;};
     }
     // inputDefaults;
