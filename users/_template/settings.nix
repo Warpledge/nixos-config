@@ -123,7 +123,6 @@
   # Enable the system monitoring applications you want installed
   system = {
     resources = false; # GNOME system and process monitor
-    nixmSettings = true; # Menus for these settings, with Apply to rebuild
   };
 
   #--- Android Screen Mirroring (scrcpy)

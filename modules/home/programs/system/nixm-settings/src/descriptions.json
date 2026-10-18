@@ -47,7 +47,6 @@
   "security.keepassxc": "**KeePassXC**, an offline password manager. Its vault file can be synced between devices with **Syncthing**.",
 
   "system.resources": "**Resources**, a system and process monitor: what's running and how much it uses.",
-  "system.nixmSettings": "This app.",
   "scrcpy.enable": "Show and control an **Android** phone or tablet from your computer, over USB or wifi. Nothing gets installed on the device.",
 
   "gaming.steam": "**Steam**, with **GE-Proton** for running Windows games. Installed for everyone on the computer once any user turns it on.",

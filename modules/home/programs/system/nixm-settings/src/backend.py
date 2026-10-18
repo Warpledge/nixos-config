@@ -115,6 +115,7 @@ def load(cfg):
         labels = {}
     pages = schema.build("machine", read("machines", "_template", "settings.nix"), data["choices"], labels)
     pages += schema.build("user", read("users", "_template", "settings.nix"), data["choices"], labels)
+    pages = schema.arrange(pages)
     try:
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "descriptions.json")) as f:
             descriptions = json.load(f)

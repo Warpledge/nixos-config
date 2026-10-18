@@ -66,8 +66,14 @@ def theme_colors():
     colors = {}
     for name in ("accent", "warning"):
         c = Gtk.Label(css_classes=[name]).get_color()
-        colors[name] = "#%02x%02x%02x" % (round(c.red * 255), round(c.green * 255), round(c.blue * 255))
+        # Wide-gamut accents can come back outside 0..1; clamp to a valid sRGB hex
+        to8 = [max(0, min(255, round(v * 255))) for v in (c.red, c.green, c.blue)]
+        colors[name] = "#%02x%02x%02x" % tuple(to8)
     return colors
+
+
+def plain(text):
+    return STRONG.sub(r"\1", CAUTION.sub(r"\1", text))
 
 
 def rich(text, colors):
@@ -305,8 +311,15 @@ class Window(Adw.ApplicationWindow):
             self._count(i)
         self.sidebar.connect("row-selected", self._select)
 
-        side = Adw.ToolbarView(content=Gtk.ScrolledWindow(child=self.sidebar,
-                                                          hscrollbar_policy=Gtk.PolicyType.NEVER))
+        self.search = Gtk.SearchEntry(placeholder_text="Search apps and settings", margin_start=10,
+                                      margin_end=10, margin_top=4, margin_bottom=6)
+        self.search.connect("search-changed", self._search)
+        self.search.set_key_capture_widget(self)  # typing anywhere starts a search
+        side_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        side_box.append(self.search)
+        side_box.append(Gtk.ScrolledWindow(child=self.sidebar, vexpand=True,
+                                           hscrollbar_policy=Gtk.PolicyType.NEVER))
+        side = Adw.ToolbarView(content=side_box)
         side.add_top_bar(Adw.HeaderBar())
 
         self.apply_button = Gtk.Button(label="Apply", css_classes=["suggested-action"])
@@ -331,7 +344,8 @@ class Window(Adw.ApplicationWindow):
 
         self.split.set_sidebar(Adw.NavigationPage(title="nixm Settings", child=side))
         self.split.set_content(self.content_page)
-        self.toasts.set_child(self.split)
+        if self.toasts.get_child() is not self.split:
+            self.toasts.set_child(self.split)
 
         self.sidebar.select_row(self.sidebar.get_row_at_index(min(self.page_index, len(state.pages) - 1)))
         self._update()
@@ -352,6 +366,57 @@ class Window(Adw.ApplicationWindow):
         self.stack.set_visible_child_name(str(self.page_index))
         self.content_page.set_title(self.state.pages[self.page_index].title)
         self.split.set_show_content(True)
+
+    #--- Search
+    def _search(self, entry):
+        words = entry.get_text().lower().split()
+        old = self.stack.get_child_by_name("search")
+        if old is not None:
+            self.stack.remove(old)
+        if not words:
+            self.stack.set_visible_child_name(str(self.page_index))
+            self.content_page.set_title(self.state.pages[self.page_index].title)
+            return
+        hits = []
+        for i, page in enumerate(self.state.pages):
+            for g in page.groups:
+                for s in g.settings:
+                    text = " ".join([s.title, s.subtitle, plain(s.description), page.title,
+                                     g.title, ".".join(s.path)]).lower()
+                    if all(w in text for w in words):
+                        hits.append((i, page, s))
+        if hits:
+            results = Adw.PreferencesPage()
+            group = Adw.PreferencesGroup(title=f"{len(hits)} match{'es' if len(hits) != 1 else ''}")
+            for i, page, s in hits:
+                key = (s.domain, s.path)
+                row = Adw.ActionRow(title=GLib.markup_escape_text(s.title),
+                                    subtitle=GLib.markup_escape_text(page.title), activatable=True)
+                row.add_prefix(Gtk.Image(icon_name=page_icon(page)))
+                value = self.changes.get(key, self.state.value(self.cfg, s))
+                row.add_suffix(Gtk.Label(label=shown(s, value), css_classes=["dim-label"],
+                                         ellipsize=Pango.EllipsizeMode.END, max_width_chars=24))
+                row.add_suffix(Gtk.Image(icon_name="go-next-symbolic"))
+                row.connect("activated", lambda _, i=i, key=key: self._jump(i, key))
+                group.add(row)
+            results.add(group)
+        else:
+            results = Adw.StatusPage(icon_name="system-search-symbolic", title="No matches",
+                                     description="Try an app name, like Steam or Zen.")
+        self.stack.add_named(results, "search")
+        self.stack.set_visible_child_name("search")
+        self.content_page.set_title("Search")
+
+    def _jump(self, i, key):
+        """Opens the page holding a search hit and puts focus on its row."""
+        self.search.set_text("")
+        self.page_index = i
+        self.sidebar.select_row(self.sidebar.get_row_at_index(i))
+        self._select(self.sidebar, self.sidebar.get_row_at_index(i))
+        row = self.rows[key][0]
+        if isinstance(row, Adw.ExpanderRow):
+            row.set_expanded(True)
+        GLib.idle_add(row.grab_focus)
 
     def _page(self, page):
         prefs = Adw.PreferencesPage()
@@ -374,9 +439,12 @@ class Window(Adw.ApplicationWindow):
             self.scope_rows.append(row)
             group.add(row)
             prefs.add(group)
-        locked = page.domain == "machine" and not self.direct
+        locked = [g for g in page.groups
+                  if not self.direct and any(s.domain == "machine" for s in g.settings)]
         if locked:
-            note = Adw.ActionRow(title="Only an admin can change these",
+            title = ("Only an admin can change these" if len(locked) == len(page.groups)
+                     else "Only an admin can change the computer-wide settings here")
+            note = Adw.ActionRow(title=title,
                                  subtitle="They apply to everyone who uses this computer.")
             note.add_prefix(Gtk.Image(icon_name="changes-prevent-symbolic", css_classes=["accent"]))
             group = Adw.PreferencesGroup()
@@ -385,7 +453,7 @@ class Window(Adw.ApplicationWindow):
         for g in page.groups:
             group = Adw.PreferencesGroup(title=GLib.markup_escape_text(g.title),
                                          description=GLib.markup_escape_text(g.description),
-                                         sensitive=not locked)
+                                         sensitive=g not in locked)
             for s in g.settings:
                 group.add(self._row(s))
             prefs.add(group)
@@ -461,8 +529,15 @@ class Window(Adw.ApplicationWindow):
         return row
 
     def _description(self, text):
-        return Gtk.Label(label=rich(text, self.colors), use_markup=True, wrap=True, xalign=0,
-                         margin_top=10, margin_bottom=10, margin_start=12, margin_end=12)
+        label = Gtk.Label(wrap=True, xalign=0, margin_top=10, margin_bottom=10,
+                          margin_start=12, margin_end=12)
+        markup = rich(text, self.colors)
+        try:
+            Pango.parse_markup(markup, -1, "\x01")
+            label.set_markup(markup)
+        except GLib.Error:
+            label.set_text(plain(text))
+        return label
 
     def _list_row(self, s, items, common):
         row = Adw.ExpanderRow(**common)

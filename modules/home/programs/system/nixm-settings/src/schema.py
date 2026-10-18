@@ -16,6 +16,16 @@ SPLIT_SECTIONS = {"Apps"}
 #--- Changes the running system can't pick up until the next boot
 RESTART = {("machine", "kernel"), ("machine", "windowManager")}
 
+#--- Page names and moves the template headers don't give
+PAGE_TITLES = {
+    "Wallpaper Picker (Mod+W)": "Wallpaper",
+    "Android Screen Mirroring (scrcpy)": "Android",
+}
+MOVES = {  # setting -> (page, group on that page)
+    ("japanese", "ime"): ("Language & Keyboard", "Japanese Typing"),
+    ("japanese", "vn"): ("Gaming", "Japanese Visual Novels"),
+}
+
 SETUP_ENTRY = re.compile(r'^\s*"([^"|]+)\|([^"|]+)\|([^"]+)"\s*$', re.M)
 
 
@@ -206,3 +216,28 @@ def make_setting(domain, path, b, values, choices, labels, doc, lead, header_tit
     else:
         s.nullable = value is None
     return s
+
+
+def arrange(pages):
+    """Applies PAGE_TITLES and MOVES to the built pages, dropping any left empty."""
+    moved = []
+    for page in pages:
+        page.title = PAGE_TITLES.get(page.title, page.title)
+        for group in page.groups:
+            moved += [s for s in group.settings if s.path in MOVES]
+            group.settings = [s for s in group.settings if s.path not in MOVES]
+    by_title = {page.title: page for page in pages}
+    for s in moved:
+        title, group_title = MOVES[s.path]
+        page = by_title.get(title)
+        if page is None:
+            page = by_title[title] = Page(s.domain, title)
+            pages.append(page)
+        group = next((g for g in page.groups if g.title == group_title), None)
+        if group is None:
+            group = Group(group_title)
+            page.groups.append(group)
+        group.settings.append(s)
+    for page in pages:
+        page.groups = [g for g in page.groups if g.settings]
+    return [p for p in pages if p.groups]

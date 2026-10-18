@@ -20,6 +20,9 @@ user: {lib, ...}: {
       #--- Media (non-configurable)
       ./media/screen-capture.nix
 
+      #--- Settings app (every user)
+      ./system/nixm-settings
+
       #--- Shell
       ./shell/p10k/p10k.nix
       ./shell/atuin.nix
@@ -81,7 +84,6 @@ user: {lib, ...}: {
     ++ lib.optionals user.security.keepassxc [./security/keepassxc.nix]
     #--- System Tools (controlled by user settings)
     ++ lib.optionals user.system.resources [./system/resources.nix]
-    ++ lib.optionals user.system.nixmSettings [./system/nixm-settings]
     #--- Android Screen Mirroring (controlled by user settings)
     ++ lib.optionals user.scrcpy.enable [./android/scrcpy.nix]
     #--- AI Tools (controlled by user settings)

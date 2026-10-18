@@ -48,6 +48,7 @@
       ./system/user/shell.nix
       ./system/user/user.nix
       ./system/user/config-repo.nix
+      ./system/user/nixm-settings-helper.nix
     ]
     #--- Graphics drivers (controlled by machine settings; null: the machine's own files)
     ++ lib.optionals (machine.gpu.type != null) [./services/hardware/gpu.nix]
@@ -70,7 +71,5 @@
     #--- FlareSolverr for Moku's Cloudflare-protected sources (any user with Moku)
     ++ lib.optionals anyUser.media.moku [./services/servers/flaresolverr.nix]
     #--- Japanese Input Method (any user with japanese.ime)
-    ++ lib.optionals anyUser.japanese.ime [./system/language/japanese-ime.nix]
-    #--- nixm Settings' root helper, for users who aren't admins (any user with the app)
-    ++ lib.optionals anyUser.system.nixmSettings [./system/user/nixm-settings-helper.nix];
+    ++ lib.optionals anyUser.japanese.ime [./system/language/japanese-ime.nix];
 }
