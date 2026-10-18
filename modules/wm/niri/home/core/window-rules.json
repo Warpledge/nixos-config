@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "name": "ProtonPlus",
+    "matches": [
+      {
+        "app-id": "^com\\.vysp3r\\.ProtonPlus$"
+      }
+    ],
+    "opacity": 0.8
+  }
+]
