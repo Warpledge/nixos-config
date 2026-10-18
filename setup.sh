@@ -25,12 +25,28 @@ people=() written=() person="" # who is being set up, the files written for them
 #--------------------------------------------------------------------#
 #-- Output & Prompts
 #--------------------------------------------------------------------#
+#--- The 16 ANSI colors, so the terminal's own theme picks the shades
 if [[ -t 1 ]]; then
   bold=$'\e[1m' plain=$'\e[0m' rev=$'\e[7m' dim=$'\e[2m'
+  accent=$'\e[35m' hl=$'\e[36m' good=$'\e[32m' warn=$'\e[33m' bad=$'\e[31m'
 else
-  bold='' plain='' rev='' dim=''
+  bold='' plain='' rev='' dim='' accent='' hl='' good='' warn='' bad=''
 fi
 say() { printf '%s\n' "$*"; }
+note() { printf '%s%s%s\n' "$warn" "$*" "$plain"; } # a refused answer, or a caution
+ok() { printf '%s%s%s\n' "$good" "$*" "$plain"; }
+
+#--- q_text <text>: a question with its marker; leading spaces stay in front
+q_text() {
+  local indent=${1%%[! ]*}
+  printf '%s%s?%s %s%s%s' "$indent" "$bold$hl" "$plain" "$bold" "${1#"$indent"}" "$plain"
+}
+question() { printf '%s\n' "$(q_text "$*")"; }
+answer() { printf '  %s> %s%s\n' "$good" "$*" "$plain"; } # what was picked
+staged() {
+  local p
+  for p; do printf '  %s+%s %s\n' "$good" "$plain" "$p"; done
+}
 
 #--- Arrow-key menus need a terminal on both ends; piped answers get plain prompts
 interactive() { [[ -t 0 && -t 1 ]]; }
@@ -96,16 +112,16 @@ menu() {
     for ((row = top; row < top + height; row++)); do
       printf '\e[2K'
       if ((idx[row] < 0)); then
-        printf '  %s%s%s\n' "$bold" "${lines[row]}" "$plain"
+        printf '  %s%s%s\n' "$bold$accent" "${lines[row]}" "$plain"
         continue
       fi
       if [[ $mode == multi ]]; then
-        ((menu_on[idx[row]])) && mark='[x]' || mark='[ ]'
+        ((menu_on[idx[row]])) && mark="${good}[x]$plain" || mark='[ ]'
       else
-        ((row == r)) && mark='(*)' || mark='( )'
+        ((row == r)) && mark="$bold$hl(*)$plain" || mark='( )'
       fi
       if ((row == r)); then
-        printf '  %s> %s %s%s\n' "$rev" "$mark" "${lines[row]}" "$plain"
+        printf '  %s>%s %s %s%s%s\n' "$bold$hl" "$plain" "$mark" "$bold$hl" "${lines[row]}" "$plain"
       else
         printf '    %s %s\n' "$mark" "${lines[row]}"
       fi
@@ -135,16 +151,21 @@ menu() {
   printf '\e[%dA\e[J\e[?25h' "$drawn" # the caller prints what was picked
   menu_pick=${idx[r]}
 }
-section() { printf '\n%s== %s ==%s\n' "$bold" "$*" "$plain"; }
+section() {
+  local rule w=$((56 - ${#1}))
+  ((w < 3)) && w=3
+  printf -v rule '%*s' "$w" ''
+  printf '\n%s── %s %s%s\n' "$bold$accent" "$*" "${rule// /─}" "$plain"
+}
 die() {
-  printf '\nsetup.sh: %s\n' "$*" >&2
+  printf '\n%ssetup.sh:%s %s\n' "$bold$bad" "$plain" "$*" >&2
   exit 1
 }
 
 #--- ask <var> <question> [default]
 ask() {
   local reply
-  read -r -p "$2${3:+ [$3]}: " reply || die "no answer, stopping"
+  read -r -p "$(q_text "$2")${3:+ ${dim}[$3]$plain}: " reply || die "no answer, stopping"
   printf -v "$1" '%s' "${reply:-${3:-}}"
 }
 
@@ -153,12 +174,13 @@ confirm() {
   local reply hint="y/N" no=1
   if interactive; then
     [[ $2 == y ]] && no=0
-    printf '%s\n\e[?25l' "$1"
+    question "$1"
+    printf '\e[?25l'
     while true; do
       if ((no)); then
-        printf '\r\e[2K    Yes   %s No %s' "$rev" "$plain"
+        printf '\r\e[2K    Yes   %s No %s' "$bold$rev$hl" "$plain"
       else
-        printf '\r\e[2K   %s Yes %s   No ' "$rev" "$plain"
+        printf '\r\e[2K   %s Yes %s   No ' "$bold$rev$hl" "$plain"
       fi
       printf '   %sLeft/Right, then Enter%s' "$dim" "$plain"
       read_key
@@ -170,12 +192,14 @@ confirm() {
       esac
     done
     ((no)) && reply=No || reply=Yes
-    printf '\r\e[2K    %s%s%s\n\e[?25h' "$bold" "$reply" "$plain"
+    printf '\r\e[2K'
+    answer "$reply"
+    printf '\e[?25h'
     return "$no"
   fi
   [[ $2 == y ]] && hint="Y/n"
   while true; do
-    read -r -p "$1 [$hint] " reply || die "no answer, stopping"
+    read -r -p "$(q_text "$1") ${dim}[$hint]$plain " reply || die "no answer, stopping"
     case ${reply:-$2} in
       [Yy]*) return 0 ;;
       [Nn]*) return 1 ;;
@@ -199,19 +223,19 @@ pick() {
       ((menu_on[n])) || continue
       item=${*:n+1:1}
       chosen+=("${item#*|}") # setting.path|Label
-      say "  [x] ${item##*|}"
+      answer "${item##*|}"
     done
-    ((${#chosen[@]})) || say "  (none)"
+    ((${#chosen[@]})) || answer "(none)"
     return
   fi
   for item in "$@"; do
     group=${item%%|*} rest=${item#*|}
-    [[ $group != "$last" ]] && printf '  %s\n' "$group" && last=$group
-    printf '    %2d) %s\n' "$i" "${rest#*|}"
+    [[ $group != "$last" ]] && printf '  %s%s%s\n' "$bold$accent" "$group" "$plain" && last=$group
+    printf '    %s%2d)%s %s\n' "$hl" "$i" "$plain" "${rest#*|}"
     i=$((i + 1))
   done
   while true; do
-    read -r -p "Numbers to turn on, with spaces between (Enter for none): " reply || die "no answer, stopping"
+    read -r -p "$(q_text "Numbers to turn on, with spaces between") $dim(Enter for none)$plain: " reply || die "no answer, stopping"
     chosen=() bad=0
     for n in ${reply//,/ }; do
       if [[ $n =~ ^[0-9]+$ ]] && ((n >= 1 && n < i)); then
@@ -222,7 +246,7 @@ pick() {
       fi
     done
     ((bad == 0)) && break
-    say "Use numbers from 1 to $((i - 1))."
+    note "Use numbers from 1 to $((i - 1))."
   done
 }
 
@@ -231,7 +255,7 @@ choose() {
   local -n _choice=$1
   local question=$2 default=$3 item i=0 values=()
   shift 3
-  say "$question"
+  question "$question"
   if interactive; then
     menu_items=() menu_start=0
     for item in "$@"; do
@@ -241,12 +265,12 @@ choose() {
     done
     menu single
     _choice=${values[menu_pick]}
-    say "  (*) ${menu_items[menu_pick]#|}"
+    answer "${menu_items[menu_pick]#|}"
     return
   fi
   for item in "$@"; do
     values+=("${item%%|*}")
-    say "  ${item%%|*}: ${item#*|}"
+    printf '  %s%s%s: %s\n' "$bold$hl" "${item%%|*}" "$plain" "${item#*|}"
   done
   while true; do
     ask _choice "Type one of: ${values[*]}" "$default"
@@ -261,13 +285,13 @@ search_pick() {
   local -n _pick=$1
   local question=$2 default=$3 reply item list=() matches=()
   mapfile -t list < <("$4")
-  say "$question"
+  question "$question"
   if ((${#list[@]} == 0)); then
     ask _pick "  Type it" "$default"
     return
   fi
   while true; do
-    read -r -p "  Enter keeps ${default:-(none)}; or type part of a name to search: " reply || die "no answer, stopping"
+    read -r -p "  ${dim}Enter keeps$plain $bold${default:-(none)}$plain${dim}; or type part of a name to search:$plain " reply || die "no answer, stopping"
     if [[ -z $reply ]]; then
       [[ -n $default ]] && _pick=$default && break
       continue
@@ -282,17 +306,17 @@ search_pick() {
       break
     fi
     if ((${#matches[@]} == 0)); then
-      say "  Nothing matches \"$reply\"; try a shorter or different word."
+      note "  Nothing matches \"$reply\"; try a shorter or different word."
       continue
     fi
     if ((${#matches[@]} > 40)); then
-      say "  ${#matches[@]} matches, showing the first 40; type more letters to narrow it."
+      note "  ${#matches[@]} matches, showing the first 40; type more letters to narrow it."
       matches=("${matches[@]:0:40}")
     fi
     choose _pick "  Matches for \"$reply\":" "${matches[0]%%|*}" "${matches[@]}" "again|None of these, search again"
     [[ $_pick == again ]] || break
   done
-  say "  -> $_pick"
+  answer "$_pick"
 }
 
 #--- First path in the store matching a glob, e.g. 'kbd-*/share/keymaps'
@@ -672,9 +696,9 @@ add_person() {
   while true; do
     ask person "Login name" "$default"
     if ! valid_username "$person"; then
-      say "Use lowercase letters, digits, - and _ (start with a letter)."
+      note "Use lowercase letters, digits, - and _ (start with a letter)."
     elif [[ " ${people[*]} " == *" $person "* ]]; then
-      say "$person is already on the list."
+      note "$person is already on the list."
     else
       break
     fi
@@ -760,9 +784,9 @@ new_machine() {
   while true; do
     ask name "Machine name" "$(hostname)"
     if [[ ! $name =~ ^[a-z0-9][a-z0-9-]{0,62}$ ]]; then
-      say "Use lowercase letters, digits and - (no spaces)."
+      note "Use lowercase letters, digits and - (no spaces)."
     elif [[ -e machines/$name ]]; then
-      say "machines/$name already exists. Pick another name; to reinstall it, run ./setup.sh again and choose it."
+      note "machines/$name already exists. Pick another name; to reinstall it, run ./setup.sh again and choose it."
     else
       break
     fi
@@ -818,7 +842,7 @@ new_machine() {
     add_person 0 ""
   done
   if [[ " ${people[*]} " != *" $USER "* ]]; then
-    say "Note: $USER isn't on the list, so that account goes away after the reboot (its files stay in /home/$USER)."
+    note "Note: $USER isn't on the list, so that account goes away after the reboot (its files stay in /home/$USER)."
   fi
 
   section "Services"
@@ -864,7 +888,7 @@ new_machine() {
 
   git add -- "machines/$name" "${written[@]}"
   section "Written and staged with git"
-  printf '  %s\n' "machines/$name/" "${written[@]}"
+  staged "machines/$name/" "${written[@]}"
   if confirm "Open the new settings files in an editor to look them over?" n; then
     "${EDITOR:-nano}" "${written[@]}"
     git add -- "${written[@]}"
@@ -927,13 +951,13 @@ finish_setup() {
 
   section "Checking the configuration"
   nix_config=$(build_nix_config "$name") || die "the configuration has an error (above). Fix the file it names and run: git add -A && ./setup.sh"
-  say "It evaluates."
+  ok "It evaluates."
 
   section "Build"
   if confirm "Build now?" y; then
     build_machine "$name" "$nix_config"
     say ""
-    say "Done. After the reboot, log in as $main. Later changes: edit the settings files, then run nixm rebuild."
+    ok "Done. After the reboot, log in as $main. Later changes: edit the settings files, then run nixm rebuild."
     say "Commit machines/$name and your users/ folders to keep them with your copy of the repo."
     if confirm "Reboot now?" n; then sudo systemctl reboot; fi
   else
@@ -987,7 +1011,7 @@ share_repo() {
   ln -s "$shared_repo" "$old"
   repo=$shared_repo
   cd "$repo"
-  say "Moved; $old now links to it."
+  ok "Moved; $old now links to it."
 }
 
 share_existing() {
@@ -1008,7 +1032,7 @@ build_later() {
   nix_config=$(build_nix_config "$machine") || die "the configuration has an error (above)"
   section "Build"
   build_machine "$machine" "$nix_config"
-  say "Done; it starts at the next boot."
+  ok "Done; it starts at the next boot."
 }
 
 add_user() {
@@ -1043,7 +1067,7 @@ add_user() {
   fi
   git add -- "$f" "${written[@]}"
   section "Written and staged with git"
-  printf '  %s\n' "$f" "${written[@]}"
+  staged "$f" "${written[@]}"
 
   if [[ $machine == "$(hostname)" ]] && confirm "Rebuild this computer now?" y; then
     sudo nixos-rebuild switch --flake "$repo#$machine"
