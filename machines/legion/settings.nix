@@ -16,15 +16,29 @@
         boorusama = false;
         tonkatsuBox = false;
       };
-      wallpaper = "carousel";
+      wallpaper = "engine";
       gaming = {
         heroic = false;
         easyrpg = false;
         xsystem4 = false;
         r2modman = false;
         pathOfBuilding = false;
+        retroshelf = false;
+        feedback = false;
+        rocksmith = false;
+        ludusavi = false;
       };
       discord.arrpc.enable = false;
+      lmstudio.enable = false;
+      opencode.enable = false;
+      scrcpy.enable = false;
+      audio.reaper = false;
+      audio.guitarix = false;
+      audio.tone3000 = false;
+      audio.katanaFloorboard = false;
+      browsers.ferdium = false;
+      fileBrowsers.dolphin = false;
+      security.keepassxc = false;
     };
   };
 
@@ -53,7 +67,7 @@
 
   #--- Mouse Cursor
   # Options: "bibata" | "catppuccin"
-  cursor = "catppuccin";
+  cursor = "bibata";
   cursorSize = 24;
 
   #--- Bluetooth
@@ -70,7 +84,7 @@
 
   #--- Ad & Tracker Blocking (Steven Black hosts list)
   blocklist.enable = true;
-  blocklist.extra = ["fakenews" "gambling"];
+  blocklist.extra = ["fakenews" "gambling" "porn"];
 
   #--- Mullvad VPN
   mullvad.enable = true;
