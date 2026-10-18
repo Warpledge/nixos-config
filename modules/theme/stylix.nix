@@ -90,6 +90,7 @@
       plymouth.enable = false;
       kmscon.enable = false;
       regreet.enable = false;
+      gtksourceview.enable = false; # overlay takes Inkscape off the binary cache
 
       qt.enable = false;
       gtk.enable = true;
