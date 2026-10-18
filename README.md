@@ -189,7 +189,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | | |
 | --- | --- |
 | **Browsers** | [Zen][zen] / [Mullvad Browser][mullvad-browser] / [Helium][helium] |
-| **File Manager** | [Nautilus][nautilus] (with an open-in-Kitty menu entry from [nautilus-open-any-terminal][nautilus-open-any-terminal]), [Yazi][yazi] (terminal file manager) |
+| **File Manager** | [Nautilus][nautilus] (with an open-in-Kitty menu entry from [nautilus-open-any-terminal][nautilus-open-any-terminal]), [Dolphin][dolphin] (optional, themed through Kvantum and the Catppuccin KDE colour scheme), [Yazi][yazi] (terminal file manager) |
 | **Media Player** | [mpv][mpv], [Spotify][spotify] via [spicetify-nix][spicetify], [FreeTube][freetube] |
 | **Twitch** | [Streamlink Twitch GUI][streamlink-twitch-gui] browses Twitch and hands the stream to [Streamlink][streamlink], which plays it in mpv, so there are no ads and the follow list stays local with no Twitch account attached; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs |
 | **Screenshot / Recording** | [Quick Capture][quick-capture] (Niri, Hyprland), [gpu-screen-recorder][gpu-screen-recorder] |
@@ -290,6 +290,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 [zen]: https://zen-browser.app
 [mullvad-browser]: https://mullvad.net/en/browser
 [helium]: https://github.com/schembriaiden/helium-browser-nix-flake
+[dolphin]: https://invent.kde.org/system/dolphin
 [nautilus]: https://apps.gnome.org/Nautilus
 [nautilus-open-any-terminal]: https://github.com/Stunkymonkey/nautilus-open-any-terminal
 [mpv]: https://mpv.io
@@ -480,7 +481,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | `Mod+Return` | Terminal (Kitty) |
 | `Mod+Z` | Code editor (Zed) |
 | `Mod+B` | Browser (Zen) |
-| `Mod+E` | File manager (Nautilus) |
+| `Mod+E` | File manager (Nautilus, or Dolphin when it's the default) |
 | `Mod+Shift+S` | Steam |
 | `Mod+Shift+D` | Discord (GoofCord) |
 | `Mod+Shift+H` | Heroic |
@@ -595,7 +596,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | `Mod+Return` | Terminal (Kitty) |
 | `Mod+Z` | Code editor (Zed) |
 | `Mod+B` | Browser (Zen) |
-| `Mod+E` | File manager (Nautilus) |
+| `Mod+E` | File manager (Nautilus, or Dolphin when it's the default) |
 | `Mod+Shift+S` | Steam |
 | `Mod+Shift+D` | Discord (GoofCord) |
 | `Mod+Shift+H` | Heroic |

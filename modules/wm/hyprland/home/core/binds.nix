@@ -4,6 +4,7 @@
 {
   lib,
   machine,
+  user,
   ...
 }: let
   lua = lib.generators.mkLuaInline;
@@ -11,6 +12,12 @@
   bind = keys: dsp: {_args = [keys (lua dsp)];};
   exec = keys: cmd: bind keys "hl.dsp.exec_cmd(${str cmd})";
   workspaces = map toString (lib.range 1 9);
+  # Dolphin when it's the user's file manager, else Nautilus
+  chosen = (import ../../../../../lib/default-apps.nix {inherit lib;}).forUser user;
+  files =
+    if chosen.fileManager.name == "dolphin"
+    then "dolphin"
+    else "nautilus";
 in {
   #--------------------------------------------------------------------#
   #-- Hyprland Keybinds
@@ -28,7 +35,7 @@ in {
           (exec "SUPER + Return" "kitty") # Terminal
           (exec "SUPER + Z" "zeditor ${machine.flakePath}") # Zed on the config
           (exec "SUPER + B" "zen-beta") # Web Browser
-          (exec "SUPER + E" "nautilus") # Files
+          (exec "SUPER + E" files) # Files
           (exec "SUPER + SHIFT + C" "nixos-settings") # Focuses it when already open
 
           #--- Gaming & XWayland Apps
