@@ -247,7 +247,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | | |
 | --- | --- |
 | **Disk** | ext4 on a [LUKS][luks]-encrypted partition, unlocked at boot |
-| **Access Control** | [AppArmor][apparmor] profiles for the apps that open untrusted files or run third-party code (mpv, yt-dlp, streamlink, Evince, File Roller, unrar, Obsidian, Prism Launcher, Moku's Tsunagu backend, and the prebuilt Tonkatsu Box and Katana FloorBoard bundles), limiting each to the files it needs. They run in log-only mode for now. Crash dumps are switched off so a crash cannot spill memory contents to disk |
+| **Access Control** | [AppArmor][apparmor] profiles for the apps that open untrusted files or run third-party code (mpv, yt-dlp, streamlink, Evince, File Roller, Ark, unrar, Obsidian, Prism Launcher, Moku's Tsunagu backend, and the prebuilt Tonkatsu Box and Katana FloorBoard bundles), limiting each to the files it needs. They run in log-only mode for now. Crash dumps are switched off so a crash cannot spill memory contents to disk |
 | **Kernel Hardening** | Boot settings that make the system harder to attack: the core of the OS refuses to be modified while running, memory is placed unpredictably so an attacker cannot count on where things are, kernel memory is zeroed before it's handed out, and io_uring, a kernel interface behind many recent exploits, is switched off |
 | **Network Hardening** | The usual anti-spoofing settings: packets claiming to come from an address they cannot have come from get dropped, requests to reroute traffic are ignored, and the machine stays up under a basic flood attack |
 | **Auditing** | [auditd][auditd], with a daily timer to keep the log from growing forever |
