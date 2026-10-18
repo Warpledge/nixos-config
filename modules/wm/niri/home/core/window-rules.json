@@ -214,24 +214,31 @@
   },
   {
     "name": "NixOS Settings",
-    "note": "Mod+C. As wide as its pages' fixed content width.",
+    "note": "Mod+C. Tiled; with Zed (Mod+Z) at 57.5% the two fill the screen side by side.",
     "default-column-width": {
-      "fixed": 1080
-    },
-    "default-window-height": {
-      "proportion": 0.88
+      "proportion": 0.425
     },
     "matches": [
       {
         "app-id": "^dev\\.nixosconfig\\.Settings$"
       }
-    ],
-    "open-floating": true
+    ]
+  },
+  {
+    "name": "Zed",
+    "note": "Mod+Z. Leaves 42.5% beside it for NixOS Settings.",
+    "default-column-width": {
+      "proportion": 0.575
+    },
+    "matches": [
+      {
+        "app-id": "^dev\\.zed\\.Zed$"
+      }
+    ]
   },
   {
     "name": "ProtonPlus",
-    "note": "Sized like NixOS Settings.",
-    "default-column-width": {
+        "default-column-width": {
       "fixed": 1080
     },
     "default-window-height": {
@@ -246,8 +253,7 @@
   },
   {
     "name": "Flatseal",
-    "note": "Sized like NixOS Settings.",
-    "default-column-width": {
+        "default-column-width": {
       "fixed": 1080
     },
     "default-window-height": {
