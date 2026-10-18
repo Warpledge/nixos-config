@@ -99,7 +99,12 @@ in {
         focus-ring = {
           enable = true; # displays around windows
           width = 2;
-          active.color = colors.base04; # Surface 2
+          active.gradient = {
+            from = colors.base0E; # Mauve
+            to = colors.base07; # Lavender
+            angle = 45;
+            in' = "oklch shorter hue";
+          };
           inactive.color = colors.base01; # Mantle
           urgent.color = colors.base08; # Red
         };

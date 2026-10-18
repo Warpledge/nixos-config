@@ -60,9 +60,17 @@
             enable = true;
             flatpakSupport.enable = true;
             # Stylix's GTK accent is base0D (blue); match DMS and Kvantum's Mauve
+            # Backgrounds a step darker than Stylix's, for contrast with the
+            # wallpaper behind translucent windows
             extraCss = with config.lib.stylix.colors.withHashtag; ''
               @define-color accent_color ${base0E};
               @define-color accent_bg_color ${base0E};
+              @define-color window_bg_color shade(${base01}, 0.75);
+              @define-color view_bg_color shade(${base01}, 0.75);
+              @define-color dialog_bg_color shade(${base01}, 0.75);
+              @define-color headerbar_bg_color ${base01};
+              @define-color sidebar_bg_color ${base01};
+              @define-color secondary_sidebar_bg_color ${base01};
             '';
           };
         };
