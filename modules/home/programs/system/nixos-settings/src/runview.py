@@ -687,6 +687,11 @@ class RunView(Gtk.Box):
             self.tick_source = 0
         self.on_close(self.outcome or "failed")
 
+    def closing(self):
+        """The window is reading the settings again before it leaves this page."""
+        for button in (self.done_button, self.undo_button, self.restart_button):
+            button.set_sensitive(False)
+
     @property
     def running(self):
         return self.ended is None

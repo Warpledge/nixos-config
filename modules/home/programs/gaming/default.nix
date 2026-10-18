@@ -118,7 +118,7 @@ user: {
       ./scripts/nix-rpgm.nix
       ./scripts/tml-prelaunch.nix
     ]
-    #--- Launchers (steam is in nixos/gaming; hytale is a hand-installed Flatpak)
+    #--- Launchers (steam is in nixos/gaming; Hytale's is a Flatpak installed by hand)
     ++ lib.optionals user.gaming.heroic [./launchers/heroic.nix]
     ++ lib.optionals user.gaming.prismlauncher [./launchers/prismlauncher.nix]
     ++ lib.optionals user.gaming.lutris [./launchers/lutris.nix]

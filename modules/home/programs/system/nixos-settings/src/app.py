@@ -21,7 +21,9 @@ import dms  # noqa: E402
 import schema  # noqa: E402
 import system  # noqa: E402
 import ui  # noqa: E402
+from flatpaks import FlatpakPage  # noqa: E402
 from overview import Overview  # noqa: E402
+from proton import ProtonPage  # noqa: E402
 from runview import RunView, fill_diff  # noqa: E402
 
 #--- The root helper every rebuild goes through (nixos/system/user/nixos-settings-helper.nix)
@@ -33,6 +35,11 @@ VERSION = "2.0"
 #--- ("" when the theme sets it and nothing here changes it)
 OWNED = {"Cursor Theme": "cursor", "Cursor Size": "cursorSize", "Icon Theme": "",
          "Dark Mode Icon Theme": "", "Light Mode Icon Theme": "", "Normal Font": "", "Monospace Font": ""}
+
+#--- The pages above the sidebar's sections: key, title and icons to try
+TOP = [("overview", "Overview", ("computer-symbolic",)),
+       ("proton", "Proton Params", ("input-gaming-symbolic", "applications-games-symbolic")),
+       ("flatpaks", "Flatpaks", ("flatpak-symbolic", "system-software-install-symbolic"))]
 
 
 def shown(setting, value):
@@ -107,8 +114,9 @@ class Window(Adw.ApplicationWindow):
         self.building = False
         self.run_message = None
 
+        self.builders = {}  # sidebar key -> makes that page, the first time it's shown
         self.toasts = Adw.ToastOverlay()
-        self.root = Gtk.Stack(transition_type=Gtk.StackTransitionType.CROSSFADE, transition_duration=220)
+        self.root = Gtk.Stack(transition_type=Gtk.StackTransitionType.CROSSFADE, transition_duration=200)
         self.toasts.set_child(self.root)
         self.set_content(self.toasts)
         self._skeleton()
@@ -234,9 +242,11 @@ class Window(Adw.ApplicationWindow):
     #-- Loading
     #--------------------------------------------------------------------#
     def reload(self, toast=None):
+        """Reads the settings again in the background. The page on screen stays
+        until the new ones are built, so nothing stale shows in between."""
         if self.busy:
             return
-        if self.state is None:
+        if self.state is None and self.root.get_visible_child_name() != "run":
             spinner = Adw.Spinner(width_request=48, height_request=48)
             self._bare(Adw.StatusPage(title="Reading your settings…", child=spinner), "loading")
 
@@ -257,8 +267,17 @@ class Window(Adw.ApplicationWindow):
         self.changes = {}
         self.build()
         self.root.set_visible_child_name("main")
+        #--- A finished run's page goes once the crossfade away from it is over
+        run = self.root.get_child_by_name("run")
+        if run is not None and self.run_view is None:
+            GLib.timeout_add(self.root.get_transition_duration() + 100, self._drop_run, run)
         if toast:
             self.toast(toast)
+
+    def _drop_run(self, run):
+        if self.root.get_child_by_name("run") is run and self.root.get_visible_child() is not run:
+            self.root.remove(run)
+        return False
 
     def _failed(self, err):
         """The error page; offers to drop settings the templates no longer have."""
@@ -322,9 +341,12 @@ class Window(Adw.ApplicationWindow):
     #-- Layout
     #--------------------------------------------------------------------#
     def build(self):
+        """Lays out the sidebar for the settings just read. Each page is made the
+        first time it's shown (_ensure), so this stays quick enough not to stall
+        an animation."""
         state = self.state
         self.colors = ui.theme_colors()
-        self.rows, self.settings, self.setters, self.page_of = {}, {}, {}, {}
+        self.rows, self.setters, self.page_of, self.builders = {}, {}, {}, {}
         self.scope_rows, self.counts = [], {}
         self.multi = len(state.user_machines) > 1
         # Admins write the files themselves; for anyone else the root helper does the
@@ -336,13 +358,15 @@ class Window(Adw.ApplicationWindow):
         self.wm = state.resolved.get("windowManager", "")
         self.links = [l for p in state.pages for g in p.groups for l in g.links]
         self.new_items = []
-        index = {(s.domain, s.path): s for p in state.pages for g in p.groups for s in g.settings}
+        self.settings = {(s.domain, s.path): s for p in state.pages for g in p.groups for s in g.settings}
         for domain, path, value in state.new:
-            s = index.get((domain, path))
+            s = self.settings.get((domain, path))
             if s is not None and (domain == "user" or self.direct):
                 self.new_items.append((s, value))
 
         self.building = True
+        # The page on screen is swapped for its new copy at once, not crossfaded
+        self.stack.set_transition_type(Gtk.StackTransitionType.NONE)
         child = self.stack.get_first_child()
         while child is not None:
             following = child.get_next_sibling()
@@ -351,25 +375,40 @@ class Window(Adw.ApplicationWindow):
         self.sidebar.remove_all()
         self.keys = []
 
+        #--- Overview, Proton Params, Flatpaks (whose switch is a schema page's
+        #--- setting) and What's New
+        flatpak_page = next((p for p in state.pages if p.section == "top"), None)
+        makers = {"overview": lambda: Overview(self, self.info, self.wm, self.links),
+                  "proton": lambda: ProtonPage(self),
+                  "flatpaks": lambda: FlatpakPage(self, flatpak_page)}
         top = Adw.SidebarSection()
-        self._sidebar_item(top, "overview", "Overview", "computer-symbolic")
-        self.stack.add_named(Overview(self, self.info, self.wm, self.links), "overview")
+        for key, title, icons in TOP:
+            self._sidebar_item(top, key, title, ui.first_icon(*icons))
+            self.builders[key] = makers[key]
+        for g in flatpak_page.groups if flatpak_page else []:
+            for s in g.settings:
+                self.page_of[(s.domain, s.path)] = "flatpaks"
         if self.new_items:
             badge = ui.chip(str(len(self.new_items)), "accent")
             self._sidebar_item(top, "new", "What's New", "starred-symbolic", suffix=badge)
-            self.stack.add_named(self._new_page(), "new")
+            self.builders["new"] = self._new_page
         self.sidebar.append(top)
 
         sections = {}
         for key, title in schema.SECTIONS:
             sections[key] = Adw.SidebarSection(title=title)
         for page in state.pages:
+            if page.section == "top":
+                continue
             section = sections.get(page.section) or sections["apps"]
             key = f"page:{page.title}"
             count = Gtk.Label(css_classes=["dim-label", "caption", "numeric"])
             self.counts[key] = (page, count)
             self._sidebar_item(section, key, page.title, page.icon, suffix=count)
-            self.stack.add_named(self._page(page, key), key)
+            self.builders[key] = lambda page=page, key=key: self._page(page, key)
+            for g in page.groups:
+                for s in g.settings:
+                    self.page_of[(s.domain, s.path)] = key
             self._count(key)
         for key, _ in schema.SECTIONS:
             if sections[key].get_items().get_n_items():
@@ -382,9 +421,10 @@ class Window(Adw.ApplicationWindow):
             self.banner.set_title(f"You can't edit the files in {self.cfg.flake}")
         self.banner.set_revealed(bool(self.banner.get_title()))
 
-        key = self.page_key if self.stack.get_child_by_name(self.page_key) else "overview"
+        key = self.page_key if self.page_key in self.builders else "overview"
         self.building = False
         self._show(key)
+        self.stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
         self._update()
 
     def _sidebar_item(self, section, key, title, icon, suffix=None):
@@ -403,15 +443,20 @@ class Window(Adw.ApplicationWindow):
                 self.search.set_text("")
             self._show(self.keys[index], from_sidebar=True)
 
+    def _ensure(self, key):
+        if self.stack.get_child_by_name(key) is None and key in self.builders:
+            self.stack.add_named(self.builders[key](), key)
+
     def _show(self, key, from_sidebar=False):
         if key not in self.keys and key != "search":
             key = "overview"
         if key != "search":
             self.page_key = key
+            self._ensure(key)
             if not from_sidebar:
                 self.sidebar.set_selected(self.keys.index(key))
         self.stack.set_visible_child_name(key)
-        titles = {"overview": "Overview", "new": "What's New", "search": "Search"}
+        titles = {key: title for key, title, _ in TOP} | {"new": "What's New", "search": "Search"}
         self.content_page.set_title(titles.get(key, key.removeprefix("page:")))
 
     #--------------------------------------------------------------------#
@@ -486,10 +531,12 @@ class Window(Adw.ApplicationWindow):
 
     def _jump(self, key):
         """Opens the page holding a setting and puts focus on its row."""
-        if key not in self.rows:
+        if key not in self.page_of:
             return
         self.search.set_text("")
         self._show(self.page_of[key])
+        if key not in self.rows:
+            return
         row = self.rows[key][0]
         if isinstance(row, Adw.ExpanderRow) and row.get_enable_expansion():
             row.set_expanded(True)
@@ -528,10 +575,10 @@ class Window(Adw.ApplicationWindow):
         what the missing line already means, so Apply writes it into the file."""
         for s, value in self.new_items:
             key = (s.domain, s.path)
-            if key in self.rows:
-                self.changes[key] = value
+            self.changes[key] = value
+            if key in self.rows:  # a page not made yet shows the change when it is
                 self.rows[key][1].set_visible(True)
-                self._count(self.page_of[key])
+            self._count(self.page_of.get(key))
         self._update()
         self.toast("Press Apply to save them")
 
@@ -641,8 +688,7 @@ class Window(Adw.ApplicationWindow):
 
     def _row(self, s, icons, page):
         key = (s.domain, s.path)
-        self.settings[key] = s
-        value = self.state.value(self.cfg, s)
+        value = self.changes.get(key, self.state.value(self.cfg, s))
         kind = s.kind
         options = []
         if kind == "pick":
@@ -661,7 +707,7 @@ class Window(Adw.ApplicationWindow):
             image.set_valign(Gtk.Align.CENTER)
             row.add_prefix(image)
 
-        marker = Gtk.Box(css_classes=["pending-dot"], valign=Gtk.Align.CENTER, visible=False,
+        marker = Gtk.Box(css_classes=["pending-dot"], valign=Gtk.Align.CENTER, visible=key in self.changes,
                          tooltip_text="Changed; Apply to use it")
         if kind == "bool":
             control = Gtk.Switch(active=bool(value), valign=Gtk.Align.CENTER)
@@ -831,10 +877,20 @@ class Window(Adw.ApplicationWindow):
         self.content.set_reveal_bottom_bars(bool(n))
 
     def _discard(self):
+        """Puts each changed row back in place, rather than making the pages again."""
         if not self.changes:
             return
-        self.changes = {}
-        self.build()
+        for key in list(self.changes):
+            if key in self.setters:
+                self.setters[key](self.state.value(self.cfg, self.settings[key]))
+        # Rows not made yet, and What's New values staged as the row already shows them
+        for key in list(self.changes):
+            del self.changes[key]
+            if key in self.rows:
+                self.rows[key][1].set_visible(False)
+        for key in self.counts:
+            self._count(key)
+        self._update()
         self.toast("Changes thrown away")
 
     def _change_lines(self):
@@ -1095,15 +1151,19 @@ class Window(Adw.ApplicationWindow):
         ui.run_async(lambda: closure.diff(closure.CURRENT, generation.path), done)
 
     def _run_closed(self, outcome):
-        boot = self.run_view is not None and self.run_view.mode == "boot"
+        """The run page stays while the settings are read again, then crossfades
+        straight to the pages made from them."""
+        view = self.run_view
+        boot = view is not None and view.mode == "boot"
         self.run_view = None
-        self.root.set_visible_child_name("main")
         message = None
         if outcome == "ok":
             message = "Ready; restart to use it" if boot else (self.run_message or "Done")
         elif outcome == "failed" and self.run_undo is not None:
             message = "Your changes are still in the files, but the system wasn't rebuilt with them"
         self.run_undo = None
+        if view is not None:
+            view.closing()
         self.reload(message)
 
     def notify_done(self, outcome, heading):

@@ -41,8 +41,10 @@ SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
 
 #--- Each page's sidebar section, icon and blurb, and for the curated ones
 #--- their groups: (title, description, [setting paths]). Pages in the apps
-#--- section keep the template's groups.
+#--- section keep the template's groups; the one "top" page is the Flatpaks
+#--- page's switch (flatpaks.py lays it out).
 PAGES = {
+    "Flatpaks": ("top", "system-software-install-symbolic", "", [("", "", ["flatpak.enable"])]),
     "System": ("computer", "computer-symbolic",
                "The name, desktop and kernel this computer runs, the same for everyone on it.",
                [("", "", ["hostName", "windowManager", "kernel"])]),

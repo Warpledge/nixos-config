@@ -827,7 +827,6 @@ apps=(
   "Gaming|gaming.lutris|Lutris"
   "Gaming|gaming.faugus|Faugus Launcher: Windows games through Proton"
   "Gaming|gaming.twintail|Twintail: gacha games"
-  "Gaming|gaming.hytale|Hytale (turns on Flatpak; its launcher is installed by hand)"
   "Gaming|gaming.easyrpg|EasyRPG Player: RPG Maker 2000/2003 games"
   "Gaming|gaming.xsystem4|xsystem4: System 4 engine games"
   "Gaming|gaming.feedback|feedBack guitar rhythm game"
@@ -855,6 +854,7 @@ services=(
   "Services|printing.enable|Printing (CUPS, finds network printers)"
   "Services|blocklist.enable|Ad and tracker blocking (Steven Black hosts list)"
   "Services|capsLockRemap|Caps Lock: Escape when tapped, Ctrl when held"
+  "Services|flatpak.enable|Flatpak: sandboxed apps, with Flatseal for their permissions"
 )
 
 valid_username() {

@@ -209,7 +209,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | **Finance** | [HomeBank][homebank] (personal accounting with labeled transactions and a running balance) |
 | **Collection Tracking** | [Tonkatsu Box][tonkatsu-box] (games, film, anime, manga, visual novels, books and music in one local database, imports from Steam and AniList; a prebuilt bundle kept in `~/.local/opt/` instead of nixpkgs) |
 | **Task Manager** | [Resources][resources] (system and process monitor) |
-| **Settings App** | NixOS Settings ([`modules/home/programs/system/nixos-settings/`](./modules/home/programs/system/nixos-settings/)), a GTK window over the settings files: switch apps on or off and pick the kernel, window manager, services, firewall ports, language and keyboard from menus, with a search box that also finds DankMaterialShell's settings and buttons that open the shell's own pages (monitors, shortcuts, mouse and touchpad, theme). Apply writes the files, checks them and rebuilds through a [polkit][polkit] helper, on a page that shows the downloads and builds as they run, what changed and which services restarted, with an undo if anything fails. Its Overview checks for updates and installs them, switches back to an earlier version, and cleans up old versions to free disk space. Each person changes only their own apps; only admins change the computer-wide settings, update or switch versions |
+| **Settings App** | NixOS Settings ([`modules/home/programs/system/nixos-settings/`](./modules/home/programs/system/nixos-settings/)), a GTK window over the settings files: switch apps on or off and pick the kernel, window manager, services, firewall ports, language and keyboard from menus, with a search box that also finds DankMaterialShell's settings and buttons that open the shell's own pages (monitors, shortcuts, mouse and touchpad, theme). Apply writes the files, checks them and rebuilds through a [polkit][polkit] helper, on a page that shows the downloads and builds as they run, what changed and which services restarted, with an undo if anything fails. Its Overview checks for updates and installs them, switches back to an earlier version, and cleans up old versions to free disk space. A Proton Params page copies game launch options with a click (this config's wrappers and presets, and general Proton ones), and a Flatpaks page turns Flatpak on or off and updates, repairs and removes Flatpak apps. Each person changes only their own apps; only admins change the computer-wide settings, update or switch versions |
 | **Japanese** | [fcitx5][fcitx5] + [Mozc][mozc] for typing hiragana, katakana and kanji, plus [innoextract][innoextract], [cabextract][cabextract] and [mdf2iso][mdf2iso] for unpacking raw Japanese visual novels (off by default) |
 </details>
 
@@ -218,7 +218,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 
 | | |
 | --- | --- |
-| **Launchers** | [Steam][steam] ([Gamescope][gamescope]), [Heroic][heroic], [Prism Launcher][prismlauncher], [Hytale][hytale] (the one Flatpak, installed by hand), [EasyRPG Player][easyrpg] (RPG Maker 2000/2003 games, plus a Tobira no Densetsu launcher upscaled in gamescope), [xsystem4][xsystem4] (System 4 engine games), [Faugus Launcher][faugus-launcher], plus [Twintail][twintail] (gacha games) and [Lutris][lutris], those two off by default |
+| **Launchers** | [Steam][steam] ([Gamescope][gamescope]), [Heroic][heroic], [Prism Launcher][prismlauncher], [Hytale][hytale] (a Flatpak, installed by hand), [EasyRPG Player][easyrpg] (RPG Maker 2000/2003 games, plus a Tobira no Densetsu launcher upscaled in gamescope), [xsystem4][xsystem4] (System 4 engine games), [Faugus Launcher][faugus-launcher], plus [Twintail][twintail] (gacha games) and [Lutris][lutris], those two off by default |
 | **Tools** | [GameMode][gamemode], [MangoHud][mangohud], [Goverlay][goverlay], [r2modman][r2modman], [ProtonPlus][protonplus], [Satisfactory Mod Manager][smm], [AntimicroX][antimicrox], [Rusty PoB][rpob], [Ludusavi][ludusavi] (daily game save backups) |
 | **Game Streaming** | [Sunshine][sunshine] streams games to [Moonlight][moonlight] clients on the LAN (off by default) |
 | **Granblue Relink Mods** | [RelinkModOrganizer][rmo] for data mods and [Reloaded-II][reloaded-ii] for code mods, both prebuilt bundles kept out of nixpkgs: RelinkModOrganizer in `~/.local/opt/`, Reloaded-II in the Desktop folder its installer makes, run in the game's Proton prefix (off by default) |
@@ -231,7 +231,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | --- | --- |
 | **Audio** | [PipeWire][pipewire] (ALSA + PulseAudio compat) |
 | **Containers** | [Docker][docker], off by default |
-| **Flatpak** | [nix-flatpak][nix-flatpak] (declarative Flatpak management) |
+| **Flatpak** | [nix-flatpak][nix-flatpak] (declarative Flatpak management) with [Flatseal][flatseal] for app permissions, when the machine's `flatpak.enable` is on |
 | **Networking** | [systemd-resolved][resolved] + [NetworkManager][networkmanager] (iwd), and [Mullvad][mullvad] over WireGuard with multihop, [DAITA][daita] and a kill switch that blocks traffic while the tunnel is down |
 | **Key Remapping** | [keyd][keyd] makes Caps Lock Escape on tap and Ctrl on hold (`capsLockRemap`) |
 | **Bluetooth** | [BlueZ][bluez], per machine (`bluetooth.enable`) |
@@ -391,6 +391,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 [nirius]: https://git.sr.ht/~tsdh/nirius
 [pipewire]: https://pipewire.org
 [nix-flatpak]: https://github.com/gmodena/nix-flatpak
+[flatseal]: https://github.com/tchx84/Flatseal
 [apparmor]: https://apparmor.net
 [auditd]: https://github.com/linux-audit/audit-userspace
 [stevenblack]: https://github.com/StevenBlack/hosts

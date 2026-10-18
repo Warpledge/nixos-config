@@ -61,8 +61,8 @@
     ++ lib.optionals machine.clamav.enable [./security/clamav.nix]
     #--- Docker (controlled by machine settings)
     ++ lib.optionals machine.docker.enable [./services/runtimes/docker.nix]
-    #--- Flatpak (any user with a Flatpak app: hytale)
-    ++ lib.optionals anyUser.gaming.hytale [./services/runtimes/flatpak.nix]
+    #--- Flatpak, with Flatseal (controlled by machine settings)
+    ++ lib.optionals machine.flatpak.enable [./services/runtimes/flatpak.nix]
     #--- SSH Server (controlled by machine settings)
     ++ lib.optionals machine.ssh.enable [./services/ssh.nix]
     #--- Suwayomi Manga Server (controlled by machine settings)

@@ -138,4 +138,9 @@
   #--- Sunshine Game Streaming
   # Streams games to Moonlight clients on the LAN, web UI at https://localhost:47990
   sunshine.enable = false;
+
+  #--- Flatpak
+  # Sandboxed apps from Flathub or a downloaded bundle, with Flatseal to
+  # change what each may reach
+  flatpak.enable = false;
 }

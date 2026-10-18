@@ -150,7 +150,6 @@
     lutris = false; # Wine launcher
     faugus = false; # UMU/Proton launcher
     twintail = false; # Gacha game launcher
-    hytale = false; # Turns on Flatpak; the official launcher is installed by hand
     easyrpg = false; # RPG Maker 2000/2003 game interpreter
     xsystem4 = false; # System 4 engine games, native
 

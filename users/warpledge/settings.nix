@@ -137,7 +137,6 @@
     lutris = false; # Wine launcher
     faugus = true; # UMU/Proton launcher
     twintail = false; # Gacha game launcher
-    hytale = true; # Enables Flatpak; official launcher installed by hand
     easyrpg = true; # RPG Maker 2000/2003 game interpreter
     xsystem4 = true; # Wonderland Soft System 4 engine (Lance 7), native
 
