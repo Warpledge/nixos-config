@@ -34,7 +34,7 @@
 
   #--- Mouse Cursor
   # Options: "bibata" | "catppuccin"
-  cursor = "catppuccin";
+  cursor = "bibata";
 
   #--- Mullvad VPN
   mullvad.enable = true;
