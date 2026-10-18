@@ -23,7 +23,7 @@ import session  # noqa: E402
 import system  # noqa: E402
 import ui  # noqa: E402
 from flatpaks import FlatpakPage  # noqa: E402
-from overview import Overview  # noqa: E402
+from overview import Overview, ShellPage  # noqa: E402
 from proton import ProtonPage  # noqa: E402
 from runview import RunView, fill_diff  # noqa: E402
 from windowrules import WindowRulesPage  # noqa: E402
@@ -41,10 +41,12 @@ OWNED = {"Cursor Theme": "cursor", "Cursor Size": "cursorSize", "Icon Theme": ""
 #--- The tabs under the search entry, each with its own sidebar
 TABS = [("main", "Main"), ("niri", "Niri"), ("docs", "Docs")]
 
-#--- Each tab's pages above its sidebar sections: key, title and icons to try
+#--- Each tab's pages above its sidebar sections: key, title and icons to try.
+#--- Shell shows only under niri, which also moves the Desktop section to Niri.
 TOP = {"main": [("overview", "Overview", ("computer-symbolic",)),
                 ("flatpaks", "Flatpaks", ("flatpak-symbolic", "system-software-install-symbolic"))],
-       "niri": [("windowrules", "Window Rules",
+       "niri": [("shell", "Shell", ("view-app-grid-symbolic",)),
+                ("windowrules", "Window Rules",
                  ("window-new-symbolic", "preferences-system-windows-symbolic"))],
        "docs": [("proton", "Proton", ("input-gaming-symbolic", "applications-games-symbolic"))]}
 
@@ -409,12 +411,15 @@ class Window(Adw.ApplicationWindow):
         flatpak_page = next((p for p in state.pages if p.section == "top"), None)
         makers = {"overview": lambda: Overview(self, self.info, self.wm, self.links),
                   "flatpaks": lambda: FlatpakPage(self, flatpak_page),
+                  "shell": lambda: ShellPage(self, self.links),
                   "windowrules": lambda: WindowRulesPage(self),
                   "proton": lambda: ProtonPage(self)}
         tops = {}
         for tab, _ in TABS:
             tops[tab] = Adw.SidebarSection()
             for key, title, icons in TOP[tab]:
+                if key == "shell" and self.wm != "niri":
+                    continue
                 self._sidebar_item(tab, tops[tab], key, title, ui.first_icon(*icons))
                 self.builders[key] = makers[key]
         for g in flatpak_page.groups if flatpak_page else []:
@@ -426,6 +431,7 @@ class Window(Adw.ApplicationWindow):
             self.builders["new"] = self._new_page
         self.sidebars["main"].append(tops["main"])
 
+        section_tab = {"desktop": "niri"} if self.wm == "niri" else {}
         sections = {}
         for key, title in schema.SECTIONS:
             sections[key] = Adw.SidebarSection(title=title)
@@ -436,17 +442,18 @@ class Window(Adw.ApplicationWindow):
             key = f"page:{page.title}"
             count = Gtk.Label(css_classes=["dim-label", "caption", "numeric"])
             self.counts[key] = (page, count)
-            self._sidebar_item("main", section, key, page.title, page.icon, suffix=count)
+            tab = section_tab.get(page.section if page.section in sections else "apps", "main")
+            self._sidebar_item(tab, section, key, page.title, page.icon, suffix=count)
             self.builders[key] = lambda page=page, key=key: self._page(page, key)
             for g in page.groups:
                 for s in g.settings:
                     self.page_of[(s.domain, s.path)] = key
             self._count(key)
-        for key, _ in schema.SECTIONS:
-            if sections[key].get_items().get_n_items():
-                self.sidebars["main"].append(sections[key])
         for tab, _ in TABS[1:]:
             self.sidebars[tab].append(tops[tab])
+        for key, _ in schema.SECTIONS:
+            if sections[key].get_items().get_n_items():
+                self.sidebars[section_tab.get(key, "main")].append(sections[key])
 
         self.banner.set_title("")
         if not self.helper:
