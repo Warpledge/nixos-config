@@ -670,9 +670,9 @@ new_user_file() {
     set_setting "$file" admin false
   fi
 
-  ask answer "Name on $name's git commits (Enter to skip)"
+  ask answer "Name to sign git commits with (shown as the author; Enter uses $name)"
   [[ -n $answer ]] && set_setting "$file" git.name "$(nix_string "$answer")"
-  ask answer "Email on $name's git commits (Enter to skip)"
+  ask answer "Email to sign git commits with (e.g. your GitHub email or its noreply address; Enter to skip)"
   [[ -n $answer ]] && set_setting "$file" git.email "$(nix_string "$answer")"
 
   say ""
