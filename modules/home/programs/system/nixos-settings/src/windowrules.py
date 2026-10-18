@@ -1,8 +1,9 @@
 """The Window Rules page (Niri tab): pick an open window, choose what niri does
 with it, and the rule is added to modules/wm/niri/home/core/window-rules.json,
-which rules.nix appends after its own rules; a rebuild applies it. The rules
-niri already has are listed read-only from the copy rules.nix writes to
-~/.config/nixos-settings/, sorted into groups by what they do."""
+which rules.nix turns into niri's window rules; a rebuild applies it. Every
+rule in that file can be edited or removed here. The rules that need Nix
+(theme colours, the translucent app list, a machine's own rules) are listed
+read-only from the copy rules.nix writes to ~/.config/nixos-settings/."""
 
 import json
 import os
@@ -51,16 +52,20 @@ EXTRA_GROUPS = {"default-floating-position": "Size & Position", "open-maximized-
                 "draw-border-with-background": "Appearance", "shadow": "Appearance",
                 "focus-ring": "Appearance", "border": "Appearance", "tab-indicator": "Appearance"}
 
-GROUPS = [("Floating", "Windows that open above the tiled ones."),
-          ("Size & Position", "How big a window opens, and where."),
-          ("Placement", "The workspace or monitor a window opens on."),
-          ("Focus", "Whether a window takes the keyboard when it opens."),
-          ("Appearance", "Opacity, corners, borders and shadows."),
-          ("Privacy", "Windows blacked out in screenshots and screen recordings."),
-          ("Performance", "Windows that turn on variable refresh rate while shown."),
-          ("Other", "")]
+#--- (group, description, icon, chip kind; the kind colours the group's tags)
+GROUPS = [("Floating", "Windows that open above the tiled ones.", "focus-windows-symbolic", "accent"),
+          ("Size & Position", "How big a window opens, and where.", "view-fullscreen-symbolic", "success"),
+          ("Placement", "The workspace or monitor a window opens on.", "video-display-symbolic", "success"),
+          ("Focus", "Whether a window takes the keyboard when it opens.", "input-keyboard-symbolic",
+           "warning"),
+          ("Appearance", "Opacity, corners, borders and shadows.", "applications-graphics-symbolic", "accent"),
+          ("Privacy", "Blacked out in screenshots and screen recordings.", "security-high-symbolic", "error"),
+          ("Performance", "Variable refresh rate while the window is shown.", "speedometer-symbolic",
+           "warning"),
+          ("Other", "", "applications-system-symbolic", "neutral")]
+GROUP = {g[0]: g for g in GROUPS}
 
-NOT_PROPERTIES = ("name", "matches", "excludes")
+NOT_PROPERTIES = ("name", "note", "matches", "excludes")
 
 
 #--------------------------------------------------------------------#
@@ -82,8 +87,8 @@ def clean(value):
 
 
 def bare(rule):
-    """A rule as rules.nix hands it to niri: without its name."""
-    return clean({k: v for k, v in rule.items() if k != "name"})
+    """A rule as rules.nix hands it to niri: without its name and note."""
+    return clean({k: v for k, v in rule.items() if k not in ("name", "note")})
 
 
 def load(path):
@@ -93,6 +98,19 @@ def load(path):
         return data if isinstance(data, list) else []
     except (OSError, ValueError):
         return []
+
+
+def load_applied():
+    """(every rule niri got, the window-rules.json that build used); the second
+    is None from a build before rules.nix wrote it."""
+    try:
+        with open(APPLIED_FILE) as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        return [], None
+    if isinstance(data, list):
+        return data, None
+    return data.get("all") or [], data.get("file")
 
 
 def save(path, rules):
@@ -198,6 +216,71 @@ def match_text(match):
     return ", ".join(parts) or "any window"
 
 
+def tag_text(prop, value):
+    """A short label for one thing a rule does, for its tag."""
+    if prop in ("default-column-width", "default-window-height") and isinstance(value, dict):
+        return f"{'Width' if prop == 'default-column-width' else 'Height'} {size_text(value)}"
+    short = {"open-floating": ("Floating", "Tiled"), "open-maximized": ("Maximized", "Not maximized"),
+             "open-fullscreen": ("Fullscreen", "Not fullscreen"), "open-focused": ("Focused", "Unfocused"),
+             "variable-refresh-rate": ("VRR", "No VRR"), "clip-to-geometry": ("Clipped", "Not clipped"),
+             "draw-border-with-background": ("Solid border", "No border fill")}
+    if prop in short and isinstance(value, bool):
+        return short[prop][0 if value else 1]
+    if prop == "block-out-from":
+        return "Hidden from capture" if value == "screen-capture" else "Hidden from recording"
+    if prop == "opacity":
+        return f"Opacity {round(value * 100)}%"
+    if prop == "open-on-workspace":
+        return f"Workspace {value}"
+    if prop == "open-on-output":
+        return f"Monitor {value}"
+    if prop == "default-floating-position" and isinstance(value, dict):
+        return f"At {value.get('relative-to', 'top-left')}"
+    if prop == "geometry-corner-radius":
+        radii = set(value.values()) if isinstance(value, dict) else {value}
+        return f"Corners {radii.pop():g}" if len(radii) == 1 else "Corners"
+    if prop == "shadow" and isinstance(value, dict) and set(value) == {"enable"}:
+        return "Shadow" if value["enable"] else "No shadow"
+    return prop.replace("-", " ").capitalize()
+
+
+def tag_kind(prop):
+    group = KIND[prop][2] if prop in KIND else EXTRA_GROUPS.get(prop, "Other")
+    return GROUP[group][3]
+
+
+def plain(pattern):
+    """A pattern as the text it looks for, ignoring case flags and anchors,
+    or the pattern itself when it is more than plain text."""
+    inner = pattern.removeprefix("(?i)").removeprefix("^").removesuffix("$")
+    text = pretty(f"^{inner}$")
+    return pattern if text.startswith("^") else text
+
+
+def window_name(match):
+    """A match as a person would name it: the app's own name where its .desktop
+    file has one, else what it matches."""
+    parts = []
+    if "app-id" in match:
+        app = plain(match["app-id"])
+        parts.append(app_name(app) or app)
+    if "title" in match:
+        parts.append(f"“{plain(match['title'])}”" if parts else f"Windows titled “{plain(match['title'])}”")
+    if match.get("is-floating"):
+        parts.append("Floating windows")
+    if match.get("is-window-cast-target"):
+        parts.append("The window being screencast")
+    for k, v in match.items():
+        if k not in ("app-id", "title", "is-floating", "is-window-cast-target"):
+            parts.append(f"{k.replace('-', ' ')} {v}")
+    return " ".join(parts) or "Any window"
+
+
+def match_pattern(match):
+    """A match's raw patterns, as niri reads them."""
+    return "  ".join(f"{k}={v}" for k, v in match.items())
+
+
 def rule_title(rule):
     matches = rule.get("matches") or []
     if rule.get("name"):
@@ -205,7 +288,9 @@ def rule_title(rule):
     if not matches:
         return "Every Window"
     if len(matches) == 1:
-        return match_text(matches[0])
+        return window_name(matches[0])
+    if all("app-id" in m for m in matches):
+        return f"{len(matches)} Apps"
     return f"{len(matches)} Kinds of Window"
 
 
@@ -233,6 +318,7 @@ class WindowRulesPage(Adw.PreferencesPage):
         self.workspaces, self.outputs = [], []
         self.list_groups = []
         self.dirty = False  # saved here since the page was made
+        self.show_ids = False
 
         top = Adw.PreferencesGroup()
         if window.wm != "niri":
@@ -481,68 +567,342 @@ class WindowRulesPage(Adw.PreferencesPage):
         for g in self.list_groups:
             self.remove(g)
         self.list_groups = []
-        added = load(self.path)
-        applied = [clean(r) for r in load(APPLIED_FILE)]
-        # The applied list holds the added rules too; take each out once
-        builtin, waiting = list(applied), False
-        for r in added:
-            if bare(r) in builtin:
-                builtin.remove(bare(r))
-            else:
+        rules = load(self.path)
+        applied, applied_file = load_applied()
+        current = [bare(r) for r in rules if "include" not in r]
+        built = current if applied_file is None else [bare(r) for r in applied_file if "include" not in r]
+        # What niri got, less the rules from the file, is what Nix sets itself
+        from_nix = [clean(r) for r in applied]
+        waiting = applied_file is not None and built != current
+        for r in built:
+            if r in from_nix:
+                from_nix.remove(r)
+            elif applied_file is None:
                 waiting = True
         self.pending.set_visible(waiting or self.dirty)
 
-        grouped = {g: [] for g, _ in GROUPS}
-        for i, r in enumerate(added):
-            grouped[group_of(r)].append((r, i))
-        for r in builtin:
-            grouped[group_of(r)].append((r, None))
-        for title, description in GROUPS:
+        options = Adw.PreferencesGroup(title="Rules", description="Later rules win where two set the same thing.")
+        ids = Adw.SwitchRow(title="Show App IDs", active=self.show_ids,
+                            subtitle="The patterns each rule matches, as niri reads them")
+        ids.connect("notify::active", lambda r, _: self._toggle_ids(r.get_active()))
+        options.add(ids)
+        self._add_group(options)
+
+        grouped = {g[0]: [] for g in GROUPS}
+        for i, r in enumerate(rules):
+            if "include" not in r:
+                grouped[group_of(r)].append((r, i))
+        for title, description, icon, kind in GROUPS:
             items = grouped[title]
             if not items:
                 continue
-            group = Adw.PreferencesGroup(title=ui.esc(f"{title} ({len(items)})"),
-                                         description=ui.esc(description))
+            group = Adw.PreferencesGroup(title=ui.esc(title), description=ui.esc(description),
+                                         header_suffix=ui.chip(str(len(items)), kind))
             for rule, index in items:
                 group.add(self._rule_row(rule, index))
-            self.add(group)
-            self.list_groups.append(group)
-        if not added and not builtin:
-            group = Adw.PreferencesGroup()
-            group.add(Adw.ActionRow(title="No window rules yet",
-                                    subtitle="The config's own rules show here after a rebuild."))
-            self.add(group)
-            self.list_groups.append(group)
+            self._add_group(group)
+        if from_nix:
+            group = Adw.PreferencesGroup(title="Set in Nix",
+                                         description="Theme styling, the translucent app list and this "
+                                                     "computer's own rules. These are edited in the config's "
+                                                     "Nix files, not here.",
+                                         header_suffix=ui.chip(str(len(from_nix)), "neutral"))
+            for rule in from_nix:
+                group.add(self._rule_row(rule, None))
+            self._add_group(group)
+
+    def _add_group(self, group):
+        self.add(group)
+        self.list_groups.append(group)
+
+    def _toggle_ids(self, on):
+        self.show_ids = on
+        GLib.idle_add(lambda: self.refresh() and False)
+
+    def _tags(self, rule):
+        """The rule's tags as markup, each coloured by its group."""
+        colors = getattr(self.window, "colors", None) or {}
+        tags = []
+        for prop, value in properties(rule):
+            text = ui.esc(tag_text(prop, value))
+            color = colors.get(tag_kind(prop))
+            if color:
+                tags.append(f'<span foreground="{color}" weight="bold">{text}</span>')
+            else:
+                tags.append(f"<b>{text}</b>")
+        return "  ·  ".join(tags)
 
     def _rule_row(self, rule, index):
-        """One rule: what it does under its name, and the windows it matches."""
+        """One rule: its name, what it does as tags, and the windows it matches
+        when expanded."""
         matches, excludes = rule.get("matches") or [], rule.get("excludes") or []
-        summary = " · ".join(property_text(k, v) for k, v in properties(rule))
-        many = len(matches) + len(excludes) > 1
-        if many:
-            row = Adw.ExpanderRow(title=ui.esc(rule_title(rule)),
-                                  subtitle=ui.esc(f"{summary} · {len(matches)} "
-                                                  + ("match" if len(matches) == 1 else "matches")
-                                                  + (f", {len(excludes)} left out" if excludes else "")))
-            for m in matches:
-                row.add_row(Adw.ActionRow(title=ui.esc(match_text(m)), subtitle="Matches"))
-            for m in excludes:
-                row.add_row(Adw.ActionRow(title=ui.esc(match_text(m)), subtitle="Left out"))
-        else:
-            where = match_text(matches[0]) if matches else "every window"
-            if rule.get("name"):
-                summary = f"{summary} · {where}" if summary else where
-            row = Adw.ActionRow(title=ui.esc(rule_title(rule)), subtitle=ui.esc(summary))
-        row.set_subtitle_lines(3)
-        if index is not None:
-            row.add_suffix(ui.chip("Added Here", "accent"))
-            row.set_tooltip_text("Added on this page; saved in " + RULES_FILE)
-            if self.editable:
-                remove = Gtk.Button(icon_name="user-trash-symbolic", valign=Gtk.Align.CENTER,
-                                    css_classes=["flat"], tooltip_text="Remove this rule")
-                remove.connect("clicked", lambda _: self._remove(index))
-                row.add_suffix(remove)
+        row = Adw.ExpanderRow(title=ui.esc(rule_title(rule)), subtitle=self._tags(rule))
+        row.set_subtitle_lines(2)
+        icon = None
+        if len(matches) == 1 and "app-id" in matches[0]:
+            app = pretty(matches[0]["app-id"])
+            icon = ui.app_image([f"{app}.desktop", app.lower()], size=32)
+        row.add_prefix(icon or Gtk.Image(icon_name=GROUP[group_of(rule)][2], pixel_size=24,
+                                         css_classes=["dim-label"]))
+        if rule.get("note"):
+            note = ui.label(rule["note"], ("dim-label",), margin_start=12, margin_end=12, margin_top=8,
+                            margin_bottom=8)
+            row.add_row(note)
+        for m in matches:
+            row.add_row(self._match_row(m, "Matches"))
+        for m in excludes:
+            row.add_row(self._match_row(m, "Left out"))
+        if index is not None and self.editable:
+            remove = Gtk.Button(icon_name="user-trash-symbolic", valign=Gtk.Align.CENTER,
+                                css_classes=["flat"], tooltip_text="Remove this rule")
+            remove.connect("clicked", lambda _: self._remove(index))
+            row.add_suffix(remove)
+            edit = Gtk.Button(icon_name="document-edit-symbolic", valign=Gtk.Align.CENTER,
+                              css_classes=["flat"], tooltip_text="Edit this rule")
+            edit.connect("clicked", lambda _: self._edit(index))
+            row.add_suffix(edit)
+        # Suffixes stack leftwards, so the count goes in last to sit leftmost
+        count = len(matches)
+        if count != 1:
+            row.add_suffix(Gtk.Label(label="all windows" if not matches else f"{count} windows",
+                                     css_classes=["dim-label", "caption"], valign=Gtk.Align.CENTER))
         return row
+
+    def _match_row(self, match, kind):
+        row = Adw.ActionRow(title=ui.esc(window_name(match)), title_lines=1)
+        if self.show_ids:
+            row.set_subtitle(f"<tt>{ui.esc(match_pattern(match))}</tt>")
+        if kind != "Matches":
+            row.add_suffix(ui.chip(kind, "warning"))
+        app = pretty(match.get("app-id", ""))
+        icon = ui.app_image([f"{app}.desktop", app.lower()], size=24) if app else None
+        row.add_prefix(icon or Gtk.Image(icon_name="window-new-symbolic", css_classes=["dim-label"]))
+        return row
+
+    def _edit(self, index):
+        rules = load(self.path)
+        if not 0 <= index < len(rules) or "include" in rules[index]:
+            return
+
+        def saved(rule):
+            again = load(self.path)
+            if 0 <= index < len(again):
+                again[index] = rule
+                if self._save(again):
+                    self.window.toast(f"Saved {rule_title(rule)}")
+        RuleDialog(rules[index], self.workspaces, self.outputs, saved).present(self.window)
+
+
+#--------------------------------------------------------------------#
+#-- Editing a rule
+#--------------------------------------------------------------------#
+class RuleDialog(Adw.Dialog):
+    """Edits one rule from window-rules.json: its name and note, the windows it
+    matches or leaves out, and what it does. Properties this page has no
+    control for are kept as they are, or removed."""
+
+    def __init__(self, rule, workspaces, outputs, on_save):
+        super().__init__(title=f"Edit {rule_title(rule)}", content_width=620, content_height=720)
+        self.rule, self.on_save = rule, on_save
+        self.workspaces, self.outputs = workspaces, outputs
+        self.match_rows = {"matches": [], "excludes": []}
+        self.props = []  # (prop, getter, rows); getter None once removed
+
+        cancel = Gtk.Button(label="Cancel")
+        cancel.connect("clicked", lambda _: self.close())
+        save = Gtk.Button(label="Save", css_classes=["suggested-action"])
+        save.connect("clicked", lambda _: self._save())
+        header = Adw.HeaderBar(show_end_title_buttons=False, show_start_title_buttons=False)
+        header.pack_start(cancel)
+        header.pack_end(save)
+        self.page = Adw.PreferencesPage()
+        self.toasts = Adw.ToastOverlay(child=self.page)
+        view = Adw.ToolbarView(content=self.toasts)
+        view.add_top_bar(header)
+        self.set_child(view)
+
+        about = Adw.PreferencesGroup()
+        self.name_row = Adw.EntryRow(title="Name", text=rule.get("name", ""))
+        self.note_row = Adw.EntryRow(title="Note", text=rule.get("note", ""))
+        about.add(self.name_row)
+        about.add(self.note_row)
+        self.page.add(about)
+
+        self.does = Adw.PreferencesGroup(title="What It Does")
+        for prop, value in properties(rule):
+            self._prop(prop, value)
+        missing = [k for k in KINDS if k[0] not in rule]
+        if missing:
+            add_row = Adw.ComboRow(title="Add", model=Gtk.StringList.new([k[1] for k in missing]))
+            plus = Gtk.Button(icon_name="list-add-symbolic", valign=Gtk.Align.CENTER, css_classes=["flat"],
+                              tooltip_text="Add this to the rule")
+            plus.connect("clicked", lambda _: self._add_prop(missing, add_row))
+            add_row.add_suffix(plus)
+            self.add_row = add_row
+            self.does.add(add_row)
+        self.page.add(self.does)
+
+        for key, title, blurb in (("matches", "Windows", "Regular expressions; a window matching any "
+                                                         "entry gets the rule."),
+                                  ("excludes", "Left Out", "Windows matching these never get the rule.")):
+            group = Adw.PreferencesGroup(title=title, description=blurb)
+            plus = Gtk.Button(icon_name="list-add-symbolic", css_classes=["flat"],
+                              tooltip_text="Add a window")
+            plus.connect("clicked", lambda _, k=key, g=group: self._add_match(k, g, {"app-id": ""}))
+            group.set_header_suffix(plus)
+            for m in rule.get(key) or []:
+                self._add_match(key, group, m)
+            self.page.add(group)
+
+    #--- Windows
+    def _add_match(self, key, group, match):
+        """One match: an app ID row and a title row; other keys are kept."""
+        app = Adw.EntryRow(title="App ID", text=match.get("app-id", ""))
+        title = Adw.EntryRow(title="Title", text=match.get("title", ""))
+        extra = {k: v for k, v in match.items() if k not in ("app-id", "title")}
+        remove = Gtk.Button(icon_name="user-trash-symbolic", valign=Gtk.Align.CENTER, css_classes=["flat"],
+                            tooltip_text="Remove this window")
+        app.add_suffix(remove)
+        rows = [app, title]
+        if extra:
+            rows.append(Adw.ActionRow(title=ui.esc(match_pattern(extra)), subtitle="Kept as it is"))
+        for r in rows:
+            group.add(r)
+        entry = [app, title, extra, rows]
+        self.match_rows[key].append(entry)
+
+        def removed(_):
+            for r in rows:
+                group.remove(r)
+            self.match_rows[key].remove(entry)
+        remove.connect("clicked", removed)
+
+    def _matches(self, key):
+        out = []
+        for app, title, extra, _ in self.match_rows[key]:
+            m = {}
+            if app.get_text().strip():
+                m["app-id"] = app.get_text().strip()
+            if title.get_text().strip():
+                m["title"] = title.get_text().strip()
+            m.update(extra)
+            if m:
+                out.append(m)
+        return out
+
+    #--- Properties
+    def _add_prop(self, missing, add_row):
+        kind = missing[add_row.get_selected()]
+        if any(p == kind[0] and g for p, g, _ in self.props):
+            return
+        default = {"on": True, "choice": kind[4][0][1] if kind[4] else True, "size": {"proportion": 0.5},
+                   "opacity": 0.9, "workspace": "", "output": ""}[kind[3]]
+        self._prop(kind[0], default, before=add_row)
+
+    def _prop(self, prop, value, before=None):
+        kind = KIND.get(prop)
+        title = kind[1] if kind else prop.replace("-", " ").capitalize()
+        control = kind[3] if kind else ("on" if isinstance(value, bool) else "")
+        rows = []
+        if control == "choice":
+            labels = [l for l, _ in kind[4]]
+            values = [v for _, v in kind[4]]
+            row = Adw.ComboRow(title=ui.esc(title), model=Gtk.StringList.new(labels),
+                               selected=values.index(value) if value in values else 0)
+            getter = lambda: values[row.get_selected()]  # noqa: E731
+            rows.append(row)
+        elif control == "on" or isinstance(value, bool):
+            row = Adw.SwitchRow(title=ui.esc(title), active=bool(value))
+            getter = row.get_active
+            rows.append(row)
+        elif control == "size" and isinstance(value, dict):
+            labels = [l for l, _ in SIZES]
+            index = next((i for i, (_, v) in enumerate(SIZES) if v == value), None)
+            if index is None:
+                index = labels.index("Pixels")
+            row = Adw.ComboRow(title=ui.esc(title), model=Gtk.StringList.new(labels), selected=index)
+            px = Adw.SpinRow.new_with_range(50, 8000, 10)
+            px.set_title("Pixels")
+            px.set_value(value.get("fixed", 800))
+            if index == labels.index("Pixels") and "proportion" in value:
+                # A proportion this page has no name for: keep it until changed
+                px.set_value(800)
+                row.set_subtitle(f"Now {size_text(value)}")
+            px.set_visible(SIZES[row.get_selected()][1] is None)
+            row.connect("notify::selected", lambda *_: px.set_visible(SIZES[row.get_selected()][1] is None))
+            original = value
+
+            def getter():
+                chosen = SIZES[row.get_selected()][1]
+                if chosen is not None:
+                    return chosen
+                if row.get_subtitle() and "proportion" in original:
+                    return original
+                return {"fixed": int(px.get_value())}
+            px.connect("notify::value", lambda *_: row.set_subtitle(""))
+            rows += [row, px]
+        elif control == "opacity":
+            row = Adw.SpinRow.new_with_range(0.05, 1.0, 0.05)
+            row.set_title(title)
+            row.set_digits(2)
+            row.set_value(float(value))
+            getter = lambda: round(row.get_value(), 2)  # noqa: E731
+            rows.append(row)
+        elif control in ("workspace", "output"):
+            names = self.workspaces if control == "workspace" else self.outputs
+            row = Adw.EntryRow(title=ui.esc(title), text=str(value))
+            if names:
+                row.set_tooltip_text("Known now: " + ", ".join(names))
+            getter = lambda: row.get_text().strip() or None  # noqa: E731
+            rows.append(row)
+        else:
+            row = Adw.ActionRow(title=ui.esc(title), subtitle=ui.esc(tag_text(prop, value)))
+            getter = lambda: value  # noqa: E731
+            rows.append(row)
+        remove = Gtk.Button(icon_name="user-trash-symbolic", valign=Gtk.Align.CENTER, css_classes=["flat"],
+                            tooltip_text="Take this out of the rule")
+        rows[0].add_suffix(remove)
+        entry = [prop, getter, rows]
+        self.props.append(entry)
+        for r in rows:
+            if before is not None:
+                self.does.remove(before)
+                self.does.add(r)
+                self.does.add(before)
+            else:
+                self.does.add(r)
+
+        def removed(_):
+            for r in rows:
+                self.does.remove(r)
+            entry[1] = None
+        remove.connect("clicked", removed)
+
+    #--- Saving
+    def _save(self):
+        rule = {}
+        name = self.name_row.get_text().strip()
+        note = self.note_row.get_text().strip()
+        if name:
+            rule["name"] = name
+        if note:
+            rule["note"] = note
+        rule["matches"] = self._matches("matches")
+        excludes = self._matches("excludes")
+        if excludes:
+            rule["excludes"] = excludes
+        for prop, getter, _ in self.props:
+            if getter is None:
+                continue
+            value = getter()
+            if value is None:
+                continue
+            rule[prop] = value
+        if not properties(rule):
+            self.toasts.add_toast(Adw.Toast(title="Give the rule something to do, or remove it"))
+            return
+        self.close()
+        self.on_save(rule)
 
 
 def app_name(app_id):

@@ -1,5 +1,502 @@
 [
   {
+    "name": "Private Apps",
+    "note": "Blacked out in screenshots and screen recordings. Includes the Bitwarden popup in Zen, and Suwayomi and Syncthing as Helium app windows.",
+    "block-out-from": "screen-capture",
+    "matches": [
+      {
+        "app-id": "org.gnome.seahorse.Application"
+      },
+      {
+        "app-id": "bitwarden"
+      },
+      {
+        "app-id": "^zen-beta$",
+        "title": "^Extension: \\(Bitwarden"
+      },
+      {
+        "app-id": "mullvad-vpn"
+      },
+      {
+        "app-id": "Mullvad Browser"
+      },
+      {
+        "app-id": "^helium$"
+      },
+      {
+        "app-id": "^chrome-localhost__-Default$"
+      },
+      {
+        "app-id": "^chrome-127\\.0\\.0\\.1__index\\.html-Default$"
+      },
+      {
+        "app-id": "^moku$"
+      },
+      {
+        "app-id": "^boorusama$"
+      },
+      {
+        "app-id": "^thunderbird$"
+      },
+      {
+        "app-id": "^md\\.obsidian\\.Obsidian$"
+      },
+      {
+        "app-id": "^homebank$"
+      },
+      {
+        "app-id": "(?i)goofcord$"
+      },
+      {
+        "app-id": "^mpv$"
+      }
+    ]
+  },
+  {
+    "include": "translucent"
+  },
+  {
+    "name": "Never Open Maximized",
+    "note": "Applies to every window.",
+    "matches": [],
+    "open-maximized": false
+  },
+  {
+    "name": "Minecraft Fullscreen",
+    "matches": [
+      {
+        "app-id": "^Minecraft"
+      }
+    ],
+    "open-fullscreen": true
+  },
+  {
+    "name": "Variable Refresh Rate for Games",
+    "note": "Monitors use on-demand VRR. Proton games show as <game>.exe on native Wayland and steam_app_<id> on X11.",
+    "matches": [
+      {
+        "app-id": "^gamescope$"
+      },
+      {
+        "app-id": "^steam_app_"
+      },
+      {
+        "app-id": "\\.exe$"
+      },
+      {
+        "app-id": "^Minecraft"
+      }
+    ],
+    "variable-refresh-rate": true
+  },
+  {
+    "name": "Full-Width Browsers",
+    "default-column-width": {
+      "proportion": 1.0
+    },
+    "matches": [
+      {
+        "app-id": "zen-beta"
+      },
+      {
+        "app-id": "helium"
+      },
+      {
+        "app-id": "freetube"
+      }
+    ]
+  },
+  {
+    "name": "FreeTube Opens in the Background",
+    "note": "Keeps youtube-dispatch link handoffs in the background, since each one opens a new window. Outranks the activation token.",
+    "matches": [
+      {
+        "app-id": "freetube"
+      }
+    ],
+    "open-focused": false
+  },
+  {
+    "name": "ProtonUp-Qt",
+    "note": "Wine and Proton installer.",
+    "default-column-width": {
+      "fixed": 600
+    },
+    "default-floating-position": {
+      "relative-to": "top",
+      "x": 0,
+      "y": 50
+    },
+    "default-window-height": {
+      "fixed": 600
+    },
+    "matches": [
+      {
+        "app-id": "net.davidotek.pupgui2"
+      }
+    ],
+    "open-floating": true,
+    "open-focused": true
+  },
+  {
+    "name": "Steam Secondary Windows",
+    "note": "Friends List, Settings and game properties. The main library window stays tiled; with no position set, niri centers them.",
+    "excludes": [
+      {
+        "title": "^Steam$"
+      }
+    ],
+    "matches": [
+      {
+        "app-id": "^steam$"
+      }
+    ],
+    "open-floating": true
+  },
+  {
+    "name": "Guitar Pro 8 Fretboard",
+    "default-column-width": {
+      "fixed": 1687
+    },
+    "default-window-height": {
+      "fixed": 222
+    },
+    "matches": [
+      {
+        "title": "Fretboard - Guitar Pro 8"
+      }
+    ],
+    "open-floating": true
+  },
+  {
+    "name": "Bitwarden Popout in Zen",
+    "note": "PIN unlock. Outranks the full-width rule for Zen.",
+    "default-column-width": {
+      "fixed": 553
+    },
+    "default-window-height": {
+      "fixed": 762
+    },
+    "matches": [
+      {
+        "app-id": "^zen-beta$",
+        "title": "^Extension: \\(Bitwarden"
+      }
+    ],
+    "open-floating": true
+  },
+  {
+    "name": "TONE3000",
+    "note": "JUCE standalone with a fixed-size UI that letterboxes when tiled. No size set, so it keeps its own.",
+    "matches": [
+      {
+        "app-id": "^TONE3000$"
+      }
+    ],
+    "open-floating": true,
+    "open-focused": true
+  },
+  {
+    "name": "Resources",
+    "note": "Task manager (Ctrl+Alt+Delete). Its maximize request is refused in raw KDL in rules.nix.",
+    "default-column-width": {
+      "proportion": 0.6
+    },
+    "default-window-height": {
+      "proportion": 0.7
+    },
+    "matches": [
+      {
+        "app-id": "^org\\.gnome\\.Resources$"
+      }
+    ],
+    "open-floating": true
+  },
+  {
+    "name": "NixOS Settings",
+    "note": "Mod+C. As wide as its pages' fixed content width.",
+    "default-column-width": {
+      "fixed": 1080
+    },
+    "default-window-height": {
+      "proportion": 0.88
+    },
+    "matches": [
+      {
+        "app-id": "^dev\\.nixosconfig\\.Settings$"
+      }
+    ],
+    "open-floating": true
+  },
+  {
+    "name": "ProtonPlus",
+    "note": "Sized like NixOS Settings.",
+    "default-column-width": {
+      "fixed": 1080
+    },
+    "default-window-height": {
+      "proportion": 0.88
+    },
+    "matches": [
+      {
+        "app-id": "^com\\.vysp3r\\.ProtonPlus$"
+      }
+    ],
+    "open-floating": true
+  },
+  {
+    "name": "Flatseal",
+    "note": "Sized like NixOS Settings.",
+    "default-column-width": {
+      "fixed": 1080
+    },
+    "default-window-height": {
+      "proportion": 0.88
+    },
+    "matches": [
+      {
+        "app-id": "^com\\.github\\.tchx84\\.Flatseal$"
+      }
+    ],
+    "open-floating": true
+  },
+  {
+    "name": "Calculator",
+    "matches": [
+      {
+        "app-id": "org.gnome.Calculator"
+      }
+    ],
+    "open-floating": true
+  },
+  {
+    "name": "Wine Installers and Dialogs",
+    "matches": [
+      {
+        "app-id": "wineboot.exe"
+      },
+      {
+        "app-id": "control.exe"
+      },
+      {
+        "title": "Wine"
+      },
+      {
+        "title": "Wine Mono Installer"
+      },
+      {
+        "title": "Wine Gecko Installer"
+      }
+    ],
+    "open-floating": true,
+    "open-focused": true
+  },
+  {
+    "name": "Wine WebView2",
+    "note": "Embedded login panels, like Morimens'. Clipping to geometry with no border background breaks their rendering.",
+    "clip-to-geometry": false,
+    "draw-border-with-background": true,
+    "matches": [
+      {
+        "app-id": "msedgewebview2.exe"
+      }
+    ]
+  },
+  {
+    "name": "Audio and Media Tools",
+    "matches": [
+      {
+        "app-id": "pavucontrol"
+      },
+      {
+        "app-id": "pavucontrol-qt"
+      },
+      {
+        "app-id": "com.saivert.pwvucontrol"
+      },
+      {
+        "app-id": "io.github.fsobolev.Cavalier"
+      },
+      {
+        "app-id": "org.gnome.Loupe"
+      }
+    ],
+    "open-floating": true
+  },
+  {
+    "name": "System Dialogs and Utilities",
+    "matches": [
+      {
+        "app-id": "dialog"
+      },
+      {
+        "app-id": "popup"
+      },
+      {
+        "app-id": "task_dialog"
+      },
+      {
+        "app-id": "gcr-prompter"
+      },
+      {
+        "app-id": "file-roller"
+      },
+      {
+        "app-id": "org.gnome.FileRoller"
+      },
+      {
+        "app-id": "org.kde.ark"
+      },
+      {
+        "app-id": "nm-connection-editor"
+      },
+      {
+        "app-id": "blueman-manager"
+      },
+      {
+        "app-id": "xdg-desktop-portal-gtk"
+      },
+      {
+        "app-id": "org.kde.polkit-kde-authentication-agent-1"
+      },
+      {
+        "app-id": "pinentry"
+      }
+    ],
+    "open-floating": true
+  },
+  {
+    "name": "File Operation Dialogs",
+    "matches": [
+      {
+        "title": "Progress"
+      },
+      {
+        "title": "File Operations"
+      },
+      {
+        "title": "Copying"
+      },
+      {
+        "title": "Moving"
+      },
+      {
+        "title": "Properties"
+      },
+      {
+        "title": "Downloads"
+      },
+      {
+        "title": "file progress"
+      }
+    ],
+    "open-floating": true
+  },
+  {
+    "name": "Alerts and Confirmations",
+    "matches": [
+      {
+        "title": "Confirm"
+      },
+      {
+        "title": "Authentication Required"
+      },
+      {
+        "title": "Notice"
+      },
+      {
+        "title": "Warning"
+      },
+      {
+        "title": "Error"
+      }
+    ],
+    "open-floating": true
+  },
+  {
+    "include": "styling"
+  },
+  {
+    "name": "Firefox Picture-in-Picture",
+    "default-column-width": {
+      "fixed": 480
+    },
+    "default-floating-position": {
+      "relative-to": "bottom-right",
+      "x": 32,
+      "y": 32
+    },
+    "default-window-height": {
+      "fixed": 270
+    },
+    "matches": [
+      {
+        "app-id": "firefox",
+        "title": "Picture-in-Picture"
+      }
+    ],
+    "open-floating": true
+  },
+  {
+    "name": "Zen Picture-in-Picture",
+    "default-column-width": {
+      "fixed": 480
+    },
+    "default-floating-position": {
+      "relative-to": "bottom-right",
+      "x": 32,
+      "y": 32
+    },
+    "default-window-height": {
+      "fixed": 270
+    },
+    "matches": [
+      {
+        "app-id": "zen",
+        "title": "Picture-in-Picture"
+      }
+    ],
+    "open-floating": true
+  },
+  {
+    "name": "Picture-in-Picture",
+    "default-floating-position": {
+      "relative-to": "bottom-right",
+      "x": 32,
+      "y": 32
+    },
+    "matches": [
+      {
+        "title": "Picture in picture"
+      }
+    ],
+    "open-floating": true
+  },
+  {
+    "name": "Discord Popout",
+    "default-floating-position": {
+      "relative-to": "bottom-right",
+      "x": 32,
+      "y": 32
+    },
+    "matches": [
+      {
+        "title": "Discord Popout"
+      }
+    ],
+    "open-floating": true
+  },
+  {
+    "name": "Steam Resize Fill",
+    "note": "XWayland has no synchronized resize, so resizing shows frame area Steam hasn't painted yet; a solid border fills it. Must stay after the theme's styling rules.",
+    "draw-border-with-background": true,
+    "matches": [
+      {
+        "app-id": "^steam$"
+      }
+    ]
+  },
+  {
     "name": "ProtonPlus",
     "matches": [
       {
