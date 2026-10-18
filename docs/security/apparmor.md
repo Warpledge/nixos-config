@@ -12,6 +12,7 @@ logged as `apparmor="ALLOWED"`.
 | `streamlink` | `streamlink` inside the Twitch GUI's bubblewrap sandbox | `media.streamlinkTwitchGui` |
 | `evince` | `evince`, `evince-previewer` | always |
 | `file-roller`, `unrar` | the GUI and the `unrar` CLI | always |
+| `ark` | `ark`, which Dolphin's Compress and Extract actions run | `fileBrowsers.dolphin` |
 | `obsidian` | the `obsidian` launcher script | `office.obsidian` |
 | `prismlauncher` | the real Prism binary, behind the mullvad-exclude wrapper | `gaming.prismlauncher` |
 | `tsunagu` | Moku's Go backend; the extension JVM and ffmpeg it starts inherit it | `media.moku` |

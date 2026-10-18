@@ -189,7 +189,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | | |
 | --- | --- |
 | **Browsers** | [Zen][zen] / [Mullvad Browser][mullvad-browser] / [Helium][helium] |
-| **File Manager** | [Nautilus][nautilus] (with an open-in-Kitty menu entry from [nautilus-open-any-terminal][nautilus-open-any-terminal]), [Dolphin][dolphin] (optional, themed through Kvantum and the Catppuccin KDE colour scheme), [Yazi][yazi] (terminal file manager) |
+| **File Manager** | [Nautilus][nautilus] (with an open-in-Kitty menu entry from [nautilus-open-any-terminal][nautilus-open-any-terminal]), [Dolphin][dolphin] (optional, themed through Kvantum and the Catppuccin KDE colour scheme, with [Ark][ark] for archives), [Yazi][yazi] (terminal file manager) |
 | **Media Player** | [mpv][mpv], [Spotify][spotify] via [spicetify-nix][spicetify], [FreeTube][freetube] |
 | **Twitch** | [Streamlink Twitch GUI][streamlink-twitch-gui] browses Twitch and hands the stream to [Streamlink][streamlink], which plays it in mpv, so there are no ads and the follow list stays local with no Twitch account attached; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs |
 | **Screenshot / Recording** | [Quick Capture][quick-capture] (Niri, Hyprland), [gpu-screen-recorder][gpu-screen-recorder] |
@@ -247,7 +247,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | | |
 | --- | --- |
 | **Disk** | ext4 on a [LUKS][luks]-encrypted partition, unlocked at boot |
-| **Access Control** | [AppArmor][apparmor] profiles for the apps that open untrusted files or run third-party code (mpv, yt-dlp, streamlink, Evince, File Roller, unrar, Obsidian, Prism Launcher, Moku's Tsunagu backend, and the prebuilt Tonkatsu Box and Katana FloorBoard bundles), limiting each to the files it needs. They run in log-only mode for now. Crash dumps are switched off so a crash cannot spill memory contents to disk |
+| **Access Control** | [AppArmor][apparmor] profiles for the apps that open untrusted files or run third-party code (mpv, yt-dlp, streamlink, Evince, File Roller, Ark, unrar, Obsidian, Prism Launcher, Moku's Tsunagu backend, and the prebuilt Tonkatsu Box and Katana FloorBoard bundles), limiting each to the files it needs. They run in log-only mode for now. Crash dumps are switched off so a crash cannot spill memory contents to disk |
 | **Kernel Hardening** | Boot settings that make the system harder to attack: the core of the OS refuses to be modified while running, memory is placed unpredictably so an attacker cannot count on where things are, kernel memory is zeroed before it's handed out, and io_uring, a kernel interface behind many recent exploits, is switched off |
 | **Network Hardening** | The usual anti-spoofing settings: packets claiming to come from an address they cannot have come from get dropped, requests to reroute traffic are ignored, and the machine stays up under a basic flood attack |
 | **Auditing** | [auditd][auditd], with a daily timer to keep the log from growing forever |
@@ -290,6 +290,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 [zen]: https://zen-browser.app
 [mullvad-browser]: https://mullvad.net/en/browser
 [helium]: https://github.com/schembriaiden/helium-browser-nix-flake
+[ark]: https://invent.kde.org/utilities/ark
 [dolphin]: https://invent.kde.org/system/dolphin
 [nautilus]: https://apps.gnome.org/Nautilus
 [nautilus-open-any-terminal]: https://github.com/Stunkymonkey/nautilus-open-any-terminal
