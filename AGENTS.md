@@ -11,7 +11,7 @@ home-manager, Niri WM, Stylix theming (Catppuccin Mocha).
    build even more rarely, only when you can't tell whether a change breaks
    evaluation or the build (a new module or import, an unfamiliar option, an
    input or package change); a value change in a working option, or a JSON,
-   Markdown or comment edit, needs neither. Commit only when asked (see
+   Markdown or comment edit, needs neither. Commit without asking (see
    rule 7); pushing and history rewrites stay with the user.
 2. **`git add` new files before `nix flake check`** — the flake ignores
    untracked files and the check fails with "file is not available".
