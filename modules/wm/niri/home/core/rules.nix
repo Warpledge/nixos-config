@@ -8,6 +8,9 @@
 }: let
   colors = config.lib.stylix.colors.withHashtag;
 
+  #--- Rules added in NixOS Settings' Window Rules page; last, so they win
+  addedRules = map (r: removeAttrs r ["name"]) (lib.importJSON ./window-rules.json);
+
   windowRules = [
     #--- Privacy Rules (blocked from both screenshots and screen recording)
     {
@@ -360,7 +363,7 @@
   ];
 in {
   programs.niri.settings = {
-    window-rules = windowRules;
+    window-rules = windowRules ++ addedRules;
     layer-rules = [
       {
         # DMS's blurred wallpaper copy (blurredWallpaperLayer in dms/settings.json),
@@ -383,6 +386,10 @@ in {
       }
     ];
   };
+
+  #--- Every rule niri gets (machine ones too), for NixOS Settings' Window Rules page
+  xdg.configFile."nixos-settings/niri-window-rules.json".text =
+    builtins.toJSON config.programs.niri.settings.window-rules;
 
   #--------------------------------------------------------------------#
   #-- Raw KDL Rules
