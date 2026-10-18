@@ -242,7 +242,7 @@ DMS runs as a systemd user service (`systemd.enable`, `niri.enableSpawn = false`
 **Login:** Niri and Hyprland start from the DMS greeter (greetd, through the `dank-greeter` input, set up in `<wm>/session.nix`).
 
 **Hyprland-only directories:** `core/animations.nix`, `core/quad.lua`, `core/variables.nix`, `core/rules/` (`luaRule.nix`, `windowrules/`, `layerrules/`), `scripts/`.
-**Niri-only directories:** `core/blur-presets.nix`, `core/portals.nix`, `core/rules.nix`, `core/translucent-apps.nix`, `core/xwayland.nix`, `nirius.nix`.
+**Niri-only directories:** `core/blur-presets.nix`, `core/portals.nix`, `core/rules.nix`, `core/translucent-apps.nix`, `core/vrr.nix`, `core/xwayland.nix`, `nirius.nix`.
 
 Per-machine WM overrides exist where needed, each applied to every user on the machine:
 - `machines/legion/wm/{hyprland,niri}.nix` — hybrid-GPU env (`AQ_DRM_DEVICES` only in the Hyprland one; niri ignores it), Solaar autostart; the niri one also sets the internal panel's outputs and turns off DMS auto-lock

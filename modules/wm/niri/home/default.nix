@@ -17,6 +17,7 @@
     ./core/portals.nix
     ./core/rules.nix
     ./core/settings.nix
+    ./core/vrr.nix
     ./core/xwayland.nix
 
     #--- Shell & Services
