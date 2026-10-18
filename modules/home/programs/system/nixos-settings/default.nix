@@ -30,7 +30,7 @@
       runHook preInstall
       share=$out/share/nixos-settings
       install -Dm644 -t $share *.py descriptions.json
-      #--- Pick lists for Language & Keyboard; only the names reach the closure
+      #--- Pick lists for Language & Input; only the names reach the closure
       tar -xJOf ${pkgs.glibc.src} --wildcards '*/localedata/SUPPORTED' \
         | sed -n 's|^\([^/ ]*\)/UTF-8.*|\1|p' | sort -u > $share/locales.txt
       sed -n '/^! layout$/,/^! /s/^  *\([^ ]*\)  *\(.*\)$/\1 \2/p' \

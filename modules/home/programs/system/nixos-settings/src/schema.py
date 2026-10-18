@@ -30,6 +30,7 @@ DATA_CHOICES = {("timeZone",): "timezones", ("locale",): "locales",
 PAGE_TITLES = {
     "Wallpaper Picker (Mod+W)": "Wallpaper",
     "Android Screen Mirroring (scrcpy)": "Android",
+    "Language & Keyboard": "Language & Input",  # fits the sidebar's width
 }
 MOVES = {  # setting -> (page, group on that page)
     ("japanese", "vn"): ("Gaming", "Japanese Visual Novels"),
@@ -48,11 +49,11 @@ PAGES = {
     "System": ("computer", "computer-symbolic",
                "The name, desktop and kernel this computer runs, the same for everyone on it.",
                [("", "", ["hostName", "windowManager", "kernel"])]),
-    "Language & Keyboard": ("computer", "preferences-desktop-locale-symbolic",
-                            "Time zone, language and keyboard layout.",
-                            [("Region", "", ["timeZone", "locale"]),
-                             ("Keyboard", "", ["keyboardLayout", "consoleKeyMap", "capsLockRemap"]),
-                             ("Japanese Typing", "", ["japanese.ime"])]),
+    "Language & Input": ("computer", "preferences-desktop-locale-symbolic",
+                         "Time zone, language and keyboard layout.",
+                         [("Region", "", ["timeZone", "locale"]),
+                          ("Keyboard", "", ["keyboardLayout", "consoleKeyMap", "capsLockRemap"]),
+                          ("Japanese Typing", "", ["japanese.ime"])]),
     "Devices": ("computer", "bluetooth-symbolic",
                 "Bluetooth, printers and sound devices.",
                 [("", "", ["bluetooth.enable", "printing.enable"])]),
