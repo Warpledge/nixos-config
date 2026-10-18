@@ -1,10 +1,10 @@
-"""nixm-settings-apply: run as root by pkexec after the caller types their own
+"""nixos-settings-apply: run as root by pkexec after the caller types their own
 password. Applies the caller's own app settings and rebuilds; it never touches
 machine settings or another user's, and accepts only template keys and kinds.
 
-Usage: nixm-settings-apply '{"mode": "switch"|"boot", "thisMachineOnly": bool,
+Usage: nixos-settings-apply '{"mode": "switch"|"boot", "thisMachineOnly": bool,
                               "changes": [[["media", "mpv"], true], ...]}'
-       nixm-settings-apply '{"clean": true}'  (drop settings the templates lost)"""
+       nixos-settings-apply '{"clean": true}'  (drop settings the templates lost)"""
 
 import fcntl
 import json
@@ -19,7 +19,7 @@ import backend  # noqa: E402
 import nixfile  # noqa: E402
 import schema  # noqa: E402
 
-LOCK = "/run/nixm-settings-apply.lock"
+LOCK = "/run/nixos-settings-apply.lock"
 
 
 def refuse(message):
@@ -58,8 +58,8 @@ def main():
         refuse("run this through pkexec")
     caller = pwd.getpwuid(int(uid)).pw_name
 
-    cfg = backend.Config(os.environ["NIXM_SETTINGS_FLAKE"], os.environ["NIXM_SETTINGS_MACHINE"],
-                         caller, os.environ["NIXM_SETTINGS_LIB"])
+    cfg = backend.Config(os.environ["NIXOS_SETTINGS_FLAKE"], os.environ["NIXOS_SETTINGS_MACHINE"],
+                         caller, os.environ["NIXOS_SETTINGS_LIB"])
     try:
         request = json.loads(sys.argv[1])
     except (IndexError, ValueError):

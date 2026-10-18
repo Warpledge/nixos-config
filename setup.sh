@@ -875,7 +875,7 @@ person_questions() {
   u_gitemail[$name]=$answer
 
   say ""
-  say "Everyone starts with Zen, kitty, Helix, Zed, Nautilus, yazi, mpv, Steam and nixm Settings."
+  say "Everyone starts with Zen, kitty, Helix, Zed, Nautilus, yazi, mpv, Steam and NixOS Settings."
   say "Extras for $name:"
   pick picked "${apps[@]}"
   u_apps[$name]="${picked[*]%%|*}"

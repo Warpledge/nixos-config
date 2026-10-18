@@ -1,4 +1,4 @@
-"""nixm Settings: pick apps and system options from menus, then rebuild."""
+"""NixOS Settings: pick apps and system options from menus, then rebuild."""
 
 import grp
 import json
@@ -18,8 +18,8 @@ from gi.repository import Adw, Gdk, Gio, GLib, Gtk, Pango  # noqa: E402
 import backend  # noqa: E402
 import schema  # noqa: E402
 
-#--- The root helper (nixos/system/user/nixm-settings-helper.nix) for non-admins
-HELPER = "/run/current-system/sw/bin/nixm-settings-apply"
+#--- The root helper (nixos/system/user/nixos-settings-helper.nix) for non-admins
+HELPER = "/run/current-system/sw/bin/nixos-settings-apply"
 
 ANSI = re.compile(r"\x1b\[[0-9;?]*[ -/]*[@-~]|\x1b\][^\x07]*(\x07|\x1b\\)")
 
@@ -239,7 +239,7 @@ class RebuildDialog(Adw.Dialog):
 #--------------------------------------------------------------------#
 class Window(Adw.ApplicationWindow):
     def __init__(self, app, cfg):
-        super().__init__(application=app, title="nixm Settings", default_width=980, default_height=700,
+        super().__init__(application=app, title="NixOS Settings", default_width=980, default_height=700,
                          width_request=360, height_request=294)
         self.cfg = cfg
         self.state = None
@@ -370,7 +370,7 @@ class Window(Adw.ApplicationWindow):
             box.append(Gtk.Label(label="What's New", xalign=0, hexpand=True))
             box.append(Gtk.Label(label=str(len(self.new_items)), css_classes=["accent", "caption", "numeric"]))
             row = Gtk.ListBoxRow(child=box)
-            row.domain, row.page_index = "new", None
+            row.section, row.page_index = "new", None
             self.sidebar.append(row)
             self.stack.add_named(self._new_page(), "new")
         for i, page in enumerate(state.pages):
@@ -382,7 +382,7 @@ class Window(Adw.ApplicationWindow):
             box.append(count)
             self.counts.append((page, count))
             row = Gtk.ListBoxRow(child=box)
-            row.domain, row.page_index = page.domain, i
+            row.section, row.page_index = page.section, i
             self.page_rows.append(row)
             self.sidebar.append(row)
             self.page_index_now = i
@@ -421,7 +421,7 @@ class Window(Adw.ApplicationWindow):
         content.add_top_bar(self.banner)
         self.content_page = Adw.NavigationPage(title=state.pages[0].title, child=content)
 
-        self.split.set_sidebar(Adw.NavigationPage(title="nixm Settings", child=side))
+        self.split.set_sidebar(Adw.NavigationPage(title="NixOS Settings", child=side))
         self.split.set_content(self.content_page)
         if self.toasts.get_child() is not self.split:
             self.toasts.set_child(self.split)
@@ -430,10 +430,10 @@ class Window(Adw.ApplicationWindow):
         self._update()
 
     def _sidebar_header(self, row, before):
-        if row.domain == "new":
+        if row.section == "new":
             row.set_header(None)
-        elif before is None or before.domain != row.domain:
-            title = "This Computer" if row.domain == "machine" else "Your Apps and Account"
+        elif before is None or before.section != row.section:
+            title = {"computer": "This Computer", "personal": "Personal", "apps": "Apps"}[row.section]
             label = Gtk.Label(label=title, xalign=0, css_classes=["heading", "dim-label"],
                               margin_start=12, margin_top=12 if before else 6, margin_bottom=6)
             row.set_header(label)
@@ -731,7 +731,7 @@ class Window(Adw.ApplicationWindow):
         page, label = self.counts[i]
         flags = [self.changes.get((s.domain, s.path), self.state.value(self.cfg, s))
                  for g in page.groups for s in g.settings if s.kind == "bool"]
-        label.set_label(f"{sum(map(bool, flags))}/{len(flags)}" if len(flags) > 1 else "")
+        label.set_label(f"{sum(map(bool, flags))}/{len(flags)}" if flags else "")
 
     def _update(self):
         n = len(self.changes)
@@ -848,7 +848,7 @@ class Window(Adw.ApplicationWindow):
 
 class App(Adw.Application):
     def __init__(self):
-        super().__init__(application_id="dev.nixm.Settings", flags=Gio.ApplicationFlags.DEFAULT_FLAGS)
+        super().__init__(application_id="dev.nixosconfig.Settings", flags=Gio.ApplicationFlags.DEFAULT_FLAGS)
 
     def do_startup(self):
         Adw.Application.do_startup(self)

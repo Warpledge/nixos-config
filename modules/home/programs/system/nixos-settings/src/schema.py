@@ -56,6 +56,7 @@ class Page:
     title: str
     description: str = ""
     groups: list = field(default_factory=list)
+    section: str = ""  # sidebar group: computer, personal or apps (set by arrange)
 
 
 def humanize(key):
@@ -220,7 +221,9 @@ def make_setting(domain, path, b, values, choices, labels, doc, lead, header_tit
 
 
 def arrange(pages):
-    """Applies PAGE_TITLES and MOVES to the built pages, dropping any left empty."""
+    """Applies PAGE_TITLES and MOVES, drops pages left empty, sorts each page's
+    settings by name, and sorts the pages A-Z within their sidebar section:
+    computer-wide pages, personal ones without switches, then app pages."""
     moved = []
     for page in pages:
         page.title = PAGE_TITLES.get(page.title, page.title)
@@ -239,6 +242,16 @@ def arrange(pages):
             group = Group(group_title)
             page.groups.append(group)
         group.settings.append(s)
+    pages = [p for p in pages if any(g.settings for g in p.groups)]
     for page in pages:
         page.groups = [g for g in page.groups if g.settings]
-    return [p for p in pages if p.groups]
+        for group in page.groups:
+            group.settings.sort(key=lambda s: s.title.casefold())
+        if page.domain == "machine":
+            page.section = "computer"
+        elif any(s.kind == "bool" for g in page.groups for s in g.settings):
+            page.section = "apps"
+        else:
+            page.section = "personal"
+    order = {"computer": 0, "personal": 1, "apps": 2}
+    return sorted(pages, key=lambda p: (order[p.section], p.title.casefold()))

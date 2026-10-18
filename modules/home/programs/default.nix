@@ -21,7 +21,7 @@ user: {lib, ...}: {
       ./media/screen-capture.nix
 
       #--- Settings app (every user)
-      ./system/nixm-settings
+      ./system/nixos-settings
 
       #--- Shell
       ./shell/p10k/p10k.nix
