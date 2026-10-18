@@ -5,11 +5,13 @@ switches to it, printing progress for NixOS Settings: nix's JSON log lines
 
 Anyone on the machine may apply their own app settings: only template keys,
 with the template's kind of value, in their own file or their own block in
-this machine's file. Rebuilding as-is, and switching to an older version,
+the file of a machine that lists them. A change for another machine is only
+saved; that machine picks it up when it rebuilds. Rebuilding as-is, and switching to an older version,
 are for admins (wheel), who could run nixos-rebuild anyway.
 
-Usage: nixos-settings-apply '{"mode": "switch"|"boot", "thisMachineOnly": bool,
+Usage: nixos-settings-apply '{"mode": "switch"|"boot", "machine": name|null,
                               "changes": [[["media", "mpv"], true], ...]}'
+       (machine: whose block takes the changes; null for the caller's own file)
        nixos-settings-apply '{"rebuild": true, "mode": "switch"|"boot"|"auto"}'
        nixos-settings-apply '{"activate": "/nix/store/...", "mode": ...}'
        nixos-settings-apply '{"collectGarbage": true}'
@@ -319,7 +321,7 @@ def main():
     if mode not in ("switch", "boot", "auto"):
         refuse("bad request")
 
-    changes, system = None, None
+    changes, system, target = None, None, None
     collecting = request.get("collectGarbage") is True
     if request.get("clean") is True:
         pass
@@ -337,6 +339,9 @@ def main():
             refuse("only an admin can rebuild without changes")
     else:
         changes = user_changes(cfg, request.get("changes"))
+        target = request.get("machine")
+        if target is not None and not isinstance(target, str):
+            refuse("bad request")
 
     with open(LOCK, "w") as lock:
         try:
@@ -362,12 +367,18 @@ def main():
                 refuse(f"the settings files don't evaluate right now:\n{e}")
             if caller.pw_name not in state["resolved"]["users"]:
                 refuse(f"{caller.pw_name} isn't listed in machines/{cfg.machine}/settings.nix")
+            if target is not None and target not in state["userMachines"]:
+                refuse(f"{caller.pw_name} isn't listed in machines/{target}/settings.nix")
         old = None
         try:
             if changes:
                 emit(step="save", state="start")
-                old = backend.write(cfg, None, changes, bool(request.get("thisMachineOnly")))
+                old = backend.write(cfg, None, changes, target, state["userMachines"])
                 emit(step="save", state="done")
+                if target not in (None, cfg.machine):
+                    emit(result="ok", mode="saved",
+                         detail=f"Your changes take effect the next time {target} rebuilds.")
+                    return
             link = None
             if system is None:
                 system, link = build(cfg, caller.pw_name)

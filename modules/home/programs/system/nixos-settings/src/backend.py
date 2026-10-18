@@ -13,7 +13,8 @@ import nixfile
 import schema
 
 #--- Every machine through lib/settings.nix: the checks, this machine's
-#--- final settings, and which machines list this user
+#--- final settings, which machines list this user, and the user's final
+#--- settings on each of them
 EVAL = r"""
 {libPath, machine, user}: let
   lib = import libPath;
@@ -21,12 +22,14 @@ EVAL = r"""
   dirs = lib.filterAttrs (n: t: t == "directory" && !lib.hasPrefix "_" n) (builtins.readDir ./machines);
   names = lib.attrNames dirs;
   lists = m: ((import (./machines + "/${m}/settings.nix")).users or {}) ? ${user};
+  userMachines = lib.filter lists names;
 in {
   checked = map (m: (s.forMachine m).machine.name) names;
   resolved = (s.forMachine machine).machine;
   choices = s.choices // s.userChoices;
   listChoices = s.listChoices;
-  userMachines = lib.filter lists names;
+  inherit userMachines;
+  perMachine = lib.genAttrs userMachines (m: (s.forMachine m).machine.users.${user});
 }
 """
 
@@ -51,9 +54,9 @@ class Config:
             os.environ["NIXOS_SETTINGS_LIB"],
         )
 
-    def file(self, domain):
+    def file(self, domain, machine=None):
         if domain == "machine":
-            return os.path.join(self.flake, "machines", self.machine, "settings.nix")
+            return os.path.join(self.flake, "machines", machine or self.machine, "settings.nix")
         return os.path.join(self.flake, "users", self.user, "settings.nix")
 
 
@@ -195,13 +198,17 @@ class State:
     resolved: dict
     overrides: dict  # this machine's users.<user> block, as Python
     user_machines: list
+    per_machine: dict  # machine -> this user's final settings there
     lists: dict  # DATA_CHOICES name -> [(value, label)]
     new: list  # (domain, path, template value) for settings added since a file was made
     dms_entries: list  # dms.Entry, for search
 
-    def value(self, cfg, setting):
+    def value(self, cfg, setting, machine=None):
+        """The setting's value on this machine, or for a user setting on `machine`."""
         if setting.domain == "machine":
             return dig(self.resolved, setting.path)
+        if machine and machine in self.per_machine:
+            return dig(self.per_machine[machine], setting.path)
         return dig(self.resolved["users"][cfg.user], setting.path)
 
     def overridden(self, setting):
@@ -285,7 +292,7 @@ def load(cfg):
     machine_doc = nixfile.to_python(nixfile.parse(read("machines", cfg.machine, "settings.nix")).root)
     lists = {name: data_list(name) for name in set(schema.DATA_CHOICES.values())}
     overrides = dig(machine_doc, ["users", cfg.user]) or {}
-    return State(pages, machine, overrides, data["userMachines"], lists,
+    return State(pages, machine, overrides, data["userMachines"], data.get("perMachine") or {}, lists,
                  new_settings(cfg, overrides), dms.search_index(links, wm))
 
 
@@ -293,29 +300,38 @@ def writable(cfg):
     return all(os.access(cfg.file(d), os.W_OK) for d in ("machine", "user"))
 
 
-def write(cfg, state, changes, this_machine_only):
-    """Writes `changes` ({(domain, path): value}) and checks the result.
-    Returns the files' old text for undo; on a failed check the files are
-    put back and SettingsError says why."""
-    files = {d: cfg.file(d) for d in ("machine", "user")}
-    old = {d: slurp(f) for d, f in files.items()}
-    text = dict(old)
+def write(cfg, state, changes, machine, everywhere=()):
+    """Writes `changes` ({(domain, path): value}) and checks the result. User
+    settings go in `machine`'s block for this user, or with `machine` None in the
+    user's own file, cleared from the blocks of every machine in `everywhere`.
+    Returns the files' old text for undo; on a failed check the files are put
+    back and SettingsError says why."""
+    old, text = {}, {}
+
+    def edit(path, fn):
+        if path not in text:
+            old[path] = text[path] = slurp(path)
+        text[path] = fn(text[path])
+
+    block = ["users", cfg.user]
     for (domain, path), value in changes.items():
         path = list(path)
         if domain == "machine":
-            text["machine"] = nixfile.set_value(text["machine"], path, value)
-        elif this_machine_only:
-            text["machine"] = nixfile.set_value(text["machine"], ["users", cfg.user] + path, value)
+            edit(cfg.file("machine"), lambda t: nixfile.set_value(t, path, value))
+        elif machine:
+            edit(cfg.file("machine", machine), lambda t: nixfile.set_value(t, block + path, value))
         else:
-            text["user"] = nixfile.set_value(text["user"], path, value)
-            # A change for every computer still loses to this one's override
-            text["machine"] = nixfile.remove_value(text["machine"], ["users", cfg.user] + path, keep=2)
+            edit(cfg.file("user"), lambda t: nixfile.set_value(t, path, value))
+            # A change for every computer still loses to a computer's own block
+            for m in set(everywhere) | {cfg.machine}:
+                edit(cfg.file("machine", m), lambda t: nixfile.remove_value(t, block + path, keep=2))
 
-    changed = [d for d in files if text[d] != old[d]]
-    for d in changed:
-        save(files[d], text[d])
+    changed = [f for f in text if text[f] != old[f]]
+    old = {f: old[f] for f in changed}
+    for f in changed:
+        save(f, text[f])
     if shutil.which("alejandra") and changed:
-        subprocess.run(["alejandra", "-q"] + [files[d] for d in changed], capture_output=True)
+        subprocess.run(["alejandra", "-q"] + changed, capture_output=True)
     try:
         evaluate(cfg)
     except SettingsError:
@@ -338,6 +354,7 @@ def slurp(path):
 
 
 def restore(cfg, old):
-    for d, text in old.items():
-        if slurp(cfg.file(d)) != text:
-            save(cfg.file(d), text)
+    """Puts back the files write() returned, keyed by path."""
+    for path, text in old.items():
+        if slurp(path) != text:
+            save(path, text)

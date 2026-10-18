@@ -413,6 +413,8 @@ class RunView(Gtk.Box):
             freed = self.cleaned.get("freed")
             self._finish("ok", "Cleaned up", f"Freed {freed} of disk space." if freed
                          else "Nothing was old enough or unused, so no space was freed.")
+        elif result == "ok" and self.mode == "saved":
+            self._finish("ok", "Saved", self.result.get("detail", "Your changes were saved."))
         elif result == "ok" or (result is None and code == 0):
             boot = self.mode == "boot"
             self.restart = self.restart or boot

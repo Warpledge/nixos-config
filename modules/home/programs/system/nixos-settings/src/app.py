@@ -102,7 +102,7 @@ class Window(Adw.ApplicationWindow):
         self.settings = {}
         self.setters = {}
         self.page_of = {}
-        self.this_only = False
+        self.scope = None  # machine whose block takes user settings; "" for all
         self.admin = False
         self.direct = False
         self.helper = None
@@ -349,6 +349,11 @@ class Window(Adw.ApplicationWindow):
         self.rows, self.setters, self.page_of, self.builders = {}, {}, {}, {}
         self.scope_rows, self.counts = [], {}
         self.multi = len(state.user_machines) > 1
+        if not self.multi:
+            self.scope = ""
+        elif self.scope not in state.user_machines and self.scope != "":
+            self.scope = self.cfg.machine
+        self.scopes = [self.cfg.machine] + [m for m in state.user_machines if m != self.cfg.machine] + [""]
         # Admins write the files themselves; for anyone else the root helper does the
         # writing too, and takes only their own app settings
         self.admin = bool(state.resolved["users"][self.cfg.user].get("admin")) and in_wheel()
@@ -493,7 +498,7 @@ class Window(Adw.ApplicationWindow):
                                                                           if s.subtitle else page.title),
                                     activatable=True, subtitle_lines=1)
                 row.add_prefix(ui.app_image(s.icon) or Gtk.Image(icon_name=ui.first_icon(page.icon)))
-                value = self.changes.get(key, self.state.value(self.cfg, s))
+                value = self.changes.get(key, self._value(s))
                 row.add_suffix(Gtk.Label(label=shown(s, value), css_classes=["dim-label"],
                                          ellipsize=Pango.EllipsizeMode.END, max_width_chars=22))
                 row.add_suffix(Gtk.Image(icon_name="go-next-symbolic"))
@@ -593,12 +598,13 @@ class Window(Adw.ApplicationWindow):
         has_user = any(s.domain == "user" for g in page.groups for s in g.settings)
         if self.multi and has_user:
             group = Adw.PreferencesGroup()
-            everywhere = ", ".join(self.state.user_machines)
+            labels = [f"This computer ({m})" if m == self.cfg.machine else m if m else "All my computers"
+                      for m in self.scopes]
             row = Adw.ComboRow(
                 title="Change For",
-                subtitle=f"Your settings on all of {everywhere}, or on this one alone",
-                model=Gtk.StringList.new(["All my computers", f"Only this one ({self.cfg.machine})"]),
-                selected=int(self.this_only))
+                subtitle="Which of your computers these app settings are saved for",
+                model=Gtk.StringList.new(labels),
+                selected=self.scopes.index(self.scope))
             row.add_prefix(Gtk.Image(icon_name=ui.first_icon("computer-symbolic"), valign=Gtk.Align.CENTER))
             row.connect("notify::selected", self._scope)
             self.scope_rows.append(row)
@@ -661,11 +667,33 @@ class Window(Adw.ApplicationWindow):
         launcher = Gtk.FileLauncher.new(Gio.File.new_for_path(self.cfg.flake))
         launcher.launch(self, None, None, None)
 
+    def _value(self, s):
+        """What a row shows: user settings as they are on the computer picked in
+        Change For (this one when it's All)."""
+        return self.state.value(self.cfg, s, self.scope or self.cfg.machine)
+
     def _scope(self, row, _):
-        self.this_only = row.get_selected() == 1
+        scope = self.scopes[row.get_selected()]
+        if scope == self.scope:
+            return
+        self.scope = scope
         for other in self.scope_rows:
             if other is not row and other.get_selected() != row.get_selected():
                 other.set_selected(row.get_selected())
+        # Rows show the picked computer's values; pending changes stay and are
+        # measured against them
+        pending = dict(self.changes)
+        for key, setter in self.setters.items():
+            if key[0] == "user":
+                setter(pending.get(key, self._value(self.settings[key])))
+        for key, value in pending.items():
+            if key[0] == "user":
+                self.change(self.settings[key], value)
+
+    def _where(self):
+        if not self.scope:
+            return "all your computers"
+        return f"this computer ({self.scope}) only" if self.scope == self.cfg.machine else f"{self.scope} only"
 
     #--------------------------------------------------------------------#
     #-- Rows
@@ -688,7 +716,7 @@ class Window(Adw.ApplicationWindow):
 
     def _row(self, s, icons, page):
         key = (s.domain, s.path)
-        value = self.changes.get(key, self.state.value(self.cfg, s))
+        value = self.changes.get(key, self._value(s))
         kind = s.kind
         options = []
         if kind == "pick":
@@ -848,7 +876,7 @@ class Window(Adw.ApplicationWindow):
     #--------------------------------------------------------------------#
     def change(self, s, value):
         key = (s.domain, s.path)
-        if value == self.state.value(self.cfg, s):
+        if value == self._value(s):
             self.changes.pop(key, None)
         else:
             self.changes[key] = value
@@ -863,7 +891,7 @@ class Window(Adw.ApplicationWindow):
         if key not in self.counts:
             return
         page, label = self.counts[key]
-        flags = [self.changes.get((s.domain, s.path), self.state.value(self.cfg, s))
+        flags = [self.changes.get((s.domain, s.path), self._value(s))
                  for g in page.groups for s in g.settings if s.kind == "bool"]
         label.set_label(f"{sum(map(bool, flags))}/{len(flags)}" if flags else "")
 
@@ -882,7 +910,7 @@ class Window(Adw.ApplicationWindow):
             return
         for key in list(self.changes):
             if key in self.setters:
-                self.setters[key](self.state.value(self.cfg, self.settings[key]))
+                self.setters[key](self._value(self.settings[key]))
         # Rows not made yet, and What's New values staged as the row already shows them
         for key in list(self.changes):
             del self.changes[key]
@@ -897,7 +925,7 @@ class Window(Adw.ApplicationWindow):
         lines = []
         for key, value in self.changes.items():
             s = self.settings[key]
-            lines.append((s, shown(s, self.state.value(self.cfg, s)), shown(s, value)))
+            lines.append((s, shown(s, self._value(s)), shown(s, value)))
         return lines
 
     def _review(self):
@@ -914,7 +942,7 @@ class Window(Adw.ApplicationWindow):
 
             def revert(_, key=key, row=row, s=s):
                 if key in self.setters:
-                    self.setters[key](self.state.value(self.cfg, s))
+                    self.setters[key](self._value(s))
                 self.changes.pop(key, None)
                 if key in self.rows:
                     self.rows[key][1].set_visible(False)
@@ -927,7 +955,7 @@ class Window(Adw.ApplicationWindow):
             group.add(row)
         page.add(group)
         if self.multi and any(k[0] == "user" for k in self.changes):
-            where = f"this computer ({self.cfg.machine}) only" if self.this_only else "all your computers"
+            where = self._where()
             page.add(Adw.PreferencesGroup(description=f"Your app changes are saved for {where}."))
         view = Adw.ToolbarView(content=page)
         view.add_top_bar(Adw.HeaderBar())
@@ -948,16 +976,21 @@ class Window(Adw.ApplicationWindow):
             body.append(f"…and {len(self.changes) - 12} more")
         text = "\n".join(body)
         if self.multi and any(k[0] == "user" for k in self.changes):
-            where = f"this computer ({self.cfg.machine}) only" if self.this_only else "all your computers"
+            where = self._where()
             text += f"\n\nApp changes are saved for {where}."
         if restart:
             text += "\n\nKernel and window manager changes take effect after a restart."
         n = len(self.changes)
-        dialog = Adw.AlertDialog(heading=f"Apply {n} Change{'s' if n != 1 else ''}?", body=text)
+        elsewhere = self._elsewhere()
+        if elsewhere:
+            text += f" They take effect the next time {self.scope} rebuilds."
+        verb = "Save" if elsewhere else "Apply"
+        dialog = Adw.AlertDialog(heading=f"{verb} {n} Change{'s' if n != 1 else ''}?", body=text)
         dialog.add_response("cancel", "Cancel")
-        dialog.add_response("boot", "At Next Restart")
-        dialog.add_response("now", "Apply Now")
-        best = "boot" if restart else "now"
+        if not elsewhere:
+            dialog.add_response("boot", "At Next Restart")
+        dialog.add_response("now", "Save" if elsewhere else "Apply Now")
+        best = "boot" if restart and not elsewhere else "now"
         dialog.set_response_appearance(best, Adw.ResponseAppearance.SUGGESTED)
         dialog.set_default_response(best)
         dialog.set_close_response("cancel")
@@ -981,8 +1014,23 @@ class Window(Adw.ApplicationWindow):
         self.run_undo = None
         return view
 
+    def _elsewhere(self):
+        """Whether every pending change is for another computer, so nothing here
+        needs rebuilding."""
+        return bool(self.scope) and self.scope != self.cfg.machine and \
+            all(k[0] == "user" for k in self.changes)
+
     def _apply(self, mode):
-        changes, this_only = dict(self.changes), self.this_only
+        changes, scope = dict(self.changes), self.scope or None
+        elsewhere = self._elsewhere()
+        if self.direct and elsewhere:
+            def saved(_, err):
+                if err is not None:
+                    self.toast(f"Nothing was saved: {err}")
+                    return
+                self.reload(f"Saved for {scope}; it takes effect when {scope} rebuilds")
+            ui.run_async(lambda: backend.write(self.cfg, self.state, changes, scope), saved)
+            return
         if self.direct:
             view = self._start("Applying Changes", ["write", "auth", "build", "compare", "switch", "boot"],
                                "Changes applied")
@@ -997,11 +1045,13 @@ class Window(Adw.ApplicationWindow):
                 self.run_undo = lambda: (backend.restore(self.cfg, old), "Your settings are back how they were")[1]
                 view.set_undo("Undo My Changes", self.run_undo)
                 view.run(self._pkexec({"rebuild": True, "mode": mode}))
-            ui.run_async(lambda: backend.write(self.cfg, self.state, changes, this_only), written)
+            ui.run_async(lambda: backend.write(self.cfg, self.state, changes, scope,
+                                               self.state.user_machines), written)
             return
-        view = self._start("Applying Changes", ["auth", "save", "build", "compare", "switch", "boot"],
-                           "Changes applied")
-        request = {"mode": mode, "thisMachineOnly": this_only,
+        steps = ["auth", "save"] if elsewhere else ["auth", "save", "build", "compare", "switch", "boot"]
+        view = self._start("Saving Changes" if elsewhere else "Applying Changes", steps,
+                           f"Saved for {scope}" if elsewhere else "Changes applied")
+        request = {"mode": mode, "machine": scope,
                    "changes": [[list(path), value] for (_, path), value in changes.items()]}
         view.run(self._pkexec(request))
 
