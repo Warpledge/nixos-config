@@ -47,7 +47,9 @@
         # Aggressive PCIe link power states on battery (covers RTX 4070 PCI slot)
         PCIE_ASPM_ON_BAT = "powersupersave";
 
-        # Runtime power management for all PCI devices on battery
+        # Runtime power management for all PCI devices; "on" (TLP's AC default)
+        # keeps the 4070's audio function and PCIe port awake, so it never powers off
+        RUNTIME_PM_ON_AC = "auto";
         RUNTIME_PM_ON_BAT = "auto";
 
         # WiFi power saving on battery
