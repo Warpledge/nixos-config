@@ -64,8 +64,9 @@ in {
         binds = lib.mkMerge (map (n: let
             name = toString n;
           in {
-            "Mod+${name}" = lib.mkForce {action.focus-workspace = name;};
-            "Mod+Shift+${name}" = lib.mkForce {action.move-column-to-workspace = name;};
+            # Forcing the action alone keeps the cheatsheet title from binds.nix
+            "Mod+${name}".action = lib.mkForce {focus-workspace = name;};
+            "Mod+Shift+${name}".action = lib.mkForce {move-column-to-workspace = name;};
           })
           numbers);
 

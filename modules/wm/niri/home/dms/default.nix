@@ -96,45 +96,51 @@ in {
   #--------------------------------------------------------------------#
   programs.niri.settings.binds = let
     dms = action: ["dms" "ipc" "call"] ++ (lib.splitString " " action);
-    # Same, but still fires while the lock screen is up
+    # A DMS bind titled for the Mod+/ cheatsheet
+    dmsBind = title: action: {
+      action.spawn = dms action;
+      hotkey-overlay.title = title;
+    };
+    # Hardware keys: still fire while the lock screen is up, left off the cheatsheet
     dmsLocked = action: {
       action.spawn = dms action;
       allow-when-locked = true;
+      hotkey-overlay.hidden = true;
     };
   in {
     #--- DankMaterialShell Controls
-    "Mod+A".action.spawn = dms "spotlight toggle"; # Application Launcher
-    "Mod+V".action.spawn = dms "clipboardPlus togglePanel"; # Clipboard Manager
-    "Mod+P".action.spawn = dms "processlist toggle"; # Task Manager
-    "Mod+Comma".action.spawn = dms "settings toggle"; # Settings
-    "Mod+N".action.spawn = dms "notepad toggle"; # Notepad
-    "Mod+K".action.spawn = dms "powermenu toggle"; # Power Menu
-    # Browse Wallpapers
-    "Mod+W".action.spawn = dms (
+    "Mod+A" = dmsBind "App launcher" "spotlight toggle";
+    "Mod+V" = dmsBind "Clipboard history" "clipboardPlus togglePanel";
+    "Mod+P" = dmsBind "Task manager" "processlist toggle";
+    "Mod+Comma" = dmsBind "Shell settings" "settings toggle";
+    "Mod+N" = dmsBind "Notepad" "notepad toggle";
+    "Mod+K" = dmsBind "Power menu" "powermenu toggle";
+    "Mod+W" = dmsBind "Wallpapers" (
       if user.wallpaper == "engine"
       then "linuxWallpaperEngine picker"
       else "wallpaperCarousel toggle"
     );
-    "Mod+Shift+N".action.spawn = dms "night toggle"; # Night Mode Toggle
-    "Mod+L".action.spawn = dms "lock lock"; # Toggle lock screen
-    "Mod+I".action.spawn = dms "inhibit toggle"; # Toggle idle inhibit
-    "Mod+slash".action.spawn = dms "keybinds toggle niri"; # Show Keybind Cheatsheet
-    "Mod+R".action.spawn = ["dms" "restart"]; # Restart DMS
+    "Mod+Shift+N" = dmsBind "Night mode on / off" "night toggle";
+    "Mod+L" = dmsBind "Lock screen" "lock lock";
+    "Mod+I" = dmsBind "Keep awake on / off" "inhibit toggle";
+    "Mod+slash" = dmsBind "Show keybinds" "keybinds toggle niri";
+    "Mod+R" = {
+      action.spawn = ["dms" "restart"];
+      hotkey-overlay.title = "Restart shell";
+    };
 
     #--- Quick Capture: screenshots open in its editor
-    "Print".action.spawn = dms "quickCapture screenshot region edit"; # Region Select
-    # Focused Window
-    "Mod+Print".action.spawn = dms "quickCapture screenshot window edit";
-    # Focused Output
-    "Mod+Shift+Print".action.spawn = dms "quickCapture screenshot full edit";
-    "Ctrl+Print".action.spawn = dms "quickCapture screenshot all edit"; # All Outputs
-    # Scrolling Capture
-    "Mod+Ctrl+Print".action.spawn = dms "quickCapture screenshot scroll edit";
+    "Print" = dmsBind "Screenshot region" "quickCapture screenshot region edit";
+    "Mod+Print" = dmsBind "Screenshot window" "quickCapture screenshot window edit";
+    "Mod+Shift+Print" = dmsBind "Screenshot monitor" "quickCapture screenshot full edit";
+    "Ctrl+Print" = dmsBind "Screenshot all monitors" "quickCapture screenshot all edit";
+    "Mod+Ctrl+Print" =
+      dmsBind "Scrolling screenshot" "quickCapture screenshot scroll edit";
 
     #--- Quick Capture: recording
     # portal only: the gpu-screen-recorder screen/region modes capture via KMS,
     # which bypasses niri's block-out-from rules.
-    "Mod+End".action.spawn = dms "quickCapture recordToggle portal"; # Toggle Recording
+    "Mod+End" = dmsBind "Start / stop recording" "quickCapture recordToggle portal";
 
     #--- Audio controls
     "XF86AudioRaiseVolume" = dmsLocked "audio increment 3"; # Volume Up
@@ -143,9 +149,14 @@ in {
     "XF86AudioMicMute" = dmsLocked "audio micmute"; # Mute Microphone
 
     #--- Brightness controls
-    "XF86MonBrightnessUp".action.spawn = dms "brightness increment 5"; # Brightness Up
-    # Brightness Down
-    "XF86MonBrightnessDown".action.spawn = dms "brightness decrement 5";
+    "XF86MonBrightnessUp" = {
+      action.spawn = dms "brightness increment 5";
+      hotkey-overlay.hidden = true;
+    };
+    "XF86MonBrightnessDown" = {
+      action.spawn = dms "brightness decrement 5";
+      hotkey-overlay.hidden = true;
+    };
   };
 
   #--------------------------------------------------------------------#

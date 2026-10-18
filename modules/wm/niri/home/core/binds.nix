@@ -12,10 +12,21 @@
   #-- Niri Keybindings
   #--------------------------------------------------------------------#
   programs.niri.settings.binds = let
-    # A spawn bind that still fires while the DMS lock screen is up
+    # The title is what the Mod+/ cheatsheet (DMS) shows for the bind
+    bind = title: action: {
+      inherit action;
+      hotkey-overlay.title = title;
+    };
+    # Left out of the cheatsheet
+    hidden = action: {
+      inherit action;
+      hotkey-overlay.hidden = true;
+    };
+    # A hidden spawn bind that still fires while the DMS lock screen is up
     locked = cmd: {
       action.spawn = cmd;
       allow-when-locked = true;
+      hotkey-overlay.hidden = true;
     };
   in {
     #--- Media Player Controls
@@ -26,119 +37,129 @@
 
     #--- Applications
     # Screenshot binds live with the other DMS commands in dms/default.nix
-    "Mod+Return".action.spawn = ["kitty"];
+    "Mod+Return" = bind "Terminal" {spawn = ["kitty"];};
 
-    "Mod+Q".action.close-window = {};
-    "Mod+S".action.switch-preset-column-width = {};
-    "Mod+D".action.expand-column-to-available-width = {};
-    "Mod+F".action.maximize-column = {};
-    "Mod+Shift+F".action.fullscreen-window = {};
-    "Mod+G".action.maximize-window-to-edges = {};
-    "Mod+Space".action.toggle-window-floating = {};
-    "Mod+Shift+Space".action.switch-focus-between-floating-and-tiling = {};
+    "Mod+Q" = bind "Close window" {close-window = {};};
+    "Mod+S" = bind "Cycle column width" {switch-preset-column-width = {};};
+    "Mod+D" = bind "Fill empty space" {expand-column-to-available-width = {};};
+    "Mod+F" = bind "Maximize column" {maximize-column = {};};
+    "Mod+Shift+F" = bind "Fullscreen" {fullscreen-window = {};};
+    "Mod+G" = bind "Maximize to screen edges" {maximize-window-to-edges = {};};
+    "Mod+Space" = bind "Float / tile window" {toggle-window-floating = {};};
+    "Mod+Shift+Space" =
+      bind "Switch focus floating / tiled" {switch-focus-between-floating-and-tiling = {};};
     # Turn the window's opacity rule (rules.nix) off and on
-    "Mod+Shift+T".action.toggle-window-rule-opacity = {};
+    "Mod+Shift+T" = bind "Window transparency on / off" {toggle-window-rule-opacity = {};};
     # Cycle the blur and translucency presets (blur-presets.nix)
-    "Mod+T".action.spawn = "niri-blur-preset";
+    "Mod+T" = bind "Cycle blur preset" {spawn = "niri-blur-preset";};
     # Takes shortcuts back from an app that inhibits them
     "Mod+Escape" = {
       action.toggle-keyboard-shortcuts-inhibit = {};
       allow-inhibiting = false;
+      hotkey-overlay.title = "Take shortcuts back from app";
     };
 
-    "Mod+Alt+1".action.set-column-width = "33.333%";
-    "Mod+Alt+2".action.set-column-width = "50%";
-    "Mod+Alt+3".action.set-column-width = "66.667%";
+    "Mod+Alt+1" = bind "Column width 1/3" {set-column-width = "33.333%";};
+    "Mod+Alt+2" = bind "Column width 1/2" {set-column-width = "50%";};
+    "Mod+Alt+3" = bind "Column width 2/3" {set-column-width = "66.667%";};
 
-    "Mod+Minus".action.set-column-width = "-10%";
-    "Mod+Plus".action.set-column-width = "+10%";
-    "Mod+Shift+Minus".action.set-window-height = "-10%";
-    "Mod+Shift+Plus".action.set-window-height = "+10%";
+    "Mod+Minus" = bind "Narrower column" {set-column-width = "-10%";};
+    "Mod+Plus" = bind "Wider column" {set-column-width = "+10%";};
+    "Mod+Shift+Minus" = bind "Shorter window" {set-window-height = "-10%";};
+    "Mod+Shift+Plus" = bind "Taller window" {set-window-height = "+10%";};
 
-    "Mod+WheelScrollUp".action.focus-column-left = {};
-    "Mod+WheelScrollDown".action.focus-column-right = {};
-    "Mod+Shift+WheelScrollUp".action.focus-workspace-up = {};
-    "Mod+Shift+WheelScrollDown".action.focus-workspace-down = {};
+    "Mod+WheelScrollUp" = hidden {focus-column-left = {};};
+    "Mod+WheelScrollDown" = hidden {focus-column-right = {};};
+    "Mod+Shift+WheelScrollUp" = hidden {focus-workspace-up = {};};
+    "Mod+Shift+WheelScrollDown" = hidden {focus-workspace-down = {};};
 
     #--- Focus Window
-    "Mod+Left".action.focus-column-left = {};
-    "Mod+Right".action.focus-column-right = {};
+    "Mod+Left" = bind "Focus left" {focus-column-left = {};};
+    "Mod+Right" = bind "Focus right" {focus-column-right = {};};
     # Walk the windows of a stacked or tabbed column before leaving the workspace
-    "Mod+Up".action.focus-window-or-workspace-up = {};
-    "Mod+Down".action.focus-window-or-workspace-down = {};
+    "Mod+Up" = bind "Focus up / workspace above" {focus-window-or-workspace-up = {};};
+    "Mod+Down" =
+      bind "Focus down / workspace below" {focus-window-or-workspace-down = {};};
 
     #--- Window Movement
-    "Mod+Shift+Left".action.move-column-left = {};
-    "Mod+Shift+Right".action.move-column-right = {};
-    "Mod+Shift+Up".action.move-window-up-or-to-workspace-up = {};
-    "Mod+Shift+Down".action.move-window-down-or-to-workspace-down = {};
+    "Mod+Shift+Left" = bind "Move left" {move-column-left = {};};
+    "Mod+Shift+Right" = bind "Move right" {move-column-right = {};};
+    "Mod+Shift+Up" =
+      bind "Move up / to workspace above" {move-window-up-or-to-workspace-up = {};};
+    "Mod+Shift+Down" =
+      bind "Move down / to workspace below" {move-window-down-or-to-workspace-down = {};};
 
     #--- Monitors
-    "Mod+Alt+Left".action.focus-monitor-left = {};
-    "Mod+Alt+Right".action.focus-monitor-right = {};
-    "Mod+Alt+Shift+Left".action.move-column-to-monitor-left = {};
-    "Mod+Alt+Shift+Right".action.move-column-to-monitor-right = {};
+    "Mod+Alt+Left" = bind "Focus monitor left" {focus-monitor-left = {};};
+    "Mod+Alt+Right" = bind "Focus monitor right" {focus-monitor-right = {};};
+    "Mod+Alt+Shift+Left" = bind "Move to monitor left" {move-column-to-monitor-left = {};};
+    "Mod+Alt+Shift+Right" =
+      bind "Move to monitor right" {move-column-to-monitor-right = {};};
 
     #--- Column Stacking
     # Pull the neighbouring window into this column, or push this one out of it
-    "Mod+BracketLeft".action.consume-or-expel-window-left = {};
-    "Mod+BracketRight".action.consume-or-expel-window-right = {};
-    "Mod+Backslash".action.toggle-column-tabbed-display = {};
+    "Mod+BracketLeft" = bind "Stack / unstack left" {consume-or-expel-window-left = {};};
+    "Mod+BracketRight" =
+      bind "Stack / unstack right" {consume-or-expel-window-right = {};};
+    "Mod+Backslash" = bind "Tabbed column on / off" {toggle-column-tabbed-display = {};};
 
     #--- Window Resize
-    "Mod+Ctrl+Left".action.set-column-width = "-80";
-    "Mod+Ctrl+Right".action.set-column-width = "+80";
-    "Mod+Ctrl+Up".action.set-window-height = "-80";
-    "Mod+Ctrl+Down".action.set-window-height = "+80";
+    "Mod+Ctrl+Left" = bind "Shrink width" {set-column-width = "-80";};
+    "Mod+Ctrl+Right" = bind "Grow width" {set-column-width = "+80";};
+    "Mod+Ctrl+Up" = bind "Shrink height" {set-window-height = "-80";};
+    "Mod+Ctrl+Down" = bind "Grow height" {set-window-height = "+80";};
 
-    "Mod+Tab".action.toggle-overview = {};
-    "Mod+C".action.center-column = {};
-    "Mod+X".action.switch-preset-window-height = {};
-    "Mod+Shift+Z".action.reset-window-height = {};
+    "Mod+Tab" = bind "Overview" {toggle-overview = {};};
+    "Mod+C" = bind "Center column" {center-column = {};};
+    "Mod+X" = bind "Cycle window height" {switch-preset-window-height = {};};
+    "Mod+Shift+Z" = bind "Reset window height" {reset-window-height = {};};
 
     #--- Workspace Navigation (Number Keys)
-    "Mod+1".action.focus-workspace = 1;
-    "Mod+2".action.focus-workspace = 2;
-    "Mod+3".action.focus-workspace = 3;
-    "Mod+4".action.focus-workspace = 4;
-    "Mod+5".action.focus-workspace = 5;
-    "Mod+6".action.focus-workspace = 6;
-    "Mod+7".action.focus-workspace = 7;
-    "Mod+8".action.focus-workspace = 8;
-    "Mod+9".action.focus-workspace = 9;
+    # 2-9 are hidden so the cheatsheet lists the number keys once
+    "Mod+1" = bind "Go to workspace 1-9" {focus-workspace = 1;};
+    "Mod+2" = hidden {focus-workspace = 2;};
+    "Mod+3" = hidden {focus-workspace = 3;};
+    "Mod+4" = hidden {focus-workspace = 4;};
+    "Mod+5" = hidden {focus-workspace = 5;};
+    "Mod+6" = hidden {focus-workspace = 6;};
+    "Mod+7" = hidden {focus-workspace = 7;};
+    "Mod+8" = hidden {focus-workspace = 8;};
+    "Mod+9" = hidden {focus-workspace = 9;};
 
     #--- Move Window to Workspace (Number Keys)
-    "Mod+Shift+1".action.move-column-to-workspace = 1;
-    "Mod+Shift+2".action.move-column-to-workspace = 2;
-    "Mod+Shift+3".action.move-column-to-workspace = 3;
-    "Mod+Shift+4".action.move-column-to-workspace = 4;
-    "Mod+Shift+5".action.move-column-to-workspace = 5;
-    "Mod+Shift+6".action.move-column-to-workspace = 6;
-    "Mod+Shift+7".action.move-column-to-workspace = 7;
-    "Mod+Shift+8".action.move-column-to-workspace = 8;
-    "Mod+Shift+9".action.move-column-to-workspace = 9;
+    "Mod+Shift+1" = bind "Send window to workspace 1-9" {move-column-to-workspace = 1;};
+    "Mod+Shift+2" = hidden {move-column-to-workspace = 2;};
+    "Mod+Shift+3" = hidden {move-column-to-workspace = 3;};
+    "Mod+Shift+4" = hidden {move-column-to-workspace = 4;};
+    "Mod+Shift+5" = hidden {move-column-to-workspace = 5;};
+    "Mod+Shift+6" = hidden {move-column-to-workspace = 6;};
+    "Mod+Shift+7" = hidden {move-column-to-workspace = 7;};
+    "Mod+Shift+8" = hidden {move-column-to-workspace = 8;};
+    "Mod+Shift+9" = hidden {move-column-to-workspace = 9;};
 
     #--- Apps
-    "Mod+Shift+S".action.spawn = ["steam"];
-    "Mod+Shift+D" = lib.mkIf user.discord.goofcord {action.spawn = ["goofcord"];};
-    "Mod+Shift+H".action.spawn = ["heroic"];
-    "Mod+Shift+G" = lib.mkIf user.gaming.lutris {action.spawn = ["lutris"];};
-    "Mod+Shift+Y".action.spawn = ["freetube"];
+    "Mod+Shift+S" = bind "Steam" {spawn = ["steam"];};
+    "Mod+Shift+D" = lib.mkIf user.discord.goofcord (bind "Discord" {spawn = ["goofcord"];});
+    "Mod+Shift+H" = bind "Heroic" {spawn = ["heroic"];};
+    "Mod+Shift+G" = lib.mkIf user.gaming.lutris (bind "Lutris" {spawn = ["lutris"];});
+    "Mod+Shift+Y" = bind "FreeTube" {spawn = ["freetube"];};
     #--- Focuses the Zed window on the config, or opens one
-    "Mod+Z".action.spawn = [
-      "nirius"
-      "focus-or-spawn"
-      "--app-id"
-      "^dev\\.zed\\.Zed$"
-      "--title"
-      (lib.escapeRegex (baseNameOf machine.flakePath))
-      "zeditor"
-      machine.flakePath
-    ];
-    "Mod+B".action.spawn = ["zen-beta"];
-    "Mod+E".action.spawn = ["nautilus"];
-    "Mod+Shift+M".action.spawn = ["spotify"];
-    "Ctrl+Alt+Delete".action.spawn = ["resources"];
+    "Mod+Z" = bind "Zed on the config" {
+      spawn = [
+        "nirius"
+        "focus-or-spawn"
+        "--app-id"
+        "^dev\\.zed\\.Zed$"
+        "--title"
+        (lib.escapeRegex (baseNameOf machine.flakePath))
+        "zeditor"
+        machine.flakePath
+      ];
+    };
+    "Mod+B" = bind "Zen browser" {spawn = ["zen-beta"];};
+    "Mod+E" = bind "Files" {spawn = ["nautilus"];};
+    "Mod+Shift+M" = bind "Spotify" {spawn = ["spotify"];};
+    "Ctrl+Alt+Delete" = bind "Resources (system monitor)" {spawn = ["resources"];};
   };
 
   #--------------------------------------------------------------------#
