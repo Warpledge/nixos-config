@@ -6,10 +6,29 @@
   user,
   ...
 }: let
-  # The theme path in the mirrored file names one home folder; point it at this user's
+  # The theme path in the mirrored file names one home folder; point it at this user's.
+  # The cursor size follows Stylix (cursorSize in the machine's settings.nix).
+  mirrored = lib.importJSON ./settings.json;
   settings =
-    lib.importJSON ./settings.json
-    // {customThemeFile = "${config.xdg.configHome}/DankMaterialShell/themes/catppuccin/theme.json";};
+    mirrored
+    // {
+      customThemeFile = "${config.xdg.configHome}/DankMaterialShell/themes/catppuccin/theme.json";
+      cursorSettings = mirrored.cursorSettings // {inherit (config.stylix.cursor) size;};
+    }
+    // inputDefaults;
+  #--- What DMS writes to niri/dms/input.kdl until its Mouse & Touchpad and
+  #--- Keyboard pages change it. DMS leaves a flag out when it's off rather than
+  #--- writing `false`, so core/settings.nix must not set these.
+  inputDefaults = {
+    mouseAccelProfile = "flat";
+    touchpadAccelProfile = "adaptive";
+    touchpadScrollMethod = "two-finger";
+    touchpadTapToClick = true;
+    touchpadNaturalScroll = true;
+    touchpadDisableWhileTyping = true;
+    touchpadMiddleEmulation = true; # left+right click together = middle click
+    keyboardNumlock = true;
+  };
   # Same shape the DMS module would link read-only (distro/nix/home.nix)
   pluginSettings = (pkgs.formats.json {}).generate "plugin_settings.json" (
     lib.mapAttrs (name: p: {enabled = p.enable;} // config.dms.pluginSettings.${name} or {})
@@ -190,6 +209,7 @@ in {
     "binds"
     "colors"
     "cursor"
+    "input" # mouse, touchpad and keyboard pages; after hm.kdl, so they win
     "layout"
     "windowrules"
     "wpblur"

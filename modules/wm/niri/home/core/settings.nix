@@ -44,24 +44,21 @@ in {
       spawn-at-startup = lib.optional user.japanese.ime {command = ["fcitx5" "-d" "-r"];};
 
       #--- Input Configuration
+      # Pointer speed and acceleration, scrolling, tapping, disable-while-typing,
+      # middle-click emulation and Num Lock are DMS's (seeded in dms/default.nix),
+      # so its Mouse & Touchpad and Keyboard pages can turn them off too
       input = {
         keyboard = {
           xkb.layout = machine.keyboardLayout;
-          numlock = true;
         };
         touchpad = {
           click-method = "button-areas";
-          dwt = true; # disable-while-typing
           dwtp = true; # disable-while-trackpointing
-          natural-scroll = true;
-          scroll-method = "two-finger";
-          tap = true;
           tap-button-map = "left-right-middle";
-          middle-emulation = true; # left+right click together = middle click
-          accel-profile = "adaptive";
-        };
-        mouse = {
-          accel-profile = "flat";
+          # niri-flake turns these on by default; off here leaves them out of
+          # hm.kdl, so DMS's input.kdl decides
+          tap = false;
+          natural-scroll = false;
         };
         focus-follows-mouse = {
           enable = true;
