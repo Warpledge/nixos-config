@@ -220,6 +220,7 @@
         {app-id = "gcr-prompter";}
         {app-id = "file-roller";}
         {app-id = "org.gnome.FileRoller";}
+        {app-id = "org.kde.ark";}
         {app-id = "nm-connection-editor";}
         {app-id = "blueman-manager";}
         {app-id = "xdg-desktop-portal-gtk";}

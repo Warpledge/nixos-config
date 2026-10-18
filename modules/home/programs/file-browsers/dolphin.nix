@@ -9,6 +9,7 @@
 
   home.packages = with pkgs; [
     kdePackages.dolphin
+    kdePackages.ark # archives; adds Compress/Extract to Dolphin's context menu
   ];
 
   #--------------------------------------------------------------------#

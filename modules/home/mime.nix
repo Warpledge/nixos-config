@@ -24,7 +24,11 @@ with lib; let
     office = ["libreoffice.desktop"];
     pdf = ["org.gnome.Evince.desktop"];
     terminal = [chosen.terminal.desktop];
-    archive = ["org.gnome.FileRoller.desktop"];
+    #--- Ark with Dolphin, File Roller otherwise
+    archive =
+      if chosen.fileManager.name == "dolphin"
+      then ["org.kde.ark.desktop"]
+      else ["org.gnome.FileRoller.desktop"];
     discord = ["discord.desktop"];
     freetube = ["freetube.desktop"];
     #--- youtube-dispatch exists only with FreeTube on

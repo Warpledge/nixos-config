@@ -14,6 +14,7 @@
 
   #--- Floating: File Management
   "match:class ^(org.gnome.FileRoller)$, float on"
+  "match:class ^(org.kde.ark)$, float on"
   "match:class ^(file_progress)$, float on"
   "match:title ^(File Upload)$, float on"
   "match:title ^(File Operation Progress)$, float on"

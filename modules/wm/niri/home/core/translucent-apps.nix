@@ -9,6 +9,7 @@
   {app-id = "dev.zed.Zed";}
   {app-id = "org.gnome.Nautilus";}
   {app-id = "org.gnome.FileRoller";}
+  {app-id = "org.kde.ark";}
   {app-id = "org.kde.dolphin";}
   {app-id = "thunar";}
   {app-id = "org.pulseaudio.pavucontrol";}

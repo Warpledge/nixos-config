@@ -9,6 +9,7 @@ in [
   "match:class ^(dev.zed.Zed)$, ${opacityRule}"
   "match:class ^(org.gnome.Nautilus)$, ${opacityRule}"
   "match:class ^(org.gnome.FileRoller)$, ${opacityRule}"
+  "match:class ^(org.kde.ark)$, ${opacityRule}"
   "match:class ^(org.kde.dolphin)$, ${opacityRule}"
   "match:class ^(thunar)$, ${opacityRule}"
   "match:title ^(Volume Control)$, ${opacityRule}"
