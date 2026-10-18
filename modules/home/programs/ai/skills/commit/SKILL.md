@@ -1,7 +1,6 @@
 ---
 name: commit
-description: Commit the current changes in this public NixOS repo as the user, split into logical commits, after a secret and content scan. Run only when the user asks for a commit.
-disable-model-invocation: true
+description: Commit the current changes in this public NixOS repo as the user, split into logical commits, after a secret and content scan. Use it for every commit, including ones made without the user asking.
 ---
 
 # Commit
