@@ -486,6 +486,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | `Mod+Shift+G` | Lutris (only while it's turned on) |
 | `Mod+Shift+M` | Spotify |
 | `Mod+Shift+Y` | FreeTube |
+| `Mod+Shift+C` | NixOS Settings (focuses it when already open) |
 | `Ctrl+Alt+Delete` | Task manager (Resources) |
 
 #### Shell (DankMaterialShell)
@@ -600,6 +601,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | `Mod+Shift+G` | Lutris |
 | `Mod+Shift+M` | Spotify |
 | `Mod+Shift+Y` | FreeTube |
+| `Mod+Shift+C` | NixOS Settings (focuses it when already open) |
 
 #### Window Management
 

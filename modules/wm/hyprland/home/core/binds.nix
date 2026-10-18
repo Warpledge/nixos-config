@@ -29,6 +29,7 @@ in {
           (exec "SUPER + Z" "zeditor ${machine.flakePath}") # Zed on the config
           (exec "SUPER + B" "zen-beta") # Web Browser
           (exec "SUPER + E" "nautilus") # Files
+          (exec "SUPER + SHIFT + C" "nixos-settings") # Focuses it when already open
 
           #--- Gaming & XWayland Apps
           (exec "SUPER + SHIFT + S" "steam")

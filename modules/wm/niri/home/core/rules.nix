@@ -158,6 +158,15 @@
       default-window-height = {proportion = 0.7;};
     }
 
+    #--- NixOS Settings (Mod+Shift+C): floating and centered, as wide as its
+    #--- pages' fixed content width
+    {
+      matches = [{app-id = "^dev\\.nixosconfig\\.Settings$";}];
+      open-floating = true;
+      default-column-width = {fixed = 1080;};
+      default-window-height = {proportion = 0.88;};
+    }
+
     #--- Calculator
     {
       matches = [

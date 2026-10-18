@@ -83,6 +83,11 @@
   "match:class ^(zen-beta)$, match:title ^Extension: \\(Bitwarden.*, float on"
   "match:class ^(zen-beta)$, match:title ^Extension: \\(Bitwarden.*, size 553 762"
 
+  #--- Floating: NixOS Settings (mirrors niri), as wide as its pages
+  "match:class ^(dev\\.nixosconfig\\.Settings)$, float on"
+  "match:class ^(dev\\.nixosconfig\\.Settings)$, size 1080 1200"
+  "match:class ^(dev\\.nixosconfig\\.Settings)$, center on"
+
   #--- Centering: File Dialogs
   "match:title ^(Open File)(.*)$, center on"
   "match:title ^(Select a File)(.*)$, center on"

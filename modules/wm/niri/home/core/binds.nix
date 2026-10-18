@@ -160,6 +160,10 @@
     "Mod+E" = bind "Files" {spawn = ["nautilus"];};
     "Mod+Shift+M" = bind "Spotify" {spawn = ["spotify"];};
     "Ctrl+Alt+Delete" = bind "Resources (system monitor)" {spawn = ["resources"];};
+    #--- Focuses NixOS Settings, or opens it
+    "Mod+Shift+C" = bind "NixOS Settings" {
+      spawn = ["nirius" "focus-or-spawn" "--app-id" "^dev\\.nixosconfig\\.Settings$" "nixos-settings"];
+    };
   };
 
   #--------------------------------------------------------------------#
