@@ -11,12 +11,66 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gio, GLib, Gtk  # noqa: E402
+from gi.repository import Adw, Gdk, Gio, GLib, Gtk, Pango  # noqa: E402
 
 import backend  # noqa: E402
 import schema  # noqa: E402
 
 ANSI = re.compile(r"\x1b\[[0-9;?]*[ -/]*[@-~]|\x1b\][^\x07]*(\x07|\x1b\\)")
+
+#--- descriptions.json marks app names **like this** and cautions !!like this!!
+STRONG = re.compile(r"\*\*(.+?)\*\*")
+CAUTION = re.compile(r"!!(.+?)!!")
+
+#--- Page icons, by the first setting on the page
+ICONS = {
+    "hostName": "computer-symbolic",
+    "timeZone": "preferences-desktop-locale-symbolic",
+    "mullvad": "network-server-symbolic",
+    "git": "avatar-default-symbolic",
+    "browsers": "web-browser-symbolic",
+    "terminals": "utilities-terminal-symbolic",
+    "editors": "accessories-text-editor-symbolic",
+    "fileBrowsers": "folder-symbolic",
+    "media": "applications-multimedia-symbolic",
+    "wallpaper": "preferences-desktop-wallpaper-symbolic",
+    "graphics": "applications-graphics-symbolic",
+    "audio": "audio-x-generic-symbolic",
+    "office": "x-office-document-symbolic",
+    "security": "security-high-symbolic",
+    "system": "utilities-system-monitor-symbolic",
+    "scrcpy": "phone-symbolic",
+    "gaming": "applications-games-symbolic",
+    "discord": "user-available-symbolic",
+    "claude": "applications-science-symbolic",
+    "japanese": "input-keyboard-symbolic",
+}
+FALLBACK_ICON = "applications-system-symbolic"
+
+#--- Bolder row titles; colours stay the theme's
+CSS = "row label.title { font-weight: bold; }"
+
+
+def page_icon(page):
+    name = ICONS.get(page.groups[0].settings[0].path[0], FALLBACK_ICON)
+    display = Gdk.Display.get_default()
+    return name if display and Gtk.IconTheme.get_for_display(display).has_icon(name) else FALLBACK_ICON
+
+
+def theme_colors():
+    """The theme's accent and warning colours, read off labels styled with them."""
+    colors = {}
+    for name in ("accent", "warning"):
+        c = Gtk.Label(css_classes=[name]).get_color()
+        colors[name] = "#%02x%02x%02x" % (round(c.red * 255), round(c.green * 255), round(c.blue * 255))
+    return colors
+
+
+def rich(text, colors):
+    """Pango markup for description text, with its ** and !! marks coloured."""
+    text = GLib.markup_escape_text(text)
+    text = STRONG.sub(lambda m: f'<span weight="bold" foreground="{colors["accent"]}">{m.group(1)}</span>', text)
+    return CAUTION.sub(lambda m: f'<span weight="bold" foreground="{colors["warning"]}">{m.group(1)}</span>', text)
 
 
 def run_async(work, done):
@@ -223,11 +277,22 @@ class Window(Adw.ApplicationWindow):
         self.sidebar = Gtk.ListBox(css_classes=["navigation-sidebar"])
         self.sidebar.set_header_func(self._sidebar_header)
         self.stack = Gtk.Stack(transition_type=Gtk.StackTransitionType.CROSSFADE)
+        self.colors = theme_colors()
+        self.row_page, self.counts = {}, []
         for i, page in enumerate(state.pages):
-            row = Gtk.ListBoxRow(child=Gtk.Label(label=page.title, xalign=0, margin_top=4, margin_bottom=4))
+            box = Gtk.Box(spacing=10, margin_top=4, margin_bottom=4)
+            box.append(Gtk.Image(icon_name=page_icon(page)))
+            box.append(Gtk.Label(label=page.title, xalign=0, hexpand=True,
+                                 ellipsize=Pango.EllipsizeMode.END))
+            count = Gtk.Label(css_classes=["dim-label", "caption", "numeric"])
+            box.append(count)
+            self.counts.append((page, count))
+            row = Gtk.ListBoxRow(child=box)
             row.domain = page.domain
             self.sidebar.append(row)
+            self.page_index_now = i
             self.stack.add_named(self._page(page), str(i))
+            self._count(i)
         self.sidebar.connect("row-selected", self._select)
 
         side = Adw.ToolbarView(content=Gtk.ScrolledWindow(child=self.sidebar,
@@ -281,7 +346,17 @@ class Window(Adw.ApplicationWindow):
         self.split.set_show_content(True)
 
     def _page(self, page):
-        prefs = Adw.PreferencesPage(description=page.description)
+        prefs = Adw.PreferencesPage()
+        hero = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        hero.append(Gtk.Image(icon_name=page_icon(page), pixel_size=56, css_classes=["accent"]))
+        hero.append(Gtk.Label(label=page.title, css_classes=["title-1"], wrap=True,
+                              justify=Gtk.Justification.CENTER))
+        if page.description:
+            hero.append(Gtk.Label(label=page.description, css_classes=["dim-label"], wrap=True,
+                                  justify=Gtk.Justification.CENTER))
+        top = Adw.PreferencesGroup()
+        top.add(hero)
+        prefs.add(top)
         if page.domain == "user" and self.multi:
             group = Adw.PreferencesGroup()
             row = Adw.ComboRow(title="Change for", model=Gtk.StringList.new(
@@ -309,14 +384,16 @@ class Window(Adw.ApplicationWindow):
     def _row(self, s):
         key = (s.domain, s.path)
         self.settings[key] = s
+        self.row_page[key] = self.page_index_now
         value = self.state.value(self.cfg, s)
         kind = s.kind
         if kind == "timezone":
             kind = "choice" if self.state.timezones else "text"
-        subtitle = s.subtitle
+        subtitle = GLib.markup_escape_text(s.subtitle)
         if self.multi and self.state.overridden(s):
-            subtitle = f"{subtitle}\nSet for this computer only" if subtitle else "Set for this computer only"
-        common = dict(title=s.title, subtitle=subtitle, use_markup=False)
+            note = f'<span foreground="{self.colors["accent"]}">Set for this computer only</span>'
+            subtitle = f"{subtitle}\n{note}" if subtitle else note
+        common = dict(title=GLib.markup_escape_text(s.title), subtitle=subtitle, use_markup=True)
         # A described switch or dropdown becomes an expander whose arrow shows the text
         described = bool(s.description) and kind in ("bool", "choice")
         control = None
@@ -367,7 +444,7 @@ class Window(Adw.ApplicationWindow):
         return row
 
     def _description(self, text):
-        return Gtk.Label(label=text, wrap=True, xalign=0, css_classes=["dim-label"],
+        return Gtk.Label(label=rich(text, self.colors), use_markup=True, wrap=True, xalign=0,
                          margin_top=10, margin_bottom=10, margin_start=12, margin_end=12)
 
     def _list_row(self, s, items, common):
@@ -425,7 +502,15 @@ class Window(Adw.ApplicationWindow):
         else:
             self.changes[key] = value
         self.rows[key][1].set_visible(key in self.changes)
+        self._count(self.row_page[key])
         self._update()
+
+    def _count(self, i):
+        """Sidebar count of the switches turned on in page i, pending changes included."""
+        page, label = self.counts[i]
+        flags = [self.changes.get((s.domain, s.path), self.state.value(self.cfg, s))
+                 for g in page.groups for s in g.settings if s.kind == "bool"]
+        label.set_label(f"{sum(map(bool, flags))}/{len(flags)}" if len(flags) > 1 else "")
 
     def _update(self):
         n = len(self.changes)
@@ -512,6 +597,13 @@ class Window(Adw.ApplicationWindow):
 class App(Adw.Application):
     def __init__(self):
         super().__init__(application_id="dev.nixm.Settings", flags=Gio.ApplicationFlags.DEFAULT_FLAGS)
+
+    def do_startup(self):
+        Adw.Application.do_startup(self)
+        css = Gtk.CssProvider()
+        css.load_from_string(CSS)
+        Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), css,
+                                                  Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
     def do_activate(self):
         window = self.props.active_window or Window(self, backend.Config.from_env())
