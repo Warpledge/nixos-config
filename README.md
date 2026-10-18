@@ -22,12 +22,10 @@ The NixOS configuration behind my desktop and laptop, both daily driven since 20
 
 ## Use It on Your Machine
 
-Install NixOS first. The graphical installer works, disk encryption included, as long as the computer boots with UEFI. Then, logged in as the account the installer made:
+Install NixOS first. The graphical installer works, disk encryption included, as long as the computer boots with UEFI. Then, logged in as the account the installer made, paste this into a terminal (it stops if the clone fails):
 
 ```bash
-nix-shell -p git --run "git clone https://github.com/Warpledge/nixos-config ~/nixos-config"
-cd ~/nixos-config
-./setup.sh
+nix-shell -p git --run "git clone https://github.com/Warpledge/nixos-config ~/nixos-config" && cd ~/nixos-config && ./setup.sh
 ```
 
 `setup.sh` asks what to call the computer and who will use it, copies `machines/_template` and `users/_template` into a folder for each, and fills them in: the hardware config, the time zone, language and keyboard picked in the installer, drivers for the graphics card it finds, and the lines an encrypted disk needs to unlock. Everyone starts with Zen, kitty, Helix, Zed, Nautilus, yazi, mpv and Steam and picks extras from a list. The new files are staged with git, since a flake ignores untracked files. The repo then moves to `/etc/nixos-config`, where every admin on the computer can edit it (`~/nixos-config` stays as a link), and the system is built to start on the next boot.
