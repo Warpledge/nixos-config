@@ -147,7 +147,7 @@ then on in `users/warpledge/settings.nix` or the machine's file, and in
 6. Add it to the matching list under **Components** in `README.md`, including
    the link reference definition at the bottom of that file
 
-   **`README.md` is ~29 KB — never read it in full.** Locate the two regions
+   **`README.md` is ~35 KB — never read it in full.** Locate the two regions
    you need with grep, then edit those lines directly:
 
    ```bash
