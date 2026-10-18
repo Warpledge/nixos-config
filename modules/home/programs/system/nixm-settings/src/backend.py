@@ -115,6 +115,15 @@ def load(cfg):
         labels = {}
     pages = schema.build("machine", read("machines", "_template", "settings.nix"), data["choices"], labels)
     pages += schema.build("user", read("users", "_template", "settings.nix"), data["choices"], labels)
+    try:
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "descriptions.json")) as f:
+            descriptions = json.load(f)
+    except (OSError, ValueError):
+        descriptions = {}
+    for page in pages:
+        for group in page.groups:
+            for s in group.settings:
+                s.description = descriptions.get(".".join(s.path), "")
     machine_doc = nixfile.to_python(nixfile.parse(read("machines", cfg.machine, "settings.nix")).root)
     try:
         zones = subprocess.run(["timedatectl", "list-timezones"], capture_output=True, text=True).stdout.split()

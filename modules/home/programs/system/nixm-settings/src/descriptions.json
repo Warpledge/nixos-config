@@ -1,0 +1,66 @@
+{
+  "windowManager": "The window manager for everyone on this computer. Both start from the same login screen and use DankMaterialShell for the bar, launcher and lock screen. Takes effect after a restart.",
+  "kernel": "The Linux kernel this computer boots; setup.sh picks Zen. CachyOS compiles on this computer, which takes a long time, and needs a CPU with AVX2 (x86-64-v3). Takes effect after a restart.",
+  "cursor": "The mouse pointer: Bibata Modern Ice, or Catppuccin Mocha Mauve to match the rest of the desktop.",
+  "mullvad.enable": "Mullvad VPN over WireGuard, with multihop and DAITA. A kill switch blocks all traffic while the tunnel is down. Needs a Mullvad account.",
+  "mullvad.splitTunnel": "Apps switched on here always go around the VPN and use your normal connection.",
+  "ssh.enable": "Lets you log in to this computer from another device over SSH, with a key only: no passwords and no root login. fail2ban bans an address for 12 hours after 3 failed attempts. Add your public key under Account first, or there's no way in.",
+  "clamav.enable": "ClamAV antivirus: a background scanner, automatic virus-definition updates, and the ClamTK window for scanning files by hand.",
+  "docker.enable": "Docker and Docker Compose for running containers. Admins join the docker group.",
+  "suwayomi.enable": "A local manga reader with a web page at localhost:4567. Its launcher opens it in Helium after a password prompt, so turn on Helium too.",
+  "syncthing.enable": "Keeps folders in sync between your devices directly, peer to peer. Runs as the main user; its settings page is at 127.0.0.1:8384.",
+  "sunshine.enable": "Streams games from this computer to Moonlight apps on other devices on your home network. Its settings page is at https://localhost:47990.",
+
+  "ssh.authorizedKeys": "Public keys allowed to log in over SSH on a computer with the SSH server on. A public key isn't a secret, so it's safe in the repo.",
+
+  "browsers.zen": "Zen browser, set up with the Arkenfox and Securefox privacy tweaks.",
+  "browsers.helium": "Helium browser. It also opens the Syncthing and Suwayomi pages as app windows.",
+  "browsers.ferdium": "All your web messengers in one window; you pick the services inside the app.",
+  "terminals.kitty": "Kitty terminal. The file manager's \"open in terminal\" entry opens Kitty.",
+  "fileBrowsers.nautilus": "The regular file manager window, with an Open in Kitty entry in its right-click menu.",
+  "fileBrowsers.yazi": "A file manager that runs inside the terminal.",
+
+  "media.mpv": "The video player. The Twitch browser and Moku play their videos in it.",
+  "media.spotify": "Spotify, themed with Spicetify.",
+  "media.freetube": "Watch YouTube without an account; subscriptions stay on your computer. Close FreeTube before applying changes, or it overwrites its new settings when it exits.",
+  "media.videoTrimmer": "Cut a clip out of a video without re-encoding it.",
+  "media.constrict": "Re-encode a video so it fits a file size you choose.",
+  "media.moku": "Reader for manga, light novels and anime, with a button that opens the current episode in mpv. Built from source, so the first build is slow.",
+  "media.streamlinkTwitchGui": "Browse Twitch and watch streams in mpv, with no ads and no Twitch account; your follow list stays on this computer.",
+  "media.boorusama": "Browse booru image sites. Its data sits in an encrypted vault that the launcher unlocks with a password and locks again on exit.",
+  "media.tonkatsuBox": "Track games, films, anime, manga, books and music in one local database, with imports from Steam and AniList. Needs its files in ~/.local/opt first (docs/local/local-binary-installs.md).",
+
+  "wallpaper": "Carousel picks still images from the repo's wallpaper folder. Engine plays animated Wallpaper Engine scenes and videos from the Steam Workshop, and needs Wallpaper Engine bought on Steam. Mod+W opens the picker either way.",
+
+  "graphics.affinity": "Affinity Photo, Designer and Publisher (v3), running through Wine.",
+
+  "audio.reaper": "REAPER, a program for recording and mixing (a DAW), with the SWS and ReaPack extensions.",
+  "audio.guitarix": "Guitar amp simulator built as a chain of effects. Any guitar app also adds shared cabinet IRs, a tuner and qpwgraph for routing audio.",
+  "audio.tone3000": "The official NAM player; browse and load amp captures and IRs from the TONE3000 library inside the app.",
+  "audio.katanaFloorboard": "Edit the patches on a BOSS Katana MkII amp from your computer. Needs its files in ~/.local/opt first (docs/local/local-binary-installs.md).",
+
+  "office.thunderbird": "Email client.",
+  "office.obsidian": "Notes app that keeps your notes as Markdown files in folders called vaults.",
+  "office.homebank": "Personal accounting: label your transactions and see a running balance.",
+
+  "security.bleachbit": "Clears caches, logs and browser leftovers when you run it; nothing runs on a schedule.",
+  "security.keepassxc": "Offline password manager. Its vault file can be synced between devices with Syncthing.",
+
+  "system.resources": "System and process monitor: what's running and how much it uses.",
+  "system.nixmSettings": "This app.",
+  "scrcpy.enable": "Show and control an Android phone or tablet from your computer, over USB or wifi. Nothing gets installed on the device.",
+
+  "gaming.steam": "Steam, with GE-Proton for running Windows games. Installed for everyone on the computer once any user turns it on.",
+  "gaming.heroic": "Launcher for your Epic, GOG and Amazon games.",
+  "gaming.easyrpg": "Plays RPG Maker 2000/2003 games, plus a Tobira no Densetsu launcher upscaled in gamescope.",
+  "gaming.feedback": "Guitar rhythm game that plays Guitar Pro tabs through its own audio engine, with VST plugins and amp models, so your guitar signal is the game input.",
+  "gaming.rocksmith": "Sets up Rocksmith 2014 on Steam (Proton) to read your guitar through a BOSS Katana. A few install steps are done by hand: docs/gaming/rocksmith-2014.md.",
+  "gaming.ludusavi": "Backs up your game saves every day to ~/SyncBackups/<computer>/Ludusavi.",
+  "gaming.granblueRelinkMods": "RelinkModOrganizer for data mods and Reloaded-II for code mods, for Granblue Fantasy Relink. Both are installed by hand outside the repo.",
+
+  "discord.goofcord": "Discord with Vencord built in. Built from source, so the first build is slow.",
+  "discord.arrpc.enable": "Shows the Steam or Proton game you're playing on your Discord profile, through GoofCord.",
+
+  "japanese.ime": "Type Japanese (hiragana, katakana and kanji) with fcitx5 and Mozc.",
+  "japanese.vn": "Tools for raw Japanese visual novels: a launcher that runs games in a Japanese locale, and innoextract, cabextract and mdf2iso for unpacking them."
+}

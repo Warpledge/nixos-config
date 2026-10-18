@@ -29,6 +29,7 @@ class Setting:
     nullable: bool = False
     choices: list = field(default_factory=list)
     options: list = field(default_factory=list)  # known items of a list
+    description: str = ""  # from descriptions.json, shown when the row expands
 
 
 @dataclass

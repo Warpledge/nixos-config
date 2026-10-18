@@ -23,7 +23,7 @@
     buildInputs = [pkgs.gtk4 pkgs.libadwaita];
     installPhase = ''
       runHook preInstall
-      install -Dm644 -t $out/share/nixm-settings *.py
+      install -Dm644 -t $out/share/nixm-settings *.py descriptions.json
       makeWrapper ${python}/bin/python3 $out/bin/nixm-settings \
         --add-flags $out/share/nixm-settings/app.py \
         --set NIXM_SETTINGS_FLAKE ${lib.escapeShellArg machine.flakePath} \

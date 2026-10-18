@@ -313,22 +313,36 @@ class Window(Adw.ApplicationWindow):
         kind = s.kind
         if kind == "timezone":
             kind = "choice" if self.state.timezones else "text"
-        common = dict(title=s.title, subtitle=s.subtitle, use_markup=False)
+        subtitle = s.subtitle
+        if self.multi and self.state.overridden(s):
+            subtitle = f"{subtitle}\nSet for this computer only" if subtitle else "Set for this computer only"
+        common = dict(title=s.title, subtitle=subtitle, use_markup=False)
+        # A described switch or dropdown becomes an expander whose arrow shows the text
+        described = bool(s.description) and kind in ("bool", "choice")
+        control = None
 
-        if kind == "bool":
+        if kind == "bool" and described:
+            row = Adw.ExpanderRow(**common)
+            control = Gtk.Switch(active=bool(value), valign=Gtk.Align.CENTER)
+            control.connect("notify::active", lambda w, _: self.change(s, w.get_active()))
+        elif kind == "bool":
             row = Adw.SwitchRow(active=bool(value), **common)
             row.connect("notify::active", lambda r, _: self.change(s, r.get_active()))
         elif kind == "choice":
             options = s.choices if s.kind == "choice" else self.state.timezones
             if value not in options:
                 options = [value] + options
-            row = Adw.ComboRow(model=Gtk.StringList.new([choice_label(o) if s.kind == "choice" else o
-                                                         for o in options]),
-                               selected=options.index(value), **common)
+            model = Gtk.StringList.new([choice_label(o) if s.kind == "choice" else o for o in options])
+            if described:
+                row = Adw.ExpanderRow(**common)
+                control = Gtk.DropDown(model=model, selected=options.index(value), valign=Gtk.Align.CENTER)
+                picker = control
+            else:
+                row = picker = Adw.ComboRow(model=model, selected=options.index(value), **common)
             if len(options) > 12:
-                row.set_enable_search(True)
-                row.set_expression(Gtk.PropertyExpression.new(Gtk.StringObject, None, "string"))
-            row.connect("notify::selected", lambda r, _: self.change(s, options[r.get_selected()]))
+                picker.set_enable_search(True)
+                picker.set_expression(Gtk.PropertyExpression.new(Gtk.StringObject, None, "string"))
+            picker.connect("notify::selected", lambda w, _: self.change(s, options[w.get_selected()]))
         elif kind == "list":
             row = self._list_row(s, list(value or []), common)
         else:
@@ -341,17 +355,25 @@ class Window(Adw.ApplicationWindow):
             row.add_suffix(entry)
             row.set_activatable_widget(entry)
 
-        if self.multi and self.state.overridden(s):
-            row.add_suffix(Gtk.Label(label="This computer only", css_classes=["dim-label", "caption"],
-                                     valign=Gtk.Align.CENTER))
         marker = Gtk.Image(icon_name="document-edit-symbolic", visible=False, valign=Gtk.Align.CENTER,
                            tooltip_text="Changed; press Apply to use it")
+        # An expander packs suffixes right to left, so its control goes in first
+        if control is not None:
+            row.add_suffix(control)
         row.add_suffix(marker)
+        if described:
+            row.add_row(self._description(s.description))
         self.rows[key] = (row, marker)
         return row
 
+    def _description(self, text):
+        return Gtk.Label(label=text, wrap=True, xalign=0, css_classes=["dim-label"],
+                         margin_top=10, margin_bottom=10, margin_start=12, margin_end=12)
+
     def _list_row(self, s, items, common):
         row = Adw.ExpanderRow(**common)
+        if s.description:
+            row.add_row(self._description(s.description))
         if s.options:
             names = s.options + [x for x in items if x not in s.options]
             switches = []
