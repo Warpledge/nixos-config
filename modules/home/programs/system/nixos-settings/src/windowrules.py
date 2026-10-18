@@ -281,6 +281,16 @@ def match_pattern(match):
     return "  ".join(f"{k}={v}" for k, v in match.items())
 
 
+def app_icon(app_id, size):
+    """The app's own icon, else the generic app icon at the same size, so every
+    row's icon lines up."""
+    app = plain(app_id)
+    return (app and ui.app_image([f"{app}.desktop", app.lower()], size=size)
+            or ui.app_image(["application-x-executable"], size=size)
+            or Gtk.Image(icon_name=ui.first_icon("application-x-executable-symbolic"),
+                         pixel_size=size))
+
+
 def rule_title(rule):
     matches = rule.get("matches") or []
     if rule.get("name"):
@@ -638,12 +648,8 @@ class WindowRulesPage(Adw.PreferencesPage):
         matches, excludes = rule.get("matches") or [], rule.get("excludes") or []
         row = Adw.ExpanderRow(title=ui.esc(rule_title(rule)), subtitle=self._tags(rule))
         row.set_subtitle_lines(2)
-        icon = None
-        if len(matches) == 1 and "app-id" in matches[0]:
-            app = pretty(matches[0]["app-id"])
-            icon = ui.app_image([f"{app}.desktop", app.lower()], size=32)
-        row.add_prefix(icon or Gtk.Image(icon_name=GROUP[group_of(rule)][2], pixel_size=24,
-                                         css_classes=["dim-label"]))
+        one_app = len(matches) == 1 and "app-id" in matches[0]
+        row.add_prefix(app_icon(matches[0]["app-id"] if one_app else "", 32))
         if rule.get("note"):
             note = ui.label(rule["note"], ("dim-label",), margin_start=12, margin_end=12, margin_top=8,
                             margin_bottom=8)
@@ -674,9 +680,7 @@ class WindowRulesPage(Adw.PreferencesPage):
             row.set_subtitle(f"<tt>{ui.esc(match_pattern(match))}</tt>")
         if kind != "Matches":
             row.add_suffix(ui.chip(kind, "warning"))
-        app = pretty(match.get("app-id", ""))
-        icon = ui.app_image([f"{app}.desktop", app.lower()], size=24) if app else None
-        row.add_prefix(icon or Gtk.Image(icon_name="window-new-symbolic", css_classes=["dim-label"]))
+        row.add_prefix(app_icon(match.get("app-id", ""), 24))
         return row
 
     def _edit(self, index):
