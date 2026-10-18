@@ -21,6 +21,7 @@ in [
   "match:class ^(Zotero)$, ${opacityRule}"
   "match:class ^(io.github.alainm23.planify)$, ${opacityRule}"
   "match:class ^(dev.nixosconfig.Settings)$, ${opacityRule}"
+  "match:class ^(com.github.tchx84.Flatseal)$, ${opacityRule}"
   "match:class ^(file_progress)$, ${opacityRule}"
   "match:class ^(notification)$, ${opacityRule}"
   "match:class ^(download)$, ${opacityRule}"

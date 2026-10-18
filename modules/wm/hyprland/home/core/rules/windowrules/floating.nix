@@ -88,6 +88,11 @@
   "match:class ^(dev\\.nixosconfig\\.Settings)$, size 1080 1200"
   "match:class ^(dev\\.nixosconfig\\.Settings)$, center on"
 
+  #--- Floating: Flatseal, sized like NixOS Settings
+  "match:class ^(com\\.github\\.tchx84\\.Flatseal)$, float on"
+  "match:class ^(com\\.github\\.tchx84\\.Flatseal)$, size 1080 1200"
+  "match:class ^(com\\.github\\.tchx84\\.Flatseal)$, center on"
+
   #--- Centering: File Dialogs
   "match:title ^(Open File)(.*)$, center on"
   "match:title ^(Select a File)(.*)$, center on"

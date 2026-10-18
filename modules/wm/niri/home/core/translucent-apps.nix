@@ -28,6 +28,7 @@
   {app-id = "org.prismlauncher.PrismLauncher";}
   {app-id = "^org\\.gnome\\.Resources$";}
   {app-id = "^dev\\.nixosconfig\\.Settings$";}
+  {app-id = "^com\\.github\\.tchx84\\.Flatseal$";}
   {title = "Volume Control";}
   {title = "Open File";}
   {title = "File Upload";}
