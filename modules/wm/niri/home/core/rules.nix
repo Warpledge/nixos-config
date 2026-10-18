@@ -178,14 +178,6 @@
       default-window-height = {proportion = 0.88;};
     }
 
-    #--- GitKraken: floating and centered, sized like NixOS Settings
-    {
-      matches = [{app-id = "(?i)^gitkraken$";}];
-      open-floating = true;
-      default-column-width = {fixed = 1080;};
-      default-window-height = {proportion = 0.88;};
-    }
-
     #--- Flatseal: floating and centered, sized like NixOS Settings
     {
       matches = [{app-id = "^com\\.github\\.tchx84\\.Flatseal$";}];

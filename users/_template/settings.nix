@@ -61,7 +61,6 @@
   editors = {
     helix = true;
     zed = true;
-    gitkraken = false; # Git client: commit graph, pull and push
   };
 
   #--- File Browser Selection

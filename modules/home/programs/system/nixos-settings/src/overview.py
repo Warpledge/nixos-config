@@ -2,6 +2,7 @@
 switch back to, and shortcuts into the shell's own settings."""
 
 import os
+import re
 
 import gi
 
@@ -116,13 +117,13 @@ class Overview(Adw.PreferencesPage):
         folder.add_suffix(Gtk.Image(icon_name=ui.link_icon(), valign=Gtk.Align.CENTER, css_classes=["dim-label"]))
         folder.connect("activated", lambda _: window.open_folder())
         group.add(folder)
-        if GLib.find_program_in_path("gitkraken"):
+        if GLib.find_program_in_path("zeditor"):
             git = Adw.ActionRow(title="Manage Git", activatable=True,
-                                subtitle="Pull, commit and push the config folder in GitKraken")
-            git.add_prefix(Gtk.Image(icon_name=ui.first_icon("gitkraken", "vcs-normal", "folder-remote-symbolic"),
+                                subtitle="Pull, commit and push the config folder in Zed")
+            git.add_prefix(Gtk.Image(icon_name=ui.first_icon("dev.zed.Zed", "zed", "vcs-normal"),
                                      valign=Gtk.Align.CENTER))
             git.add_suffix(Gtk.Image(icon_name=ui.link_icon(), valign=Gtk.Align.CENTER, css_classes=["dim-label"]))
-            git.connect("activated", lambda _: self._open_gitkraken())
+            git.connect("activated", lambda _: self._open_zed())
             group.add(git)
         self.add(group)
 
@@ -166,11 +167,17 @@ class Overview(Adw.PreferencesPage):
                 group.add(row)
             self.add(group)
 
-    def _open_gitkraken(self):
+    def _open_zed(self):
+        """Focuses the Zed window on the config, or opens one, as Mod+Z does."""
+        flake = self.window.cfg.flake
+        argv = ["zeditor", flake]
+        if GLib.find_program_in_path("nirius"):
+            title = re.escape(os.path.basename(flake.rstrip("/")))
+            argv = ["nirius", "focus-or-spawn", "--app-id", r"^dev\.zed\.Zed$", "--title", title] + argv
         try:
-            Gio.Subprocess.new(["gitkraken", "--path", self.window.cfg.flake], Gio.SubprocessFlags.NONE)
+            Gio.Subprocess.new(argv, Gio.SubprocessFlags.NONE)
         except GLib.Error as e:
-            self.window.toast(f"Couldn't open GitKraken: {e.message}")
+            self.window.toast(f"Couldn't open Zed: {e.message}")
 
     #--------------------------------------------------------------------#
     #-- Update check
