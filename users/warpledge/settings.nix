@@ -51,6 +51,7 @@
   fileBrowsers = {
     nautilus = true;
     yazi = true;
+    dolphin = true;
   };
 
   #--- Default Apps
