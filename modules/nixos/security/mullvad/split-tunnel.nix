@@ -81,6 +81,11 @@
       # RateYourMusic and similar sites reject Mullvad exit IPs
       bin = "${pkgs.ferdium}/bin/ferdium";
     };
+    nixos-settings = {
+      home = true;
+      enable = true; # imported for every user, no toggle
+      bin = "${hm.nixos-settings.package}/bin/nixos-settings";
+    };
   };
 
   #--- The system entries are the same in every user's table
