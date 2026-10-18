@@ -21,8 +21,116 @@ people=() written=() person="" # who is being set up, the files written for them
 #--------------------------------------------------------------------#
 #-- Output & Prompts
 #--------------------------------------------------------------------#
-if [[ -t 1 ]]; then bold=$'\e[1m' plain=$'\e[0m'; else bold='' plain=''; fi
+if [[ -t 1 ]]; then
+  bold=$'\e[1m' plain=$'\e[0m' rev=$'\e[7m' dim=$'\e[2m'
+else
+  bold='' plain='' rev='' dim=''
+fi
 say() { printf '%s\n' "$*"; }
+
+#--- Arrow-key menus need a terminal on both ends; piped answers get plain prompts
+interactive() { [[ -t 0 && -t 1 ]]; }
+interactive && trap 'printf "\e[?25h"' EXIT # the menus hide the text cursor
+
+#--- Reads one key into REPLY: up, down, left, right, space, enter, or the character
+read_key() {
+  local k rest=""
+  IFS= read -rsn1 k || die "no answer, stopping"
+  case $k in
+    $'\e')
+      IFS= read -rsn2 -t 0.05 rest || true
+      case $rest in
+        '[A') REPLY=up ;;
+        '[B') REPLY=down ;;
+        '[C') REPLY=right ;;
+        '[D') REPLY=left ;;
+        *) REPLY=other ;;
+      esac
+      ;;
+    ' ') REPLY=space ;;
+    '') REPLY=enter ;;
+    $'\t') REPLY=right ;;
+    k) REPLY=up ;;
+    j) REPLY=down ;;
+    *) REPLY=$k ;;
+  esac
+}
+
+#--- menu <multi|single>: arrow-key list over menu_items ("Group|Label", an
+#--- empty group for none). multi: Space ticks, menu_on holds 0/1 per item.
+#--- single: the cursor starts on item menu_start and menu_pick gets the choice.
+menu() {
+  local mode=$1 n=${#menu_items[@]} i row r=-1 top=0 height drawn=0 last="" group mark
+  local lines=() idx=()
+  for ((i = 0; i < n; i++)); do
+    group=${menu_items[i]%%|*}
+    if [[ -n $group && $group != "$last" ]]; then
+      lines+=("$group") idx+=(-1) last=$group
+    fi
+    [[ $mode == single && $i == "${menu_start:-0}" ]] && r=${#lines[@]}
+    ((r < 0)) && [[ $mode == multi ]] && r=${#lines[@]}
+    lines+=("${menu_items[i]#*|}") idx+=("$i")
+  done
+  local total=${#lines[@]}
+  height=$(($(tput lines 2>/dev/null || echo 24) - 4))
+  ((height > total)) && height=$total
+  ((height < 5)) && height=5 && ((height > total)) && height=$total
+
+  _menu_move() {
+    local x=$r
+    while true; do
+      x=$((x + $1))
+      ((x < 0 || x >= total)) && return
+      ((idx[x] >= 0)) && r=$x && return
+    done
+  }
+  _menu_draw() {
+    ((drawn)) && printf '\e[%dA' "$drawn"
+    ((r < top)) && top=$r
+    ((r > 0 && idx[r - 1] < 0 && r - 1 < top)) && top=$((r - 1)) # keep its group heading
+    ((r >= top + height)) && top=$((r - height + 1))
+    for ((row = top; row < top + height; row++)); do
+      printf '\e[2K'
+      if ((idx[row] < 0)); then
+        printf '  %s%s%s\n' "$bold" "${lines[row]}" "$plain"
+        continue
+      fi
+      if [[ $mode == multi ]]; then
+        ((menu_on[idx[row]])) && mark='[x]' || mark='[ ]'
+      else
+        ((row == r)) && mark='(*)' || mark='( )'
+      fi
+      if ((row == r)); then
+        printf '  %s> %s %s%s\n' "$rev" "$mark" "${lines[row]}" "$plain"
+      else
+        printf '    %s %s\n' "$mark" "${lines[row]}"
+      fi
+    done
+    printf '\e[2K%s' "$dim"
+    if [[ $mode == multi ]]; then
+      printf 'Up/Down: move   Space: tick or untick   Enter: done'
+    else
+      printf 'Up/Down: move   Enter: choose'
+    fi
+    ((top + height < total)) && printf '   (more below)'
+    printf '%s\n' "$plain"
+    drawn=$((height + 1))
+  }
+
+  printf '\e[?25l'
+  while true; do
+    _menu_draw
+    read_key
+    case $REPLY in
+      up) _menu_move -1 ;;
+      down) _menu_move 1 ;;
+      space) [[ $mode == multi ]] && menu_on[idx[r]]=$((1 - menu_on[idx[r]])) ;;
+      enter) break ;;
+    esac
+  done
+  printf '\e[%dA\e[J\e[?25h' "$drawn" # the caller prints what was picked
+  menu_pick=${idx[r]}
+}
 section() { printf '\n%s== %s ==%s\n' "$bold" "$*" "$plain"; }
 die() {
   printf '\nsetup.sh: %s\n' "$*" >&2
@@ -36,9 +144,31 @@ ask() {
   printf -v "$1" '%s' "${reply:-${3:-}}"
 }
 
-#--- confirm <question> <y|n default>
+#--- confirm <question> <y|n default>: Left/Right between Yes and No, or y/n
 confirm() {
-  local reply hint="y/N"
+  local reply hint="y/N" no=1
+  if interactive; then
+    [[ $2 == y ]] && no=0
+    printf '%s\n\e[?25l' "$1"
+    while true; do
+      if ((no)); then
+        printf '\r\e[2K    Yes   %s No %s' "$rev" "$plain"
+      else
+        printf '\r\e[2K   %s Yes %s   No ' "$rev" "$plain"
+      fi
+      printf '   %sLeft/Right, then Enter%s' "$dim" "$plain"
+      read_key
+      case $REPLY in
+        left | right) no=$((1 - no)) ;;
+        y | Y) no=0 && break ;;
+        n | N) no=1 && break ;;
+        enter) break ;;
+      esac
+    done
+    ((no)) && reply=No || reply=Yes
+    printf '\r\e[2K    %s%s%s\n\e[?25h' "$bold" "$reply" "$plain"
+    return "$no"
+  fi
   [[ $2 == y ]] && hint="Y/n"
   while true; do
     read -r -p "$1 [$hint] " reply || die "no answer, stopping"
@@ -49,11 +179,27 @@ confirm() {
   done
 }
 
-#--- pick <result-array> <"Group|setting.path|Label">...: numbered checklist
+#--- pick <result-array> <"Group|setting.path|Label">...: checklist, all unticked
 pick() {
   local -n chosen=$1
   shift
   local i=1 last="" item group rest reply n bad
+  if interactive; then
+    menu_items=() menu_on=() chosen=()
+    for item in "$@"; do
+      rest=${item#*|}
+      menu_items+=("${item%%|*}|${rest#*|}") menu_on+=(0)
+    done
+    menu multi
+    for ((n = 0; n < $#; n++)); do
+      ((menu_on[n])) || continue
+      item=${*:n+1:1}
+      chosen+=("${item#*|}") # setting.path|Label
+      say "  [x] ${item##*|}"
+    done
+    ((${#chosen[@]})) || say "  (none)"
+    return
+  fi
   for item in "$@"; do
     group=${item%%|*} rest=${item#*|}
     [[ $group != "$last" ]] && printf '  %s\n' "$group" && last=$group
@@ -73,6 +219,34 @@ pick() {
     done
     ((bad == 0)) && break
     say "Use numbers from 1 to $((i - 1))."
+  done
+}
+
+#--- choose <var> <question> <default value> <"value|Label">...: one of a list
+choose() {
+  local -n _choice=$1
+  local question=$2 default=$3 item i=0 values=()
+  shift 3
+  say "$question"
+  if interactive; then
+    menu_items=() menu_start=0
+    for item in "$@"; do
+      values+=("${item%%|*}") menu_items+=("|${item#*|}")
+      [[ ${item%%|*} == "$default" ]] && menu_start=$i
+      i=$((i + 1))
+    done
+    menu single
+    _choice=${values[menu_pick]}
+    say "  (*) ${menu_items[menu_pick]#|}"
+    return
+  fi
+  for item in "$@"; do
+    values+=("${item%%|*}")
+    say "  ${item%%|*}: ${item#*|}"
+  done
+  while true; do
+    ask _choice "Type one of: ${values[*]}" "$default"
+    [[ " ${values[*]} " == *" $_choice "* ]] && return
   done
 }
 
@@ -293,10 +467,10 @@ new_user_file() {
   for item in "${picked[@]}"; do
     set_setting "$file" "${item%%|*}" true
   done
-  say "Wallpapers: still images from the repo, or animated ones from Wallpaper Engine."
-  if confirm "Use Wallpaper Engine for $name (needs it bought and installed on Steam)?" n; then
-    set_setting "$file" wallpaper '"engine"'
-  fi
+  choose answer "Wallpapers for $name (Mod+W opens the picker):" carousel \
+    "carousel|Still images from the repo (Wallpaper Carousel)" \
+    "engine|Animated Wallpaper Engine wallpapers (needs Wallpaper Engine bought on Steam)"
+  [[ $answer == engine ]] && set_setting "$file" wallpaper '"engine"'
   written+=("$file")
 }
 
@@ -389,10 +563,9 @@ new_machine() {
   ask keymap "Keyboard layout on the text console and disk password prompt" "${keymap:-$layout}"
 
   section "Desktop"
-  while true; do
-    ask wm "Window manager, for everyone on this computer (niri or hyprland)" niri
-    [[ $wm == niri || $wm == hyprland ]] && break
-  done
+  choose wm "Window manager, for everyone on this computer:" niri \
+    "niri|niri: windows in a row that scrolls sideways (the most worked-on setup here)" \
+    "hyprland|Hyprland: windows tile to fill the screen"
   #--- The template's zen kernel stays: it comes from the binary cache, and
   #--- cachyos would compile on this computer
   say "Kernel: zen. Another one can be picked later with kernel in machines/$name/settings.nix."
@@ -518,19 +691,16 @@ build_later() {
 }
 
 add_user() {
-  local machine f known=() m main
+  local machine f known=() items=() m main
   for m in machines/*/; do
     m=${m%/} m=${m#machines/}
-    [[ $m == _* ]] || known+=("$m")
+    [[ $m == _* ]] || known+=("$m") items+=("$m|$m")
   done
   ((${#known[@]})) || die "no machines yet; run ./setup.sh first"
+  section "Add a person"
   m=$(hostname)
   [[ -d machines/$m ]] || m=${known[0]}
-  section "Add a person"
-  while true; do
-    ask machine "Which machine (${known[*]})" "$m"
-    [[ " ${known[*]} " == *" $machine "* ]] && break
-  done
+  choose machine "Which machine?" "$m" "${items[@]}"
   f=machines/$machine/settings.nix
 
   #--- Two or more users need mainUser written down
