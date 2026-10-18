@@ -37,6 +37,7 @@ Afterwards:
 - **Apps:** each person's `users/<name>/settings.nix`, then `nixm rebuild`
 - **Services and hardware:** the machine's `machines/<name>/settings.nix` and `default.nix`
 - **Another person:** `./setup.sh add-user`
+- **Reinstalling a machine already in the repo:** run `./setup.sh` and pick it; it keeps the machine's settings and takes the new install's disks
 - **A clone set up before the move:** `./setup.sh share` moves it to `/etc/nixos-config`
 - **Every setting:** listed with a comment in the two `_template/settings.nix` files; anything your copy leaves out is off
 

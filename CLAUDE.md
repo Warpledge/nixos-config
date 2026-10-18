@@ -145,7 +145,7 @@ Gotchas. Grep the option name before assuming which file owns it:
 - `machines/<name>/` — `default.nix` (machine entry), `settings.nix`, `hardware/` (`gpu.nix`, `hardware-configuration.nix`), `wm/<wm>.nix` (per-WM machine overrides for every user: monitors, GPU env vars, autostart, the desktop's DMS bars)
 - `machines/_template/` and `users/_template/` — what `setup.sh` copies; their `settings.nix` files are also the full setting lists and the defaults. `machines/_template/hardware/hardware-configuration.nix` throws until it's replaced
 - `users/<name>/settings.nix` — one person's account and apps (`users/warpledge/` for the user)
-- `setup.sh` — sets up a new computer (moves the clone to `/etc/nixos-config` with a link at the old place, `machines/<name>/` from the template, `hardware-configuration.nix`, locale and keyboard from the installer's `configuration.nix`, disk-unlock lines into `hardware/boot.nix`, GPU from sysfs, the zen kernel without asking (cachyos has no binary cache, so it compiles locally), a `users/<name>/` per new person, then `nixos-rebuild boot`), `add-user`, `build`, and `share` (that move alone, for a clone set up before it). It stages its files with git and asks before anything that needs sudo
+- `setup.sh` — sets up a new computer (moves the clone to `/etc/nixos-config` with a link at the old place, `machines/<name>/` from the template, `hardware-configuration.nix`, locale and keyboard from the installer's `configuration.nix`, disk-unlock lines into `hardware/boot.nix`, GPU from sysfs, the zen kernel without asking (cachyos has no binary cache, so it compiles locally), a `users/<name>/` per new person, then `nixos-rebuild boot`; or a reinstall of a machine already in `machines/`, which keeps its settings and replaces only `hardware-configuration.nix`, `hardware/boot.nix` and, if you agree, `stateVersion`), `add-user`, `build`, and `share` (that move alone, for a clone set up before it). It stages its files with git and asks before anything that needs sudo
 - `machines/legion/` also has `hardware/swapfile.nix` and `minecraft-servers/` (GTNH + TerraFirmaGreg server definitions, plus `mcservers.nix`, an fzf picker over them). `minecraft-servers/` is a **home-manager** module injected from `machines/legion/default.nix` via `home-manager.users.${machine.mainUser}.imports`, not a NixOS module, since the servers live in the main user's `~/Documents`.
 
 ### Where to place things
@@ -203,7 +203,7 @@ into place.
 
 **Add a system service:** same flow, but the toggle goes in `machines/_template/settings.nix` (off) and the machine's `settings.nix`, the module in `modules/nixos/services/<category>/<name>.nix`, the import (`lib.optionals machine.<name>.enable [...]`) in `modules/nixos/default.nix`, and its entry in the `services` list of `setup.sh`.
 
-**New computer or person:** `./setup.sh` on the new computer, `./setup.sh add-user` for a person. It's for people installing this config; don't run it here (its last steps use sudo and `nixos-rebuild`).
+**New computer, reinstall or person:** `./setup.sh` on the new computer (it offers to reinstall a machine already in `machines/` instead), `./setup.sh add-user` for a person. It's for people installing this config; don't run it here (its last steps use sudo and `nixos-rebuild`).
 
 **Switch WM:** change `windowManager` in the machine's `settings.nix`, then hand back for the rebuild.
 

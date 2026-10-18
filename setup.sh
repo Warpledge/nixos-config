@@ -5,7 +5,8 @@
 # Run from the cloned repo, as your normal user, on an installed NixOS:
 #   ./setup.sh            set up this computer: machines/<name>/ from the
 #                         template, users/<you>/ for each person, then a
-#                         build that starts on the next boot
+#                         build that starts on the next boot; or reinstall
+#                         a machine already in machines/ on new disks
 #   ./setup.sh add-user   add a person to a machine that is already set up
 #   ./setup.sh build [machine]   build a machine set up earlier, for the next boot
 #   ./setup.sh share      move this clone to /etc/nixos-config, where every
@@ -14,7 +15,7 @@
 # repo (accounts, the build, a reboot) waits for a yes and runs with sudo.
 set -euo pipefail
 
-repo=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+repo=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P) # the real path, not ~/nixos-config's link
 cd "$repo"
 nixos_dir=${SETUP_NIXOS_DIR:-/etc/nixos} # where the NixOS installer wrote its config
 nix_flags=(--extra-experimental-features "nix-command flakes")
@@ -295,7 +296,8 @@ set_setting() {
     }
     END { exit hits == 1 ? 0 : 1 }
   ' "$1" >"$tmp"; then
-    mv "$tmp" "$1"
+    cat "$tmp" >"$1" # rewrites in place, keeping its mode, owner and ACL
+    rm -f "$tmp"
   else
     rm -f "$tmp"
     die "could not find the setting $2 in $1"
@@ -311,7 +313,8 @@ add_line_after() {
     !done && $0 ~ ENVIRON["AFTER"] { print ENVIRON["LINE"]; done = 1 }
     END { exit done ? 0 : 1 }
   ' "$1" >"$tmp"; then
-    mv "$tmp" "$1"
+    cat "$tmp" >"$1" # rewrites in place, keeping its mode, owner and ACL
+    rm -f "$tmp"
   else
     rm -f "$tmp"
     die "no line matching $2 in $1"
@@ -513,6 +516,15 @@ create_accounts() {
   done
 }
 
+#--- machine_users <settings.nix>: the logins in its `users = {` block
+machine_users() {
+  awk '
+    /^  users = \{/ { inside = 1; next }
+    inside && /^  \}/ { exit }
+    inside && /^    [a-z_][a-z0-9_-]* = \{/ { print $1 }
+  ' "$1"
+}
+
 #--- NIX_CONFIG for a build on a system that doesn't have this config's
 #--- caches (or flakes) turned on yet. Evaluating it checks the config too.
 build_nix_config() {
@@ -533,17 +545,39 @@ build_machine() {
 #-- Modes
 #--------------------------------------------------------------------#
 new_machine() {
-  local name hw state_version tz locale layout keymap wm picked=() item main key boot_lines f
+  local name state_version tz locale layout keymap wm picked=() item main key f
 
   section "This computer"
   [[ -d /sys/firmware/efi ]] || die "this computer booted without UEFI; the config boots with systemd-boot, which needs it"
+  #--- Only a machine that lists this login is offered for reinstall, so a
+  #--- clone of someone else's repo can't overwrite their machines
+  local m existing=() others=()
+  for m in machines/*/; do
+    m=${m%/} m=${m#machines/}
+    [[ $m == _* ]] && continue
+    if machine_users "machines/$m/settings.nix" | grep -qx "$USER"; then
+      existing+=("$m|Reinstall $m: keep its settings, use this install's disks")
+    else
+      others+=("$m")
+    fi
+  done
+  if ((${#others[@]})); then
+    say "machines/ also has: ${others[*]}. They don't list $USER, so only one of their own users can reinstall them."
+  fi
+  if ((${#existing[@]})); then
+    choose m "Set this computer up as:" new "new|A new machine" "${existing[@]}"
+    [[ $m == new ]] || {
+      reinstall_machine "$m"
+      return
+    }
+  fi
   say "A name for this computer in the config (its folder in machines/, and its hostname)."
   while true; do
     ask name "Machine name" "$(hostname)"
     if [[ ! $name =~ ^[a-z0-9][a-z0-9-]{0,62}$ ]]; then
       say "Use lowercase letters, digits and - (no spaces)."
     elif [[ -e machines/$name ]]; then
-      say "machines/$name already exists. Pick another name, or run ./setup.sh add-user to add someone to it."
+      say "machines/$name already exists. Pick another name; to reinstall it, run ./setup.sh again and choose it."
     else
       break
     fi
@@ -600,29 +634,7 @@ new_machine() {
   f=machines/$name/settings.nix
   cp -r machines/_template "machines/$name"
   sed -i "2s/(TEMPLATE)/(${name^^})/" "$f" "machines/$name/default.nix"
-  hw=$nixos_dir/hardware-configuration.nix
-  if [[ -r $hw ]]; then
-    cp "$hw" "machines/$name/hardware/hardware-configuration.nix"
-  else
-    # sudo only for reading the hardware; the file stays the user's
-    # shellcheck disable=SC2024
-    nixos-generate-config --show-hardware-config >"machines/$name/hardware/hardware-configuration.nix" 2>/dev/null ||
-      sudo nixos-generate-config --show-hardware-config >"machines/$name/hardware/hardware-configuration.nix"
-  fi
-  boot_lines=$(installer_boot_lines)
-  if [[ -n $boot_lines ]]; then
-    {
-      say "#=====================================================================#"
-      say "# BOOT SETTINGS FROM THE NIXOS INSTALLER"
-      say "#=====================================================================#"
-      say "#- Copied by setup.sh from $nixos_dir/configuration.nix: disk unlocking"
-      say "#- that hardware-configuration.nix doesn't carry"
-      say "{"
-      say "$boot_lines"
-      say "}"
-    } >"machines/$name/hardware/boot.nix"
-    say "Copied disk-unlock settings from the installer into machines/$name/hardware/boot.nix."
-  fi
+  write_hardware "$name"
 
   set_setting "$f" stateVersion "$(nix_string "$state_version")"
   set_setting "$f" timeZone "$(nix_string "$tz")"
@@ -662,23 +674,64 @@ new_machine() {
     git add -- "${written[@]}"
   fi
 
+  finish_setup "$name" "$main"
+}
+
+#--- write_hardware <name>: this install's hardware config and disk-unlock
+#--- lines into machines/<name>/hardware/
+write_hardware() {
+  local name=$1 hw=$nixos_dir/hardware-configuration.nix boot_lines
+  if [[ -r $hw ]]; then
+    cp "$hw" "machines/$name/hardware/hardware-configuration.nix"
+  else
+    # sudo only for reading the hardware; the file stays the user's
+    # shellcheck disable=SC2024
+    nixos-generate-config --show-hardware-config >"machines/$name/hardware/hardware-configuration.nix" 2>/dev/null ||
+      sudo nixos-generate-config --show-hardware-config >"machines/$name/hardware/hardware-configuration.nix"
+  fi
+  boot_lines=$(installer_boot_lines)
+  if [[ -n $boot_lines ]]; then
+    {
+      say "#=====================================================================#"
+      say "# BOOT SETTINGS FROM THE NIXOS INSTALLER"
+      say "#=====================================================================#"
+      say "#- Copied by setup.sh from $nixos_dir/configuration.nix: disk unlocking"
+      say "#- that hardware-configuration.nix doesn't carry"
+      say "{"
+      say "$boot_lines"
+      say "}"
+    } >"machines/$name/hardware/boot.nix"
+    say "Copied disk-unlock settings from the installer into machines/$name/hardware/boot.nix."
+  elif [[ -e machines/$name/hardware/boot.nix ]]; then
+    rm "machines/$name/hardware/boot.nix" # a previous install's disks
+    say "Removed machines/$name/hardware/boot.nix: this install has no extra disk-unlock lines."
+  fi
+}
+
+#--- finish_setup <name> <main user>: where the repo lives, the check, accounts
+#--- and the build; shared by a new machine and a reinstall
+finish_setup() {
+  local name=$1 main=$2 f=machines/$1/settings.nix nix_config
+  section "Accounts"
+  create_accounts "${people[@]}"
+
   section "Where the config lives"
   if [[ $repo == "$shared_repo" ]]; then
     :
   elif confirm "Move the config to $shared_repo, so every admin here can edit it? $repo stays as a link to it." y; then
     share_repo "$main"
   else
-    set_setting "$f" flakePath "$(nix_string "$repo")"
+    if grep -q '^  flakePath = ' "$f"; then
+      set_setting "$f" flakePath "$(nix_string "$repo")"
+    else
+      add_line_after "$f" '^  stateVersion = ' "  flakePath = $(nix_string "$repo");"
+    fi
     git add -- "$f"
   fi
 
   section "Checking the configuration"
-  local nix_config
   nix_config=$(build_nix_config "$name") || die "the configuration has an error (above). Fix the file it names and run: git add -A && ./setup.sh"
   say "It evaluates."
-
-  section "Accounts"
-  create_accounts "${people[@]}"
 
   section "Build"
   if confirm "Build now?" y; then
@@ -692,11 +745,37 @@ new_machine() {
   fi
 }
 
+#--- reinstall_machine <name>: a fresh NixOS install of a machine already in
+#--- machines/; keeps its settings and takes this install's disks
+reinstall_machine() {
+  local name=$1 f=machines/$1/settings.nix state_version old main
+  section "Reinstall $name"
+  say "machines/$name keeps its settings, apps and users. This computer's disks replace"
+  say "hardware/hardware-configuration.nix and hardware/boot.nix; git keeps the old ones."
+  confirm "Reinstall $name on this computer?" y || exit 0
+  write_hardware "$name"
+  state_version=$(installer_value stateVersion)
+  old=$(sed -n -E 's/^  stateVersion = "([^"]*)";.*/\1/p' "$f")
+  if [[ -n $state_version && $state_version != "$old" ]] &&
+    confirm "This install is NixOS $state_version and machines/$name says $old. Use $state_version, as a fresh install should?" y; then
+    set_setting "$f" stateVersion "$(nix_string "$state_version")"
+  fi
+  git add -A -- "machines/$name"
+
+  main=$(nix "${nix_flags[@]}" eval --raw "$repo#nixosConfigurations.$name._module.specialArgs.machine.mainUser") ||
+    die "machines/$name doesn't evaluate; fix the error above first"
+  mapfile -t people < <(nix "${nix_flags[@]}" eval --json "$repo#nixosConfigurations.$name._module.specialArgs.machine.users" --apply builtins.attrNames | tr -d '[]"' | tr ',' '\n')
+  say "People on $name: ${people[*]} (main user: $main)."
+  finish_setup "$name" "$main"
+  say "Commit machines/$name/hardware afterwards, or a later pull brings back the old disks."
+}
+
 #--- share_repo <owner>: moves the clone to $shared_repo for every admin (the
 #--- wheel group); config-repo.nix keeps the group access up from then on
 share_repo() {
   local owner=$1 old=$repo
   [[ $repo != "$shared_repo" ]] || die "the config is already in $shared_repo"
+  id -u "$owner" >/dev/null 2>&1 || owner=$USER # no account yet: the build makes it
   if [[ -e $shared_repo ]]; then
     [[ -d $shared_repo && -z $(ls -A "$shared_repo") ]] || die "$shared_repo already exists and isn't empty"
     sudo rmdir "$shared_repo"
@@ -784,7 +863,7 @@ add_user() {
 #--------------------------------------------------------------------#
 case ${1:-} in
   -h | --help)
-    sed -n '5,14p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '5,15p' "$0" | sed 's/^# \{0,1\}//'
     exit 0
     ;;
 esac
