@@ -247,10 +247,12 @@ class WindowRulesPage(Adw.PreferencesPage):
                           child=Adw.ButtonContent(icon_name="find-location-symbolic", label="Pick a Window"),
                           tooltip_text="Click any window to fill in the rule for it")
         pick.connect("clicked", self._pick)
-        self.open_list = Gtk.ListBox(selection_mode=Gtk.SelectionMode.NONE, css_classes=["boxed-list"])
+        self.open_list = Gtk.ListBox(selection_mode=Gtk.SelectionMode.NONE, css_classes=["boxed-list"],
+                                     margin_start=6, margin_end=6, margin_top=6, margin_bottom=6)
         self.open_list.connect("row-activated", lambda _, row: self._use(row.niri_window))
+        # A fixed width, or the rows' wrapping labels shrink the popover to a sliver
         scroll = Gtk.ScrolledWindow(child=self.open_list, propagate_natural_height=True,
-                                    max_content_height=420, min_content_width=360,
+                                    max_content_height=480, width_request=460,
                                     hscrollbar_policy=Gtk.PolicyType.NEVER)
         self.popover = Gtk.Popover(child=scroll)
         self.popover.connect("notify::visible", self._list_windows)
@@ -382,6 +384,7 @@ class WindowRulesPage(Adw.PreferencesPage):
             row = Adw.ActionRow(title=ui.esc(w.get("title") or w.get("app_id") or "Untitled"),
                                 subtitle=ui.esc(w.get("app_id") or "no app ID"), activatable=True)
             row.set_title_lines(1)
+            row.set_subtitle_lines(1)
             image = ui.app_image([f"{w.get('app_id')}.desktop", w.get("app_id") or ""], size=24)
             row.add_prefix(image or Gtk.Image(icon_name="window-new-symbolic"))
             row.niri_window = w
