@@ -4,6 +4,7 @@
 {
   config,
   pkgs,
+  machine,
   ...
 }: {
   #--------------------------------------------------------------------#
@@ -16,6 +17,7 @@
   ];
 
   gtk.gtk3.bookmarks = [
+    "file://${machine.flakePath} NixOS Config"
     "file://${config.home.homeDirectory}/Downloads Downloads"
     "file://${config.home.homeDirectory}/Documents Documents"
     "file://${config.home.homeDirectory}/Pictures Pictures"
