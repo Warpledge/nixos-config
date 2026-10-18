@@ -1,6 +1,9 @@
 """Builds the app's pages from the two _template settings files: their
 `#--` sections and `#---` headers name the pages and groups, the template
-values give each setting's kind, and setup.sh's app list gives labels."""
+values give each setting's kind, and setup.sh's app list gives labels.
+PAGES places the computer, desktop and personal settings on pages of their
+own; a setting it doesn't name keeps its template section and header, so a
+new setting still shows up without touching the app."""
 
 import re
 from dataclasses import dataclass, field
@@ -16,22 +19,90 @@ SPLIT_SECTIONS = {"Apps"}
 #--- Changes the running system can't pick up until the next boot
 RESTART = {("machine", "kernel"), ("machine", "windowManager")}
 
+#--- Lists of port numbers rather than names
+PORT_LISTS = {("firewall", "openTCPPorts"), ("firewall", "openUDPPorts")}
+
+#--- Settings picked from a list default.nix builds (or timedatectl's)
+DATA_CHOICES = {("timeZone",): "timezones", ("locale",): "locales",
+                ("keyboardLayout",): "layouts", ("consoleKeyMap",): "keymaps"}
+
 #--- Page names and moves the template headers don't give
 PAGE_TITLES = {
     "Wallpaper Picker (Mod+W)": "Wallpaper",
     "Android Screen Mirroring (scrcpy)": "Android",
 }
 MOVES = {  # setting -> (page, group on that page)
-    ("japanese", "ime"): ("Language & Keyboard", "Japanese Typing"),
     ("japanese", "vn"): ("Gaming", "Japanese Visual Novels"),
 }
 
-#--- DankMaterialShell settings tabs the Desktop page opens: (title, tab id from
-#--- `dms ipc call settings tabs`, subtitle)
-DMS_TABS = [
-    ("Monitors", "display_config", "Resolution, refresh rate, scale and layout"),
-    ("Keyboard Shortcuts", "keybinds", "Add or change keybinds"),
-]
+#--- Sidebar sections, top to bottom
+SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
+            ("personal", "Personal"), ("apps", "Apps")]
+
+#--- Each page's sidebar section, icon and blurb, and for the curated ones
+#--- their groups: (title, description, [setting paths]). Pages in the apps
+#--- section keep the template's groups.
+PAGES = {
+    "System": ("computer", "computer-symbolic",
+               "The name, desktop and kernel this computer runs, the same for everyone on it.",
+               [("", "", ["hostName", "windowManager", "kernel"])]),
+    "Language & Keyboard": ("computer", "preferences-desktop-locale-symbolic",
+                            "Time zone, language and keyboard layout.",
+                            [("Region", "", ["timeZone", "locale"]),
+                             ("Keyboard", "", ["keyboardLayout", "consoleKeyMap", "capsLockRemap"]),
+                             ("Japanese Typing", "", ["japanese.ime"])]),
+    "Devices": ("computer", "bluetooth-symbolic",
+                "Bluetooth, printers and sound devices.",
+                [("", "", ["bluetooth.enable", "printing.enable"])]),
+    "Network & Firewall": ("computer", "network-workgroup-symbolic",
+                           "What other devices may reach on this computer, and what it blocks.",
+                           [("Open Ports", "Other devices can connect to this computer on these. "
+                             "SSH, Syncthing, Sunshine, Steam and printing open their own "
+                             "ports while they're on.",
+                             ["firewall.openTCPPorts", "firewall.openUDPPorts"]),
+                            ("Ad & Tracker Blocking", "",
+                             ["blocklist.enable", "blocklist.extra"])]),
+    "Services": ("computer", "network-server-symbolic",
+                 "Background services for everyone on this computer.",
+                 [("VPN & Remote Access", "", ["mullvad.enable", "mullvad.splitTunnel", "ssh.enable"]),
+                  ("Sharing & Streaming", "", ["syncthing.enable", "sunshine.enable", "suwayomi.enable"]),
+                  ("Containers & Scanning", "", ["docker.enable", "clamav.enable"])]),
+    "Appearance": ("desktop", "applications-graphics-symbolic",
+                   "Pointer, wallpaper and the shell's look. Colors, fonts and icons "
+                   "come from the Catppuccin theme this config sets.",
+                   [("Mouse Pointer", "", ["cursor", "cursorSize"]),
+                    ("Wallpaper", "", ["wallpaper"])]),
+    "Displays": ("desktop", "video-display-symbolic",
+                 "Monitors, night light and what each screen shows.", []),
+    "Desktop Shell": ("desktop", "view-app-grid-symbolic",
+                      "The bar, dock, launcher, notifications and widgets.", []),
+    "Power & Lock": ("desktop", "system-lock-screen-symbolic",
+                     "Idle timers, the lock screen and the power menu.", []),
+    "Account": ("personal", "avatar-default-symbolic",
+                "Your name on git commits and the keys that may log in as you.",
+                [("Git", "", ["git.name", "git.email"]),
+                 ("Remote Login", "", ["ssh.authorizedKeys"])]),
+    "Default Apps": ("personal", "emblem-default-symbolic",
+                     "Which app opens links, text files, terminal programs and folders.",
+                     [("", "", ["defaultApps.browser", "defaultApps.textEditor",
+                                "defaultApps.terminal", "defaultApps.fileManager"])]),
+    "Browsers": ("apps", "web-browser-symbolic", "Browsers to install. The one that opens links "
+                 "is picked under Default Apps.", None),
+    "Terminals": ("apps", "utilities-terminal-symbolic", "Terminal emulators to install.", None),
+    "Editors": ("apps", "accessories-text-editor-symbolic", "Text and code editors to install.", None),
+    "File Browsers": ("apps", "folder-symbolic", "File managers to install.", None),
+    "Media": ("apps", "applications-multimedia-symbolic", "Video, music, streaming and reading.", None),
+    "Graphics": ("apps", "applications-graphics-symbolic", "3D, painting and design.", None),
+    "Audio": ("apps", "audio-x-generic-symbolic", "Recording, mixing and guitar tools.", None),
+    "Office": ("apps", "x-office-document-symbolic", "Mail, notes and money.", None),
+    "Security": ("apps", "security-high-symbolic", "Passwords and clean-up.", None),
+    "System Tools": ("apps", "utilities-system-monitor-symbolic", "Monitoring tools.", None),
+    "Android": ("apps", "phone-symbolic", "Phones and tablets.", None),
+    "Gaming": ("apps", "applications-games-symbolic", "Launchers, games and gaming tools.", None),
+    "Discord": ("apps", "user-available-symbolic", "Discord and showing what you play.", None),
+    "AI Tools": ("apps", "applications-science-symbolic", "Coding agents and local language models.", None),
+}
+FALLBACK_ICON = "applications-system-symbolic"
 
 SETUP_ENTRY = re.compile(r'^\s*"([^"|]+)\|([^"|]+)\|([^"]+)"\s*$', re.M)
 
@@ -40,14 +111,19 @@ SETUP_ENTRY = re.compile(r'^\s*"([^"|]+)\|([^"|]+)\|([^"]+)"\s*$', re.M)
 class Setting:
     domain: str  # "machine" or "user"
     path: tuple
-    kind: str  # bool, choice, text, timezone, list
+    kind: str  # bool, choice, text, pick (from a data list), list
     title: str
     subtitle: str = ""
     nullable: bool = False
     choices: list = field(default_factory=list)
     options: list = field(default_factory=list)  # known items of a list
-    description: str = ""  # from descriptions.json, shown when the row expands
-    note: str = ""  # from descriptions.json; replaces the subtitle of a described row
+    ports: bool = False  # a list of port numbers
+    data: str = ""  # for kind pick: which list (DATA_CHOICES)
+    #--- From descriptions.json
+    description: str = ""  # shown when the row expands
+    note: str = ""  # a caution under the summary
+    icon: list = field(default_factory=list)  # icon names or .desktop ids to try
+    labels: dict = field(default_factory=dict)  # choice value -> label
 
 
 @dataclass
@@ -55,6 +131,7 @@ class Group:
     title: str
     description: str = ""
     settings: list = field(default_factory=list)
+    links: list = field(default_factory=list)  # dms.Link, after the settings
 
 
 @dataclass
@@ -63,9 +140,8 @@ class Page:
     title: str
     description: str = ""
     groups: list = field(default_factory=list)
-    section: str = ""  # sidebar group: computer, personal or apps (set by arrange)
-    icon: str = ""  # overrides the icon picked from the page's first setting
-    links: list = field(default_factory=list)  # DMS_TABS entries, for the Desktop page
+    section: str = ""  # sidebar section (SECTIONS), set by arrange
+    icon: str = ""
 
 
 def humanize(key):
@@ -100,7 +176,8 @@ def leaves(attrset, prefix=()):
             yield path, b, prefix
 
 
-def build(domain, template_text, choices, labels):
+def build(domain, template_text, choices, labels, list_choices=None):
+    list_choices = list_choices or {}
     doc = nixfile.parse(template_text)
     #--- Comments alone on their line, by line number
     by_line = {}
@@ -179,14 +256,16 @@ def build(domain, template_text, choices, labels):
         last_section, last_header, prev_path = section, header, path
 
         group.settings.append(make_setting(domain, path, b, values, choices, labels, doc,
-                                           lead_text if not parent else [], header_title, header_desc))
+                                           lead_text if not parent else [], header_title, header_desc,
+                                           list_choices))
 
     for p in pages:
         p.groups = [g for g in p.groups if g.settings]
     return [p for p in pages if p.groups]
 
 
-def make_setting(domain, path, b, values, choices, labels, doc, lead, header_title, header_desc):
+def make_setting(domain, path, b, values, choices, labels, doc, lead, header_title, header_desc,
+                 list_choices):
     dotted = ".".join(path)
     trailing = ""
     end_line = doc.line_of(b.end)
@@ -218,54 +297,107 @@ def make_setting(domain, path, b, values, choices, labels, doc, lead, header_tit
         s.kind = "bool"
     elif isinstance(value, list):
         s.kind = "list"
+        s.ports = path in PORT_LISTS
         m = re.search(r"Known names:\s*(.+)", desc)
-        if m:
+        if dotted in list_choices:
+            s.options = list(list_choices[dotted])
+        elif m:
             s.options = [o.strip() for o in m.group(1).split(",")]
+        if m:
             s.subtitle = desc[: m.start()].strip()
-    elif dotted == "timeZone":
-        s.kind = "timezone"
+    elif path in DATA_CHOICES:
+        s.kind, s.data = "pick", DATA_CHOICES[path]
     else:
         s.nullable = value is None
     return s
 
 
-def arrange(pages):
-    """Applies PAGE_TITLES and MOVES, drops pages left empty, sorts each page's
-    settings by name, and sorts the pages A-Z within their sidebar section:
-    computer-wide pages, personal ones without switches, then app pages."""
-    moved = []
+def arrange(pages, links=()):
+    """Lays the settings out: the curated PAGES first, in their order, holding the
+    settings they name; every other setting stays on its template page (renamed by
+    PAGE_TITLES, moved by MOVES), sorted by name. `links` (dms.Link) join the
+    group their page and group name, made if missing. Pages left empty are
+    dropped; app pages sort A-Z."""
+    pool = {}  # path -> (setting, template page, template group)
     for page in pages:
         page.title = PAGE_TITLES.get(page.title, page.title)
         for group in page.groups:
-            moved += [s for s in group.settings if s.path in MOVES]
-            group.settings = [s for s in group.settings if s.path not in MOVES]
-    by_title = {page.title: page for page in pages}
-    for s in moved:
-        title, group_title = MOVES[s.path]
-        page = by_title.get(title)
-        if page is None:
-            page = by_title[title] = Page(s.domain, title)
-            pages.append(page)
-        group = next((g for g in page.groups if g.title == group_title), None)
+            for s in group.settings:
+                pool[s.path] = (s, page, group)
+
+    out = []
+    placed = set()
+    for title, (section, icon, description, groups) in PAGES.items():
+        if groups is None:
+            continue
+        page = Page("machine" if section == "computer" else "user", title, description,
+                    section=section, icon=icon)
+        for group_title, group_desc, paths in groups:
+            group = Group(group_title, group_desc)
+            for dotted in paths:
+                path = tuple(dotted.split("."))
+                if path in pool:
+                    group.settings.append(pool[path][0])
+                    placed.add(path)
+            page.groups.append(group)
+        out.append(page)
+
+    by_title = {p.title: p for p in out}
+    for page in pages:
+        for group in page.groups:
+            group.settings = [s for s in group.settings if s.path not in placed]
+    for path, (s, _, source) in pool.items():
+        if path in placed or path not in MOVES:
+            continue
+        title, group_title = MOVES[path]
+        target = next((p for p in pages if p.title == title), None) or by_title.get(title)
+        if target is None:
+            continue
+        source.settings.remove(s)
+        group = next((g for g in target.groups if g.title == group_title), None)
         if group is None:
             group = Group(group_title)
-            page.groups.append(group)
+            target.groups.append(group)
         group.settings.append(s)
-    pages = [p for p in pages if any(g.settings for g in p.groups)]
+
     for page in pages:
+        if page.title in by_title:
+            # A template page with the same name as a curated one adds its groups there
+            by_title[page.title].groups += [g for g in page.groups if g.settings]
+            continue
         page.groups = [g for g in page.groups if g.settings]
         for group in page.groups:
             group.settings.sort(key=lambda s: s.title.casefold())
-        if page.domain == "machine":
+        info = PAGES.get(page.title)
+        if info:
+            page.section, page.icon, page.description = info[0], info[1], info[2] or page.description
+        elif page.domain == "machine":
             page.section = "computer"
         elif any(s.kind == "bool" for g in page.groups for s in g.settings):
             page.section = "apps"
         else:
             page.section = "personal"
-    pages.append(Page(
-        "user", "Desktop", section="personal", icon="video-display-symbolic", links=DMS_TABS,
-        description="These open DankMaterialShell's own settings. Under niri, monitor and "
-                    "shortcut changes made there are kept on this computer across rebuilds, "
-                    "but they aren't saved in the repo."))
-    order = {"computer": 0, "personal": 1, "apps": 2}
-    return sorted(pages, key=lambda p: (order[p.section], p.title.casefold()))
+        page.icon = page.icon or FALLBACK_ICON
+        out.append(page)
+
+    for link in links:
+        page = next((p for p in out if p.title == link.page), None)
+        if page is None:
+            info = PAGES.get(link.page, ("desktop", FALLBACK_ICON, "", []))
+            page = Page("user", link.page, info[2], section=info[0], icon=info[1])
+            out.append(page)
+        group = next((g for g in page.groups if g.title == link.group), None)
+        if group is None:
+            group = Group(link.group)
+            page.groups.append(group)
+        group.links.append(link)
+
+    out = [p for p in out if any(g.settings or g.links for g in p.groups)]
+    for page in out:
+        page.groups = [g for g in page.groups if g.settings or g.links]
+    order = {key: i for i, (key, _) in enumerate(SECTIONS)}
+    curated = list(PAGES)
+    return sorted(out, key=lambda p: (order.get(p.section, len(order)),
+                                      curated.index(p.title) if p.section != "apps" and p.title in curated
+                                      else len(curated),
+                                      p.title.casefold()))

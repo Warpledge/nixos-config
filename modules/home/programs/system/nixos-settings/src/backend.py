@@ -8,6 +8,7 @@ import shutil
 import subprocess
 from dataclasses import dataclass
 
+import dms
 import nixfile
 import schema
 
@@ -24,6 +25,7 @@ in {
   checked = map (m: (s.forMachine m).machine.name) names;
   resolved = (s.forMachine machine).machine;
   choices = s.choices // s.userChoices;
+  listChoices = s.listChoices;
   userMachines = lib.filter lists names;
 }
 """
@@ -124,12 +126,19 @@ def read_tree(path):
 
 def new_settings(cfg, overrides):
     """Template settings that this user's file and this machine's block both leave
-    out, with the template's value: what was added since the file was made."""
+    out, with the template's value: what was added since the file was made. Then
+    the same for the machine's own file, as (domain, path, value)."""
     template = read_tree(os.path.join(cfg.flake, "users", "_template", "settings.nix"))
     own = read_tree(cfg.file("user"))
-    return [(path, value) for path, value in leaf_paths(template)
-            if path[0] not in schema.HIDDEN and not lookup(own, path)[0]
-            and not lookup(overrides, path)[0]]
+    out = [("user", path, value) for path, value in leaf_paths(template)
+           if path[0] not in schema.HIDDEN and not lookup(own, path)[0]
+           and not lookup(overrides, path)[0]]
+    machine_t = read_tree(os.path.join(cfg.flake, "machines", "_template", "settings.nix"))
+    machine = read_tree(cfg.file("machine"))
+    # A null template value (hostName) is meant to be left out
+    return out + [("machine", path, value) for path, value in leaf_paths(machine_t)
+                  if path[0] not in schema.HIDDEN and value is not None
+                  and not lookup(machine, path)[0]]
 
 
 def stale_settings(cfg, everyone=False):
@@ -186,8 +195,9 @@ class State:
     resolved: dict
     overrides: dict  # this machine's users.<user> block, as Python
     user_machines: list
-    timezones: list
-    new: list  # (path, template value) for settings added since the user's file was made
+    lists: dict  # DATA_CHOICES name -> [(value, label)]
+    new: list  # (domain, path, template value) for settings added since a file was made
+    dms_entries: list  # dms.Entry, for search
 
     def value(self, cfg, setting):
         if setting.domain == "machine":
@@ -198,37 +208,85 @@ class State:
         return setting.domain == "user" and dig(self.overrides, setting.path) is not None
 
 
+HERE = os.path.dirname(os.path.realpath(__file__))
+
+
+def describe(setting, entry):
+    """Applies a descriptions.json entry: a string is the long text; an object
+    may set title, summary (the line under the name), note (a caution), text,
+    icon (names or .desktop ids to try) and choices (value -> label)."""
+    if isinstance(entry, str):
+        setting.description = entry
+        return
+    if not isinstance(entry, dict):
+        return
+    setting.title = entry.get("title", setting.title)
+    setting.subtitle = entry.get("summary", setting.subtitle)
+    setting.note = entry.get("note", "")
+    setting.description = entry.get("text", "")
+    icon = entry.get("icon", [])
+    setting.icon = [icon] if isinstance(icon, str) else list(icon)
+    setting.labels = {str(k): v for k, v in (entry.get("choices") or {}).items()}
+
+
+def data_list(name):
+    """One of the lists default.nix builds, as [(value, label)]: a line is a
+    value, then optionally whitespace and a label."""
+    if name == "timezones":
+        try:
+            out = subprocess.run(["timedatectl", "list-timezones"], capture_output=True, text=True)
+            return [(z, z.replace("_", " ")) for z in out.stdout.split()]
+        except OSError:
+            return []
+    try:
+        with open(os.path.join(HERE, f"{name}.txt")) as f:
+            rows = [line.strip().split(None, 1) for line in f if line.strip()]
+    except OSError:
+        return []
+    return [(r[0], f"{r[0]} — {r[1]}" if len(r) > 1 else r[0]) for r in rows]
+
+
+def has_battery():
+    try:
+        return any(n.startswith("BAT") for n in os.listdir("/sys/class/power_supply"))
+    except OSError:
+        return False
+
+
 def load(cfg):
     data = evaluate(cfg)
-    read = lambda *p: open(os.path.join(cfg.flake, *p)).read()
+
+    def read(*p):
+        with open(os.path.join(cfg.flake, *p)) as f:
+            return f.read()
     try:
         labels = schema.setup_labels(read("setup.sh"))
     except OSError:
         labels = {}
-    pages = schema.build("machine", read("machines", "_template", "settings.nix"), data["choices"], labels)
-    pages += schema.build("user", read("users", "_template", "settings.nix"), data["choices"], labels)
-    pages = schema.arrange(pages)
+    list_choices = data.get("listChoices") or {}
+    pages = schema.build("machine", read("machines", "_template", "settings.nix"), data["choices"],
+                         labels, list_choices)
+    pages += schema.build("user", read("users", "_template", "settings.nix"), data["choices"],
+                          labels, list_choices)
+    machine = data["resolved"]
+    wm = machine.get("windowManager", "")
+    links = dms.links(wm, bool(dig(machine, ["printing", "enable"])), has_battery()) \
+        if dms.binary() else []
+    pages = schema.arrange(pages, links)
     try:
-        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "descriptions.json")) as f:
+        with open(os.path.join(HERE, "descriptions.json")) as f:
             descriptions = json.load(f)
     except (OSError, ValueError):
         descriptions = {}
     for page in pages:
         for group in page.groups:
             for s in group.settings:
-                entry = descriptions.get(".".join(s.path), "")
-                if isinstance(entry, dict):
-                    s.description, s.note = entry.get("text", ""), entry.get("note", "")
-                else:
-                    s.description = entry
+                describe(s, descriptions.get(".".join(s.path), ""))
     machine_doc = nixfile.to_python(nixfile.parse(read("machines", cfg.machine, "settings.nix")).root)
-    try:
-        zones = subprocess.run(["timedatectl", "list-timezones"], capture_output=True, text=True).stdout.split()
-    except FileNotFoundError:
-        zones = []
+    lists = {name: data_list(name) for name in set(schema.DATA_CHOICES.values())}
     overrides = dig(machine_doc, ["users", cfg.user]) or {}
-    return State(pages, data["resolved"], overrides, data["userMachines"], zones,
-                 new_settings(cfg, overrides))
+    return State(pages, machine, overrides, data["userMachines"], lists,
+                 new_settings(cfg, overrides), dms.search_index(links, wm))
 
 
 def writable(cfg):
@@ -240,7 +298,7 @@ def write(cfg, state, changes, this_machine_only):
     Returns the files' old text for undo; on a failed check the files are
     put back and SettingsError says why."""
     files = {d: cfg.file(d) for d in ("machine", "user")}
-    old = {d: open(f).read() for d, f in files.items()}
+    old = {d: slurp(f) for d, f in files.items()}
     text = dict(old)
     for (domain, path), value in changes.items():
         path = list(path)
@@ -274,7 +332,12 @@ def save(path, text):
         f.truncate()
 
 
+def slurp(path):
+    with open(path) as f:
+        return f.read()
+
+
 def restore(cfg, old):
     for d, text in old.items():
-        if open(cfg.file(d)).read() != text:
+        if slurp(cfg.file(d)) != text:
             save(cfg.file(d), text)

@@ -1,32 +1,242 @@
 """nixos-settings-apply: run as root by pkexec after the caller types their own
-password. Applies the caller's own app settings and rebuilds; it never touches
-machine settings or another user's, and accepts only template keys and kinds.
+password. Builds this machine's system from the repo, shows what changes and
+switches to it, printing progress for NixOS Settings: nix's JSON log lines
+(`@nix {...}`), the helper's own events (`@ns {...}`) and plain text.
+
+Anyone on the machine may apply their own app settings: only template keys,
+with the template's kind of value, in their own file or their own block in
+this machine's file. Rebuilding as-is, and switching to an older version,
+are for admins (wheel), who could run nixos-rebuild anyway.
 
 Usage: nixos-settings-apply '{"mode": "switch"|"boot", "thisMachineOnly": bool,
                               "changes": [[["media", "mpv"], true], ...]}'
-       nixos-settings-apply '{"clean": true}'  (drop settings the templates lost)"""
+       nixos-settings-apply '{"rebuild": true, "mode": "switch"|"boot"|"auto"}'
+       nixos-settings-apply '{"activate": "/nix/store/...", "mode": ...}'
+       nixos-settings-apply '{"collectGarbage": true}'
+       nixos-settings-apply '{"clean": true}'  (drop settings the templates lost)
+
+"auto" switches now unless the new system changes a package that froze the
+desktop when switched live (closure.CORE); then it's used from the next boot.
+While building, a line "cancel" on stdin (or stdin closing) stops the build."""
 
 import fcntl
+import grp
 import json
 import os
 import pwd
+import re
+import shlex
+import signal
 import subprocess
 import sys
+import threading
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 
 import backend  # noqa: E402
+import closure  # noqa: E402
 import nixfile  # noqa: E402
+import nixlog  # noqa: E402
 import schema  # noqa: E402
 
 LOCK = "/run/nixos-settings-apply.lock"
+RUN_DIR = "/run/nixos-settings"
+#--- The weekly nh clean job's own arguments (the wrapper reads nh.nix)
+CLEAN_ARGS = shlex.split(os.environ.get("NIXOS_SETTINGS_CLEAN_ARGS", "--keep-since 5d --keep 5"))
+DELETED_SYSTEM = re.compile(r"^- DEL /nix/var/nix/profiles/system-\d+-link")
+FREED = re.compile(r"(\d+) store paths deleted, ([\d.]+ \w+) freed")
+#--- What nh and nixos-rebuild run switch-to-configuration with, so a lost
+#--- session can't kill it halfway and two switches can't overlap
+SYSTEMD_RUN = ["systemd-run", "-E", "LOCALE_ARCHIVE", "-E", "NIXOS_INSTALL_BOOTLOADER",
+               "-E", "NIXOS_NO_CHECK", "--collect", "--no-ask-password", "--wait", "--verbose",
+               "--output=cat", "--quiet", "--service-type=exec",
+               "--unit=nixos-rebuild-switch-to-configuration"]
+
+
+class Cancelled(Exception):
+    pass
+
+
+#--------------------------------------------------------------------#
+#-- Output
+#--------------------------------------------------------------------#
+def out(line):
+    """Prints one line; a closed pipe (the window went away) doesn't stop the work."""
+    try:
+        sys.stdout.write(line + "\n")
+        sys.stdout.flush()
+    except (BrokenPipeError, ValueError):
+        pass
+
+
+def emit(**event):
+    out("@ns " + json.dumps(event))
 
 
 def refuse(message):
-    print(f"error: {message}", flush=True)
+    emit(error=message)
+    out(f"error: {message}")
     sys.exit(2)
 
 
+#--------------------------------------------------------------------#
+#-- Cancelling
+#--------------------------------------------------------------------#
+class Canceller:
+    """Watches stdin; "cancel" or end of input stops whatever `allow` names."""
+
+    def __init__(self):
+        self.proc = None
+        self.allowed = False
+        self.requested = False
+        threading.Thread(target=self._watch, daemon=True).start()
+
+    def _watch(self):
+        try:
+            for line in sys.stdin:
+                if line.strip() == "cancel":
+                    break
+        except (OSError, ValueError):
+            pass
+        self.requested = True
+        self._stop()
+
+    def _stop(self):
+        if self.allowed and self.proc is not None and self.proc.poll() is None:
+            try:
+                os.killpg(self.proc.pid, signal.SIGTERM)
+            except OSError:
+                pass
+
+    def run(self, proc):
+        self.proc, self.allowed = proc, True
+        if self.requested:
+            self._stop()
+
+    def done(self):
+        self.proc, self.allowed = None, False
+
+
+CANCEL = Canceller()
+
+
+#--------------------------------------------------------------------#
+#-- Steps
+#--------------------------------------------------------------------#
+def env():
+    e = {"PATH": os.environ["PATH"], "HOME": "/root", "LANG": "C.UTF-8"}
+    archive = "/run/current-system/sw/lib/locale/locale-archive"
+    if os.path.exists(archive):
+        e["LOCALE_ARCHIVE"] = archive
+    return e
+
+
+def stream(cmd, cancellable=False):
+    """Runs `cmd`, passing its output on line by line; returns (exit code, lines)."""
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env(),
+                            start_new_session=True, text=True, errors="replace", bufsize=1)
+    if cancellable:
+        CANCEL.run(proc)
+    lines = []
+    for line in proc.stdout:
+        line = line.rstrip("\n")
+        lines.append(line)
+        out(line)
+    code = proc.wait()
+    CANCEL.done()
+    if cancellable and CANCEL.requested:
+        raise Cancelled()
+    return code, lines
+
+
+def build(cfg, owner):
+    """Builds the system; returns its store path. Nix's JSON log goes out as is."""
+    emit(step="build", state="start")
+    os.makedirs(RUN_DIR, mode=0o755, exist_ok=True)
+    link = os.path.join(RUN_DIR, f"system-{owner}")
+    target = f"{cfg.flake}#nixosConfigurations.{cfg.machine}.config.system.build.toplevel"
+    cmd = ["nix", "build", target, "--log-format", "internal-json", "-v",
+           "--out-link", link, "--print-out-paths"]
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env(),
+                            start_new_session=True, text=True, errors="replace", bufsize=1)
+    CANCEL.run(proc)
+    for line in proc.stderr:
+        out(line.rstrip("\n"))
+    path = proc.stdout.read().strip().splitlines()
+    code = proc.wait()
+    CANCEL.done()
+    if CANCEL.requested:
+        raise Cancelled()
+    if code != 0 or not path:
+        emit(step="build", state="failed")
+        raise RuntimeError("the build failed")
+    emit(step="build", state="done", system=path[-1])
+    return path[-1], link
+
+
+def compare(path, mode):
+    """Emits what changes; picks switch or boot for "auto"."""
+    emit(step="compare", state="start")
+    diff = closure.diff(closure.CURRENT, path)
+    emit(diff=diff.as_json())
+    old, new = closure.kernel(closure.BOOTED), closure.kernel(path)
+    if old and new and old != new:
+        emit(kernel=[old, new])
+    if mode == "auto":
+        core = diff.core()
+        mode = "boot" if core else "switch"
+        if core:
+            emit(boot=core)
+    emit(step="compare", state="done", mode=mode)
+    return mode
+
+
+def activate(path, mode):
+    """Switches to `path` now and makes it the boot default, or (boot) only the latter."""
+    if mode == "switch":
+        emit(step="switch", state="start")
+        code, _ = stream(SYSTEMD_RUN + [os.path.join(path, "bin/switch-to-configuration"), "test"])
+        if code != 0:
+            emit(step="switch", state="failed", code=code)
+            raise RuntimeError("switching to the new system failed; it isn't added to the boot menu")
+        emit(step="switch", state="done")
+    emit(step="boot", state="start")
+    code, _ = stream(["nix", "build", "--no-link", "--profile", closure.SYSTEM_PROFILE, path])
+    if code == 0:
+        code, _ = stream(SYSTEMD_RUN + [os.path.join(path, "bin/switch-to-configuration"), "boot"])
+    if code != 0:
+        emit(step="boot", state="failed", code=code)
+        raise RuntimeError("adding the new system to the boot menu failed")
+    emit(step="boot", state="done")
+
+
+def collect():
+    """Deletes old generations with the weekly nh clean job's arguments (every
+    profile, home-manager's too), collects garbage, then rewrites the boot menu
+    so it lists only versions that still exist."""
+    emit(step="collect", state="start")
+    code, lines = stream(["nh", "clean", "all", *CLEAN_ARGS])
+    plain = [nixlog.strip_ansi(line).strip() for line in lines]
+    if code != 0:
+        emit(step="collect", state="failed")
+        raise RuntimeError("cleaning up failed")
+    freed = next((m for m in map(FREED.search, plain) if m), None)
+    emit(step="collect", state="done")
+    emit(step="boot", state="start")
+    profile = os.path.realpath(closure.SYSTEM_PROFILE)
+    code, _ = stream(SYSTEMD_RUN + [os.path.join(profile, "bin/switch-to-configuration"), "boot"])
+    if code != 0:
+        emit(step="boot", state="failed")
+        raise RuntimeError("the boot menu wasn't updated")
+    emit(step="boot", state="done")
+    emit(cleaned={"versions": sum(1 for line in plain if DELETED_SYSTEM.match(line)),
+                  "paths": int(freed.group(1)) if freed else 0,
+                  "freed": freed.group(2) if freed else ""})
+
+
+#--------------------------------------------------------------------#
+#-- Requests
+#--------------------------------------------------------------------#
 def same_kind(template, value):
     if isinstance(template, bool):
         return isinstance(value, bool)
@@ -37,48 +247,13 @@ def same_kind(template, value):
     return False
 
 
-def clean(cfg):
-    """Deletes settings the templates no longer have from the caller's own file and
-    their block in this machine's file. The list is worked out here, never taken
-    from the request, and machine settings are left to an admin."""
-    if not os.path.exists(cfg.file("user")):
-        refuse(f"there is no users/{cfg.user}/settings.nix")
-    with open(LOCK, "w") as lock:
-        fcntl.flock(lock, fcntl.LOCK_EX)
-        items = [(where, user, path) for where, user, path in backend.stale_settings(cfg)
-                 if where in ("user", "override") and user == cfg.user]
-        for _, _, path in items:
-            print(f"Removing {'.'.join(path)}", flush=True)
-        backend.remove_stale(cfg, items)
-
-
-def main():
-    uid = os.environ.get("PKEXEC_UID")
-    if os.geteuid() != 0 or uid is None:
-        refuse("run this through pkexec")
-    caller = pwd.getpwuid(int(uid)).pw_name
-
-    cfg = backend.Config(os.environ["NIXOS_SETTINGS_FLAKE"], os.environ["NIXOS_SETTINGS_MACHINE"],
-                         caller, os.environ["NIXOS_SETTINGS_LIB"])
-    try:
-        request = json.loads(sys.argv[1])
-    except (IndexError, ValueError):
+def user_changes(cfg, raw):
+    """The request's changes, refused unless each is a user template key with
+    the template's kind of value."""
+    if not isinstance(raw, list) or not raw:
         refuse("bad request")
-    if isinstance(request, dict) and request.get("clean") is True:
-        clean(cfg)
-        return
-    try:
-        mode = request["mode"]
-        this_only = bool(request.get("thisMachineOnly"))
-        raw = request["changes"]
-    except (KeyError, TypeError):
-        refuse("bad request")
-    if mode not in ("switch", "boot") or not isinstance(raw, list) or not raw:
-        refuse("bad request")
-
     with open(os.path.join(cfg.flake, "users", "_template", "settings.nix")) as f:
         template = nixfile.to_python(nixfile.parse(f.read()).root)
-
     changes = {}
     for item in raw:
         if not (isinstance(item, list) and len(item) == 2 and isinstance(item[0], list)
@@ -91,29 +266,134 @@ def main():
         if not same_kind(default, value):
             refuse(f"`{'.'.join(path)}` got the wrong kind of value")
         changes[("user", tuple(path))] = value
+    return changes
+
+
+def clean(cfg):
+    """Deletes settings the templates no longer have from the caller's own file and
+    their block in this machine's file. The list is worked out here, never taken
+    from the request, and machine settings are left to an admin."""
+    if not os.path.exists(cfg.file("user")):
+        refuse(f"there is no users/{cfg.user}/settings.nix")
+    items = [(where, user, path) for where, user, path in backend.stale_settings(cfg)
+             if where in ("user", "override") and user == cfg.user]
+    for _, _, path in items:
+        out(f"Removing {'.'.join(path)}")
+    backend.remove_stale(cfg, items)
+
+
+def generation_path(path):
+    """`path` if it's one of this computer's system generations, else None."""
+    if not isinstance(path, str):
+        return None
+    real = os.path.realpath(path)
+    known = {g.path for g in closure.generations()}
+    return real if real in known and closure.is_system(real) else None
+
+
+def in_wheel(name, gid):
+    try:
+        wheel = grp.getgrnam("wheel").gr_gid
+    except KeyError:
+        return False
+    return wheel in os.getgrouplist(name, gid)
+
+
+def main():
+    uid = os.environ.get("PKEXEC_UID")
+    if os.geteuid() != 0 or uid is None:
+        refuse("run this through pkexec")
+    caller = pwd.getpwuid(int(uid))
+    admin = in_wheel(caller.pw_name, caller.pw_gid)
+    emit(step="auth", state="done")
+
+    cfg = backend.Config(os.environ["NIXOS_SETTINGS_FLAKE"], os.environ["NIXOS_SETTINGS_MACHINE"],
+                         caller.pw_name, os.environ["NIXOS_SETTINGS_LIB"])
+    try:
+        request = json.loads(sys.argv[1])
+    except (IndexError, ValueError):
+        refuse("bad request")
+    if not isinstance(request, dict):
+        refuse("bad request")
+    mode = request.get("mode", "switch")
+    if mode not in ("switch", "boot", "auto"):
+        refuse("bad request")
+
+    changes, system = None, None
+    collecting = request.get("collectGarbage") is True
+    if request.get("clean") is True:
+        pass
+    elif collecting:
+        if not admin:
+            refuse("only an admin can clean up old versions")
+    elif "activate" in request:
+        if not admin:
+            refuse("only an admin can switch to another version")
+        system = generation_path(request["activate"])
+        if system is None:
+            refuse("that isn't one of this computer's system versions")
+    elif request.get("rebuild") is True:
+        if not admin:
+            refuse("only an admin can rebuild without changes")
+    else:
+        changes = user_changes(cfg, request.get("changes"))
 
     with open(LOCK, "w") as lock:
-        fcntl.flock(lock, fcntl.LOCK_EX)
         try:
-            state = backend.evaluate(cfg)
-        except backend.SettingsError as e:
-            refuse(f"the settings files don't evaluate right now:\n{e}")
-        if caller not in state["resolved"]["users"]:
-            refuse(f"{caller} isn't listed in machines/{cfg.machine}/settings.nix")
-
-        print("Saving your settings…", flush=True)
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            refuse("another change is being applied; try again when it's done")
+        if request.get("clean") is True:
+            clean(cfg)
+            return
+        if collecting:
+            try:
+                collect()
+            except Exception as e:  # noqa: BLE001
+                emit(error=str(e))
+                emit(result="failed", restored=False)
+                sys.exit(1)
+            emit(result="ok")
+            return
+        if system is None:
+            try:
+                state = backend.evaluate(cfg)
+            except backend.SettingsError as e:
+                refuse(f"the settings files don't evaluate right now:\n{e}")
+            if caller.pw_name not in state["resolved"]["users"]:
+                refuse(f"{caller.pw_name} isn't listed in machines/{cfg.machine}/settings.nix")
+        old = None
         try:
-            old = backend.write(cfg, None, changes, this_only)
+            if changes:
+                emit(step="save", state="start")
+                old = backend.write(cfg, None, changes, bool(request.get("thisMachineOnly")))
+                emit(step="save", state="done")
+            link = None
+            if system is None:
+                system, link = build(cfg, caller.pw_name)
+            mode = compare(system, mode)
+            activate(system, mode)
+            if link:
+                try:
+                    os.unlink(link)
+                except OSError:
+                    pass
+            emit(result="ok", mode=mode)
+        except Cancelled:
+            if old:
+                backend.restore(cfg, old)
+            emit(result="cancelled", restored=bool(old))
+            sys.exit(3)
         except backend.SettingsError as e:
-            refuse(f"these settings don't work, nothing was saved:\n{e}")
-
-        print("Building the system…", flush=True)
-        env = {"PATH": os.environ["PATH"], "HOME": "/root", "LANG": "C.UTF-8"}
-        target = f"{cfg.flake}#{cfg.machine}"
-        result = subprocess.run(["nixos-rebuild", mode, "--flake", target], env=env)
-        if result.returncode != 0:
-            backend.restore(cfg, old)
-            print("error: the rebuild failed, so your settings were put back", flush=True)
+            emit(step="save", state="failed")
+            emit(error=f"these settings don't work, nothing was saved:\n{e}")
+            emit(result="failed", restored=False)
+            sys.exit(1)
+        except Exception as e:  # noqa: BLE001
+            if old:
+                backend.restore(cfg, old)
+            emit(error=str(e))
+            emit(result="failed", restored=bool(old))
             sys.exit(1)
 
 

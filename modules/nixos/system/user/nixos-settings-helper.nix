@@ -1,9 +1,10 @@
 #=====================================================================#
 # NIXOS SETTINGS HELPER
 #=====================================================================#
-#- Lets a user who isn't an admin apply their own app settings from NixOS
-#- Settings: pkexec runs nixos-settings-apply as root after that user types
-#- their own password. The script is src/helper.py beside the app.
+#- Every rebuild NixOS Settings starts: pkexec runs nixos-settings-apply as
+#- root after the user types their own password. Anyone may apply their own
+#- app settings; rebuilding as-is or switching versions is for admins. The
+#- script is src/helper.py beside the app.
 {
   config,
   pkgs,
@@ -28,6 +29,7 @@
         --set NIXOS_SETTINGS_FLAKE ${lib.escapeShellArg machine.flakePath} \
         --set NIXOS_SETTINGS_MACHINE ${lib.escapeShellArg machine.name} \
         --set NIXOS_SETTINGS_LIB ${pkgs.path}/lib \
+        --set NIXOS_SETTINGS_CLEAN_ARGS ${lib.escapeShellArg config.programs.nh.clean.extraArgs} \
         --set PATH ${lib.makeBinPath [alejandra config.nix.package pkgs.git]}:/run/current-system/sw/bin
       mkdir -p $out/share/polkit-1/actions
       cat > $out/share/polkit-1/actions/dev.nixosconfig.settings.apply.policy <<EOF
@@ -36,12 +38,12 @@
         "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
       <policyconfig>
         <action id="dev.nixosconfig.settings.apply">
-          <description>Apply your own app settings</description>
-          <message>NixOS Settings needs your password to apply your app settings</message>
+          <description>Apply settings and rebuild the system</description>
+          <message>NixOS Settings needs your password to change the system</message>
           <defaults>
             <allow_any>no</allow_any>
             <allow_inactive>no</allow_inactive>
-            <allow_active>auth_self</allow_active>
+            <allow_active>auth_self_keep</allow_active>
           </defaults>
           <annotate key="org.freedesktop.policykit.exec.path">$out/bin/nixos-settings-apply</annotate>
         </action>
