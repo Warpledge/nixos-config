@@ -110,7 +110,7 @@
   mullvad.enable = false;
   # Apps always routed around the VPN (see nixos/security/mullvad/). Known
   # names: steam, heroic, prismlauncher, opencode, claude, spotify, freetube,
-  # ferdium
+  # ferdium, nixos-settings
   mullvad.splitTunnel = [];
 
   #--- SSH Server

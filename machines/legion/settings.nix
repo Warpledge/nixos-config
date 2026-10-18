@@ -84,6 +84,7 @@
     "spotify"
     "freetube"
     "ferdium"
+    "nixos-settings"
   ];
 
   #--- SSH Server
