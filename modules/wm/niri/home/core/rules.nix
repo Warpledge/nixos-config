@@ -78,7 +78,6 @@
         {app-id = "zen-beta";}
         {app-id = "helium";}
         {app-id = "freetube";}
-        {app-id = "^retroshelf$";} # Keeping, Moving and details panels side by side
       ];
       default-column-width = {proportion = 1.0;};
     }
