@@ -47,6 +47,7 @@
       ./system/tuning/zram.nix
       ./system/user/shell.nix
       ./system/user/user.nix
+      ./system/user/config-repo.nix
     ]
     #--- Graphics drivers (controlled by machine settings; null: the machine's own files)
     ++ lib.optionals (machine.gpu.type != null) [./services/hardware/gpu.nix]

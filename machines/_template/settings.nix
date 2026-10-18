@@ -36,7 +36,8 @@
   #--- Network name; null uses the folder name
   hostName = null;
 
-  #--- Where this repo is cloned; null means /home/<mainUser>/nixos-config
+  #--- Where this repo is cloned; null means /etc/nixos-config, which every
+  #--- admin can edit (setup.sh moves it there)
   flakePath = null;
 
   #--- Window Manager Selection, for everyone on this machine

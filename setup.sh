@@ -8,6 +8,8 @@
 #                         build that starts on the next boot
 #   ./setup.sh add-user   add a person to a machine that is already set up
 #   ./setup.sh build [machine]   build a machine set up earlier, for the next boot
+#   ./setup.sh share      move this clone to /etc/nixos-config, where every
+#                         admin can edit it, leaving a link at the old place
 # Files in the repo are written and staged with git; anything outside the
 # repo (accounts, the build, a reboot) waits for a yes and runs with sudo.
 set -euo pipefail
@@ -16,6 +18,7 @@ repo=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 cd "$repo"
 nixos_dir=${SETUP_NIXOS_DIR:-/etc/nixos} # where the NixOS installer wrote its config
 nix_flags=(--extra-experimental-features "nix-command flakes")
+shared_repo=/etc/nixos-config # flakePath's default (lib/settings.nix)
 people=() written=() person="" # who is being set up, the files written for them
 
 #--------------------------------------------------------------------#
@@ -637,7 +640,6 @@ new_machine() {
     add_line_after "$f" '^  users = \{' "    ${people[i]} = {};"
   done
   ((${#people[@]} > 1)) && set_setting "$f" mainUser "$(nix_string "$main")"
-  [[ $repo == "/home/$main/nixos-config" ]] || set_setting "$f" flakePath "$(nix_string "$repo")"
   for item in "${picked[@]}"; do
     if [[ $item == ssh.enable* ]]; then
       if [[ " ${written[*]} " == *" users/$main/settings.nix "* ]]; then
@@ -660,6 +662,16 @@ new_machine() {
     git add -- "${written[@]}"
   fi
 
+  section "Where the config lives"
+  if [[ $repo == "$shared_repo" ]]; then
+    :
+  elif confirm "Move the config to $shared_repo, so every admin here can edit it? $repo stays as a link to it." y; then
+    share_repo "$main"
+  else
+    set_setting "$f" flakePath "$(nix_string "$repo")"
+    git add -- "$f"
+  fi
+
   section "Checking the configuration"
   local nix_config
   nix_config=$(build_nix_config "$name") || die "the configuration has an error (above). Fix the file it names and run: git add -A && ./setup.sh"
@@ -678,6 +690,40 @@ new_machine() {
   else
     say "Build it later with: ./setup.sh build $name"
   fi
+}
+
+#--- share_repo <owner>: moves the clone to $shared_repo for every admin (the
+#--- wheel group); config-repo.nix keeps the group access up from then on
+share_repo() {
+  local owner=$1 old=$repo
+  [[ $repo != "$shared_repo" ]] || die "the config is already in $shared_repo"
+  if [[ -e $shared_repo ]]; then
+    [[ -d $shared_repo && -z $(ls -A "$shared_repo") ]] || die "$shared_repo already exists and isn't empty"
+    sudo rmdir "$shared_repo"
+  fi
+  say "Moving $repo to $shared_repo (sudo)."
+  sudo mv "$repo" "$shared_repo"
+  sudo chown -R "$owner:wheel" "$shared_repo"
+  sudo chmod -R g+rwX "$shared_repo"
+  sudo find "$shared_repo" -type d -exec chmod g+s {} +
+  if command -v setfacl >/dev/null; then
+    sudo setfacl -R -m g:wheel:rwX -m d:g:wheel:rwX "$shared_repo"
+  fi
+  ln -s "$shared_repo" "$old"
+  repo=$shared_repo
+  cd "$repo"
+  say "Moved; $old now links to it."
+}
+
+share_existing() {
+  section "Share the config"
+  say "Moves $repo to $shared_repo, where every admin on this computer can edit it."
+  confirm "Go ahead?" y || exit 0
+  share_repo "$USER"
+  if grep -q '^ *flakePath = "' machines/*/settings.nix; then
+    say "A machine's settings.nix sets flakePath; set it to null (or \"$shared_repo\") to match."
+  fi
+  say "Run nixm rebuild once so the other admins get access to it."
 }
 
 build_later() {
@@ -738,7 +784,7 @@ add_user() {
 #--------------------------------------------------------------------#
 case ${1:-} in
   -h | --help)
-    sed -n '5,13p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '5,14p' "$0" | sed 's/^# \{0,1\}//'
     exit 0
     ;;
 esac
@@ -755,5 +801,6 @@ case ${1:-} in
   "") new_machine ;;
   add-user) add_user ;;
   build) build_later "${2:-}" ;;
+  share) share_existing ;;
   *) die "unknown command \"$1\"; try ./setup.sh --help" ;;
 esac

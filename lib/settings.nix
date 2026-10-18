@@ -123,7 +123,7 @@ in {
         flakePath =
           if merged.flakePath != null
           then merged.flakePath
-          else "/home/${mainUser}/nixos-config";
+          else "/etc/nixos-config";
       };
 
     machineProblems =

@@ -5,6 +5,7 @@
   pkgs,
   lib,
   config,
+  machine,
   ...
 }: let
   fetch = "fastfetch"; # neofetch, nerdfetch, pfetch, fastfetch
@@ -125,7 +126,7 @@ in {
       bindkey -e
 
       # Default to nixos-config directory on new shells
-      [[ "$PWD" == "$HOME" ]] && cd ~/nixos-config
+      [[ "$PWD" == "$HOME" ]] && cd ${machine.flakePath}
 
       ${
         if fetch == "neofetch"
@@ -274,7 +275,7 @@ in {
       nano = "micro";
       zed = "zeditor";
       cat = "bat";
-      cdnix = "cd ~/nixos-config && zeditor ~/nixos-config";
+      cdnix = "cd ${machine.flakePath} && zeditor ${machine.flakePath}";
 
       l = "eza --icons  -a --group-directories-first -1"; # EZA_ICON_SPACING=2
       ll = "eza --icons  -a --group-directories-first -1 --no-user --long";
