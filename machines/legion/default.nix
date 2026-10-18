@@ -45,7 +45,7 @@
       settings = {
         # Legion platform profile, shown by the Fn+Q LED (performance=red,
         # balanced=white, low-power=blue); performance lifts the CPU power limit
-        PLATFORM_PROFILE_ON_AC = "performance";
+        PLATFORM_PROFILE_ON_AC = "balanced";
         PLATFORM_PROFILE_ON_BAT = "low-power";
 
         # amd-pstate EPP: clock up at once for the server tick (TLP default is
