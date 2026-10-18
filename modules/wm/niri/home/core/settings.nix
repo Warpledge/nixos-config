@@ -101,7 +101,7 @@ in {
           width = 2;
           active.gradient = {
             from = colors.base0E; # Mauve
-            to = colors.base07; # Lavender
+            to = colors.base0B; # Green
             angle = 45;
             in' = "oklch shorter hue";
           };
