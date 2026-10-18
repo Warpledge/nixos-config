@@ -45,9 +45,9 @@ def clean(cfg):
         refuse(f"there is no users/{cfg.user}/settings.nix")
     with open(LOCK, "w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
-        items = [(where, path) for where, path in backend.stale_settings(cfg)
-                 if where in ("user", "override")]
-        for where, path in items:
+        items = [(where, user, path) for where, user, path in backend.stale_settings(cfg)
+                 if where in ("user", "override") and user == cfg.user]
+        for _, _, path in items:
             print(f"Removing {'.'.join(path)}", flush=True)
         backend.remove_stale(cfg, items)
 

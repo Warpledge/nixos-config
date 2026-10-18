@@ -40,6 +40,7 @@ class Setting:
     choices: list = field(default_factory=list)
     options: list = field(default_factory=list)  # known items of a list
     description: str = ""  # from descriptions.json, shown when the row expands
+    note: str = ""  # from descriptions.json; replaces the subtitle of a described row
 
 
 @dataclass

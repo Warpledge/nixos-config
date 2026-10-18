@@ -53,7 +53,10 @@ ICONS = {
 FALLBACK_ICON = "applications-system-symbolic"
 
 #--- Bolder row titles; colours stay the theme's
-CSS = "row label.title { font-weight: bold; }"
+CSS = """
+row label.title { font-weight: bold; }
+row.nixm-plain image.expander-row-arrow { opacity: 0; }
+"""
 
 
 def page_icon(page):
@@ -71,6 +74,14 @@ def theme_colors():
         to8 = [max(0, min(255, round(v * 255))) for v in (c.red, c.green, c.blue)]
         colors[name] = "#%02x%02x%02x" % tuple(to8)
     return colors
+
+
+def valid_markup(text):
+    try:
+        Pango.parse_markup(text, -1, "\x01")
+        return True
+    except GLib.Error:
+        return False
 
 
 def plain(text):
@@ -280,19 +291,22 @@ class Window(Adw.ApplicationWindow):
     def _failed(self, err):
         """The error page; offers to drop settings the templates no longer have."""
         try:
-            stale = backend.stale_settings(self.cfg)
-        except Exception:  # noqa: BLE001
-            stale = []
-        try:
             in_wheel = grp.getgrnam("wheel").gr_gid in os.getgroups()
         except KeyError:
             in_wheel = False
         direct = in_wheel and backend.writable(self.cfg)
         helper = os.path.realpath(HELPER) if os.path.exists(HELPER) else None
+        try:
+            # An admin can clean every user on the machine; anyone else only themself
+            stale = backend.stale_settings(self.cfg, everyone=direct)
+        except Exception:  # noqa: BLE001
+            stale = []
         mine = [i for i in stale if direct or i[0] != "machine"]
-        where = {"user": f"users/{self.cfg.user}/settings.nix",
-                 "override": f"machines/{self.cfg.machine}/settings.nix, your block",
-                 "machine": f"machines/{self.cfg.machine}/settings.nix"}
+        machine_file = f"machines/{self.cfg.machine}/settings.nix"
+
+        def where(w, user):
+            return {"user": f"users/{user}/settings.nix", "machine": machine_file,
+                    "override": f"{machine_file}, {user}'s block"}[w]
 
         buttons = Gtk.Box(spacing=12, halign=Gtk.Align.CENTER)
         retry = Gtk.Button(label="Try Again", css_classes=["pill"])
@@ -301,7 +315,7 @@ class Window(Adw.ApplicationWindow):
         text = str(err)
         if stale:
             text = "These settings aren't in the templates any more, so the files can't be read:\n" + \
-                "\n".join(f"• {'.'.join(p)}  ({where[w]})" for w, p in stale)
+                "\n".join(f"• {'.'.join(p)}  ({where(w, u)})" for w, u, p in stale)
             if len(mine) < len(stale):
                 text += "\n\nAn admin needs to remove the computer-wide ones."
         if mine and (direct or helper):
@@ -452,7 +466,7 @@ class Window(Adw.ApplicationWindow):
         for i, page in enumerate(self.state.pages):
             for g in page.groups:
                 for s in g.settings:
-                    text = " ".join([s.title, s.subtitle, plain(s.description), page.title,
+                    text = " ".join([s.title, s.subtitle, plain(s.note), plain(s.description), page.title,
                                      g.title, ".".join(s.path)]).lower()
                     if all(w in text for w in words):
                         hits.append((i, page, s))
@@ -589,57 +603,54 @@ class Window(Adw.ApplicationWindow):
         kind = s.kind
         if kind == "timezone":
             kind = "choice" if self.state.timezones else "text"
-        subtitle = GLib.markup_escape_text(s.subtitle)
+        # A described row keeps only its note under the name; the rest is in the dropdown
+        subtitle = rich(s.note, self.colors) if s.description else GLib.markup_escape_text(s.subtitle)
         if self.multi and self.state.overridden(s):
-            note = f'<span foreground="{self.colors["accent"]}">Set for this computer only</span>'
-            subtitle = f"{subtitle}\n{note}" if subtitle else note
+            here = f'<span foreground="{self.colors["accent"]}">Set for this computer only</span>'
+            subtitle = f"{subtitle}\n{here}" if subtitle else here
+        if not valid_markup(subtitle):
+            subtitle = GLib.markup_escape_text(plain(s.note if s.description else s.subtitle))
         common = dict(title=GLib.markup_escape_text(s.title), subtitle=subtitle, use_markup=True)
-        # A described switch or dropdown becomes an expander whose arrow shows the text
         described = bool(s.description) and kind in ("bool", "choice")
-        control = None
 
-        if kind == "bool" and described:
-            row = Adw.ExpanderRow(**common)
+        control = None
+        if kind == "bool":
             control = Gtk.Switch(active=bool(value), valign=Gtk.Align.CENTER)
             control.connect("notify::active", lambda w, _: self.change(s, w.get_active()))
-        elif kind == "bool":
-            row = Adw.SwitchRow(active=bool(value), **common)
-            row.connect("notify::active", lambda r, _: self.change(s, r.get_active()))
         elif kind == "choice":
             options = s.choices if s.kind == "choice" else self.state.timezones
             if value not in options:
                 options = [value] + options
             model = Gtk.StringList.new([choice_label(o) if s.kind == "choice" else o for o in options])
-            if described:
-                row = Adw.ExpanderRow(**common)
-                control = Gtk.DropDown(model=model, selected=options.index(value), valign=Gtk.Align.CENTER)
-                picker = control
-            else:
-                row = picker = Adw.ComboRow(model=model, selected=options.index(value), **common)
+            control = Gtk.DropDown(model=model, selected=options.index(value), valign=Gtk.Align.CENTER)
             if len(options) > 12:
-                picker.set_enable_search(True)
-                picker.set_expression(Gtk.PropertyExpression.new(Gtk.StringObject, None, "string"))
-            picker.connect("notify::selected", lambda w, _: self.change(s, options[w.get_selected()]))
-        elif kind == "list":
-            row = self._list_row(s, list(value or []), common)
-        else:
-            row = Adw.ActionRow(**common)
+                control.set_enable_search(True)
+                control.set_expression(Gtk.PropertyExpression.new(Gtk.StringObject, None, "string"))
+            control.connect("notify::selected", lambda w, _: self.change(s, options[w.get_selected()]))
+        elif kind != "list":
             placeholder = self.cfg.machine if s.path == ("hostName",) else "Not set"
-            entry = Gtk.Entry(text=value or "", valign=Gtk.Align.CENTER, width_chars=24,
-                              placeholder_text=placeholder if s.nullable else "")
-            entry.connect("changed", lambda e: self.change(
+            control = Gtk.Entry(text=value or "", valign=Gtk.Align.CENTER, width_chars=24,
+                                placeholder_text=placeholder if s.nullable else "")
+            control.connect("changed", lambda e: self.change(
                 s, e.get_text() or (None if s.nullable else "")))
-            row.add_suffix(entry)
-            row.set_activatable_widget(entry)
 
         marker = Gtk.Image(icon_name="document-edit-symbolic", visible=False, valign=Gtk.Align.CENTER,
                            tooltip_text="Changed; press Apply to use it")
-        # An expander packs suffixes right to left, so its control goes in first
-        if control is not None:
+        if kind == "list":
+            row = self._list_row(s, list(value or []), common)
+            row.add_suffix(marker)
+        else:
+            # Every row is an expander so controls line up down the page; one with
+            # nothing to show keeps its arrow's space but not the arrow (CSS)
+            row = Adw.ExpanderRow(**common)
+            # An expander packs suffixes right to left, so its control goes in first
             row.add_suffix(control)
-        row.add_suffix(marker)
-        if described:
-            row.add_row(self._description(s.description))
+            row.add_suffix(marker)
+            if described:
+                row.add_row(self._description(s.description))
+            else:
+                row.set_enable_expansion(False)
+                row.add_css_class("nixm-plain")
         self.rows[key] = (row, marker)
         return row
 
@@ -647,10 +658,9 @@ class Window(Adw.ApplicationWindow):
         label = Gtk.Label(wrap=True, xalign=0, margin_top=10, margin_bottom=10,
                           margin_start=12, margin_end=12)
         markup = rich(text, self.colors)
-        try:
-            Pango.parse_markup(markup, -1, "\x01")
+        if valid_markup(markup):
             label.set_markup(markup)
-        except GLib.Error:
+        else:
             label.set_text(plain(text))
         return label
 

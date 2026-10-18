@@ -132,38 +132,51 @@ def new_settings(cfg, overrides):
             and not lookup(overrides, path)[0]]
 
 
-def stale_settings(cfg):
-    """Settings the templates no longer have, as (where, path): "user" is this user's
-    file, "override" their block in this machine's file, "machine" the machine's own."""
+def stale_settings(cfg, everyone=False):
+    """Settings the templates no longer have, as (where, user, path): "user" is that
+    user's file, "override" their block in this machine's file, "machine" the
+    machine's own settings. `everyone` adds the machine's other users (for admins)."""
     user_t = read_tree(os.path.join(cfg.flake, "users", "_template", "settings.nix"))
     machine_t = read_tree(os.path.join(cfg.flake, "machines", "_template", "settings.nix"))
     machine = read_tree(cfg.file("machine"))
-    block = dig(machine, ["users", cfg.user]) or {}
+    listed = list(machine.get("users") or {})
+    users = [cfg.user] + ([u for u in listed if u != cfg.user] if everyone else [])
+    out = []
+    for user in users:
+        path = os.path.join(cfg.flake, "users", user, "settings.nix")
+        if os.path.exists(path):
+            out += [("user", user, p) for p, _ in leaf_paths(read_tree(path)) if not known(user_t, p)]
+        block = dig(machine, ["users", user]) or {}
+        out += [("override", user, p) for p, _ in leaf_paths(block) if not known(user_t, p)]
     machine_own = {k: v for k, v in machine.items() if k != "users"}
-    return ([("user", p) for p, _ in leaf_paths(read_tree(cfg.file("user"))) if not known(user_t, p)]
-            + [("override", p) for p, _ in leaf_paths(block) if not known(user_t, p)]
-            + [("machine", p) for p, _ in leaf_paths(machine_own) if not known(machine_t, p)])
+    return out + [("machine", None, p) for p, _ in leaf_paths(machine_own) if not known(machine_t, p)]
 
 
 def remove_stale(cfg, items):
-    """Deletes the given stale settings from the files; returns the files' old text."""
-    files = {d: cfg.file(d) for d in ("machine", "user")}
-    old = {d: open(f).read() for d, f in files.items()}
-    text = dict(old)
-    for where, path in items:
+    """Deletes the given stale settings from the files."""
+    text = {}
+
+    def edit(path, fn):
+        if path not in text:
+            with open(path) as f:
+                text[path] = [f.read()] * 2  # [old, new]
+        text[path][1] = fn(text[path][1])
+
+    for where, user, path in items:
         path = list(path)
         if where == "user":
-            text["user"] = nixfile.remove_value(text["user"], path)
+            edit(os.path.join(cfg.flake, "users", user, "settings.nix"),
+                 lambda t, p=path: nixfile.remove_value(t, p))
         elif where == "override":
-            text["machine"] = nixfile.remove_value(text["machine"], ["users", cfg.user] + path, keep=2)
+            edit(cfg.file("machine"),
+                 lambda t, p=path, u=user: nixfile.remove_value(t, ["users", u] + p, keep=2))
         else:
-            text["machine"] = nixfile.remove_value(text["machine"], path)
-    changed = [d for d in files if text[d] != old[d]]
-    for d in changed:
-        save(files[d], text[d])
+            edit(cfg.file("machine"), lambda t, p=path: nixfile.remove_value(t, p))
+    changed = [f for f, (old, new) in text.items() if old != new]
+    for f in changed:
+        save(f, text[f][1])
     if shutil.which("alejandra") and changed:
-        subprocess.run(["alejandra", "-q"] + [files[d] for d in changed], capture_output=True)
-    return old
+        subprocess.run(["alejandra", "-q"] + changed, capture_output=True)
 
 
 @dataclass
@@ -203,7 +216,11 @@ def load(cfg):
     for page in pages:
         for group in page.groups:
             for s in group.settings:
-                s.description = descriptions.get(".".join(s.path), "")
+                entry = descriptions.get(".".join(s.path), "")
+                if isinstance(entry, dict):
+                    s.description, s.note = entry.get("text", ""), entry.get("note", "")
+                else:
+                    s.description = entry
     machine_doc = nixfile.to_python(nixfile.parse(read("machines", cfg.machine, "settings.nix")).root)
     try:
         zones = subprocess.run(["timedatectl", "list-timezones"], capture_output=True, text=True).stdout.split()
