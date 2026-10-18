@@ -36,7 +36,7 @@ MOVES = {  # setting -> (page, group on that page)
     ("japanese", "vn"): ("Gaming", "Japanese Visual Novels"),
 }
 
-#--- Sidebar sections, top to bottom
+#--- Sidebar sections, top to bottom; under niri, Desktop is on the Niri tab
 SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
             ("personal", "Personal"), ("apps", "Apps")]
 
@@ -55,8 +55,9 @@ PAGES = {
                           ("Keyboard", "", ["keyboardLayout", "consoleKeyMap", "capsLockRemap"]),
                           ("Japanese Typing", "", ["japanese.ime"])]),
     "Devices": ("computer", "bluetooth-symbolic",
-                "Bluetooth, printers and sound devices.",
-                [("", "", ["bluetooth.enable", "printing.enable"])]),
+                "Bluetooth, printing and the mouse pointer.",
+                [("", "", ["bluetooth.enable", "printing.enable"]),
+                 ("Mouse Pointer", "", ["cursor", "cursorSize"])]),
     "Network & Firewall": ("computer", "network-workgroup-symbolic",
                            "What other devices may reach on this computer, and what it blocks.",
                            [("Open Ports", "Other devices can connect to this computer on these. "
@@ -71,12 +72,13 @@ PAGES = {
                   ("Sharing & Streaming", "", ["syncthing.enable", "sunshine.enable", "suwayomi.enable"]),
                   ("Containers & Scanning", "", ["docker.enable", "clamav.enable"])]),
     "Appearance": ("desktop", "applications-graphics-symbolic",
-                   "Pointer, wallpaper and the shell's look. Colors, fonts and icons "
+                   "Wallpaper and the shell's look. Colors, fonts and icons "
                    "come from the Catppuccin theme this config sets.",
-                   [("Mouse Pointer", "", ["cursor", "cursorSize"]),
-                    ("Wallpaper", "", ["wallpaper"])]),
+                   [("Wallpaper", "", ["wallpaper"])]),
     "Displays": ("desktop", "video-display-symbolic",
                  "Monitors, night light and what each screen shows.", []),
+    "Input & Connections": ("desktop", "input-keyboard-symbolic",
+                            "The shell's keyboard, mouse, sound, printer and network settings.", []),
     "Desktop Shell": ("desktop", "view-app-grid-symbolic",
                       "The bar, dock, launcher, notifications and widgets.", []),
     "Power & Lock": ("desktop", "system-lock-screen-symbolic",

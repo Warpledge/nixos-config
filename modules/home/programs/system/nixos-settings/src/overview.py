@@ -19,6 +19,42 @@ QUICK = ["display_config", "keybinds", "mouse_touchpad", "theme", "wallpaper", "
 HISTORY = 8
 
 
+def quick_links(window, links):
+    """Buttons for the DMS settings tabs in QUICK, or None when DMS has none."""
+    by_tab = {l.tab: l for l in links}
+    quick = [by_tab[t] for t in QUICK if t in by_tab]
+    if not quick:
+        return None
+    group = Adw.PreferencesGroup(title="Shell Settings",
+                                 description="Open DankMaterialShell's settings on one page.")
+    wrap = Adw.WrapBox(child_spacing=10, line_spacing=10)
+    for link in quick:
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        box.append(Gtk.Image(icon_name=ui.first_icon(link.icon), pixel_size=24))
+        box.append(Gtk.Label(label=link.title, wrap=True, justify=Gtk.Justification.CENTER,
+                             max_width_chars=14))
+        button = Gtk.Button(child=box, css_classes=["card", "quick-link"],
+                            tooltip_text=link.subtitle)
+        button.connect("clicked", lambda _, l=link: window.open_dms(l))
+        wrap.append(button)
+    group.add(wrap)
+    return group
+
+
+class ShellPage(Adw.PreferencesPage):
+    """The Niri tab's start page: DankMaterialShell's settings in one place."""
+    def __init__(self, window, links):
+        super().__init__()
+        top = Adw.PreferencesGroup()
+        top.add(ui.hero(ui.first_icon("view-app-grid-symbolic"), "Shell",
+                        "DankMaterialShell, the bar, launcher and lock screen niri runs with. "
+                        "The pages below hold the rest of its settings."))
+        self.add(top)
+        group = quick_links(window, links)
+        if group:
+            self.add(group)
+
+
 class Overview(Adw.PreferencesPage):
     def __init__(self, window, info, wm, links):
         super().__init__()
@@ -72,25 +108,6 @@ class Overview(Adw.PreferencesPage):
             self.check_button.set_tooltip_text("Only an admin can update this computer")
         self.add(self.updates_group)
 
-        #--- Shell settings
-        by_tab = {l.tab: l for l in links}
-        quick = [by_tab[t] for t in QUICK if t in by_tab]
-        if quick:
-            group = Adw.PreferencesGroup(title="Shell Settings",
-                                         description="Open DankMaterialShell's settings on one page.")
-            wrap = Adw.WrapBox(child_spacing=10, line_spacing=10)
-            for link in quick:
-                box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-                box.append(Gtk.Image(icon_name=ui.first_icon(link.icon), pixel_size=24))
-                box.append(Gtk.Label(label=link.title, wrap=True, justify=Gtk.Justification.CENTER,
-                                     max_width_chars=14))
-                button = Gtk.Button(child=box, css_classes=["card", "quick-link"],
-                                    tooltip_text=link.subtitle)
-                button.connect("clicked", lambda _, l=link: window.open_dms(l))
-                wrap.append(button)
-            group.add(wrap)
-            self.add(group)
-
         #--- Actions
         group = Adw.PreferencesGroup(title="Maintenance")
         rebuild = Adw.ActionRow(title="Rebuild Now", activatable=True,
@@ -126,6 +143,12 @@ class Overview(Adw.PreferencesPage):
             git.connect("activated", lambda _: self._open_zed())
             group.add(git)
         self.add(group)
+
+        #--- Shell settings; under niri they're on the Niri tab's Shell page
+        if wm != "niri":
+            group = quick_links(window, links)
+            if group:
+                self.add(group)
 
         #--- Earlier versions
         gens = info.generations[:HISTORY]
