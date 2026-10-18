@@ -13,7 +13,7 @@ home-manager would write and runs `Hyprland --verify-config` on it.
 ## Run it
 
 ```bash
-bash <skill-dir>/scripts/verify.sh desktop   # or: laptop
+bash <skill-dir>/scripts/verify.sh eclipse   # or: legion
 ```
 
 - Works when the machine runs niri: `windowManager` is overridden to `"hyprland"` in

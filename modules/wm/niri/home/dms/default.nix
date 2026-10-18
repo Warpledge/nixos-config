@@ -35,7 +35,7 @@ in {
     # itself are kept.
     managePluginSettings = false;
     plugins = {
-      # amdGpuMonitor is per machine: machines/desktop/hardware/gpu.nix
+      # amdGpuMonitor is per machine: machines/eclipse/hardware/gpu.nix
       aiOverviewControl.enable = user.claude.enable;
       quickCapture.enable = true;
 

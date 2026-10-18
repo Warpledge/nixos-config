@@ -6,7 +6,7 @@
 - **Port:** 25566
 - **Loader:** Forge 1.20.1-47.4.13
 - **Java:** JDK 21
-- **Script:** `machines/laptop/minecraft-servers/tfg-server.nix` — defines `tfg` CLI
+- **Script:** `machines/legion/minecraft-servers/tfg-server.nix` — defines `tfg` CLI
 
 ## tfg Command
 

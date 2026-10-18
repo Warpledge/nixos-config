@@ -2,7 +2,7 @@
 
 ## Project
 
-NixOS flake managing **Desktop** (Ryzen 5800X3D + RX 9070 XT, 280Hz OLED + 144Hz) and **Laptop** (Legion Slim 5, Ryzen 7735HS + hybrid AMD 680M/RTX 4070, 1600p@165Hz). Nixpkgs unstable, Catppuccin Mocha Mauve via Stylix. Active WM: Niri; a Hyprland module also exists.
+NixOS flake managing **eclipse**, the desktop (Ryzen 5800X3D + RX 9070 XT, 280Hz OLED + 144Hz) and **legion**, the laptop (Legion Slim 5, Ryzen 7735HS + hybrid AMD 680M/RTX 4070, 1600p@165Hz). Nixpkgs unstable, Catppuccin Mocha Mauve via Stylix. Active WM: Niri; a Hyprland module also exists.
 
 ## Critical Rules
 
@@ -82,7 +82,7 @@ User settings: `admin` (wheel, so sudo and rebuilds; non-admins also skip the do
 
 - `~/.local/opt` bundles (kept out of git) have no category of their own: `media.tonkatsuBox`, `gaming.granblueRelinkMods` and `audio.katanaFloorboard` wrap them; see `docs/local/local-binary-installs.md`. `setup.sh` doesn't offer them.
 
-`users/warpledge/settings.nix` holds the user's apps for every machine, and both machines list `warpledge` as their only user. The laptop's `users.warpledge` block turns these off there, as of 2026-10-17: `gaming.{heroic,easyrpg,xsystem4,hytale,r2modman,pathOfBuilding}`, `discord.arrpc.enable`, `media.{moku,boorusama,tonkatsuBox}`, `wallpaper = "carousel"`; and the laptop machine has `suwayomi.enable = false`. Verify with `diff machines/desktop/settings.nix machines/laptop/settings.nix` before assuming.
+`users/warpledge/settings.nix` holds the user's apps for every machine, and both machines list `warpledge` as their only user. The laptop's `users.warpledge` block turns these off there, as of 2026-10-17: `gaming.{heroic,easyrpg,xsystem4,hytale,r2modman,pathOfBuilding}`, `discord.arrpc.enable`, `media.{moku,boorusama,tonkatsuBox}`, `wallpaper = "carousel"`; and the laptop machine has `suwayomi.enable = false`. Verify with `diff machines/eclipse/settings.nix machines/legion/settings.nix` before assuming.
 
 Gotchas. Grep the option name before assuming which file owns it:
 
@@ -99,7 +99,7 @@ Gotchas. Grep the option name before assuming which file owns it:
 - `ai/{claude,opencode,lmstudio}.nix` are conditionally imported **and** wrap their body in `config = lib.mkIf user.<toggle> {...}`, so the inner guard never fires on its own. New modules take the conditional import alone.
 - Module *loading* goes through `lib.optionals` in a `default.nix`; config *logic* inside a module uses `if/then/else`. Mixing them up is why an option looks wired but has no effect.
 - Every setting exists once `lib/settings.nix` has filled the gaps, so read it as a bare path (`user.media.mpv`); `or false` isn't needed.
-- Machine-specific hardware lives in the machine's folder, never behind a name check in a shared module: niri monitors and the desktop's DMS bars in `machines/<name>/wm/niri.nix` (the bars through the `dms.extraSettings` option declared in `niri/home/dms/default.nix`), the desktop's DMS GPU widget in `machines/desktop/hardware/gpu.nix`.
+- Machine-specific hardware lives in the machine's folder, never behind a name check in a shared module: niri monitors and the desktop's DMS bars in `machines/<name>/wm/niri.nix` (the bars through the `dms.extraSettings` option declared in `niri/home/dms/default.nix`), the desktop's DMS GPU widget in `machines/eclipse/hardware/gpu.nix`.
 - **Moku is built from source, pinned twice:** the `moku` and `tsunagu` inputs move together, since Tsunagu is the backend each Moku release ships with. The comments in `media/moku/default.nix` explain each patch and hash override, `tsunagu/` holds the Kototoro bridge, and the `moku-bump` skill has the bump order and what each patch fixes. Sources that drive an Android WebView can't work in Tsunagu. Library and extensions live in `~/.local/share/{tsunagu,io.github.MokuProject.Moku}`.
 
 ### Conditional import patterns
@@ -146,7 +146,7 @@ Gotchas. Grep the option name before assuming which file owns it:
 - `machines/_template/` and `users/_template/` — what `setup.sh` copies; their `settings.nix` files are also the full setting lists and the defaults. `machines/_template/hardware/hardware-configuration.nix` throws until it's replaced
 - `users/<name>/settings.nix` — one person's account and apps (`users/warpledge/` for the user)
 - `setup.sh` — sets up a new computer (moves the clone to `/etc/nixos-config` with a link at the old place, `machines/<name>/` from the template, `hardware-configuration.nix`, locale and keyboard from the installer's `configuration.nix`, disk-unlock lines into `hardware/boot.nix`, GPU from sysfs, the zen kernel without asking (cachyos has no binary cache, so it compiles locally), a `users/<name>/` per new person, then `nixos-rebuild boot`), `add-user`, `build`, and `share` (that move alone, for a clone set up before it). It stages its files with git and asks before anything that needs sudo
-- `machines/laptop/` also has `hardware/swapfile.nix` and `minecraft-servers/` (GTNH + TerraFirmaGreg server definitions, plus `mcservers.nix`, an fzf picker over them). `minecraft-servers/` is a **home-manager** module injected from `machines/laptop/default.nix` via `home-manager.users.${machine.mainUser}.imports`, not a NixOS module, since the servers live in the main user's `~/Documents`.
+- `machines/legion/` also has `hardware/swapfile.nix` and `minecraft-servers/` (GTNH + TerraFirmaGreg server definitions, plus `mcservers.nix`, an fzf picker over them). `minecraft-servers/` is a **home-manager** module injected from `machines/legion/default.nix` via `home-manager.users.${machine.mainUser}.imports`, not a NixOS module, since the servers live in the main user's `~/Documents`.
 
 ### Where to place things
 
@@ -244,18 +244,18 @@ DMS runs as a systemd user service (`systemd.enable`, `niri.enableSpawn = false`
 **Niri-only directories:** `core/blur-presets.nix`, `core/portals.nix`, `core/rules.nix`, `core/translucent-apps.nix`, `core/xwayland.nix`, `nirius.nix`.
 
 Per-machine WM overrides exist where needed, each applied to every user on the machine:
-- `machines/laptop/wm/{hyprland,niri}.nix` — hybrid-GPU env (`WLR_DRM_DEVICES` only in the Hyprland one; niri ignores it), Solaar autostart; the niri one also sets the internal panel's outputs and turns off DMS auto-lock
-- `machines/desktop/wm/{hyprland,niri}.nix` — monitor layout and workspace assignment (1–6 on DP-2, 7–9 on DP-3); the niri one also the app placement Hyprland keeps in `windowrules/workspaces.nix`, and the DMS bars (an auto-hiding copy of the main bar on the OLED)
+- `machines/legion/wm/{hyprland,niri}.nix` — hybrid-GPU env (`WLR_DRM_DEVICES` only in the Hyprland one; niri ignores it), Solaar autostart; the niri one also sets the internal panel's outputs and turns off DMS auto-lock
+- `machines/eclipse/wm/{hyprland,niri}.nix` — monitor layout and workspace assignment (1–6 on DP-2, 7–9 on DP-3); the niri one also the app placement Hyprland keeps in `windowrules/workspaces.nix`, and the DMS bars (an auto-hiding copy of the main bar on the OLED)
 - `machines/_template/wm/{hyprland,niri}.nix` — commented monitor examples; with no outputs set, both WMs use each monitor's preferred mode
 
 These are only imported when the WM is active, e.g. `lib.optional (machine.windowManager == "niri") ./wm/niri.nix`.
 
 ## Hardware
 
-**Which machine:** run `hostname` (`desktop` or `laptop`, which match their folders in `machines/`) before diagnosing anything machine-specific, and read that machine's `machines/<name>/` and `settings.nix`; the two differ in GPU, power management and the overrides listed under **Machine and user settings**.
+**Which machine:** run `hostname` (`eclipse` for the desktop or `legion` for the laptop, which match their folders in `machines/`) before diagnosing anything machine-specific, and read that machine's `machines/<name>/` and `settings.nix`; the two differ in GPU, power management and the overrides listed under **Machine and user settings**.
 
-**Desktop:** AMD-only (RX 9070 XT direct rendering), performance governor. Suspend is disabled because the RX 9070 XT doesn't resume cleanly. LACT runs with amdgpu overdrive on (`ppfeaturemask` is the kernel default plus the overdrive bit), set in `machines/desktop/hardware/gpu.nix`. GameMode has no `gpu` section: its `amd_performance_level = "high"` pinned the card to the 2400 MHz game clock (about 20% slower in Superposition), so don't add it back.
-**Laptop:** TLP power mgmt, hybrid GPU defaults to AMD 680M; route apps to RTX 4070 with `nvidia-offload <app>`. WM-specific GPU vars live in `machines/laptop/wm/`. It doubles as the Minecraft server host, so sleep, suspend and hibernate are off, the lid and power key are ignored, and DMS auto-lock is off under niri.
+**Desktop:** AMD-only (RX 9070 XT direct rendering), performance governor. Suspend is disabled because the RX 9070 XT doesn't resume cleanly. LACT runs with amdgpu overdrive on (`ppfeaturemask` is the kernel default plus the overdrive bit), set in `machines/eclipse/hardware/gpu.nix`. GameMode has no `gpu` section: its `amd_performance_level = "high"` pinned the card to the 2400 MHz game clock (about 20% slower in Superposition), so don't add it back.
+**Laptop:** TLP power mgmt, hybrid GPU defaults to AMD 680M; route apps to RTX 4070 with `nvidia-offload <app>`. WM-specific GPU vars live in `machines/legion/wm/`. It doubles as the Minecraft server host, so sleep, suspend and hibernate are off, the lid and power key are ignored, and DMS auto-lock is off under niri.
 
 ## Network
 
@@ -396,7 +396,7 @@ Common errors:
 
 **Rollback:** the user runs `nixm rollback` (rule 1), or picks a generation from the bootloader.
 
-**Laptop GPU:** `lspci | grep -i vga`, `env | grep -E 'DRI|VDPAU|LIBVA|VK'`. Configs: `machines/laptop/hardware/gpu.nix` and `machines/laptop/wm/{hyprland,niri}.nix`. Verify offload with `nvidia-offload glxinfo | grep "OpenGL renderer"`.
+**Laptop GPU:** `lspci | grep -i vga`, `env | grep -E 'DRI|VDPAU|LIBVA|VK'`. Configs: `machines/legion/hardware/gpu.nix` and `machines/legion/wm/{hyprland,niri}.nix`. Verify offload with `nvidia-offload glxinfo | grep "OpenGL renderer"`.
 
 **A game crashes, freezes or won't start:** the `game-troubleshooting` skill has the logging, hang-vs-crash and native-engine steps, and indexes the per-game notes in `docs/gaming/`.
 
@@ -447,7 +447,7 @@ Game-specific notes live under `docs/gaming/` (the `game-troubleshooting` skill 
 - `gaming/rocksmith-2014.md` — Rocksmith 2014 on Proton 11 + WOW64 with the Katana DI via PipeASIO and RS_ASIO: the manual install steps the `gaming.rocksmith` module can't do, the Katana driver-priority stall, why calibration is skipped, which CDLC enabler build works (the CustomsForge v4.0 one, not the newer GitHub build), and the optional RSMods setup
 - `gaming/feedback.md` — feedBack's working audio settings and the Guitar Pro import order (import without audio, constant offset, never auto-sync)
 - `gaming/arknights-endfield.md` — the Steam copy, and "Unable to start ACE Setup (1-1700-2)": `ACE-Setup64.exe` missing from `AntiCheatExpert/`; Steam's verify restores it, the old Epic copy needed it copied back
-- `gaming/minecraft_servers/{GTNH,TerraFirmaGreg-Modern}/` — each pack has `index.md` listing its sub-files (server setup, mods, config tweaks, etc.). **Update the relevant sub-file when that pack's config, mods, or settings change.** The matching declarative modules live at `machines/laptop/minecraft-servers/{gtnh-server,tfg-server}.nix` (add a new server by creating a `.nix` there, importing it in that dir's `default.nix`, and adding a line to the hardcoded pack list in `mcservers.nix`, the fzf picker that names each pack with its version and dispatches to that server's command).
+- `gaming/minecraft_servers/{GTNH,TerraFirmaGreg-Modern}/` — each pack has `index.md` listing its sub-files (server setup, mods, config tweaks, etc.). **Update the relevant sub-file when that pack's config, mods, or settings change.** The matching declarative modules live at `machines/legion/minecraft-servers/{gtnh-server,tfg-server}.nix` (add a new server by creating a `.nix` there, importing it in that dir's `default.nix`, and adding a line to the hardcoded pack list in `mcservers.nix`, the fzf picker that names each pack with its version and dispatches to that server's command).
 
 Audio hardware notes live under `docs/audio/`:
 

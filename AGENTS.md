@@ -1,7 +1,7 @@
 # AGENTS.md
 
-NixOS flake managing two machines: **desktop** and **laptop** (one folder each in
-`machines/`), with each person's apps in `users/`. Nixpkgs unstable,
+NixOS flake managing two machines, **eclipse** (desktop) and **legion** (laptop), one folder
+each in `machines/`, with each person's apps in `users/`. Nixpkgs unstable,
 home-manager, Niri WM, Stylix theming (Catppuccin Mocha).
 
 ## Rules

@@ -13,7 +13,7 @@ anything into the kernel, so no root is needed.
 ## Run it
 
 ```bash
-bash <skill-dir>/scripts/check.sh desktop   # or: laptop
+bash <skill-dir>/scripts/check.sh eclipse   # or: legion
 ```
 
 - `git add` new profile files first; the flake ignores untracked files.

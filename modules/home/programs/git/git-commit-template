@@ -6,7 +6,7 @@
 #
 # type:  feat | fix | refactor | perf | docs | chore | revert
 # scope: area as the repo names it (hyprland, niri, dms, moku, freetube,
-#        apparmor, mullvad, theme, claude, desktop, laptop, flake);
+#        apparmor, mullvad, theme, claude, eclipse, legion, flake);
 #        omit when the commit spans the whole config
 # breaking: type(scope)!: plus a "BREAKING CHANGE: ..." footer
 #

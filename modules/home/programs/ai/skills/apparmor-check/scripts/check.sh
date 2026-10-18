@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Compile every AppArmor policy a host defines; loads nothing, needs no root.
-# Usage: check.sh [desktop|laptop] [repo-path]
+# Usage: check.sh [machine, default: this one's hostname] [repo-path]
 set -uo pipefail
 
-host="${1:-desktop}"
+host="${1:-$(hostname)}"
 repo="${2:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
 cfg="$repo#nixosConfigurations.$host"
 

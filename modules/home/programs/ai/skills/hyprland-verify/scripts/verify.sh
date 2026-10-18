@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Build a machine's generated Hyprland Lua config (its main user's) and run
 # Hyprland's own verifier on it.
-# Usage: verify.sh [desktop|laptop|<machine>] [repo-path]
+# Usage: verify.sh [machine, default: this one's hostname] [repo-path]
 # Works under any WM: windowManager is overridden to "hyprland" in memory only.
 set -euo pipefail
 
-host="${1:-desktop}"
+host="${1:-$(hostname)}"
 repo="${2:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
 scratch="$(mktemp -d)"
 

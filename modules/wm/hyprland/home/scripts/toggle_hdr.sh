@@ -2,7 +2,7 @@
 # Toggle HDR on/off for Dell AW2725D OLED monitor
 
 # Reads the live preset, so the toggle stays correct across restarts and reloads.
-# Keep the mode string in sync with machines/desktop/wm/hyprland.nix.
+# Keep the mode string in sync with machines/eclipse/wm/hyprland.nix.
 MONITOR='output = "DP-2", mode = "2560x1440@280", position = "0x0", scale = 1.0, bitdepth = 10'
 PRESET=$(hyprctl monitors -j | jq -r '.[] | select(.name == "DP-2") | .colorManagementPreset')
 

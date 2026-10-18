@@ -20,7 +20,7 @@
     # Mirrors the niri module. Any `settings` here makes plugin_settings.json a
     # read-only store link, so changes in a plugin's settings page no longer save.
     plugins = {
-      # amdGpuMonitor is per machine: machines/desktop/hardware/gpu.nix
+      # amdGpuMonitor is per machine: machines/eclipse/hardware/gpu.nix
 
       # The plugin stores its options as strings, booleans included.
       aiOverviewControl = {

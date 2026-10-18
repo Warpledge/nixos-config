@@ -19,8 +19,8 @@ Work from the repo root. Check each item below, and for every mismatch record th
 2. **Settings.** The setting lists under `### Machine and user settings` in CLAUDE.md
    must match the attributes in `machines/_template/settings.nix` and
    `users/_template/settings.nix`. The documented laptop overrides must match exactly the
-   `users.warpledge` block in `machines/laptop/settings.nix` plus the machine settings
-   that differ in `diff machines/desktop/settings.nix machines/laptop/settings.nix`;
+   `users.warpledge` block in `machines/legion/settings.nix` plus the machine settings
+   that differ in `diff machines/eclipse/settings.nix machines/legion/settings.nix`;
    report a difference the doc doesn't list and a listed one that no longer differs.
 3. **Claude tooling.** Skills, agents, plugins, hooks and LSP servers that CLAUDE.md names
    must match `modules/home/programs/ai/claude.nix` and the directories

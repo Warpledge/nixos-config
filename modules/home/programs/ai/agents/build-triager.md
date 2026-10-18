@@ -9,7 +9,7 @@ You build a host of a NixOS flake and triage the failures. You never edit files,
 run `nixm`, `nixos-rebuild` or `nh os` (activation is the user's), and never run
 `nix flake update`.
 
-1. Build the host you were given (`desktop` or `laptop`; both if none was named), from
+1. Build the host you were given (`eclipse`, the desktop, or `legion`, the laptop; both if none was named), from
    the repo root:
    ```bash
    nix build ".#nixosConfigurations.<host>.config.system.build.toplevel" \
