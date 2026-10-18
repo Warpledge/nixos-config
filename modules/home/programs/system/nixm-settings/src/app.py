@@ -1,5 +1,6 @@
 """nixm Settings: pick apps and system options from menus, then rebuild."""
 
+import json
 import os
 import re
 import sys
@@ -15,6 +16,9 @@ from gi.repository import Adw, Gdk, Gio, GLib, Gtk, Pango  # noqa: E402
 
 import backend  # noqa: E402
 import schema  # noqa: E402
+
+#--- The root helper (nixos/system/user/nixm-settings-helper.nix) for non-admins
+HELPER = "/run/current-system/sw/bin/nixm-settings-apply"
 
 ANSI = re.compile(r"\x1b\[[0-9;?]*[ -/]*[@-~]|\x1b\][^\x07]*(\x07|\x1b\\)")
 
@@ -172,7 +176,7 @@ class RebuildDialog(Adw.Dialog):
             proc = Gio.Subprocess.new(argv, Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_MERGE)
         except GLib.Error as e:
             self.append(e.message)
-            done(False)
+            done(False, -1)
             return
         stream = proc.get_stdout_pipe()
         pending = bytearray()
@@ -202,10 +206,11 @@ class RebuildDialog(Adw.Dialog):
 
         def finished(p, res):
             try:
-                ok = p.wait_check_finish(res)
+                p.wait_finish(res)
+                code = p.get_exit_status() if p.get_if_exited() else -1
             except GLib.Error:
-                ok = False
-            done(ok)
+                code = -1
+            done(code == 0, code)
 
         stream.read_bytes_async(4096, GLib.PRIORITY_DEFAULT, None, read)
 
@@ -273,6 +278,11 @@ class Window(Adw.ApplicationWindow):
         state = self.state
         self.rows, self.settings, self.scope_rows = {}, {}, []
         self.multi = len(state.user_machines) > 1
+        # Admins write the files and run nixm; anyone else goes through the root
+        # helper, which only takes their own app settings
+        self.admin = bool(state.resolved["users"][self.cfg.user].get("admin"))
+        self.direct = self.admin and backend.writable(self.cfg)
+        self.helper = None if self.direct or not os.path.exists(HELPER) else os.path.realpath(HELPER)
 
         self.sidebar = Gtk.ListBox(css_classes=["navigation-sidebar"])
         self.sidebar.set_header_func(self._sidebar_header)
@@ -308,12 +318,10 @@ class Window(Adw.ApplicationWindow):
         header.pack_end(self.discard_button)
 
         self.banner = Adw.Banner()
-        user = state.resolved["users"][self.cfg.user]
-        if not user.get("admin"):
-            self.banner.set_title("Only an admin can apply changes on this computer")
-        elif not backend.writable(self.cfg):
-            self.banner.set_title(f"You can't edit the files in {self.cfg.flake}")
-        self.can_apply = not self.banner.get_title()
+        if not self.direct and not self.helper:
+            self.banner.set_title("Only an admin can apply changes on this computer"
+                                  if not self.admin else f"You can't edit the files in {self.cfg.flake}")
+        self.can_apply = self.direct or bool(self.helper)
         self.banner.set_revealed(not self.can_apply)
 
         content = Adw.ToolbarView(content=self.stack)
@@ -366,9 +374,18 @@ class Window(Adw.ApplicationWindow):
             self.scope_rows.append(row)
             group.add(row)
             prefs.add(group)
+        locked = page.domain == "machine" and not self.direct
+        if locked:
+            note = Adw.ActionRow(title="Only an admin can change these",
+                                 subtitle="They apply to everyone who uses this computer.")
+            note.add_prefix(Gtk.Image(icon_name="changes-prevent-symbolic", css_classes=["accent"]))
+            group = Adw.PreferencesGroup()
+            group.add(note)
+            prefs.add(group)
         for g in page.groups:
             group = Adw.PreferencesGroup(title=GLib.markup_escape_text(g.title),
-                                         description=GLib.markup_escape_text(g.description))
+                                         description=GLib.markup_escape_text(g.description),
+                                         sensitive=not locked)
             for s in g.settings:
                 group.add(self._row(s))
             prefs.add(group)
@@ -555,6 +572,19 @@ class Window(Adw.ApplicationWindow):
         self.done_toast = None
         dialog.present(self)
         changes, this_only = dict(self.changes), self.this_only
+        if self.helper:
+            pkexec = GLib.find_program_in_path("pkexec")
+            if pkexec is None:
+                self.busy = False
+                dialog.finish(False, "pkexec wasn't found", "Nothing was changed.")
+                return
+            request = {"mode": "boot" if boot else "switch", "thisMachineOnly": this_only,
+                       "changes": [[list(path), value] for (_, path), value in changes.items()]}
+            dialog.status("Applying your settings…",
+                          "Type your own password when asked. The rebuild can take several minutes.")
+            dialog.run([pkexec, self.helper, json.dumps(request)],
+                       lambda ok, code: self._helped(dialog, boot, ok, code))
+            return
         run_async(lambda: backend.write(self.cfg, self.state, changes, this_only),
                   lambda old, err: self._written(dialog, boot, old, err))
 
@@ -573,7 +603,18 @@ class Window(Adw.ApplicationWindow):
             return
         dialog.status("Building your system…",
                       "This can take several minutes. A window will ask for your password.")
-        dialog.run([nixm, "boot" if boot else "rebuild"], lambda ok: self._rebuilt(dialog, boot, ok))
+        dialog.run([nixm, "boot" if boot else "rebuild"], lambda ok, _: self._rebuilt(dialog, boot, ok))
+
+    def _helped(self, dialog, boot, ok, code):
+        if ok:
+            self._rebuilt(dialog, boot, True)
+            return
+        self.busy = False
+        if code in (126, 127):  # pkexec: prompt dismissed, or not authorised
+            dialog.finish(False, "Nothing was changed", "The password prompt was cancelled or refused.")
+        else:
+            dialog.finish(False, "Your settings weren't applied",
+                          "Anything saved was put back. The details below say why.")
 
     def _rebuilt(self, dialog, boot, ok):
         self.busy = False
