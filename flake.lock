@@ -1076,10 +1076,10 @@
     "retroshelf": {
       "flake": false,
       "locked": {
-        "lastModified": 1791811132,
-        "narHash": "sha256-vR028P8BKDhSmMl45Ru73rBEjwRlL8uywy1CPFm6aEc=",
+        "lastModified": 1792354497,
+        "narHash": "sha256-WJs0hhebB3O34k5f2DQqOKvH23jA3vLOUkR1ppQhD2Q=",
         "ref": "main",
-        "rev": "076152fa3fb75b1cf61dfbd44549ad8379d96906",
+        "rev": "77247b0629f08602c8ce7369bff743b21f3df9d4",
         "shallow": true,
         "type": "git",
         "url": "https://github.com/votex09/retroshelf"
