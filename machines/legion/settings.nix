@@ -99,6 +99,7 @@
     "freetube"
     "ferdium"
     "nixos-settings"
+    "protonplus"
   ];
 
   #--- SSH Server

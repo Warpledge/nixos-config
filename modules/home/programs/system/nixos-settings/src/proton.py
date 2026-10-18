@@ -12,9 +12,11 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gdk, GLib, Gtk  # noqa: E402
+from gi.repository import Adw, Gdk, Gio, GLib, Gtk  # noqa: E402
 
 import ui  # noqa: E402
+
+PROTONPLUS = "com.vysp3r.ProtonPlus"
 
 #--- Variables shown as already set for every game, read off this session
 SESSION_PREFIXES = ("PROTON_", "DXVK_", "VKD3D_", "WINE", "MANGOHUD", "ENABLE_LAYER_", "SDL_VIDEODRIVER")
@@ -128,8 +130,16 @@ class ProtonPage(Adw.PreferencesPage):
         self.window = window
 
         top = Adw.PreferencesGroup()
+        protonplus = None
+        if GLib.find_program_in_path("protonplus"):
+            icon = ui.first_icon(PROTONPLUS, "list-add-symbolic")
+            protonplus = Gtk.Button(halign=Gtk.Align.CENTER, margin_top=6,
+                                    css_classes=["pill", "suggested-action"],
+                                    child=Adw.ButtonContent(icon_name=icon, label="Open ProtonPlus"),
+                                    tooltip_text="Install and update Proton and Wine builds")
+            protonplus.connect("clicked", lambda _: self._open_protonplus())
         top.add(ui.hero(ui.first_icon("input-gaming-symbolic", "applications-games-symbolic"), "Proton",
-                        "Launch options for Steam, Heroic and Lutris. Click one to copy it."))
+                        "Launch options for Steam, Heroic and Lutris. Click one to copy it.", extra=protonplus))
         self.add(top)
 
         how = Adw.PreferencesGroup(
@@ -201,6 +211,19 @@ class ProtonPage(Adw.PreferencesPage):
                                  css_classes=["dim-label"]))
         row.connect("activated", lambda _: self._copy(option))
         return row
+
+    def _open_protonplus(self):
+        try:
+            info = ui.DesktopAppInfo.new(f"{PROTONPLUS}.desktop")
+        except (TypeError, GLib.Error):
+            info = None
+        try:
+            if info is not None:
+                info.launch([], self.window.get_display().get_app_launch_context())
+            else:
+                Gio.Subprocess.new(["protonplus"], Gio.SubprocessFlags.NONE)
+        except GLib.Error as e:
+            self.window.toast(f"Couldn't open ProtonPlus: {e.message}")
 
     def _copy(self, option):
         Gdk.Display.get_default().get_clipboard().set(option)

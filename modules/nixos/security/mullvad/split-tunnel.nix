@@ -86,6 +86,11 @@
       enable = true; # imported for every user, no toggle
       bin = "${hm.nixos-settings.package}/bin/nixos-settings";
     };
+    protonplus = {
+      home = true;
+      enable = true; # in every user's gaming packages, no toggle
+      bin = "${pkgs.protonplus}/bin/protonplus";
+    };
   };
 
   #--- The system entries are the same in every user's table
