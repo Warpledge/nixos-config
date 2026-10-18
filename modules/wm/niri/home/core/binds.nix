@@ -119,7 +119,7 @@
 
     #--- Apps
     "Mod+Shift+S".action.spawn = ["steam"];
-    "Mod+Shift+D".action.spawn = ["goofcord"];
+    "Mod+Shift+D" = lib.mkIf user.discord.goofcord {action.spawn = ["goofcord"];};
     "Mod+Shift+H".action.spawn = ["heroic"];
     "Mod+Shift+G" = lib.mkIf user.gaming.lutris {action.spawn = ["lutris"];};
     "Mod+Shift+Y".action.spawn = ["freetube"];

@@ -152,6 +152,9 @@
     granblueRelinkMods = false; # GBFR mods: RelinkModOrganizer + Reloaded-II
   };
 
+  #--- Discord: GoofCord (Vencord), built from source with its own Node.js (slow)
+  discord.goofcord = false;
+
   #--- Discord Rich Presence (arRPC)
   # Standalone arRPC server for Steam/Proton game detection in GoofCord
   discord.arrpc.enable = false;

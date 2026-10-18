@@ -35,7 +35,6 @@ user: {lib, ...}: {
 
       #--- Other
       ./android/android.nix
-      ./discord/discord.nix
       (import ./gaming user)
       ./git/git.nix
       ./options.nix
@@ -89,6 +88,7 @@ user: {lib, ...}: {
     ++ lib.optionals user.opencode.enable [./ai/opencode.nix]
     ++ lib.optionals user.lmstudio.enable [./ai/lmstudio.nix]
     ++ lib.optionals (user.claude.enable || user.opencode.enable) [./ai/mcp.nix]
-    #--- Discord Rich Presence / Game Detection (controlled by user settings)
+    #--- Discord (controlled by user settings)
+    ++ lib.optionals user.discord.goofcord [./discord/discord.nix]
     ++ lib.optionals user.discord.arrpc.enable [./discord/arrpc.nix];
 }

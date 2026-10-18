@@ -220,6 +220,7 @@ apps=(
   "Media|media.streamlinkTwitchGui|Streamlink Twitch GUI"
   "Media|media.boorusama|Boorusama image board browser"
   "Media|media.wallpaperEngine|Wallpaper Engine wallpapers (needs it on Steam)"
+  "Chat|discord.goofcord|GoofCord: Discord with Vencord (built from source, slow)"
   "Graphics|graphics.blender|Blender"
   "Graphics|graphics.krita|Krita"
   "Graphics|graphics.affinity|Affinity Photo, Designer and Publisher (Wine)"
