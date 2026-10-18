@@ -90,6 +90,12 @@
       url = "github:moku-project/Moku/v0.14.0";
       flake = false;
     };
+    retroshelf = {
+      # Built in home-manager gaming/tools/retroshelf.nix; git, since the
+      # github: tarball drops app/ (export-ignore)
+      url = "git+https://github.com/votex09/retroshelf?ref=main&shallow=1";
+      flake = false;
+    };
 
     #--- Window Managers
     niri = {

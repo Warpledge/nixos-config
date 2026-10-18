@@ -94,6 +94,7 @@
   "gaming.r2modman": {"summary": "Mods for Thunderstore games", "text": "**r2modman** installs and manages mods from **Thunderstore**, for games such as Risk of Rain 2."},
   "gaming.pathOfBuilding": {"summary": "Path of Exile build planner", "icon": ["rusty-path-of-building-1.desktop"], "text": "**Path of Building** for planning Path of Exile builds, through **Rusty PoB**, which runs the planners for both Path of Exile games."},
   "gaming.ludusavi": {"summary": "Daily backups of game saves", "icon": ["com.mtkennerly.ludusavi.desktop"], "text": "**Ludusavi** backs up your game saves every day to ~/SyncBackups/<computer>/Ludusavi."},
+  "gaming.retroshelf": {"summary": "Tidies an ES-DE / RetroDECK game library", "icon": ["retroshelf.desktop"], "text": "**RetroShelf** helps prune an ES-DE / RetroDECK roms folder, fills in metadata and artwork, renames files and imports games. New versions come with each flake update."},
   "gaming.granblueRelinkMods": {"summary": "Mod tools for Granblue Fantasy: Relink", "note": "!!Installed by hand outside the repo!!", "icon": ["Reloaded-II - Granblue Fantasy Relink.desktop"], "text": "**RelinkModOrganizer** for data mods and **Reloaded-II** for code mods, for Granblue Fantasy Relink. !!Both are installed by hand outside the repo.!!"},
 
   "discord.goofcord": {"summary": "Discord with Vencord", "note": "!!Slow first build!! (built from source)", "icon": ["goofcord.desktop", "discord"], "text": "**Discord** with **Vencord** built in, through GoofCord. !!Built from source, so the first build is slow.!!"},

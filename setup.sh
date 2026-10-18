@@ -835,6 +835,7 @@ apps=(
   "Gaming|gaming.r2modman|r2modman mod manager"
   "Gaming|gaming.pathOfBuilding|Path of Building: Path of Exile planner"
   "Gaming|gaming.ludusavi|Ludusavi: daily game save backups"
+  "Gaming|gaming.retroshelf|RetroShelf: tidy an ES-DE / RetroDECK library"
   "Gaming|discord.arrpc.enable|Show the game you're playing in Discord"
   "AI tools|claude.enable|Claude Code (needs an Anthropic account)"
   "AI tools|opencode.enable|opencode"
