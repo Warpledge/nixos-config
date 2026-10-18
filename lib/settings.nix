@@ -24,6 +24,7 @@
   choices = {
     windowManager = ["niri" "hyprland"];
     kernel = ["zen" "latest" "xanmod" "cachyos"];
+    cursor = ["bibata" "catppuccin"];
     "gpu.type" = [null "amd" "intel" "nvidia" "amd+nvidia" "intel+nvidia"];
   };
 

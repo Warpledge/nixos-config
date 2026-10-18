@@ -49,6 +49,10 @@
   # cache is off in nix/substituters.nix), and needs an x86-64-v3 CPU (AVX2)
   kernel = "zen";
 
+  #--- Mouse Cursor
+  # Options: "bibata" (Bibata-Modern-Ice) | "catppuccin" (Catppuccin Mocha Mauve)
+  cursor = "bibata";
+
   #--- Graphics Drivers
   # "amd", "intel" or "nvidia" for one graphics chip. A laptop with an AMD or
   # Intel chip plus an NVIDIA one: "amd+nvidia" or "intel+nvidia", with both

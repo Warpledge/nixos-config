@@ -49,6 +49,10 @@
   # Options: "zen" | "latest" | "xanmod" | "cachyos"
   kernel = "zen";
 
+  #--- Mouse Cursor
+  # Options: "bibata" | "catppuccin"
+  cursor = "catppuccin";
+
   #--- Mullvad VPN
   mullvad.enable = true;
   # Apps always routed around the VPN (see nixos/security/mullvad/)

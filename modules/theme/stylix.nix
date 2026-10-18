@@ -97,11 +97,21 @@
     };
 
     #--- Cursor
-    cursor = {
-      package = pkgs.catppuccin-cursors.mochaMauve;
-      name = "catppuccin-mocha-mauve-cursors";
-      size = 24;
-    };
+    cursor =
+      {
+        bibata = {
+          package = pkgs.bibata-cursors;
+          name = "Bibata-Modern-Ice";
+        };
+        catppuccin = {
+          package = pkgs.catppuccin-cursors.mochaMauve;
+          name = "catppuccin-mocha-mauve-cursors";
+        };
+      }
+      .${
+        machine.cursor
+      }
+      // {size = 24;};
 
     fonts = {
       monospace = {
