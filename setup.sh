@@ -21,6 +21,9 @@ nixos_dir=${SETUP_NIXOS_DIR:-/etc/nixos} # where the NixOS installer wrote its c
 nix_flags=(--extra-experimental-features "nix-command flakes")
 shared_repo=/etc/nixos-config # flakePath's default (lib/settings.nix)
 people=() written=() person="" # who is being set up, the files written for them
+#--- The new people's answers, by login; their files are written after the questions
+new_people=()
+declare -A u_admin=() u_gitname=() u_gitemail=() u_apps=() u_wall=()
 
 #--------------------------------------------------------------------#
 #-- Output & Prompts
@@ -52,7 +55,7 @@ staged() {
 interactive() { [[ -t 0 && -t 1 ]]; }
 interactive && trap 'printf "\e[?25h"' EXIT # the menus hide the text cursor
 
-#--- Reads one key into REPLY: up, down, left, right, space, enter, or the character
+#--- Reads one key into REPLY: up, down, left, right, space, enter, esc, or the character
 read_key() {
   local k rest=""
   IFS= read -rsn1 k || die "no answer, stopping"
@@ -64,6 +67,7 @@ read_key() {
         '[B') REPLY=down ;;
         '[C') REPLY=right ;;
         '[D') REPLY=left ;;
+        '') REPLY=esc ;;
         *) REPLY=other ;;
       esac
       ;;
@@ -76,9 +80,36 @@ read_key() {
   esac
 }
 
+#--- read_line <var> <prompt> [text]: a typed line, starting from text; Esc goes back
+read_line() {
+  local -n _line=$1
+  local k rest
+  _line=${3:-}
+  printf '%s%s' "$2" "$_line"
+  while true; do
+    IFS= read -rsn1 k || die "no answer, stopping"
+    case $k in
+      '') break ;;
+      $'\e')
+        rest=""
+        IFS= read -rsn1 -t 0.05 rest || true
+        if [[ -z $rest ]]; then
+          back
+        elif [[ $rest == [[O] ]]; then # an arrow or other key: skip to its last byte
+          while IFS= read -rsn1 -t 0.05 rest && [[ $rest != [A-Za-z~] ]]; do :; done
+        fi
+        ;;
+      $'\x7f' | $'\b') [[ -n $_line ]] && _line=${_line%?} && printf '\b \b' ;;
+      [[:print:]]) _line+=$k && printf '%s' "$k" ;;
+    esac
+  done
+  printf '\n'
+}
+
 #--- menu <multi|single>: arrow-key list over menu_items ("Group|Label", an
-#--- empty group for none). multi: Space ticks, menu_on holds 0/1 per item.
-#--- single: the cursor starts on item menu_start and menu_pick gets the choice.
+#--- empty group for none). multi: Enter or Space ticks, menu_on holds 0/1 per
+#--- item, and a Continue row at the end finishes. single: the cursor starts on
+#--- item menu_start and menu_pick gets the choice. Esc sets menu_esc.
 menu() {
   local mode=$1 n=${#menu_items[@]} i row r=-1 top=0 height drawn=0 last="" group mark
   local lines=() idx=()
@@ -91,6 +122,7 @@ menu() {
     ((r < 0)) && [[ $mode == multi ]] && r=${#lines[@]}
     lines+=("${menu_items[i]#*|}") idx+=("$i")
   done
+  [[ $mode == multi ]] && lines+=("" "Continue") idx+=(-1 -2)
   local total=${#lines[@]}
   height=$(($(tput lines 2>/dev/null || echo 24) - 4))
   ((height > total)) && height=$total
@@ -101,7 +133,7 @@ menu() {
     while true; do
       x=$((x + $1))
       ((x < 0 || x >= total)) && return
-      ((idx[x] >= 0)) && r=$x && return
+      ((idx[x] != -1)) && r=$x && return
     done
   }
   _menu_draw() {
@@ -111,8 +143,16 @@ menu() {
     ((r >= top + height)) && top=$((r - height + 1))
     for ((row = top; row < top + height; row++)); do
       printf '\e[2K'
-      if ((idx[row] < 0)); then
+      if ((idx[row] == -1)); then
         printf '  %s%s%s\n' "$bold$accent" "${lines[row]}" "$plain"
+        continue
+      fi
+      if ((idx[row] == -2)); then
+        if ((row == r)); then
+          printf '  %s>%s %s %s %s\n' "$bold$hl" "$plain" "$bold$rev$hl" "${lines[row]}" "$plain"
+        else
+          printf '    %s[ %s ]%s\n' "$bold" "${lines[row]}" "$plain"
+        fi
         continue
       fi
       if [[ $mode == multi ]]; then
@@ -128,15 +168,17 @@ menu() {
     done
     printf '\e[2K%s' "$dim"
     if [[ $mode == multi ]]; then
-      printf 'Up/Down: move   Space: tick or untick   Enter: done'
+      printf 'Up/Down move  Enter tick/untick  Tab to Continue'
     else
-      printf 'Up/Down: move   Enter: choose'
+      printf 'Up/Down move  Enter choose'
     fi
-    ((top + height < total)) && printf '   (more below)'
+    ((qa_on)) && printf '  Esc back'
+    ((top + height < total)) && printf '  (more below)'
     printf '%s\n' "$plain"
     drawn=$((height + 1))
   }
 
+  menu_esc=0
   printf '\e[?25l'
   while true; do
     _menu_draw
@@ -144,8 +186,12 @@ menu() {
     case $REPLY in
       up) _menu_move -1 ;;
       down) _menu_move 1 ;;
-      space) [[ $mode == multi ]] && menu_on[idx[r]]=$((1 - menu_on[idx[r]])) ;;
-      enter) break ;;
+      right) [[ $mode == multi ]] && r=$((total - 1)) ;;
+      space | enter)
+        [[ $mode == single || ${idx[r]} == -2 ]] && [[ $REPLY == enter ]] && break
+        ((idx[r] >= 0)) && [[ $mode == multi ]] && menu_on[idx[r]]=$((1 - menu_on[idx[r]]))
+        ;;
+      esc) menu_esc=1 && break ;;
     esac
   done
   printf '\e[%dA\e[J\e[?25h' "$drawn" # the caller prints what was picked
@@ -164,16 +210,36 @@ die() {
 
 #--- ask <var> <question> [default]
 ask() {
-  local reply
-  read -r -p "$(q_text "$2")${3:+ ${dim}[$3]$plain}: " reply || die "no answer, stopping"
-  printf -v "$1" '%s' "${reply:-${3:-}}"
+  local reply prompt
+  prompt="$(q_text "$2")${3:+ ${dim}[$3]$plain}: "
+  if replayed; then
+    say "$prompt$kept"
+    printf -v "$1" '%s' "$kept"
+    return
+  fi
+  if interactive; then
+    read_line reply "$prompt" "$(previous)"
+  else
+    read -r -p "$prompt" reply || die "no answer, stopping"
+  fi
+  reply=${reply:-${3:-}}
+  given "$reply"
+  printf -v "$1" '%s' "$reply"
 }
 
 #--- confirm <question> <y|n default>: Left/Right between Yes and No, or y/n
 confirm() {
-  local reply hint="y/N" no=1
+  local reply hint="y/N" no=1 def
+  if replayed; then
+    question "$1"
+    [[ $kept == y ]] && answer Yes || answer No
+    [[ $kept == y ]]
+    return
+  fi
+  def=$(previous)
+  [[ -n $def ]] || def=$2
   if interactive; then
-    [[ $2 == y ]] && no=0
+    [[ $def == y ]] && no=0
     question "$1"
     printf '\e[?25l'
     while true; do
@@ -189,22 +255,25 @@ confirm() {
         y | Y) no=0 && break ;;
         n | N) no=1 && break ;;
         enter) break ;;
+        esc) back ;;
       esac
     done
     ((no)) && reply=No || reply=Yes
     printf '\r\e[2K'
     answer "$reply"
     printf '\e[?25h'
-    return "$no"
+  else
+    [[ $def == y ]] && hint="Y/n"
+    while true; do
+      read -r -p "$(q_text "$1") ${dim}[$hint]$plain " reply || die "no answer, stopping"
+      case ${reply:-$def} in
+        [Yy]*) no=0 && break ;;
+        [Nn]*) no=1 && break ;;
+      esac
+    done
   fi
-  [[ $2 == y ]] && hint="Y/n"
-  while true; do
-    read -r -p "$(q_text "$1") ${dim}[$hint]$plain " reply || die "no answer, stopping"
-    case ${reply:-$2} in
-      [Yy]*) return 0 ;;
-      [Nn]*) return 1 ;;
-    esac
-  done
+  ((no)) && given n || given y
+  return "$no"
 }
 
 #--- pick <result-array> <"Group|setting.path|Label">...: checklist, all unticked
@@ -212,70 +281,100 @@ pick() {
   local -n chosen=$1
   shift
   local i=1 last="" item group rest reply n bad
-  if interactive; then
-    menu_items=() menu_on=() chosen=()
-    for item in "$@"; do
-      rest=${item#*|}
-      menu_items+=("${item%%|*}|${rest#*|}") menu_on+=(0)
-    done
-    menu multi
-    for ((n = 0; n < $#; n++)); do
-      ((menu_on[n])) || continue
-      item=${*:n+1:1}
-      chosen+=("${item#*|}") # setting.path|Label
-      answer "${item##*|}"
-    done
-    ((${#chosen[@]})) || answer "(none)"
-    return
+  chosen=()
+  if ! replayed; then
+    kept=""
+    if interactive; then
+      menu_items=() menu_on=()
+      for item in "$@"; do
+        rest=${item#*|}
+        menu_items+=("${item%%|*}|${rest#*|}") menu_on+=(0)
+      done
+      for n in $(previous); do menu_on[n]=1; done
+      while true; do
+        menu multi
+        ((menu_esc)) || break
+        back
+      done
+      for ((n = 0; n < $#; n++)); do
+        ((menu_on[n])) && kept+="$n "
+      done
+    else
+      for item in "$@"; do
+        group=${item%%|*} rest=${item#*|}
+        [[ $group != "$last" ]] && printf '  %s%s%s\n' "$bold$accent" "$group" "$plain" && last=$group
+        printf '    %s%2d)%s %s\n' "$hl" "$i" "$plain" "${rest#*|}"
+        i=$((i + 1))
+      done
+      while true; do
+        read -r -p "$(q_text "Numbers to turn on, with spaces between") $dim(Enter for none)$plain: " reply || die "no answer, stopping"
+        kept="" bad=0
+        for n in ${reply//,/ }; do
+          if [[ $n =~ ^[0-9]+$ ]] && ((n >= 1 && n < i)); then
+            kept+="$((n - 1)) "
+          else
+            bad=1
+          fi
+        done
+        ((bad == 0)) && break
+        note "Use numbers from 1 to $((i - 1))."
+      done
+    fi
+    kept=${kept% }
+    given "$kept"
   fi
-  for item in "$@"; do
-    group=${item%%|*} rest=${item#*|}
-    [[ $group != "$last" ]] && printf '  %s%s%s\n' "$bold$accent" "$group" "$plain" && last=$group
-    printf '    %s%2d)%s %s\n' "$hl" "$i" "$plain" "${rest#*|}"
-    i=$((i + 1))
+  for n in $kept; do
+    item=${*:n+1:1}
+    chosen+=("${item#*|}") # setting.path|Label
+    answer "${item##*|}"
   done
-  while true; do
-    read -r -p "$(q_text "Numbers to turn on, with spaces between") $dim(Enter for none)$plain: " reply || die "no answer, stopping"
-    chosen=() bad=0
-    for n in ${reply//,/ }; do
-      if [[ $n =~ ^[0-9]+$ ]] && ((n >= 1 && n < i)); then
-        item=${*:n:1}
-        chosen+=("${item#*|}") # setting.path|Label
-      else
-        bad=1
-      fi
-    done
-    ((bad == 0)) && break
-    note "Use numbers from 1 to $((i - 1))."
-  done
+  ((${#chosen[@]})) || answer "(none)"
 }
 
 #--- choose <var> <question> <default value> <"value|Label">...: one of a list
 choose() {
   local -n _choice=$1
-  local question=$2 default=$3 item i=0 values=()
+  local question=$2 default=$3 item i values=() labels=() reply prev
   shift 3
   question "$question"
-  if interactive; then
-    menu_items=() menu_start=0
-    for item in "$@"; do
-      values+=("${item%%|*}") menu_items+=("|${item#*|}")
-      [[ ${item%%|*} == "$default" ]] && menu_start=$i
-      i=$((i + 1))
-    done
-    menu single
-    _choice=${values[menu_pick]}
-    answer "${menu_items[menu_pick]#|}"
-    return
-  fi
   for item in "$@"; do
-    values+=("${item%%|*}")
-    printf '  %s%s%s: %s\n' "$bold$hl" "${item%%|*}" "$plain" "${item#*|}"
+    values+=("${item%%|*}") labels+=("${item#*|}")
   done
-  while true; do
-    ask _choice "Type one of: ${values[*]}" "$default"
-    [[ " ${values[*]} " == *" $_choice "* ]] && return
+  if replayed; then
+    _choice=$kept
+  else
+    prev=$(previous)
+    [[ -n $prev ]] && default=$prev
+    if interactive; then
+      menu_items=() menu_start=0
+      for i in "${!values[@]}"; do
+        menu_items+=("|${labels[i]}")
+        [[ ${values[i]} == "$default" ]] && menu_start=$i
+      done
+      while true; do
+        menu single
+        ((menu_esc)) || break
+        ((qa_nested)) && break # in search_pick's matches: search again
+        back
+      done
+      ((menu_esc)) && _choice=again || _choice=${values[menu_pick]}
+    else
+      for i in "${!values[@]}"; do
+        printf '  %s%s%s: %s\n' "$bold$hl" "${values[i]}" "$plain" "${labels[i]}"
+      done
+      while true; do
+        read -r -p "$(q_text "Type one of: ${values[*]}") ${dim}[$default]$plain: " reply || die "no answer, stopping"
+        reply=${reply:-$default}
+        [[ " ${values[*]} " == *" $reply "* ]] && break
+      done
+      _choice=$reply
+    fi
+    given "$_choice"
+  fi
+  for i in "${!values[@]}"; do
+    [[ ${values[i]} == "$_choice" ]] && answer "${labels[i]}"
   done
+  return 0
 }
 
 #--- search_pick <var> <question> <default> <list function>: the function
@@ -283,15 +382,27 @@ choose() {
 #--- taken as is, and anything else searches the labels.
 search_pick() {
   local -n _pick=$1
-  local question=$2 default=$3 reply item list=() matches=()
-  mapfile -t list < <("$4")
+  local question=$2 default=$3 reply item list=() matches=() prev prompt
   question "$question"
+  if replayed; then
+    _pick=$kept
+    answer "$_pick"
+    return
+  fi
+  mapfile -t list < <("$4")
   if ((${#list[@]} == 0)); then
     ask _pick "  Type it" "$default"
     return
   fi
+  prev=$(previous)
+  [[ -n $prev ]] && default=$prev
+  prompt="  ${dim}Enter keeps$plain $bold${default:-(none)}$plain${dim}; or type part of a name to search:$plain "
   while true; do
-    read -r -p "  ${dim}Enter keeps$plain $bold${default:-(none)}$plain${dim}; or type part of a name to search:$plain " reply || die "no answer, stopping"
+    if interactive; then
+      read_line reply "$prompt"
+    else
+      read -r -p "$prompt" reply || die "no answer, stopping"
+    fi
     if [[ -z $reply ]]; then
       [[ -n $default ]] && _pick=$default && break
       continue
@@ -313,9 +424,12 @@ search_pick() {
       note "  ${#matches[@]} matches, showing the first 40; type more letters to narrow it."
       matches=("${matches[@]:0:40}")
     fi
+    qa_nested=1
     choose _pick "  Matches for \"$reply\":" "${matches[0]%%|*}" "${matches[@]}" "again|None of these, search again"
+    qa_nested=0
     [[ $_pick == again ]] || break
   done
+  given "$_pick"
   answer "$_pick"
 }
 
@@ -348,6 +462,92 @@ list_keymaps() {
   loadkeys=$(readlink -f "$(command -v loadkeys)" 2>/dev/null) || return 0
   find "${loadkeys%/bin/*}/share/keymaps" -name '*.map.gz' -printf '%f\n' 2>/dev/null |
     sed 's/\.map\.gz$//' | sort -u | sed 's/.*/&|&/'
+}
+
+#--------------------------------------------------------------------#
+#-- Going Back
+#--------------------------------------------------------------------#
+#--- A command's questions run in a subshell (see questions) that keeps every
+#--- answer. Esc drops the last one and ends the subshell, and the next run
+#--- replays the rest without asking. Answers stay as text, a pick's as indexes.
+qa_on=0 qa_final=0 qa_nested=0 qa_state="" pos=0 answers=() undone=() kept=""
+qa_save() { declare -p answers undone | sed 's/^declare -a/declare -ga/' >"$qa_state"; }
+
+#--- replayed: the next kept answer into `kept`; false when it's a new question
+replayed() {
+  ((qa_on && !qa_nested)) || return 1
+  if ((pos < ${#answers[@]})); then
+    kept=${answers[pos]}
+    pos=$((pos + 1))
+    return 0
+  fi
+  ((qa_final)) && die "the answers changed while being replayed; run setup.sh again"
+  return 1
+}
+
+#--- previous: the answer given here before Esc went back over it, or nothing
+previous() {
+  ((qa_on && !qa_nested)) && printf '%s' "${undone[pos]:-}"
+  return 0
+}
+
+#--- given <answer>: keeps a new answer; a changed one forgets what came after it
+given() {
+  ((qa_on && !qa_nested)) || return 0
+  local i
+  if [[ ${undone[pos]-} != "$1" ]]; then
+    for i in "${!undone[@]}"; do ((i >= pos)) && unset 'undone[i]'; done
+  fi
+  answers+=("$1")
+  pos=$((pos + 1))
+  qa_save
+}
+
+#--- back: Esc. Drops the last answer and starts the questions over; does
+#--- nothing on the first question or outside the questions.
+back() {
+  ((qa_on && !qa_nested && pos > 0)) || return 0
+  pos=$((pos - 1))
+  undone[pos]=${answers[pos]}
+  unset 'answers[pos]'
+  qa_save
+  printf '\e[?25h'
+  exit 3
+}
+
+#--- questions <function>: runs a command's questions until they get through
+#--- without an Esc, then once more here, silently, from the answers, so their
+#--- variables are set in this shell
+questions() {
+  local rc
+  qa_state=$(mktemp)
+  answers=() undone=()
+  qa_save
+  while true; do
+    set +e
+    (
+      set -e
+      qa_on=1 pos=0
+      # shellcheck source=/dev/null
+      source "$qa_state"
+      interactive && printf '%sEsc goes back to the previous question.%s\n' "$dim" "$plain"
+      "$1"
+    )
+    rc=$?
+    set -e
+    ((rc == 3)) || break
+    printf '\e[H\e[2J' # the replay prints the answers so far again
+  done
+  if ((rc != 0)); then
+    rm -f "$qa_state"
+    exit "$rc"
+  fi
+  # shellcheck source=/dev/null
+  source "$qa_state"
+  qa_on=1 qa_final=1 pos=0
+  "$1" >/dev/null
+  qa_on=0 qa_final=0
+  rm -f "$qa_state"
 }
 
 #--------------------------------------------------------------------#
@@ -657,35 +857,48 @@ valid_username() {
   [[ $1 =~ ^[a-z_][a-z0-9_-]{0,31}$ ]] && [[ ! $1 =~ ^(root|nobody|greeter)$ ]]
 }
 
-#--- Writes users/<name>/settings.nix from the template, asking as it goes
-new_user_file() {
-  local name=$1 main=$2 file="users/$1/settings.nix" answer picked=() item
-  mkdir -p "users/$name"
-  cp users/_template/settings.nix "$file"
-  sed -i "2s/(TEMPLATE)/(${name^^})/" "$file"
-
+#--- person_questions <name> <main>: a new person's account and apps, into u_*
+person_questions() {
+  local name=$1 main=$2 answer picked=()
   if [[ $main == 1 ]]; then
     say "$name is this machine's main user, so an admin (sudo, rebuilds)."
-  elif ! confirm "Can $name use sudo and change the system (admin)?" n; then
-    set_setting "$file" admin false
+    u_admin[$name]=true
+  elif confirm "Can $name use sudo and change the system (admin)?" n; then
+    u_admin[$name]=true
+  else
+    u_admin[$name]=false
   fi
 
   ask answer "Name to sign git commits with (shown as the author; Enter uses $name)"
-  [[ -n $answer ]] && set_setting "$file" git.name "$(nix_string "$answer")"
+  u_gitname[$name]=$answer
   ask answer "Email to sign git commits with (e.g. your GitHub email or its noreply address; Enter to skip)"
-  [[ -n $answer ]] && set_setting "$file" git.email "$(nix_string "$answer")"
+  u_gitemail[$name]=$answer
 
   say ""
   say "Everyone starts with Zen, kitty, Helix, Zed, Nautilus, yazi, mpv and Steam."
   say "Extras for $name:"
   pick picked "${apps[@]}"
-  for item in "${picked[@]}"; do
-    set_setting "$file" "${item%%|*}" true
-  done
+  u_apps[$name]="${picked[*]%%|*}"
   choose answer "Wallpapers for $name (Mod+W opens the picker):" carousel \
     "carousel|Still images from the repo (Wallpaper Carousel)" \
     "engine|Animated Wallpaper Engine wallpapers (needs Wallpaper Engine bought on Steam)"
-  [[ $answer == engine ]] && set_setting "$file" wallpaper '"engine"'
+  u_wall[$name]=$answer
+}
+
+#--- write_user_file <name>: users/<name>/settings.nix from the template and
+#--- that person's answers
+write_user_file() {
+  local name=$1 file="users/$1/settings.nix" item
+  mkdir -p "users/$name"
+  cp users/_template/settings.nix "$file"
+  sed -i "2s/(TEMPLATE)/(${name^^})/" "$file"
+  [[ ${u_admin[$name]} == true ]] || set_setting "$file" admin false
+  [[ -z ${u_gitname[$name]} ]] || set_setting "$file" git.name "$(nix_string "${u_gitname[$name]}")"
+  [[ -z ${u_gitemail[$name]} ]] || set_setting "$file" git.email "$(nix_string "${u_gitemail[$name]}")"
+  for item in ${u_apps[$name]}; do
+    set_setting "$file" "$item" true
+  done
+  [[ ${u_wall[$name]} != engine ]] || set_setting "$file" wallpaper '"engine"'
   written+=("$file")
 }
 
@@ -706,7 +919,8 @@ add_person() {
   if [[ -e users/$person/settings.nix ]]; then
     say "users/$person/ already exists; this machine uses it as it is."
   else
-    new_user_file "$person" "$main"
+    person_questions "$person" "$main"
+    new_people+=("$person")
   fi
   people+=("$person")
 }
@@ -753,32 +967,34 @@ build_machine() {
 #--------------------------------------------------------------------#
 #-- Modes
 #--------------------------------------------------------------------#
-new_machine() {
-  local name state_version tz locale layout keymap wm picked=() item main key f
+#--- A new machine's questions, or the choice to reinstall one. They only set
+#--- variables (name, tz, people, picked...), so Esc can go back over them.
+new_machine_questions() {
+  local d existing=() others=()
+  people=() new_people=() u_admin=() u_gitname=() u_gitemail=() u_apps=() u_wall=()
 
   section "This computer"
-  [[ -d /sys/firmware/efi ]] || die "this computer booted without UEFI; the config boots with systemd-boot, which needs it"
   #--- Only a machine that lists this login is offered for reinstall, so a
   #--- clone of someone else's repo can't overwrite their machines
-  local m existing=() others=()
-  for m in machines/*/; do
-    m=${m%/} m=${m#machines/}
-    [[ $m == _* ]] && continue
-    if machine_users "machines/$m/settings.nix" | grep -qx "$USER"; then
-      existing+=("$m|Reinstall $m: keep its settings, use this install's disks")
+  for d in machines/*/; do
+    d=${d%/} d=${d#machines/}
+    [[ $d == _* ]] && continue
+    if machine_users "machines/$d/settings.nix" | grep -qx "$USER"; then
+      existing+=("$d|Reinstall $d: keep its settings, use this install's disks")
     else
-      others+=("$m")
+      others+=("$d")
     fi
   done
   if ((${#others[@]})); then
     say "machines/ also has: ${others[*]}. They don't list $USER, so only one of their own users can reinstall them."
   fi
+  m=new
   if ((${#existing[@]})); then
     choose m "Set this computer up as:" new "new|A new machine" "${existing[@]}"
-    [[ $m == new ]] || {
-      reinstall_machine "$m"
+    if [[ $m != new ]]; then
+      reinstall_questions "$m"
       return
-    }
+    fi
   fi
   say "A name for this computer in the config (its folder in machines/, and its hostname)."
   while true; do
@@ -835,7 +1051,6 @@ new_machine() {
 
   section "People"
   say "Who will log in here? The first person owns the config and can change the system."
-  people=() written=()
   add_person 1 "$USER"
   main=${people[0]}
   while confirm "Add another person?" n; do
@@ -848,6 +1063,24 @@ new_machine() {
   section "Services"
   say "Optional services for the whole computer:"
   pick picked "${services[@]}"
+  key=""
+  if [[ " ${picked[*]%%|*} " == *" ssh.enable "* ]]; then
+    if [[ " ${new_people[*]} " == *" $main "* ]]; then
+      ask key "Public SSH key that may log in as $main (ssh-ed25519 ..., Enter to skip SSH)"
+    else
+      say "SSH: add a key to ssh.authorizedKeys in users/$main/settings.nix, then turn on ssh.enable."
+    fi
+  fi
+}
+
+new_machine() {
+  local f item i p
+  [[ -d /sys/firmware/efi ]] || die "this computer booted without UEFI; the config boots with systemd-boot, which needs it"
+  questions new_machine_questions
+  if [[ $m != new ]]; then
+    reinstall_machine "$m"
+    return
+  fi
 
   #--- Write the machine folder
   f=machines/$name/settings.nix
@@ -868,17 +1101,16 @@ new_machine() {
     set_setting "$f" gpu.nvidiaBusId "$(nix_string "$gpu_nvidia_bus")"
     set_setting "$f" gpu.integratedBusId "$(nix_string "$gpu_integrated_bus")"
   fi
+  written=()
+  for p in "${new_people[@]}"; do
+    write_user_file "$p"
+  done
   for ((i = ${#people[@]} - 1; i >= 0; i--)); do
     add_line_after "$f" '^  users = \{' "    ${people[i]} = {};"
   done
   ((${#people[@]} > 1)) && set_setting "$f" mainUser "$(nix_string "$main")"
   for item in "${picked[@]}"; do
     if [[ $item == ssh.enable* ]]; then
-      if [[ " ${written[*]} " == *" users/$main/settings.nix "* ]]; then
-        ask key "Public SSH key that may log in as $main (ssh-ed25519 ..., Enter to skip SSH)"
-      else
-        key="" && say "SSH: add a key to ssh.authorizedKeys in users/$main/settings.nix, then turn on ssh.enable."
-      fi
       [[ -n $key ]] || continue
       set_setting "users/$main/settings.nix" ssh.authorizedKeys "[$(nix_string "$key")]"
     fi
@@ -965,21 +1197,31 @@ finish_setup() {
   fi
 }
 
-#--- reinstall_machine <name>: a fresh NixOS install of a machine already in
-#--- machines/; keeps its settings and takes this install's disks
-reinstall_machine() {
-  local name=$1 f=machines/$1/settings.nix state_version old main
+#--- reinstall_questions <name>: sets reinstall (1 to go ahead) and new_state,
+#--- this install's stateVersion when it should replace the machine's
+reinstall_questions() {
+  local name=$1 old
+  reinstall=0 new_state=""
   section "Reinstall $name"
   say "machines/$name keeps its settings, apps and users. This computer's disks replace"
   say "hardware/hardware-configuration.nix and hardware/boot.nix; git keeps the old ones."
-  confirm "Reinstall $name on this computer?" y || exit 0
-  write_hardware "$name"
+  confirm "Reinstall $name on this computer?" y || return 0
+  reinstall=1
   state_version=$(installer_value stateVersion)
-  old=$(sed -n -E 's/^  stateVersion = "([^"]*)";.*/\1/p' "$f")
+  old=$(sed -n -E 's/^  stateVersion = "([^"]*)";.*/\1/p' "machines/$name/settings.nix")
   if [[ -n $state_version && $state_version != "$old" ]] &&
     confirm "This install is NixOS $state_version and machines/$name says $old. Use $state_version, as a fresh install should?" y; then
-    set_setting "$f" stateVersion "$(nix_string "$state_version")"
+    new_state=$state_version
   fi
+}
+
+#--- reinstall_machine <name>: a fresh NixOS install of a machine already in
+#--- machines/; keeps its settings and takes this install's disks
+reinstall_machine() {
+  local name=$1 f=machines/$1/settings.nix main
+  ((reinstall)) || exit 0
+  write_hardware "$name"
+  [[ -z $new_state ]] || set_setting "$f" stateVersion "$(nix_string "$new_state")"
   git add -A -- "machines/$name"
 
   main=$(nix "${nix_flags[@]}" eval --raw "$repo#nixosConfigurations.$name._module.specialArgs.machine.mainUser") ||
@@ -1035,28 +1277,36 @@ build_later() {
   ok "Done; it starts at the next boot."
 }
 
-add_user() {
-  local machine f known=() items=() m main
-  for m in machines/*/; do
-    m=${m%/} m=${m#machines/}
-    [[ $m == _* ]] || known+=("$m") items+=("$m|$m")
+#--- add-user's questions: the machine, then the person (sets machine, person)
+add_user_questions() {
+  local known=() items=() d
+  people=() new_people=() u_admin=() u_gitname=() u_gitemail=() u_apps=() u_wall=()
+  for d in machines/*/; do
+    d=${d%/} d=${d#machines/}
+    [[ $d == _* ]] || known+=("$d") items+=("$d|$d")
   done
-  ((${#known[@]})) || die "no machines yet; run ./setup.sh first"
   section "Add a person"
-  m=$(hostname)
-  [[ -d machines/$m ]] || m=${known[0]}
-  choose machine "Which machine?" "$m" "${items[@]}"
+  d=$(hostname)
+  [[ -d machines/$d ]] || d=${known[0]}
+  choose machine "Which machine?" "$d" "${items[@]}"
+  mapfile -t people < <(machine_users "machines/$machine/settings.nix")
+  add_person 0 ""
+}
+
+add_user() {
+  local f main p
+  compgen -G 'machines/[!_]*/' >/dev/null || die "no machines yet; run ./setup.sh first"
+  questions add_user_questions
   f=machines/$machine/settings.nix
 
   #--- Two or more users need mainUser written down
   main=$(nix "${nix_flags[@]}" eval --raw "$repo#nixosConfigurations.$machine._module.specialArgs.machine.mainUser") ||
     die "machines/$machine doesn't evaluate; fix the error above first"
 
-  people=() written=()
-  mapfile -t people < <(nix "${nix_flags[@]}" eval --json "$repo#nixosConfigurations.$machine._module.specialArgs.machine.users" --apply builtins.attrNames | tr -d '[]"' | tr ',' '\n')
-  local before=${#people[@]}
-  add_person 0 ""
-  ((${#people[@]} > before)) || return 0
+  written=()
+  for p in "${new_people[@]}"; do
+    write_user_file "$p"
+  done
   add_line_after "$f" '^  users = \{' "    $person = {};"
   if ! grep -qE '^  mainUser = "' "$f"; then
     if grep -qE '^  mainUser = ' "$f"; then
