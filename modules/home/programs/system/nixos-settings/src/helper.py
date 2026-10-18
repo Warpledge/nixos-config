@@ -16,6 +16,8 @@ Usage: nixos-settings-apply '{"mode": "switch"|"boot", "machine": name|null,
        nixos-settings-apply '{"activate": "/nix/store/...", "mode": ...}'
        nixos-settings-apply '{"collectGarbage": true}'
        nixos-settings-apply '{"clean": true}'  (drop settings the templates lost)
+       nixos-settings-apply '{"session": true}'  (stdin: NixOS Settings' socket;
+                                                 runs each request it sends, see session())
 
 "auto" switches now unless the new system changes a package that froze the
 desktop when switched live (closure.CORE); then it's used from the next boot.
@@ -29,6 +31,7 @@ import pwd
 import re
 import shlex
 import signal
+import socket
 import subprocess
 import sys
 import threading
@@ -91,7 +94,13 @@ class Canceller:
         self.proc = None
         self.allowed = False
         self.requested = False
-        threading.Thread(target=self._watch, daemon=True).start()
+        self.watching = False
+
+    def watch(self):
+        """Started with the first cancellable step, so a session's stdin is left alone."""
+        if not self.watching:
+            self.watching = True
+            threading.Thread(target=self._watch, daemon=True).start()
 
     def _watch(self):
         try:
@@ -111,6 +120,7 @@ class Canceller:
                 pass
 
     def run(self, proc):
+        self.watch()
         self.proc, self.allowed = proc, True
         if self.requested:
             self._stop()
@@ -237,6 +247,47 @@ def collect():
 
 
 #--------------------------------------------------------------------#
+#-- Session
+#--------------------------------------------------------------------#
+def serve(request, conn):
+    """Runs one request as a fresh helper, its stdin and output on `conn`."""
+    with conn:
+        try:
+            code = subprocess.run([sys.executable, "-I", os.path.realpath(__file__), request],
+                                  stdin=conn, stdout=conn, stderr=subprocess.STDOUT).returncode
+            conn.sendall(("@ns " + json.dumps({"exit": code}) + "\n").encode())
+        except OSError:
+            pass
+
+
+def session():
+    """Stays root for the NixOS Settings window that started it (src/session.py).
+    Each message on stdin, a socket pair only that window holds, is a request plus
+    the socket for its output; it ends when the window closes its end."""
+    try:
+        ctl = socket.socket(fileno=0)
+        if ctl.type != socket.SOCK_SEQPACKET:
+            raise OSError
+    except OSError:
+        refuse("a session is only for NixOS Settings")
+    os.environ["NIXOS_SETTINGS_SESSION"] = "1"
+    ctl.send(b"ready")
+    while True:
+        try:
+            msg, fds, _, _ = socket.recv_fds(ctl, 1 << 20, 1)
+        except OSError:
+            break
+        if not msg:
+            break
+        if len(fds) != 1:
+            for fd in fds:
+                os.close(fd)
+            continue
+        conn = socket.socket(fileno=fds[0])
+        threading.Thread(target=serve, args=(msg.decode("utf-8", "replace"), conn)).start()
+
+
+#--------------------------------------------------------------------#
 #-- Requests
 #--------------------------------------------------------------------#
 def same_kind(template, value):
@@ -317,6 +368,11 @@ def main():
         refuse("bad request")
     if not isinstance(request, dict):
         refuse("bad request")
+    if request.get("session") is True:
+        if os.environ.get("NIXOS_SETTINGS_SESSION"):
+            refuse("bad request")
+        session()
+        return
     mode = request.get("mode", "switch")
     if mode not in ("switch", "boot", "auto"):
         refuse("bad request")
