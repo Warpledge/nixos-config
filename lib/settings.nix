@@ -82,6 +82,9 @@
     then lib.zipAttrsWith (_: anyOf) values
     else null;
 in {
+  #--- The allowed values, for tools that edit the settings files
+  inherit choices userChoices;
+
   #--------------------------------------------------------------------#
   #-- Machine
   #--------------------------------------------------------------------#

@@ -28,7 +28,7 @@ Install NixOS first. The graphical installer works, disk encryption included, as
 nix-shell -p git --run "git clone https://github.com/Warpledge/nixos-config ~/nixos-config" && cd ~/nixos-config && ./setup.sh
 ```
 
-`setup.sh` asks what to call the computer and who will use it, copies `machines/_template` and `users/_template` into a folder for each, and fills them in: the hardware config, the time zone, language and keyboard picked in the installer, drivers for the graphics card it finds, and the lines an encrypted disk needs to unlock. Everyone starts with Zen, kitty, Helix, Zed, Nautilus, yazi, mpv and Steam and picks extras from a list. The new files are staged with git, since a flake ignores untracked files. The repo then moves to `/etc/nixos-config`, where every admin on the computer can edit it (`~/nixos-config` stays as a link), and the system is built to start on the next boot.
+`setup.sh` asks what to call the computer and who will use it, copies `machines/_template` and `users/_template` into a folder for each, and fills them in: the hardware config, the time zone, language and keyboard picked in the installer, drivers for the graphics card it finds, and the lines an encrypted disk needs to unlock. Everyone starts with Zen, kitty, Helix, Zed, Nautilus, yazi, mpv, Steam and nixm Settings and picks extras from a list. The new files are staged with git, since a flake ignores untracked files. The repo then moves to `/etc/nixos-config`, where every admin on the computer can edit it (`~/nixos-config` stays as a link), and the system is built to start on the next boot.
 
 Afterwards:
 
@@ -209,6 +209,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | **Finance** | [HomeBank][homebank] (personal accounting with labeled transactions and a running balance) |
 | **Collection Tracking** | [Tonkatsu Box][tonkatsu-box] (games, film, anime, manga, visual novels, books and music in one local database, imports from Steam and AniList; a prebuilt bundle kept in `~/.local/opt/` instead of nixpkgs) |
 | **Task Manager** | [Resources][resources] (system and process monitor) |
+| **Settings App** | nixm Settings ([`modules/home/programs/system/nixm-settings/`](./modules/home/programs/system/nixm-settings/)), a GTK window over the settings files: switch apps on or off and pick the kernel, window manager, services and language from menus, then Apply writes the files, checks them and runs `nixm rebuild` (or `nixm boot`), with an undo if the rebuild fails |
 | **Japanese** | [fcitx5][fcitx5] + [Mozc][mozc] for typing hiragana, katakana and kanji, plus [innoextract][innoextract], [cabextract][cabextract] and [mdf2iso][mdf2iso] for unpacking raw Japanese visual novels (off by default) |
 </details>
 
