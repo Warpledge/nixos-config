@@ -18,12 +18,6 @@
   rgb = n: "${c."${n}-rgb-r"};${c."${n}-rgb-g"};${c."${n}-rgb-b"}";
   hex = n: "#${c.${n}}";
 
-  #--- sudo runs this only when no terminal is attached (`! nixm rebuild`
-  #--- inside Claude Code); a real terminal keeps its normal prompt
-  sudoAskpass = pkgs.writeShellScript "nixm-askpass" ''
-    exec ${pkgs.zenity}/bin/zenity --password --title="nixm: sudo password"
-  '';
-
   #--- Turns moz_bookmarks rows into a Netscape bookmark file, the format
   #--- every browser's "import bookmarks from HTML" reads. Tags and
   #--- place: queries are Firefox-only, so they are left out.
@@ -360,7 +354,10 @@
       MACHINE=${lib.escapeShellArg machine.name}
       HOSTNAME=$(hostname)
       FLAKE_PATH=${lib.escapeShellArg machine.flakePath}
-      export SUDO_ASKPASS=${sudoAskpass}
+      #--- nh and the rollback below elevate with pkexec, so the password prompt
+      #--- is DMS's polkit dialog; set here too, as nix/nh.nix's global value only
+      #--- reaches shells started after the rebuild that adds it
+      export NH_ELEVATION_STRATEGY=pkexec
 
       #--- Kept outside the repo: subscriptions, bookmarks and history are
       #--- personal data and this flake is public. Per-host folders, since
@@ -408,10 +405,10 @@
           ;;
         rollback)
           echo "Available generations:"
-          sudo nix-env --list-generations -p /nix/var/nix/profiles/system
+          nix-env --list-generations -p /nix/var/nix/profiles/system
           read -p "Enter generation number to rollback to: " gen
-          sudo nix-env --switch-generation "$gen" -p /nix/var/nix/profiles/system
-          sudo /nix/var/nix/profiles/system/bin/switch-to-configuration switch
+          pkexec "$(command -v nix-env)" --switch-generation "$gen" -p /nix/var/nix/profiles/system
+          pkexec /nix/var/nix/profiles/system/bin/switch-to-configuration switch
           ;;
 
         # --- Backup ---

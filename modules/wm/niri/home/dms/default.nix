@@ -270,6 +270,7 @@ in {
     inputs.dms.homeModules.niri
     inputs.dms-plugin-registry.homeModules.default
     ../../../dms-mutable.nix
+    ../../../dms-polkit
     {
       # Not DMS's own programs.dank-material-shell.settings, which would write
       # the same file

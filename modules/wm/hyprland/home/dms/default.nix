@@ -135,6 +135,7 @@
     inputs.dms.homeModules.dank-material-shell
     inputs.dms-plugin-registry.homeModules.default
     ../../../dms-mutable.nix
+    ../../../dms-polkit
     {
       # Shared with the niri module, so a machine sets a plugin's settings
       # once for both WMs (the desktop's GPU widget); here DMS links them
