@@ -605,6 +605,7 @@ class Window(Adw.ApplicationWindow):
                 subtitle="Which of your computers these app settings are saved for",
                 model=Gtk.StringList.new(labels),
                 selected=self.scopes.index(self.scope))
+            row.set_factory(self._full_label_factory())
             row.add_prefix(Gtk.Image(icon_name=ui.first_icon("computer-symbolic"), valign=Gtk.Align.CENTER))
             row.connect("notify::selected", self._scope)
             self.scope_rows.append(row)
@@ -769,6 +770,13 @@ class Window(Adw.ApplicationWindow):
                 row.add_css_class("nixm-plain")
         self.rows[key] = (row, marker)
         return row
+
+    def _full_label_factory(self):
+        """Labels that keep their full text instead of the default ellipsized ones."""
+        factory = Gtk.SignalListItemFactory()
+        factory.connect("setup", lambda _, item: item.set_child(Gtk.Label(xalign=0)))
+        factory.connect("bind", lambda _, item: item.get_child().set_label(item.get_item().get_string()))
+        return factory
 
     def _dropdown(self, options, selected, search):
         """A dropdown showing each option's label; the button shows the part
