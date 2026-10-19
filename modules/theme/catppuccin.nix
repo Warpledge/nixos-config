@@ -28,6 +28,7 @@
           apply = true; # Auto-apply theme via kvantum.kvconfig
         };
         zed.enable = false;
+        vscodium.profiles.default.enable = false; # Stylix's vscodium target owns it
         opencode.enable = false; # stylix's opencode target owns tui.theme
         mpv.enable = false; # its include overrides Stylix's black background-color
         # Emits Lua-only colors that break configType = "hyprlang"; Stylix's

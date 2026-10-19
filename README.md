@@ -287,7 +287,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 [zed]: https://zed.dev
 [helix]: https://helix-editor.com
 [micro]: https://micro-editor.github.io
-[vscodium]: https://vscodium.com
+[vscodium]: https://github.com/VSCodium/vscodium
 [zen]: https://zen-browser.app
 [mullvad-browser]: https://mullvad.net/en/browser
 [helium]: https://github.com/schembriaiden/helium-browser-nix-flake

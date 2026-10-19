@@ -33,6 +33,11 @@ home-manager, Niri WM, Stylix theming (Catppuccin Mocha).
 8. **No desktop screenshots without permission.** Never capture the screen,
    a window, or the desktop unless the user has said yes to that specific
    capture first.
+9. **Never say a fix "should work".** Nix reports one error at a time, so
+   the line it names is rarely the only problem. After a Nix change: check
+   every option path and attribute in the file you touched (see **Looking
+   things up**), then run `nix flake check 2>&1 | tail -n 30`, fix, and
+   repeat until it passes. Report the check's result, not a prediction.
 
 ## Context budget
 
@@ -110,8 +115,7 @@ of them is often out of date or invented. Look an option up with the `nixos`
 MCP tool, or `grep -n 'mkOption' <module>` (some move under a submodule, e.g.
 VSCodium's extensions are `profiles.default.extensions`). Check a package
 attribute exists with `nix eval --raw nixpkgs#<attr>.name`, extensions too
-(`nixpkgs#vscode-extensions.<publisher>.<name>.name`). Run `nix flake check`
-before telling the user a change is done.
+(`nixpkgs#vscode-extensions.<publisher>.<name>.name`).
 
 Stop once you have the answer: a man page is
 authoritative for config syntax, so don't go on to the nixpkgs derivation.
