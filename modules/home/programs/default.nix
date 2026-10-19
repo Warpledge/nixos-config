@@ -89,6 +89,7 @@ user: {lib, ...}: {
     ++ lib.optionals user.scrcpy.enable [./android/scrcpy.nix]
     #--- AI Tools (controlled by user settings)
     ++ lib.optionals user.claude.enable [./ai/claude.nix]
+    ++ lib.optionals user.claudeDesktop.enable [./ai/claude-desktop.nix]
     ++ lib.optionals user.opencode.enable [./ai/opencode.nix]
     ++ lib.optionals user.lmstudio.enable [./ai/lmstudio.nix]
     ++ lib.optionals user.llamaSwap.enable [./ai/llama-swap.nix]

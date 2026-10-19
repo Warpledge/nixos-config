@@ -838,6 +838,7 @@ apps=(
   "Gaming|gaming.retroshelf|RetroShelf: tidy an ES-DE / RetroDECK library"
   "Gaming|discord.arrpc.enable|Show the game you're playing in Discord"
   "AI tools|claude.enable|Claude Code (needs an Anthropic account)"
+  "AI tools|claudeDesktop.enable|Claude desktop app: chat and Claude Code"
   "AI tools|opencode.enable|opencode"
   "AI tools|lmstudio.enable|LM Studio: run language models locally"
   "AI tools|llamaSwap.enable|llama-swap: llama.cpp server for opencode"

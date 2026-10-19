@@ -59,6 +59,16 @@
       # The package programs.claude-code installs, incl. any plugin wrapper
       bin = "${hm.programs.claude-code.finalPackage}/bin/claude";
     };
+    claude-desktop = {
+      home = true;
+      enable = user.claudeDesktop.enable;
+      bin = "${hm.claude-desktop.package}/bin/claude-desktop";
+    };
+    lm-studio = {
+      home = true;
+      enable = user.lmstudio.enable;
+      bin = "${pkgs.lmstudio}/bin/lm-studio";
+    };
     opencode = {
       home = true;
       enable = user.opencode.enable;

@@ -201,7 +201,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | **Guitar** | [TONE3000][tone3000] (official NAM player, browses its capture and IR library in-app), [Guitarix][guitarix] (modular amp rig), [ir.lv2][ir-lv2] for cabinet IRs, [qpwgraph][qpwgraph] for patching, plus [FxFloorBoard][katana-fxfloorboard] to edit patches on the Boss Katana itself |
 | **Rhythm Games** | [feedBack][feedback] plays Guitar Pro tabs through its own audio engine, with VST hosting and amp modeling, so the Katana DI feed doubles as the game input; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs. [Rocksmith 2014][rocksmith] runs on Proton and reads the same DI through [PipeASIO][pipeasio] and [RS_ASIO][rs-asio]; the module writes their config, and the hand-done install steps live in `docs/gaming/rocksmith-2014.md` |
 | **Chat / Productivity** | [GoofCord][goofcord] via [nixcord][nixcord] (Vencord, with [arRPC][arrpc] running alongside it so Steam and Proton games show up as rich presence), [Ferdium][ferdium] (all your web messengers in one window), [Thunderbird][thunderbird], [Obsidian][obsidian] |
-| **AI Tooling** | [Claude Code][claude-code], [OpenCode][opencode], [LM Studio][lmstudio], [llama-swap][llama-swap] |
+| **AI Tooling** | [Claude Code][claude-code], [Claude Desktop][claude-desktop], [OpenCode][opencode], [LM Studio][lmstudio], [llama-swap][llama-swap] |
 | **Android** | [scrcpy][scrcpy] (mirror and control a device over USB or wifi, nothing to install on the phone) |
 | **Video Trimming** | [Video Trimmer][video-trimmer] (cut a clip out of a video without re-encoding it), [Constrict][constrict] (re-encode a video to fit a chosen file size) |
 | **Manga / Anime Reader** | [Suwayomi][suwayomi] is a local manga reader, opened from the launcher as a [Helium][helium] app window (`localhost:4567`) after a password prompt. [Moku][moku] covers manga, light novels and anime, built from source with a fix for overlapping search results, a per-source filter panel and a button that opens the current episode in mpv, with a local [FlareSolverr][flaresolverr] for Cloudflare-protected sources |
@@ -369,6 +369,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 [sunshine]: https://github.com/LizardByte/Sunshine
 [moonlight]: https://moonlight-stream.org
 [claude-code]: https://github.com/anthropics/claude-code
+[claude-desktop]: https://code.claude.com/docs/en/desktop-linux
 [opencode]: https://github.com/opencode-ai/opencode
 [lmstudio]: https://lmstudio.ai
 [llama-swap]: https://github.com/mostlygeek/llama-swap
@@ -723,6 +724,7 @@ flake.nix
 | [`cachyos-kernel`](https://github.com/xddxdd/nix-cachyos-kernel) | CachyOS kernel |
 | [`nix-flatpak`](https://github.com/gmodena/nix-flatpak) | Declarative Flatpak management |
 | [`claude-code`](https://github.com/sadjow/claude-code-nix) | Claude Code, packaged so it updates without waiting on nixpkgs |
+| [`claude-desktop`](https://github.com/kubastick/claude-desktop-nixos) | Anthropic's Linux .deb of the Claude desktop app, patched for NixOS |
 | [`nix-index-database`](https://github.com/nix-community/nix-index-database) | Prebuilt weekly nix-index database for comma and the command-not-found hint |
 | [`alejandra`](https://github.com/kamadorueda/alejandra) (pinned 3.0.0) | Nix formatter |
 | [`affinity-nix`](https://github.com/mrshmllow/affinity-nix) | Affinity Suite v3 (Photo, Designer, Publisher) via Wine |

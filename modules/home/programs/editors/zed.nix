@@ -306,13 +306,13 @@
           // lib.optionalAttrs user.llamaSwap.enable {
             default_model = {
               provider = "llama-swap";
-              model = "lfm2.5-24b-a2b";
+              model = "qwen3.6-35b-a3b";
             };
             # Zed's own request temperature would override llama-swap's
             model_parameters = [
               {
                 provider = "llama-swap";
-                temperature = 0.1;
+                temperature = 0.6;
               }
             ];
             #--- Fewer tool schemas in the local model's context
@@ -365,9 +365,14 @@
             api_url = "http://127.0.0.1:8090/v1";
             available_models = [
               {
-                name = "lfm2.5-24b-a2b";
-                display_name = "LFM2.5 24B A2B";
-                max_tokens = 65536;
+                name = "qwen3.6-35b-a3b";
+                display_name = "Qwen3.6 35B A3B";
+                max_tokens = 131072;
+              }
+              {
+                name = "qwen3.6-35b-a3b-instruct";
+                display_name = "Qwen3.6 35B A3B (no thinking)";
+                max_tokens = 131072;
               }
             ];
           };

@@ -68,6 +68,8 @@
     "prismlauncher"
     "opencode"
     "claude"
+    "claude-desktop"
+    "lm-studio"
     "spotify"
     "freetube"
     "ferdium"
