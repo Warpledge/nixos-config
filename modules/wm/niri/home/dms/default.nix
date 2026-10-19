@@ -241,6 +241,7 @@ in {
       # Blur and translucency come from the Mod+T preset (core/blur-presets.nix)
       text = ''
         include optional=true "${config.xdg.configHome}/niri/dms/blur-preset.kdl"
+        include optional=true "${config.xdg.configHome}/niri/dms/opacity-extra.kdl"
       '';
     };
   };
