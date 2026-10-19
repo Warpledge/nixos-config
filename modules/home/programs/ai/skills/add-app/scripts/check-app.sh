@@ -27,15 +27,19 @@ else
 fi
 [[ -n $scope ]] && pass "$toggle defined in $scope/_template/settings.nix"
 
+any_on=""
 for m in machines/*/; do
   m=${m%/} m=${m#machines/}
   [[ $m == _* || -z $expr ]] && continue
   if v="$(nix eval --json ".#nixosConfigurations.$m._module.specialArgs.machine" --apply "$expr" 2>/dev/null)"; then
     pass "$m: $toggle = $v"
+    [[ $v == true ]] && any_on=1
   else
     fail "$m does not evaluate $toggle (nix eval .#nixosConfigurations.$m shows why)"
   fi
 done
+#--- A module only evaluates where its toggle is on; off everywhere, flake check skips it
+[[ -n $expr && -z $any_on ]] && fail "$toggle is off on every machine, so nix flake check never evaluates the module: turn it on in users/<name>/settings.nix or a machine's settings.nix"
 
 if [[ $scope == users ]]; then
   if grep -qF "|$toggle|" setup.sh; then pass "setup.sh offers $toggle"; else echo "note  setup.sh's apps list doesn't offer $toggle (fine for an essential or a ~/.local/opt bundle)"; fi
