@@ -33,6 +33,26 @@
         "--no-webui"
       ];
     };
+    #--- Zed edit predictions: a next-edit model, not instruct
+    models."sweep-next-edit-1.5b" = {
+      ttl = 600;
+      cmd = lib.concatStringsSep " " [
+        llamaServer
+        "--port \${PORT}"
+        "-m ${models}/sweepai/sweep-next-edit-1.5B/sweep-next-edit-1.5b.q8_0.v2.gguf"
+        "-ngl 99"
+        "-c 8192"
+        "-np 1"
+        "-fa on"
+        "--no-webui"
+      ];
+    };
+    #--- Both fit in 16GB, so neither unloads the other
+    groups.editor = {
+      swap = false;
+      exclusive = true;
+      members = ["lfm2.5-24b-a2b" "sweep-next-edit-1.5b"];
+    };
   };
   configFile = (pkgs.formats.yaml {}).generate "llama-swap.yaml" settings;
 in {

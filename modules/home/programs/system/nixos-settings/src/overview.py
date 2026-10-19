@@ -3,6 +3,7 @@ switch back to, and shortcuts into the shell's own settings."""
 
 import os
 import re
+import shutil
 
 import gi
 
@@ -19,6 +20,8 @@ import ui  # noqa: E402
 QUICK = ["display_config", "keybinds", "mouse_touchpad", "theme", "wallpaper", "dankbar_settings",
          "notifications", "network_wifi", "audio"]
 HISTORY = 8
+#--- The template editors/zed.nix merges into Zed's settings.json on each rebuild
+ZED_DEFAULTS = os.path.expanduser("~/.config/zed/declarative-settings.json")
 
 
 def quick_links(window, links):
@@ -150,6 +153,13 @@ class Overview(Adw.PreferencesPage):
                 git.connect("activated", lambda _: self._open_zed())
             group.add(git)
             ui.run_async(lambda: system.git_status(window.cfg.flake), self._git)
+        if os.path.isfile(ZED_DEFAULTS):
+            reset = Adw.ActionRow(title="Reset Zed Settings", activatable=True, subtitle_lines=2,
+                                  subtitle="Puts back the config's Zed settings; "
+                                           "changes made in Zed's settings are dropped")
+            reset.add_prefix(Gtk.Image(icon_name=ui.first_icon("edit-undo-symbolic"), valign=Gtk.Align.CENTER))
+            reset.connect("activated", lambda _: self._reset_zed())
+            group.add(reset)
         failed = runview.last_failed()
         if failed:
             title, when, heading, _, _ = failed
@@ -266,6 +276,32 @@ class Overview(Adw.PreferencesPage):
         view.add_top_bar(Adw.HeaderBar())
         view.add_bottom_bar(bar)
         dialog.set_child(view)
+        dialog.present(self.window)
+
+    def _reset_zed(self):
+        """Copies the template zed.nix last wrote over Zed's settings.json."""
+        dialog = Adw.AlertDialog(heading="Reset Zed settings?",
+                                 body="Zed goes back to the settings in the config. Anything changed "
+                                      "in Zed's own settings since is dropped; the old file is kept "
+                                      "as settings.json.old.")
+        dialog.add_response("cancel", "Cancel")
+        dialog.add_response("reset", "Reset")
+        dialog.set_response_appearance("reset", Adw.ResponseAppearance.DESTRUCTIVE)
+        dialog.set_close_response("cancel")
+
+        def chosen(_, r):
+            if r != "reset":
+                return
+            settings = os.path.join(os.path.dirname(ZED_DEFAULTS), "settings.json")
+            try:
+                if os.path.isfile(settings):
+                    shutil.copyfile(settings, settings + ".old")
+                shutil.copyfile(ZED_DEFAULTS, settings)
+            except OSError as e:
+                self.window.toast(f"Couldn't reset Zed: {e.strerror}")
+                return
+            self.window.toast("Zed settings reset")
+        dialog.connect("response", chosen)
         dialog.present(self.window)
 
     def _open_zed(self):
