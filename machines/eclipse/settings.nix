@@ -9,7 +9,10 @@
   #-- Users
   #--------------------------------------------------------------------#
   users = {
-    warpledge = {gaming.retroshelf = false;};
+    warpledge = {
+      gaming.retroshelf = false;
+      fileBrowsers.dolphin = false;
+    };
   };
 
   #--------------------------------------------------------------------#
