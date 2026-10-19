@@ -3,6 +3,7 @@
   inputs,
   lib,
   config,
+  user,
   ...
 }: {
   #--------------------------------------------------------------------#
@@ -268,12 +269,32 @@
         diagnostics.button = true;
 
         #--- AI
-        disable_ai = true;
-        agent = {
-          button = true;
-          dock = "right";
-          favorite_models = [];
-          model_parameters = [];
+        disable_ai = !user.llamaSwap.enable;
+        agent =
+          {
+            button = true;
+            dock = "right";
+            favorite_models = [];
+            model_parameters = [];
+          }
+          // lib.optionalAttrs user.llamaSwap.enable {
+            default_model = {
+              provider = "llama-swap";
+              model = "lfm2.5-24b-a2b";
+            };
+          };
+        #--- Local model served by ai/llama-swap.nix (same port and model id)
+        language_models = lib.optionalAttrs user.llamaSwap.enable {
+          openai_compatible.llama-swap = {
+            api_url = "http://127.0.0.1:8090/v1";
+            available_models = [
+              {
+                name = "lfm2.5-24b-a2b";
+                display_name = "LFM2.5 24B A2B";
+                max_tokens = 32768;
+              }
+            ];
+          };
         };
 
         #--- Network
