@@ -177,6 +177,7 @@
 
   #--- AI Tools
   claude.enable = false; # Claude Code (needs an Anthropic account)
+  claudeDesktop.enable = false; # Claude desktop app: chat and Claude Code
   opencode.enable = false;
   lmstudio.enable = false; # Runs language models locally
   llamaSwap.enable = false; # llama.cpp server on the GPU, opencode's default model

@@ -161,6 +161,7 @@
 
   #--- AI Tools
   claude = {enable = true;};
+  claudeDesktop = {enable = true;};
   opencode = {enable = true;};
   lmstudio = {enable = true;};
   llamaSwap = {enable = true;};

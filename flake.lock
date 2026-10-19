@@ -177,6 +177,22 @@
         "type": "github"
       }
     },
+    "claude-desktop": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1791714838,
+        "narHash": "sha256-HSj7DD2Zy9kaFpIzm3tPzktW/5JIoEAALuOHgblZe/c=",
+        "owner": "kubastick",
+        "repo": "claude-desktop-nixos",
+        "rev": "a56a03c0d8c72d14957c92f69106cbebd1ebb2cf",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kubastick",
+        "repo": "claude-desktop-nixos",
+        "type": "github"
+      }
+    },
     "corefonts": {
       "flake": false,
       "locked": {
@@ -1098,6 +1114,7 @@
         "cachyos-kernel": "cachyos-kernel",
         "catppuccin": "catppuccin",
         "claude-code": "claude-code",
+        "claude-desktop": "claude-desktop",
         "dank-greeter": "dank-greeter",
         "dms": "dms",
         "dms-plugin-registry": "dms-plugin-registry",
