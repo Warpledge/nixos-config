@@ -14,7 +14,11 @@
 #-
 #- Server path: ~/Documents/Minecraft_Servers/GT_New_Horizons_2.8.4_Server_Modified
 #- Session name: gtnh
-{pkgs, ...}: let
+{
+  pkgs,
+  lib,
+  ...
+}: let
   serverDir = "$HOME/Documents/Minecraft_Servers/GT_New_Horizons_2.8.4_Server_Modified";
   sessionName = "gtnh";
 
@@ -127,4 +131,13 @@
     '';
 in {
   home.packages = [gtnh-server];
+
+  #--- Lists the server on NixOS Settings' Servers tab
+  xdg.configFile."nixos-settings/servers/gtnh.json".text = builtins.toJSON {
+    name = "GregTech: New Horizons";
+    version = "2.8.4";
+    command = "gtnh";
+    folder = lib.removePrefix "$HOME/" serverDir;
+    docs = "GTNH";
+  };
 }

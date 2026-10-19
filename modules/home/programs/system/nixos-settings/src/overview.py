@@ -8,9 +8,11 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gio, GLib, Gtk  # noqa: E402
+from gi.repository import Adw, Gdk, Gio, GLib, Gtk  # noqa: E402
 
 import closure  # noqa: E402
+import runview  # noqa: E402
+import system  # noqa: E402
 import ui  # noqa: E402
 
 #--- DMS tabs shown as buttons on the Overview, in this order
@@ -134,14 +136,30 @@ class Overview(Adw.PreferencesPage):
         folder.add_suffix(Gtk.Image(icon_name=ui.link_icon(), valign=Gtk.Align.CENTER, css_classes=["dim-label"]))
         folder.connect("activated", lambda _: window.open_folder())
         group.add(folder)
-        if GLib.find_program_in_path("zeditor"):
-            git = Adw.ActionRow(title="Manage Git", activatable=True,
-                                subtitle="Pull, commit and push the config folder in Zed")
+        zed = GLib.find_program_in_path("zeditor")
+        if zed or GLib.find_program_in_path("git"):
+            git = Adw.ActionRow(title="Manage Git" if zed else "Git", activatable=bool(zed),
+                                subtitle="Pull, commit and push the config folder in Zed" if zed else "")
             git.add_prefix(Gtk.Image(icon_name=ui.first_icon("dev.zed.Zed", "zed", "vcs-normal"),
                                      valign=Gtk.Align.CENTER))
-            git.add_suffix(Gtk.Image(icon_name=ui.link_icon(), valign=Gtk.Align.CENTER, css_classes=["dim-label"]))
-            git.connect("activated", lambda _: self._open_zed())
+            self.git_chips = Gtk.Box(spacing=6, valign=Gtk.Align.CENTER)
+            git.add_suffix(self.git_chips)
+            if zed:
+                git.add_suffix(Gtk.Image(icon_name=ui.link_icon(), valign=Gtk.Align.CENTER,
+                                         css_classes=["dim-label"]))
+                git.connect("activated", lambda _: self._open_zed())
             group.add(git)
+            ui.run_async(lambda: system.git_status(window.cfg.flake), self._git)
+        failed = runview.last_failed()
+        if failed:
+            title, when, heading, _, _ = failed
+            row = Adw.ActionRow(title="Last Failed Run", activatable=True, subtitle_lines=2,
+                                subtitle=ui.esc(f"{title}, {ui.when(when).lower()}: {heading}"))
+            row.add_prefix(Gtk.Image(icon_name=ui.first_icon("dialog-warning-symbolic"), valign=Gtk.Align.CENTER,
+                                     css_classes=["warning"]))
+            row.add_suffix(Gtk.Image(icon_name="go-next-symbolic", valign=Gtk.Align.CENTER))
+            row.connect("activated", lambda _: self._show_failed(row))
+            group.add(row)
         self.add(group)
 
         #--- Shell settings; under niri they're on the Niri tab's Shell page
@@ -190,6 +208,66 @@ class Overview(Adw.PreferencesPage):
                 group.add(row)
             self.add(group)
 
+    def _git(self, status, err):
+        if err is not None:
+            self.git_chips.append(ui.chip("Couldn't read", "warning", tooltip=str(err)))
+            return
+        chips = []
+        if status.changed:
+            chips.append(ui.chip(f"{status.changed} changed", "accent",
+                                 tooltip="Files with changes that aren't committed yet"))
+        if status.ahead:
+            chips.append(ui.chip(f"{status.ahead} to push", "neutral", tooltip="Commits not pushed yet"))
+        if status.behind:
+            chips.append(ui.chip(f"{status.behind} to pull", "warning",
+                                 tooltip="Commits on the remote, as of the last fetch"))
+        if not chips:
+            chips.append(ui.chip("Up to date" if status.upstream else "Committed", "success",
+                                 tooltip=f"Branch {status.branch}"))
+        for c in chips:
+            self.git_chips.append(c)
+
+    def _show_failed(self, row):
+        failed = runview.last_failed()
+        if not failed:
+            return
+        title, when, heading, reason, log = failed
+        dialog = Adw.Dialog(title="Last Failed Run", content_width=640, content_height=640)
+        page = Adw.PreferencesPage()
+        top = Adw.PreferencesGroup(title=ui.esc(heading),
+                                   description=ui.esc(f"{title}, {ui.when(when).lower()}. {reason}"))
+        page.add(top)
+        group = Adw.PreferencesGroup(title="Log")
+        text = Gtk.TextView(editable=False, cursor_visible=False, monospace=True, top_margin=10,
+                            bottom_margin=10, left_margin=12, right_margin=12,
+                            wrap_mode=Gtk.WrapMode.WORD_CHAR, css_classes=["log-view"])
+        text.get_buffer().set_text(log)
+        scroll = Gtk.ScrolledWindow(child=text, min_content_height=320, css_classes=["card"],
+                                    hscrollbar_policy=Gtk.PolicyType.NEVER)
+        group.add(scroll)
+        copy = Gtk.Button(icon_name="edit-copy-symbolic", css_classes=["flat"], tooltip_text="Copy the log")
+        copy.connect("clicked", lambda _: (Gdk.Display.get_default().get_clipboard().set(log),
+                                           self.window.toast("Log copied")))
+        group.set_header_suffix(copy)
+        page.add(group)
+        forget = Gtk.Button(label="Forget It", css_classes=["destructive-action"])
+
+        def forgotten(_):
+            try:
+                os.remove(runview.FAILED_LOG)
+            except OSError:
+                pass
+            row.set_visible(False)
+            dialog.close()
+        forget.connect("clicked", forgotten)
+        bar = Gtk.ActionBar()
+        bar.pack_end(forget)
+        view = Adw.ToolbarView(content=page)
+        view.add_top_bar(Adw.HeaderBar())
+        view.add_bottom_bar(bar)
+        dialog.set_child(view)
+        dialog.present(self.window)
+
     def _open_zed(self):
         """Focuses the Zed window on the config, or opens one, as Mod+Z does."""
         flake = self.window.cfg.flake
@@ -231,11 +309,25 @@ class Overview(Adw.PreferencesPage):
         self.status_row.set_subtitle(ui.esc(f"{len(changes)} of this config's sources have newer "
                                             f"versions, up to {ui.day(newest)}."))
         exp = Adw.ExpanderRow(title=f"What's New ({len(changes)})",
-                              subtitle=ui.esc(", ".join(c.name for c in changes[:6])
-                                              + ("…" if len(changes) > 6 else "")))
+                              subtitle=ui.esc("Untick a source to leave it as it is. "
+                                              + ", ".join(c.name for c in changes[:6])
+                                              + ("…" if len(changes) > 6 else "")), subtitle_lines=2)
+        picks = {}
+        go = Adw.ButtonRow(title="Update Now", start_icon_name=ui.first_icon("software-update-available-symbolic"),
+                           css_classes=["suggested-action"])
+
+        def picked(*_):
+            n = sum(1 for check in picks.values() if check.get_active())
+            go.set_title("Update Now" if n == len(changes) else f"Update {n} of {len(changes)}")
+            go.set_sensitive(n > 0)
         for c in changes:
-            row = Adw.ActionRow(title=ui.esc(c.name),
+            row = Adw.ActionRow(title=ui.esc(c.name), activatable=True,
                                 subtitle=ui.esc(f"{ui.day(c.old)}  →  {ui.day(c.new)}"))
+            check = Gtk.CheckButton(active=True, valign=Gtk.Align.CENTER)
+            check.connect("toggled", picked)
+            row.add_prefix(check)
+            row.set_activatable_widget(check)
+            picks[c.name] = check
             if c.link:
                 button = Gtk.Button(icon_name=ui.link_icon(), css_classes=["flat"], valign=Gtk.Align.CENTER,
                                     tooltip_text="See the changes on GitHub")
@@ -243,8 +335,7 @@ class Overview(Adw.PreferencesPage):
                 row.add_suffix(button)
             exp.add_row(row)
         self.updates_group.add(exp)
-        go = Adw.ButtonRow(title="Update Now", start_icon_name=ui.first_icon("software-update-available-symbolic"),
-                           css_classes=["suggested-action"])
-        go.connect("activated", lambda _: self.window.confirm_update(new_lock, changes))
+        go.connect("activated", lambda _: self.window.confirm_update(
+            new_lock, changes, [n for n, check in picks.items() if check.get_active()]))
         self.updates_group.add(go)
         self.results = [exp, go]

@@ -129,6 +129,7 @@ class Setting:
     note: str = ""  # a caution under the summary
     icon: list = field(default_factory=list)  # icon names or .desktop ids to try
     labels: dict = field(default_factory=dict)  # choice value -> label
+    default: object = None  # the template's value
 
 
 @dataclass
@@ -296,6 +297,7 @@ def make_setting(domain, path, b, values, choices, labels, doc, lead, header_tit
     if subtitle.startswith("Options:"):
         subtitle = ""
     s = Setting(domain, path, "text", title, subtitle)
+    s.default = value
     if dotted in choices:
         s.kind, s.choices = "choice", choices[dotted]
     elif isinstance(value, bool):

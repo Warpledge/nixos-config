@@ -142,6 +142,58 @@ def to_delete(generations, policy):
             if g.number not in newest and g.when < cutoff and g.number != current]
 
 
+def store_closure(paths):
+    """Every store path `paths` need."""
+    if not paths:
+        return set()
+    out = subprocess.run(["nix-store", "--query", "--requisites", *paths], capture_output=True, text=True,
+                         timeout=300)
+    return set(out.stdout.split()) if out.returncode == 0 else set()
+
+
+def freed_estimate(doomed, kept):
+    """Bytes in the Nix store only the doomed system generations use: roughly
+    what deleting them frees, before anything else that's already unused."""
+    gone = store_closure([g.path for g in doomed]) - store_closure([g.path for g in kept] + [closure.CURRENT])
+    total, paths = 0, sorted(gone)
+    for i in range(0, len(paths), 2000):
+        out = subprocess.run(["nix-store", "--query", "--size", *paths[i:i + 2000]], capture_output=True,
+                             text=True, timeout=300)
+        total += sum(int(n) for n in out.stdout.split() if n.isdigit())
+    return total
+
+
+#--------------------------------------------------------------------#
+#-- Git
+#--------------------------------------------------------------------#
+@dataclass
+class GitStatus:
+    branch: str
+    changed: int  # files with changes not committed yet
+    ahead: int  # commits not pushed
+    behind: int  # commits on the remote not pulled (as of the last fetch)
+    upstream: bool
+
+
+def git_status(flake):
+    out = subprocess.run(["git", "-C", flake, "status", "--porcelain=v2", "--branch"], capture_output=True,
+                         text=True, timeout=20)
+    if out.returncode != 0:
+        raise RuntimeError(out.stderr.strip() or "git status failed")
+    branch, changed, ahead, behind, upstream = "", 0, 0, 0, False
+    for line in out.stdout.splitlines():
+        if line.startswith("# branch.head "):
+            branch = line.split(" ", 2)[2]
+        elif line.startswith("# branch.upstream "):
+            upstream = True
+        elif line.startswith("# branch.ab "):
+            a, b = line.split()[2:4]
+            ahead, behind = int(a), -int(b)
+        elif line and not line.startswith("#"):
+            changed += 1
+    return GitStatus(branch, changed, ahead, behind, upstream)
+
+
 #--------------------------------------------------------------------#
 #-- Updates
 #--------------------------------------------------------------------#
@@ -192,6 +244,25 @@ def check_updates(flake):
             link = f"https://github.com/{new['owner']}/{new['repo']}/compare/{old['rev']}...{new['rev']}"
         changes.append(InputChange(name, old.get("lastModified", 0), new.get("lastModified", 0), link))
     return new_lock, changes
+
+
+def partial_lock(flake, names):
+    """A lock file with only `names` moved to their newest versions, the rest
+    as flake.lock has them. Returns its path."""
+    new_lock = os.path.join(runtime_dir(), "flake-some.lock")
+    try:
+        os.unlink(new_lock)
+    except OSError:
+        pass
+    try:
+        out = subprocess.run(["nix", "flake", "update", "--flake", flake, *names, "--output-lock-file", new_lock],
+                             capture_output=True, text=True, timeout=900)
+    except (OSError, subprocess.TimeoutExpired) as e:
+        raise UpdateError(str(e))
+    if out.returncode != 0 or not os.path.exists(new_lock):
+        import nixlog
+        raise UpdateError(nixlog.first_error(out.stderr) or "nix flake update failed")
+    return new_lock
 
 
 def apply_lock(flake, new_lock):

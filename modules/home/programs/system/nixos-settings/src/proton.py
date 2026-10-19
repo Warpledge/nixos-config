@@ -1,5 +1,6 @@
-"""The Proton page (Docs tab): launch options to copy into a game's Steam launch
-options, or Heroic's and Lutris's environment and wrapper fields. This
+"""The Docs tab's Proton pages. Launch Options lists options to copy into a
+game's Steam launch options, or Heroic's and Lutris's environment and wrapper
+fields; Proton Versions lists the Proton and Wine builds each launcher has. This
 config's wrappers come first; the nix-vn and nix-rpgm presets are read off
 PATH, as `nixm launch-params` does, so the list follows nix-vn.nix and
 nix-rpgm.nix. The variables were checked against the `proton` scripts of
@@ -130,16 +131,8 @@ class ProtonPage(Adw.PreferencesPage):
         self.window = window
 
         top = Adw.PreferencesGroup()
-        protonplus = None
-        if GLib.find_program_in_path("protonplus"):
-            icon = ui.first_icon(PROTONPLUS, "list-add-symbolic")
-            protonplus = Gtk.Button(halign=Gtk.Align.CENTER, margin_top=6,
-                                    css_classes=["pill", "suggested-action"],
-                                    child=Adw.ButtonContent(icon_name=icon, label="Open ProtonPlus"),
-                                    tooltip_text="Install and update Proton and Wine builds")
-            protonplus.connect("clicked", lambda _: self._open_protonplus())
-        top.add(ui.hero(ui.first_icon("input-gaming-symbolic", "applications-games-symbolic"), "Proton",
-                        "Launch options for Steam, Heroic and Lutris. Click one to copy it.", extra=protonplus))
+        top.add(ui.hero(ui.first_icon("input-gaming-symbolic", "applications-games-symbolic"), "Launch Options",
+                        "Launch options for Steam, Heroic and Lutris. Click one to copy it."))
         self.add(top)
 
         how = Adw.PreferencesGroup(
@@ -212,6 +205,127 @@ class ProtonPage(Adw.PreferencesPage):
         row.connect("activated", lambda _: self._copy(option))
         return row
 
+    def _copy(self, option):
+        Gdk.Display.get_default().get_clipboard().set(option)
+        self.window.toast(f"Copied {option}")
+
+
+#--------------------------------------------------------------------#
+#-- Proton Versions
+#--------------------------------------------------------------------#
+HOME = os.path.expanduser("~")
+STEAM = os.path.join(HOME, ".local", "share", "Steam")
+#--- (launcher, what it calls them, folders each build is a subfolder of)
+TOOL_DIRS = [
+    ("Steam", "Added by hand or by ProtonPlus",
+     [os.path.join(HOME, ".steam", "root", "compatibilitytools.d"),
+      os.path.join(STEAM, "compatibilitytools.d")]),
+    ("Heroic", "Heroic's own downloads",
+     [os.path.join(HOME, ".config", "heroic", "tools", "proton"),
+      os.path.join(HOME, ".config", "heroic", "tools", "wine")]),
+    ("Lutris", "Lutris's own downloads",
+     [os.path.join(HOME, ".local", "share", "lutris", "runners", "proton"),
+      os.path.join(HOME, ".local", "share", "lutris", "runners", "wine")]),
+]
+DEFAULT_TOOL = re.compile(r'"CompatToolMapping"\s*\{\s*"0"\s*\{\s*"name"\s*"([^"]*)"')
+DISPLAY_NAME = re.compile(r'"display_name"\s*"([^"]*)"')
+
+
+def installed(folders):
+    """[(name, folder)] for the builds in `folders`, newest name first."""
+    seen, out = set(), []
+    for folder in folders:
+        try:
+            names = os.listdir(folder)
+        except OSError:
+            continue
+        for name in names:
+            path = os.path.join(folder, name)
+            real = os.path.realpath(path)
+            if real in seen or not os.path.isdir(path) or name.startswith("."):
+                continue
+            seen.add(real)
+            out.append((display_name(path) or name, path))
+    return sorted(out, key=lambda t: t[0].lower(), reverse=True)
+
+
+def display_name(path):
+    try:
+        with open(os.path.join(path, "compatibilitytool.vdf"), errors="replace") as f:
+            m = DISPLAY_NAME.search(f.read())
+        return m.group(1) if m else None
+    except OSError:
+        return None
+
+
+def steam_default():
+    """The internal name of the build Steam runs every game with, or None."""
+    try:
+        with open(os.path.join(STEAM, "config", "config.vdf"), errors="replace") as f:
+            m = DEFAULT_TOOL.search(f.read())
+        return m.group(1) or None if m else None
+    except OSError:
+        return None
+
+
+class ProtonVersionsPage(Adw.PreferencesPage):
+    def __init__(self, window):
+        super().__init__()
+        self.window = window
+        top = Adw.PreferencesGroup()
+        protonplus = None
+        if GLib.find_program_in_path("protonplus"):
+            icon = ui.first_icon(PROTONPLUS, "list-add-symbolic")
+            protonplus = Gtk.Button(halign=Gtk.Align.CENTER, margin_top=6,
+                                    css_classes=["pill", "suggested-action"],
+                                    child=Adw.ButtonContent(icon_name=icon, label="Open ProtonPlus"),
+                                    tooltip_text="Install and update Proton and Wine builds")
+            protonplus.connect("clicked", lambda _: self._open_protonplus())
+        top.add(ui.hero(ui.first_icon("system-software-install-symbolic", "input-gaming-symbolic"),
+                        "Proton Versions",
+                        "The Proton and Wine builds each launcher can run games with. Pick one per "
+                        "game in the launcher, or Steam's default under Settings, Compatibility.",
+                        extra=protonplus))
+        self.add(top)
+
+        default = steam_default()
+        nix = [t for t in os.environ.get("NIXOS_SETTINGS_COMPAT_TOOLS", "").split(";") if t]
+        if nix:
+            group = Adw.PreferencesGroup(title="From This Config",
+                                         description="Added to Steam by programs.steam.extraCompatPackages, "
+                                                     "and updated with the flake.")
+            for tool in nix:
+                name, _, version = tool.partition(" ")
+                group.add(self._tool_row(version or name, name, None, default))
+            self.add(group)
+
+        for launcher, where, folders in TOOL_DIRS:
+            tools = installed(folders)
+            if launcher == "Steam":
+                tools += [(n, p) for n, p in installed([os.path.join(STEAM, "steamapps", "common")])
+                          if n.lower().startswith("proton")]
+            if not tools and launcher != "Steam":
+                continue
+            group = Adw.PreferencesGroup(title=launcher, description=where if tools else "")
+            if not tools:
+                group.add(Adw.ActionRow(title="No builds yet",
+                                        subtitle="Steam lists its own Proton once it has downloaded one."))
+            for name, path in tools:
+                group.add(self._tool_row(name, path.replace(HOME, "~", 1), path, default))
+            self.add(group)
+
+    def _tool_row(self, name, subtitle, path, default):
+        row = Adw.ActionRow(title=ui.esc(name), subtitle=ui.esc(subtitle), subtitle_lines=1)
+        if default and (default == name or (path and default == os.path.basename(path))):
+            row.add_suffix(ui.chip("Steam default", "accent"))
+        if path:
+            button = Gtk.Button(icon_name=ui.first_icon("folder-open-symbolic"), css_classes=["flat"],
+                                valign=Gtk.Align.CENTER, tooltip_text="Open its folder")
+            button.connect("clicked", lambda _: Gtk.FileLauncher.new(Gio.File.new_for_path(path))
+                           .launch(self.window, None, None, None))
+            row.add_suffix(button)
+        return row
+
     def _open_protonplus(self):
         try:
             info = ui.DesktopAppInfo.new(f"{PROTONPLUS}.desktop")
@@ -224,7 +338,3 @@ class ProtonPage(Adw.PreferencesPage):
                 Gio.Subprocess.new(["protonplus"], Gio.SubprocessFlags.NONE)
         except GLib.Error as e:
             self.window.toast(f"Couldn't open ProtonPlus: {e.message}")
-
-    def _copy(self, option):
-        Gdk.Display.get_default().get_clipboard().set(option)
-        self.window.toast(f"Copied {option}")
