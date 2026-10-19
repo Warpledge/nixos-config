@@ -12,6 +12,7 @@
     warpledge = {
       gaming.retroshelf = false;
       fileBrowsers.dolphin = false;
+      wallpaper = "carousel";
     };
   };
 
