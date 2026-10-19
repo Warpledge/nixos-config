@@ -21,7 +21,7 @@
         "--port \${PORT}"
         "-m ${models}/unsloth/LFM2.5-24B-A2B-GGUF/LFM2.5-24B-A2B-UD-Q3_K_XL.gguf"
         "-ngl 99"
-        "-c 32768"
+        "-c 65536" # opencode's own prompt and tools take ~27K
         "-np 1" # One slot, so it gets the whole context
         "-fa on"
         "-ctk q8_0"
@@ -40,14 +40,14 @@
         llamaServer
         "--port \${PORT}"
         "-m ${models}/sweepai/sweep-next-edit-1.5B/sweep-next-edit-1.5b.q8_0.v2.gguf"
-        "-ngl 99"
+        "-ngl 0" # On the CPU: the desktop's VRAM is full with the 24B loaded
         "-c 8192"
         "-np 1"
         "-fa on"
         "--no-webui"
       ];
     };
-    #--- Both fit in 16GB, so neither unloads the other
+    #--- Both stay loaded, so neither unloads the other
     groups.editor = {
       swap = false;
       exclusive = true;
@@ -80,7 +80,7 @@ in {
       models."lfm2.5-24b-a2b" = {
         name = "LFM2.5 24B A2B";
         limit = {
-          context = 32768;
+          context = 65536;
           output = 8192;
         };
       };
