@@ -20,7 +20,9 @@ NixOS flake managing **eclipse**, the desktop (Ryzen 5800X3D + RX 9070 XT, 280Hz
 
 `AGENTS.md` at the repo root is a second, shorter ruleset for other agents (opencode reads it *instead of* `CLAUDE.md`). The two must not contradict each other: when a rule here changes, check whether `AGENTS.md` says the same.
 
-Only `.claude/settings.json` is tracked (public); the rest of `.claude/` is gitignored, including `settings.local.json`, where "always allow" approvals land and can capture a secret. **Maintenance check:** before committing a `settings.json` change, and in any CLAUDE.md audit, read both files for tokens, keys, credentialed URLs or private paths; nothing secret goes in `settings.json`, and stale or sensitive local approvals get pruned. Bash allow rules stay read-only, since in auto mode a matching allow rule skips the safety classifier (`autoMode.classifyAllShell` is off by default). `alejandra` is the one writer (the edit hook runs it anyway). `deadnix --no-lambda-arg` (with or without ` .`) and `nix flake check`/`show`/`metadata` are exact rules, because a prefix rule would also let risky flags through (deadnix's `--edit`). `nix build`/`nix eval`/`nix log` stay off: `--impure --expr` reads and sends out any file, and `--option` can enable `builtins.exec`. Deny rules enforce rules 1 and 7 (rebuild, activation, boot, upgrade, rollback and screenshot commands), so an approved capture runs on the user's side with `!`. The `PostToolUse` hook, `modules/home/programs/ai/hooks/post-edit.sh`, runs `alejandra` on each edited `.nix` file and flags four things: a new `---` line in `README.md`, a color literal outside `theme/` (rule 5), after a `settings.nix` edit under `machines/` or `users/` any setting `lib/settings.nix` rejects, and after a `users/_template/settings.nix` edit a reminder to add the toggle to `setup.sh`'s `apps` list. The hook matches `Write|Edit` only, so a file changed through Bash (`sed`, a heredoc) skips the formatting and all four checks; edit tracked files with Edit or Write.
+Only `.claude/settings.json` is tracked (public); the rest of `.claude/` is gitignored, including `settings.local.json`, where approvals can capture a secret. Before committing a `settings.json` change, and in any CLAUDE.md audit, do the **maintenance check** in `modules/home/programs/ai/CLAUDE.md`, which also explains the permission rules and what the post-edit hook flags. The hook (alejandra plus repo checks) runs on `Write|Edit` only, so edit tracked files with Edit or Write, not `sed` or a heredoc.
+
+Several folders carry their own `CLAUDE.md` (`modules/wm/`, `modules/nixos/`, `docs/`, `modules/home/programs/ai/`, `programs/system/nixos-settings/`, `programs/media/freetube/`). Claude Code loads one when it reads a file in that folder; the pointers below say when to read one first.
 
 ## Commands
 
@@ -78,9 +80,7 @@ Module arguments:
 
 The settings that need more than their template comment: `users` in a machine file (each name a `users/<name>/` folder; the braces hold that user's settings for this machine only); `mainUser` (owns the repo, runs Syncthing, themes the login screen; may be left null with one user); `flakePath` (null: `/etc/nixos-config`, where `system/user/config-repo.nix` gives every admin (wheel) write access through a default ACL and sets git's `safe.directory`; skipped for a path under `/home/`); `windowManager` (one per machine: the greeter and portal setup are per compositor); `gpu.*` (`services/hardware/gpu.nix`; null on a machine whose own `hardware/gpu.nix` does it); a user's `admin` (wheel, so sudo and rebuilds; non-admins also skip the docker group); a user's `defaultApps.{browser,textEditor,terminal,fileManager}`, whose choices and `.desktop` ids live in `lib/default-apps.nix` (`lib/settings.nix` builds the dropdown choices from it) and which `mime.nix`, `terminal-exec` and `youtube-dispatch` read through its `forUser`: a pick whose app toggle is off falls to the first of its kind that's on. `mimeapps.list` is forced, so DMS's default-app picker doesn't survive a rebuild; these settings are the place to change defaults. The user template turns on the starter set; `setup.sh` offers the rest from its `apps` list.
 
-NixOS Settings (`programs/system/nixos-settings/`) is a Python GTK4/libadwaita app over these files, imported for every user with no toggle. It builds its pages from the two `_template` files (`#--` sections, `#---` headers, trailing comments), its labels from `setup.sh`'s `apps`/`services` lists and its dropdowns from the `choices`/`userChoices`/`listChoices` that `lib/settings.nix` exports, so a new setting shows up without touching the app. Its edits replace one value's text (`src/nixfile.py`), then it runs alejandra and the `lib/settings.nix` check. `src/schema.py` holds the settings it hides (`HIDDEN`), `PAGES` (each page's sidebar section, icon and blurb, and outside the Apps section which settings it shows in which group; a setting no page names stays on its template page), page renames (`PAGE_TITLES`), moves (`MOVES`), the port lists (`PORT_LISTS`) and the settings picked from lists that `default.nix` extracts at build time from glibc, xkeyboard-config and kbd (`DATA_CHOICES`). `src/dms.py` holds `LINKS`, the DankMaterialShell settings tabs the app links to and the page each shows on, opened with `dms ipc call settings openWith <tab>` (tab ids from `dms ipc call settings tabs`; DMS always shows its full window, on that tab), and reads DMS's own settings search index so the app's search finds DMS settings; its comment names the tabs left out and why. `src/descriptions.json`, keyed by setting path, holds each row's text: a plain string is the text the row shows when expanded, or an object with `title`, `summary` (the line under the name), `note` (a caution below that), `text`, `icon` (icon names or `.desktop` ids to try) and `choices` (value to label). Keep the settings files plain data (no `let`, functions or string interpolation), or the app can't parse them. Each user's copy edits only that user (no picker; change someone else's apps by logging in as them). For someone listed on several machines, pages with app settings start with **Change For**: this machine (the default, their `users.<name>` block here), each other machine listing them (that machine's block; saved without a rebuild, since it applies when that machine rebuilds), or all of them (their own file, with the setting cleared from every machine's block). Pages are made the first time they're shown, and Discard sets the changed rows back in place, so neither stalls the window. Tabs under the search box (`TABS` and `TOP` in `src/app.py`) swap the sidebar: Main holds Overview, Flatpaks and the template pages, Niri holds Window Rules, Docs holds Proton. Under niri the Niri tab also gets a Shell page (the DMS quick links the Overview shows otherwise) and the Desktop section (`section_tab` in `build()`), whose pages hold the DMS links, including `Input & Connections` for the keyboard, mouse, sound, printer and network ones. Three pages don't come from the templates: Proton (`src/proton.py`) lists launch options to copy, with the nix-vn/nix-rpgm presets read off PATH as `nixm launch-params` does; Window Rules (`src/windowrules.py`) fills a rule from a window picked with `niri msg pick-window` or `niri msg windows`, and admins add, edit and remove rules in `wm/niri/home/core/window-rules.json`, which holds every window rule `rules.nix` sets (a rebuild applies them; `name` and `note` are page labels `rules.nix` strips). Rules that need Nix (the Stylix-coloured styling, the `translucent-apps.nix` list) stay in `rules.nix` and are spliced in where the JSON has `{"include": "<name>"}`, so order is kept. The page reads what niri got, plus the JSON that build used, from the copy `rules.nix` writes to `~/.config/nixos-settings/niri-window-rules.json`, and lists the include and machine rules read-only under Set in Nix; Flatpaks (`src/flatpaks.py`) holds the `flatpak.enable` switch (the one `"top"` entry in `PAGES`), and runs `flatpak` itself for the rest: updates, removing unused runtimes, repair (pkexec for the system installation) and one switch per app, which uninstalls or reinstalls it straight away and remembers switched-off apps in `~/.local/state/nixos-settings/flatpaks-off.json`.
-
-Every rebuild the app starts goes through `pkexec nixos-settings-apply` (`nixos/system/user/nixos-settings-helper.nix`, always imported, script `src/helper.py`), so the password prompt is DMS's polkit dialog. It asks once per window: the first run starts the helper as `{"session": true}` (`src/session.py`), and later runs reach it over a socket pair only that window holds, each one a fresh helper run with the usual checks, until the window closes or sits idle for 15 minutes. The helper builds with `nix build --log-format internal-json`, which the app reads for its progress page (`src/nixlog.py`, `src/runview.py`), compares the new system with `nix store diff-closures` (`src/closure.py`), then switches the way nh does: `switch-to-configuration test` and `boot` in a `systemd-run` unit, setting the profile in between. Mode `auto` uses `boot` instead when the new system changes a `closure.CORE` package (glibc, systemd, niri, xwayland-satellite). A line `cancel` on the helper's stdin, or stdin closing, stops the build, and nothing is switched. When a finished run leaves a different `nixos-settings` build on PATH than the one running, the app offers to restart, re-executing the new build once `run()` has released its D-Bus name. Admins (wheel, with write access to the repo) write the files themselves and then ask the helper to rebuild as-is; only they can update the flake inputs (the Overview page locks the newest versions into a separate file with `nix flake update --output-lock-file`, copies it over `flake.lock` and rebuilds; Undo puts the old file back) or switch to an earlier version (the helper takes only a path that is one of the system profile's generations), or clean up old versions (`{"collectGarbage": true}`: `nh clean all` with the weekly nh clean job's arguments, which both wrappers read from `nix/nh.nix`, then `switch-to-configuration boot` so the boot menu drops deleted versions). For anyone else the machine settings are locked (per group, so a moved user setting stays editable) and the helper does the writing: it takes the caller from `PKEXEC_UID`, accepts only `users/_template` keys outside `HIDDEN` with the template's kind of value, writes that user's file (or their `users.<name>` block in the file of a machine that lists them), runs the check, builds and switches (or only saves, when the block is another machine's), and puts the file back if any step fails. That rebuild builds the whole working tree, so an admin's saved but unapplied edits go live with it. Files made from an older template are handled in the app rather than by hand: a **What's New** page lists template settings the user's file and their machine block both leave out (`backend.new_settings`; admins also see the machine file's) and can stage them all at the template's values, and when evaluation fails on keys the templates dropped, the error page lists them (`backend.stale_settings`) and removes them, for every user on the machine when an admin runs it; for a non-admin that's `nixos-settings-apply '{"clean": true}'`, which works the list out itself and touches only the caller's file and block. It needs the shared repo: a `flakePath` under `/home/` is unreadable to other users.
+NixOS Settings (`programs/system/nixos-settings/`) is a Python GTK4/libadwaita app over these files, imported for every user with no toggle; its root helper is `nixos/system/user/nixos-settings-helper.nix`. Its internals are in `modules/home/programs/system/nixos-settings/CLAUDE.md`: read that before changing the app, the helper, or how the templates are laid out (`#--` sections, `#---` headers, trailing comments), since the app builds its pages from them. Keep the settings files plain data (no `let`, functions or string interpolation), or the app can't parse them.
 
 - `~/.local/opt` bundles (kept out of git) have no category of their own: `media.tonkatsuBox`, `gaming.granblueRelinkMods` and `audio.katanaFloorboard` wrap them; see `docs/local/local-binary-installs.md`. `setup.sh` doesn't offer them.
 
@@ -134,12 +134,12 @@ Gotchas. Grep the option name before assuming which file owns it:
 - `modules/nixos/` — system: `gaming/` (default, steam, `performance/` esync + gamemode + kernel, `tools/` gamescope + java), `network/` (default, blockers, dns, firewall, networkmanager), `nix/` (default, nh, nixpkgs, substituters), `security/` (auditd, clamav, `apparmor/`, `auth/` keyring + sudo, `hardening/` default + kernel, `mullvad/`), `services/` (desktop, `hardware/` adb + bluetooth + gpu + keyd + power + printing + sound, `runtimes/` docker + flatpak + runners, `servers/` flaresolverr + suwayomi + sunshine + syncthing, ssh), `system/` (bootloader, documentation, packages, `desktop/` input + wayland, `language/` locale + japanese-ime, `tuning/` tweaks + zram, `user/` config-repo + shell + user + nixos-settings-helper)
 - `modules/home/` — user: `programs/` (browsers, terminals, editors, ai, shell, fetch, file-browsers, graphics, audio, media, office, security, system, gaming (`launchers/`, `games/`, `tools/`, `scripts/`), git (`git.nix` + the commit template), android, discord, plus `options.nix` and `utilities.nix` (the general package list) at its root). `mime.nix`, `nixm.nix`, `services.nix` and `variables.nix` are single files at that level, not directories
   - Wrappers for prebuilt bundles in `~/.local/opt/` (`media/tonkatsu-box.nix`, `gaming/tools/relink-mod-organizer.nix`, `audio/guitar/katana-floorboard.nix`) sit in the folder for what the app is; the payload is intentionally not in the repo. `gaming/tools/reloaded-ii-gbfr.nix` is the exception: a Windows `.exe` its installer puts in `~/Desktop/Reloaded-II - Granblue Fantasy Relink/`, run in GBFR's Proton prefix through `protontricks-launch`
-  - `programs/ai/skills/<name>/` and `programs/ai/agents/<name>.md` — Claude Code skills and subagents kept in the repo so every machine gets them, registered in `ai/claude.nix` under `programs.claude-code.{skills,agents}`, beside the pinned plugins and LSP servers. New ones (including what skill-creator writes to `~/.claude/skills/`) move here. Commits go through the `commit` skill, which runs `gitleaks` on the staged diff and the `public-repo-auditor` subagent
-  - Subagents: `build-triager` builds one machine's closure and reports only what failed (hand it a build that failed rather than reading the log inline; a clean build never needs it, so the flake-update skill builds inline first); `prose-reviewer` is the cut-only pass in step 5 of **Add an application**; `docs-drift-auditor` checks CLAUDE.md, AGENTS.md and README.md against the tree, before doc commits and in any CLAUDE.md audit
+  - `programs/ai/skills/<name>/` and `programs/ai/agents/<name>.md` — Claude Code skills and subagents kept in the repo so every machine gets them, registered in `ai/claude.nix` under `programs.claude-code.{skills,agents}`, beside the pinned plugins and LSP servers. New ones (including what skill-creator writes to `~/.claude/skills/`) move here. Commits go through the `commit` skill, which runs `gitleaks` on the staged diff, plus the `public-repo-auditor` subagent when a commit adds files or new text. The subagents run at medium effort without CLAUDE.md (`omitClaudeMd`), so each one's file holds everything it needs
+  - Subagents: `build-triager` builds one machine's closure and reports only what failed (hand it a build that failed rather than reading the log inline; a clean build never needs it, so the flake-update skill builds inline first); `prose-reviewer` is the cut-only pass in step 5 of **Add an application**; `docs-drift-auditor` checks every CLAUDE.md, AGENTS.md and README.md against the tree, before doc commits and in any CLAUDE.md audit
   - `programs/ai/mcp.nix` — MCP servers shared by Claude Code and opencode. API keys are read at launch from owner-only files in `~/.nixos-config-mcp/`, so they never reach the repo or the store; a new server that needs a key does the same
   - AppImage wraps (`appimageTools`) sit in the folder for what the app is, not how it is packaged: `gaming/games/feedback.nix`, `media/streamlink-twitch-gui.nix`, `media/boorusama.nix`. The payload is hash-pinned into the store, so unlike the `~/.local/opt` wrappers nothing lives outside git (see `docs/local/appimage-wraps.md`)
   - `default.nix` carries a `clearStaleBackups` activation hook that deletes `*.bak` under `~/.config`, `~/.local/{share,state}` before `checkLinkTargets`. This is why HM activation never fails on leftover backups. Don't remove it when debugging a "file exists" error; find the real conflicting file instead.
-  - `programs/media/freetube/` — `settings.nix` (mirrored from the app), `blocked-channels.nix` (~870 channel ids in one flat list, sorted by lowercased name under `LC_ALL=C`) and `youtube-dispatch.nix`, the link handler `mime.nix` points `webLinks` at. The first two are **mirrored**: the home-manager module copies `hm_settings.db` over `settings.db` **only when the declared content changes**, and FreeTube rewrites that file from memory when it exits, so close FreeTube before rebuilding, or the copy is clobbered and stays clobbered until the module changes again. Blocklist entries are emitted with a `preferredName` and a placeholder `icon`, because FreeTube re-resolves every entry missing either one, at one API call each. Subscriptions, profiles, playlists and history are **not** in the repo: they are personal data and this flake is public. `nixm freetube-backup` exports them to a dated folder under `~/SyncBackups/<hostname>/FreeTube` instead, in FreeTube's own Export format so its Import reads them back.
+  - `programs/media/freetube/` — mirrored settings and blocklist; its `CLAUDE.md` explains the mirroring (close FreeTube before rebuilding) and what stays out of the repo
 - `modules/wm/{hyprland,niri}/` — each has `session.nix` (NixOS: turns the WM on, login screen, keyring unlock) and `home/` (home-manager, everything else, including DankMaterialShell (DMS)); `modules/wm/dms-mutable.nix` is the settings merge both DMS modules import, and `modules/wm/dms-polkit/` the patch both import that makes DMS's polkit password prompt a full-screen modal, with `PolkitScreenBlockers.qml` covering the other monitors
 - `modules/theme/` — stylix, catppuccin, fonts, plus `gtk.nix` and `qt.nix`, the toolkit theming targets rule 5 routes through, and `dms.nix`, the DMS theme file built from Stylix's palette. Stylix's `base00` is Catppuccin's Crust rather than Base, for contrast behind translucent windows; apps themed outside Stylix (DMS, Zed, Helix, GoofCord, Spotify, Dolphin) read `base00` in place of Base, and Zen's CSS carries Crust. No module sets the wallpaper: DMS picks it at runtime (`Mod+W`) and `theme/wallpapers/` holds the images
 - `modules/nixos/security/mullvad/` — `daemon.nix` (daemon settings), `gui.nix` (tray app, a home-manager module) and `split-tunnel.nix` (system and home wrappers). Imported from `nixos/default.nix`, gated on `machine.mullvad.enable`
@@ -184,23 +184,9 @@ For an app not in nixpkgs, wrap upstream's AppImage (`appimageTools`) or patch i
    grep -n '^\[.*\]: http' README.md    # link-reference block
    ```
 
-   **Never add a `---` horizontal rule to `README.md`.** Zed's markdown preview
-   pairs `---` lines across the whole file like front-matter delimiters, so every
-   odd-numbered rule opens a raw block and the section after it renders as an
-   unformatted code block (headings dead, so ToC anchors break; images shown as
-   literal text). The file is still valid CommonMark and GitHub renders it fine,
-   which makes this expensive to diagnose. Section breaks come from the `##`
-   heading alone; GitHub already draws a rule under every H2. Verify markdown
-   changes with `nix run nixpkgs#pulldown-cmark -- < README.md`, not the preview pane.
+   **Never add a `---` line to `README.md`.** Zed's preview pairs them like front-matter delimiters and shows the sections between as raw text, while GitHub renders fine. Section breaks come from `##` headings alone. Verify markdown with `nix run nixpkgs#pulldown-cmark -- < README.md`, not the preview pane.
 
-**Update FreeTube state** (blocklist or settings), asked for as "I blocked more" /
-"sync freetube": the `freetube-sync` skill has the steps and checks; FreeTube stays closed
-throughout. `~/.config/FreeTube/settings.db` is a NeDB append-log where a later line
-with the same `_id` wins, so reduce it before reading:
-`jq -rs 'reduce .[] as $x ({}; .[$x._id] = $x.value)' settings.db`. The blocklist sits
-inside it as `channelsHidden`, a JSON **string** needing `fromjson`. A `nixm freetube-backup`
-folder is restored through the app's Settings → Data Settings → Import, not by copying files
-into place.
+**Update FreeTube state** (blocklist or settings), asked for as "I blocked more" / "sync freetube": the `freetube-sync` skill; background in `programs/media/freetube/CLAUDE.md`.
 
 **Update flake inputs:** the user-only `flake-update` skill (`/flake-update [input…]`) does what `nixm upgrade` does, minus the rebuild. It builds this machine without activating it, fixes or switches off failures and rechecks disabled packages, then hands back the rebuild command. Asked to update the flake, point the user at it.
 
@@ -214,44 +200,7 @@ into place.
 
 ## Window Managers
 
-**Keybind syntax differs per WM, so never mix them.**
-
-Hyprland uses the Lua config (`configType = "lua"`), so each bind is an `hl.bind` call built from `_args` with a Lua dispatcher. `modules/wm/hyprland/home/core/binds.nix` wraps that shape in two helpers, and new binds go through them:
-```nix
-(exec "SUPER + Return" "kitty")                                       # hl.dsp.exec_cmd("kitty")
-(bind "SUPER + 0" ''hl.dsp.workspace.toggle_special("scratchpad")'')  # any other dispatcher
-```
-
-Window and layer rules stay in the `"match:class X, float on"` string form and go through `core/rules/luaRule.nix`. Check changes with the `hyprland-verify` skill, which builds a machine's `hyprland.lua` (even while it runs niri) and runs `Hyprland --verify-config` on it.
-
-Niri uses attribute-set actions, and **spawns with arguments must be lists**, not strings (`modules/wm/niri/home/core/binds.nix`):
-```nix
-programs.niri.settings.binds = {
-  "Mod+Return".action.spawn = "kitty";                            # single command, string OK
-  "XF86AudioPlay".action.spawn = ["playerctl" "play-pause"];      # args → must be a list
-  "Mod+Left".action.focus-column-left = {};
-};
-```
-
-A string like `"dms ipc call spotlight"` in Niri only runs `dms` and drops the rest, so use `["dms" "ipc" "call"] ++ lib.splitString " " action`. An assertion in `niri/home/core/binds.nix` fails the build on a `spawn` string containing a space.
-
-**DMS** (DankMaterialShell): Niri and Hyprland only. Declarative config lives at `modules/wm/{wm}/home/dms/`. Both have `default.nix`, `settings.json` and `clsettings.json`; Niri additionally has `niri-cheatsheet.json`. The DMS keybind helper differs per WM (an `hl.dsp.exec_cmd` Lua helper for Hyprland, list concat for Niri). Both modules point `settings.json`'s `customThemeFile` at the current user's `~/.config`, since the mirrored file names one home folder; Niri's merges a machine's `dms.extraSettings` (its bars, the laptop's lock timeout) over the file last. Neither file is a store link: both modules hand them to `dms.mutableFiles` (`modules/wm/dms-mutable.nix`), which writes real files the DMS settings GUI saves to. On each activation a key takes the repo's value only when it's missing, still matches what the repo last applied (kept in `~/.local/state/dms-declared/`), or is listed in `dms.lockedSettings` (theme, fonts, cursor, and the wallpaper keys under `wallpaper = "engine"`), so every other GUI change survives rebuilds and a fresh install gets the repo's file. Under niri the GUI's keybinds and monitors work too: `dms/binds.kdl` and `dms/outputs.kdl` are plain files (`dms.writableFiles`), binds.kdl loads after `hm.kdl` so its binds override the repo's, and outputs.kdl loads before it, since niri uses the first `output` block per monitor. So do its Mouse & Touchpad and Keyboard pages: `dms/input.kdl` loads after `hm.kdl`, and what DMS writes there (pointer acceleration, scrolling, tapping, disable-while-typing, middle-click emulation, Num Lock) is seeded as DMS settings (`inputDefaults` in niri's `dms/default.nix`) rather than set in `core/settings.nix`. DMS leaves a switched-off flag out instead of writing `false`, so a flag `hm.kdl` sets could never be turned off; niri-flake turns touchpad `tap` and `natural-scroll` on by default, hence their explicit `false` there. The keyboard layout stays the machine's `keyboardLayout` until layouts are added on DMS's Keyboard page. Plugin settings go in `dms.pluginSettings.<plugin>`, declared in both modules, not `plugins.<plugin>.settings`: niri writes `plugin_settings.json` itself (`managePluginSettings = false`), and DMS warns it ignores `plugins.*.settings` then; Hyprland's module passes them on to DMS.
-
-DMS runs as a systemd user service (`systemd.enable`, `niri.enableSpawn = false`), so it inherits the **systemd user manager** environment (`modules/home/variables.nix`), not niri's `programs.niri.settings.environment` block. It launches every app with `systemd-run --user --scope`, so those session variables, and not niri's, govern anything started from the spotlight. Keep the two sets compatible: `QT_QPA_PLATFORM`, `GDK_BACKEND` and `SDL_VIDEODRIVER` must keep their X11 fallbacks (`wayland;xcb`, `wayland,x11`, `wayland,x11`) or X11-only apps die instantly from the launcher while still working from a terminal: a Qt app with no wayland plugin aborts in ~50 ms, a JUCE/GTK one exits with "cannot open display". Diagnose by diffing `tr '\0' '\n' < /proc/$(pgrep -x .quickshell-wra)/environ` against `env`, then replaying with `env -i "${DMS_ENV[@]}" <app>`. A rebuild alone does not fix a bad value: the running manager keeps the old import, so `systemctl --user set-environment` then restart `dms.service`, or log out.
-
-**XDG portals** (Niri): `niri/session.nix` strips `GDK_BACKEND` from `xdg-desktop-portal-gnome`, and `niri/home/core/portals.nix` adds the gtk backend back. Read `docs/wm/niri-xdg-portals.md` before touching either, and never "fix" a portal by dropping the X11 fallback from `variables.nix`.
-
-**Login:** Niri and Hyprland start from the DMS greeter (greetd, through the `dank-greeter` input, set up in `<wm>/session.nix`).
-
-**Hyprland-only directories:** `core/animations.nix`, `core/quad.lua`, `core/variables.nix`, `core/rules/` (`luaRule.nix`, `windowrules/`, `layerrules/`), `scripts/`.
-**Niri-only directories:** `core/blur-presets.nix`, `core/portals.nix`, `core/rules.nix` (plus `core/window-rules.json`), `core/translucent-apps.nix`, `core/vrr.nix`, `core/xwayland.nix`, `nirius.nix`.
-
-Per-machine WM overrides exist where needed, each applied to every user on the machine:
-- `machines/legion/wm/{hyprland,niri}.nix` — hybrid-GPU env (`AQ_DRM_DEVICES` only in the Hyprland one; niri ignores it), Solaar autostart; the niri one also sets the internal panel's outputs and turns off DMS auto-lock
-- `machines/eclipse/wm/{hyprland,niri}.nix` — monitor layout and workspace assignment (1–6 on DP-2, 7–9 on DP-3); the niri one also the app placement Hyprland keeps in `windowrules/workspaces.nix`, and the DMS bars (an auto-hiding copy of the main bar on the OLED)
-- `machines/_template/wm/{hyprland,niri}.nix` — commented monitor examples; with no outputs set, both WMs use each monitor's preferred mode
-
-These are only imported when the WM is active, e.g. `lib.optional (machine.windowManager == "niri") ./wm/niri.nix`.
+Keybind syntax (Hyprland Lua helpers vs Niri attribute sets), DMS, XDG portals, login and the per-machine overrides are in `modules/wm/CLAUDE.md`. Read it before changing a WM file, including `machines/<name>/wm/` and `modules/home/variables.nix`, which don't load it on their own. Two rules that bite from anywhere: Niri spawns with arguments must be lists, not strings (an assertion fails the build on a spaced string), and `QT_QPA_PLATFORM`, `GDK_BACKEND` and `SDL_VIDEODRIVER` keep their X11 fallbacks (`wayland;xcb`, `wayland,x11`, `wayland,x11`) or X11-only apps die when launched from DMS.
 
 ## Hardware
 
@@ -262,95 +211,34 @@ These are only imported when the WM is active, e.g. `lib.optional (machine.windo
 
 ## Network
 
-- DNS: systemd-resolved (stub listener on 127.0.0.53, opportunistic DNS-over-TLS, no fallback servers) + NetworkManager
-- WiFi: iwd, IPv6 privacy, random MAC
-- Firewall: `modules/nixos/network/firewall.nix` opens the ports in the machine's `firewall.openTCPPorts`/`openUDPPorts` (TCP 7777, Terraria, on both machines); other ports open with the module that uses them. When `printing.enable` is set, `services/hardware/printing.nix` turns on Avahi, which opens UDP 5353. `services/ssh.nix` opens TCP 22, so it's open only while the machine's `ssh.enable` loads that module; the laptop's `default.nix` opens TCP 25566 for its Minecraft servers; Steam's remote-play and local-transfer options in `gaming/steam.nix` open its LAN ports. FlareSolverr and Suwayomi listen on 127.0.0.1 only. When `syncthing.enable` is set, the Syncthing module also opens TCP/UDP 22000 and UDP 21027. When `sunshine.enable` is set, `servers/sunshine.nix` opens TCP 47984, 47989 and 48010 plus UDP 47998–48000, 48002 and 48010 (the module's own list minus 47990, so the web UI stays local), and the module turns on Avahi, which opens UDP 5353.
-- Mullvad: `mullvad.enable` in the machine's settings (WireGuard, quantum resistance, multihop, DAITA; lockdown mode cuts all traffic while the tunnel is down). Settings are applied with the `mullvad` CLI from a oneshot unit, not by templating `settings.json`, which the daemon rewrites. Relay and entry selection are deliberately unmanaged so exits can be switched by hand. `mullvad.splitTunnel` names apps routed around the VPN; `split-tunnel.nix` puts each wrapper in the profile its app is installed in (each user's home profile, for the apps that user has on), since the home profile outranks `/run/current-system/sw/bin` in PATH and a system wrapper for an HM package is silently shadowed. Steam sets `no_new_privs` on what it launches, which blocks the setuid `mullvad-exclude` helper, so the wrapper skips the helper when `/proc/self/cgroup` already shows `mullvad-exclusions` (Steam is split-tunnelled itself). If a Steam shortcut to a split-tunnelled app closes instantly with nothing in the app's logs, its stderr is in `~/.local/share/Steam/logs/console-linux.txt`, and `gameprocess_log.txt` beside it has the spawned command line; reproduce with `setpriv --no-new-privs <wrapper> true`. Why DataPacket exits read as London, and the relay to pick instead, is in `docs/security/mullvad.md`.
-- `network/blockers.nix` — hosts-level blocklists, imported while the machine's `blocklist.enable` is on, with `blocklist.extra` as its extra categories
+DNS (systemd-resolved, DoT), Wi-Fi (iwd), which ports each module opens, Mullvad and its split tunnel, and the hosts blocklists are in `modules/nixos/CLAUDE.md`.
 
 ## Security
 
 LUKS, kernel hardening, AppArmor, GNOME Keyring, auditd. Mullvad VPN as above. Only users with `admin = true` are in wheel. nh, and so `nixm`, elevates with pkexec (`NH_ELEVATION_STRATEGY` in `nix/nh.nix`, whose polkit rule keeps the authorization for the calling process so a rebuild asks once), so `nixm rebuild` prompts in DMS's polkit dialog whether or not a terminal is attached, as with `! nixm rebuild` in Claude Code. `modules/wm/dms-polkit/` patches DMS so that dialog is a full-screen modal holding the keyboard until it closes, and dims every other monitor with a layer that takes clicks and, under niri, the keyboard (niri honours a layer's keyboard grab only on the active monitor, and a click elsewhere changes it); plain `sudo` typed in a terminal still asks there, and GPG and keyring prompts (pinentry-gnome3, gcr-prompter) aren't polkit, so they keep their own windows. Wheel needs a password for sudo; the NOPASSWD list in `security/auth/sudo.nix` covers only sync, poweroff, reboot and shutdown. Keep it to commands that cannot be turned into a root shell (sed, systemctl, nixos-rebuild and dmesg all can). Non-admins can't run sudo at all (`execWheelOnly`); their one root path is NixOS Settings' polkit helper (see **Machine and user settings**), which must keep taking typed values for the caller's own keys only, never file text or Nix. Its admin requests (rebuild as-is, switch to a generation) check wheel membership first.
 
-Audit tooling is `lynis` (configuration) and `sbomnix`/`vulnxscan` (CVE scanning against the real closure, via osv.dev). **Do not go back to `vulnix`**: it only knows NVD's legacy JSON 1.1 feeds, which return 403 since their retirement, so every run ends in a `ConnectionError` traceback. Verified 2026-09-22, when the NVD API 2.0 answered 200 from the same machine.
-
-**AppArmor profiles** live in `modules/nixos/security/apparmor/`, one module per app (`archives.nix` holds file-roller and unrar), gated on `anyUser.<app>` where the app has a toggle, all in `complain` mode. Attach them by store-path glob (`/nix/store/*-mpv-*/bin/mpv`), never to a binary Nix builds also run (unzip, tar). `nix flake check` does not parse profiles, so test-compile them with the `apparmor-check` skill before handing back. Log reading, the enforce procedure and known gaps are in `docs/security/apparmor.md`.
-
-The machine's `ssh.enable` gates `nixos/services/ssh.nix`, which owns both sshd and fail2ban: key-only auth for the machine's users, no root login, no forwarding, ed25519 host key, and the fail2ban sshd jail. Keys come from each user's `ssh.authorizedKeys`. An assertion refuses to build when the toggle is on and no user lists a key, since password and keyboard-interactive auth are both off and there would be no way in.
+Audit tooling (`lynis`, `sbomnix`/`vulnxscan`; never `vulnix`), the AppArmor profiles (test-compile with the `apparmor-check` skill) and SSH/fail2ban are in `modules/nixos/CLAUDE.md`.
 
 ## Writing Style
 
-Covers everything with prose in it: chat replies, `README.md`, `docs/`, commit
-messages. Code comments have their own rules under **Comment Style** below.
+Covers chat replies, `README.md`, `docs/` and commit messages; code comments follow
+**Comment Style** below. The `prose-reviewer` subagent holds the full rules and does the
+cut-only pass.
 
-**Avoid the usual LLM tells.** They are what makes a reader decide a text was
-machine-written:
-
-- **"It's not X, it's Y."** Same for "not just X, but Y" and "X isn't about A,
-  it's about B". State the point once, directly.
-- **Fragments used for emphasis.** "Every time." "No exceptions." "Silently."
-  Write them as part of a sentence.
-- **Stacked short sentences.** Three or four clipped sentences in a row read
-  as machine-written even when each one is grammatical. Join them with a
-  comma or a semicolon and let the paragraph run at an uneven length.
-- **Upbeat filler.** No "Great question", "Perfect!", "Happy to help", no
-  exclamation marks, no closing line congratulating the work ("Your config is
-  now fully modular!").
-- **Affirming the user before answering.** Drop "You're absolutely right" and
-  the restatement of what was just asked. Start with the answer.
-- **Hedging boilerplate.** "It's worth noting", "It's important to understand",
-  "Keep in mind". Say the caveat or leave it out.
-- **Rule-of-three everything.** Three bullets, three adjectives, three parallel
-  clauses. If there are two real items, list two.
-- **Rigid parallel bullets** that all open with the same word and run the same
-  length. Vary them, or use prose.
-- **Abstract marketing nouns** where a plain phrase works: "Easy undo" beats
-  "Declarative rollback capability". Superlatives belong in the same bin:
-  cutting-edge, revolutionary, world-class, best-in-class, acclaimed.
-- **Puffery.** How important a thing is, how significant the change was, and
-  how well it works are the reader's call, not the writer's. "Stylix ensures
-  a consistent look across every application" fails this even though every
-  word in it is allowed; "Stylix sets the palette" is the fix. Say what the
-  thing does and stop there. This one is about the move, not the vocabulary,
-  so a sentence can fail it while passing every word list above.
-- **False ranges and empty summary sentences.** "From keybinds to portals,
-  the WM modules cover the full desktop experience" gestures at breadth
-  without naming anything inside it. If a sentence would survive deletion
-  with no information lost, delete it.
-- **Pet words.** The LLM favourites: delve, robust, seamless, leverage,
-  crucial, ensure, comprehensive, streamline, elegant, powerful, versatile,
-  utilize, showcase, intricate, landscape, realm, essentially, furthermore,
-  tapestry, testament, underscore, pivotal, foster, enhance. The "stands as"
-  construction goes with them ("this stands as a testament to"). Also any
-  word leaned on twice in a short passage, even a harmless one. Reach for the
-  plain synonym, or cut the word.
-
-What to do instead: use contractions, vary sentence length, and vary the
-subject, since consecutive sentences opening the same way read stiff. Plain
-words over jargon. In `README.md` and `docs/` prose also skip em dashes; a
-colon, a comma, parentheses, or two sentences all work. This applies to dashes
-inside a sentence. A dash separating a label from its description in a list
-(`` `path/` — what it holds ``) is structure, not prose, and stays.
-
-When a chat reply names packages, projects or upstream sources, end it with a
-**Sources** list linking each one. Take the links from the lookups under
-**Looking things up** (a package's `meta.homepage`, the flake input's repo),
-not from memory.
-
-Structure is not the problem and should stay. The bold-label bullet listing
-(`**Short label:** description`) is the house style for `README.md` and stays
-even when the wording around it gets loosened up.
-
-`docs/` carries three extra rules, because a note is read months later with
-no memory of writing it. Pin anything time-bound to an absolute date or
-version rather than "recently", "currently" or "the latest version". Replace a
-vague frequency ("sometimes crashes") with the condition that triggers it. Say
-where a claim came from, an issue number, a commit, a man page, instead of
-asserting that something is known to break.
-
-These rules cover prose only. Leave code blocks, command output, quotes, and
-table cells alone: repetition in a keybind or command table is the column
-doing its job, not a tell.
+- Lead with the answer. No upbeat filler, exclamation marks, affirming the user,
+  hedging boilerplate ("It's worth noting"), or a closing line praising the work.
+- Avoid the LLM tells: "it's not X, it's Y", fragments for emphasis, stacks of short
+  sentences, rule-of-three lists, rigid parallel bullets, puffery (say what a thing does,
+  not how well), empty summary sentences, marketing nouns, and pet words (delve, robust,
+  seamless, leverage, crucial, ensure, comprehensive, streamline, utilize, enhance).
+- Use contractions, plain words, and varied sentence length and openings.
+- No em dashes in `README.md` or `docs/` prose; a `` `path/` — description `` list dash is
+  structure and stays, as does README's `**Label:** text` bullet style.
+- `docs/` notes pin time-bound facts to a date or version, name the condition behind a
+  vague frequency, and cite where a claim came from.
+- A chat reply naming packages or upstream projects ends with a **Sources** list, taken
+  from the lookups under **Looking things up**, not memory.
+- Code blocks, command output, quotes and table cells are exempt.
 
 ## Formatting Standards
 
@@ -433,44 +321,6 @@ If that returns a path, read it and use `programs.<pkg>` instead.
 
 ## Reference Notes (`docs/`)
 
-Security/privacy notes live under `docs/security/`:
-
-- `security/blocklists.md` — uBlock Origin filter lists
-- `security/ublock-filters.md` — custom uBlock cosmetic filters (paste into uBlock → My Filters)
-- `security/mullvad.md` — DataPacket-hosted relays read as London to registry-based services (Steam); pick a Tzulo relay in the same city
-- `security/android-quic-vpn-leak.md` — QUIC VPN bypass (CVE, May 2026): mitigation via `adb shell device_config put tethering close_quic_connection -1`; re-apply after Android updates
-- `security/apparmor.md` — the per-app AppArmor profiles: what each attaches to, reading `apparmor="ALLOWED"` log lines, moving a profile to enforce, and what breaks first when you do
-
-Game-specific notes live under `docs/gaming/` (the `game-troubleshooting` skill indexes them):
-
-- `gaming/tmodloader-debugging.md` — tModLoader paths and log locations
-- `gaming/steam-launch-parameters.md` — per-game Steam launch flags; documents the `tml-prelaunch` script (`modules/home/programs/gaming/scripts/tml-prelaunch.nix`)
-- `gaming/launcher-env-variables.md` — common env vars + wrappers for Heroic/Lutris/Faugus/umu/Steam (JP locale, Proton WineD3D, XWayland wrapper, RPG Maker, perf wrappers)
-- `gaming/steam-client-menu-bug.md` — Steam's menus self-dismiss on niri because xwayland-satellite 0.8.2 focuses override-redirect windows; fixed in v0.8.3 (upstream `add2795`, PR #494), which nixpkgs ships, so `niri/home/core/xwayland.nix` uses the nixpkgs build again
-- `gaming/rocksmith-2014.md` — Rocksmith 2014 on Proton 11 + WOW64 with the Katana DI via PipeASIO and RS_ASIO: the manual install steps the `gaming.rocksmith` module can't do, the Katana driver-priority stall, why calibration is skipped, which CDLC enabler build works (the CustomsForge v4.0 one, not the newer GitHub build), and the optional RSMods setup
-- `gaming/feedback.md` — feedBack's working audio settings and the Guitar Pro import order (import without audio, constant offset, never auto-sync)
-- `gaming/arknights-endfield.md` — the Steam copy, and "Unable to start ACE Setup (1-1700-2)": `ACE-Setup64.exe` missing from `AntiCheatExpert/`; Steam's verify restores it, the old Epic copy needed it copied back
-- `gaming/minecraft_servers/{GTNH,TerraFirmaGreg-Modern}/` — each pack has `index.md` listing its sub-files (server setup, mods, config tweaks, etc.). **Update the relevant sub-file when that pack's config, mods, or settings change.** The matching declarative modules live at `machines/legion/minecraft-servers/{gtnh-server,tfg-server}.nix` (add a new server by creating a `.nix` there, importing it in that dir's `default.nix`, and adding a line to the hardcoded pack list in `mcservers.nix`, the fzf picker that names each pack with its version and dispatches to that server's command).
-
-Audio hardware notes live under `docs/audio/`:
-
-- `audio/katana-mk2.md` — the Katana MkII as an interface: 44.1 kHz only, four fixed channels, dry DI on capture channels 3 and 4, `front:` refusing 2-channel playback, the driver-priority rule
-
-Android device notes live under `docs/android/`:
-
-- `android/debloat/Lenovo-Idea-Tab-Pro/` — `index.md` (full redo procedure: never-remove list, install-replacements-first ordering, PMS flush, reboot test, privacy settings) + `removal-list.txt` (the 131 verified-safe packages). **A ZUI OTA restores every stock package, so this gets redone after each system update** with the `android-debloat-redo` skill.
-
-Local (non-nixpkgs) binary installs live under `docs/local/`:
-
-- `local/local-binary-installs.md` — the `~/.local/opt` wrapper pattern for prebuilt third-party bundles kept out of git; restore steps for fresh installs / the laptop. **Add an entry here for each new local app.**
-- `local/appimage-wraps.md` — the `appimageTools.wrapType2` pattern for upstream AppImages. Hash-pinned into the store, so nothing to restore by hand; covers the per-app `Exec`/icon fixups, a non-executable `AppRun`, a DwarFS payload `appimageTools.extract` can't open (unpack with `dwarfsextract`), how to get a new hash when `nix store prefetch-file` hits the daemon's DNS timeout, building one module without a rebuild, and blank text in a Chromium-based wrap (stale GPU shader caches in its profile).
-
-nixpkgs update notes live under `docs/nixpkgs/`:
-
-- `nixpkgs/disabled-packages.md` — packages switched off because a flake update broke them, with the date, the nixpkgs rev and how to tell a fix has landed. **Add a row whenever an update forces a package off, and remove it on re-enable.** The `disable-package` skill does both.
-
-Window manager notes live under `docs/wm/`:
-
-- `wm/niri-xdg-portals.md` — why `xdg-desktop-portal-gnome` drops to Settings-only when `GDK_BACKEND` is set, how niri-flake hides the system portal backends, and the `busctl` health check
+Notes under `docs/` (security, gaming, audio, android, local installs, disabled packages, WM) are indexed in `docs/CLAUDE.md`, which says which to update when. Keep them current: a Minecraft pack's `docs/gaming/minecraft_servers/<pack>/` file when that pack's config, mods or settings change; a `docs/local/local-binary-installs.md` entry per new `~/.local/opt` app; a `docs/nixpkgs/disabled-packages.md` row per package an update forces off (the `disable-package` skill); and the Android debloat after each ZUI OTA (the `android-debloat-redo` skill).
 
 Planned work lives under `docs/todo/`, one file per task, named after it (`todo/affinity-setup.md`). **When the user says "add X to the todo", write a new file there** holding what the task is, why they want it, what the repo already has toward it, the steps left, and any research already done (links, versions, gotchas). Update the file rather than starting a second one for the same task, and delete it once the work is done. These are working notes: no `README.md` or Components entry.
