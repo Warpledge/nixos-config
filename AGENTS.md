@@ -103,7 +103,17 @@ The skills were written for Claude Code. Read them this way:
 | A home-manager module for a program | `find /nix/store -maxdepth 4 -path '*/modules/programs/<pkg>.nix' \| head -1` |
 
 If the home-manager module exists, read it and use `programs.<pkg>` instead
-of `home.packages`. Stop once you have the answer: a man page is
+of `home.packages`.
+
+**Check every option path and attribute name before writing it.** Your memory
+of them is often out of date or invented. Look an option up with the `nixos`
+MCP tool, or `grep -n 'mkOption' <module>` (some move under a submodule, e.g.
+VSCodium's extensions are `profiles.default.extensions`). Check a package
+attribute exists with `nix eval --raw nixpkgs#<attr>.name`, extensions too
+(`nixpkgs#vscode-extensions.<publisher>.<name>.name`). Run `nix flake check`
+before telling the user a change is done.
+
+Stop once you have the answer: a man page is
 authoritative for config syntax, so don't go on to the nixpkgs derivation.
 Don't guess documentation URLs; after two failed fetches, use a local source.
 
