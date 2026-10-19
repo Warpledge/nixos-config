@@ -518,6 +518,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | `Mod+Space` | Toggle floating |
 | `Mod+Shift+Space` | Switch focus between floating and tiled windows |
 | `Mod+Shift+T` | Turn the window's opacity rule off and on |
+| `Mod+Y` | Same, and makes apps without an opacity rule (Zen) translucent too |
 | `Mod+T` | Cycle blur presets (Subtle, Default, Clear) |
 | `Mod+Escape` | Take shortcuts back from an app that inhibits them |
 | `Mod+F` | Maximize column |

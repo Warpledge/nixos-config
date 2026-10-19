@@ -56,6 +56,8 @@
       bind "Switch focus floating / tiled" {switch-focus-between-floating-and-tiling = {};};
     # Turn the window's opacity rule (rules.nix) off and on
     "Mod+Shift+T" = bind "Window transparency on / off" {toggle-window-rule-opacity = {};};
+    # Same, and also works on apps without an opacity rule (blur-presets.nix)
+    "Mod+Y" = bind "Transparency on / off, any app" {spawn = "niri-opacity-toggle";};
     # Cycle the blur and translucency presets (blur-presets.nix)
     "Mod+T" = bind "Cycle blur preset" {spawn = "niri-blur-preset";};
     # Takes shortcuts back from an app that inhibits them
