@@ -76,13 +76,25 @@
   #--- Settings template for merging with Zed's writable settings.json
   #--- Avoids making settings read-only, so AI models can be switched from GUI
 
-  #--- Zed settings: write the declarative template, merge with user settings
+  #--- A key takes the repo's value when missing, unchanged since the last rebuild,
+  #--- or locked, as in wm/dms-mutable.nix; other GUI changes stay
   home.activation.zedSettings = lib.hm.dag.entryAfter ["writeBoundary"] (
     let
       #--- Extract font names from Stylix config
       uiFontFamily = config.stylix.fonts.sansSerif.name;
       bufferFontFamily = config.stylix.fonts.monospace.name;
       terminalFontFamily = config.stylix.fonts.monospace.name;
+      jq = lib.getExe pkgs.jq;
+
+      #--- Reset on every rebuild; Stylix owns theming (rule 5)
+      locked = builtins.toJSON [
+        ["theme"]
+        ["theme_overrides"]
+        ["icon_theme"]
+        ["ui_font_family"]
+        ["buffer_font_family"]
+        ["terminal" "font_family"]
+      ];
 
       zedDeclarativeSettings = builtins.toJSON {
         #--- UI & Theme
@@ -269,20 +281,84 @@
         diagnostics.button = true;
 
         #--- AI
-        disable_ai = !user.llamaSwap.enable;
+        disable_ai = !(user.llamaSwap.enable || user.claude.enable);
         agent =
           {
             button = true;
             dock = "right";
-            favorite_models = [];
-            model_parameters = [];
+
+            #--- Mirrors CLAUDE.md rules 1, 4 and 11; applies to Claude Agent too
+            tool_permissions.tools = let
+              patterns = map (pattern: {inherit pattern;});
+              secrets = patterns ["\\.nixos-config-mcp/" "settings\\.local\\.json$"];
+            in {
+              terminal.always_confirm = patterns [
+                "nixm\\s+(rebuild|boot|upgrade|rollback)"
+                "nixos-rebuild"
+                "\\bsudo\\b"
+                "\\brm\\s"
+                "git\\s+push"
+              ];
+              edit_file.always_deny = secrets;
+              write_file.always_deny = secrets;
+            };
           }
           // lib.optionalAttrs user.llamaSwap.enable {
             default_model = {
               provider = "llama-swap";
               model = "lfm2.5-24b-a2b";
             };
+            # Zed's own request temperature would override llama-swap's
+            model_parameters = [
+              {
+                provider = "llama-swap";
+                temperature = 0.1;
+              }
+            ];
+            #--- Fewer tool schemas in the local model's 32K context
+            default_profile = "local";
+            profiles.local = {
+              name = "Local";
+              enable_all_context_servers = true;
+              tools = lib.genAttrs [
+                "apply_code_action"
+                "copy_path"
+                "create_directory"
+                "delete_path"
+                "diagnostics"
+                "edit_file"
+                "find_path"
+                "find_references"
+                "get_code_actions"
+                "go_to_definition"
+                "grep"
+                "list_directory"
+                "move_path"
+                "read_file"
+                "rename_symbol"
+                "terminal"
+                "write_file"
+              ] (_: true);
+            };
           };
+        #--- Inline completions from the small model in ai/llama-swap.nix
+        edit_predictions = lib.optionalAttrs user.llamaSwap.enable {
+          provider = "open_ai_compatible_api";
+          open_ai_compatible_api = {
+            api_url = "http://127.0.0.1:8090/v1/completions";
+            model = "qwen2.5-coder-1.5b";
+            prompt_format = "qwen";
+          };
+        };
+        #--- Claude Code in the agent panel, signed in with Claude Code's own login
+        agent_servers = lib.optionalAttrs user.claude.enable {
+          "Claude Code" = {
+            type = "custom";
+            command = lib.getExe pkgs.claude-agent-acp;
+            args = [];
+            env = {};
+          };
+        };
         #--- Local model served by ai/llama-swap.nix (same port and model id)
         language_models = lib.optionalAttrs user.llamaSwap.enable {
           openai_compatible.llama-swap = {
@@ -406,38 +482,30 @@
         ];
       };
     in ''
-            set -e
-            config_dir="$HOME/.config/zed"
-            declarative_file="$config_dir/declarative-settings.json"
-            settings_file="$config_dir/settings.json"
+      config_dir="$HOME/.config/zed"
+      declarative_file="$config_dir/declarative-settings.json"
+      settings_file="$config_dir/settings.json"
+      new_file=${pkgs.writeText "zed-declarative-settings.json" zedDeclarativeSettings}
 
-            # Ensure config directory exists
-            mkdir -p "$config_dir"
-
-            # Write the declarative settings template
-            cat > "$declarative_file" <<'DECLARATIVE_EOF'
-      ${zedDeclarativeSettings}
-      DECLARATIVE_EOF
-
-            # If settings.json doesn't exist, use declarative as the base
-            if [ ! -f "$settings_file" ]; then
-              ${pkgs.coreutils}/bin/cp "$declarative_file" "$settings_file"
-              exit 0
-            fi
-
-            # Validate existing settings.json
-            if ! ${pkgs.jq}/bin/jq -e . "$settings_file" > /dev/null 2>&1; then
-              # If invalid JSON, replace with declarative version
-              ${pkgs.coreutils}/bin/cp "$declarative_file" "$settings_file"
-              exit 0
-            fi
-
-            # Declarative settings win: they're second in jq -s 'add'
-            ${pkgs.jq}/bin/jq -s 'add' \
-              "$settings_file" \
-              "$declarative_file" \
-              > "$settings_file.tmp"
-            ${pkgs.coreutils}/bin/mv "$settings_file.tmp" "$settings_file"
+      if [[ -v DRY_RUN ]]; then
+        echo "Would merge $new_file into $settings_file"
+      else
+        mkdir -p "$config_dir"
+        # A missing or unreadable settings.json starts from the repo's settings
+        if ! ${jq} -e . "$settings_file" > /dev/null 2>&1; then
+          cp --no-preserve=mode "$new_file" "$settings_file"
+        else
+          # The last applied template is the merge's "old"; none on a first run
+          ${jq} -e . "$declarative_file" > /dev/null 2>&1 \
+            || echo '{}' > "$declarative_file"
+          merged="$(${jq} --slurpfile old "$declarative_file" \
+            --slurpfile new "$new_file" --argjson locked '${locked}' \
+            -f ${../../../../lib/mutable-merge.jq} "$settings_file")"
+          printf '%s\n' "$merged" > "$settings_file"
+        fi
+        # Also what NixOS Settings' reset copies over settings.json
+        cp --no-preserve=mode "$new_file" "$declarative_file"
+      fi
     ''
   );
 }
