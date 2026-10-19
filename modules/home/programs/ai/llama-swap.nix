@@ -1,6 +1,8 @@
 #=====================================================================#
 # LLAMA-SWAP - LOCAL LLM SERVER (LLAMA.CPP, VULKAN)
 #=====================================================================#
+#- Serves the models picked in localAi (lib/local-models.nix lists them)
+#- and makes them opencode's and Zed's defaults.
 {
   config,
   lib,
@@ -9,78 +11,85 @@
   ...
 }: let
   port = 8090; # 8080 is taken by Steam's webhelper
-  llamaServer = lib.getExe' pkgs.llama-cpp-vulkan "llama-server";
-  models = "${config.home.homeDirectory}/.lmstudio/models";
+  catalog = import ../../../../lib/local-models.nix;
+  pick = kind: name:
+    if name == null
+    then null
+    else catalog.${kind}.${name};
+  code = pick "code" user.localAi.code;
+  edit = pick "edit" user.localAi.edit;
+  codeId = user.localAi.code;
+  fastId = "${codeId}-instruct";
+  hasFast = code != null && code.fast != null;
 
-  #--- MoE, 3B active. Only 10 of its 40 layers keep a KV cache (the rest are
-  #--- Gated DeltaNet), so 128K context costs ~1.4GB at q8_0
-  qwen = [
-    llamaServer
-    "--port \${PORT}"
-    "-m ${models}/unsloth/Qwen3.6-35B-A3B-GGUF/Qwen3.6-35B-A3B-UD-Q3_K_XL.gguf"
-    "-ngl 99"
-    # Experts of the first N layers run from RAM (~0.4GB each); attention and
-    # KV stay on the GPU. Lower it for speed while VRAM stays under ~13GB.
-    "--n-cpu-moe 20"
-    "-c 131072" # opencode's own prompt and tools take ~27K
-    "-np 1" # One slot, so it gets the whole context
-    "-ub 2048" # Larger prefill batches: fewer expert copies over PCIe
-    "-fa on"
-    "-ctk q8_0"
-    "-ctv q8_0"
-    "--top-k 20"
-    "--min-p 0"
-    "--no-webui"
-  ];
+  #--- Finds the model's file in its LM Studio folder, so the exact name and case
+  #--- of a download don't matter; the first part of a split file sorts first
+  launch = pkgs.writeShellScript "llama-model" ''
+    dir="${config.home.homeDirectory}/.lmstudio/models/$1" match=$2
+    shift 2
+    file=$(find "$dir" -maxdepth 1 -iname "$match" 2>/dev/null | sort | head -n 1)
+    if [ -z "$file" ]; then
+      echo "No $match in $dir: download it in LM Studio" >&2
+      exit 1
+    fi
+    exec ${lib.getExe' pkgs.llama-cpp-vulkan "llama-server"} -m "$file" "$@"
+  '';
+  cmd = model: args: lib.concatStringsSep " " ([launch "'${model.dir}'" "'${model.match}'" "--port \${PORT}"] ++ args);
+
+  #--- One slot gets the whole context; q8_0 cache halves its VRAM
+  codeCmd = temp: extra:
+    cmd code (["-c ${toString code.context}" "-np 1" "-fa on" "-ctk q8_0" "-ctv q8_0" "--no-webui"]
+      ++ code.args
+      ++ ["--temp ${toString temp}"]
+      ++ extra);
 
   #--- Loads on the first request, unloads after `ttl` idle seconds to free VRAM
   settings = {
-    #--- Qwen's thinking-mode sampling for coding
-    models."qwen3.6-35b-a3b" = {
-      ttl = 600;
-      cmd = lib.concatStringsSep " " (qwen ++ ["--temp 0.6" "--top-p 0.95"]);
-    };
-    #--- Same weights, no thinking: faster replies for single-step edits
-    models."qwen3.6-35b-a3b-instruct" = {
-      ttl = 600;
-      cmd = lib.concatStringsSep " " (qwen
-        ++ [
-          "--reasoning off"
-          # Qwen's non-thinking sampling
-          "--temp 0.7"
-          "--top-p 0.8"
-          "--presence-penalty 1.5"
-        ]);
-    };
-    #--- Zed edit predictions: a next-edit model, not instruct
-    models."sweep-next-edit-1.5b" = {
-      ttl = 600;
-      cmd = lib.concatStringsSep " " [
-        llamaServer
-        "--port \${PORT}"
-        "-m ${models}/sweepai/sweep-next-edit-1.5B/sweep-next-edit-1.5b.q8_0.v2.gguf"
-        # CPU only: keeps the VRAM for the 35B; -ngl 0 alone still allocates GPU buffers
-        "--device none"
-        "-c 32768" # Zed's prediction prompts reach ~16K
-        "--cache-reuse 256" # Reuses the cached prompt between keystrokes
-        "-np 1"
-        "-fa on"
-        "--no-webui"
-      ];
-    };
-    #--- One Qwen variant at a time; switching reloads it (from page cache)
-    groups.chat = {
-      swap = true;
-      exclusive = false;
-      members = ["qwen3.6-35b-a3b" "qwen3.6-35b-a3b-instruct"];
-    };
-    #--- Stays loaded beside either variant
-    groups.predict = {
-      swap = false;
-      exclusive = false;
-      persistent = true;
-      members = ["sweep-next-edit-1.5b"];
-    };
+    models =
+      lib.optionalAttrs (code != null) {
+        ${codeId} = {
+          ttl = 600;
+          cmd = codeCmd code.temp code.think;
+        };
+      }
+      // lib.optionalAttrs hasFast {
+        ${fastId} = {
+          ttl = 600;
+          cmd = codeCmd code.fastTemp code.fast;
+        };
+      }
+      // lib.optionalAttrs (edit != null) {
+        ${user.localAi.edit} = {
+          ttl = 600;
+          cmd = cmd edit [
+            # CPU only: -ngl 0 alone still allocates GPU buffers
+            "--device none"
+            "-c ${toString edit.context}"
+            "--cache-reuse 256" # Reuses the cached prompt between keystrokes
+            "-np 1"
+            "-fa on"
+            "--no-webui"
+          ];
+        };
+      };
+    #--- One coding variant at a time; switching reloads it (from page cache)
+    groups =
+      lib.optionalAttrs (code != null) {
+        chat = {
+          swap = true;
+          exclusive = false;
+          members = [codeId] ++ lib.optional hasFast fastId;
+        };
+      }
+      #--- Stays loaded beside either variant
+      // lib.optionalAttrs (edit != null) {
+        predict = {
+          swap = false;
+          exclusive = false;
+          persistent = true;
+          members = [user.localAi.edit];
+        };
+      };
   };
   configFile = (pkgs.formats.yaml {}).generate "llama-swap.yaml" settings;
 in {
@@ -99,26 +108,31 @@ in {
   #--------------------------------------------------------------------#
   #-- OpenCode Provider
   #--------------------------------------------------------------------#
-  programs.opencode.settings = lib.mkIf user.opencode.enable {
-    model = "llama-swap/qwen3.6-35b-a3b";
+  programs.opencode.settings = lib.mkIf (user.opencode.enable && code != null) {
+    model = "llama-swap/${codeId}";
     provider.llama-swap = {
       npm = "@ai-sdk/openai-compatible";
       name = "llama-swap (local)";
       options.baseURL = "http://127.0.0.1:${toString port}/v1";
-      models."qwen3.6-35b-a3b" = {
-        name = "Qwen3.6 35B A3B";
-        limit = {
-          context = 131072;
-          output = 16384; # Thinking tokens count against it
+      models =
+        {
+          ${codeId} = {
+            inherit (code) name;
+            limit = {
+              inherit (code) context;
+              output = 16384; # Thinking tokens count against it
+            };
+          };
+        }
+        // lib.optionalAttrs hasFast {
+          ${fastId} = {
+            name = "${code.name} (fast)";
+            limit = {
+              inherit (code) context;
+              output = 8192;
+            };
+          };
         };
-      };
-      models."qwen3.6-35b-a3b-instruct" = {
-        name = "Qwen3.6 35B A3B (no thinking)";
-        limit = {
-          context = 131072;
-          output = 8192;
-        };
-      };
     };
   };
 }

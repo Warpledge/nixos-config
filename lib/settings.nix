@@ -39,7 +39,10 @@
     }
     #--- defaultApps.<kind>: the app names lib/default-apps.nix lists
     // lib.mapAttrs' (kind: candidates: lib.nameValuePair "defaultApps.${kind}" (map (c: c.name) candidates))
-    (import ./default-apps.nix {inherit lib;}).apps;
+    (import ./default-apps.nix {inherit lib;}).apps
+    #--- localAi.<kind>: none, or a model lib/local-models.nix lists
+    // lib.mapAttrs' (kind: models: lib.nameValuePair "localAi.${kind}" ([null] ++ lib.attrNames models))
+    (import ./local-models.nix);
 
   #--------------------------------------------------------------------#
   #-- Checks
