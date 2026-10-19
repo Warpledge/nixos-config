@@ -61,6 +61,7 @@
   editors = {
     helix = true;
     zed = true;
+    vscodium = false; # VS Code without telemetry
   };
 
   #--- File Browser Selection

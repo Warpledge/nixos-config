@@ -55,6 +55,7 @@ user: {lib, ...}: {
     #--- Editors (controlled by user settings)
     ++ lib.optionals user.editors.helix [./editors/helix.nix]
     ++ lib.optionals user.editors.zed [./editors/zed.nix]
+    ++ lib.optionals user.editors.vscodium [./editors/vscodium.nix]
     #--- Media (controlled by user settings)
     ++ lib.optionals user.media.mpv [./media/mpv.nix]
     ++ lib.optionals user.media.spotify [./media/spotify.nix]
