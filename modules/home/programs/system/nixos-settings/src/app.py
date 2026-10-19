@@ -5,6 +5,7 @@ import grp
 import json
 import os
 import pwd
+import re
 import subprocess
 import sys
 
@@ -100,7 +101,18 @@ def installed_package():
     path = GLib.find_program_in_path("nixos-settings")
     if not path:
         return None
-    package = os.path.dirname(os.path.dirname(os.path.realpath(path)))
+    real = os.path.realpath(path)
+    package = os.path.dirname(os.path.dirname(real))
+    if not os.path.exists(os.path.join(package, "share", "nixos-settings", "app.py")):
+        #--- A wrapper on PATH (the Mullvad split tunnel's) names the build it runs
+        try:
+            with open(real, errors="replace") as f:
+                found = re.search(r"/nix/store/[^/\s'\"]+/bin/nixos-settings", f.read(65536))
+        except OSError:
+            return None
+        if not found:
+            return None
+        package = os.path.dirname(os.path.dirname(found.group(0)))
     return package if package.startswith("/nix/store/") else None
 
 
