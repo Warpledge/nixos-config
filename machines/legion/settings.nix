@@ -30,6 +30,7 @@
       };
       discord.arrpc.enable = false;
       lmstudio.enable = false;
+      llamaSwap.enable = false;
       opencode.enable = false;
       scrcpy.enable = false;
       audio.reaper = false;

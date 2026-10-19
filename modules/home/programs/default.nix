@@ -91,6 +91,7 @@ user: {lib, ...}: {
     ++ lib.optionals user.claude.enable [./ai/claude.nix]
     ++ lib.optionals user.opencode.enable [./ai/opencode.nix]
     ++ lib.optionals user.lmstudio.enable [./ai/lmstudio.nix]
+    ++ lib.optionals user.llamaSwap.enable [./ai/llama-swap.nix]
     ++ lib.optionals (user.claude.enable || user.opencode.enable) [./ai/mcp.nix]
     #--- Discord (controlled by user settings)
     ++ lib.optionals user.discord.goofcord [./discord/discord.nix]
