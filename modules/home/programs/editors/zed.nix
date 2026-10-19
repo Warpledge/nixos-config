@@ -346,8 +346,8 @@
           provider = "open_ai_compatible_api";
           open_ai_compatible_api = {
             api_url = "http://127.0.0.1:8090/v1/completions";
-            model = "qwen2.5-coder-1.5b";
-            prompt_format = "qwen";
+            model = "sweep-next-edit-1.5b";
+            prompt_format = "sweep";
           };
         };
         #--- Claude Code in the agent panel, signed in with Claude Code's own login

@@ -33,13 +33,13 @@
         "--no-webui"
       ];
     };
-    #--- Zed edit predictions: a base (FIM) model, not instruct
-    models."qwen2.5-coder-1.5b" = {
+    #--- Zed edit predictions: a next-edit model, not instruct
+    models."sweep-next-edit-1.5b" = {
       ttl = 600;
       cmd = lib.concatStringsSep " " [
         llamaServer
         "--port \${PORT}"
-        "-m ${models}/prithivMLmods/Qwen2.5-Coder-1.5B-GGUF/Qwen2.5-Coder-1.5B.Q8_0.gguf"
+        "-m ${models}/sweepai/sweep-next-edit-1.5B/sweep-next-edit-1.5b.q8_0.v2.gguf"
         "-ngl 99"
         "-c 8192"
         "-np 1"
@@ -51,7 +51,7 @@
     groups.editor = {
       swap = false;
       exclusive = true;
-      members = ["lfm2.5-24b-a2b" "qwen2.5-coder-1.5b"];
+      members = ["lfm2.5-24b-a2b" "sweep-next-edit-1.5b"];
     };
   };
   configFile = (pkgs.formats.yaml {}).generate "llama-swap.yaml" settings;
