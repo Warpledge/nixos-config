@@ -369,6 +369,11 @@
                 display_name = "Qwen3.6 35B A3B";
                 max_tokens = 131072;
               }
+              {
+                name = "qwen3.6-35b-a3b-instruct";
+                display_name = "Qwen3.6 35B A3B (no thinking)";
+                max_tokens = 131072;
+              }
             ];
           };
         };

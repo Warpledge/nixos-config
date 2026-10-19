@@ -12,33 +12,45 @@
   llamaServer = lib.getExe' pkgs.llama-cpp-vulkan "llama-server";
   models = "${config.home.homeDirectory}/.lmstudio/models";
 
+  #--- MoE, 3B active. Only 10 of its 40 layers keep a KV cache (the rest are
+  #--- Gated DeltaNet), so 128K context costs ~1.4GB at q8_0
+  qwen = [
+    llamaServer
+    "--port \${PORT}"
+    "-m ${models}/unsloth/Qwen3.6-35B-A3B-GGUF/Qwen3.6-35B-A3B-UD-Q3_K_XL.gguf"
+    "-ngl 99"
+    # Experts of the first N layers run from RAM (~0.4GB each); attention and
+    # KV stay on the GPU. Lower it for speed while VRAM stays under ~13GB.
+    "--n-cpu-moe 20"
+    "-c 131072" # opencode's own prompt and tools take ~27K
+    "-np 1" # One slot, so it gets the whole context
+    "-ub 2048" # Larger prefill batches: fewer expert copies over PCIe
+    "-fa on"
+    "-ctk q8_0"
+    "-ctv q8_0"
+    "--top-k 20"
+    "--min-p 0"
+    "--no-webui"
+  ];
+
   #--- Loads on the first request, unloads after `ttl` idle seconds to free VRAM
   settings = {
-    #--- MoE, 3B active. Only 10 of its 40 layers keep a KV cache (the rest are
-    #--- Gated DeltaNet), so 128K context costs ~1.4GB at q8_0
+    #--- Qwen's thinking-mode sampling for coding
     models."qwen3.6-35b-a3b" = {
       ttl = 600;
-      cmd = lib.concatStringsSep " " [
-        llamaServer
-        "--port \${PORT}"
-        "-m ${models}/unsloth/Qwen3.6-35B-A3B-GGUF/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf"
-        "-ngl 99"
-        # Experts of the first N layers run from RAM (~0.5GB each); attention and
-        # KV stay on the GPU. Lower it for speed while VRAM stays under ~13GB.
-        "--n-cpu-moe 24"
-        "-c 131072" # opencode's own prompt and tools take ~27K
-        "-np 1" # One slot, so it gets the whole context
-        "-ub 2048" # Larger prefill batches: fewer expert copies over PCIe
-        "-fa on"
-        "-ctk q8_0"
-        "-ctv q8_0"
-        # Qwen's thinking-mode sampling for coding
-        "--temp 0.6"
-        "--top-p 0.95"
-        "--top-k 20"
-        "--min-p 0"
-        "--no-webui"
-      ];
+      cmd = lib.concatStringsSep " " (qwen ++ ["--temp 0.6" "--top-p 0.95"]);
+    };
+    #--- Same weights, no thinking: faster replies for single-step edits
+    models."qwen3.6-35b-a3b-instruct" = {
+      ttl = 600;
+      cmd = lib.concatStringsSep " " (qwen
+        ++ [
+          "--reasoning off"
+          # Qwen's non-thinking sampling
+          "--temp 0.7"
+          "--top-p 0.8"
+          "--presence-penalty 1.5"
+        ]);
     };
     #--- Zed edit predictions: a next-edit model, not instruct
     models."sweep-next-edit-1.5b" = {
@@ -56,11 +68,18 @@
         "--no-webui"
       ];
     };
-    #--- Both stay loaded, so neither unloads the other
-    groups.editor = {
+    #--- One Qwen variant at a time; switching reloads it (from page cache)
+    groups.chat = {
+      swap = true;
+      exclusive = false;
+      members = ["qwen3.6-35b-a3b" "qwen3.6-35b-a3b-instruct"];
+    };
+    #--- Stays loaded beside either variant
+    groups.predict = {
       swap = false;
-      exclusive = true;
-      members = ["qwen3.6-35b-a3b" "sweep-next-edit-1.5b"];
+      exclusive = false;
+      persistent = true;
+      members = ["sweep-next-edit-1.5b"];
     };
   };
   configFile = (pkgs.formats.yaml {}).generate "llama-swap.yaml" settings;
@@ -91,6 +110,13 @@ in {
         limit = {
           context = 131072;
           output = 16384; # Thinking tokens count against it
+        };
+      };
+      models."qwen3.6-35b-a3b-instruct" = {
+        name = "Qwen3.6 35B A3B (no thinking)";
+        limit = {
+          context = 131072;
+          output = 8192;
         };
       };
     };
