@@ -41,7 +41,8 @@
         "--port \${PORT}"
         "-m ${models}/sweepai/sweep-next-edit-1.5B/sweep-next-edit-1.5b.q8_0.v2.gguf"
         "-ngl 0" # On the CPU: the desktop's VRAM is full with the 24B loaded
-        "-c 8192"
+        "-c 32768" # Zed's prediction prompts reach ~16K
+        "--cache-reuse 256" # Reuses the cached prompt between keystrokes
         "-np 1"
         "-fa on"
         "--no-webui"
