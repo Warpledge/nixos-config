@@ -21,6 +21,8 @@
   {app-id = "Zotero";}
   {app-id = "io.github.alainm23.planify";}
   {app-id = "org.quickshell";}
+  # DMS's own windows: Settings, System Monitor, Notepad, Keybinds and the rest
+  {app-id = "^com\\.danklinux\\.dms$";}
   {app-id = "Revolt";}
   {app-id = "discord";}
   {app-id = "(?i)goofcord$";}
