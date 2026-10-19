@@ -840,6 +840,7 @@ apps=(
   "AI tools|claude.enable|Claude Code (needs an Anthropic account)"
   "AI tools|opencode.enable|opencode"
   "AI tools|lmstudio.enable|LM Studio: run language models locally"
+  "AI tools|llamaSwap.enable|llama-swap: llama.cpp server for opencode"
   "Japanese|japanese.ime|Japanese typing (fcitx5 + Mozc)"
   "Japanese|japanese.vn|Japanese visual novel tools"
 )

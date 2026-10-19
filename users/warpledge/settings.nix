@@ -163,6 +163,7 @@
   claude = {enable = true;};
   opencode = {enable = true;};
   lmstudio = {enable = true;};
+  llamaSwap = {enable = true;};
 
   #--- Japanese Language & Game Support
   # ime: fcitx5 + Mozc input method for typing hiragana/katakana/kanji

@@ -179,6 +179,7 @@
   claude.enable = false; # Claude Code (needs an Anthropic account)
   opencode.enable = false;
   lmstudio.enable = false; # Runs language models locally
+  llamaSwap.enable = false; # llama.cpp server on the GPU, opencode's default model
 
   #--- Japanese Language & Game Support
   # ime: fcitx5 + Mozc input method for typing hiragana/katakana/kanji
