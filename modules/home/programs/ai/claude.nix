@@ -32,7 +32,8 @@
         claude-md-management = "${official}/plugins/claude-md-management";
         skill-creator = "${official}/plugins/skill-creator";
         claude-code-setup = "${official}/plugins/claude-code-setup";
-        claude-security = "${official}/plugins/claude-security";
+        # Off: lists 9 agents every session and a scan costs heavy usage
+        # claude-security = "${official}/plugins/claude-security";
       };
 
       #--- Repo-local skills and subagents (synced to every host through this module)
@@ -84,7 +85,7 @@
     };
 
     #--- gitleaks: the commit skill's secret scan
-    #--- python3: the claude-security plugin's scripts
+    #--- python3: the skill-creator and claude-security plugins' scripts
     home.packages = [pkgs.gitleaks pkgs.python3];
 
     #--- Turn off Claude-drafted feedback (the SendFeedback tool)
