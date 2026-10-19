@@ -99,7 +99,7 @@ in {
         focus-ring = {
           enable = true; # displays around windows
           width = 2;
-          active.color = colors.base03; # Surface 1
+          active.color = colors.base02; # Surface 0
           inactive.color = colors.base01; # Mantle
           urgent.color = colors.base08; # Red
         };
