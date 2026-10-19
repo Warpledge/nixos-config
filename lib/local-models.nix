@@ -40,6 +40,20 @@
       fastTemp = 0.7;
       fast = ["--reasoning off" "--top-p 0.8" "--presence-penalty 1.5"];
     };
+    #--- Qwen3.6's MoE architecture, trained further for coding agents. Its MTP head
+    #--- stays off: drafts route more tokens through the experts in RAM
+    "ornith-1.5-35b-a3b" = {
+      name = "Ornith 1.5 35B A3B";
+      dir = "ornith-ai/Ornith-1.5-35B-A3B-GGUF";
+      match = "*Q4_K_M*.gguf";
+      context = 131072;
+      # ~0.5GB per layer's experts in the 22.6GB file: 26 from RAM for ~13.8GB VRAM
+      args = ["-ngl 99" "--n-cpu-moe 26" "-ub 2048" "--top-k 20" "--min-p 0"];
+      temp = 0.6; # The model card's coding sampling
+      think = ["--top-p 0.95"];
+      fastTemp = 0.7;
+      fast = ["--reasoning off" "--top-p 0.8" "--presence-penalty 1.5"];
+    };
     #--- Dense 27B; --fit keeps layers on the GPU while 2GB of VRAM stays free
     "qwen3.8-27b" = {
       name = "Qwen3.8 27B";
