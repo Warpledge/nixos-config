@@ -36,9 +36,11 @@ MOVES = {  # setting -> (page, group on that page)
     ("japanese", "vn"): ("Gaming", "Japanese Visual Novels"),
 }
 
-#--- Sidebar sections, top to bottom; under niri, Desktop is on the Niri tab
+#--- Sidebar sections, top to bottom; under niri, Desktop is on the Niri tab, and
+#--- the two AI sections are always on the AI tab
 SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
-            ("personal", "Personal"), ("apps", "Apps")]
+            ("personal", "Personal"), ("apps", "Apps"),
+            ("cloudai", "Cloud AI"), ("localai", "Local AI")]
 
 #--- Each page's sidebar section, icon and blurb, and for the curated ones
 #--- their groups: (title, description, [setting paths]). Pages in the apps
@@ -105,7 +107,17 @@ PAGES = {
     "Android": ("apps", "phone-symbolic", "Phones and tablets.", None),
     "Gaming": ("apps", "applications-games-symbolic", "Launchers, games and gaming tools.", None),
     "Discord": ("apps", "user-available-symbolic", "Discord and showing what you play.", None),
-    "AI Tools": ("apps", "applications-science-symbolic", "Coding agents and local language models.", None),
+    "Claude": ("cloudai", "applications-science-symbolic",
+               "Anthropic's Claude, signed in with your Claude account.",
+               [("", "", ["claude.enable", "claudeDesktop.enable"])]),
+    "Tools": ("localai", "utilities-terminal-symbolic",
+              "The local model server, the app that downloads models, and opencode, "
+              "the coding agent that uses them.",
+              [("", "", ["llamaSwap.enable", "lmstudio.enable", "opencode.enable"])]),
+    "Code": ("localai", "applications-engineering-symbolic",
+             "The models llama-swap runs on this computer's GPU, used by default in "
+             "opencode and Zed. Download each one in LM Studio first.",
+             [("", "", ["localAi.code", "localAi.edit"])]),
 }
 FALLBACK_ICON = "applications-system-symbolic"
 

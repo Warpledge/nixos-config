@@ -43,7 +43,8 @@ that catches the step that usually gets missed.
    service `machine.<name>.enable`. `gaming.steam` is the exception, wired in
    `nixos/gaming/default.nix` on `anyUser.gaming.steam`.
 4. `git add <new files>` → `nix flake check` (a new module and import are the
-   uncertain case CLAUDE.md rule 1 keeps the check for).
+   uncertain case CLAUDE.md rule 1 keeps the check for). The check only evaluates
+   the module where its toggle is on, so step 1's toggle must be on somewhere first.
 5. **README**: grep, never read it whole (`grep -n '^| \*\*' README.md`,
    `grep -n '^\[.*\]: http' README.md`), add the app to its Components row and a
    `[label]: url` link (homepage from `nix eval --raw nixpkgs#<pkg>.meta.homepage`). No

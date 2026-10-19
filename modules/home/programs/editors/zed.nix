@@ -5,7 +5,21 @@
   config,
   user,
   ...
-}: {
+}: let
+  #--- The models picked in localAi (lib/local-models.nix), served by ai/llama-swap.nix
+  models = import ../../../../lib/local-models.nix;
+  codeId = user.localAi.code;
+  code =
+    if user.llamaSwap.enable && codeId != null
+    then models.code.${codeId}
+    else null;
+  hasFast = code != null && code.fast != null;
+  editId = user.localAi.edit;
+  edit =
+    if user.llamaSwap.enable && editId != null
+    then models.edit.${editId}
+    else null;
+in {
   #--------------------------------------------------------------------#
   #-- Dependencies
   #--------------------------------------------------------------------#
@@ -303,18 +317,25 @@
               write_file.always_deny = secrets;
             };
           }
-          // lib.optionalAttrs user.llamaSwap.enable {
+          // lib.optionalAttrs (code != null) {
             default_model = {
               provider = "llama-swap";
-              model = "qwen3.6-35b-a3b";
+              model = codeId;
             };
             # Zed's own request temperature would override llama-swap's
-            model_parameters = [
-              {
+            model_parameters =
+              [
+                {
+                  provider = "llama-swap";
+                  model = codeId;
+                  temperature = code.temp;
+                }
+              ]
+              ++ lib.optional hasFast {
                 provider = "llama-swap";
-                temperature = 0.6;
-              }
-            ];
+                model = "${codeId}-instruct";
+                temperature = code.fastTemp;
+              };
             #--- Fewer tool schemas in the local model's context
             default_profile = "local";
             profiles.local = {
@@ -342,12 +363,12 @@
             };
           };
         #--- Inline completions from the small model in ai/llama-swap.nix
-        edit_predictions = lib.optionalAttrs user.llamaSwap.enable {
+        edit_predictions = lib.optionalAttrs (edit != null) {
           provider = "open_ai_compatible_api";
           open_ai_compatible_api = {
             api_url = "http://127.0.0.1:8090/v1/completions";
-            model = "sweep-next-edit-1.5b";
-            prompt_format = "sweep";
+            model = editId;
+            prompt_format = edit.format;
           };
         };
         #--- Claude Code in the agent panel, signed in with Claude Code's own login
@@ -360,21 +381,22 @@
           };
         };
         #--- Local model served by ai/llama-swap.nix (same port and model id)
-        language_models = lib.optionalAttrs user.llamaSwap.enable {
+        language_models = lib.optionalAttrs (code != null) {
           openai_compatible.llama-swap = {
             api_url = "http://127.0.0.1:8090/v1";
-            available_models = [
-              {
-                name = "qwen3.6-35b-a3b";
-                display_name = "Qwen3.6 35B A3B";
-                max_tokens = 131072;
-              }
-              {
-                name = "qwen3.6-35b-a3b-instruct";
-                display_name = "Qwen3.6 35B A3B (no thinking)";
-                max_tokens = 131072;
-              }
-            ];
+            available_models =
+              [
+                {
+                  name = codeId;
+                  display_name = code.name;
+                  max_tokens = code.context;
+                }
+              ]
+              ++ lib.optional hasFast {
+                name = "${codeId}-instruct";
+                display_name = "${code.name} (fast)";
+                max_tokens = code.context;
+              };
           };
         };
 

@@ -182,6 +182,12 @@
   opencode.enable = false;
   lmstudio.enable = false; # Runs language models locally
   llamaSwap.enable = false; # llama.cpp server on the GPU, opencode's default model
+  # Models llama-swap serves as opencode's and Zed's default; null: none.
+  # Options: the names in lib/local-models.nix
+  localAi = {
+    code = null; # Coding model
+    edit = null; # Zed's inline suggestions
+  };
 
   #--- Japanese Language & Game Support
   # ime: fcitx5 + Mozc input method for typing hiragana/katakana/kanji

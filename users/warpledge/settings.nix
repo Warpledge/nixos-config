@@ -165,6 +165,10 @@
   opencode = {enable = true;};
   lmstudio = {enable = true;};
   llamaSwap = {enable = true;};
+  localAi = {
+    code = "qwen3.6-35b-a3b";
+    edit = "sweep-next-edit-1.5b";
+  };
 
   #--- Japanese Language & Game Support
   # ime: fcitx5 + Mozc input method for typing hiragana/katakana/kanji

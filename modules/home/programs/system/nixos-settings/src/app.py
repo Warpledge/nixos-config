@@ -47,9 +47,10 @@ OWNED = {"Cursor Theme": "cursor", "Cursor Size": "cursorSize", "Icon Theme": ""
          "Dark Mode Icon Theme": "", "Light Mode Icon Theme": "", "Normal Font": "", "Monospace Font": ""}
 
 #--- The master tabs across the top of the window, each with its own sidebar
-TABS = [("main", "Main"), ("niri", "Niri"), ("servers", "Servers"), ("docs", "Docs")]
+TABS = [("main", "Main"), ("niri", "Niri"), ("ai", "AI"), ("servers", "Servers"), ("docs", "Docs")]
 TAB_ICONS = {"main": ("go-home-symbolic", "user-home-symbolic"),
              "niri": ("view-grid-symbolic", "view-app-grid-symbolic"),
+             "ai": ("applications-science-symbolic", "starred-symbolic"),
              "servers": ("network-server-symbolic",),
              "docs": ("accessories-dictionary-symbolic", "help-browser-symbolic")}
 
@@ -62,6 +63,7 @@ TOP = {"main": [("overview", "Overview", ("computer-symbolic",)),
        "niri": [("shell", "Shell", ("view-app-grid-symbolic",)),
                 ("windowrules", "Window Rules",
                  ("window-new-symbolic", "preferences-system-windows-symbolic"))],
+       "ai": [],
        "servers": [("minecraft", "Minecraft", ("network-server-symbolic",))],
        "docs": []}
 
@@ -490,7 +492,9 @@ class Window(Adw.ApplicationWindow):
             self.builders["new"] = self._new_page
         self.sidebars["main"].append(tops["main"])
 
-        section_tab = {"desktop": "niri"} if self.wm == "niri" else {}
+        section_tab = {"cloudai": "ai", "localai": "ai"}
+        if self.wm == "niri":
+            section_tab["desktop"] = "niri"
         sections = {}
         for key, title in schema.SECTIONS:
             sections[key] = Adw.SidebarSection(title=title)

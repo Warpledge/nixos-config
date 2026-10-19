@@ -38,6 +38,8 @@ home-manager, Niri WM, Stylix theming (Catppuccin Mocha).
    every option path and attribute in the file you touched (see **Looking
    things up**), then run `nix flake check 2>&1 | tail -n 30`, fix, and
    repeat until it passes. Report the check's result, not a prediction.
+   The check only evaluates a module where its toggle is on: a toggle that's
+   off on every machine passes without testing anything.
 
 ## Context budget
 
