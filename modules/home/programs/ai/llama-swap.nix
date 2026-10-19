@@ -14,22 +14,29 @@
 
   #--- Loads on the first request, unloads after `ttl` idle seconds to free VRAM
   settings = {
-    models."lfm2.5-24b-a2b" = {
+    #--- MoE, 3B active. Only 10 of its 40 layers keep a KV cache (the rest are
+    #--- Gated DeltaNet), so 128K context costs ~1.4GB at q8_0
+    models."qwen3.6-35b-a3b" = {
       ttl = 600;
       cmd = lib.concatStringsSep " " [
         llamaServer
         "--port \${PORT}"
-        "-m ${models}/unsloth/LFM2.5-24B-A2B-GGUF/LFM2.5-24B-A2B-UD-Q3_K_XL.gguf"
+        "-m ${models}/unsloth/Qwen3.6-35B-A3B-GGUF/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf"
         "-ngl 99"
-        "-c 65536" # opencode's own prompt and tools take ~27K
+        # Experts of the first N layers run from RAM (~0.5GB each); attention and
+        # KV stay on the GPU. Lower it for speed while VRAM stays under ~13GB.
+        "--n-cpu-moe 24"
+        "-c 131072" # opencode's own prompt and tools take ~27K
         "-np 1" # One slot, so it gets the whole context
+        "-ub 2048" # Larger prefill batches: fewer expert copies over PCIe
         "-fa on"
         "-ctk q8_0"
         "-ctv q8_0"
-        # Liquid AI's suggested sampling
-        "--temp 0.1"
-        "--min-p 0.15"
-        "--repeat-penalty 1.05"
+        # Qwen's thinking-mode sampling for coding
+        "--temp 0.6"
+        "--top-p 0.95"
+        "--top-k 20"
+        "--min-p 0"
         "--no-webui"
       ];
     };
@@ -40,7 +47,7 @@
         llamaServer
         "--port \${PORT}"
         "-m ${models}/sweepai/sweep-next-edit-1.5B/sweep-next-edit-1.5b.q8_0.v2.gguf"
-        # CPU only: the 24B fills the VRAM, and -ngl 0 alone still allocates GPU buffers
+        # CPU only: keeps the VRAM for the 35B; -ngl 0 alone still allocates GPU buffers
         "--device none"
         "-c 32768" # Zed's prediction prompts reach ~16K
         "--cache-reuse 256" # Reuses the cached prompt between keystrokes
@@ -53,7 +60,7 @@
     groups.editor = {
       swap = false;
       exclusive = true;
-      members = ["lfm2.5-24b-a2b" "sweep-next-edit-1.5b"];
+      members = ["qwen3.6-35b-a3b" "sweep-next-edit-1.5b"];
     };
   };
   configFile = (pkgs.formats.yaml {}).generate "llama-swap.yaml" settings;
@@ -74,16 +81,16 @@ in {
   #-- OpenCode Provider
   #--------------------------------------------------------------------#
   programs.opencode.settings = lib.mkIf user.opencode.enable {
-    model = "llama-swap/lfm2.5-24b-a2b";
+    model = "llama-swap/qwen3.6-35b-a3b";
     provider.llama-swap = {
       npm = "@ai-sdk/openai-compatible";
       name = "llama-swap (local)";
       options.baseURL = "http://127.0.0.1:${toString port}/v1";
-      models."lfm2.5-24b-a2b" = {
-        name = "LFM2.5 24B A2B";
+      models."qwen3.6-35b-a3b" = {
+        name = "Qwen3.6 35B A3B";
         limit = {
-          context = 65536;
-          output = 8192;
+          context = 131072;
+          output = 16384; # Thinking tokens count against it
         };
       };
     };
