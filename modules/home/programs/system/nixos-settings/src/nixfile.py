@@ -220,6 +220,8 @@ def nix_value(value):
         return json.dumps(value, ensure_ascii=False).replace("${", "\\${")
     if isinstance(value, list):
         return "[" + " ".join(nix_value(v) for v in value) + "]"
+    if value == {}:
+        return "{}"
     raise NixError(f"cannot write {value!r}")
 
 

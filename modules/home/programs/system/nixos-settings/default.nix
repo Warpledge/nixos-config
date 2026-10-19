@@ -19,6 +19,11 @@
   alejandra = inputs.alejandra.defaultPackage.${pkgs.stdenv.hostPlatform.system};
   #--- The weekly nh clean job (nixos/nix/nh.nix), which the Overview's clean-up matches
   clean = osConfig.programs.nh.clean;
+  #--- Proton builds steam.nix adds to Steam, listed on Proton Versions
+  steam = osConfig.programs.steam;
+  compatTools = lib.concatMapStringsSep ";" (p: "${lib.getName p} ${lib.getVersion p}") (
+    lib.optionals steam.enable steam.extraCompatPackages
+  );
 
   nixos-settings = pkgs.stdenvNoCC.mkDerivation {
     pname = "nixos-settings";
@@ -45,6 +50,7 @@
         --set NIXOS_SETTINGS_LIB ${pkgs.path}/lib \
         --set NIXOS_SETTINGS_CLEAN_ARGS ${lib.escapeShellArg clean.extraArgs} \
         --set NIXOS_SETTINGS_CLEAN_DATES ${lib.escapeShellArg (lib.optionalString clean.enable clean.dates)} \
+        --set NIXOS_SETTINGS_COMPAT_TOOLS ${lib.escapeShellArg compatTools} \
         --prefix PATH : ${lib.makeBinPath [alejandra]}
       runHook postInstall
     '';

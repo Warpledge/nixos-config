@@ -48,6 +48,18 @@ row.nixm-plain image.expander-row-arrow { opacity: 0; }
 .big-progress { min-height: 10px; }
 .big-progress trough, .big-progress progress { min-height: 10px; border-radius: 999px; }
 .quick-link { padding: 12px 6px; min-width: 112px; }
+.master-bar { background-image: linear-gradient(to right, alpha(@accent_bg_color, 0.30),
+                                                alpha(@accent_bg_color, 0.12));
+              border-bottom: 1px solid alpha(@accent_color, 0.45); }
+.master-tab { border-radius: 999px; padding: 2px 14px; font-weight: 800;
+              background-color: alpha(currentColor, 0.07); }
+.master-tab:hover { background-color: alpha(@accent_color, 0.22); }
+.master-tab:checked { background-color: @accent_bg_color; color: @accent_fg_color; }
+.doc-code { padding: 10px 12px; font-size: 0.9em; }
+.doc-quote { border-left: 3px solid @accent_color; padding: 4px 0 4px 12px;
+             background-color: alpha(@accent_color, 0.08); border-radius: 0 8px 8px 0; }
+.diff-add { color: @success_color; }
+.diff-del { color: @error_color; }
 .pop { animation: nsx-pop 500ms cubic-bezier(0.34, 1.56, 0.64, 1); }
 @keyframes nsx-pop { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: scale(1); } }
 .fade-in { animation: nsx-fade 300ms ease-out; }

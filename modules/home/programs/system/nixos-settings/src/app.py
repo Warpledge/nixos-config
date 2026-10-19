@@ -1,5 +1,6 @@
 """NixOS Settings: pick apps and system options from menus, then rebuild."""
 
+import difflib
 import grp
 import json
 import os
@@ -18,13 +19,19 @@ from gi.repository import Adw, Gio, GLib, GObject, Gtk, Pango  # noqa: E402
 import backend  # noqa: E402
 import closure  # noqa: E402
 import dms  # noqa: E402
+import nixfile  # noqa: E402
 import schema  # noqa: E402
+import services  # noqa: E402
 import session  # noqa: E402
 import system  # noqa: E402
 import ui  # noqa: E402
+import docs  # noqa: E402
+from backups import BackupsPage  # noqa: E402
 from flatpaks import FlatpakPage  # noqa: E402
 from overview import Overview, ShellPage  # noqa: E402
-from proton import ProtonPage  # noqa: E402
+from people import PeoplePage  # noqa: E402
+from proton import ProtonPage, ProtonVersionsPage  # noqa: E402
+from servers import ServersPage  # noqa: E402
 from runview import RunView, fill_diff  # noqa: E402
 from windowrules import WindowRulesPage  # noqa: E402
 
@@ -38,17 +45,29 @@ VERSION = "2.0"
 OWNED = {"Cursor Theme": "cursor", "Cursor Size": "cursorSize", "Icon Theme": "",
          "Dark Mode Icon Theme": "", "Light Mode Icon Theme": "", "Normal Font": "", "Monospace Font": ""}
 
-#--- The tabs under the search entry, each with its own sidebar
-TABS = [("main", "Main"), ("niri", "Niri"), ("docs", "Docs")]
+#--- The master tabs across the top of the window, each with its own sidebar
+TABS = [("main", "Main"), ("niri", "Niri"), ("servers", "Servers"), ("docs", "Docs")]
+TAB_ICONS = {"main": ("go-home-symbolic", "user-home-symbolic"),
+             "niri": ("view-grid-symbolic", "view-app-grid-symbolic"),
+             "servers": ("network-server-symbolic",),
+             "docs": ("accessories-dictionary-symbolic", "help-browser-symbolic")}
 
 #--- Each tab's pages above its sidebar sections: key, title and icons to try.
 #--- Shell shows only under niri, which also moves the Desktop section to Niri.
 TOP = {"main": [("overview", "Overview", ("computer-symbolic",)),
-                ("flatpaks", "Flatpaks", ("flatpak-symbolic", "system-software-install-symbolic"))],
+                ("flatpaks", "Flatpaks", ("flatpak-symbolic", "system-software-install-symbolic")),
+                ("backups", "Backups", ("drive-harddisk-symbolic", "document-save-symbolic")),
+                ("people", "People", ("system-users-symbolic", "avatar-default-symbolic"))],
        "niri": [("shell", "Shell", ("view-app-grid-symbolic",)),
                 ("windowrules", "Window Rules",
                  ("window-new-symbolic", "preferences-system-windows-symbolic"))],
-       "docs": [("proton", "Proton", ("input-gaming-symbolic", "applications-games-symbolic"))]}
+       "servers": [("minecraft", "Minecraft", ("network-server-symbolic",))],
+       "docs": []}
+
+#--- Docs tab sections ahead of the game notes: (title, [(key, title, icons)])
+DOCS_SECTIONS = [("Proton", [("proton", "Launch Options", ("input-gaming-symbolic",)),
+                             ("protonversions", "Proton Versions",
+                              ("system-software-install-symbolic", "input-gaming-symbolic"))])]
 
 
 def shown(setting, value):
@@ -127,6 +146,8 @@ class Window(Adw.ApplicationWindow):
         self.colors = {}
         self.building = False
         self.run_message = None
+        self.previewing = False
+        self.preview_restore = None  # puts back what a preview wrote
 
         self.builders = {}  # sidebar key -> makes that page, the first time it's shown
         self.toasts = Adw.ToastOverlay()
@@ -151,21 +172,30 @@ class Window(Adw.ApplicationWindow):
             sidebar.connect("activated", lambda *_: self.split.set_show_content(True))
             self.sidebars[tab] = sidebar
             self.side_stack.add_named(sidebar, tab)
-        self.tabs = Adw.ToggleGroup(margin_start=10, margin_end=10, margin_bottom=8,
-                                    css_classes=["round"], homogeneous=True)
+        #--- Master tabs: one strip across the window, scrolling when it's too narrow
+        self.tab_buttons = {}
+        strip = Gtk.Box(spacing=6, css_classes=["master-tabs"], valign=Gtk.Align.CENTER)
+        first = None
+        self.tab_labels = []
         for tab, title in TABS:
-            self.tabs.add(Adw.Toggle(name=tab, label=title))
-        self.tabs.set_active_name(self.tab)
-        self.tabs.connect("notify::active-name", self._tab_changed)
-        self.search = Gtk.SearchEntry(placeholder_text="Search settings", margin_start=10, margin_end=10,
-                                      margin_top=2, margin_bottom=8)
+            content = Adw.ButtonContent(icon_name=ui.first_icon(*TAB_ICONS[tab]), label=title)
+            self.tab_labels.append(content)
+            button = Gtk.ToggleButton(child=content, css_classes=["master-tab"], active=tab == self.tab,
+                                      tooltip_text=title)
+            if first is None:
+                first = button
+            else:
+                button.set_group(first)
+            button.connect("toggled", self._tab_toggled, tab)
+            strip.append(button)
+            self.tab_buttons[tab] = button
+        tabs_scroll = Gtk.ScrolledWindow(child=strip, vscrollbar_policy=Gtk.PolicyType.NEVER,
+                                         hscrollbar_policy=Gtk.PolicyType.EXTERNAL,
+                                         propagate_natural_width=True, hexpand=True)
+        self.search = Gtk.SearchEntry(placeholder_text="Search settings", hexpand=True)
         self.search.connect("search-changed", self._search)
         self.search.connect("stop-search", lambda *_: self.search.set_text(""))
         self.search.set_key_capture_widget(self)  # typing anywhere starts a search
-        side_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        side_box.append(self.search)
-        side_box.append(self.tabs)
-        side_box.append(self.side_stack)
         menu = Gio.Menu()
         section = Gio.Menu()
         section.append("Reload Settings", "win.reload")
@@ -175,10 +205,12 @@ class Window(Adw.ApplicationWindow):
         section.append("Keyboard Shortcuts", "win.shortcuts")
         section.append("About NixOS Settings", "win.about")
         menu.append_section(None, section)
-        side_header = Adw.HeaderBar()
-        side_header.pack_end(Gtk.MenuButton(icon_name="open-menu-symbolic", menu_model=menu,
-                                            tooltip_text="Main Menu", primary=True))
-        side = Adw.ToolbarView(content=side_box)
+        master = Adw.HeaderBar(title_widget=tabs_scroll, css_classes=["master-bar"])
+        master.pack_start(Gtk.MenuButton(icon_name="open-menu-symbolic", menu_model=menu,
+                                         tooltip_text="Main Menu", primary=True))
+        side_header = Adw.HeaderBar(title_widget=self.search, show_start_title_buttons=False,
+                                    show_end_title_buttons=False)
+        side = Adw.ToolbarView(content=self.side_stack)
         side.add_top_bar(side_header)
 
         self.stack = Gtk.Stack(transition_type=Gtk.StackTransitionType.CROSSFADE, transition_duration=150)
@@ -204,7 +236,7 @@ class Window(Adw.ApplicationWindow):
         actions.pack_end(self.discard_button)
 
         self.content = Adw.ToolbarView(content=self.stack, reveal_bottom_bars=False)
-        self.content.add_top_bar(Adw.HeaderBar())
+        self.content.add_top_bar(Adw.HeaderBar(show_start_title_buttons=False, show_end_title_buttons=False))
         self.content.add_top_bar(self.banner)
         self.content.add_bottom_bar(actions)
         self.content_page = Adw.NavigationPage(title="Overview", child=self.content)
@@ -213,13 +245,22 @@ class Window(Adw.ApplicationWindow):
                                              sidebar_width_fraction=0.27)
         self.split.set_sidebar(Adw.NavigationPage(title="NixOS Settings", child=side))
         self.split.set_content(self.content_page)
+        #--- Too narrow for every master tab's name: icons only. Only the last
+        #--- matching breakpoint applies, so the narrow one repeats this.
+        icons_only = Adw.Breakpoint.new(Adw.BreakpointCondition.parse(f"max-width: {120 * len(TABS) + 80}sp"))
         narrow = Adw.Breakpoint.new(Adw.BreakpointCondition.parse("max-width: 640sp"))
+        for content in self.tab_labels:
+            for bp in (icons_only, narrow):
+                bp.add_setter(content, "label", GObject.Value(str, ""))
         narrow.add_setter(self.split, "collapsed", True)
         mode = GObject.Value(Adw.SidebarMode, Adw.SidebarMode.PAGE)
         for sidebar in self.sidebars.values():
             narrow.add_setter(sidebar, "mode", mode)
+        self.add_breakpoint(icons_only)
         self.add_breakpoint(narrow)
-        self.root.add_named(self.split, "main")
+        main = Adw.ToolbarView(content=self.split)
+        main.add_top_bar(master)
+        self.root.add_named(main, "main")
 
     def _actions(self):
         for name, accels, fn in (
@@ -370,7 +411,7 @@ class Window(Adw.ApplicationWindow):
         an animation."""
         state = self.state
         self.colors = ui.theme_colors()
-        self.rows, self.setters, self.page_of, self.builders = {}, {}, {}, {}
+        self.rows, self.setters, self.page_of, self.builders, self.resets = {}, {}, {}, {}, {}
         self.scope_rows, self.counts = [], {}
         self.multi = len(state.user_machines) > 1
         if not self.multi:
@@ -405,15 +446,21 @@ class Window(Adw.ApplicationWindow):
             sidebar.remove_all()
         self.tab_keys = {tab: [] for tab, _ in TABS}
         self.tab_of = {}
+        self.titles = {"new": "What's New", "search": "Search"}
+        self.doc_keys = {}  # a note's path -> its sidebar key
 
         #--- Overview, Flatpaks (whose switch is a schema page's setting) and
-        #--- What's New on Main, then the Niri and Docs tabs' pages
+        #--- What's New on Main, then the other tabs' pages
         flatpak_page = next((p for p in state.pages if p.section == "top"), None)
         makers = {"overview": lambda: Overview(self, self.info, self.wm, self.links),
                   "flatpaks": lambda: FlatpakPage(self, flatpak_page),
+                  "backups": lambda: BackupsPage(self),
+                  "people": lambda: PeoplePage(self),
                   "shell": lambda: ShellPage(self, self.links),
                   "windowrules": lambda: WindowRulesPage(self),
-                  "proton": lambda: ProtonPage(self)}
+                  "minecraft": lambda: ServersPage(self),
+                  "proton": lambda: ProtonPage(self),
+                  "protonversions": lambda: ProtonVersionsPage(self)}
         tops = {}
         for tab, _ in TABS:
             tops[tab] = Adw.SidebarSection()
@@ -450,10 +497,35 @@ class Window(Adw.ApplicationWindow):
                     self.page_of[(s.domain, s.path)] = key
             self._count(key)
         for tab, _ in TABS[1:]:
-            self.sidebars[tab].append(tops[tab])
+            if tops[tab].get_items().get_n_items():
+                self.sidebars[tab].append(tops[tab])
         for key, _ in schema.SECTIONS:
             if sections[key].get_items().get_n_items():
                 self.sidebars[section_tab.get(key, "main")].append(sections[key])
+
+        #--- Servers: each modpack's notes; Docs: Proton, then the game notes
+        doc_sections = [("servers", title, pack, "text-x-generic-symbolic")
+                        for title, pack in docs.packs(self.cfg.flake)]
+        doc_sections.append(("docs", "Games", docs.game_docs(self.cfg.flake), "input-gaming-symbolic"))
+        for title, items in DOCS_SECTIONS:
+            section = Adw.SidebarSection(title=title)
+            for key, item_title, icons in items:
+                self._sidebar_item("docs", section, key, item_title, ui.first_icon(*icons))
+                self.builders[key] = makers[key]
+            self.sidebars["docs"].append(section)
+        for tab, title, items, icon in doc_sections:
+            if not items:
+                continue
+            section = Adw.SidebarSection(title=title)
+            for doc in items:
+                short, rest = docs.sidebar_title(doc.title)
+                item = self._sidebar_item(tab, section, doc.key, short, icon)
+                item.set_subtitle(rest or None)
+                item.set_tooltip(doc.title)
+                self.titles[doc.key] = doc.title
+                self.builders[doc.key] = lambda doc=doc: docs.DocPage(self, doc, self.cfg.flake)
+                self.doc_keys[os.path.realpath(doc.path)] = doc.key
+            self.sidebars[tab].append(section)
 
         self.banner.set_title("")
         if not self.helper:
@@ -475,6 +547,8 @@ class Window(Adw.ApplicationWindow):
         section.append(item)
         self.tab_keys[tab].append(key)
         self.tab_of[key] = tab
+        self.titles[key] = title
+        return item
 
     def _selected(self, sidebar, _, tab):
         if self.building or self.switching or tab != self.tab:
@@ -486,8 +560,11 @@ class Window(Adw.ApplicationWindow):
                 self.search.set_text("")
             self._show(keys[index], from_sidebar=True)
 
-    def _tab_changed(self, *_):
-        tab = self.tabs.get_active_name()
+    def _tab_toggled(self, button, tab):
+        if button.get_active():
+            self._tab_changed(tab)
+
+    def _tab_changed(self, tab):
         if self.switching or tab not in self.tab_keys:
             return
         self._set_tab(tab)
@@ -501,9 +578,9 @@ class Window(Adw.ApplicationWindow):
         """Shows `tab`'s sidebar, without opening a page."""
         self.tab = tab
         self.side_stack.set_visible_child_name(tab)
-        if self.tabs.get_active_name() != tab:
+        if not self.tab_buttons[tab].get_active():
             self.switching = True
-            self.tabs.set_active_name(tab)
+            self.tab_buttons[tab].set_active(True)
             self.switching = False
 
     def _ensure(self, key):
@@ -525,9 +602,18 @@ class Window(Adw.ApplicationWindow):
                 self.sidebars[tab].set_selected(self.tab_keys[tab].index(key))
                 self.switching = False
         self.stack.set_visible_child_name(key)
-        titles = {key: title for top in TOP.values() for key, title, _ in top} | \
-            {"new": "What's New", "search": "Search"}
-        self.content_page.set_title(titles.get(key, key.removeprefix("page:")))
+        self.content_page.set_title(self.titles.get(key, key.removeprefix("page:")))
+
+    def open_doc(self, path):
+        """Shows the page of the note at `path`; False when no page has it."""
+        key = self.doc_keys.get(os.path.realpath(path))
+        if key is None:
+            return False
+        self.search.set_text("")
+        self._show(key)
+        if self.split.get_collapsed():
+            self.split.set_show_content(True)
+        return True
 
     #--------------------------------------------------------------------#
     #-- Search
@@ -703,6 +789,8 @@ class Window(Adw.ApplicationWindow):
             prefs.add(group)
             if g.title == "Open Ports":
                 prefs.add(self._ports_group())
+        if page.title == "Services":
+            prefs.add(services.RunningGroup(self))
         return prefs
 
     def _ports_group(self):
@@ -826,6 +914,13 @@ class Window(Adw.ApplicationWindow):
         if control is not None:
             # An expander packs suffixes right to left, so its control goes in first
             row.add_suffix(control)
+        if kind != "bool":
+            reset = Gtk.Button(icon_name="edit-undo-symbolic", css_classes=["flat"], valign=Gtk.Align.CENTER,
+                               visible=value != s.default,
+                               tooltip_text=f"Reset to the default: {shown(s, s.default)}")
+            reset.connect("clicked", lambda _: self.setters[key](s.default))
+            row.add_suffix(reset)
+            self.resets[key] = reset
         row.add_suffix(marker)
         if kind != "list":
             if s.description:
@@ -955,6 +1050,8 @@ class Window(Adw.ApplicationWindow):
             self.changes[key] = value
         if key in self.rows:
             self.rows[key][1].set_visible(key in self.changes)
+        if key in self.resets:
+            self.resets[key].set_visible(value != s.default)
         if key in self.page_of:
             self._count(self.page_of[key])
         self._update()
@@ -1030,10 +1127,45 @@ class Window(Adw.ApplicationWindow):
         if self.multi and any(k[0] == "user" for k in self.changes):
             where = self._where()
             page.add(Adw.PreferencesGroup(description=f"Your app changes are saved for {where}."))
+        files = self._file_changes()
+        if files is not None:
+            page.add(files)
         view = Adw.ToolbarView(content=page)
         view.add_top_bar(Adw.HeaderBar())
         dialog.set_child(view)
         dialog.present(self)
+
+    def _file_changes(self):
+        """The lines Apply changes in each settings file, before formatting."""
+        try:
+            edits = backend.render(self.cfg, self.changes, self.scope or None, self.state.user_machines)
+        except (OSError, nixfile.NixError):
+            return None
+        if not edits:
+            return None
+        group = Adw.PreferencesGroup(title="In the Files")
+        for path, (old, new) in edits.items():
+            name = os.path.relpath(path, self.cfg.flake)
+            lines = []
+            diff = list(difflib.unified_diff(old.splitlines(), new.splitlines(), lineterm="", n=1))[2:]
+            added = sum(1 for line in diff if line.startswith("+"))
+            removed = sum(1 for line in diff if line.startswith("-"))
+            for line in diff:
+                text = GLib.markup_escape_text(line)
+                if line.startswith("+"):
+                    text = f'<span foreground="{self.colors["success"]}">{text}</span>'
+                elif line.startswith("-"):
+                    text = f'<span foreground="{self.colors["error"]}">{text}</span>'
+                elif line.startswith("@@"):
+                    text = f"<i>{text}</i>"
+                lines.append(text)
+            exp = Adw.ExpanderRow(title=ui.esc(name), subtitle=f"{added} added, {removed} removed")
+            label = Gtk.Label(xalign=0, wrap=True, wrap_mode=Pango.WrapMode.WORD_CHAR, selectable=True,
+                              css_classes=["monospace", "doc-code"])
+            label.set_markup("\n".join(lines))
+            exp.add_row(label)
+            group.add(exp)
+        return group
 
     #--------------------------------------------------------------------#
     #-- Applying
@@ -1058,16 +1190,20 @@ class Window(Adw.ApplicationWindow):
         if elsewhere:
             text += f" They take effect the next time {self.scope} rebuilds."
         verb = "Save" if elsewhere else "Apply"
+        if not elsewhere:
+            text += "\n\nPreview builds it and shows what would change, without switching or saving."
         dialog = Adw.AlertDialog(heading=f"{verb} {n} Change{'s' if n != 1 else ''}?", body=text)
         dialog.add_response("cancel", "Cancel")
         if not elsewhere:
+            dialog.add_response("preview", "Preview")
             dialog.add_response("boot", "At Next Restart")
         dialog.add_response("now", "Save" if elsewhere else "Apply Now")
         best = "boot" if restart and not elsewhere else "now"
         dialog.set_response_appearance(best, Adw.ResponseAppearance.SUGGESTED)
         dialog.set_default_response(best)
         dialog.set_close_response("cancel")
-        dialog.connect("response", lambda _, r: r != "cancel" and self._apply("boot" if r == "boot" else "switch"))
+        modes = {"boot": "boot", "preview": "build", "now": "switch"}
+        dialog.connect("response", lambda _, r: r != "cancel" and self._apply(modes[r]))
         dialog.present(self)
 
     def _pkexec(self, request):
@@ -1082,8 +1218,12 @@ class Window(Adw.ApplicationWindow):
             self.session = session.Session(helper)
         return self.session
 
-    def _start(self, title, steps, message, titles=None):
+    def _start(self, title, steps, message, titles=None, preview=False):
+        """A run page. A preview builds without switching: what it wrote is put
+        back when it ends (preview_restore), and pending changes stay."""
         self.run_message = message
+        self.previewing = preview
+        self.preview_restore = None
         self.search.set_text("")
         view = RunView(self, title, steps, self._run_closed, titles)
         old = self.root.get_child_by_name("run")
@@ -1112,9 +1252,11 @@ class Window(Adw.ApplicationWindow):
                 self.reload(f"Saved for {scope}; it takes effect when {scope} rebuilds")
             ui.run_async(lambda: backend.write(self.cfg, self.state, changes, scope), saved)
             return
+        preview = mode == "build"
+        title = "Previewing Changes" if preview else "Applying Changes"
+        tail = ["build", "compare"] if preview else ["build", "compare", "switch", "boot"]
         if self.direct:
-            view = self._start("Applying Changes", ["write", "auth", "build", "compare", "switch", "boot"],
-                               "Changes applied")
+            view = self._start(title, ["write", "auth"] + tail, "Changes applied", preview=preview)
             view.step("write", "running")
 
             def written(old, err):
@@ -1123,15 +1265,22 @@ class Window(Adw.ApplicationWindow):
                                    f"Nothing was saved.\n\n{err}")
                     return
                 view.step("write", "done")
-                self.run_undo = lambda: (backend.restore(self.cfg, old), "Your settings are back how they were")[1]
-                view.set_undo("Undo My Changes", self.run_undo)
+                restore = lambda: (backend.restore(self.cfg, old), "Your settings are back how they were")[1]
+                if preview:
+                    self.preview_restore = restore
+                    view.set_next("Apply Now", lambda: self._apply("switch"))
+                else:
+                    self.run_undo = restore
+                    view.set_undo("Undo My Changes", self.run_undo)
                 view.run(self._pkexec({"rebuild": True, "mode": mode}))
             ui.run_async(lambda: backend.write(self.cfg, self.state, changes, scope,
                                                self.state.user_machines), written)
             return
-        steps = ["auth", "save"] if elsewhere else ["auth", "save", "build", "compare", "switch", "boot"]
-        view = self._start("Saving Changes" if elsewhere else "Applying Changes", steps,
-                           f"Saved for {scope}" if elsewhere else "Changes applied")
+        steps = ["auth", "save"] if elsewhere else ["auth", "save"] + tail
+        view = self._start("Saving Changes" if elsewhere else title, steps,
+                           f"Saved for {scope}" if elsewhere else "Changes applied", preview=preview)
+        if preview:
+            view.set_next("Apply Now", lambda: self._apply("switch"))
         request = {"mode": mode, "machine": scope,
                    "changes": [[list(path), value] for (_, path), value in changes.items()]}
         view.run(self._pkexec(request))
@@ -1144,8 +1293,10 @@ class Window(Adw.ApplicationWindow):
             return
         dialog = Adw.AlertDialog(heading="Rebuild now?",
                                  body="This builds the system from the settings files as they are "
-                                      "and switches to it.")
+                                      "and switches to it. Preview builds it and shows what would "
+                                      "change, without switching.")
         dialog.add_response("cancel", "Cancel")
+        dialog.add_response("preview", "Preview")
         dialog.add_response("boot", "At Next Restart")
         dialog.add_response("now", "Rebuild Now")
         dialog.set_response_appearance("now", Adw.ResponseAppearance.SUGGESTED)
@@ -1153,6 +1304,12 @@ class Window(Adw.ApplicationWindow):
 
         def chosen(_, r):
             if r == "cancel":
+                return
+            if r == "preview":
+                view = self._start("Previewing a Rebuild", ["auth", "build", "compare"], "Built",
+                                   preview=True)
+                view.set_next("Rebuild Now", lambda: chosen(None, "now"))
+                view.run(self._pkexec({"rebuild": True, "mode": "build"}))
                 return
             view = self._start("Rebuilding", ["auth", "build", "compare", "switch", "boot"], "Rebuilt")
             view.run(self._pkexec({"rebuild": True, "mode": "boot" if r == "boot" else "switch"}))
@@ -1182,7 +1339,18 @@ class Window(Adw.ApplicationWindow):
                 "You can't switch back to a deleted version.")
         if policy.schedule:
             body += f"\n\nThe same clean-up also runs on its own ({policy.schedule})."
-        dialog = Adw.AlertDialog(heading="Clean up old versions?", body=body)
+        dialog = Adw.AlertDialog(heading="Clean up old versions?",
+                                 body=body + ("\n\nWorking out how much space it frees…" if doomed else ""))
+
+        def estimated(size, err):
+            if err is None and size:
+                dialog.set_body(body + f"\n\nThe old system versions alone free about {closure.human_size(size)}"
+                                       ", more if older versions of apps or other unused files go too.")
+            else:
+                dialog.set_body(body)
+        if doomed:
+            kept = [g for g in gens if g not in doomed]
+            ui.run_async(lambda: system.freed_estimate(doomed, kept), estimated)
         dialog.add_response("cancel", "Cancel")
         dialog.add_response("clean", "Clean Up")
         dialog.set_response_appearance("clean", Adw.ResponseAppearance.DESTRUCTIVE)
@@ -1200,42 +1368,64 @@ class Window(Adw.ApplicationWindow):
     def check_updates(self, done):
         ui.run_async(lambda: system.check_updates(self.cfg.flake), done)
 
-    def confirm_update(self, new_lock, changes):
+    def confirm_update(self, new_lock, changes, names):
+        """`names`: the sources picked on the Overview, out of `changes`."""
         if self.busy or not self.can_apply or not self.admin:
             return
         if self.changes:
             self.toast("Apply or discard your changes first")
             return
+        if not names:
+            self.toast("Pick at least one source to update")
+            return
+        some = len(names) < len(changes)
+        which = f"{len(names)} of the {len(changes)} sources" if some else f"{len(changes)} sources"
         dialog = Adw.AlertDialog(
             heading="Update this computer?",
-            body=f"{len(changes)} sources move to their newest versions. The new system is "
+            body=f"{which} move to their newest versions. The new system is "
                  "downloaded and built, then switched to. If it changes systemd, glibc, niri or "
                  "xwayland-satellite, it starts at the next restart instead, since switching to "
-                 "those live has frozen the desktop before.")
+                 "those live has frozen the desktop before.\n\nPreview builds it and shows what "
+                 "would change, then puts flake.lock back.")
         dialog.add_response("cancel", "Cancel")
+        dialog.add_response("build", "Preview")
         dialog.add_response("boot", "At Next Restart")
         dialog.add_response("auto", "Update Now")
         dialog.set_response_appearance("auto", Adw.ResponseAppearance.SUGGESTED)
         dialog.set_default_response("auto")
         dialog.set_close_response("cancel")
-        dialog.connect("response", lambda _, r: r != "cancel" and self._run_update(new_lock, r))
+        picked = names if some else None
+        dialog.connect("response", lambda _, r: r != "cancel" and self._run_update(new_lock, r, picked))
         dialog.present(self)
 
-    def _run_update(self, new_lock, mode):
-        view = self._start("Updating", ["update", "auth", "build", "compare", "switch", "boot"],
-                           "System updated")
-        view.step("update", "running", "Writing the new versions into flake.lock")
+    def _run_update(self, new_lock, mode, names=None):
+        """Puts `new_lock` in place, or with `names` a lock that moves only those
+        sources, and rebuilds."""
+        preview = mode == "build"
+        tail = ["build", "compare"] if preview else ["build", "compare", "switch", "boot"]
+        view = self._start("Previewing the Update" if preview else "Updating", ["update", "auth"] + tail,
+                           "System updated", preview=preview)
+        view.step("update", "running", f"Getting the newest {', '.join(names)}" if names
+                  else "Writing the new versions into flake.lock")
 
         def written(old, err):
             if err is not None:
                 view.fail_step("update", "Couldn't update flake.lock", str(err))
                 return
             view.step("update", "done", "flake.lock now names the new versions")
-            self.run_undo = lambda: (system.restore_lock(self.cfg.flake, old),
-                                     "flake.lock is back how it was")[1]
-            view.set_undo("Undo the Update", self.run_undo)
+            restore = lambda: (system.restore_lock(self.cfg.flake, old), "flake.lock is back how it was")[1]
+            if preview:
+                self.preview_restore = restore
+                view.set_next("Update Now", lambda: self._run_update(new_lock, "auto", names))
+            else:
+                self.run_undo = restore
+                view.set_undo("Undo the Update", self.run_undo)
             view.run(self._pkexec({"rebuild": True, "mode": mode}))
-        ui.run_async(lambda: system.apply_lock(self.cfg.flake, new_lock), written)
+
+        def work():
+            lock = system.partial_lock(self.cfg.flake, names) if names else new_lock
+            return system.apply_lock(self.cfg.flake, lock)
+        ui.run_async(work, written)
 
     def confirm_rollback(self, generation):
         if self.busy or not self.can_apply or not self.admin:
@@ -1287,6 +1477,16 @@ class Window(Adw.ApplicationWindow):
         view = self.run_view
         boot = view is not None and view.mode == "boot"
         self.run_view = None
+        if self.previewing:
+            # Nothing on disk changed, so the pages and pending changes stay as they are
+            self.previewing = False
+            self.run_undo = None
+            self.root.set_visible_child_name("main")
+            run = self.root.get_child_by_name("run")
+            if run is not None:
+                GLib.timeout_add(self.root.get_transition_duration() + 100, self._drop_run, run)
+            self._update()
+            return
         message = None
         if outcome == "ok":
             message = "Ready; restart to use it" if boot else (self.run_message or "Done")
@@ -1300,6 +1500,9 @@ class Window(Adw.ApplicationWindow):
     def notify_done(self, outcome, heading):
         """Called when a run ends: puts back what the app wrote if nothing was
         built, and tells the desktop when the window isn't in front."""
+        if self.preview_restore is not None:
+            self.preview_restore()
+            self.preview_restore = None
         if outcome in ("auth", "cancelled") and self.run_undo is not None:
             message = self.run_undo()
             self.run_undo = None

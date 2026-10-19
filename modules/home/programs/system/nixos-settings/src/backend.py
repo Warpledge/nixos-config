@@ -306,6 +306,24 @@ def write(cfg, state, changes, machine, everywhere=()):
     user's own file, cleared from the blocks of every machine in `everywhere`.
     Returns the files' old text for undo; on a failed check the files are put
     back and SettingsError says why."""
+    edits = render(cfg, changes, machine, everywhere)
+    old = {f: before for f, (before, _) in edits.items()}
+    for f, (_, after) in edits.items():
+        save(f, after)
+    changed = list(edits)
+    if shutil.which("alejandra") and changed:
+        subprocess.run(["alejandra", "-q"] + changed, capture_output=True)
+    try:
+        evaluate(cfg)
+    except SettingsError:
+        restore(cfg, old)
+        raise
+    return old
+
+
+def render(cfg, changes, machine, everywhere=()):
+    """What write() would put in each file, unformatted: {path: (old, new)} for
+    the files it changes."""
     old, text = {}, {}
 
     def edit(path, fn):
@@ -325,19 +343,7 @@ def write(cfg, state, changes, machine, everywhere=()):
             # A change for every computer still loses to a computer's own block
             for m in set(everywhere) | {cfg.machine}:
                 edit(cfg.file("machine", m), lambda t: nixfile.remove_value(t, block + path, keep=2))
-
-    changed = [f for f in text if text[f] != old[f]]
-    old = {f: old[f] for f in changed}
-    for f in changed:
-        save(f, text[f])
-    if shutil.which("alejandra") and changed:
-        subprocess.run(["alejandra", "-q"] + changed, capture_output=True)
-    try:
-        evaluate(cfg)
-    except SettingsError:
-        restore(cfg, old)
-        raise
-    return old
+    return {f: (old[f], text[f]) for f in text if text[f] != old[f]}
 
 
 def save(path, text):
