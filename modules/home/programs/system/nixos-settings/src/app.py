@@ -964,9 +964,10 @@ class Window(Adw.ApplicationWindow):
             dd.set_expression(Gtk.PropertyExpression.new(Gtk.StringObject, None, "string"))
             dd.set_search_match_mode(Gtk.StringFilterMatchMode.SUBSTRING)
 
+        # Not ellipsized: an ellipsizing label's minimum width is near zero, so the row
+        # squeezes the button and the popover takes the button's width
         def setup(_, item, short):
-            item.set_child(Gtk.Label(xalign=0, ellipsize=Pango.EllipsizeMode.END,
-                                     max_width_chars=22 if short else 48))
+            item.set_child(Gtk.Label(xalign=0))
 
         def bind(_, item, short):
             text = item.get_item().get_string()
