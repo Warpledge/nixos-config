@@ -315,7 +315,7 @@
                 temperature = 0.1;
               }
             ];
-            #--- Fewer tool schemas in the local model's 32K context
+            #--- Fewer tool schemas in the local model's context
             default_profile = "local";
             profiles.local = {
               name = "Local";
@@ -367,7 +367,7 @@
               {
                 name = "lfm2.5-24b-a2b";
                 display_name = "LFM2.5 24B A2B";
-                max_tokens = 32768;
+                max_tokens = 65536;
               }
             ];
           };
