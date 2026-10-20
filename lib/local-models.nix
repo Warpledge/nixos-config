@@ -73,24 +73,6 @@
         presence_penalty = 1.5;
       };
     };
-    #--- Dense 27B; --fit keeps layers on the GPU while 2GB of VRAM stays free
-    "qwen3.8-27b" = {
-      name = "Qwen3.8 27B";
-      dir = "unsloth/Qwen3.8-27B-GGUF";
-      match = "*UD-Q3_K_XL*.gguf";
-      context = 65536; # Every layer is on the GPU path, so less room for cache
-      args = ["--fit-target 2048" "--top-k 20" "--min-p 0"];
-      think = {
-        temperature = 0.6;
-        top_p = 0.95;
-      };
-      fast = {
-        chat_template_kwargs.enable_thinking = false;
-        temperature = 0.7;
-        top_p = 0.8;
-        presence_penalty = 1.5;
-      };
-    };
     #--- MoE, 3.6B active, MXFP4 weights (~13GB); reasoning can't be turned off
     "gpt-oss-20b" = {
       name = "gpt-oss 20B";
