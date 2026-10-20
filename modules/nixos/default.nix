@@ -73,6 +73,7 @@
     ++ lib.optionals machine.sunshine.enable [./services/servers/sunshine.nix]
     #--- FlareSolverr for Moku's Cloudflare-protected sources (any user with Moku)
     ++ lib.optionals anyUser.media.moku [./services/servers/flaresolverr.nix]
+    ++ lib.optionals anyUser.openWebui.enable [./services/servers/open-webui.nix]
     #--- Japanese Input Method (any user with japanese.ime)
     ++ lib.optionals anyUser.japanese.ime [./system/language/japanese-ime.nix];
 }

@@ -113,14 +113,14 @@ PAGES = {
     "Tools": ("localai", "utilities-terminal-symbolic",
               "The local model server, the app that downloads models, and opencode, "
               "the coding agent that uses them.",
-              [("", "", ["llamaSwap.enable", "lmstudio.enable", "opencode.enable"])]),
+              [("", "", ["llamaSwap.enable", "lmstudio.enable", "opencode.enable", "openWebui.enable"])]),
     "Code": ("localai", "applications-engineering-symbolic",
              "The models llama-swap runs on this computer's GPU, used by default in "
              "opencode and Zed. Download each one in LM Studio first.",
              [("", "", ["localAi.code", "localAi.edit"])]),
     "Chat": ("localai", "user-available-symbolic",
              "A model for conversation rather than code, served by llama-swap. Chat with it "
-             "in llama-swap's Playground at http://127.0.0.1:8090. Download it in LM Studio first.",
+             "in Open WebUI (Tools) or llama-swap's Playground. Download it in LM Studio first.",
              [("", "", ["localAi.chat"])]),
 }
 FALLBACK_ICON = "applications-system-symbolic"

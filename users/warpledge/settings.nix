@@ -165,6 +165,7 @@
   opencode = {enable = true;};
   lmstudio = {enable = true;};
   llamaSwap = {enable = true;};
+  openWebui = {enable = true;};
   localAi = {
     code = "qwen3.6-35b-a3b-q4";
     edit = "sweep-next-edit-1.5b";
