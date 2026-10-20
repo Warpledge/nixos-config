@@ -166,7 +166,7 @@
   lmstudio = {enable = true;};
   llamaSwap = {enable = true;};
   localAi = {
-    code = "qwen3.6-35b-a3b";
+    code = "qwen3.6-35b-a3b-q4";
     edit = "sweep-next-edit-1.5b";
   };
 
