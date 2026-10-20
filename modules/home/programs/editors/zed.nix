@@ -52,16 +52,6 @@ in {
   ];
 
   #--------------------------------------------------------------------#
-  #-- Agent Skills
-  #--------------------------------------------------------------------#
-  #--- The repo's skills (as in ai/claude.nix), where Zed's agent looks for global ones
-  home.file = lib.optionalAttrs (user.llamaSwap.enable || user.claude.enable) (
-    lib.mapAttrs' (name: _:
-      lib.nameValuePair ".agents/skills/${name}" {source = ../ai/skills + "/${name}";})
-    (lib.filterAttrs (_: type: type == "directory") (builtins.readDir ../ai/skills))
-  );
-
-  #--------------------------------------------------------------------#
   #-- Zed Editor Configuration
   #--------------------------------------------------------------------#
   programs.zed-editor = {

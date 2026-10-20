@@ -9,6 +9,10 @@
   ...
 }: {
   config = lib.mkIf user.opencode.enable {
+    #--- It reads the skills from ~/.agents/skills (agent-skills.nix); without this
+    #--- it also lists the same ones from Claude Code's ~/.claude/skills
+    home.sessionVariables.OPENCODE_DISABLE_CLAUDE_CODE_SKILLS = "1";
+
     #--------------------------------------------------------------------#
     #-- Package Installation
     #--------------------------------------------------------------------#
