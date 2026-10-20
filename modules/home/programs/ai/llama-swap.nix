@@ -37,11 +37,9 @@
   cmd = model: args: lib.concatStringsSep " " ([launch "'${model.dir}'" "'${model.match}'" "--port \${PORT}"] ++ args);
 
   #--- One slot gets the whole context; q8_0 cache halves its VRAM
-  codeCmd = temp: extra:
+  codeCmd =
     cmd code (["-c ${toString code.context}" "-np 1" "-fa on" "-ctk q8_0" "-ctv q8_0" "--no-webui"]
-      ++ code.args
-      ++ ["--temp ${toString temp}"]
-      ++ extra);
+      ++ code.args);
 
   #--- Loads on the first request, unloads after `ttl` idle seconds to free VRAM
   settings = {
@@ -49,13 +47,12 @@
       lib.optionalAttrs (code != null) {
         ${codeId} = {
           ttl = 600;
-          cmd = codeCmd code.temp code.think;
-        };
-      }
-      // lib.optionalAttrs hasFast {
-        ${fastId} = {
-          ttl = 600;
-          cmd = codeCmd code.fastTemp code.fast;
+          cmd = codeCmd;
+          #--- Each ID gets its variant's sampling over whatever the client sent; the
+          #--- -instruct key also registers as an alias, so it needs no reload
+          filters.setParamsByID =
+            {${codeId} = code.think;}
+            // lib.optionalAttrs hasFast {${fastId} = code.fast;};
         };
       }
       // lib.optionalAttrs (edit != null) {
@@ -72,16 +69,15 @@
           ];
         };
       };
-    #--- One coding variant at a time; switching reloads it (from page cache)
     groups =
       lib.optionalAttrs (code != null) {
         chat = {
           swap = true;
           exclusive = false;
-          members = [codeId] ++ lib.optional hasFast fastId;
+          members = [codeId];
         };
       }
-      #--- Stays loaded beside either variant
+      #--- Stays loaded beside the coding model
       // lib.optionalAttrs (edit != null) {
         predict = {
           swap = false;
@@ -110,6 +106,8 @@ in {
   #--------------------------------------------------------------------#
   programs.opencode.settings = lib.mkIf (user.opencode.enable && code != null) {
     model = "llama-swap/${codeId}";
+    # Session titles and summaries: thinking there only delays the first reply
+    small_model = "llama-swap/${if hasFast then fastId else codeId}";
     provider.llama-swap = {
       npm = "@ai-sdk/openai-compatible";
       name = "llama-swap (local)";
