@@ -106,8 +106,9 @@ The skills were written for Claude Code. Read them this way:
   `prose-reviewer`, `build-triager`, `docs-drift-auditor`) is yours to do:
   for the auditor, read `git diff --cached` for personal data, private paths,
   hostnames and tokens; for the prose pass, cut words from what you wrote.
-- The context7, deepwiki and grep MCP tools are off for you. Skip steps that
-  need them and use the lookups below.
+- The context7 and grep MCP tools are off for you. Skip steps that
+  need them and use the lookups below. Deepwiki is available for upstream
+  docs on public repos.
 
 Several folders carry their own `CLAUDE.md`. Read it first before changing
 files in that area:
