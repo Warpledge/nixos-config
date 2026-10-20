@@ -20,8 +20,8 @@
       dir = "unsloth/Qwen3.6-35B-A3B-GGUF";
       match = "*UD-Q3_K_XL*.gguf";
       context = 131072;
-      # Experts of 17 layers from RAM: ~15GB VRAM (20 measured 13.8GB, 37 tok/s)
-      args = ["-ngl 99" "--n-cpu-moe 17" "-ub 2048" "--top-k 20" "--min-p 0"];
+      # Experts of 18 layers from RAM: ~15GB VRAM (20 measured 80-85%, 37-39 tok/s)
+      args = ["-ngl 99" "--n-cpu-moe 18" "-ub 2048" "--top-k 20" "--min-p 0"];
       # Qwen's thinking-mode coding sampling, and its non-thinking sampling
       think = {
         temperature = 0.6;
