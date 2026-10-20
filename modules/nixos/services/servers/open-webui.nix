@@ -16,6 +16,40 @@
   url = "http://127.0.0.1:${toString port}";
   nixosMcpPort = 8092;
 
+  #--- Its grey scale from Stylix's palette, for the dark theme; the steps
+  #--- between Crust and Text that base16 lacks are mixed from the two
+  css = with config.lib.stylix.colors.withHashtag; let
+    mix = pct: "color-mix(in oklch, ${base05} ${toString pct}%, ${base00})";
+  in ''
+    html.dark {
+      --color-gray-50: ${base05};
+      --color-gray-100: ${base05};
+      --color-gray-200: ${mix 88};
+      --color-gray-300: ${mix 78};
+      --color-gray-400: ${mix 66};
+      --color-gray-500: ${mix 54};
+      --color-gray-600: ${base04};
+      --color-gray-700: ${base03};
+      --color-gray-800: ${base02};
+      --color-gray-850: color-mix(in oklch, ${base02} 50%, ${base01});
+      --color-gray-900: ${base01};
+      --color-gray-950: ${base00};
+    }
+    html.dark ::selection {
+      background: color-mix(in oklch, ${base0E} 40%, transparent);
+    }
+  '';
+
+  #--- The server copies the frontend's static/ to its state dir on each start, and
+  #--- every page loads static/custom.css, so the theme rides in a frontend copy
+  frontend = "${pkgs.open-webui.frontend}/share/open-webui";
+  themedFrontend = pkgs.runCommand "open-webui-frontend-stylix" {nativeBuildInputs = [pkgs.lndir];} ''
+    mkdir $out
+    lndir -silent ${frontend} $out
+    rm -f $out/static/custom.css
+    cp ${pkgs.writeText "custom.css" css} $out/static/custom.css
+  '';
+
   #--- MCP servers it calls itself; only Streamable HTTP ones work without a proxy.
   #--- Same servers as home/programs/ai/mcp.nix
   mcp = id: name: mcpUrl: {
@@ -34,6 +68,9 @@ in {
   services.open-webui = {
     enable = true;
     inherit port;
+    package = pkgs.open-webui.overridePythonAttrs {
+      makeWrapperArgs = ["--set FRONTEND_BUILD_DIR ${themedFrontend}"];
+    };
     # Replaces the module's default set, so its three no-tracking values are restated
     environment = {
       SCARF_NO_ANALYTICS = "True";
@@ -94,7 +131,7 @@ in {
           if user.browsers.helium
           then "helium --app=${url}"
           else "xdg-open ${url}";
-        icon = "${config.services.open-webui.package.frontend}/share/open-webui/static/favicon.png";
+        icon = "${frontend}/static/favicon.png";
         categories = ["Network" "Chat"];
       };
     })
