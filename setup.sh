@@ -843,6 +843,7 @@ apps=(
   "AI tools|opencode.enable|opencode"
   "AI tools|lmstudio.enable|LM Studio: run language models locally"
   "AI tools|llamaSwap.enable|llama-swap: llama.cpp server for opencode"
+  "AI tools|openWebui.enable|Open WebUI: chat with the local models in the browser"
   "Japanese|japanese.ime|Japanese typing (fcitx5 + Mozc)"
   "Japanese|japanese.vn|Japanese visual novel tools"
 )

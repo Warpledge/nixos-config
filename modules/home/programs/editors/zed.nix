@@ -322,20 +322,14 @@ in {
               provider = "llama-swap";
               model = codeId;
             };
-            # Zed's own request temperature would override llama-swap's
-            model_parameters =
-              [
-                {
-                  provider = "llama-swap";
-                  model = codeId;
-                  temperature = code.temp;
-                }
-              ]
-              ++ lib.optional hasFast {
-                provider = "llama-swap";
-                model = "${codeId}-instruct";
-                temperature = code.fastTemp;
-              };
+            # Thread titles: thinking there only delays the first reply
+            thread_summary_model = {
+              provider = "llama-swap";
+              model =
+                if hasFast
+                then "${codeId}-instruct"
+                else codeId;
+            };
             #--- Fewer tool schemas in the local model's context
             default_profile = "local";
             profiles.local = {

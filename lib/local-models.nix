@@ -11,9 +11,9 @@
   #--------------------------------------------------------------------#
   #-- Coding Models
   #--------------------------------------------------------------------#
-  #--- `args` are shared; `think`/`temp` and `fast`/`fastTemp` are the two variants'
-  #--- flags and temperature (fast is served as <name>-instruct; null: none). Zed
-  #--- sends its own temperature, so it reads `temp` too.
+  #--- `args` start the server; `think` and `fast` are request parameters llama-swap
+  #--- forces on <name> and its <name>-instruct alias, so both share one loaded model
+  #--- --load-mode none: experts in RAM read into memory, not paged in from the file
   code = {
     #--- MoE, 3B active; 10 of its 40 layers keep a KV cache, so 128K is ~1.4GB
     "qwen3.6-35b-a3b" = {
@@ -21,24 +21,37 @@
       dir = "unsloth/Qwen3.6-35B-A3B-GGUF";
       match = "*UD-Q3_K_XL*.gguf";
       context = 131072;
-      # Experts of the first 20 layers from RAM: ~13.8GB VRAM, ~37 tok/s
-      args = ["-ngl 99" "--n-cpu-moe 20" "-ub 2048" "--top-k 20" "--min-p 0"];
-      temp = 0.6; # Qwen's thinking-mode coding sampling
-      think = ["--top-p 0.95"];
-      fastTemp = 0.7; # and its non-thinking sampling
-      fast = ["--reasoning off" "--top-p 0.8" "--presence-penalty 1.5"];
+      # Experts of 18 layers from RAM: ~15GB VRAM (20 measured 80-85%, 37-39 tok/s)
+      args = ["-ngl 99" "--load-mode none" "--n-cpu-moe 18" "-ub 2048" "--top-k 20" "--min-p 0"];
+      # Qwen's thinking-mode coding sampling, and its non-thinking sampling
+      think = {
+        temperature = 0.6;
+        top_p = 0.95;
+      };
+      fast = {
+        chat_template_kwargs.enable_thinking = false;
+        temperature = 0.7;
+        top_p = 0.8;
+        presence_penalty = 1.5;
+      };
     };
     "qwen3.6-35b-a3b-q4" = {
       name = "Qwen3.6 35B A3B (Q4)";
       dir = "unsloth/Qwen3.6-35B-A3B-GGUF";
       match = "*UD-Q4_K_XL*.gguf";
       context = 131072;
-      # ~0.5GB per layer's experts, so 24 from RAM for the same ~13.8GB
-      args = ["-ngl 99" "--n-cpu-moe 24" "-ub 2048" "--top-k 20" "--min-p 0"];
-      temp = 0.6;
-      think = ["--top-p 0.95"];
-      fastTemp = 0.7;
-      fast = ["--reasoning off" "--top-p 0.8" "--presence-penalty 1.5"];
+      # Experts of 24 layers from RAM: measured ~89% VRAM, 38 tok/s
+      args = ["-ngl 99" "--load-mode none" "--n-cpu-moe 24" "-ub 2048" "--top-k 20" "--min-p 0"];
+      think = {
+        temperature = 0.6;
+        top_p = 0.95;
+      };
+      fast = {
+        chat_template_kwargs.enable_thinking = false;
+        temperature = 0.7;
+        top_p = 0.8;
+        presence_penalty = 1.5;
+      };
     };
     #--- Qwen3.6's MoE architecture, trained further for coding agents. Its MTP head
     #--- stays off: drafts route more tokens through the experts in RAM
@@ -47,48 +60,80 @@
       dir = "ornith-ai/Ornith-1.5-35B-A3B-GGUF";
       match = "*Q4_K_M*.gguf";
       context = 131072;
-      # ~0.5GB per layer's experts in the 22.6GB file: 26 from RAM for ~13.8GB VRAM
-      args = ["-ngl 99" "--n-cpu-moe 26" "-ub 2048" "--top-k 20" "--min-p 0"];
-      temp = 0.6; # The model card's coding sampling
-      think = ["--top-p 0.95"];
-      fastTemp = 0.7;
-      fast = ["--reasoning off" "--top-p 0.8" "--presence-penalty 1.5"];
+      # ~0.5GB per layer's experts: 23 in RAM, ~15.3GB (26 measured 13.9GB, 35 tok/s)
+      args = ["-ngl 99" "--load-mode none" "--n-cpu-moe 23" "-ub 2048" "--top-k 20" "--min-p 0"];
+      # The model card's coding sampling
+      think = {
+        temperature = 0.6;
+        top_p = 0.95;
+      };
+      fast = {
+        chat_template_kwargs.enable_thinking = false;
+        temperature = 0.7;
+        top_p = 0.8;
+        presence_penalty = 1.5;
+      };
     };
-    #--- Dense 27B; --fit keeps layers on the GPU while 2GB of VRAM stays free
-    "qwen3.8-27b" = {
-      name = "Qwen3.8 27B";
-      dir = "unsloth/Qwen3.8-27B-GGUF";
-      match = "*UD-Q3_K_XL*.gguf";
-      context = 65536; # Every layer is on the GPU path, so less room for cache
-      args = ["--fit-target 2048" "--top-k 20" "--min-p 0"];
-      temp = 0.6;
-      think = ["--top-p 0.95"];
-      fastTemp = 0.7;
-      fast = ["--reasoning off" "--top-p 0.8" "--presence-penalty 1.5"];
-    };
+  };
+
+  #--------------------------------------------------------------------#
+  #-- Chat Models
+  #--------------------------------------------------------------------#
+  #--- Same fields as the coding models; 32K is plenty for a conversation
+  chat = {
     #--- MoE, 3.6B active, MXFP4 weights (~13GB); reasoning can't be turned off
     "gpt-oss-20b" = {
       name = "gpt-oss 20B";
       dir = "ggml-org/gpt-oss-20b-GGUF";
       match = "*.gguf";
-      context = 131072;
-      args = ["--fit-target 2048" "-ub 2048" "--top-p 1.0"];
-      temp = 1.0;
-      fastTemp = 1.0;
-      think = ["--chat-template-kwargs '{\"reasoning_effort\":\"high\"}'"];
-      fast = ["--chat-template-kwargs '{\"reasoning_effort\":\"low\"}'"];
+      context = 32768;
+      args = ["--fit-target 2048"];
+      # OpenAI's sampling; medium effort, and low for the fast variant
+      think = {
+        temperature = 1.0;
+        top_p = 1.0;
+        chat_template_kwargs.reasoning_effort = "medium";
+      };
+      fast = {
+        temperature = 1.0;
+        top_p = 1.0;
+        chat_template_kwargs.reasoning_effort = "low";
+      };
     };
-    #--- MoE, 2B active; always reasons first
-    "lfm2.5-24b-a2b" = {
-      name = "LFM2.5 24B A2B";
-      dir = "unsloth/LFM2.5-24B-A2B-GGUF";
-      match = "*UD-Q3_K_XL*.gguf";
-      context = 131072;
-      # Liquid AI's suggested sampling
-      args = ["--fit-target 2048" "--min-p 0.15" "--repeat-penalty 1.05"];
-      temp = 0.1;
-      think = [];
+    #--- MoE, 3.8B active; the QAT file (~14GB) is Google's 4-bit training
+    "gemma-4-26b-a4b" = {
+      name = "Gemma 4 26B A4B";
+      dir = "unsloth/gemma-4-26B-A4B-it-qat-GGUF";
+      match = "*UD-Q4_K_XL*.gguf";
+      context = 32768;
+      args = ["--fit-target 2048" "--load-mode none"];
+      think = {
+        # Google's sampling
+        temperature = 1.0;
+        top_p = 0.95;
+        top_k = 64;
+      };
       fast = null;
+    };
+    #--- The Q4 coding model's file, with Qwen's general-chat sampling
+    "qwen3.6-35b-a3b-chat" = {
+      name = "Qwen3.6 35B A3B";
+      dir = "unsloth/Qwen3.6-35B-A3B-GGUF";
+      match = "*UD-Q4_K_XL*.gguf";
+      context = 32768;
+      # 128K less cache than the coding entry: 2 more layers fit on the GPU
+      args = ["-ngl 99" "--load-mode none" "--n-cpu-moe 22" "--top-k 20" "--min-p 0"];
+      think = {
+        temperature = 1.0;
+        top_p = 0.95;
+        presence_penalty = 1.5;
+      };
+      fast = {
+        chat_template_kwargs.enable_thinking = false;
+        temperature = 0.7;
+        top_p = 0.8;
+        presence_penalty = 1.5;
+      };
     };
   };
 
