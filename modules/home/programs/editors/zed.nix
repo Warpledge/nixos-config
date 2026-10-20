@@ -19,6 +19,13 @@
     if user.llamaSwap.enable && editId != null
     then models.edit.${editId}
     else null;
+
+  #--- Same token file as ai/mcp.nix, read at launch so it never enters the store
+  githubMcp = pkgs.writeShellScript "github-mcp" ''
+    GITHUB_PERSONAL_ACCESS_TOKEN=$(cat "$HOME/.nixos-config-mcp/github")
+    export GITHUB_PERSONAL_ACCESS_TOKEN
+    exec ${lib.getExe pkgs.github-mcp-server} stdio --read-only
+  '';
 in {
   #--------------------------------------------------------------------#
   #-- Dependencies
@@ -43,6 +50,16 @@ in {
     #--- Runtime & Utilities
     pkgs.nodejs
   ];
+
+  #--------------------------------------------------------------------#
+  #-- Agent Skills
+  #--------------------------------------------------------------------#
+  #--- The repo's skills (as in ai/claude.nix), where Zed's agent looks for global ones
+  home.file = lib.optionalAttrs (user.llamaSwap.enable || user.claude.enable) (
+    lib.mapAttrs' (name: _:
+      lib.nameValuePair ".agents/skills/${name}" {source = ../ai/skills + "/${name}";})
+    (lib.filterAttrs (_: type: type == "directory") (builtins.readDir ../ai/skills))
+  );
 
   #--------------------------------------------------------------------#
   #-- Zed Editor Configuration
@@ -482,10 +499,15 @@ in {
           biome.settings.linter.rules.correctness.noUnknownTypeSelector = "off";
         };
 
-        #--- MCP Servers
+        #--- MCP Servers: the ones opencode keeps on for the local model (opencode.nix)
         context_servers = {
           nixos = {
             command = lib.getExe pkgs.mcp-nixos;
+            args = [];
+            env = {};
+          };
+          github = {
+            command = "${githubMcp}";
             args = [];
             env = {};
           };
