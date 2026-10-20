@@ -7,14 +7,16 @@ home-manager, Niri WM, Stylix theming (Catppuccin Mocha).
 ## Rules
 
 1. **Never run `nixm rebuild` or `nixos-rebuild`.** Stop and ask instead.
-   Run `alejandra .` after editing Nix. Run `nix flake check`, and a host
+   Run `alejandra <file>` on each Nix file you edited, never `alejandra .`
+   (it reformats files the task never touched). Run `nix flake check`, and a host
    build even more rarely, only when you can't tell whether a change breaks
    evaluation or the build (a new module or import, an unfamiliar option, an
    input or package change); a value change in a working option, or a JSON,
    Markdown or comment edit, needs neither. Commit without asking (see
    rule 7); pushing and history rewrites stay with the user.
 2. **`git add` new files before `nix flake check`** — the flake ignores
-   untracked files and the check fails with "file is not available".
+   untracked files and the check fails with "file is not available". Stage
+   by path, never `git add -A` or `git add .`, which sweep in unrelated changes.
 3. **Stylix owns all theming.** Never set colors, fonts, or wallpaper in a
    module. Enable a program's theming and let Stylix supply the palette.
    catppuccin/nix (`modules/theme/catppuccin.nix`) also auto-enables its
@@ -57,7 +59,7 @@ lost. Work so that compaction costs nothing:
 - **Read each file once**, and only the files the task touches. Two or three
   sibling modules are enough to learn a pattern.
 - **Trim command output at the source**: `nix flake check 2>&1 | tail -n 30`,
-  `alejandra . 2>&1 | tail -n 5`, man pages through `grep`. Never print a store
+  `alejandra <file> 2>&1 | tail -n 5`, man pages through `grep`. Never print a store
   listing, a derivation or a full log.
 - **Small edits.** Use the edit tool with the shortest unique `oldString`, not a
   whole-file write. Finish one file before opening the next.
