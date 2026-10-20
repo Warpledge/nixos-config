@@ -21,8 +21,8 @@
       dir = "unsloth/Qwen3.6-35B-A3B-GGUF";
       match = "*UD-Q3_K_XL*.gguf";
       context = 131072;
-      # Experts of the first 20 layers from RAM: ~13.8GB VRAM, ~37 tok/s
-      args = ["-ngl 99" "--n-cpu-moe 20" "-ub 2048" "--top-k 20" "--min-p 0"];
+      # Experts of 17 layers from RAM: ~15GB VRAM (20 measured 13.8GB, 37 tok/s)
+      args = ["-ngl 99" "--n-cpu-moe 17" "-ub 2048" "--top-k 20" "--min-p 0"];
       temp = 0.6; # Qwen's thinking-mode coding sampling
       think = ["--top-p 0.95"];
       fastTemp = 0.7; # and its non-thinking sampling
@@ -33,8 +33,8 @@
       dir = "unsloth/Qwen3.6-35B-A3B-GGUF";
       match = "*UD-Q4_K_XL*.gguf";
       context = 131072;
-      # ~0.5GB per layer's experts, so 24 from RAM for the same ~13.8GB
-      args = ["-ngl 99" "--n-cpu-moe 24" "-ub 2048" "--top-k 20" "--min-p 0"];
+      # ~0.5GB per layer's experts, so 21 from RAM for the same ~15GB
+      args = ["-ngl 99" "--n-cpu-moe 21" "-ub 2048" "--top-k 20" "--min-p 0"];
       temp = 0.6;
       think = ["--top-p 0.95"];
       fastTemp = 0.7;
@@ -47,8 +47,8 @@
       dir = "ornith-ai/Ornith-1.5-35B-A3B-GGUF";
       match = "*Q4_K_M*.gguf";
       context = 131072;
-      # ~0.5GB per layer's experts in the 22.6GB file: 26 from RAM for ~13.8GB VRAM
-      args = ["-ngl 99" "--n-cpu-moe 26" "-ub 2048" "--top-k 20" "--min-p 0"];
+      # ~0.5GB per layer's experts: 23 in RAM, ~15.3GB (26 measured 13.9GB, 35 tok/s)
+      args = ["-ngl 99" "--n-cpu-moe 23" "-ub 2048" "--top-k 20" "--min-p 0"];
       temp = 0.6; # The model card's coding sampling
       think = ["--top-p 0.95"];
       fastTemp = 0.7;
