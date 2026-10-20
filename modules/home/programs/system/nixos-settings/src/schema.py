@@ -118,6 +118,10 @@ PAGES = {
              "The models llama-swap runs on this computer's GPU, used by default in "
              "opencode and Zed. Download each one in LM Studio first.",
              [("", "", ["localAi.code", "localAi.edit"])]),
+    "Chat": ("localai", "user-available-symbolic",
+             "A model for conversation rather than code, served by llama-swap. Chat with it "
+             "in llama-swap's Playground at http://127.0.0.1:8090. Download it in LM Studio first.",
+             [("", "", ["localAi.chat"])]),
 }
 FALLBACK_ICON = "applications-system-symbolic"
 

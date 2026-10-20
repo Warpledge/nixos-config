@@ -168,6 +168,7 @@
   localAi = {
     code = "qwen3.6-35b-a3b-q4";
     edit = "sweep-next-edit-1.5b";
+    chat = "gpt-oss-20b";
   };
 
   #--- Japanese Language & Game Support

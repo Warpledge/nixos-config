@@ -17,8 +17,10 @@
     then null
     else catalog.${kind}.${name};
   code = pick "code" user.localAi.code;
+  chat = pick "chat" user.localAi.chat;
   edit = pick "edit" user.localAi.edit;
   codeId = user.localAi.code;
+  chatId = user.localAi.chat;
   fastId = "${codeId}-instruct";
   hasFast = code != null && code.fast != null;
 
@@ -36,25 +38,26 @@
   '';
   cmd = model: args: lib.concatStringsSep " " ([launch "'${model.dir}'" "'${model.match}'" "--port \${PORT}"] ++ args);
 
-  #--- One slot gets the whole context; q8_0 cache halves its VRAM
-  codeCmd =
-    cmd code (["-c ${toString code.context}" "-np 1" "-fa on" "-ctk q8_0" "-ctv q8_0" "--no-webui"]
-      ++ code.args);
+  #--- A coding or chat model. One slot gets the whole context; q8_0 cache halves
+  #--- its VRAM. Each ID gets its variant's sampling over whatever the client sent;
+  #--- the -instruct key also registers as an alias, so it needs no reload
+  serve = id: model: {
+    ${id} = {
+      ttl = 600;
+      cmd =
+        cmd model (["-c ${toString model.context}" "-np 1" "-fa on" "-ctk q8_0" "-ctv q8_0" "--no-webui"]
+          ++ model.args);
+      filters.setParamsByID =
+        {${id} = model.think;}
+        // lib.optionalAttrs (model.fast != null) {"${id}-instruct" = model.fast;};
+    };
+  };
 
   #--- Loads on the first request, unloads after `ttl` idle seconds to free VRAM
   settings = {
     models =
-      lib.optionalAttrs (code != null) {
-        ${codeId} = {
-          ttl = 600;
-          cmd = codeCmd;
-          #--- Each ID gets its variant's sampling over whatever the client sent; the
-          #--- -instruct key also registers as an alias, so it needs no reload
-          filters.setParamsByID =
-            {${codeId} = code.think;}
-            // lib.optionalAttrs hasFast {${fastId} = code.fast;};
-        };
-      }
+      lib.optionalAttrs (code != null) (serve codeId code)
+      // lib.optionalAttrs (chat != null) (serve chatId chat)
       // lib.optionalAttrs (edit != null) {
         ${user.localAi.edit} = {
           ttl = 600;
@@ -70,14 +73,15 @@
         };
       };
     groups =
-      lib.optionalAttrs (code != null) {
-        chat = {
+      #--- The coding and chat models don't fit the GPU together: one at a time
+      lib.optionalAttrs (code != null || chat != null) {
+        gpu = {
           swap = true;
           exclusive = false;
-          members = [codeId];
+          members = lib.optional (code != null) codeId ++ lib.optional (chat != null) chatId;
         };
       }
-      #--- Stays loaded beside the coding model
+      #--- Stays loaded beside them
       // lib.optionalAttrs (edit != null) {
         predict = {
           swap = false;
