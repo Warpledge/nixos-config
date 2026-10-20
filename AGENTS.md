@@ -106,9 +106,6 @@ The skills were written for Claude Code. Read them this way:
   `prose-reviewer`, `build-triager`, `docs-drift-auditor`) is yours to do:
   for the auditor, read `git diff --cached` for personal data, private paths,
   hostnames and tokens; for the prose pass, cut words from what you wrote.
-- The context7 and grep MCP tools are off for you. Skip steps that
-  need them and use the lookups below. Deepwiki is available for upstream
-  docs on public repos.
 
 Several folders carry their own `CLAUDE.md`. Read it first before changing
 files in that area:
@@ -133,6 +130,10 @@ files in that area:
 
 If the home-manager module exists, read it and use `programs.<pkg>` instead
 of `home.packages`.
+
+**Available MCP tools:** deepwiki for upstream wiki docs on public repos,
+context7 for version-specific library docs and code examples, grep for
+real-world code across public GitHub repos.
 
 **Check every option path and attribute name before writing it.** Your memory
 of them is often out of date or invented. Look an option up with the `nixos`
