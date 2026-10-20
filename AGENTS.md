@@ -225,6 +225,9 @@ user. Before changing the app, its helper, or the template layout, read
   NixOS Settings' Flatpaks page. Don't try to add Flatpak apps declaratively.
 - **Every setting exists once** `lib/settings.nix` has filled the gaps, so read
   it as a bare path (`user.media.mpv`); `or false` isn't needed.
+- **Read tool truncates lines over 2000 chars.** Use `grep` or `sed` to read
+  specific ranges when dealing with long lines (README tables, single-line
+  JSON, etc.).
 
 ### Machine context
 
