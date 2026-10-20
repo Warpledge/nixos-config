@@ -8,14 +8,16 @@
 {
   config,
   lib,
+  pkgs,
   machine,
   ...
 }: let
   port = 8091; # 8080, the default, is taken by Steam's webhelper
   url = "http://127.0.0.1:${toString port}";
+  nixosMcpPort = 8092;
 
   #--- MCP servers it calls itself; only Streamable HTTP ones work without a proxy.
-  #--- Same URLs as home/programs/ai/mcp.nix
+  #--- Same servers as home/programs/ai/mcp.nix
   mcp = id: name: mcpUrl: {
     type = "mcp";
     url = mcpUrl;
@@ -50,7 +52,31 @@ in {
       TOOL_SERVER_CONNECTIONS = builtins.toJSON [
         (mcp "deepwiki" "DeepWiki" "https://mcp.deepwiki.com/mcp")
         (mcp "grep" "grep.app" "https://mcp.grep.app")
+        (mcp "nixos" "NixOS" "http://127.0.0.1:${toString nixosMcpPort}/mcp")
       ];
+    };
+  };
+
+  #--------------------------------------------------------------------#
+  #-- NixOS MCP Server
+  #--------------------------------------------------------------------#
+  #--- mcp-nixos over HTTP on localhost: packages, options and the NixOS wiki
+  systemd.services.mcp-nixos = {
+    description = "mcp-nixos MCP server for Open WebUI";
+    wantedBy = ["multi-user.target"];
+    before = ["open-webui.service"];
+    environment = {
+      MCP_NIXOS_TRANSPORT = "http";
+      MCP_NIXOS_HOST = "127.0.0.1";
+      MCP_NIXOS_PORT = toString nixosMcpPort;
+    };
+    serviceConfig = {
+      ExecStart = lib.getExe pkgs.mcp-nixos;
+      DynamicUser = true;
+      Restart = "on-failure";
+      ProtectHome = true;
+      PrivateDevices = true;
+      NoNewPrivileges = true;
     };
   };
 
