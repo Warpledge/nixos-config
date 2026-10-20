@@ -78,18 +78,6 @@
       think = ["--chat-template-kwargs '{\"reasoning_effort\":\"high\"}'"];
       fast = ["--chat-template-kwargs '{\"reasoning_effort\":\"low\"}'"];
     };
-    #--- MoE, 2B active; always reasons first
-    "lfm2.5-24b-a2b" = {
-      name = "LFM2.5 24B A2B";
-      dir = "unsloth/LFM2.5-24B-A2B-GGUF";
-      match = "*UD-Q3_K_XL*.gguf";
-      context = 131072;
-      # Liquid AI's suggested sampling
-      args = ["--fit-target 2048" "--min-p 0.15" "--repeat-penalty 1.05"];
-      temp = 0.1;
-      think = [];
-      fast = null;
-    };
   };
 
   #--------------------------------------------------------------------#
