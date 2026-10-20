@@ -246,6 +246,13 @@ The flake manages two machines: **eclipse** (desktop, Ryzen 5800X3D + RX 9070 XT
 ++ lib.optionals anyUser.media.mpv [./mpv.nix]
 ```
 
+### Flake inputs
+
+All inputs follow `nixpkgs` unless noted. Pinned versions: **moku v0.14.0**,
+**tsunagu v0.5.0**, **alejandra 3.0.0**. Flake=false: `claude-desktop`,
+`moku`, `tsunagu`, `retroshelf`. Non-nixpkgs-followers: `alejandra`,
+`nix-flatpak`, `claude-code`, `affinity-nix`, `cachyos-kernel`.
+
 **Never add a `---` line to `README.md`.** Zed's preview pairs them like
 front-matter and shows the sections between as raw text.
 
