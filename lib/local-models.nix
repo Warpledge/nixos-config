@@ -39,8 +39,8 @@
       dir = "unsloth/Qwen3.6-35B-A3B-GGUF";
       match = "*UD-Q4_K_XL*.gguf";
       context = 131072;
-      # ~0.5GB per layer's experts, so 21 from RAM for the same ~15GB
-      args = ["-ngl 99" "--n-cpu-moe 21" "-ub 2048" "--top-k 20" "--min-p 0"];
+      # Experts of 24 layers from RAM: measured ~89% VRAM, 38 tok/s
+      args = ["-ngl 99" "--n-cpu-moe 24" "-ub 2048" "--top-k 20" "--min-p 0"];
       think = {
         temperature = 0.6;
         top_p = 0.95;
