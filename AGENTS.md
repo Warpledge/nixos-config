@@ -1,5 +1,12 @@
 # AGENTS.md
 
+## Critical: Read CLAUDE.md first
+
+**Always read `CLAUDE.md` at the start of every session.** It contains the full
+repo rules, architecture, workflows, and critical gotchas. This AGENTS.md is
+OpenCode-specific tips only; CLAUDE.md has everything else. Read it before
+doing any work.
+
 ## Context budget
 
 Your context window is 128K tokens and the tool definitions already use about
@@ -49,8 +56,8 @@ Read them this way:
 - `<skill-dir>` is `modules/home/programs/ai/skills/<name>`, so run
   `bash modules/home/programs/ai/skills/add-app/scripts/check-app.sh ...`.
 - "CLAUDE.md rule 1" is rule 1 in `CLAUDE.md` (no rebuilds, when to flake check);
-  "rule 6" is rule 7 there (commit format). Do not open `CLAUDE.md` to look
-  a rule up. If a skill names a CLAUDE.md section you need, `grep -n` it.
+  "rule 6" is rule 7 there (commit format). You already read it at session start
+  (see above). If a skill names a CLAUDE.md section you need, `grep -n` it.
 - A step that hands work to a subagent (`public-repo-auditor`,
   `prose-reviewer`, `build-triager`, `docs-drift-auditor`) is yours to do:
   for the auditor, read `git diff --cached` for personal data, private paths,
