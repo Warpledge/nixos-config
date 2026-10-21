@@ -22,7 +22,15 @@ that catches the step that usually gets missed.
   A prebuilt bundle in `~/.local/opt` gets a wrapper in the folder for what the app is,
   a toggle in that category, and an entry in `docs/local/local-binary-installs.md`.
 - Set only what the user asked for; Stylix owns colors and fonts, so enable the program's
-  theming target instead of setting any.
+  theming target instead of setting any. If catppuccin/nix also has a port for the app,
+  switch one of the two off in `theme/catppuccin.nix`, or both theme it.
+- Install it once: `programs.<pkg>.enable` already adds the package, so don't also list
+  it in `home.packages`.
+- Option keys inside a freeform set (`programs.<pkg>.options`, `settings`) aren't
+  checked by Nix; confirm each against the app's man page (`selection-clipboard`, not a
+  guess).
+- Put it in a category that already exists in the template, and take only the module
+  arguments the module uses (`deadnix --no-lambda-arg <file>` flags the rest).
 
 ## Steps
 
