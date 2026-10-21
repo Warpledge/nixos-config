@@ -1,41 +1,163 @@
 # AGENTS.md
 
-## Critical: Read CLAUDE.md first
+Rules for local models working in this repo (opencode, and Zed's agent, which reads
+this file too). Claude Code reads `CLAUDE.md`; this file is the condensed version
+of it for a smaller model, kept in sync with it. Everything you need for most tasks
+is here. For the rest, `grep -n` CLAUDE.md for the section; don't read it whole.
 
-**Always read `CLAUDE.md` at the start of every session.** It contains the full
-repo rules, architecture, workflows, and critical gotchas. This AGENTS.md is
-OpenCode-specific tips only; CLAUDE.md has everything else. Read it before
-doing any work.
+NixOS flake for two machines: **eclipse** (desktop, RX 9070 XT) and **legion**
+(laptop, hybrid AMD/NVIDIA). Nixpkgs unstable, home-manager, Niri WM, Dux Shell
+(formerly DankMaterialShell, still called DMS in the code), Stylix theming
+(Catppuccin Mocha). Run `hostname` before anything machine-specific.
+
+## Rules
+
+Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
+
+1. **Never run `nixm rebuild`, `nixm boot` or `nixos-rebuild`.** Hand back with
+   `! nixm rebuild 2>&1 | grep -E "error|Error|failed|Failed" || echo "✓"`.
+   After any `.nix` edit, run `alejandra <file>` on that file (no hook does it for
+   you; never `alejandra .`), then `nix flake check 2>&1 | tail -n 30`. A JSON,
+   Markdown or comment-only edit needs neither.
+2. **`git add <path>` new files before `nix flake check`**: the flake can't see
+   untracked files. Stage by path, never `git add -A` or `git add .`.
+3. **Edit in place.** Never rewrite a whole file unless asked. Never delete what
+   the task didn't ask you to remove, including comments, commented-out code and
+   disabled options. Changing code under a comment? Update the comment, keep it.
+4. **Public repo.** No passwords, API keys, tokens or secrets.
+5. **Stylix owns theming.** Never set colours, fonts, font sizes, theme presets or
+   wallpaper in a module, including an app's own settings (`theme = "purple"`,
+   `fontWeight`). Leave them at the app's default or enable its Stylix target.
+6. **Commits** use Conventional Commits, `type(scope): subject` plus a bullet body;
+   load the `commit` skill. Commit without asking; never push, amend or rebase.
+7. **No screenshots** of the screen or a window unless the user said yes to that one.
+8. **Set only what was asked for.** No extra options, and never restate an app's
+   defaults: set only the values that differ, after checking what the default is.
+9. **Ask before writing new docs** (a new `.md`, a new doc section, a comment over
+   two lines). Keeping existing docs accurate needs no approval.
+10. **No memory files.** If something is worth remembering, propose the line for
+    CLAUDE.md or this file and let the user decide.
+11. **`rm` takes literal absolute paths**, one deletion per command, never `$VAR`.
+
+## Verify, don't guess
+
+Most mistakes so far were confident guesses that still passed `nix flake check`
+and then did nothing, or the wrong thing. Evaluation passing proves very little:
+unknown keys in `nixpkgs.config`, an app's JSON settings or a plugin's settings are
+accepted silently.
+
+- **Before setting an option, read where it's defined.** For a flake input's
+  module, find it in the source:
+  `nix eval --raw --impure --expr '(builtins.getFlake "/etc/nixos-config").inputs.<name>.outPath'`
+  then `grep -rn mkOption` there and read how the option is used (a `settings`
+  option often writes a read-only store link, not a file the app can save to).
+  For nixpkgs and home-manager options, use the `nixos` MCP tool.
+- **Check an app's setting names, defaults and units in its source** before
+  writing them (a QML `property`, a settings schema, the man page). An interval
+  in minutes is not seconds.
+- **Check a package attribute exists**: `nix eval --raw nixpkgs#<attr>.name`.
+- **Never write a homepage, description or option name from memory.**
+  `nix eval --raw nixpkgs#<pkg>.meta.homepage`.
+- **Don't blame upstream in a comment** ("nixpkgs bug") unless you read the
+  upstream code and it shows the bug.
+- **Think through what the change does at runtime**, not only whether it builds:
+  spawning a terminal app (yazi, btop) without a terminal opens nothing; a file in a
+  shared module reaches every machine.
+- **Never say a fix "should work".** Report the command you ran and its result.
+
+## Stop looping
+
+You have got stuck repeating the same step until the user stopped you. Follow
+this, in thinking and in tool calls alike:
+
+- **Before retrying, name what's different.** If you can't say what changed since
+  the last attempt (a new file read, a new hypothesis, a different command),
+  don't run it again.
+- **Two strikes per approach.** If the same fix or command fails twice, drop that
+  approach. After three different approaches fail, **stop and report**: what you
+  tried, the exact errors, and your best guess at the cause. Then wait.
+- **Don't re-read a file or re-run a command to "check again"** when nothing has
+  changed since. The output will be the same.
+- **Nix reports one error at a time.** A new error after a fix is progress, not a
+  repeat; the same error at the same line means the fix didn't apply.
+- **In thinking: when you notice you're restating a plan you already made, act on
+  it or ask.** Don't weigh the same options again.
+- **Unsure what the user wants? Ask** instead of guessing and iterating.
 
 ## Context budget
 
-Your context window is 128K tokens and the tool definitions already use about
-27K of it. Long tasks get compacted, and whatever you only held in context is
-lost. Work so that compaction costs nothing:
+128K tokens, about 27K of it taken by tool definitions. Long tasks get compacted
+and whatever only lived in context is lost.
 
-- **Start every multi-step task with a todo list** (the `todowrite` tool), one
-  item per file or step, and tick items off as you go. After a compaction, read
-  the todo list and run `git status --short && git diff --stat` to see where you
-  are. Do not re-read files to rebuild your memory.
-- **Never read a large file whole.** `README.md` (~38 KB) is off limits in full:
-  `grep -n` for the lines you need, then read that range with an offset and
-  limit. Do the same for any file over ~300 lines.
-- **Read each file once**, and only the files the task touches. Two or three
-  sibling modules are enough to learn a pattern.
-- **Trim command output at the source**: `nix flake check 2>&1 | tail -n 30`,
-  `alejandra <file> 2>&1 | tail -n 5`, man pages through `grep`. Never print a store
-  listing, a derivation or a full log.
-- **Checkpoint on demand.** When the user asks "where are we?" or "summarize", output a brief status (what's done, what's blocking, next step) and wait for direction instead of continuing.
-- **Small edits.** Use the edit tool with the shortest unique `oldString`, not a
-  whole-file write. Finish one file before opening the next.
+- **Start every multi-step task with a todo list** (`todowrite`), one item per file
+  or step. After a compaction, read the list and run
+  `git status --short && git diff --stat`; don't re-read files to catch up.
+- **Never read a large file whole.** `README.md` and `CLAUDE.md` (~40 KB each):
+  `grep -n` the lines, then read that range with offset and limit. Same for any
+  file over ~300 lines.
+- **Read each file once**, and only what the task touches. Two or three sibling
+  modules are enough to learn a pattern.
+- **Trim output at the source**: `| tail -n 30`, `| grep`. Never print a store
+  listing, a derivation or a full build log.
+- **Small edits**: the shortest unique `oldString`. Finish one file before the next.
 - **Batch** independent shell commands into one call.
-- **Don't think in circles.** Once you know the next step, take it. If the same tool fires on the same path twice without new information, stop and try a different approach. If you're unsure how to proceed, stop and ask instead of looping.
+- When asked "where are we?", give a short status (done, blocked, next) and wait.
+
+## Where things go
+
+`flake.nix` → `lib/settings.nix` (reads the settings files) →
+`machines/<name>/default.nix` → `modules/default.nix` → `modules/{nixos,home}/`
+and the active WM's `modules/wm/<wm>/`.
+
+| Change | Path |
+| --- | --- |
+| Shared system config | `modules/nixos/` |
+| Shared user config | `modules/home/` |
+| A user app toggle | `users/_template/settings.nix` (off), then `users/<name>/settings.nix` |
+| A machine toggle (service, kernel, WM) | `machines/_template/settings.nix` (off), then `machines/<name>/settings.nix` |
+| One user's change on one machine | `users.<name>` block in `machines/<machine>/settings.nix` |
+| Monitors, bars, GPU env for one machine | `machines/<name>/wm/<wm>.nix`, never a shared module |
+| WM behaviour for everyone | `modules/wm/<wm>/home/` |
+
+- Modules are loaded by `lib.optionals user.<cat>.<app> [./path.nix]` in a router
+  (`modules/home/programs/default.nix`; `gaming.*` in `programs/gaming/default.nix`).
+  Don't also wrap the new module's body in `lib.mkIf`.
+- NixOS modules get `machine` and `anyUser`; home modules get `machine` and `user`.
+  Every setting exists after `lib/settings.nix`, so read `user.media.mpv`, no
+  `or false`.
+- Settings files stay plain data: no `let`, functions or interpolation.
+- **Folder CLAUDE.md files hold the rules for their folder and aren't loaded for
+  you.** Read the matching one before editing there: `modules/wm/` (also for
+  `machines/*/wm/` and `modules/home/variables.nix`), `modules/nixos/`,
+  `modules/home/programs/ai/`, `modules/home/programs/system/nixos-settings/`,
+  `modules/home/programs/media/freetube/`, `docs/`.
+
+## Gotchas
+
+- **A GUI app's settings must stay writable.** `home.file`/`xdg.configFile` and
+  most upstream `settings` options make read-only store links, so the app can't
+  save. Use `lib/mutable-merge.jq` through an activation script, as
+  `modules/home/programs/file-browsers/dux-files.nix` and `editors/zed.nix` do.
+- **DMS settings**: `modules/wm/<wm>/home/dms/settings.json` is shared by every
+  machine. Plugin settings go in `dms.pluginSettings.<plugin>`, not
+  `plugins.<plugin>.settings`.
+- **Niri spawns with arguments are lists**: `spawn = ["dms" "ipc" "call" ...]`.
+- Keep `QT_QPA_PLATFORM`, `GDK_BACKEND`, `SDL_VIDEODRIVER` X11 fallbacks
+  (`wayland;xcb`, `wayland,x11`, `wayland,x11`).
+- `boot.kernelModules` silently swallows kernel parameters; they go in
+  `boot.kernelParams`.
+- A package an update broke: the `disable-package` skill. Remove it from the
+  package list; nixpkgs has no setting that disables a package.
+- Don't add `inputs.nixpkgs.follows` to `alejandra`, `claude-code`,
+  `affinity-nix` or `cachyos-kernel`.
+- **After renaming or removing something, `grep -rn` the old name** across the
+  repo (`--exclude=flake.lock`) and fix every hit, docs and README included.
+  Deleting a doc means removing its entry in `docs/CLAUDE.md` too.
 
 ## Skills
 
-The repo's skills are loaded through the `skill` tool. When a request matches
-one, load it **before** doing anything else and follow its steps; they carry
-checks that are easy to miss.
+Load the matching skill with the `skill` tool **before** starting, and follow its
+steps.
 
 | Skill | Use when |
 | --- | --- |
@@ -51,14 +173,46 @@ checks that are easy to miss.
 | `android-debloat-redo` | Tablet debloat after an OTA |
 | `flake-update` | Only when the user runs `/flake-update`; never on your own |
 
-Read them this way:
+- `<skill-dir>` is `modules/home/programs/ai/skills/<name>`.
+- A step that hands work to a subagent is yours to do: for
+  `public-repo-auditor`, read `git diff --cached` for personal data, private
+  paths, hostnames and tokens; for `prose-reviewer`, cut words from what you
+  wrote; for `docs-drift-auditor`, grep the docs for the paths and names you
+  changed; for `build-triager`, run
+  `nix build .#nixosConfigurations.$(hostname).config.system.build.toplevel --no-link 2>&1 | tail -n 40`.
 
-- `<skill-dir>` is `modules/home/programs/ai/skills/<name>`, so run
-  `bash modules/home/programs/ai/skills/add-app/scripts/check-app.sh ...`.
-- "CLAUDE.md rule 1" is rule 1 in `CLAUDE.md` (no rebuilds, when to flake check);
-  "rule 6" is rule 6 there (commit format). You already read it at session start
-  (see above). If a skill names a CLAUDE.md section you need, `grep -n` it.
-- A step that hands work to a subagent (`public-repo-auditor`,
-  `prose-reviewer`, `build-triager`, `docs-drift-auditor`) is yours to do:
-  for the auditor, read `git diff --cached` for personal data, private paths,
-  hostnames and tokens; for the prose pass, cut words from what you wrote.
+## Formatting
+
+Every module opens with a banner; copy it byte for byte from a neighbour:
+
+```nix
+#=====================================================================#
+# VIDEO TRIMMER
+#=====================================================================#
+{pkgs, ...}: {
+  home.packages = [pkgs.video-trimmer];
+}
+```
+
+- Sections: `#-- Name` between two `#----...----#` rules; items: `#--- text`.
+- Take only the arguments you use; `deadnix --no-lambda-arg <file>` finds the rest.
+- Comments are short and say *why*: no narration ("we"), no restating the code,
+  no alternatives. Lines within 89 columns: `awk 'length>89' <file>`.
+
+## Writing style
+
+For replies, `README.md`, `docs/` and commit messages.
+
+- Lead with the answer. No praise, no exclamation marks, no restating the request.
+- Full sentences of varied length. Not "it's not X, it's Y"; no lists padded to
+  three; don't rate what you describe.
+- Avoid: delve, robust, seamless, leverage, crucial, ensure, comprehensive,
+  streamline, utilize, enhance.
+- No em dashes in `README.md` or `docs/` prose. Never add a `---` line to
+  `README.md`.
+- A reply naming packages or upstream projects ends with **Sources** links.
+
+## Keeping this file current
+
+CLAUDE.md is the source. When it changes a rule, a path or a gotcha listed here,
+this file changes in the same commit. Don't add anything here that contradicts it.
