@@ -18,6 +18,9 @@
       localAi.edit = null;
       media.moku = false;
       media.boorusama = true;
+      defaultApps.fileManager = "duxFiles";
+      fileBrowsers.nautilus = false;
+      fileBrowsers.yazi = false;
     };
   };
 

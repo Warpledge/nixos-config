@@ -256,6 +256,22 @@
         "type": "github"
       }
     },
+    "dank-qml-common_3": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792513666,
+        "narHash": "sha256-RDqPdPrM5lnwRrfFGLz3IwgTjCV2Ie+nrTD3ldj1t/s=",
+        "owner": "duxlabs-dev",
+        "repo": "dux-qml-common",
+        "rev": "ebf5e6c002da1bdaa4aaa2f319fea7b8507abc42",
+        "type": "github"
+      },
+      "original": {
+        "owner": "duxlabs-dev",
+        "repo": "dux-qml-common",
+        "type": "github"
+      }
+    },
     "dms": {
       "inputs": {
         "dank-qml-common": "dank-qml-common",
@@ -299,9 +315,30 @@
         "type": "github"
       }
     },
-    "dux-greeter": {
+    "dux-files": {
       "inputs": {
         "dank-qml-common": "dank-qml-common_2",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792524315,
+        "narHash": "sha256-D7Rpu2bKlh46KSA7NGF4jmt3Ji1nscWmdjtCOJAWaiU=",
+        "owner": "duxlabs-dev",
+        "repo": "dux-files",
+        "rev": "f646769cc6de61354402bba0ee8ee3bb7d52d588",
+        "type": "github"
+      },
+      "original": {
+        "owner": "duxlabs-dev",
+        "repo": "dux-files",
+        "type": "github"
+      }
+    },
+    "dux-greeter": {
+      "inputs": {
+        "dank-qml-common": "dank-qml-common_3",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -576,11 +613,11 @@
         "utils": "utils"
       },
       "locked": {
-        "lastModified": 1792295731,
-        "narHash": "sha256-aV+kJDe6UPkr6DPj0XxoLDKJ9KoD56kzCjeXcsJqUkY=",
+        "lastModified": 1792570323,
+        "narHash": "sha256-mw7VzWO9S5T4+OgiTyw5GwRySOoPyiMEnANxnXQOfuI=",
         "owner": "schembriaiden",
         "repo": "helium-browser-nix-flake",
-        "rev": "f8ea5e9ee4ef98a920e2fa1fddf4e6e15a81ba5f",
+        "rev": "a05e2c1e9596d7c3630dd56b53d21a36b8270a26",
         "type": "github"
       },
       "original": {
@@ -796,11 +833,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1792545573,
-        "narHash": "sha256-G315OsXSpvnLEtXBtm8+yqUf5fvPdx9/ja4OyavykDA=",
+        "lastModified": 1792566228,
+        "narHash": "sha256-RPpBBmnJbUYqsrhXtFjeYaCOZYZF47JzS/nutEQJPZk=",
         "owner": "kaylorben",
         "repo": "nixcord",
-        "rev": "677fbfaded1a4543eed15c5f25bc4b7fe4561041",
+        "rev": "c2e036b2ca434424464d2dd49a008598b76029c5",
         "type": "github"
       },
       "original": {
@@ -1017,11 +1054,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792563370,
-        "narHash": "sha256-hK7q+NLh/TtyyCzDQfO6Kl+c63HzS7PKXAbqlO131IU=",
+        "lastModified": 1792568219,
+        "narHash": "sha256-Ows5FV85KOmKiUKntJtExuQwH5LSigKdpxMQPFqHj3U=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "4832ddf6c432666e4ea89ee351b4ce4ec9686f24",
+        "rev": "3befc081173211ae480392f2391c766d9b3188e8",
         "type": "github"
       },
       "original": {
@@ -1116,6 +1153,7 @@
         "claude-desktop": "claude-desktop",
         "dms": "dms",
         "dms-plugin-registry": "dms-plugin-registry",
+        "dux-files": "dux-files",
         "dux-greeter": "dux-greeter",
         "helium": "helium",
         "home-manager": "home-manager",
