@@ -56,7 +56,7 @@ in {
     managePluginSettings = false;
     plugins = {
       # amdGpuMonitor is per machine: machines/eclipse/hardware/gpu.nix
-      aiOverviewControl.enable = user.claude.enable;
+      claudeCodeUsage.enable = user.claude.enable;
       quickCapture.enable = true;
 
       # A bar widget: its IPC target only exists while it sits in a bar
@@ -82,7 +82,7 @@ in {
   #--- warns it ignores while managePluginSettings is off
   dms.pluginSettings = {
     # The plugin stores its options as strings, booleans included.
-    aiOverviewControl = {
+    claudeCodeUsage = {
       providerSelection = "claude";
       pillProviders = "claude";
       languageOverride = "en_US";

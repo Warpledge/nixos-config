@@ -24,7 +24,7 @@
       # amdGpuMonitor is per machine: machines/eclipse/hardware/gpu.nix
 
       # The plugin stores its options as strings, booleans included.
-      aiOverviewControl = {
+      claudeCodeUsage = {
         enable = user.claude.enable;
         settings = {
           providerSelection = "claude";
