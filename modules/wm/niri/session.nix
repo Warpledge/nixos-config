@@ -11,7 +11,7 @@
   # niri-flake's git build, for 10-bit output (docs/todo/niri-10-bit.md)
   niri = inputs.niri.packages.${pkgs.stdenv.hostPlatform.system}.niri-unstable;
 in {
-  imports = [inputs.dank-greeter.nixosModules.default];
+  imports = [inputs.dux-greeter.nixosModules.default];
 
   #--------------------------------------------------------------------#
   #-- Window Manager

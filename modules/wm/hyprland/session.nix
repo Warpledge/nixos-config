@@ -6,7 +6,7 @@
   machine,
   ...
 }: {
-  imports = [inputs.dank-greeter.nixosModules.default];
+  imports = [inputs.dux-greeter.nixosModules.default];
 
   #--------------------------------------------------------------------#
   #-- Window Manager

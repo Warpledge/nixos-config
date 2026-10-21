@@ -14,7 +14,7 @@
 
   #--- DMS Quick Capture editor: tiled under a fullscreen window, it stays
   #--- hidden behind it
-  "match:class ^(com\\.danklinux\\.dms)$, match:title ^(Quick Capture)$, float on, pin on"
+  "match:class ^(dev\\.duxlabs\\.shell)$, match:title ^(Quick Capture)$, float on, pin on"
 
   #--- Picture-in-Picture
   "match:title ^([Pp]icture[-\\s]?[Ii]n[-\\s]?[Pp]icture)(.*)$, float on"
