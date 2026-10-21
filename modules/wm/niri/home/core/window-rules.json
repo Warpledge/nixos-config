@@ -396,6 +396,11 @@
         "title": "file progress"
       }
     ],
+    "excludes": [
+      {
+        "app-id": "^dev\\.duxlabs\\.files$"
+      }
+    ],
     "open-floating": true
   },
   {
