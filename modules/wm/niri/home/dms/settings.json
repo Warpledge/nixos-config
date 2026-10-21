@@ -141,6 +141,7 @@
   "matugenTemplateNeovim": true,
   "notificationOverlayEnabled": true,
   "osdPowerProfileEnabled": true,
+  "osdWorkspaceEnabled": true,
   "powerMenuActions": [
     "reboot",
     "poweroff",
@@ -162,6 +163,9 @@
         {
           "enabled": true,
           "id": "workspaceSwitcher",
+          "workspaceIndicatorStyle": "cards",
+          "workspaceIndicatorCompact": true,
+          "showWorkspaceIndex": true,
           "showWorkspaceApps": true,
           "workspaceDragReorder": false,
           "maxWorkspaceIcons": 10,
@@ -427,7 +431,7 @@
     {
       "id": "lock_date",
       "widgetType": "lockDate",
-      "enabled": false,
+      "enabled": true,
       "config": {
         "displayPreferences": [
           "all"
@@ -455,7 +459,7 @@
     {
       "id": "lock_notifications",
       "widgetType": "lockNotifications",
-      "enabled": true,
+      "enabled": false,
       "config": {
         "displayPreferences": [
           "all"
@@ -481,7 +485,7 @@
     {
       "id": "lock_power",
       "widgetType": "lockPower",
-      "enabled": false,
+      "enabled": true,
       "config": {
         "displayPreferences": [
           "all"
