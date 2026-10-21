@@ -1,6 +1,7 @@
 # live file | jq --slurpfile old <last applied> --slurpfile new <declared>
 #   --argjson locked <key paths the repo always resets>
-# Used by modules/wm/dms-mutable.nix and modules/home/programs/editors/zed.nix
+# Used by modules/wm/dms-mutable.nix, modules/home/programs/editors/zed.nix and
+# modules/home/programs/file-browsers/dux-files.nix
 # Leaf paths; arrays and empty objects count as one value
 def leafpaths:
   if type == "object" and length > 0

@@ -1,7 +1,46 @@
 #=====================================================================#
 # DUX FILES (DUX-FILES) FILE BROWSER CONFIGURATION
 #=====================================================================#
-{config, lib, pkgs, inputs, ...}: {
+{
+  config,
+  lib,
+  pkgs,
+  inputs,
+  ...
+}: let
+  dir = "${config.xdg.configHome}/dfiles";
+  state = "${config.xdg.stateHome}/dfiles-declared";
+  jq = lib.getExe pkgs.jq;
+
+  # Only values that differ from upstream's (quickshell/Common/SettingsData.qml);
+  # theme, colours and fonts are left to the app (rule 5)
+  settings = pkgs.writeText "dfiles-ui-settings.json" (builtins.toJSON {
+    confirmTrash = true;
+    defaultView = "list";
+    focusRingEnabled = false;
+    recentFiles = false;
+    showHidden = true;
+  });
+
+  bookmark = path: label: {
+    path = "${config.home.homeDirectory}/${path}";
+    inherit label;
+    icon = "";
+  };
+  bookmarks = pkgs.writeText "dfiles-bookmarks.json" (builtins.toJSON {
+    version = 2;
+    bookmarks = [
+      (bookmark "Downloads" "Downloads")
+      (bookmark "Documents" "Documents")
+      (bookmark "Pictures" "Pictures")
+      (bookmark "Videos" "Videos")
+      (bookmark "Games" "Games")
+      (bookmark ".local/share" "Local")
+      (bookmark ".local/share/Steam/steamapps/common" "Steam")
+      (bookmark ".local/share/Terraria/tModLoader" "tModLoader")
+    ];
+  });
+in {
   #--------------------------------------------------------------------#
   #-- Packages & Modules
   #--------------------------------------------------------------------#
@@ -10,87 +49,36 @@
     inputs.dux-files.homeModules.dux-files
   ];
 
+  # settings is left unset: upstream writes it as a read-only store link
   programs.dux-files = {
     enable = true;
-
-    # Keep a resident instance so windows open fast and the portal answers at once
-    systemd.enable = true;
-
-    #--- UI settings — declared defaults, mutable (GUI can still edit)
-    settings = {
-      animationDuration = 250;
-      clickToOpen = "double";
-      closeBehavior = "quit";
-      colorSource = "auto";
-      confirmTrash = true;
-      defaultSort = "name";
-      defaultSortDescending = false;
-      defaultView = "list";
-      dragAction = "auto";
-      enableRippleEffects = true;
-      extractOnOpen = true;
-      focusRingColor = "primary";
-      focusRingEnabled = false;
-      focusRingWidth = 2;
-      folderCounts = true;
-      foldersFirst = true;
-      fontScale = 1;
-      fontWeight = 500;
-      gtkBookmarksOffered = true;
-      language = "";
-      listTyping = "jump";
-      mountOnClick = true;
-      networkThumbnails = false;
-      openLocationIn = "current";
-      presetTheme = "purple";
-      radiusStrength = 50;
-      recentFiles = false;
-      reduceMotion = false;
-      registerFileManager = true;
-      rememberFolderViews = true;
-      searchExcludes = [];
-      searchHidden = false;
-      showHidden = true;
-      showSystemPartitions = false;
-      sidebarCollapsed = false;
-      springBounce = 1;
-      terminal = "";
-      themeMode = "auto";
-      thumbnailSizeLimitMb = 64;
-      thumbnails = true;
-      vimKeys = false;
-      windowTitleBars = true;
-    };
+    systemd.enable = true; # Resident instance, so windows open fast
   };
 
   #--------------------------------------------------------------------#
-  #-- Bookmarks
+  #-- Settings & Bookmarks
   #--------------------------------------------------------------------#
+  # Real files the app can save to. A setting changed in the app survives
+  # rebuilds (lib/mutable-merge.jq); bookmarks are seeded once.
 
-  # Dux Files reads ~/.config/gtk-3.0/bookmarks on first launch as a seed,
-  # then manages its own ~/.config/dfiles/bookmarks.json from there.
-  # We write the native file declaratively so bookmarks appear immediately
-  # (no need to wait for the first-run import).
-  home.file.".config/dfiles/bookmarks.json".text =
-    let
-      home = config.home.homeDirectory;
-      mkBookmark = path: label: {
-        path = "${home}/${lib.removePrefix "file://${home}/" path}";
-        inherit label;
-        icon = "";
-      };
-    in
-    builtins.toJSON {
-      version = 2;
-      bookmarks = [
-        (mkBookmark "file://${home}/Downloads" "Downloads")
-        (mkBookmark "file://${home}/Documents" "Documents")
-        (mkBookmark "file://${home}/Pictures" "Pictures")
-        (mkBookmark "file://${home}/Videos" "Videos")
-        (mkBookmark "file://${home}/Games" "Games")
-        (mkBookmark "file://${home}/.local/share" "Local")
-        (mkBookmark "file://${home}/.local/share/Steam/steamapps/common" "Steam")
-        (mkBookmark "file://${home}/.local/share/Terraria/tModLoader" "tModLoader")
-      ];
-    };
+  home.activation.dfilesMutableFiles = lib.hm.dag.entryAfter ["linkGeneration"] ''
+    f="${dir}/ui-settings.json"
+    old="${state}/ui-settings.json"
+    b="${dir}/bookmarks.json"
+    if [[ -v DRY_RUN ]]; then
+      echo "Would merge ${settings} into $f"
+    else
+      mkdir -p "${dir}" "${state}"
+      # The read-only links an older generation left
+      [[ -L "$f" ]] && rm -f "$f"
+      [[ -L "$b" ]] && rm -f "$b"
+      [[ -s "$f" ]] && ${jq} empty "$f" 2>/dev/null || echo '{}' > "$f"
+      [[ -s "$old" ]] || echo '{}' > "$old"
+      merged="$(${jq} --slurpfile old "$old" --slurpfile new ${settings} \
+        --argjson locked '[]' -f ${../../../../lib/mutable-merge.jq} "$f")"
+      printf '%s\n' "$merged" > "$f"
+      cp --no-preserve=mode ${settings} "$old"
+      [[ -e "$b" ]] || cp --no-preserve=mode ${bookmarks} "$b"
+    fi
+  '';
 }
