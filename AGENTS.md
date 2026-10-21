@@ -45,6 +45,17 @@ Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
     CLAUDE.md or this file and let the user decide.
 11. **`rm` takes literal absolute paths**, one deletion per command, never `$VAR`.
 
+## Finishing a task
+
+A task that changed files isn't done until all four steps are. Put them on your
+todo list at the start, and don't write your summary before step 3.
+
+1. `alejandra <file>` on each `.nix` file you changed.
+2. `nix flake check 2>&1 | tail -n 30` (skip for JSON, Markdown or comment-only
+   changes).
+3. Load the `commit` skill and run every step, `scan.sh` included.
+4. Reply with what changed and the commit hash.
+
 ## Verify, don't guess
 
 Most mistakes so far were confident guesses that still passed `nix flake check`
@@ -94,6 +105,9 @@ this, in thinking and in tool calls alike:
   through branches, builds and other tools for it.
 - **Don't build when `nix flake check` answers the question.** If you must
   build, always pass `--no-link`, or a `result` link is left in the repo.
+- **`nix flake check` evaluates both eclipse and legion.** A pass means neither
+  has an evaluation error, so never build the other machine's system to look for
+  one; that compiles a whole second system.
 
 ## Context budget
 
@@ -172,6 +186,9 @@ lines, `grep -n` that file for the part you need.
   as a real file the GUI saves to (`dms.mutableFiles`). Machine bars go in the
   machine's `wm/niri.nix` through `dms.extraSettings`. Plugin settings go in
   `dms.pluginSettings.<plugin>`, not `plugins.<plugin>.settings`.
+- Each WM's `settings.json` mirrors what the user set in the DMS settings window.
+  A value that differs between niri's and Hyprland's is a choice, not a bug:
+  don't copy values across unless asked.
 - Keep `QT_QPA_PLATFORM`, `GDK_BACKEND`, `SDL_VIDEODRIVER` X11 fallbacks
   (`wayland;xcb`, `wayland,x11`, `wayland,x11`). DMS launches apps with the
   systemd user environment (`variables.nix`), not niri's `environment` block.
