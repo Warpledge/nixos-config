@@ -310,6 +310,8 @@ in {
             button = true;
             dock = "right";
 
+            # Run tools without asking unless a rule below matches, like opencode
+            tool_permissions.default = "allow";
             #--- Mirrors CLAUDE.md rules 1, 4 and 11; applies to Claude Agent too
             tool_permissions.tools = let
               patterns = map (pattern: {inherit pattern;});
