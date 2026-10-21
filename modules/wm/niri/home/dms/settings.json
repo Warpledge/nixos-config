@@ -189,7 +189,7 @@
           "enabled": true
         },
         {
-          "id": "aiOverviewControl",
+          "id": "claudeCodeUsage",
           "enabled": true
         },
         {
@@ -214,7 +214,8 @@
         },
         {
           "enabled": true,
-          "id": "controlCenterButton"
+          "id": "controlCenterButton",
+          "showBatteryIcon": true
         }
       ],
       "screenPreferences": [
@@ -236,6 +237,134 @@
       "widgetOutlineOpacity": 1,
       "widgetOutlineThickness": 1,
       "widgetTransparency": 0.8
+    },
+    {
+      "autoHide": true,
+      "autoHideDelay": 250,
+      "borderColor": "primary",
+      "borderEnabled": false,
+      "borderOpacity": 1,
+      "borderThickness": 1,
+      "bottomGap": 0,
+      "centerWidgets": [
+        {
+          "enabled": true,
+          "id": "workspaceSwitcher",
+          "showWorkspaceApps": true,
+          "workspaceDragReorder": false,
+          "maxWorkspaceIcons": 10,
+          "showOccupiedWorkspacesOnly": true,
+          "workspaceColorMode": "sch",
+          "workspaceUnfocusedColorMode": "sc"
+        }
+      ],
+      "enabled": true,
+      "fontScale": 1,
+      "gothCornerRadiusOverride": false,
+      "gothCornerRadiusValue": 12,
+      "gothCornersEnabled": false,
+      "hoverPopoutDelay": 150,
+      "hoverPopouts": false,
+      "iconScale": 1,
+      "id": "oled",
+      "innerPadding": 4,
+      "leftWidgets": [
+        {
+          "enabled": true,
+          "id": "launcherButton",
+          "launcherLogoMode": "os",
+          "launcherLogoColorOverride": "primary"
+        },
+        {
+          "clockCompactMode": false,
+          "enabled": true,
+          "id": "clock"
+        },
+        {
+          "enabled": true,
+          "id": "memUsage",
+          "minimumWidth": true,
+          "showSwap": false
+        },
+        {
+          "enabled": true,
+          "id": "cpuUsage",
+          "minimumWidth": true
+        },
+        {
+          "enabled": true,
+          "id": "amdGpuMonitor:variant_1791177076814"
+        }
+      ],
+      "maximizeDetection": true,
+      "maximizeWidgetIcons": true,
+      "maximizeWidgetText": true,
+      "name": "OLED Bar",
+      "noBackground": false,
+      "openOnOverview": false,
+      "popupGapsAuto": true,
+      "popupGapsManual": 4,
+      "position": 0,
+      "rightWidgets": [
+        {
+          "enabled": true,
+          "id": "quickCapture"
+        },
+        {
+          "id": "claudeCodeUsage",
+          "enabled": true
+        },
+        {
+          "enabled": true,
+          "id": "systemTray"
+        },
+        {
+          "enabled": true,
+          "id": "notepadButton"
+        },
+        {
+          "enabled": true,
+          "id": "battery"
+        },
+        {
+          "enabled": true,
+          "id": "notificationButton"
+        },
+        {
+          "enabled": true,
+          "id": "clipboardPlus"
+        },
+        {
+          "enabled": true,
+          "id": "controlCenterButton",
+          "showBatteryIcon": true
+        }
+      ],
+      "screenPreferences": [
+        {
+          "name": "DP-2",
+          "model": "AW2725D"
+        }
+      ],
+      "scrollEnabled": true,
+      "scrollYBehavior": "workspace",
+      "shadowColorMode": "custom",
+      "shadowIntensity": 0,
+      "shadowOpacity": 67,
+      "showOnLastDisplay": false,
+      "showOnWindowsOpen": false,
+      "spacing": 0,
+      "squareCorners": true,
+      "transparency": 0.8,
+      "visible": true,
+      "widgetOutlineColor": "primary",
+      "widgetOutlineEnabled": false,
+      "widgetOutlineOpacity": 1,
+      "widgetOutlineThickness": 1,
+      "widgetTransparency": 0.8,
+      "attachToScreenEdge": false,
+      "followInterfaceStyle": false,
+      "widgetFollowInterfaceStyle": false
     }
   ],
   "desktopClockCustomColor": {
@@ -276,6 +405,15 @@
     },
     "dms_sysmon": {
       "enabled": true
+    },
+    "dms_clipboard_search": {
+      "trigger": "cb"
+    },
+    "dms_power": {
+      "trigger": "pw"
+    },
+    "dms_qr_generator": {
+      "trigger": "qrg"
     }
   },
   "frameThickness": 2,
