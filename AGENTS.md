@@ -130,11 +130,8 @@ and the active WM's `modules/wm/<wm>/`.
   Every setting exists after `lib/settings.nix`, so read `user.media.mpv`, no
   `or false`.
 - Settings files stay plain data: no `let`, functions or interpolation.
-- **Folder CLAUDE.md files hold the rules for their folder and aren't loaded for
-  you.** Read the matching one before editing there: `modules/wm/` (also for
-  `machines/*/wm/` and `modules/home/variables.nix`), `modules/nixos/`,
-  `modules/home/programs/ai/`, `modules/home/programs/system/nixos-settings/`,
-  `modules/home/programs/media/freetube/`, `docs/`.
+- Several folders have their own `CLAUDE.md`, which isn't loaded for you. Their
+  hard rules are condensed under **Folder rules** below.
 
 ## Gotchas
 
@@ -142,12 +139,6 @@ and the active WM's `modules/wm/<wm>/`.
   most upstream `settings` options make read-only store links, so the app can't
   save. Use `lib/mutable-merge.jq` through an activation script, as
   `modules/home/programs/file-browsers/dux-files.nix` and `editors/zed.nix` do.
-- **DMS settings**: `modules/wm/<wm>/home/dms/settings.json` is shared by every
-  machine. Plugin settings go in `dms.pluginSettings.<plugin>`, not
-  `plugins.<plugin>.settings`.
-- **Niri spawns with arguments are lists**: `spawn = ["dms" "ipc" "call" ...]`.
-- Keep `QT_QPA_PLATFORM`, `GDK_BACKEND`, `SDL_VIDEODRIVER` X11 fallbacks
-  (`wayland;xcb`, `wayland,x11`, `wayland,x11`).
 - `boot.kernelModules` silently swallows kernel parameters; they go in
   `boot.kernelParams`.
 - A package an update broke: the `disable-package` skill. Remove it from the
@@ -157,6 +148,78 @@ and the active WM's `modules/wm/<wm>/`.
 - **After renaming or removing something, `grep -rn` the old name** across the
   repo (`--exclude=flake.lock`) and fix every hit, docs and README included.
   Deleting a doc means removing its entry in `docs/CLAUDE.md` too.
+
+## Folder rules
+
+Condensed from each folder's `CLAUDE.md`. Before a change that goes past these
+lines, `grep -n` that file for the part you need.
+
+**`modules/wm/`** (also `machines/*/wm/` and `modules/home/variables.nix`)
+
+- Keybinds differ per WM. Hyprland is Lua: add binds through the `exec`/`bind`
+  helpers in `hyprland/home/core/binds.nix`; rules stay in the
+  `"match:class X, float on"` string form. Run the `hyprland-verify` skill after.
+- **Niri spawns with arguments are lists** (`spawn = ["dms" "ipc" "call" ...]`);
+  a spaced string fails the build.
+- DMS `settings.json` in `<wm>/home/dms/` is shared by every machine and written
+  as a real file the GUI saves to (`dms.mutableFiles`). Machine bars go in the
+  machine's `wm/niri.nix` through `dms.extraSettings`. Plugin settings go in
+  `dms.pluginSettings.<plugin>`, not `plugins.<plugin>.settings`.
+- Keep `QT_QPA_PLATFORM`, `GDK_BACKEND`, `SDL_VIDEODRIVER` X11 fallbacks
+  (`wayland;xcb`, `wayland,x11`, `wayland,x11`). DMS launches apps with the
+  systemd user environment (`variables.nix`), not niri's `environment` block.
+- Don't touch the XDG portal setup (`niri/session.nix`, `core/portals.nix`)
+  without reading `docs/wm/niri-xdg-portals.md`.
+
+**`modules/nixos/`**
+
+- A module that opens a port: list it in `modules/nixos/CLAUDE.md`'s Network
+  section. Local services (FlareSolverr, Suwayomi, Open WebUI) listen on
+  127.0.0.1 only.
+- Mullvad settings are applied through the `mullvad` CLI from a oneshot unit,
+  never by templating its `settings.json`.
+- Audit tooling is `lynis` and `sbomnix`/`vulnxscan`. **Never `vulnix`**: its NVD
+  feeds are retired.
+- AppArmor profiles (`security/apparmor/`, one module per app) stay in
+  `complain` mode, attach by store-path glob (`/nix/store/*-mpv-*/bin/mpv`), never
+  to a binary Nix builds also run (unzip, tar). Run `apparmor-check` after.
+- `services/ssh.nix` owns sshd and fail2ban; key-only auth, and an assertion
+  fails the build if no user lists a key.
+
+**`modules/home/programs/system/nixos-settings/`** (a Python GTK app)
+
+- It builds its pages from the `_template/settings.nix` layout (`#--` sections,
+  `#---` headers, trailing comments), so keep that layout when adding a setting.
+  Row text is `src/descriptions.json`; hidden settings and page layout are in
+  `src/schema.py`.
+- **Security:** its root helper (`nixos/system/user/nixos-settings-helper.nix`,
+  `src/helper.py`) must only accept typed values for the caller's own
+  `users/_template` keys, never file text or Nix. Admin-only requests check
+  wheel first. Don't loosen either.
+- Passwords reach the helper on stdin, never as an argument.
+
+**`modules/home/programs/media/freetube/`**
+
+- Settings and blocklist are mirrored into FreeTube's database only when the
+  declared content changes, and FreeTube overwrites it on exit: **FreeTube must
+  be closed before a rebuild.** Use the `freetube-sync` skill to change either.
+- Subscriptions, playlists and history stay out of the repo (personal data).
+
+**`modules/home/programs/ai/`**
+
+- `.claude/settings.json` is the only tracked file under `.claude/`; nothing
+  secret goes in it. Its Bash allow rules stay read-only.
+- MCP API keys are read at launch from `~/.nixos-config-mcp/`, never written into
+  the repo or the store.
+
+**`docs/`**
+
+- `docs/CLAUDE.md` indexes every note; adding, renaming or deleting a note
+  updates its entry there.
+- Update a Minecraft pack's notes when its config or mods change, add a
+  `docs/local/local-binary-installs.md` entry per new `~/.local/opt` app, and a
+  `docs/nixpkgs/disabled-packages.md` row per package an update forces off.
+- In `docs/`: absolute dates and versions, and say where a claim came from.
 
 ## Skills
 
