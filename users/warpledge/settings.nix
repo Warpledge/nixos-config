@@ -52,6 +52,7 @@
     nautilus = true;
     yazi = true;
     dolphin = true;
+    duxFiles = true;
   };
 
   #--- Default Apps

@@ -11,6 +11,7 @@ in [
   "match:class ^(org.gnome.FileRoller)$, ${opacityRule}"
   "match:class ^(org.kde.ark)$, ${opacityRule}"
   "match:class ^(org.kde.dolphin)$, ${opacityRule}"
+  "match:class ^(dev.duxlabs.files)$, ${opacityRule}"
   "match:class ^(thunar)$, ${opacityRule}"
   "match:title ^(Volume Control)$, ${opacityRule}"
   "match:class ^(org.pulseaudio.pavucontrol)$, ${opacityRule}"

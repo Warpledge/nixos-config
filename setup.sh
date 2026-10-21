@@ -802,6 +802,7 @@ apps=(
   "Browsers|browsers.ferdium|Ferdium: web messengers in one window"
   "Terminals|terminals.ghostty|Ghostty"
   "File browsers|fileBrowsers.dolphin|Dolphin: KDE's file manager"
+  "File browsers|fileBrowsers.duxFiles|Dux Files: Dux Labs file manager"
   "Media|media.spotify|Spotify"
   "Media|media.freetube|FreeTube: YouTube without an account"
   "Media|media.videoTrimmer|Video Trimmer"

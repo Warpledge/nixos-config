@@ -120,6 +120,10 @@
       url = "github:duxlabs-dev/dux-greeter";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    dux-files = {
+      url = "github:duxlabs-dev/dux-files";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     #--- Kernels
     # Own nixpkgs: upstream says an override can mismatch patches and kernel

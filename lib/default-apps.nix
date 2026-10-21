@@ -28,6 +28,7 @@ in rec {
       (app "nautilus" ["fileBrowsers" "nautilus"] "org.gnome.Nautilus.desktop")
       (app "dolphin" ["fileBrowsers" "dolphin"] "org.kde.dolphin.desktop")
       (app "yazi" ["fileBrowsers" "yazi"] "yazi.desktop")
+      (app "duxFiles" ["fileBrowsers" "duxFiles"] "dev.duxlabs.files.desktop")
     ];
   };
 

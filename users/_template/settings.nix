@@ -70,6 +70,7 @@
     nautilus = true;
     dolphin = false; # KDE's file manager
     yazi = true;
+    duxFiles = false; # Dux Labs file manager
   };
 
   #--- Media Selection

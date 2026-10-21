@@ -11,6 +11,7 @@
   {app-id = "org.gnome.FileRoller";}
   {app-id = "org.kde.ark";}
   {app-id = "org.kde.dolphin";}
+  {app-id = "dev.duxlabs.files";}
   {app-id = "thunar";}
   {app-id = "org.pulseaudio.pavucontrol";}
   {app-id = "pavucontrol";}
