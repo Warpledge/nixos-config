@@ -20,6 +20,7 @@
       enable = true;
       enableMcpIntegration = true;
       settings.share = "disabled"; # No /share uploads to opencode.ai
+      settings.instructions = ["CLAUDE.md"]; # Load CLAUDE.md alongside AGENTS.md
 
       #--- Context7 indexes JS/Python framework docs; deepwiki and grep provide
       #--- upstream wiki docs and real-world code examples.
