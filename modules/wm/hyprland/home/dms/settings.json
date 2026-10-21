@@ -271,6 +271,15 @@
     },
     "dms_sysmon": {
       "enabled": true
+    },
+    "dms_clipboard_search": {
+      "trigger": "cb"
+    },
+    "dms_power": {
+      "trigger": "pw"
+    },
+    "dms_qr_generator": {
+      "trigger": "qrg"
     }
   },
   "frameThickness": 2,
