@@ -20,6 +20,14 @@
       enable = true;
       enableMcpIntegration = true;
       settings.share = "disabled"; # No /share uploads to opencode.ai
+      #--- Ask before touching paths outside the project (v1's default; v2 allows)
+      settings.permissions = [
+        {
+          action = "external_directory";
+          resource = "*";
+          effect = "ask";
+        }
+      ];
 
       #--- Context7 indexes JS/Python framework docs; deepwiki and grep provide
       #--- upstream wiki docs and real-world code examples.

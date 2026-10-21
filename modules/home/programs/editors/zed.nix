@@ -309,21 +309,38 @@ in {
           {
             button = true;
             dock = "right";
+            thinking_display = "always_collapsed";
 
             # Run tools without asking unless a rule below matches, like opencode
             tool_permissions.default = "allow";
-            #--- Mirrors CLAUDE.md rules 1, 4 and 11; applies to Claude Agent too
+            # The rules below guard instead; the sandbox blocks .git and nix's socket
+            sandbox_permissions.allow_unsandboxed = true;
+            #--- Mirrors CLAUDE.md rules 1, 4, 6 and 11; applies to Claude Agent too
             tool_permissions.tools = let
               patterns = map (pattern: {inherit pattern;});
               secrets = patterns ["\\.nixos-config-mcp/" "settings\\.local\\.json$"];
+              # Writable places git can't restore; file tools already stay in the project
+              outside = "(~|\\$HOME|/home/|/mnt/)";
+              writes = "\\b(rm|rmdir|unlink|mv|cp|ln|touch|mkdir|tee|truncate|install|rsync)\\b|\\bsed\\s+-i";
             in {
-              terminal.always_confirm = patterns [
+              terminal.always_deny = patterns [
                 "nixm\\s+(rebuild|boot|upgrade|rollback)"
                 "nixos-rebuild"
-                "\\bsudo\\b"
-                "\\brm\\s"
-                "git\\s+push"
+                "\\bnh\\s+os\\b"
+                "\\b(sudo|pkexec|doas|run0)\\b"
+                "git\\s+(push|rebase|reset\\s+--hard|clean\\s+-\\S*f)"
+                "git\\s+commit\\s.*--amend"
+                "\\b(dd|mkfs\\S*|wipefs|shred)\\s"
+                "\\bch(mod|own)\\s+-\\S*R"
+                "\\brm\\s.*\\$"
               ];
+              terminal.always_confirm = patterns [
+                "\\brm\\s"
+                "(${writes}).*${outside}"
+                "${outside}.*(${writes})"
+                ">\\s*${outside}"
+              ];
+              delete_path.default = "confirm";
               edit_file.always_deny = secrets;
               write_file.always_deny = secrets;
             };
