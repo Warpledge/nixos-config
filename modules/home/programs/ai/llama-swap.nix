@@ -12,17 +12,15 @@
 }: let
   port = 8090; # 8080 is taken by Steam's webhelper
   catalog = import ../../../../lib/local-models.nix;
-  pick = kind: name:
-    if name == null
+  #--- The coding and chat models turned on, by ID; the first coding one is the default
+  codes = lib.genAttrs user.localAi.code (id: catalog.code.${id});
+  chats = lib.genAttrs user.localAi.chat (id: catalog.chat.${id});
+  edit =
+    if user.localAi.edit == null
     then null
-    else catalog.${kind}.${name};
-  code = pick "code" user.localAi.code;
-  chat = pick "chat" user.localAi.chat;
-  edit = pick "edit" user.localAi.edit;
-  codeId = user.localAi.code;
-  chatId = user.localAi.chat;
-  fastId = "${codeId}-instruct";
-  hasFast = code != null && code.fast != null;
+    else catalog.edit.${user.localAi.edit};
+  defaultId = lib.head user.localAi.code;
+  defaultFast = codes.${defaultId}.fast != null;
 
   #--- Finds the model's file in its LM Studio folder, so the exact name and case
   #--- of a download don't matter; the first part of a split file sorts first
@@ -56,8 +54,7 @@
   #--- Loads on the first request, unloads after `ttl` idle seconds to free VRAM
   settings = {
     models =
-      lib.optionalAttrs (code != null) (serve codeId code)
-      // lib.optionalAttrs (chat != null) (serve chatId chat)
+      lib.concatMapAttrs serve (codes // chats)
       // lib.optionalAttrs (edit != null) {
         ${user.localAi.edit} = {
           ttl = 600;
@@ -74,11 +71,11 @@
       };
     groups =
       #--- The coding and chat models don't fit the GPU together: one at a time
-      lib.optionalAttrs (code != null || chat != null) {
+      lib.optionalAttrs (codes // chats != {}) {
         gpu = {
           swap = true;
           exclusive = false;
-          members = lib.optional (code != null) codeId ++ lib.optional (chat != null) chatId;
+          members = lib.attrNames (codes // chats);
         };
       }
       #--- Stays loaded beside them
@@ -108,33 +105,35 @@ in {
   #--------------------------------------------------------------------#
   #-- OpenCode Provider
   #--------------------------------------------------------------------#
-  programs.opencode.settings = lib.mkIf (user.opencode.enable && code != null) {
-    model = "llama-swap/${codeId}";
+  #--- Every coding model and its fast variant to pick from; the first is the default
+  programs.opencode.settings = lib.mkIf (user.opencode.enable && codes != {}) {
+    model = "llama-swap/${defaultId}";
     # Session titles and summaries: thinking there only delays the first reply
-    small_model = "llama-swap/${if hasFast then fastId else codeId}";
+    small_model = "llama-swap/${defaultId}${lib.optionalString defaultFast "-instruct"}";
     provider.llama-swap = {
       npm = "@ai-sdk/openai-compatible";
       name = "llama-swap (local)";
       options.baseURL = "http://127.0.0.1:${toString port}/v1";
-      models =
+      models = lib.concatMapAttrs (id: model:
         {
-          ${codeId} = {
-            inherit (code) name;
+          ${id} = {
+            inherit (model) name;
             limit = {
-              inherit (code) context;
+              inherit (model) context;
               output = 16384; # Thinking tokens count against it
             };
           };
         }
-        // lib.optionalAttrs hasFast {
-          ${fastId} = {
-            name = "${code.name} (fast)";
+        // lib.optionalAttrs (model.fast != null) {
+          "${id}-instruct" = {
+            name = "${model.name} (fast)";
             limit = {
-              inherit (code) context;
+              inherit (model) context;
               output = 8192;
             };
           };
-        };
+        })
+      codes;
     };
   };
 }
