@@ -30,7 +30,9 @@ Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
    `fontWeight`). Leave them at the app's default or enable its Stylix target.
 6. **Commits** use Conventional Commits, `type(scope): subject` plus a bullet body;
    load the `commit` skill. Commit without asking; never push, amend or rebase.
-   **Commit once, when the task is finished and checked**, not after each edit.
+   **Commit once, when the task is finished and checked**, not after each edit,
+   and don't end a task that changed files without committing. Run every step
+   of the `commit` skill, `scan.sh` included.
    A feature and every fix, tweak and doc change made for it while you're still
    working are one commit. Split only unrelated changes. Since you can't amend, an
    early commit can't be folded in later.
@@ -87,6 +89,11 @@ this, in thinking and in tool calls alike:
 - **In thinking: when you notice you're restating a plan you already made, act on
   it or ask.** Don't weigh the same options again.
 - **Unsure what the user wants? Ask** instead of guessing and iterating.
+- **When a check contradicts what the user described** (they report an error and
+  `nix flake check` passes), say so after that first check and ask. Don't hunt
+  through branches, builds and other tools for it.
+- **Don't build when `nix flake check` answers the question.** If you must
+  build, always pass `--no-link`, or a `result` link is left in the repo.
 
 ## Context budget
 
