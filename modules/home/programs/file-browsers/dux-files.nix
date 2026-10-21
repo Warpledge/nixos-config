@@ -21,14 +21,30 @@
   #-- Bookmarks
   #--------------------------------------------------------------------#
 
-  gtk.gtk3.bookmarks = [
-    "file://${config.home.homeDirectory}/Downloads Downloads"
-    "file://${config.home.homeDirectory}/Documents Documents"
-    "file://${config.home.homeDirectory}/Pictures Pictures"
-    "file://${config.home.homeDirectory}/Videos Videos"
-    "file://${config.home.homeDirectory}/Games Games"
-    "file://${config.home.homeDirectory}/.local/share Local"
-    "file://${config.home.homeDirectory}/.local/share/Steam/steamapps/common Steam"
-    "file://${config.home.homeDirectory}/.local/share/Terraria/tModLoader tModLoader"
-  ];
+  # Dux Files reads ~/.config/gtk-3.0/bookmarks on first launch as a seed,
+  # then manages its own ~/.config/dfiles/bookmarks.json from there.
+  # We write the native file declaratively so bookmarks appear immediately
+  # (no need to wait for the first-run import).
+  home.file.".config/dfiles/bookmarks.json".text =
+    let
+      home = config.home.homeDirectory;
+      mkBookmark = path: label: {
+        path = "${home}/${lib.removePrefix "file://${home}/" path}";
+        inherit label;
+        icon = "";
+      };
+    in
+    builtins.toJSON {
+      version = 2;
+      bookmarks = [
+        (mkBookmark "file://${home}/Downloads" "Downloads")
+        (mkBookmark "file://${home}/Documents" "Documents")
+        (mkBookmark "file://${home}/Pictures" "Pictures")
+        (mkBookmark "file://${home}/Videos" "Videos")
+        (mkBookmark "file://${home}/Games" "Games")
+        (mkBookmark "file://${home}/.local/share" "Local")
+        (mkBookmark "file://${home}/.local/share/Steam/steamapps/common" "Steam")
+        (mkBookmark "file://${home}/.local/share/Terraria/tModLoader" "tModLoader")
+      ];
+    };
 }
