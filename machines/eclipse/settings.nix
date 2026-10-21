@@ -16,6 +16,8 @@
       editors.vscodium = false;
       localAi.chat = "gemma-4-26b-a4b";
       localAi.edit = null;
+      media.moku = false;
+      media.boorusama = true;
     };
   };
 
