@@ -30,6 +30,10 @@ Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
    `fontWeight`). Leave them at the app's default or enable its Stylix target.
 6. **Commits** use Conventional Commits, `type(scope): subject` plus a bullet body;
    load the `commit` skill. Commit without asking; never push, amend or rebase.
+   **Commit once, when the task is finished and checked**, not after each edit.
+   A feature and every fix, tweak and doc change made for it while you're still
+   working are one commit. Split only unrelated changes. Since you can't amend, an
+   early commit can't be folded in later.
 7. **No screenshots** of the screen or a window unless the user said yes to that one.
 8. **Set only what was asked for.** No extra options, and never restate an app's
    defaults: set only the values that differ, after checking what the default is.
@@ -162,7 +166,7 @@ steps.
 | Skill | Use when |
 | --- | --- |
 | `add-app` | Installing, adding, enabling or packaging any app, launcher or service |
-| `commit` | Every commit |
+| `commit` | Every commit, once at the end of the task |
 | `disable-package` | An update broke one package; switch it off or back on |
 | `freetube-sync` | "I blocked more" / "sync freetube" |
 | `apparmor-check` | After editing `modules/nixos/security/apparmor/` |
