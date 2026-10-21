@@ -15,6 +15,52 @@
 
     # Keep a resident instance so windows open fast and the portal answers at once
     systemd.enable = true;
+
+    #--- UI settings — declared defaults, mutable (GUI can still edit)
+    settings = {
+      animationDuration = 250;
+      clickToOpen = "double";
+      closeBehavior = "quit";
+      colorSource = "auto";
+      confirmTrash = true;
+      defaultSort = "name";
+      defaultSortDescending = false;
+      defaultView = "columns";
+      dragAction = "auto";
+      enableRippleEffects = true;
+      extractOnOpen = true;
+      focusRingColor = "primary";
+      focusRingEnabled = false;
+      focusRingWidth = 2;
+      folderCounts = true;
+      foldersFirst = true;
+      fontScale = 1;
+      fontWeight = 500;
+      gtkBookmarksOffered = true;
+      language = "";
+      listTyping = "jump";
+      mountOnClick = true;
+      networkThumbnails = false;
+      openLocationIn = "current";
+      presetTheme = "purple";
+      radiusStrength = 50;
+      recentFiles = false;
+      reduceMotion = false;
+      registerFileManager = true;
+      rememberFolderViews = true;
+      searchExcludes = [];
+      searchHidden = false;
+      showHidden = true;
+      showSystemPartitions = false;
+      sidebarCollapsed = false;
+      springBounce = 1;
+      terminal = "";
+      themeMode = "auto";
+      thumbnailSizeLimitMb = 64;
+      thumbnails = true;
+      vimKeys = false;
+      windowTitleBars = true;
+    };
   };
 
   #--------------------------------------------------------------------#
