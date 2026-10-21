@@ -25,7 +25,7 @@
       confirmTrash = true;
       defaultSort = "name";
       defaultSortDescending = false;
-      defaultView = "columns";
+      defaultView = "list";
       dragAction = "auto";
       enableRippleEffects = true;
       extractOnOpen = true;
