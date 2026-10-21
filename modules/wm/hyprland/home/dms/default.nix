@@ -106,26 +106,15 @@
   # the one the mirrored file names; the cursor size follows Stylix.
   dms.mutableFiles = let
     mirrored = lib.importJSON ./settings.json;
-    settings =
-      mirrored
+  in {
+    "settings.json" = pkgs.writeText "dms-settings.json" (builtins.toJSON (mirrored
       // {
         currentThemeCategory = "custom";
         customThemeFile = "${config.xdg.configHome}/DankMaterialShell/themes/stylix/theme.json";
         cursorSettings = mirrored.cursorSettings // {inherit (config.stylix.cursor) size;};
-      }
-      // lib.optionalAttrs (user.wallpaper == "engine") {
-        screenPreferences.wallpaper = [];
-        blurredWallpaperLayer = false;
-      };
-  in {
-    "settings.json" = pkgs.writeText "dms-settings.json" (builtins.toJSON settings);
+      }));
     "clsettings.json" = ./clsettings.json;
   };
-
-  dms.lockedSettings = lib.optionals (user.wallpaper == "engine") [
-    ["screenPreferences" "wallpaper"]
-    ["blurredWallpaperLayer"]
-  ];
 
   #--------------------------------------------------------------------#
   #-- Imports
