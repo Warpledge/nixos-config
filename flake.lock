@@ -164,11 +164,11 @@
         "systems": "systems"
       },
       "locked": {
-        "lastModified": 1792552369,
-        "narHash": "sha256-YcM61WVrvmcA1qS0xFWGu8wYQtAtOq/5D4T+OuXcoyw=",
+        "lastModified": 1792555313,
+        "narHash": "sha256-LAn60oHP6bgxqED9ORKNOQmLZZP0JA9ozfy/+UVYfgY=",
         "owner": "sadjow",
         "repo": "claude-code-nix",
-        "rev": "463d6f0f918d040f2bd78f5951f5f2355027d5e7",
+        "rev": "2576baf49c38fa0f194f6c6c6a094e694ac2a2f7",
         "type": "github"
       },
       "original": {
@@ -307,11 +307,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792550313,
-        "narHash": "sha256-VCS+G0oWeLmohzK1zTOsqzCa/AoonIE6ocjt0LHZWvc=",
+        "lastModified": 1792559905,
+        "narHash": "sha256-CZcBZFFQf8i/qSzioLK/DbtcR4/mwwGQTNnYnFz8KBg=",
         "owner": "AvengeMedia",
         "repo": "dms-plugin-registry",
-        "rev": "4e6ec1837a64ff09dfcb2f9215e43e2bcab08412",
+        "rev": "52cca00de4f18854e2438f114a5f53ec627f5860",
         "type": "github"
       },
       "original": {
@@ -1017,11 +1017,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792554002,
-        "narHash": "sha256-+dW1UwNhhHLMtdoikD23hbILiVHA6VuQFe4iGTaknPw=",
+        "lastModified": 1792563370,
+        "narHash": "sha256-hK7q+NLh/TtyyCzDQfO6Kl+c63HzS7PKXAbqlO131IU=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "00ffe4ad96a98c86ab654d603f7cd59f4d3aaffb",
+        "rev": "4832ddf6c432666e4ea89ee351b4ce4ec9686f24",
         "type": "github"
       },
       "original": {
