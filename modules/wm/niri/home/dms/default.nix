@@ -81,12 +81,6 @@ in {
   #--- Plugin settings, here rather than in plugins.<name>.settings, which DMS
   #--- warns it ignores while managePluginSettings is off
   dms.pluginSettings = {
-    # Claude Code Usage (DMS community plugin) — refresh interval in seconds
-    claudeCodeUsage = {
-      enabled = true;
-      refreshInterval = 2;
-    };
-
     quickCapture = {
       toolbarPosition = "bottom";
       showToolbarBorder = false;

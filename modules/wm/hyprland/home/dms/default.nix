@@ -23,14 +23,7 @@
     plugins = {
       # amdGpuMonitor is per machine: machines/eclipse/hardware/gpu.nix
 
-      # Claude Code Usage (DMS community plugin)
-      claudeCodeUsage = {
-        enable = user.claude.enable;
-        settings = {
-          enabled = true;
-          refreshInterval = 2;
-        };
-      };
+      claudeCodeUsage.enable = user.claude.enable;
 
       quickCapture = {
         enable = true;

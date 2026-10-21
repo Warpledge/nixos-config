@@ -12,15 +12,13 @@
   bind = keys: dsp: {_args = [keys (lua dsp)];};
   exec = keys: cmd: bind keys "hl.dsp.exec_cmd(${str cmd})";
   workspaces = map toString (lib.range 1 9);
-  # File manager binary: dolphin, dux-files, yazi, or Nautilus
+  # Dolphin or Dux Files when it's the user's file manager, else Nautilus
   chosen = (import ../../../../../lib/default-apps.nix {inherit lib;}).forUser user;
   files =
     if chosen.fileManager.name == "dolphin"
     then "dolphin"
     else if chosen.fileManager.name == "duxFiles"
     then "dfiles"
-    else if chosen.fileManager.name == "yazi"
-    then "yazi"
     else "nautilus";
 in {
   #--------------------------------------------------------------------#
