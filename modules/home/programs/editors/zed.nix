@@ -8,9 +8,11 @@
 }: let
   #--- The models picked in localAi (lib/local-models.nix), served by ai/llama-swap.nix
   models = import ../../../../lib/local-models.nix;
-  codeId = user.localAi.code;
+  #--- Every coding model turned on; the first is the default
+  codeIds = lib.optionals user.llamaSwap.enable user.localAi.code;
+  codeId = lib.head codeIds;
   code =
-    if user.llamaSwap.enable && codeId != null
+    if codeIds != []
     then models.code.${codeId}
     else null;
   hasFast = code != null && code.fast != null;
@@ -381,23 +383,26 @@ in {
             env = {};
           };
         };
-        #--- Local model served by ai/llama-swap.nix (same port and model id)
+        #--- Local models served by ai/llama-swap.nix (same port and model ids)
         language_models = lib.optionalAttrs (code != null) {
           openai_compatible.llama-swap = {
             api_url = "http://127.0.0.1:8090/v1";
-            available_models =
+            available_models = lib.concatMap (id: let
+              model = models.code.${id};
+            in
               [
                 {
-                  name = codeId;
-                  display_name = code.name;
-                  max_tokens = code.context;
+                  name = id;
+                  display_name = model.name;
+                  max_tokens = model.context;
                 }
               ]
-              ++ lib.optional hasFast {
-                name = "${codeId}-instruct";
-                display_name = "${code.name} (fast)";
-                max_tokens = code.context;
-              };
+              ++ lib.optional (model.fast != null) {
+                name = "${id}-instruct";
+                display_name = "${model.name} (fast)";
+                max_tokens = model.context;
+              })
+            codeIds;
           };
         };
 

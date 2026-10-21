@@ -29,7 +29,7 @@ user's). Push and history rewrites (amend, rebase, force) stay with the user.
      Two topics inside one hunk can't be split; put that hunk with the larger topic.
    - Propose the grouping to the user (one line per planned commit) before committing
      when there are more than three or four.
-3. For each group, `git add <paths>` (or stage hunks), then **check** (only when the
+3. For each group, `git add <paths>` by path, never `git add -A` or `.` (or stage hunks), then **check** (only when the
    note at the end calls for it) **and scan**:
    ```bash
    bash <skill-dir>/scripts/check-staged.sh
@@ -66,8 +66,9 @@ user's). Push and history rewrites (amend, rebase, force) stay with the user.
      module (`moku`, `freetube`, `mpv`), a subsystem (`apparmor`, `mullvad`, `kernel`,
      `theme`), `claude` for Claude Code tooling, `eclipse`/`legion` for one host, `flake`
      for input bumps. Omit it when a commit truly spans the whole config.
-   - **body**: bullets wrapped at 72 columns; skip it for a one-line change. Docs that
-     belong to the change go in the same commit and need no bullet of their own.
+   - **body**: bullets wrapped at 72 columns, required for anything beyond a one-line
+     change. Docs that belong to the change go in the same commit and need no bullet of
+     their own.
    - **breaking**: `type(scope)!:` plus a `BREAKING CHANGE:` footer when a rebuild needs
      more than `nixm rebuild` (a WM switch needing `nixm boot`, a manual migration step).
    - The Writing Style rules apply: no puffery, no "various improvements", no "update

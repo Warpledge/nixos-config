@@ -14,7 +14,7 @@
       fileBrowsers.dolphin = false;
       wallpaper = "carousel";
       editors.vscodium = false;
-      localAi.chat = "gemma-4-26b-a4b";
+      localAi.chat = ["gemma-4-26b-a4b" "gpt-oss-20b" "qwen3.6-35b-a3b-chat"];
       localAi.edit = null;
       media.moku = false;
       media.boorusama = true;

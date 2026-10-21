@@ -31,6 +31,9 @@
   #--- Lists whose items must come from a known set
   listChoices = {
     "blocklist.extra" = ["fakenews" "gambling" "porn" "social"];
+    #--- localAi.code and .chat: models lib/local-models.nix lists
+    "localAi.code" = lib.attrNames (import ./local-models.nix).code;
+    "localAi.chat" = lib.attrNames (import ./local-models.nix).chat;
   };
   portLists = ["firewall.openTCPPorts" "firewall.openUDPPorts"];
   userChoices =
@@ -40,9 +43,8 @@
     #--- defaultApps.<kind>: the app names lib/default-apps.nix lists
     // lib.mapAttrs' (kind: candidates: lib.nameValuePair "defaultApps.${kind}" (map (c: c.name) candidates))
     (import ./default-apps.nix {inherit lib;}).apps
-    #--- localAi.<kind>: none, or a model lib/local-models.nix lists
-    // lib.mapAttrs' (kind: models: lib.nameValuePair "localAi.${kind}" ([null] ++ lib.attrNames models))
-    (import ./local-models.nix);
+    #--- localAi.edit: none, or a model lib/local-models.nix lists
+    // {"localAi.edit" = [null] ++ lib.attrNames (import ./local-models.nix).edit;};
 
   #--------------------------------------------------------------------#
   #-- Checks

@@ -115,12 +115,12 @@ PAGES = {
               "the coding agent that uses them.",
               [("", "", ["llamaSwap.enable", "lmstudio.enable", "opencode.enable", "openWebui.enable"])]),
     "Code": ("localai", "applications-engineering-symbolic",
-             "The models llama-swap runs on this computer's GPU, used by default in "
-             "opencode and Zed. Download each one in LM Studio first.",
+             "The models llama-swap runs on this computer's GPU for opencode and Zed. "
+             "Download each one in LM Studio first.",
              [("", "", ["localAi.code", "localAi.edit"])]),
     "Chat": ("localai", "user-available-symbolic",
-             "A model for conversation rather than code, served by llama-swap. Chat with it "
-             "in Open WebUI (Tools) or llama-swap's Playground. Download it in LM Studio first.",
+             "Models for conversation rather than code, served by llama-swap. Chat with them "
+             "in Open WebUI (Tools) or llama-swap's Playground. Download each one in LM Studio first.",
              [("", "", ["localAi.chat"])]),
 }
 FALLBACK_ICON = "applications-system-symbolic"
