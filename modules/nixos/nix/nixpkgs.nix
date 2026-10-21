@@ -10,9 +10,6 @@
       allowBroken = true; # Allow broken packages (for development/edge cases)
       allowUnsupportedSystem = true;
       allowUnfree = true; # Allow unfree packages (proprietary software)
-      disabledPackages = [
-        "sbomnix" # Broken with python314 (sqliteschema dependency)
-      ];
       permittedInsecurePackages = [
         "electron-40.10.5" # Required by nixcord/discord (EOL but still in use)
         "pnpm-10.29.2" # Build-time dep of astro-language-server (zed.nix)
