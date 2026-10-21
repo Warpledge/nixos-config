@@ -36,7 +36,7 @@
   "defaultApps.browser": {"title": "Web Browser", "summary": "Opens links from every app", "icon": ["web-browser"], "choices": {"zen": "Zen", "mullvad": "Mullvad Browser", "helium": "Helium"}, "text": "Opens links from every app. With **FreeTube** on, YouTube links go to FreeTube and the rest come here. A browser switched off under Browsers is skipped for the first one that's on."},
   "defaultApps.textEditor": {"title": "Text Editor", "summary": "Opens text and code files", "icon": ["text-editor"], "choices": {"zed": "Zed", "helix": "Helix"}, "text": "Opens text and code files. An editor switched off under Editors is skipped for the first one that's on."},
   "defaultApps.terminal": {"title": "Terminal", "summary": "Runs terminal programs from the launcher", "icon": ["utilities-terminal"], "choices": {"kitty": "Kitty", "ghostty": "Ghostty"}, "text": "Runs terminal programs started from the launcher or a file manager. A terminal switched off under Terminals is skipped for the first one that's on."},
-  "defaultApps.fileManager": {"title": "File Manager", "summary": "Opens folders", "icon": ["system-file-manager"], "choices": {"nautilus": "Nautilus", "dolphin": "Dolphin", "yazi": "Yazi"}, "text": "Opens folders from other apps. A file manager switched off under File Browsers is skipped for the first one that's on."},
+  "defaultApps.fileManager": {"title": "File Manager", "summary": "Opens folders", "icon": ["system-file-manager"], "choices": {"nautilus": "Nautilus", "dolphin": "Dolphin", "yazi": "Yazi", "duxFiles": "Dux Files"}, "text": "Opens folders from other apps. A file manager switched off under File Browsers is skipped for the first one that's on."},
 
   "wallpaper": {"title": "Wallpaper Source", "summary": "Still images, or animated Wallpaper Engine scenes", "note": "Engine !!needs Wallpaper Engine bought on Steam!!", "icon": ["preferences-desktop-wallpaper"], "choices": {"carousel": "Still images", "engine": "Wallpaper Engine"}, "text": "**Still images** come from the repo's wallpaper folder. **Wallpaper Engine** plays animated scenes and videos from the Steam Workshop, and !!needs Wallpaper Engine bought on Steam.!! Mod+W opens the picker either way."},
 
@@ -51,6 +51,7 @@
   "fileBrowsers.nautilus": {"summary": "The regular file manager window", "icon": ["org.gnome.Nautilus", "nautilus"], "text": "**Nautilus**, the regular file manager window, with an Open in Kitty entry in its right-click menu."},
   "fileBrowsers.dolphin": {"summary": "KDE's file manager", "icon": ["org.kde.dolphin", "system-file-manager"], "text": "**Dolphin**, KDE's file manager, themed to match the GTK apps."},
   "fileBrowsers.yazi": {"summary": "File manager in the terminal", "icon": ["yazi.desktop", "system-file-manager"], "text": "**Yazi**, a file manager that runs inside the terminal."},
+  "fileBrowsers.duxFiles": {"summary": "Dux Labs file manager", "icon": ["dev.duxlabs.files", "system-file-manager"], "text": "**Dux Files**, a standalone file manager from Dux Labs with tabs, split view, column view and archive support."},
 
   "media.mpv": {"summary": "Video player", "icon": ["mpv", "io.mpv.Mpv"], "text": "**mpv**, the video player. The Twitch browser and Moku play their videos in it."},
   "media.spotify": {"summary": "Music streaming", "icon": ["spotify-client", "spotify"], "text": "**Spotify**, themed with **Spicetify**."},
