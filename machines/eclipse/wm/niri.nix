@@ -52,7 +52,7 @@ in {
         #--------------------------------------------------------------------#
         #-- Workspaces & App Placement
         #--------------------------------------------------------------------#
-        #--- 1-6 on DP-2, 7-9 on DP-3, as in hyprland.nix
+        #--- 1-6 on DP-2, 7-9 on DP-3
         workspaces = lib.genAttrs (map toString numbers) (name: {
           open-on-output =
             if lib.toInt name <= 6
@@ -70,7 +70,7 @@ in {
           })
           numbers);
 
-        #--- Same placement as Hyprland's windowrules/workspaces.nix
+        #--- App placement on the named workspaces
         window-rules = [
           {
             matches = [{app-id = "^steam$";}];

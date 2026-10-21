@@ -205,7 +205,7 @@ nix-gamescope
 ```
 **What it does:** Runs the game fullscreen in gamescope, with `nix-performance`
 applied inside. Nested gamescope can't detect the display and falls back to
-1280x720, so the wrapper asks niri (or Hyprland) for the focused monitor's mode
+1280x720, so the wrapper asks niri for the focused monitor's mode
 and passes it as both the output and game size, plus the refresh rate as the
 frame cap. A game set to a lower resolution gets scaled up to fill the screen.
 Extra gamescope flags go before a `--` and override the detected ones:

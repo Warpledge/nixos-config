@@ -22,7 +22,7 @@
 
   #--- Settings that take one of a few values
   choices = {
-    windowManager = ["niri" "hyprland"];
+    windowManager = ["niri"];
     kernel = ["zen" "latest" "xanmod" "cachyos"];
     cursor = ["bibata" "catppuccin"];
     cursorSize = [24 32 48 64];

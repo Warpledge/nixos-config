@@ -87,7 +87,7 @@
   #--------------------------------------------------------------------#
   #-- DMS GPU Widget
   #--------------------------------------------------------------------#
-  #--- For every user, under niri or Hyprland. The variant pins this GPU by PCI
+  #--- For every user, under niri. The variant pins this GPU by PCI
   #--- address; the bar widget id in settings.json (amdGpuMonitor:<id>) must match it.
   home-manager.users =
     lib.mapAttrs (_: _: {

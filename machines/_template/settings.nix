@@ -41,7 +41,7 @@
   flakePath = null;
 
   #--- Window Manager Selection, for everyone on this machine
-  # Options: "niri" | "hyprland"
+  # Options: "niri"
   windowManager = "niri";
 
   #--- Kernel Selection

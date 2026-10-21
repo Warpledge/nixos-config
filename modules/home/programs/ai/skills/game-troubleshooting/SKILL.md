@@ -67,7 +67,7 @@ then confirm the Proton processes are gone.
 
 ## 5. Narrow it down, one change at a time
 
-- Windowed vs fullscreen vs `nix-gamescope`, and niri vs Hyprland (a WM-specific bug).
+- Windowed vs fullscreen vs `nix-gamescope`.
 - Another Proton build. Before suggesting `PROTON_ENABLE_WAYLAND=1`, check the build
   ships the driver: `find <proton>/files/lib -name 'winewayland*'`. GE-Proton9-27 has
   none, so the variable is ignored there (checked 2026-10-12).

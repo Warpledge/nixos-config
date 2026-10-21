@@ -19,7 +19,7 @@ user's). Push and history rewrites (amend, rebase, force) stay with the user.
      window rules, three related binds); a change and the test or check that came with it.
    - **Separate**: unrelated areas (a Moku fix and a FreeTube sync), and a fix that stands
      alone even if found while doing something else. Changes that cancel out within the
-     session (switched to Hyprland, switched back) aren't committed at all.
+     session (a toggle switched on, then off) aren't committed at all.
    - A file mixing topics (`claude.nix`, `settings.nix`, CLAUDE.md) gets split by hunk;
      `git add -p` is interactive and unavailable, so:
      ```bash
@@ -62,7 +62,7 @@ user's). Push and history rewrites (amend, rebase, force) stay with the user.
      `refactor` (same behaviour, new shape), `perf`, `docs` (README, `docs/`, CLAUDE.md
      on their own), `chore` (flake input updates, syncs like the FreeTube blocklist),
      `revert`.
-   - **scope**: the area as the repo names it: a WM (`hyprland`, `niri`, `dms`), an app
+   - **scope**: the area as the repo names it: a WM (`niri`, `dms`), an app
      module (`moku`, `freetube`, `mpv`), a subsystem (`apparmor`, `mullvad`, `kernel`,
      `theme`), `claude` for Claude Code tooling, `eclipse`/`legion` for one host, `flake`
      for input bumps. Omit it when a commit truly spans the whole config.

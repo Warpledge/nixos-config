@@ -447,7 +447,6 @@ in {
           toml = true;
           kdl = true;
           qml = true;
-          hyprlang = true;
           git-firefly = true;
         };
 

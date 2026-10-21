@@ -1638,9 +1638,6 @@ def focus_own_window():
             if ids:
                 subprocess.run(["niri", "msg", "action", "focus-window", "--id", str(ids[0])],
                                capture_output=True, timeout=3)
-        elif os.environ.get("HYPRLAND_INSTANCE_SIGNATURE") and GLib.find_program_in_path("hyprctl"):
-            subprocess.run(["hyprctl", "dispatch", "focuswindow", f"pid:{pid}"],
-                           capture_output=True, timeout=3)
     except (OSError, ValueError, KeyError, subprocess.TimeoutExpired):
         pass
 

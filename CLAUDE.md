@@ -2,7 +2,7 @@
 
 ## Project
 
-NixOS flake managing **eclipse**, the desktop (Ryzen 5800X3D + RX 9070 XT, 280Hz OLED + 144Hz) and **legion**, the laptop (Legion Slim 5, Ryzen 7735HS + hybrid AMD 680M/RTX 4070, 1600p@165Hz). Nixpkgs unstable, Catppuccin Mocha Mauve via Stylix. Active WM: Niri; a Hyprland module also exists.
+NixOS flake managing **eclipse**, the desktop (Ryzen 5800X3D + RX 9070 XT, 280Hz OLED + 144Hz) and **legion**, the laptop (Legion Slim 5, Ryzen 7735HS + hybrid AMD 680M/RTX 4070, 1600p@165Hz). Nixpkgs unstable, Catppuccin Mocha Mauve via Stylix. WM: Niri only; Hyprland was removed on 2026-10-21 and its config kept on the `hyprland-backup` branch.
 
 ## Critical Rules
 
@@ -78,7 +78,7 @@ Module arguments:
 - NixOS modules get `machine` (the machine's settings plus `name`, `hostName`, `flakePath` and `mainUser`, filled in, and each user's final settings in `machine.users.<name>`) and `anyUser` (each true/false user setting, true when any user on the machine has it on). An app with a system-side piece (an AppArmor profile, Steam, FlareSolverr, the Nautilus extension, the Japanese IME) loads on `anyUser.<app>`.
 - Home modules get `machine` and `user`, that user's settings. Home routers (`home/default.nix`, `programs/default.nix`, `programs/gaming/default.nix`, `audio/guitar/default.nix`) read `user` in `imports`, where `_module.args` can't reach, so they take it as a plain first argument (`user: {lib, ...}: {...}`) and their parent imports them with `(import ./gaming user)`.
 
-The settings that need more than their template comment: `users` in a machine file (each name a `users/<name>/` folder; the braces hold that user's settings for this machine only); `mainUser` (owns the repo, runs Syncthing, themes the login screen; may be left null with one user); `flakePath` (null: `/etc/nixos-config`, where `system/user/config-repo.nix` gives every admin (wheel) write access through a default ACL and sets git's `safe.directory`; skipped for a path under `/home/`); `windowManager` (one per machine: the greeter and portal setup are per compositor); `gpu.*` (`services/hardware/gpu.nix`; null on a machine whose own `hardware/gpu.nix` does it); a user's `admin` (wheel, so sudo and rebuilds; non-admins also skip the docker group); a user's `defaultApps.{browser,textEditor,terminal,fileManager}`, whose choices, `.desktop` ids and launch commands live in `lib/default-apps.nix` (`lib/settings.nix` builds the dropdown choices from it) and which `mime.nix`, `terminal-exec`, `youtube-dispatch` and both WMs' app binds read through its `forUser`: a pick whose app toggle is off falls to the first of its kind that's on. `mimeapps.list` is forced, so DMS's default-app picker doesn't survive a rebuild; these settings are the place to change defaults. A user's `localAi.code` and `localAi.chat` are lists of the models llama-swap serves, each with its own tuned flags, for opencode's and Zed's model pickers and Open WebUI (the first coding model is the default), and `localAi.edit` picks Zed's inline-suggestion model (null: none); `lib/local-models.nix` lists them with their LM Studio folder, file match and llama.cpp flags, and `lib/settings.nix`, `ai/llama-swap.nix` and `editors/zed.nix` read it. The user template turns on the starter set; `setup.sh` offers the rest from its `apps` list.
+The settings that need more than their template comment: `users` in a machine file (each name a `users/<name>/` folder; the braces hold that user's settings for this machine only); `mainUser` (owns the repo, runs Syncthing, themes the login screen; may be left null with one user); `flakePath` (null: `/etc/nixos-config`, where `system/user/config-repo.nix` gives every admin (wheel) write access through a default ACL and sets git's `safe.directory`; skipped for a path under `/home/`); `windowManager` (only `"niri"` for now; one per machine: the greeter and portal setup are per compositor); `gpu.*` (`services/hardware/gpu.nix`; null on a machine whose own `hardware/gpu.nix` does it); a user's `admin` (wheel, so sudo and rebuilds; non-admins also skip the docker group); a user's `defaultApps.{browser,textEditor,terminal,fileManager}`, whose choices, `.desktop` ids and launch commands live in `lib/default-apps.nix` (`lib/settings.nix` builds the dropdown choices from it) and which `mime.nix`, `terminal-exec`, `youtube-dispatch` and niri's app binds read through its `forUser`: a pick whose app toggle is off falls to the first of its kind that's on. `mimeapps.list` is forced, so DMS's default-app picker doesn't survive a rebuild; these settings are the place to change defaults. A user's `localAi.code` and `localAi.chat` are lists of the models llama-swap serves, each with its own tuned flags, for opencode's and Zed's model pickers and Open WebUI (the first coding model is the default), and `localAi.edit` picks Zed's inline-suggestion model (null: none); `lib/local-models.nix` lists them with their LM Studio folder, file match and llama.cpp flags, and `lib/settings.nix`, `ai/llama-swap.nix` and `editors/zed.nix` read it. The user template turns on the starter set; `setup.sh` offers the rest from its `apps` list.
 
 NixOS Settings (`programs/system/nixos-settings/`) is a Python GTK4/libadwaita app over these files, imported for every user with no toggle; its root helper is `nixos/system/user/nixos-settings-helper.nix`. Its internals are in `modules/home/programs/system/nixos-settings/CLAUDE.md`: read that before changing the app, the helper, or how the templates are laid out (`#--` sections, `#---` headers, trailing comments), since the app builds its pages from them. Keep the settings files plain data (no `let`, functions or string interpolation), or the app can't parse them.
 
@@ -140,7 +140,7 @@ Gotchas. Grep the option name before assuming which file owns it:
   - AppImage wraps (`appimageTools`) sit in the folder for what the app is, not how it is packaged: `gaming/games/feedback.nix`, `media/streamlink-twitch-gui.nix`, `media/boorusama.nix`. The payload is hash-pinned into the store, so unlike the `~/.local/opt` wrappers nothing lives outside git (see `docs/local/appimage-wraps.md`)
   - `default.nix` carries a `clearStaleBackups` activation hook that deletes `*.bak` under `~/.config`, `~/.local/{share,state}` before `checkLinkTargets`. This is why HM activation never fails on leftover backups. Don't remove it when debugging a "file exists" error; find the real conflicting file instead.
   - `programs/media/freetube/` — mirrored settings and blocklist; its `CLAUDE.md` explains the mirroring (close FreeTube before rebuilding) and what stays out of the repo
-- `modules/wm/{hyprland,niri}/` — each has `session.nix` (NixOS: turns the WM on, login screen, keyring unlock) and `home/` (home-manager, everything else, including DankMaterialShell (DMS)); `modules/wm/dms-mutable.nix` is the settings merge both DMS modules import, and `modules/wm/dms-polkit/` the patch both import that makes DMS's polkit password prompt a full-screen modal, with `PolkitScreenBlockers.qml` covering the other monitors
+- `modules/wm/niri/` — `session.nix` (NixOS: turns the WM on, login screen, keyring unlock) and `home/` (home-manager, everything else, including DankMaterialShell (DMS)); `modules/wm/dms-mutable.nix` is the settings merge its DMS module imports, and `modules/wm/dms-polkit/` the patch it imports that makes DMS's polkit password prompt a full-screen modal, with `PolkitScreenBlockers.qml` covering the other monitors
 - `modules/theme/` — stylix, catppuccin, fonts, plus `gtk.nix` and `qt.nix`, the toolkit theming targets rule 5 routes through, and `dms.nix`, the DMS theme file built from Stylix's palette. Stylix's `base00` is Catppuccin's Crust rather than Base, for contrast behind translucent windows; apps themed outside Stylix (DMS, Zed, Helix, GoofCord, Spotify, Dolphin) read `base00` in place of Base, and Zen's CSS carries Crust. No module sets the wallpaper: DMS picks it at runtime (`Mod+W`) and `theme/wallpapers/` holds the images
 - `modules/nixos/security/mullvad/` — `daemon.nix` (daemon settings), `gui.nix` (tray app, a home-manager module) and `split-tunnel.nix` (system and home wrappers). Imported from `nixos/default.nix`, gated on `machine.mullvad.enable`
 - `lib/settings.nix` — reads a machine's settings and its users', fills them in from the templates, checks them, and returns `machine` and `anyUser`
@@ -164,7 +164,7 @@ Gotchas. Grep the option name before assuming which file owns it:
 | One user's change on one machine | the `users.<name>` block of `machines/<machine>/settings.nix` |
 | WM internals | `modules/wm/{wm}/` |
 | Mullvad VPN | `modules/nixos/security/mullvad/` |
-| Per-machine WM overrides | `machines/<name>/wm/{wm}.nix` (`hyprland.nix` / `niri.nix`) |
+| Per-machine WM overrides | `machines/<name>/wm/{wm}.nix` (`niri.nix`) |
 
 ## Workflows
 
@@ -195,13 +195,13 @@ For an app not in nixpkgs, wrap upstream's AppImage (`appimageTools`) or patch i
 
 **New computer, reinstall or person:** `./setup.sh` on the new computer (it offers to reinstall a machine already in `machines/` instead), `./setup.sh add-user` for a person. It's for people installing this config; don't run it here (its last steps use sudo and `nixos-rebuild`).
 
-**Switch WM:** change `windowManager` in the machine's `settings.nix`, then hand back for the rebuild.
+**Bring Hyprland back:** restore it from the `hyprland-backup` branch (`git show hyprland-backup --stat` lists what was there), re-add `"hyprland"` to `windowManager` in `lib/settings.nix`, then set it in the machine's `settings.nix`.
 
-**Customize WM:** edit `modules/wm/{wm}/home/...` for shared behavior, or `machines/<name>/wm/{wm}.nix` for per-machine overrides (monitors for both WMs, GPU env vars).
+**Customize WM:** edit `modules/wm/{wm}/home/...` for shared behavior, or `machines/<name>/wm/{wm}.nix` for per-machine overrides (monitors, GPU env vars).
 
 ## Window Managers
 
-Keybind syntax (Hyprland Lua helpers vs Niri attribute sets), DMS, XDG portals, login and the per-machine overrides are in `modules/wm/CLAUDE.md`. Read it before changing a WM file, including `machines/<name>/wm/` and `modules/home/variables.nix`, which don't load it on their own. Two rules that bite from anywhere: Niri spawns with arguments must be lists, not strings (an assertion fails the build on a spaced string), and `QT_QPA_PLATFORM`, `GDK_BACKEND` and `SDL_VIDEODRIVER` keep their X11 fallbacks (`wayland;xcb`, `wayland,x11`, `wayland,x11`) or X11-only apps die when launched from DMS.
+Niri keybind syntax, DMS, XDG portals, login and the per-machine overrides are in `modules/wm/CLAUDE.md`. Read it before changing a WM file, including `machines/<name>/wm/` and `modules/home/variables.nix`, which don't load it on their own. Two rules that bite from anywhere: Niri spawns with arguments must be lists, not strings (an assertion fails the build on a spaced string), and `QT_QPA_PLATFORM`, `GDK_BACKEND` and `SDL_VIDEODRIVER` keep their X11 fallbacks (`wayland;xcb`, `wayland,x11`, `wayland,x11`) or X11-only apps die when launched from DMS.
 
 ## Hardware
 
@@ -288,7 +288,7 @@ Common errors:
 
 **Rollback:** the user runs `nixm rollback` (rule 1), or picks a generation from the bootloader.
 
-**Laptop GPU:** `lspci | grep -i vga`, `env | grep -E 'DRI|VDPAU|LIBVA|VK'`. Configs: `machines/legion/hardware/gpu.nix` and `machines/legion/wm/{hyprland,niri}.nix`. Verify offload with `nvidia-offload glxinfo | grep "OpenGL renderer"`.
+**Laptop GPU:** `lspci | grep -i vga`, `env | grep -E 'DRI|VDPAU|LIBVA|VK'`. Configs: `machines/legion/hardware/gpu.nix` and `machines/legion/wm/niri.nix`. Verify offload with `nvidia-offload glxinfo | grep "OpenGL renderer"`.
 
 **A game crashes, freezes or won't start:** the `game-troubleshooting` skill has the logging, hang-vs-crash and native-engine steps, and indexes the per-game notes in `docs/gaming/`.
 

@@ -39,7 +39,6 @@
     };
     login = {}; # Login service
     sddm = {}; # Simple Desktop Display Manager
-    hyprlock = {}; # Hyprland screen locker
     swaylock = {}; # Sway screen locker
     sudo = {}; # Sudo authentication
     su = {}; # Switch user authentication

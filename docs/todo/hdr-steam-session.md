@@ -9,7 +9,7 @@ Added 2026-10-15.
 - `modules/nixos/gaming/steam.nix` turns on `programs.steam.gamescopeSession` and passes it `--hdr-enabled` (added 2026-10-15). The session's entry is named Steam and runs `steam-gamescope`.
 - niri 26.04 has no color-management protocol: its binary has no `wp_color_manager_v1` (checked 2026-10-15).
 - The CachyOS 7.2.8 kernel's amdgpu module has none of the `AMD_PLANE_*` color properties (checked 2026-10-15). Without them, gamescope still outputs HDR but composites every frame with Vulkan instead of handing planes to the display hardware (DeepWiki's summary of gamescope's `src/Backends/DRMBackend.cpp`), which costs some GPU time per frame.
-- The Hyprland session is the other HDR route; its `Mod+H` bind runs `toggle_hdr`.
+- Hyprland, the other HDR route (its `Mod+H` bind ran `toggle_hdr`), was removed on 2026-10-21; it's on the `hyprland-backup` branch.
 
 ## Steps left
 

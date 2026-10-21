@@ -13,7 +13,7 @@
     type = "fcitx5";
 
     fcitx5 = {
-      #--- Use the Wayland text-input frontend for native apps (Niri/Hyprland)
+      #--- Use the Wayland text-input frontend for native apps (Niri)
       # while still exporting XMODIFIERS so XWayland/Wine VNs reach the IME via XIM.
       waylandFrontend = true;
 

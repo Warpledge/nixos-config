@@ -46,7 +46,6 @@
         flake-update = ./skills/flake-update;
         freetube-sync = ./skills/freetube-sync;
         game-troubleshooting = ./skills/game-troubleshooting;
-        hyprland-verify = ./skills/hyprland-verify;
         moku-bump = ./skills/moku-bump;
         rpgm-setup = ./skills/rpgm-setup;
         vn-setup = ./skills/vn-setup;

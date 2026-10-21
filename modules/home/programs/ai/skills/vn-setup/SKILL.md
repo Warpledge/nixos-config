@@ -41,8 +41,6 @@ for most VNs). Then read the window:
 # niri
 niri msg --json windows | jq -c '.[] | select(.app_id // "" | test("\\.exe$"; "i"))
   | {title, app_id, size: .layout.window_size}'
-# Hyprland
-hyprctl clients -j | jq -c '.[] | select(.class | test("\\.exe$"; "i")) | {title, class, size}'
 ```
 
 - `app_id` is usually the exe name in lower case; match the title too.

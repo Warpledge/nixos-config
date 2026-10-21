@@ -153,7 +153,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 
 | | |
 | --- | --- |
-| **Window Manager** | [Niri][niri] / [Hyprland][hyprland] |
+| **Window Manager** | [Niri][niri] |
 | **Status Bar / Notifier / Launcher / Lock** | [Dux Shell][dms] (formerly DankMaterialShell) |
 | **Display Manager** | [dux-greeter][dms-greeter] via [greetd][greetd] |
 | **Color Scheme** | [Catppuccin][catppuccin] Mocha Mauve applied globally via [Stylix][stylix] + [catppuccin/nix][catppuccin-nix] |
@@ -192,7 +192,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | **File Manager** | [Nautilus][nautilus] (with an open-in-Kitty menu entry from [nautilus-open-any-terminal][nautilus-open-any-terminal]), [Dolphin][dolphin] (optional, themed through Kvantum and the Catppuccin KDE colour scheme, with [Ark][ark] for archives), [Yazi][yazi] (terminal file manager), [Dux Files][dux-files] (standalone file manager from Dux Labs) |
 | **Media Player** | [mpv][mpv], [Spotify][spotify] via [spicetify-nix][spicetify], [FreeTube][freetube] |
 | **Twitch** | [Streamlink Twitch GUI][streamlink-twitch-gui] browses Twitch and hands the stream to [Streamlink][streamlink], which plays it in mpv, so there are no ads and the follow list stays local with no Twitch account attached; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs |
-| **Screenshot / Recording** | [Quick Capture][quick-capture] (Niri, Hyprland), [gpu-screen-recorder][gpu-screen-recorder] |
+| **Screenshot / Recording** | [Quick Capture][quick-capture] (Niri), [gpu-screen-recorder][gpu-screen-recorder] |
 | **Clipboard** | [ClipBoard+][clipboard-plus] (Niri) |
 | **Wallpaper Picker** | [Wallpaper Carousel][wallpaper-carousel] over the images in `modules/theme/wallpapers` (Niri), the default; each user picks it or Wallpaper Engine with `wallpaper` in their settings |
 | **Animated Wallpaper** | [linux-wallpaperengine][linux-wallpaperengine] plays Wallpaper Engine scenes and videos from the Steam Workshop, in place of DMS's wallpaper; the [Linux Wallpaper Engine][dms-wallpaperengine] DMS plugin picks them (Niri, `wallpaper = "engine"`; needs Wallpaper Engine bought on Steam) |
@@ -262,7 +262,6 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 </details>
 
 [niri]: https://github.com/YaLTeR/niri
-[hyprland]: https://hyprland.org
 [dms]: https://github.com/duxlabs-dev/dux-shell
 [dms-greeter]: https://github.com/duxlabs-dev/dux-greeter
 [greetd]: https://git.sr.ht/~kennylevinsen/greetd
@@ -476,7 +475,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 
 `Mod` is the Super (Windows) key.
 
->**Note:** `Mod+/` opens a keybind overlay cheatsheet in both WMs.
+>**Note:** `Mod+/` opens a keybind overlay cheatsheet.
 
 <details>
 <summary>⌨️ Niri Keybinds</summary>
@@ -591,79 +590,6 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | --- | --- |
 | `Alt+Tab` | Recent windows switcher; `Shift` goes back, `S` narrows it to the workspace or monitor |
 | `Alt+Tilde` | The same switcher, limited to the focused app's windows |
-
-</details>
-
-<details>
-<summary>⌨️ Hyprland Keybinds</summary>
-
-#### Apps
-
-| Keybind | Action |
-| --- | --- |
-| `Mod+Return` | Terminal (Kitty) |
-| `Mod+Z` | Code editor (Zed) |
-| `Mod+B` | Browser (Zen) |
-| `Mod+E` | File manager (Nautilus, or Dolphin when it's the default) |
-| `Mod+Shift+S` | Steam |
-| `Mod+Shift+D` | Discord (GoofCord) |
-| `Mod+Shift+H` | Heroic |
-| `Mod+Shift+G` | Lutris |
-| `Mod+Shift+M` | Spotify |
-| `Mod+Shift+Y` | FreeTube |
-| `Mod+Shift+C` | NixOS Settings (focuses it when already open) |
-
-#### Window Management
-
-| Keybind | Action |
-| --- | --- |
-| `Mod+Q` | Close window |
-| `Mod+Space` | Toggle floating |
-| `Mod+F` | Fullscreen |
-| `Mod+D` | Maximize |
-| `Mod+T` | Toggle opacity |
-| `Mod+H` | Toggle HDR on the main monitor |
-| `Mod+0` | Toggle scratchpad |
-| `Mod+Shift+0` | Move to scratchpad |
-
-#### Shell (DankMaterialShell)
-
-Same binds as the Niri table, `Mod+A` through `Mod+R`.
-
-#### Focus & Movement
-
-| Keybind | Action |
-| --- | --- |
-| `Mod+←/→/↑/↓` | Focus window in direction |
-| `Mod+Shift+←/→/↑/↓` | Move window in direction |
-| `Mod+Scroll` | Scroll through workspaces |
-
-#### Resize & Move
-
-| Keybind | Action |
-| --- | --- |
-| `Mod+Ctrl+←/→/↑/↓` | Resize window ±80px |
-| `Mod+Alt+←/→/↑/↓` | Move floating window ±80px |
-| `Mod+LMB drag` | Move window |
-| `Mod+RMB drag` | Resize window |
-
-#### Workspaces
-
-| Keybind | Action |
-| --- | --- |
-| `Mod+1–9` | Focus workspace N |
-| `Mod+Shift+1–9` | Move window to workspace N |
-
-#### Media & Capture
-
-| Keybind | Action |
-| --- | --- |
-| `Print` | Region screenshot (Quick Capture, opens its editor) |
-| `Mod+Print` | Focused window screenshot |
-| `Mod+Shift+Print` | Focused output screenshot |
-| `Ctrl+Print` | All outputs screenshot |
-| `Mod+Ctrl+Print` | Scrolling capture |
-| `Mod+End` | Toggle screen recording (portal) |
 
 </details>
 

@@ -59,7 +59,7 @@
   capsLockRemap = true;
 
   #--- Window Manager Selection
-  # Options: "hyprland" | "niri"
+  # Options: "niri"
   windowManager = "niri";
 
   #--- Kernel Selection

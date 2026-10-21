@@ -2,7 +2,7 @@
 # NIX-GAMESCOPE - GAMESCOPE LAUNCH WRAPPER
 #=====================================================================#
 #- `nix-gamescope %command%` runs the game fullscreen in gamescope at the
-#- focused monitor's resolution and refresh (read from niri or Hyprland;
+#- focused monitor's resolution and refresh (read from niri;
 #- nested gamescope can't detect them and falls back to 1280x720), under
 #- nix-performance. Base flags come from nixos/gaming/tools/gamescope/.
 #- Extra gamescope flags go before `--` and override the detected ones:
@@ -47,9 +47,6 @@
       if [[ -n $NIRI_SOCKET ]]; then
         mode=$(niri msg --json focused-output \
           | ${jq} -r '.modes[.current_mode] | "\(.width) \(.height) \(.refresh_rate / 1000 | round)"')
-      elif [[ -n $HYPRLAND_INSTANCE_SIGNATURE ]]; then
-        mode=$(hyprctl -j monitors \
-          | ${jq} -r '.[] | select(.focused) | "\(.width) \(.height) \(.refreshRate | round)"')
       fi
 
       detected=()

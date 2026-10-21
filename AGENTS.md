@@ -177,18 +177,14 @@ lines, `grep -n` that file for the part you need.
 
 **`modules/wm/`** (also `machines/*/wm/` and `modules/home/variables.nix`)
 
-- Keybinds differ per WM. Hyprland is Lua: add binds through the `exec`/`bind`
-  helpers in `hyprland/home/core/binds.nix`; rules stay in the
-  `"match:class X, float on"` string form. Run the `hyprland-verify` skill after.
+- Niri is the only WM; Hyprland's config is on the `hyprland-backup` branch.
 - **Niri spawns with arguments are lists** (`spawn = ["dms" "ipc" "call" ...]`);
   a spaced string fails the build.
 - DMS `settings.json` in `<wm>/home/dms/` is shared by every machine and written
   as a real file the GUI saves to (`dms.mutableFiles`). Machine bars go in the
   machine's `wm/niri.nix` through `dms.extraSettings`. Plugin settings go in
   `dms.pluginSettings.<plugin>`, not `plugins.<plugin>.settings`.
-- Each WM's `settings.json` mirrors what the user set in the DMS settings window.
-  A value that differs between niri's and Hyprland's is a choice, not a bug:
-  don't copy values across unless asked.
+- `settings.json` mirrors what the user set in the DMS settings window.
 - Keep `QT_QPA_PLATFORM`, `GDK_BACKEND`, `SDL_VIDEODRIVER` X11 fallbacks
   (`wayland;xcb`, `wayland,x11`, `wayland,x11`). DMS launches apps with the
   systemd user environment (`variables.nix`), not niri's `environment` block.
@@ -257,7 +253,6 @@ steps.
 | `disable-package` | An update broke one package; switch it off or back on |
 | `freetube-sync` | "I blocked more" / "sync freetube" |
 | `apparmor-check` | After editing `modules/nixos/security/apparmor/` |
-| `hyprland-verify` | After editing Hyprland config |
 | `game-troubleshooting` | A game crashes, freezes or won't start |
 | `vn-setup`, `rpgm-setup` | Upscaling a visual novel or RPG Maker game |
 | `moku-bump` | Updating or repairing Moku/Tsunagu |

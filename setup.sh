@@ -717,14 +717,13 @@ write_monitors() {
     IFS='|' read -r n w h cm <<<"${monitors[i]}"
     s=${scales[i]}
     [[ $s == *.* ]] || s=$s.0
-    if [[ $wm == niri ]]; then
-      mode=""
-      ((w > 0)) && mode="
+    mode=""
+    ((w > 0)) && mode="
             mode = {
               width = $w;
               height = $h;
             };"
-      block+="          \"$n\" = {$mode
+    block+="          \"$n\" = {$mode
             position = {
               x = $x;
               y = 0;
@@ -732,27 +731,11 @@ write_monitors() {
             scale = $s;
           };
 "
-    else
-      block+="          {
-            output = \"$n\";
-            mode = \"highrr\";
-            position = \"${x}x0\";
-            scale = $s;
-          }
-"
-    fi
     ((w > 0)) && x=$((x + $(awk -v w="$w" -v s="$s" 'BEGIN { printf "%d", w / s + 0.5 }')))
   done
-  if [[ $wm == niri ]]; then
-    add_line_after "$file" '^      programs\.niri\.settings = \{' "        #--- Found by setup.sh; with no refresh niri picks each one's highest
+  add_line_after "$file" '^      programs\.niri\.settings = \{' "        #--- Found by setup.sh; with no refresh niri picks each one's highest
         outputs = {
 ${block}        };"
-  else
-    add_line_after "$file" '^      wayland\.windowManager\.hyprland\.settings = \{' "        #--- Found by setup.sh; highrr is the highest refresh rate, which can
-        #--- mean a lower resolution: \`hyprctl monitors\` lists exact modes
-        monitor = [
-${block}        ];"
-  fi
 }
 
 #--- 0000:01:00.0 -> PCI:1:0:0, the form hardware.nvidia.prime wants
@@ -1039,9 +1022,7 @@ new_machine_questions() {
     "${keymap:-$layout}" list_keymaps
 
   section "Desktop"
-  choose wm "Window manager, for everyone on this computer:" niri \
-    "niri|niri: windows in a row that scrolls sideways (the most worked-on setup here)" \
-    "hyprland|Hyprland: windows tile to fill the screen"
+  wm=niri
   #--- The template's zen kernel stays: it comes from the binary cache, and
   #--- cachyos would compile on this computer
   say "Kernel: zen. Another one can be picked later with kernel in machines/$name/settings.nix."

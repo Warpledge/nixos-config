@@ -270,7 +270,6 @@ in {
         default = {};
         description = "Keys merged over settings.json on one machine.";
       };
-      # Hyprland's DMS module declares the same option
       options.dms.pluginSettings = lib.mkOption {
         type = lib.types.attrsOf lib.types.attrs;
         default = {};

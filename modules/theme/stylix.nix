@@ -32,7 +32,6 @@
           zed.enable = false; # handled by app
           kde.enable = false; # breaks KDE apps / Desktop
           forge.enable = false; # GNOME Shell extension, not installed
-          hyprlock.enable = false; # have custom theme
           mangohud.enable = false; # managed via programs.mangohud
           helix.enable = false;
           micro.enable = false;
