@@ -12,14 +12,8 @@
   #-- Niri Keybindings
   #--------------------------------------------------------------------#
   programs.niri.settings.binds = let
-    # Dolphin or Dux Files when it's the user's file manager, else Nautilus
+    # The user's defaultApps, for the terminal, browser and files binds
     chosen = (import ../../../../../lib/default-apps.nix {inherit lib;}).forUser user;
-    files =
-      if chosen.fileManager.name == "dolphin"
-      then "dolphin"
-      else if chosen.fileManager.name == "duxFiles"
-      then "dfiles"
-      else "nautilus";
     # The title is what the Mod+/ cheatsheet (DMS) shows for the bind
     bind = title: action: {
       inherit action;
@@ -45,7 +39,7 @@
 
     #--- Applications
     # Screenshot binds live with the other DMS commands in dms/default.nix
-    "Mod+Return" = bind "Terminal" {spawn = ["kitty"];};
+    "Mod+Return" = bind "Terminal" {spawn = chosen.terminal.launch;};
 
     "Mod+Q" = bind "Close window" {close-window = {};};
     "Mod+S" = bind "Cycle column width" {switch-preset-column-width = {};};
@@ -166,8 +160,8 @@
         machine.flakePath
       ];
     };
-    "Mod+B" = bind "Zen browser" {spawn = ["zen-beta"];};
-    "Mod+E" = bind "Files" {spawn = [files];};
+    "Mod+B" = bind "Web browser" {spawn = chosen.browser.launch;};
+    "Mod+E" = bind "Files" {spawn = chosen.fileManager.launch;};
     "Mod+Shift+M" = bind "Spotify" {spawn = ["spotify"];};
     "Ctrl+Alt+Delete" = bind "Resources (system monitor)" {spawn = ["resources"];};
     #--- Focuses NixOS Settings, or opens it

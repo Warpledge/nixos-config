@@ -12,14 +12,9 @@
   bind = keys: dsp: {_args = [keys (lua dsp)];};
   exec = keys: cmd: bind keys "hl.dsp.exec_cmd(${str cmd})";
   workspaces = map toString (lib.range 1 9);
-  # Dolphin or Dux Files when it's the user's file manager, else Nautilus
+  # The user's defaultApps, for the terminal, browser and files binds
   chosen = (import ../../../../../lib/default-apps.nix {inherit lib;}).forUser user;
-  files =
-    if chosen.fileManager.name == "dolphin"
-    then "dolphin"
-    else if chosen.fileManager.name == "duxFiles"
-    then "dfiles"
-    else "nautilus";
+  launch = kind: lib.escapeShellArgs chosen.${kind}.launch;
 in {
   #--------------------------------------------------------------------#
   #-- Hyprland Keybinds
@@ -34,10 +29,10 @@ in {
           (bind "SUPER + SHIFT + 0" ''hl.dsp.window.move({ workspace = "special:scratchpad" })'')
 
           #--- Applications
-          (exec "SUPER + Return" "kitty") # Terminal
+          (exec "SUPER + Return" (launch "terminal")) # Terminal
           (exec "SUPER + Z" "zeditor ${machine.flakePath}") # Zed on the config
-          (exec "SUPER + B" "zen-beta") # Web Browser
-          (exec "SUPER + E" files) # Files
+          (exec "SUPER + B" (launch "browser")) # Web Browser
+          (exec "SUPER + E" (launch "fileManager")) # Files
           (exec "SUPER + SHIFT + C" "nixos-settings") # Focuses it when already open
 
           #--- Gaming & XWayland Apps
