@@ -12,7 +12,7 @@
     warpledge = {
       gaming.retroshelf = false;
       fileBrowsers.dolphin = false;
-      wallpaper = "carousel";
+      wallpaper = "engine";
       editors.vscodium = false;
       localAi.chat = "gemma-4-26b-a4b";
       localAi.edit = null;
