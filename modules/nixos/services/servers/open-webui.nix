@@ -41,11 +41,19 @@
   '';
 
   #--- The server copies the frontend's static/ to its state dir on each start, and
-  #--- every page loads static/custom.css, so the theme rides in a frontend copy
+  #--- every page loads static/custom.css, so the theme rides in a frontend copy.
+  #--- Real files: Starlette 404s symlinks leading out of the dir. pyodide has
+  #--- its own mount, so it stays a link
   frontend = "${pkgs.open-webui.frontend}/share/open-webui";
-  themedFrontend = pkgs.runCommand "open-webui-frontend-stylix" {nativeBuildInputs = [pkgs.lndir];} ''
+  themedFrontend = pkgs.runCommand "open-webui-frontend-stylix" {} ''
     mkdir $out
-    lndir -silent ${frontend} $out
+    for f in ${frontend}/*; do
+      if [ "$(basename $f)" = pyodide ]; then
+        ln -s $f $out/pyodide
+      else
+        cp -r --no-preserve=mode $f $out/
+      fi
+    done
     rm -f $out/static/custom.css
     cp ${pkgs.writeText "custom.css" css} $out/static/custom.css
   '';
