@@ -50,6 +50,16 @@
     cp ${pkgs.writeText "custom.css" css} $out/static/custom.css
   '';
 
+  #--- nixpkgs open-webui has a bug: makeWrapperArgs is a single string
+  #--- "--set FRONTEND_BUILD_DIR /path" instead of ["--set" "FRONTEND_BUILD_DIR" "/path"];
+  #--- makeWrapper rejects it. Clear makeWrapperArgs and set env var via shell wrapper.
+  openWebuiPatched = pkgs.open-webui.overridePythonAttrs (old: {
+    makeWrapperArgs = [];
+    postFixup = ''
+      wrapProgram $out/bin/open-webui --set FRONTEND_BUILD_DIR ${themedFrontend}
+    '';
+  });
+
   #--- MCP servers it calls itself; only Streamable HTTP ones work without a proxy.
   #--- Same servers as home/programs/ai/mcp.nix
   mcp = id: name: mcpUrl: {
@@ -68,9 +78,7 @@ in {
   services.open-webui = {
     enable = true;
     inherit port;
-    package = pkgs.open-webui.overridePythonAttrs {
-      makeWrapperArgs = ["--set FRONTEND_BUILD_DIR ${themedFrontend}"];
-    };
+    package = openWebuiPatched;
     # Replaces the module's default set, so its three no-tracking values are restated
     environment = {
       SCARF_NO_ANALYTICS = "True";
