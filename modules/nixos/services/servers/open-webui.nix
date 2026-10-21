@@ -50,9 +50,8 @@
     cp ${pkgs.writeText "custom.css" css} $out/static/custom.css
   '';
 
-  #--- nixpkgs open-webui has a bug: makeWrapperArgs is a single string
-  #--- "--set FRONTEND_BUILD_DIR /path" instead of ["--set" "FRONTEND_BUILD_DIR" "/path"];
-  #--- makeWrapper rejects it. Clear makeWrapperArgs and set env var via shell wrapper.
+  #--- Points FRONTEND_BUILD_DIR at the themed copy from postFixup, in place of
+  #--- upstream's makeWrapperArgs
   openWebuiPatched = pkgs.open-webui.overridePythonAttrs (old: {
     makeWrapperArgs = [];
     postFixup = ''

@@ -154,8 +154,8 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | | |
 | --- | --- |
 | **Window Manager** | [Niri][niri] / [Hyprland][hyprland] |
-| **Status Bar / Notifier / Launcher / Lock** | [DankMaterialShell][dms] |
-| **Display Manager** | [dms-greeter][dms-greeter] via [greetd][greetd] |
+| **Status Bar / Notifier / Launcher / Lock** | [Dux Shell][dms] (formerly DankMaterialShell) |
+| **Display Manager** | [dux-greeter][dms-greeter] via [greetd][greetd] |
 | **Color Scheme** | [Catppuccin][catppuccin] Mocha Mauve applied globally via [Stylix][stylix] + [catppuccin/nix][catppuccin-nix] |
 | **Fonts** | [JetBrains Mono Nerd Font][nerd-fonts], Monaspace, Roboto, Nerd Fonts Symbols |
 | **Window Switcher** | Niri's built-in recent-windows switcher |
@@ -263,8 +263,8 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 
 [niri]: https://github.com/YaLTeR/niri
 [hyprland]: https://hyprland.org
-[dms]: https://github.com/AvengeMedia/DankMaterialShell
-[dms-greeter]: https://github.com/AvengeMedia/dank-greeter
+[dms]: https://github.com/duxlabs-dev/dux-shell
+[dms-greeter]: https://github.com/duxlabs-dev/dux-greeter
 [greetd]: https://git.sr.ht/~kennylevinsen/greetd
 [catppuccin]: https://github.com/catppuccin/catppuccin
 [catppuccin-nix]: https://github.com/catppuccin/nix
@@ -712,10 +712,10 @@ flake.nix
 | [`home-manager`](https://github.com/nix-community/home-manager) | User environment management |
 | [`nur`](https://github.com/nix-community/NUR) | NixOS User Repository |
 | [`niri`](https://github.com/epireyn/niri-flake) (epireyn/niri-flake) | Niri WM |
-| [`dms`](https://github.com/AvengeMedia/DankMaterialShell) (AvengeMedia, stable) | DankMaterialShell |
-| [`dms-plugin-registry`](https://github.com/AvengeMedia/dms-plugin-registry) | DankMaterialShell plugins (AI usage overview, Quick Capture, AMD GPU monitor, ClipBoard+, Wallpaper Carousel, Linux Wallpaper Engine) |
+| [`dms`](https://github.com/duxlabs-dev/dux-shell) (duxlabs-dev, stable) | Dux Shell (formerly DankMaterialShell) |
+| [`dms-plugin-registry`](https://github.com/duxlabs-dev/dux-plugin-registry) | Dux Shell plugins (Claude Code usage, Quick Capture, AMD GPU monitor, ClipBoard+, Wallpaper Carousel, Linux Wallpaper Engine) |
 | [`dux-files`](https://github.com/duxlabs-dev/dux-files) | Dux Files, standalone file manager from Dux Labs |
-| [`dank-greeter`](https://github.com/AvengeMedia/dank-greeter) | Login screen that matches DankMaterialShell |
+| [`dux-greeter`](https://github.com/duxlabs-dev/dux-greeter) | Login screen that matches Dux Shell |
 | [`stylix`](https://github.com/nix-community/stylix) | System-wide theming |
 | [`catppuccin`](https://github.com/catppuccin/nix) | Catppuccin theme module |
 | [`nixcord`](https://github.com/kaylorben/nixcord) | GoofCord / Vencord |

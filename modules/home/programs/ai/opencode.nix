@@ -23,9 +23,11 @@
 
       #--- Context7 indexes JS/Python framework docs; deepwiki and grep provide
       #--- upstream wiki docs and real-world code examples.
+      #--- Overrides replace the whole entry, so the full server is restated here.
       settings.mcp.context7 = {
         type = "local";
         command = [(lib.getExe pkgs.context7-mcp)];
+        # Same file as tokenDir in mcp.nix
         environment.CONTEXT7_API_KEY = "{file:${config.home.homeDirectory}/.nixos-config-mcp/context7}";
         enabled = true;
       };

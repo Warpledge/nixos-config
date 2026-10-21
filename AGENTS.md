@@ -56,7 +56,7 @@ Read them this way:
 - `<skill-dir>` is `modules/home/programs/ai/skills/<name>`, so run
   `bash modules/home/programs/ai/skills/add-app/scripts/check-app.sh ...`.
 - "CLAUDE.md rule 1" is rule 1 in `CLAUDE.md` (no rebuilds, when to flake check);
-  "rule 6" is rule 7 there (commit format). You already read it at session start
+  "rule 6" is rule 6 there (commit format). You already read it at session start
   (see above). If a skill names a CLAUDE.md section you need, `grep -n` it.
 - A step that hands work to a subagent (`public-repo-auditor`,
   `prose-reviewer`, `build-triager`, `docs-drift-auditor`) is yours to do:

@@ -29,7 +29,7 @@ DMS runs as a systemd user service (`systemd.enable`, `niri.enableSpawn = false`
 
 **XDG portals** (Niri): `niri/session.nix` strips `GDK_BACKEND` from `xdg-desktop-portal-gnome`, and `niri/home/core/portals.nix` adds the gtk backend back. Read `docs/wm/niri-xdg-portals.md` before touching either, and never "fix" a portal by dropping the X11 fallback from `variables.nix`.
 
-**Login:** Niri and Hyprland start from the DMS greeter (greetd, through the `dank-greeter` input, set up in `<wm>/session.nix`).
+**Login:** Niri and Hyprland start from the DMS greeter (greetd, through the `dux-greeter` input, set up in `<wm>/session.nix`).
 
 **Hyprland-only directories:** `core/animations.nix`, `core/quad.lua`, `core/variables.nix`, `core/rules/` (`luaRule.nix`, `windowrules/`, `layerrules/`), `scripts/`.
 **Niri-only directories:** `core/blur-presets.nix`, `core/portals.nix`, `core/rules.nix` (plus `core/window-rules.json`), `core/translucent-apps.nix`, `core/vrr.nix`, `core/xwayland.nix`, `nirius.nix`.
