@@ -12,7 +12,7 @@
   bind = keys: dsp: {_args = [keys (lua dsp)];};
   exec = keys: cmd: bind keys "hl.dsp.exec_cmd(${str cmd})";
   workspaces = map toString (lib.range 1 9);
-  # The user's defaultApps, for the terminal, browser and files binds
+  # The user's defaultApps, for the app binds
   chosen = (import ../../../../../lib/default-apps.nix {inherit lib;}).forUser user;
   launch = kind: lib.escapeShellArgs chosen.${kind}.launch;
 in {
@@ -30,7 +30,8 @@ in {
 
           #--- Applications
           (exec "SUPER + Return" (launch "terminal")) # Terminal
-          (exec "SUPER + Z" "zeditor ${machine.flakePath}") # Zed on the config
+          # Editor on the config
+          (exec "SUPER + Z" "${launch "textEditor"} ${lib.escapeShellArg machine.flakePath}")
           (exec "SUPER + B" (launch "browser")) # Web Browser
           (exec "SUPER + E" (launch "fileManager")) # Files
           (exec "SUPER + SHIFT + C" "nixos-settings") # Focuses it when already open

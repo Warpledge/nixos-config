@@ -12,7 +12,7 @@
   #-- Niri Keybindings
   #--------------------------------------------------------------------#
   programs.niri.settings.binds = let
-    # The user's defaultApps, for the terminal, browser and files binds
+    # The user's defaultApps, for the app binds
     chosen = (import ../../../../../lib/default-apps.nix {inherit lib;}).forUser user;
     # The title is what the Mod+/ cheatsheet (DMS) shows for the bind
     bind = title: action: {
@@ -147,18 +147,22 @@
     "Mod+Shift+H" = bind "Heroic" {spawn = ["heroic"];};
     "Mod+Shift+G" = lib.mkIf user.gaming.lutris (bind "Lutris" {spawn = ["lutris"];});
     "Mod+Shift+Y" = bind "FreeTube" {spawn = ["freetube"];};
-    #--- Focuses the Zed window on the config, or opens one
-    "Mod+Z" = bind "Zed on the config" {
-      spawn = [
-        "nirius"
-        "focus-or-spawn"
-        "--app-id"
-        "^dev\\.zed\\.Zed$"
-        "--title"
-        (lib.escapeRegex (baseNameOf machine.flakePath))
-        "zeditor"
-        machine.flakePath
-      ];
+    #--- Opens the config in the default editor; focuses an open Zed window on it
+    "Mod+Z" = bind "Editor on the config" {
+      spawn =
+        if chosen.textEditor.name == "zed"
+        then
+          [
+            "nirius"
+            "focus-or-spawn"
+            "--app-id"
+            "^dev\\.zed\\.Zed$"
+            "--title"
+            (lib.escapeRegex (baseNameOf machine.flakePath))
+          ]
+          ++ chosen.textEditor.launch
+          ++ [machine.flakePath]
+        else chosen.textEditor.launch ++ [machine.flakePath];
     };
     "Mod+B" = bind "Web browser" {spawn = chosen.browser.launch;};
     "Mod+E" = bind "Files" {spawn = chosen.fileManager.launch;};
