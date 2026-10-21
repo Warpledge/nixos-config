@@ -79,7 +79,6 @@
   #-- Intrusion Detection System (IDS) Tools
   #--------------------------------------------------------------------#
   environment.systemPackages = with pkgs; [
-    sbomnix # SBOM + CVE scanning; ships vulnxscan
     lynis # Security auditing tool
   ];
 
