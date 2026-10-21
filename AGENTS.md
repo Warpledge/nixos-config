@@ -51,6 +51,8 @@ home-manager, Niri WM, Stylix theming (Catppuccin Mocha).
 11. **`rm` takes literal paths.** Write the absolute path, never `$VAR`
     (`rm /run/user/1000/a`, not `rm $XDG_RUNTIME_DIR/a`), and run each
     deletion as its own command, never chained onto a read-only check.
+12. **Hard stop on request.** If the user says "stop looping" or "summarize and ask", pause immediately, report current state, and ask what to do next. Do not continue troubleshooting.
+13. **No triple-retry rule.** If the same error appears twice without new information, stop and ask. Do not try a third variation of the same approach.
 
 ## Context budget
 
@@ -70,6 +72,7 @@ lost. Work so that compaction costs nothing:
 - **Trim command output at the source**: `nix flake check 2>&1 | tail -n 30`,
   `alejandra <file> 2>&1 | tail -n 5`, man pages through `grep`. Never print a store
   listing, a derivation or a full log.
+- **Checkpoint on demand.** When the user asks "where are we?" or "summarize", output a brief status (what's done, what's blocking, next step) and wait for direction instead of continuing.
 - **Small edits.** Use the edit tool with the shortest unique `oldString`, not a
   whole-file write. Finish one file before opening the next.
 - **Batch** independent shell commands into one call.
