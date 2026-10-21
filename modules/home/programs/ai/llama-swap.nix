@@ -120,7 +120,8 @@ in {
             inherit (model) name;
             limit = {
               inherit (model) context;
-              output = 16384; # Thinking tokens count against it
+              # Qwen's recommended output length; thinking tokens count against it
+              output = 32768;
             };
           };
         }

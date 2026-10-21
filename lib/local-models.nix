@@ -23,10 +23,12 @@
       context = 131072;
       # Experts of 18 layers from RAM: ~15GB VRAM (20 measured 80-85%, 37-39 tok/s)
       args = ["-ngl 99" "--load-mode none" "--n-cpu-moe 18" "-ub 2048" "--top-k 20" "--min-p 0"];
-      # Qwen's thinking-mode coding sampling, and its non-thinking sampling
+      # Qwen's thinking-mode coding sampling, and its non-thinking sampling;
+      # presence_penalty (0-2 per Qwen) curbs the repetition loops a quant falls into
       think = {
         temperature = 0.6;
         top_p = 0.95;
+        presence_penalty = 1.0;
       };
       fast = {
         chat_template_kwargs.enable_thinking = false;
@@ -45,6 +47,7 @@
       think = {
         temperature = 0.6;
         top_p = 0.95;
+        presence_penalty = 1.0;
       };
       fast = {
         chat_template_kwargs.enable_thinking = false;
