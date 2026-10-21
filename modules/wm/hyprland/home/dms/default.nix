@@ -23,19 +23,12 @@
     plugins = {
       # amdGpuMonitor is per machine: machines/eclipse/hardware/gpu.nix
 
-      # The plugin stores its options as strings, booleans included.
+      # Claude Code Usage (DMS community plugin)
       claudeCodeUsage = {
         enable = user.claude.enable;
         settings = {
-          providerSelection = "claude";
-          pillProviders = "claude";
-          languageOverride = "en_US";
-          densityMode = "comfortable";
-          pillMode = "auto";
-          pillTooltip = "true";
-          pillCompact = "false";
-          showAntigravityModelDetails = "false";
-          notifyThreshold = "85";
+          enabled = true;
+          refreshInterval = 2;
         };
       };
 

@@ -81,17 +81,10 @@ in {
   #--- Plugin settings, here rather than in plugins.<name>.settings, which DMS
   #--- warns it ignores while managePluginSettings is off
   dms.pluginSettings = {
-    # The plugin stores its options as strings, booleans included.
+    # Claude Code Usage (DMS community plugin) — refresh interval in seconds
     claudeCodeUsage = {
-      providerSelection = "claude";
-      pillProviders = "claude";
-      languageOverride = "en_US";
-      densityMode = "comfortable";
-      pillMode = "auto";
-      pillTooltip = "true";
-      pillCompact = "false";
-      showAntigravityModelDetails = "false";
-      notifyThreshold = "85";
+      enabled = true;
+      refreshInterval = 2;
     };
 
     quickCapture = {
