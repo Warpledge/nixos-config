@@ -55,6 +55,8 @@ row.nixm-plain image.expander-row-arrow { opacity: 0; }
               background-color: alpha(currentColor, 0.07); }
 .master-tab:hover { background-color: alpha(@accent_color, 0.22); }
 .master-tab:checked { background-color: @accent_bg_color; color: @accent_fg_color; }
+.master-tab image { color: @accent_color; }
+.master-tab:checked image { color: @accent_fg_color; }
 .doc-code { padding: 10px 12px; font-size: 0.9em; }
 .doc-quote { border-left: 3px solid @accent_color; padding: 4px 0 4px 12px;
              background-color: alpha(@accent_color, 0.08); border-radius: 0 8px 8px 0; }
