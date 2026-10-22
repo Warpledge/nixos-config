@@ -560,7 +560,7 @@ in {
             -f ${../../../../lib/mutable-merge.jq} "$settings_file")"
           printf '%s\n' "$merged" > "$settings_file"
         fi
-        # Also what NixOS Settings' reset copies over settings.json
+        # Also what NixOS Settings' Zed reset puts back into settings.json
         cp --no-preserve=mode "$new_file" "$declarative_file"
       fi
     ''

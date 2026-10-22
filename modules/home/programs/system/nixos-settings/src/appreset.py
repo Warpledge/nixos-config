@@ -1,8 +1,9 @@
-"""Reset buttons on the app switches: copy the settings the config last wrote
-back over the app's own file, dropping what was changed in the app since. Only
-apps whose config file stays writable are listed; the rest are store links a
-rebuild already puts back."""
+"""Reset buttons on the app switches: put each setting the config declares
+back to the value it last wrote, leaving every other setting in the app's file
+as it is. Only apps whose config file stays writable are listed; the rest are
+store links a rebuild already puts back."""
 
+import json
 import os
 import shutil
 import subprocess
@@ -16,6 +17,7 @@ from gi.repository import Adw, Gtk  # noqa: E402
 HOME = os.path.expanduser("~")
 #--- user setting -> (app, its live file, the config's copy, pgrep -f pattern
 #--- of a running app that rewrites the file on exit, extra warning)
+#--- .db files are NeDB logs (one {"_id", "value"} per line), the rest JSON
 APPS = {
     ("editors", "zed"): ("Zed", ".config/zed/settings.json",
                          ".config/zed/declarative-settings.json", None, ""),
@@ -42,8 +44,9 @@ def button(window, setting):
 
 def _confirm(window, app, live, declared, running, extra):
     dialog = Adw.AlertDialog(heading=f"Reset {app} settings?",
-                             body=f"{app} goes back to the settings in the config. Everything changed in "
-                                  f"{app}'s own settings since is lost; the old file is kept as "
+                             body=f"Every setting the config sets for {app} goes back to the config's "
+                                  f"value, losing what was changed in {app}; settings the config "
+                                  f"leaves alone stay as they are. The old file is kept as "
                                   f"{os.path.basename(live)}.old." + extra)
     dialog.add_response("cancel", "Cancel")
     dialog.add_response("reset", "Reset")
@@ -59,12 +62,65 @@ def _confirm(window, app, live, declared, running, extra):
             return
         path = os.path.join(HOME, live)
         try:
+            text = reset_text(path, os.path.join(HOME, declared))
             if os.path.isfile(path):
                 shutil.copyfile(path, path + ".old")
-            shutil.copyfile(os.path.join(HOME, declared), path)
+            with open(path, "w") as f:
+                f.write(text)
         except OSError as e:
             window.toast(f"Couldn't reset {app}: {e.strerror}")
+            return
+        except ValueError:
+            window.toast(f"Couldn't reset {app}: its settings file isn't plain JSON")
             return
         window.toast(f"{app} settings reset")
     dialog.connect("response", chosen)
     dialog.present(window)
+
+
+def reset_text(live, declared):
+    """The live file's text with the declared values put back."""
+    with open(declared) as f:
+        want = f.read()
+    try:
+        with open(live) as f:
+            have = f.read()
+    except FileNotFoundError:
+        return want
+    if live.endswith(".db"):
+        return _reset_nedb(have, want)
+    data = json.loads(have) if have.strip() else {}
+    for path, value in _leaves(json.loads(want)):
+        node = data
+        for key in path[:-1]:
+            if not isinstance(node.get(key), dict):
+                node[key] = {}
+            node = node[key]
+        node[path[-1]] = value
+    return json.dumps(data, indent=2) + "\n"
+
+
+def _leaves(obj, path=()):
+    """(key path, value) for each leaf; arrays and empty objects count as one,
+    as in lib/mutable-merge.jq."""
+    if isinstance(obj, dict) and obj:
+        for key, value in obj.items():
+            yield from _leaves(value, path + (key,))
+    elif path:
+        yield path, obj
+
+
+def _reset_nedb(have, want):
+    """Folds the log (a later line with the same _id wins), sets the declared
+    _ids and writes one line per setting."""
+    docs = {}
+    for text in (have, want):
+        for line in text.splitlines():
+            if not line.strip():
+                continue
+            doc = json.loads(line)
+            if doc.get("$$deleted"):
+                docs.pop(doc.get("_id"), None)
+            elif "_id" in doc:
+                docs[doc["_id"]] = doc
+    return "".join(json.dumps(d, separators=(",", ":"), ensure_ascii=False) + "\n" for d in docs.values())
