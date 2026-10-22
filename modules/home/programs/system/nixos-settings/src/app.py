@@ -31,7 +31,7 @@ import docs  # noqa: E402
 from backups import BackupsPage  # noqa: E402
 from flatpaks import FlatpakPage  # noqa: E402
 from overview import Overview, ShellPage  # noqa: E402
-from packages import PackagesPage  # noqa: E402
+from packages import PackagesPage, UserPackagesPage  # noqa: E402
 from people import PeoplePage  # noqa: E402
 from proton import ProtonPage, ProtonVersionsPage  # noqa: E402
 from servers import ServersPage  # noqa: E402
@@ -49,8 +49,9 @@ OWNED = {"Cursor Theme": "cursor", "Cursor Size": "cursorSize", "Icon Theme": ""
          "Dark Mode Icon Theme": "", "Light Mode Icon Theme": "", "Normal Font": "", "Monospace Font": ""}
 
 #--- The master tabs across the top of the window, each with its own sidebar
-TABS = [("main", "Main"), ("niri", "Niri"), ("ai", "AI"), ("servers", "Servers"), ("docs", "Docs")]
+TABS = [("main", "Main"), ("packages", "Packages"), ("niri", "Niri"), ("ai", "AI"), ("servers", "Servers"), ("docs", "Docs")]
 TAB_ICONS = {"main": ("go-home-symbolic", "user-home-symbolic"),
+             "packages": ("package-x-generic-symbolic", "system-software-install-symbolic"),
              "niri": ("view-grid-symbolic", "view-app-grid-symbolic"),
              "ai": ("applications-science-symbolic", "starred-symbolic"),
              "servers": ("network-server-symbolic",),
@@ -60,9 +61,9 @@ TAB_ICONS = {"main": ("go-home-symbolic", "user-home-symbolic"),
 #--- Shell shows only under niri, which also moves the Desktop section to Niri.
 TOP = {"main": [("overview", "Overview", ("computer-symbolic",)),
                 ("flatpaks", "Flatpaks", ("flatpak-symbolic", "system-software-install-symbolic")),
-                ("packages", "Packages", ("system-search-symbolic", "edit-find-symbolic")),
                 ("backups", "Backups", ("drive-harddisk-symbolic", "document-save-symbolic")),
                 ("people", "People", ("system-users-symbolic", "avatar-default-symbolic"))],
+       "packages": [("packages", "Search", ("system-search-symbolic", "edit-find-symbolic"))],
        "niri": [("shell", "Shell", ("view-app-grid-symbolic",)),
                 ("windowrules", "Window Rules",
                  ("window-new-symbolic", "preferences-system-windows-symbolic"))],
@@ -74,6 +75,9 @@ TOP = {"main": [("overview", "Overview", ("computer-symbolic",)),
 DOCS_SECTIONS = [("Proton", [("proton", "Launch Options", ("input-gaming-symbolic",)),
                              ("protonversions", "Proton Versions",
                               ("system-software-install-symbolic", "input-gaming-symbolic"))])]
+
+
+USER_PACKAGES = ("user", ("userPackages",))
 
 
 def shown(setting, value):
@@ -165,6 +169,7 @@ class Window(Adw.ApplicationWindow):
         self.run_message = None
         self.previewing = False
         self.preview_restore = None  # puts back what a preview wrote
+        self.package_listeners = []  # called with the userPackages list as it changes
 
         self.builders = {}  # sidebar key -> makes that page, the first time it's shown
         self.toasts = Adw.ToastOverlay()
@@ -473,6 +478,7 @@ class Window(Adw.ApplicationWindow):
                   "flatpaks": lambda: FlatpakPage(self, flatpak_page),
                   "backups": lambda: BackupsPage(self),
                   "packages": lambda: PackagesPage(self),
+                  "userpackages": lambda: UserPackagesPage(self),
                   "people": lambda: PeoplePage(self),
                   "shell": lambda: ShellPage(self, self.links),
                   "windowrules": lambda: WindowRulesPage(self),
@@ -496,14 +502,14 @@ class Window(Adw.ApplicationWindow):
             self.builders["new"] = self._new_page
         self.sidebars["main"].append(tops["main"])
 
-        section_tab = {"cloudai": "ai", "localai": "ai"}
+        section_tab = {"cloudai": "ai", "localai": "ai", "apps": "packages"}
         if self.wm == "niri":
             section_tab["desktop"] = "niri"
         sections = {}
         for key, title in schema.SECTIONS:
             sections[key] = Adw.SidebarSection(title=title)
         for page in state.pages:
-            if page.section == "top":
+            if page.section in ("top", "userpkgs"):
                 continue
             section = sections.get(page.section) or sections["apps"]
             key = f"page:{page.title}"
@@ -522,6 +528,21 @@ class Window(Adw.ApplicationWindow):
         for key, _ in schema.SECTIONS:
             if sections[key].get_items().get_n_items():
                 self.sidebars[section_tab.get(key, "main")].append(sections[key])
+
+        #--- User Packages, under Default Packages on the Packages tab
+        self.package_listeners = []
+        packages_setting = self.settings.get(USER_PACKAGES)
+        if packages_setting is not None:
+            section = Adw.SidebarSection(title="User Packages")
+            count = Gtk.Label(css_classes=["dim-label", "caption", "numeric"])
+            self._sidebar_item("packages", section, "userpackages", "Installed", "package-x-generic-symbolic",
+                               suffix=count)
+            self.builders["userpackages"] = makers["userpackages"]
+            self.page_of[USER_PACKAGES] = "userpackages"
+            self.setters[USER_PACKAGES] = self._packages_changed
+            self.package_listeners.append(lambda names: count.set_label(str(len(names)) if names else ""))
+            self._packages_changed(self.user_packages())
+            self.sidebars["packages"].append(section)
 
         #--- Servers: each modpack's notes; Docs: Proton, then the game notes
         doc_sections = [("servers", title, pack, "text-x-generic-symbolic")
@@ -1063,6 +1084,25 @@ class Window(Adw.ApplicationWindow):
             self.change(s, list(current))
         self.setters[key] = reset
         return row
+
+    #--------------------------------------------------------------------#
+    #-- User Packages (shared by the Search and Installed pages)
+    #--------------------------------------------------------------------#
+    def user_packages(self, saved=False):
+        """The userPackages list with pending changes, or as saved."""
+        s = self.settings.get(USER_PACKAGES)
+        if s is None:
+            return []
+        value = self._value(s) if saved else self.changes.get(USER_PACKAGES, self._value(s))
+        return list(value or [])
+
+    def set_user_packages(self, names):
+        self.change(self.settings[USER_PACKAGES], list(names))
+        self._packages_changed(list(names))
+
+    def _packages_changed(self, names):
+        for listener in list(self.package_listeners):
+            listener(list(names or []))
 
     #--------------------------------------------------------------------#
     #-- Changes

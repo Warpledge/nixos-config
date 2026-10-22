@@ -78,19 +78,30 @@ def search(index, query):
     return [h[3] for h in hits]
 
 
+def state(window, attr):
+    """Where `attr` stands: installed, adding (on Apply), removing, or None."""
+    now, saved = attr in window.user_packages(), attr in window.user_packages(saved=True)
+    if now:
+        return "installed" if saved else "adding"
+    return "removing" if saved else None
+
+
 class PackagesPage(Adw.PreferencesPage):
     def __init__(self, window):
         super().__init__()
         self.window = window
         self.index = None
         self.rows = []
+        self.buttons = {}  # attr -> its row's install button, for the rows shown
+        window.package_listeners.append(lambda _: self._mark())
         self.timer = 0
         self.asked = 0  # bumps per search, so details for an older one are dropped
 
         top = Adw.PreferencesGroup()
-        top.add(ui.hero(ui.first_icon("system-search-symbolic", "edit-find-symbolic"), "Packages",
-                        "Search nixpkgs by package name. Expand a result for its homepage, licence "
-                        "and the program it runs."))
+        top.add(ui.hero(ui.first_icon("system-search-symbolic", "edit-find-symbolic"), "Search",
+                        "Search nixpkgs by package name and install what you need; it's added to "
+                        "User Packages and installed when you apply. Expand a result for its "
+                        "homepage, licence and the program it runs."))
         self.entry = Gtk.SearchEntry(placeholder_text="Search packages", hexpand=True, sensitive=False,
                                      margin_top=6)
         self.entry.connect("search-changed", self._changed)
@@ -146,6 +157,7 @@ class PackagesPage(Adw.PreferencesPage):
         for row in self.rows:
             self.results.remove(row)
         self.rows = []
+        self.buttons = {}
         self.asked += 1
         query = self.entry.get_text().strip()
         found = search(self.index, query)
@@ -185,6 +197,11 @@ class PackagesPage(Adw.PreferencesPage):
                           tooltip_text="Copy the attribute name")
         copy.connect("clicked", lambda _: self._copy(attr))
         row.add_suffix(copy)
+        install = Gtk.Button(valign=Gtk.Align.CENTER)
+        install.connect("clicked", lambda _: self._install(attr))
+        row.add_suffix(install)
+        self.buttons[attr] = install
+        self._mark_one(attr, install)
 
         def fill(info):
             row.set_subtitle(ui.esc(info["description"] or "No description"))
@@ -203,6 +220,100 @@ class PackagesPage(Adw.PreferencesPage):
                 row.add_row(Adw.ActionRow(title="About", subtitle=ui.esc(info["about"]), subtitle_lines=0))
         return row, fill
 
+    def _install(self, attr):
+        names = self.window.user_packages()
+        if attr not in names:
+            self.window.set_user_packages(names + [attr])
+            self.window.toast(f"{attr} will be installed when you apply")
+
+    def _mark(self):
+        for attr, button in self.buttons.items():
+            self._mark_one(attr, button)
+
+    def _mark_one(self, attr, button):
+        where = state(self.window, attr)
+        label = {"installed": "Installed", "adding": "Added"}.get(where, "Install")
+        button.set_label(label)
+        button.set_sensitive(where not in ("installed", "adding"))
+        button.set_css_classes(["suggested-action"] if label == "Install" else ["flat"])
+        button.set_tooltip_text({"adding": "Installed when you apply"}.get(where, "Add to User Packages"
+                                                                          if label == "Install" else None))
+
     def _copy(self, text):
         Gdk.Display.get_default().get_clipboard().set(text)
         self.window.toast(f"Copied {text}")
+
+
+class UserPackagesPage(Adw.PreferencesPage):
+    """The userPackages list: what Search installed, each with an Uninstall
+    button, plus pending removals that can still be undone."""
+
+    def __init__(self, window):
+        super().__init__()
+        self.window = window
+        self.rows = []
+        self.details = {}  # attr -> description, read once per page
+        top = Adw.PreferencesGroup()
+        top.add(ui.hero(ui.first_icon("package-x-generic-symbolic"), "User Packages",
+                        "Packages you added from Search, installed as they come with no settings "
+                        "of their own. Apps with settings made for them are under Default Packages."))
+        self.add(top)
+        self.group = Adw.PreferencesGroup(title="Installed")
+        self.add(self.group)
+        window.package_listeners.append(lambda _: self._render())
+        self._render()
+
+    def _render(self):
+        for row in self.rows:
+            self.group.remove(row)
+        self.rows = []
+        now, saved = self.window.user_packages(), self.window.user_packages(saved=True)
+        names = now + [n for n in saved if n not in now]
+        self.group.set_description(f"Saved for {self.window._where()}." if names else None)
+        if not names:
+            empty = Adw.ActionRow(title="No user packages yet", activatable=True,
+                                  subtitle="Find one on the Search page and press Install.")
+            empty.add_suffix(Gtk.Image(icon_name="go-next-symbolic", valign=Gtk.Align.CENTER))
+            empty.connect("activated", lambda _: self.window._show("packages"))
+            self._add(empty)
+            return
+        for attr in names:
+            where = state(self.window, attr)
+            row = Adw.ActionRow(title=ui.esc(attr), subtitle_lines=2,
+                                subtitle=ui.esc(self.details.get(attr, "")))
+            if where == "adding":
+                row.add_suffix(ui.chip("Installs on Apply", "accent"))
+            elif where == "removing":
+                row.add_suffix(ui.chip("Removed on Apply", "warning"))
+            if where == "removing":
+                button = Gtk.Button(label="Undo", valign=Gtk.Align.CENTER)
+                button.connect("clicked", lambda _, a=attr: self._undo(a))
+            else:
+                button = Gtk.Button(label="Uninstall", valign=Gtk.Align.CENTER,
+                                    css_classes=["destructive-action"])
+                button.connect("clicked", lambda _, a=attr: self._uninstall(a))
+            row.add_suffix(button)
+            self._add(row)
+        missing = [a for a in names if a not in self.details]
+        if missing and GLib.find_program_in_path(TOOL):
+            ui.run_async(lambda: {a: preview(a)["description"] for a in missing}, self._described)
+
+    def _add(self, row):
+        self.group.add(row)
+        self.rows.append(row)
+
+    def _described(self, found, error):
+        if error is not None:
+            return
+        self.details.update({a: d or "No description" for a, d in found.items()})
+        self._render()
+
+    def _uninstall(self, attr):
+        self.window.set_user_packages([n for n in self.window.user_packages() if n != attr])
+        if state(self.window, attr) == "removing":
+            self.window.toast(f"{attr} will be removed when you apply")
+
+    def _undo(self, attr):
+        saved = self.window.user_packages(saved=True)
+        names = self.window.user_packages() + [attr]
+        self.window.set_user_packages([n for n in saved if n in names] + [n for n in names if n not in saved])

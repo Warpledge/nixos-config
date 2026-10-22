@@ -43,6 +43,8 @@ user: {lib, ...}: {
       ./options.nix
       ./utilities.nix
     ]
+    #--- Packages added from NixOS Settings' Packages tab
+    ++ lib.optionals (user.userPackages != []) [./user-packages.nix]
     #--- File Browsers (controlled by user settings)
     ++ lib.optionals user.fileBrowsers.nautilus [./file-browsers/nautilus.nix]
     ++ lib.optionals user.fileBrowsers.dolphin [./file-browsers/dolphin.nix]
