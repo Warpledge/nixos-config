@@ -30,7 +30,9 @@
           package = pkgs.adw-gtk3;
           name = "adw-gtk3-dark";
         };
-        gtk4.theme = config.gtk.theme; # as Stylix's gtk target set it
+        # No adw-gtk3 import in gtk-4.0/gtk.css: its full libadwaita sheet would
+        # load at user priority and override apps' own CSS
+        gtk4.theme = null;
         # DMS's file sets accent_bg_color only; apps reading accent_color
         # (NixOS Settings) would get Adwaita's stock accent instead
         gtk3.extraCss = css;
