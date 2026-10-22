@@ -200,7 +200,7 @@ class Window(Adw.ApplicationWindow):
         self.side_stack = Gtk.Stack(transition_type=Gtk.StackTransitionType.CROSSFADE,
                                     transition_duration=150, vexpand=True)
         for tab, _ in TABS:
-            sidebar = Adw.Sidebar()
+            sidebar = Adw.Sidebar(css_classes=["nav-sidebar"])
             sidebar.connect("notify::selected", self._selected, tab)
             sidebar.connect("activated", lambda *_: self.split.set_show_content(True))
             self.sidebars[tab] = sidebar
