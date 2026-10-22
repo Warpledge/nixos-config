@@ -17,13 +17,23 @@
   #--- --load-mode none: experts in RAM read into memory, not paged in from the file
   code = {
     #--- MoE, 3B active; 10 of its 40 layers keep a KV cache, so 128K is ~1.4GB
-    "qwen3.6-35b-a3b" = {
-      name = "Qwen3.6 35B A3B (Q3)";
+    "qwen3.6-35b-a3b-q4" = {
+      name = "Qwen3.6 35B A3B (Q4)";
       dir = "unsloth/Qwen3.6-35B-A3B-GGUF";
-      match = "*UD-Q3_K_XL*.gguf";
+      match = "*UD-Q4_K_XL*.gguf";
       context = 131072;
-      # Experts of 18 layers from RAM: ~15GB VRAM (20 measured 80-85%, 37-39 tok/s)
-      args = ["-ngl 99" "--load-mode none" "--n-cpu-moe 18" "-ub 2048" "--top-k 20" "--min-p 0"];
+      # Experts of 18 layers from RAM (24 measured ~89% VRAM, 38 tok/s). The
+      # reasoning budget cuts a thinking loop off; the message is Qwen's own
+      args = [
+        "-ngl 99"
+        "--load-mode none"
+        "--n-cpu-moe 18"
+        "-ub 2048"
+        "--top-k 20"
+        "--min-p 0"
+        "--reasoning-budget 8192"
+        "--reasoning-budget-message 'Considering the limited time by the user, I have to give the solution based on the thinking directly now.'"
+      ];
       # Qwen's general-chat sampling, for Open WebUI
       chat = {
         temperature = 1.0;
@@ -31,31 +41,7 @@
         presence_penalty = 1.5;
       };
       # Qwen's thinking-mode coding sampling, and its non-thinking sampling;
-      # presence_penalty (0-2 per Qwen) curbs the repetition loops a quant falls into
-      think = {
-        temperature = 0.6;
-        top_p = 0.95;
-        presence_penalty = 1.0;
-      };
-      fast = {
-        chat_template_kwargs.enable_thinking = false;
-        temperature = 0.7;
-        top_p = 0.8;
-        presence_penalty = 1.5;
-      };
-    };
-    "qwen3.6-35b-a3b-q4" = {
-      name = "Qwen3.6 35B A3B (Q4)";
-      dir = "unsloth/Qwen3.6-35B-A3B-GGUF";
-      match = "*UD-Q4_K_XL*.gguf";
-      context = 131072;
-      # Experts of 24 layers from RAM: measured ~89% VRAM, 38 tok/s
-      args = ["-ngl 99" "--load-mode none" "--n-cpu-moe 18" "-ub 2048" "--top-k 20" "--min-p 0" "--reasoning-budget 4096"];
-      chat = {
-        temperature = 1.0;
-        top_p = 0.95;
-        presence_penalty = 1.5;
-      };
+      # preserve_thinking keeps earlier turns' reasoning in an agent session
       think = {
         temperature = 0.6;
         top_p = 0.95;
@@ -66,7 +52,7 @@
         chat_template_kwargs.enable_thinking = false;
         temperature = 0.7;
         top_p = 0.8;
-        presence_penalty = 0.0;
+        presence_penalty = 1.5;
       };
     };
     #--- Qwen3.6's MoE architecture, trained further for coding agents. Its MTP head
