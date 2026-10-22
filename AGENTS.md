@@ -261,7 +261,7 @@ steps.
 
 - `<skill-dir>` is `modules/home/programs/ai/skills/<name>`.
 - A step that hands work to a subagent is yours to do: for
-  `public-repo-auditor`, read `git diff --cached` for personal data, private
+  `public-repo-auditor` (only when the user asks), read `git diff --cached` for personal data, private
   paths, hostnames and tokens; for `prose-reviewer`, cut words from what you
   wrote; for `docs-drift-auditor`, grep the docs for the paths and names you
   changed; for `build-triager`, run

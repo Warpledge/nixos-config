@@ -41,12 +41,9 @@ user's). Push and history rewrites (amend, rebase, force) stay with the user.
    bash <skill-dir>/scripts/scan.sh
    ```
    gitleaks runs on the staged changes; any leak or `STOP` line means unstage and ask the
-   user. When the group adds a file, a URL, a comment or prose, or a new name (an app,
-   package, source, path or host), also have the `public-repo-auditor` subagent review
-   `git diff --cached` for what a pattern scanner misses: personal data, private paths and
-   hostnames, adult app or source names, tokens in unusual formats. A group that only
-   changes existing values (a keybind, a number, a toggle, a rule's match) skips it; read
-   its diff yourself for the same things. If `.claude/settings.json` is staged, do
+   user. Read the staged diff yourself for what a pattern scanner misses: personal data,
+   private paths and hostnames, adult app or source names, tokens in unusual formats.
+   Run the `public-repo-auditor` subagent only when the user asks for it. If `.claude/settings.json` is staged, do
    CLAUDE.md's maintenance check on it.
 4. **Message** in Conventional Commits form (adopted 2026-10-06; older history is plain
    lowercase summaries, so don't copy its style):
