@@ -31,6 +31,7 @@ PAGE_TITLES = {
     "Wallpaper Picker (Mod+W)": "Wallpaper",
     "Android Screen Mirroring (scrcpy)": "Android",
     "Language & Keyboard": "Language & Input",  # fits the sidebar's width
+    "Artcraft": "ArtCraft",  # humanize() of the artcraft key
 }
 MOVES = {  # setting -> (page, group on that page)
     ("japanese", "vn"): ("Gaming", "Japanese Visual Novels"),
@@ -102,6 +103,7 @@ PAGES = {
     "File Browsers": ("apps", "folder-symbolic", "File managers to install.", None),
     "Media": ("apps", "applications-multimedia-symbolic", "Video, music, streaming and reading.", None),
     "Graphics": ("apps", "applications-graphics-symbolic", "3D, painting and design.", None),
+    "ArtCraft": ("apps", "draw-brush-symbolic", "Rust creative and office suite.", None),
     "Audio": ("apps", "audio-x-generic-symbolic", "Recording, mixing and guitar tools.", None),
     "Office": ("apps", "x-office-document-symbolic", "Mail, notes and money.", None),
     "Security": ("apps", "security-high-symbolic", "Passwords and clean-up.", None),

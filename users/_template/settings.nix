@@ -104,7 +104,7 @@
     affinity = false;
   };
 
-  #--- ArtCraft Apps
+  #--- ArtCraft
   # Rust creative and office suite, wrapped from upstream's AppImages
   artcraft = {
     photocraft = false; # Layered photo editor (PSD)
