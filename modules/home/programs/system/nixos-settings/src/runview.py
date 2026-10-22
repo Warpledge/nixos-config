@@ -192,6 +192,7 @@ class RunView(Gtk.Box):
                                             overflow=Gtk.Overflow.HIDDEN)
         self.running_group.add(running_scroll)
         self.running_rows = []
+        self.pulsing = []  # build rows' bars, pulsed each tick
 
         #--- Results
         self.notes_group = Adw.PreferencesGroup(visible=False)
@@ -561,6 +562,8 @@ class RunView(Gtk.Box):
         if self.dirty:
             self._running(p, now)
             self.dirty = False
+        for bar in self.pulsing:
+            bar.pulse()
         return True
 
     def _build_status(self, p, now):
@@ -610,6 +613,7 @@ class RunView(Gtk.Box):
             row.add_suffix(clock)
             self.running_list.append(row)
             self.running_rows.append((row, icon, bar, clock))
+        self.pulsing = []
         for i, (row, icon, bar, clock) in enumerate(self.running_rows):
             if i >= len(items):
                 row.set_visible(False)
@@ -628,6 +632,8 @@ class RunView(Gtk.Box):
             elif kind == "build":
                 row.set_subtitle(ui.esc(f"Building · {detail}" if detail else "Building"))
                 icon.set_from_icon_name(ui.first_icon("system-run-symbolic"))
+                bar.set_visible(True)
+                self.pulsing.append(bar)
             else:
                 row.set_subtitle("Fetching")
                 icon.set_from_icon_name(ui.first_icon("emblem-synchronizing-symbolic"))
