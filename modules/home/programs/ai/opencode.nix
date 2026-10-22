@@ -29,12 +29,18 @@
         "longcat-2.5-preview-free"
         "jev-1.13-free"
       ];
-      #--- Ask before touching paths outside the project (v1's default; v2 allows)
+      #--- Ask before touching paths outside the project (v1's default; v2 allows),
+      #--- except /tmp, where local models keep scratch notes. The last match wins
       settings.permissions = [
         {
           action = "external_directory";
           resource = "*";
           effect = "ask";
+        }
+        {
+          action = "external_directory";
+          resource = "/tmp/*";
+          effect = "allow";
         }
       ];
 
