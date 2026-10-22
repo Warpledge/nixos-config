@@ -1,42 +1,43 @@
 #=====================================================================#
 # DANKMATERIALSHELL THEME
 #=====================================================================#
-# The DMS registry's Catppuccin Mocha Mauve theme, with Stylix's palette for
-# the colours base16 covers, so DMS follows base00 (stylix.nix). Both DMS
-# modules point customThemeFile here.
+# The DMS registry's Catppuccin Mocha Mauve theme with Crust (11111b) for
+# Base, the default DMS seeds. DMS's matugen colours each app from the theme
+# picked in its settings, so this file is the starting preset, not a lock.
 {
   lib,
   machine,
   ...
 }: {
   #--- Every user on the machine
-  home-manager.users = lib.mapAttrs (_: _: {config, ...}: {
-    xdg.configFile."DankMaterialShell/themes/stylix/theme.json".text = with config.lib.stylix.colors.withHashtag;
-      builtins.toJSON {
-        id = "stylix";
-        name = "Catppuccin (Stylix)";
+  home-manager.users =
+    lib.mapAttrs (_: _: {
+      xdg.configFile."DankMaterialShell/themes/catppuccin-crust/theme.json".text = builtins.toJSON {
+        id = "catppuccin-crust";
+        name = "Catppuccin Crust";
         dark = {
-          primary = base0E;
-          primaryText = base00;
+          primary = "#cba6f7"; # Mauve
+          primaryText = "#11111b";
           primaryContainer = "#55307f";
-          secondary = base07;
+          secondary = "#b4befe"; # Lavender
           surfaceTint = "#33293f";
-          surface = base01;
-          surfaceText = base05;
-          surfaceVariant = base00;
+          surface = "#181825"; # Mantle
+          surfaceText = "#cdd6f4";
+          surfaceVariant = "#11111b";
           surfaceVariantText = "#a6adc8";
-          background = base00;
-          backgroundText = base05;
-          outline = base03;
+          background = "#11111b";
+          backgroundText = "#cdd6f4";
+          outline = "#6c7086"; # Overlay 0
           # Lowest and Low are left out: DMS blends them from surface and
-          # surfaceContainer, so they stay darker than base00
-          surfaceContainer = base00;
-          surfaceContainerHigh = base02;
-          surfaceContainerHighest = "#45475a";
-          error = base08;
-          warning = base09;
-          info = base0D;
+          # surfaceContainer, so they stay darker than Crust
+          surfaceContainer = "#11111b";
+          surfaceContainerHigh = "#313244"; # Surface 0
+          surfaceContainerHighest = "#45475a"; # Surface 1
+          error = "#f38ba8"; # Red
+          warning = "#fab387"; # Peach
+          info = "#89b4fa"; # Blue
         };
       };
-  }) machine.users;
+    })
+    machine.users;
 }

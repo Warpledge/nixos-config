@@ -11,16 +11,32 @@
   users = {
     warpledge = {
       gaming.retroshelf = false;
-      fileBrowsers.dolphin = false;
+      fileBrowsers.dolphin = true;
       wallpaper = "carousel";
       editors.vscodium = false;
-      localAi.chat = ["gemma-4-26b-a4b" "gpt-oss-20b"];
+      localAi.chat = ["gemma-4-26b-a4b"];
       localAi.edit = null;
       media.moku = false;
       media.boorusama = true;
       defaultApps.fileManager = "duxFiles";
-      fileBrowsers.nautilus = false;
+      fileBrowsers.nautilus = true;
       fileBrowsers.yazi = false;
+      userPackages = [];
+      claudeDesktop.enable = false;
+      localAi.code = ["qwen3.6-35b-a3b-q4" "ornith-1.5-35b-a3b"];
+      artcraft.photocraft = true;
+      artcraft.lightcraft = true;
+      artcraft.vectorcraft = true;
+      artcraft.designcraft = true;
+      artcraft.figcraft = true;
+      artcraft.effectcraft = true;
+      artcraft.filmcraft = true;
+      artcraft.soundcraft = true;
+      artcraft.cadcraft = true;
+      artcraft.pdfcraft = true;
+      artcraft.wordcraft = true;
+      artcraft.gridcraft = true;
+      artcraft.deckcraft = true;
     };
   };
 

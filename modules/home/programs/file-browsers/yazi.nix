@@ -5,8 +5,7 @@
   #--------------------------------------------------------------------#
   #-- Program
   #--------------------------------------------------------------------#
-  # Theming is handled by the Catppuccin home-manager port (Mocha Mauve);
-  # the matching Stylix yazi target is disabled to avoid a conflict.
+  # theme.toml is written by DMS's matugen (theme/matugen.nix).
   # The `y` shell wrapper changes the working directory to the last
   # location browsed when Yazi exits.
 

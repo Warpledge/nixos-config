@@ -1,0 +1,35 @@
+// Written by DMS's matugen from modules/theme/matugen/niri-colors.kdl
+layout {
+    focus-ring {
+        active-color   "{{colors.surface_container_high.default.hex}}"
+        inactive-color "{{colors.surface.default.hex}}"
+        urgent-color   "{{colors.error.default.hex}}"
+    }
+
+    border {
+        active-color   "{{colors.outline.default.hex}}"
+        inactive-color "{{colors.surface.default.hex}}"
+    }
+}
+
+window-rule {
+    match is-window-cast-target=true
+
+    focus-ring {
+        active-color   "{{colors.primary.default.hex}}"
+        inactive-color "{{colors.background.default.hex}}"
+    }
+
+    border {
+        inactive-color "{{colors.background.default.hex}}"
+    }
+
+    shadow {
+        color "{{colors.background.default.hex}}70"
+    }
+
+    tab-indicator {
+        active-color   "{{colors.primary.default.hex}}"
+        inactive-color "{{colors.background.default.hex}}"
+    }
+}

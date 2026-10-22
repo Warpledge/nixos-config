@@ -1,0 +1,205 @@
+{
+  "$schema": "https://opencode.ai/theme.json",
+  "theme": {
+    "accent": {
+      "dark": "{{dank16.color9.default.hex}}",
+      "light": "{{colors.secondary.default.hex}}"
+    },
+    "background": {
+      "dark": "{{colors.background.default.hex}}",
+      "light": "{{dank16.color15.default.hex}}"
+    },
+    "backgroundElement": {
+      "dark": "{{colors.surface.default.hex}}",
+      "light": "{{colors.outline.default.hex}}"
+    },
+    "backgroundPanel": {
+      "dark": "{{colors.surface.default.hex}}",
+      "light": "{{colors.on_surface.default.hex}}"
+    },
+    "border": {
+      "dark": "{{colors.surface_container_high.default.hex}}",
+      "light": "{{colors.outline.default.hex}}"
+    },
+    "borderActive": {
+      "dark": "{{colors.outline.default.hex}}",
+      "light": "{{colors.surface_container_high.default.hex}}"
+    },
+    "borderSubtle": {
+      "dark": "{{colors.surface_container_high.default.hex}}",
+      "light": "{{colors.outline.default.hex}}"
+    },
+    "diffAdded": {
+      "dark": "{{dank16.color2.default.hex}}",
+      "light": "{{dank16.color2.default.hex}}"
+    },
+    "diffAddedBg": {
+      "dark": "{{colors.surface.default.hex}}",
+      "light": "{{colors.on_surface.default.hex}}"
+    },
+    "diffAddedLineNumberBg": {
+      "dark": "{{colors.surface.default.hex}}",
+      "light": "{{colors.on_surface.default.hex}}"
+    },
+    "diffContext": {
+      "dark": "{{colors.outline.default.hex}}",
+      "light": "{{colors.outline.default.hex}}"
+    },
+    "diffContextBg": {
+      "dark": "{{colors.surface.default.hex}}",
+      "light": "{{colors.on_surface.default.hex}}"
+    },
+    "diffHighlightAdded": {
+      "dark": "{{dank16.color2.default.hex}}",
+      "light": "{{dank16.color2.default.hex}}"
+    },
+    "diffHighlightRemoved": {
+      "dark": "{{dank16.color1.default.hex}}",
+      "light": "{{dank16.color1.default.hex}}"
+    },
+    "diffHunkHeader": {
+      "dark": "{{colors.outline.default.hex}}",
+      "light": "{{colors.outline.default.hex}}"
+    },
+    "diffLineNumber": {
+      "dark": "{{colors.outline.default.hex}}",
+      "light": "{{colors.outline.default.hex}}"
+    },
+    "diffRemoved": {
+      "dark": "{{dank16.color1.default.hex}}",
+      "light": "{{dank16.color1.default.hex}}"
+    },
+    "diffRemovedBg": {
+      "dark": "{{colors.surface.default.hex}}",
+      "light": "{{colors.on_surface.default.hex}}"
+    },
+    "diffRemovedLineNumberBg": {
+      "dark": "{{colors.surface.default.hex}}",
+      "light": "{{colors.on_surface.default.hex}}"
+    },
+    "error": {
+      "dark": "{{dank16.color1.default.hex}}",
+      "light": "{{dank16.color1.default.hex}}"
+    },
+    "info": {
+      "dark": "{{dank16.color14.default.hex}}",
+      "light": "{{dank16.color9.default.hex}}"
+    },
+    "markdownBlockQuote": {
+      "dark": "{{colors.outline.default.hex}}",
+      "light": "{{colors.surface.default.hex}}"
+    },
+    "markdownCode": {
+      "dark": "{{dank16.color2.default.hex}}",
+      "light": "{{dank16.color2.default.hex}}"
+    },
+    "markdownCodeBlock": {
+      "dark": "{{colors.surface.default.hex}}",
+      "light": "{{colors.background.default.hex}}"
+    },
+    "markdownEmph": {
+      "dark": "{{dank16.color3.default.hex}}",
+      "light": "{{dank16.color11.default.hex}}"
+    },
+    "markdownHeading": {
+      "dark": "{{colors.primary.default.hex}}",
+      "light": "{{dank16.color9.default.hex}}"
+    },
+    "markdownHorizontalRule": {
+      "dark": "{{colors.outline.default.hex}}",
+      "light": "{{colors.outline.default.hex}}"
+    },
+    "markdownImage": {
+      "dark": "{{dank16.color4.default.hex}}",
+      "light": "{{dank16.color4.default.hex}}"
+    },
+    "markdownImageText": {
+      "dark": "{{dank16.color14.default.hex}}",
+      "light": "{{colors.secondary.default.hex}}"
+    },
+    "markdownLink": {
+      "dark": "{{dank16.color4.default.hex}}",
+      "light": "{{dank16.color4.default.hex}}"
+    },
+    "markdownLinkText": {
+      "dark": "{{dank16.color14.default.hex}}",
+      "light": "{{colors.secondary.default.hex}}"
+    },
+    "markdownListEnumeration": {
+      "dark": "{{dank16.color14.default.hex}}",
+      "light": "{{colors.secondary.default.hex}}"
+    },
+    "markdownListItem": {
+      "dark": "{{dank16.color4.default.hex}}",
+      "light": "{{dank16.color9.default.hex}}"
+    },
+    "markdownStrong": {
+      "dark": "{{dank16.color11.default.hex}}",
+      "light": "{{dank16.color3.default.hex}}"
+    },
+    "markdownText": {
+      "dark": "{{colors.on_surface.default.hex}}",
+      "light": "{{colors.background.default.hex}}"
+    },
+    "primary": {
+      "dark": "{{dank16.color4.default.hex}}",
+      "light": "{{dank16.color9.default.hex}}"
+    },
+    "secondary": {
+      "dark": "{{colors.primary.default.hex}}",
+      "light": "{{dank16.color4.default.hex}}"
+    },
+    "success": {
+      "dark": "{{dank16.color2.default.hex}}",
+      "light": "{{dank16.color2.default.hex}}"
+    },
+    "syntaxComment": {
+      "dark": "{{colors.outline.default.hex}}",
+      "light": "{{colors.outline.default.hex}}"
+    },
+    "syntaxFunction": {
+      "dark": "{{dank16.color4.default.hex}}",
+      "light": "{{dank16.color14.default.hex}}"
+    },
+    "syntaxKeyword": {
+      "dark": "{{colors.primary.default.hex}}",
+      "light": "{{dank16.color4.default.hex}}"
+    },
+    "syntaxNumber": {
+      "dark": "{{dank16.color11.default.hex}}",
+      "light": "{{colors.primary.default.hex}}"
+    },
+    "syntaxOperator": {
+      "dark": "{{dank16.color14.default.hex}}",
+      "light": "{{dank16.color4.default.hex}}"
+    },
+    "syntaxPunctuation": {
+      "dark": "{{colors.on_surface.default.hex}}",
+      "light": "{{colors.background.default.hex}}"
+    },
+    "syntaxString": {
+      "dark": "{{dank16.color2.default.hex}}",
+      "light": "{{dank16.color2.default.hex}}"
+    },
+    "syntaxType": {
+      "dark": "{{dank16.color3.default.hex}}",
+      "light": "{{colors.secondary.default.hex}}"
+    },
+    "syntaxVariable": {
+      "dark": "{{colors.secondary.default.hex}}",
+      "light": "{{colors.secondary.default.hex}}"
+    },
+    "text": {
+      "dark": "{{colors.on_surface.default.hex}}",
+      "light": "{{colors.background.default.hex}}"
+    },
+    "textMuted": {
+      "dark": "{{colors.outline.default.hex}}",
+      "light": "{{colors.surface.default.hex}}"
+    },
+    "warning": {
+      "dark": "{{dank16.color3.default.hex}}",
+      "light": "{{dank16.color3.default.hex}}"
+    }
+  }
+}

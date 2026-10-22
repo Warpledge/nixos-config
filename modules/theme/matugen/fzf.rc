@@ -1,0 +1,5 @@
+--color=bg+:-1,bg:-1,spinner:{{dank16.color15.default.hex}},hl:{{dank16.color1.default.hex}}
+--color=fg:{{colors.on_surface.default.hex}},header:{{dank16.color1.default.hex}},info:{{colors.primary.default.hex}},pointer:{{dank16.color4.default.hex}}
+--color=marker:{{colors.secondary.default.hex}},fg+:{{dank16.color4.default.hex}},prompt:{{colors.surface_container_highest.default.hex}},hl+:{{dank16.color1.default.hex}}
+--color=selected-bg:{{colors.surface_container_highest.default.hex}}
+--color=border:{{colors.outline.default.hex}},label:{{colors.on_surface.default.hex}}

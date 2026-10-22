@@ -121,7 +121,7 @@ in {
   #--------------------------------------------------------------------#
   #-- Packages
   #--------------------------------------------------------------------#
-  # Colours and icons come from theme/qt.nix (Kvantum, qt6ct, kdeglobals)
+  # Colours and icons come from theme/qt.nix (qt5ct/qt6ct, kdeglobals)
 
   home.packages = with pkgs; [
     dolphin

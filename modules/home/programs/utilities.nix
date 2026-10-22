@@ -70,8 +70,6 @@
     cmatrix
 
     #--- Qt Theme Support
-    kdePackages.qtstyleplugin-kvantum
-    catppuccin-kvantum
     qt6.qt5compat
   ];
 }

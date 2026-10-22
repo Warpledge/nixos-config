@@ -81,7 +81,7 @@ in {
             open-on-workspace = "8";
           }
           {
-            matches = [{app-id = "(?i)goofcord$";}];
+            matches = [{app-id = "(?i)goofcord$";} {app-id = "(?i)^vesktop$";}];
             open-on-workspace = "9";
           }
         ];

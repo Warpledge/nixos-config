@@ -22,7 +22,6 @@
         fcitx5-mozc # Japanese conversion engine (hiragana/katakana/kanji)
         fcitx5-gtk # GTK IM module integration
         kdePackages.fcitx5-configtool # GUI for tweaking input methods/hotkeys
-        catppuccin-fcitx5 # Candidate-window theme to match Stylix (Mocha Mauve)
       ];
 
       #--------------------------------------------------------------------#
@@ -50,7 +49,8 @@
         };
 
         addons = {
-          classicui.globalSection.Theme = "catppuccin-mocha-mauve";
+          # Candidate window: DMS's matugen writes ~/.local/share/fcitx5/themes/dms
+          classicui.globalSection.Theme = "dms";
         };
       };
     };

@@ -27,6 +27,9 @@
       bind-key -n C-Tab next-window
       bind-key -n C-S-Tab previous-window
       bind-key -n M-Tab new-window
+
+      # Colours: written by DMS's matugen (theme/matugen.nix)
+      source-file -q ~/.config/tmux/dank.conf
     '';
 
     plugins = with pkgs; [

@@ -41,6 +41,8 @@ in {
       #--- 23.976 fps doesn't divide 280 Hz, so frames are blended to stop judder
       video-sync = "display-resample";
       interpolation = "yes";
+      #--- OSD colours, written by DMS's matugen (theme/matugen.nix)
+      include = "~~/dank.conf";
     };
 
     #--- Anime4K shaders, off until a key picks a mode. A, B and C suit 1080p,

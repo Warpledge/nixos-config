@@ -9,6 +9,7 @@
     ./catppuccin.nix
     ./dms.nix
     ./gtk.nix
+    ./matugen.nix
     ./stylix.nix
     ./fonts.nix
     ./qt.nix

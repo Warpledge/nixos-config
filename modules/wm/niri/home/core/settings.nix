@@ -9,9 +9,7 @@
   machine,
   user,
   ...
-}: let
-  colors = config.lib.stylix.colors.withHashtag;
-in {
+}: {
   #--------------------------------------------------------------------#
   #-- Packages
   #--------------------------------------------------------------------#
@@ -96,18 +94,14 @@ in {
         # Shows the backdrop wallpaper (rules.nix) through workspaces
         background-color =
           lib.mkIf (user.wallpaper == "engine") "transparent";
+        # Colours: dms/colors.kdl, from theme/matugen/niri-colors.kdl
         focus-ring = {
           enable = true; # displays around windows
           width = 2;
-          active.color = colors.base02; # Surface 0
-          inactive.color = colors.base01; # Mantle
-          urgent.color = colors.base08; # Red
         };
         border = {
           enable = false; # displays inside windows
           width = 2;
-          active.color = colors.base04; # Surface 2
-          inactive.color = colors.base01; # Mantle
         };
         shadow = {
           enable = false;

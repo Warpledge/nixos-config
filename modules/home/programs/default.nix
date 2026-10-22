@@ -77,6 +77,20 @@ user: {lib, ...}: {
     ++ lib.optionals user.graphics.blender [./graphics/blender.nix]
     ++ lib.optionals user.graphics.krita [./graphics/krita.nix]
     ++ lib.optionals user.graphics.affinity [./graphics/affinity.nix]
+    #--- ArtCraft (controlled by user settings)
+    ++ lib.optionals user.artcraft.photocraft [./artcraft/photocraft.nix]
+    ++ lib.optionals user.artcraft.lightcraft [./artcraft/lightcraft.nix]
+    ++ lib.optionals user.artcraft.vectorcraft [./artcraft/vectorcraft.nix]
+    ++ lib.optionals user.artcraft.designcraft [./artcraft/designcraft.nix]
+    ++ lib.optionals user.artcraft.figcraft [./artcraft/figcraft.nix]
+    ++ lib.optionals user.artcraft.effectcraft [./artcraft/effectcraft.nix]
+    ++ lib.optionals user.artcraft.filmcraft [./artcraft/filmcraft.nix]
+    ++ lib.optionals user.artcraft.soundcraft [./artcraft/soundcraft.nix]
+    ++ lib.optionals user.artcraft.cadcraft [./artcraft/cadcraft.nix]
+    ++ lib.optionals user.artcraft.pdfcraft [./artcraft/pdfcraft.nix]
+    ++ lib.optionals user.artcraft.wordcraft [./artcraft/wordcraft.nix]
+    ++ lib.optionals user.artcraft.gridcraft [./artcraft/gridcraft.nix]
+    ++ lib.optionals user.artcraft.deckcraft [./artcraft/deckcraft.nix]
     #--- Audio (controlled by user settings)
     ++ lib.optionals user.audio.reaper [./audio/reaper.nix]
     ++ lib.optionals (with user.audio; guitarix || tone3000 || katanaFloorboard) [(import ./audio/guitar user)]
@@ -100,6 +114,6 @@ user: {lib, ...}: {
     ++ lib.optionals (user.claude.enable || user.opencode.enable) [./ai/mcp.nix]
     ++ lib.optionals (user.opencode.enable || (user.editors.zed && (user.llamaSwap.enable || user.claude.enable))) [./ai/agent-skills.nix]
     #--- Discord (controlled by user settings)
-    ++ lib.optionals user.discord.goofcord [./discord/discord.nix]
+    ++ lib.optionals (user.discord.goofcord || user.discord.vesktop) [./discord/discord.nix]
     ++ lib.optionals user.discord.arrpc.enable [./discord/arrpc.nix];
 }

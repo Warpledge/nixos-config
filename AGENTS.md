@@ -7,8 +7,9 @@ is here. For the rest, `grep -n` CLAUDE.md for the section; don't read it whole.
 
 NixOS flake for two machines: **eclipse** (desktop, RX 9070 XT) and **legion**
 (laptop, hybrid AMD/NVIDIA). Nixpkgs unstable, home-manager, Niri WM, Dux Shell
-(formerly DankMaterialShell, still called DMS in the code), Stylix theming
-(Catppuccin Mocha). Run `hostname` before anything machine-specific.
+(formerly DankMaterialShell, still called DMS in the code), colours from DMS's
+matugen (default Catppuccin Mocha), fonts and cursor from Stylix. Run `hostname`
+before anything machine-specific.
 
 ## Rules
 
@@ -25,9 +26,16 @@ Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
    the task didn't ask you to remove, including comments, commented-out code and
    disabled options. Changing code under a comment? Update the comment, keep it.
 4. **Public repo.** No passwords, API keys, tokens or secrets.
-5. **Stylix owns theming.** Never set colours, fonts, font sizes, theme presets or
-   wallpaper in a module, including an app's own settings (`theme = "purple"`,
-   `fontWeight`). Leave them at the app's default or enable its Stylix target.
+5. **DMS's matugen owns colours; Stylix owns fonts and cursor.** Never set colours,
+   fonts, font sizes, theme presets or wallpaper in a module, including an app's
+   own settings (`theme = "purple"`, `fontWeight`). An app's colours come from a
+   matugen template: an entry under `matugen.templates` (option in
+   `modules/theme/matugen.nix`; the entry sits there or in the app's module), with
+   the template in `modules/theme/matugen/` or beside the module. The app's config
+   includes the rendered file, which must stay a plain file, never a home-manager
+   link. Fonts come from
+   `config.stylix.fonts`. Name a CSS template `.css.matugen`: its `{{ }}`
+   placeholders run Zed's biome out of memory.
 6. **Commits** use Conventional Commits, `type(scope): subject` plus a bullet body;
    load the `commit` skill. Commit without asking; never push, amend or rebase.
    **Commit once, when the task is finished and checked**, not after each edit,
@@ -261,7 +269,7 @@ steps.
 
 - `<skill-dir>` is `modules/home/programs/ai/skills/<name>`.
 - A step that hands work to a subagent is yours to do: for
-  `public-repo-auditor`, read `git diff --cached` for personal data, private
+  `public-repo-auditor` (only when the user asks), read `git diff --cached` for personal data, private
   paths, hostnames and tokens; for `prose-reviewer`, cut words from what you
   wrote; for `docs-drift-auditor`, grep the docs for the paths and names you
   changed; for `build-triager`, run

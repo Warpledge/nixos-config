@@ -47,10 +47,11 @@ Afterwards:
 
 ## Theming
 
-Two tools split the job:
+Colors change live from the shell, with no rebuild:
 
-- **[Stylix][stylix]:** It takes the color scheme, the fonts and the mouse cursor and pushes them into every program that it supports automatically.
-- **[catppuccin/nix][catppuccin-nix]:** Some programs have an official Catppuccin port written by the Catppuccin project. I typically use this as a higher priority than Stylix in most cases because Base16 can be a bit limiting compared to an official Catppuccin port.
+- **[Dux Shell][dms] + [matugen][matugen]:** Picking a theme in the shell's settings (a preset, a custom theme or the wallpaper's colors) runs matugen, which writes a color file for each app. Some apps get the shell's own templates (GTK, Qt, Kitty, Zed, Vesktop); the rest use templates in this repo, mostly in `modules/theme/matugen/` and made from the official Catppuccin ports. The default theme is Catppuccin Mocha Mauve.
+- **[Stylix][stylix]:** Sets the fonts and the mouse cursor, plus fixed Catppuccin colors for VS Code and the TTY.
+- **[catppuccin/nix][catppuccin-nix]:** Only themes the boot splash.
 
 ## System Management TUI Script
 
@@ -156,7 +157,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | **Window Manager** | [Niri][niri] |
 | **Status Bar / Notifier / Launcher / Lock** | [Dux Shell][dms] (formerly DankMaterialShell) |
 | **Display Manager** | [dux-greeter][dms-greeter] via [greetd][greetd] |
-| **Color Scheme** | [Catppuccin][catppuccin] Mocha Mauve applied globally via [Stylix][stylix] + [catppuccin/nix][catppuccin-nix] |
+| **Color Scheme** | Picked live in [Dux Shell][dms] and written to each app by [matugen][matugen]; [Catppuccin][catppuccin] Mocha Mauve by default |
 | **Fonts** | [JetBrains Mono Nerd Font][nerd-fonts], Monaspace, Roboto, Nerd Fonts Symbols |
 | **Window Switcher** | Niri's built-in recent-windows switcher |
 | **Scratchpad** | [nirius][nirius] (Niri only) |
@@ -189,7 +190,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | | |
 | --- | --- |
 | **Browsers** | [Zen][zen] / [Mullvad Browser][mullvad-browser] / [Helium][helium] |
-| **File Manager** | [Nautilus][nautilus] (with an open-in-Kitty menu entry from [nautilus-open-any-terminal][nautilus-open-any-terminal]), [Dolphin][dolphin] (optional, themed through Kvantum and the Catppuccin KDE colour scheme, with [Ark][ark] for archives and a Convert Media menu entry using [FFmpeg][ffmpeg]), [Yazi][yazi] (terminal file manager), [Dux Files][dux-files] (standalone file manager from Dux Labs) |
+| **File Manager** | [Nautilus][nautilus] (with an open-in-Kitty menu entry from [nautilus-open-any-terminal][nautilus-open-any-terminal]), [Dolphin][dolphin] (optional, colored from the shell's theme, with [Ark][ark] for archives and a Convert Media menu entry using [FFmpeg][ffmpeg]), [Yazi][yazi] (terminal file manager), [Dux Files][dux-files] (standalone file manager from Dux Labs) |
 | **Media Player** | [mpv][mpv], [Spotify][spotify] via [spicetify-nix][spicetify], [FreeTube][freetube] |
 | **Twitch** | [Streamlink Twitch GUI][streamlink-twitch-gui] browses Twitch and hands the stream to [Streamlink][streamlink], which plays it in mpv, so there are no ads and the follow list stays local with no Twitch account attached; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs |
 | **Screenshot / Recording** | [Quick Capture][quick-capture] (Niri), [gpu-screen-recorder][gpu-screen-recorder] |
@@ -197,10 +198,11 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | **Wallpaper Picker** | [Wallpaper Carousel][wallpaper-carousel] over the images in `modules/theme/wallpapers` (Niri), the default; each user picks it or Wallpaper Engine with `wallpaper` in their settings |
 | **Animated Wallpaper** | [linux-wallpaperengine][linux-wallpaperengine] plays Wallpaper Engine scenes and videos from the Steam Workshop, in place of DMS's wallpaper; the [Linux Wallpaper Engine][dms-wallpaperengine] DMS plugin picks them (Niri, `wallpaper = "engine"`; needs Wallpaper Engine bought on Steam) |
 | **Graphics** | [Blender][blender], [Krita][krita], [Affinity Suite v3][affinity-nix] (via Wine), all off by default |
+| **ArtCraft** | The [ArtCraft][artcraft] apps, each its own toggle and off by default: PhotoCraft, LightCraft, VectorCraft, DesignCraft, FigCraft, EffectCraft, FilmCraft, SoundCraft, CADCraft, PdfCraft, WordCraft, GridCraft and DeckCraft; wrapped from the upstream AppImages with `appimageTools`, since they are not in nixpkgs |
 | **Audio** | [Reaper][reaper] (DAW, with [SWS][sws] and [ReaPack][reapack]) |
 | **Guitar** | [TONE3000][tone3000] (official NAM player, browses its capture and IR library in-app), [Guitarix][guitarix] (modular amp rig), [ir.lv2][ir-lv2] for cabinet IRs, [qpwgraph][qpwgraph] for patching, plus [FxFloorBoard][katana-fxfloorboard] to edit patches on the Boss Katana itself |
 | **Rhythm Games** | [feedBack][feedback] plays Guitar Pro tabs through its own audio engine, with VST hosting and amp modeling, so the Katana DI feed doubles as the game input; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs. [Rocksmith 2014][rocksmith] runs on Proton and reads the same DI through [PipeASIO][pipeasio] and [RS_ASIO][rs-asio]; the module writes their config, and the hand-done install steps live in `docs/gaming/rocksmith-2014.md` |
-| **Chat / Productivity** | [GoofCord][goofcord] via [nixcord][nixcord] (Vencord, with [arRPC][arrpc] running alongside it so Steam and Proton games show up as rich presence), [Ferdium][ferdium] (all your web messengers in one window), [Thunderbird][thunderbird], [Obsidian][obsidian] |
+| **Chat / Productivity** | [GoofCord][goofcord] or [Vesktop][vesktop] (follows the shell's theme live) via [nixcord][nixcord] (Vencord, with [arRPC][arrpc] running alongside it so Steam and Proton games show up as rich presence), [Ferdium][ferdium] (all your web messengers in one window), [Thunderbird][thunderbird], [Obsidian][obsidian] |
 | **AI Tooling** | [Claude Code][claude-code], [Claude Desktop][claude-desktop], [OpenCode][opencode], [LM Studio][lmstudio], [llama-swap][llama-swap], [Open WebUI][open-webui] |
 | **Android** | [scrcpy][scrcpy] (mirror and control a device over USB or wifi, nothing to install on the phone) |
 | **Video Trimming** | [Video Trimmer][video-trimmer] (cut a clip out of a video without re-encoding it), [Constrict][constrict] (re-encode a video to fit a chosen file size) |
@@ -263,6 +265,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 
 [niri]: https://github.com/YaLTeR/niri
 [dms]: https://github.com/duxlabs-dev/dux-shell
+[matugen]: https://github.com/InioX/matugen
 [dms-greeter]: https://github.com/duxlabs-dev/dux-greeter
 [greetd]: https://git.sr.ht/~kennylevinsen/greetd
 [catppuccin]: https://github.com/catppuccin/catppuccin
@@ -308,6 +311,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 [blender]: https://www.blender.org
 [krita]: https://krita.org
 [affinity-nix]: https://github.com/mrshmllow/affinity-nix
+[artcraft]: https://github.com/storytold
 [reaper]: https://www.reaper.fm
 [sws]: https://www.sws-extension.org
 [reapack]: https://reapack.com
@@ -318,6 +322,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 [qpwgraph]: https://gitlab.freedesktop.org/rncbc/qpwgraph
 [katana-fxfloorboard]: https://github.com/gumtown/Katana-MK2-FxFloorBoard
 [goofcord]: https://github.com/Milkshiift/GoofCord
+[vesktop]: https://github.com/Vencord/Vesktop
 [nixcord]: https://github.com/KaylorBen/nixcord
 [ferdium]: https://ferdium.org
 [thunderbird]: https://www.thunderbird.net
@@ -490,7 +495,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | `Mod+B` | Browser (Zen) |
 | `Mod+E` | File manager (Nautilus, or Dolphin when it's the default) |
 | `Mod+Shift+S` | Steam |
-| `Mod+Shift+D` | Discord (GoofCord) |
+| `Mod+Shift+D` | Discord (Vesktop, or GoofCord) |
 | `Mod+Shift+H` | Heroic |
 | `Mod+Shift+G` | Lutris (only while it's turned on) |
 | `Mod+Shift+M` | Spotify |
@@ -565,7 +570,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 
 | Keybind | Action |
 | --- | --- |
-| `Mod+1–9` | Focus workspace N (desktop: 1–6 on the main monitor, 7–9 on the second; Steam opens on 6, Spotify on 8, GoofCord on 9) |
+| `Mod+1–9` | Focus workspace N (desktop: 1–6 on the main monitor, 7–9 on the second; Steam opens on 6, Spotify on 8, Discord on 9) |
 | `Mod+Shift+1–9` | Move window to workspace N |
 | `Mod+0` | Show / hide the scratchpad windows over the current workspace (nirius) |
 | `Mod+Shift+0` | Move window to / out of the scratchpad (nirius) |
@@ -617,7 +622,7 @@ modules/
   ├── default.nix                 # NixOS + one home-manager config per user
   ├── nixos/                      # system modules
   ├── home/                       # user modules
-  ├── theme/                      # stylix, catppuccin, fonts, GTK, QT, DMS
+  ├── theme/                      # matugen templates, DMS theme, GTK, Qt, fonts
   └── wm/                         # window managers
 docs/                           # personal notes I share between devices
 ```
@@ -643,9 +648,9 @@ flake.nix
 | [`dms-plugin-registry`](https://github.com/duxlabs-dev/dux-plugin-registry) | Dux Shell plugins (Claude Code usage, Quick Capture, AMD GPU monitor, ClipBoard+, Wallpaper Carousel, Linux Wallpaper Engine) |
 | [`dux-files`](https://github.com/duxlabs-dev/dux-files) | Dux Files, standalone file manager from Dux Labs |
 | [`dux-greeter`](https://github.com/duxlabs-dev/dux-greeter) | Login screen that matches Dux Shell |
-| [`stylix`](https://github.com/nix-community/stylix) | System-wide theming |
-| [`catppuccin`](https://github.com/catppuccin/nix) | Catppuccin theme module |
-| [`nixcord`](https://github.com/kaylorben/nixcord) | GoofCord / Vencord |
+| [`stylix`](https://github.com/nix-community/stylix) | Fonts and cursor |
+| [`catppuccin`](https://github.com/catppuccin/nix) | Catppuccin boot splash |
+| [`nixcord`](https://github.com/kaylorben/nixcord) | GoofCord / Vesktop / Vencord |
 | [`spicetify-nix`](https://github.com/gerg-l/spicetify-nix) | Spotify theming |
 | [`zen-browser`](https://github.com/0xc000022070/zen-browser-flake) | Zen Browser |
 | [`helium`](https://github.com/schembriaiden/helium-browser-nix-flake) | Helium Browser |

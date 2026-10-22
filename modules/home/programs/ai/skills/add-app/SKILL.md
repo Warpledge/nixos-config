@@ -21,9 +21,10 @@ that catches the step that usually gets missed.
   host; it gets its own module gated on a toggle, not an inline entry in `flatpak.nix`.
   A prebuilt bundle in `~/.local/opt` gets a wrapper in the folder for what the app is,
   a toggle in that category, and an entry in `docs/local/local-binary-installs.md`.
-- Set only what the user asked for; Stylix owns colors and fonts, so enable the program's
-  theming target instead of setting any. If catppuccin/nix also has a port for the app,
-  switch one of the two off in `theme/catppuccin.nix`, or both theme it.
+- Set only what the user asked for, and no colors or fonts (CLAUDE.md rule 5). Colors
+  come from DMS's matugen: use DMS's built-in template if it has one for the app,
+  otherwise add a repo template under `matugen.templates` and have the app's config
+  include the rendered file. Fonts come from `config.stylix.fonts`.
 - Install it once: `programs.<pkg>.enable` already adds the package, so don't also list
   it in `home.packages`.
 - Option keys inside a freeform set (`programs.<pkg>.options`, `settings`) aren't

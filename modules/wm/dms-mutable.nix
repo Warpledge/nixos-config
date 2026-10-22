@@ -34,11 +34,8 @@ in {
   #--------------------------------------------------------------------#
   #-- Locked Settings
   #--------------------------------------------------------------------#
-  #- Theme, fonts and cursor come from Stylix and catppuccin/nix (rule 5)
+  #- Fonts and cursor come from Stylix; the theme picker's choice stays
   config.dms.lockedSettings = [
-    ["currentThemeName"]
-    ["currentThemeCategory"]
-    ["customThemeFile"]
     ["fontFamily"]
     ["monoFontFamily"]
     ["cursorSettings" "theme"]

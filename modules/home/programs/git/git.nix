@@ -50,11 +50,15 @@
     enable = true;
     enableGitIntegration = true;
     options = {
+      features = "dank"; # from the include below
       line-numbers = true;
       # side-by-side = true;
       navigate = true;
     };
   };
+
+  #--- delta's colours, written by DMS's matugen (theme/matugen.nix)
+  programs.git.includes = [{path = "${config.xdg.configHome}/git/dank-delta.gitconfig";}];
 
   # Also sets gh as git's credential helper for github.com
   programs.gh.enable = true;

@@ -21,6 +21,7 @@ in {
       NIXPKGS_ALLOW_UNFREE = "1";
       NIXPKGS_ALLOW_INSECURE = "1";
       CARAPACE_BRIDGES = "carapace,zsh,fish,bash";
+      BAT_THEME = "base16"; # the terminal's palette, which DMS's matugen sets
     };
   };
 

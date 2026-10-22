@@ -31,6 +31,7 @@ PAGE_TITLES = {
     "Wallpaper Picker (Mod+W)": "Wallpaper",
     "Android Screen Mirroring (scrcpy)": "Android",
     "Language & Keyboard": "Language & Input",  # fits the sidebar's width
+    "Artcraft": "ArtCraft",  # humanize() of the artcraft key
 }
 MOVES = {  # setting -> (page, group on that page)
     ("japanese", "vn"): ("Gaming", "Japanese Visual Novels"),
@@ -102,6 +103,7 @@ PAGES = {
     "File Browsers": ("apps", "folder-symbolic", "File managers to install.", None),
     "Media": ("apps", "applications-multimedia-symbolic", "Video, music, streaming and reading.", None),
     "Graphics": ("apps", "applications-graphics-symbolic", "3D, painting and design.", None),
+    "ArtCraft": ("apps", "draw-brush-symbolic", "Rust creative and office suite.", None),
     "Audio": ("apps", "audio-x-generic-symbolic", "Recording, mixing and guitar tools.", None),
     "Office": ("apps", "x-office-document-symbolic", "Mail, notes and money.", None),
     "Security": ("apps", "security-high-symbolic", "Passwords and clean-up.", None),
@@ -141,15 +143,14 @@ PAGE_INTROS = {
               "1. **Qwen3.6 35B A3B (Q4)**: unsloth/Qwen3.6-35B-A3B-GGUF, the UD-Q4_K_XL file "
               "(~21 GB)\n"
               "2. **Ornith 1.5 35B A3B**: ornith-ai/Ornith-1.5-35B-A3B-GGUF, the Q4_K_M file "
-              "(~23 GB)\n"
-              "3. **Qwen3.6 35B A3B (Q3)**: unsloth/Qwen3.6-35B-A3B-GGUF, the UD-Q3_K_XL file (~17 GB)\n\n"
+              "(~23 GB)\n\n"
               "Chat\n"
-              "4. **gpt-oss 20B**: ggml-org/gpt-oss-20b-GGUF (~13 GB)\n"
-              "5. **Gemma 4 26B A4B**: unsloth/gemma-4-26B-A4B-it-qat-GGUF, the UD-Q4_K_XL file "
+              "3. **gpt-oss 20B**: ggml-org/gpt-oss-20b-GGUF (~13 GB)\n"
+              "4. **Gemma 4 26B A4B**: unsloth/gemma-4-26B-A4B-it-qat-GGUF, the UD-Q4_K_XL file "
               "(~14 GB)\n\n"
               "Inline Suggestions\n"
-              "6. **Sweep Next-Edit 1.5B**: sweepai/sweep-next-edit-1.5B\n"
-              "7. **Qwen2.5 Coder 1.5B**: ggml-org/Qwen2.5-Coder-1.5B-Q8_0-GGUF\n\n"
+              "5. **Sweep Next-Edit 1.5B**: sweepai/sweep-next-edit-1.5B\n"
+              "6. **Qwen2.5 Coder 1.5B**: ggml-org/Qwen2.5-Coder-1.5B-Q8_0-GGUF\n\n"
               "!!Without the file, an app gets an error the first time it uses the model.!!",
 }
 FALLBACK_ICON = "applications-system-symbolic"

@@ -34,9 +34,6 @@
           };
         };
       };
-
-      #--- Import theme configuration
-      inherit (import ./theme.nix) userChrome userContent;
     };
   };
 
@@ -92,5 +89,5 @@
   #--------------------------------------------------------------------#
   #-- Imports
   #--------------------------------------------------------------------#
-  imports = [inputs.zen-browser.homeModules.default];
+  imports = [inputs.zen-browser.homeModules.default ./theme.nix];
 }

@@ -1,23 +1,29 @@
 #=====================================================================#
 # FZF CONFIGURATION
 #=====================================================================#
-{lib, ...}: {
+{
+  config,
+  lib,
+  ...
+}: {
   #--------------------------------------------------------------------#
   #-- Configuration
   #--------------------------------------------------------------------#
+
+  #--- Colours: written by DMS's matugen (theme/matugen.nix); fzf exits if the
+  #--- file is missing, so it starts empty until DMS first renders it
+  home.sessionVariables.FZF_DEFAULT_OPTS_FILE = "${config.xdg.configHome}/fzf/dank.rc";
+  home.activation.fzfColours = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    f="${config.xdg.configHome}/fzf/dank.rc"
+    if [[ ! -v DRY_RUN && ! -e "$f" ]]; then
+      mkdir -p "$(dirname "$f")" && : > "$f"
+    fi
+  '';
 
   programs.fzf = {
     enable = true;
     enableZshIntegration = true;
     historyWidget.zsh.command = ""; # Atuin owns Ctrl-R (avoids double-binding)
-    colors = lib.mkForce {
-      "fg+" = "#89b4fa";
-      "bg+" = "-1";
-      "fg" = "#cdd6f4";
-      "bg" = "-1";
-      "prompt" = "#45475a";
-      "pointer" = "#89b4fa";
-    };
     defaultOptions = [
       "--margin=1"
       "--layout=reverse"

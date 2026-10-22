@@ -28,5 +28,11 @@
       font_family = "${config.stylix.fonts.monospace.name}";
       font_size = config.stylix.fonts.sizes.terminal;
     };
+
+    #--- Colours: written by DMS's matugen on each theme change
+    extraConfig = ''
+      include dank-theme.conf
+      include dank-tabs.conf
+    '';
   };
 }

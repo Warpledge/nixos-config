@@ -54,6 +54,8 @@
 
   #--- Loads on the first request, unloads after `ttl` idle seconds to free VRAM
   settings = {
+    # Lists the -instruct and -chat aliases in /v1/models, so Open WebUI shows them
+    includeAliasesInList = true;
     models =
       lib.concatMapAttrs serve (codes // chats)
       // lib.optionalAttrs (edit != null) {

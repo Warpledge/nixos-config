@@ -26,7 +26,7 @@ $out")
   ;;
 esac
 if [[ $f == *.nix && $f != */modules/theme/* ]] && grep -qE '"#[0-9a-fA-F]{6}|rgba?\(' <<<"$new"; then
-  msg+=("New color literal outside modules/theme/: Stylix owns theming (CLAUDE.md rule 5). Enable the program's Stylix target unless this is a deliberate override.")
+  msg+=("New color literal outside modules/theme/: DMS's matugen owns colours (CLAUDE.md rule 5). Use DMS's template for the app or add a matugen.templates entry, unless this is a deliberate fixed colour.")
 fi
 ((${#msg[@]})) && jq -n --arg c "$(printf '%s\n' "${msg[@]}")" '{hookSpecificOutput:{hookEventName:"PostToolUse",additionalContext:$c}}'
 exit 0
