@@ -1177,7 +1177,7 @@ finish_setup() {
   if [[ $repo == "$shared_repo" ]]; then
     :
   elif confirm "Move the config to $shared_repo, so every admin here can edit it? $repo stays as a link to it." y; then
-    share_repo "$main"
+    share_repo
   else
     if grep -q '^  flakePath = ' "$f"; then
       set_setting "$f" flakePath "$(nix_string "$repo")"
@@ -1238,19 +1238,19 @@ reinstall_machine() {
   say "Commit machines/$name/hardware afterwards, or a later pull brings back the old disks."
 }
 
-#--- share_repo <owner>: moves the clone to $shared_repo for every admin (the
-#--- wheel group); config-repo.nix keeps the group access up from then on
+#--- share_repo: moves the clone to $shared_repo for every admin (the wheel
+#--- group). It stays this login's (git and nix refuse another user's repo)
+#--- until the build, whose config-repo.nix hands it to mainUser.
 share_repo() {
-  local owner=$1 old=$repo
+  local old=$repo
   [[ $repo != "$shared_repo" ]] || die "the config is already in $shared_repo"
-  id -u "$owner" >/dev/null 2>&1 || owner=$USER # no account yet: the build makes it
   if [[ -e $shared_repo ]]; then
     [[ -d $shared_repo && -z $(ls -A "$shared_repo") ]] || die "$shared_repo already exists and isn't empty"
     sudo rmdir "$shared_repo"
   fi
   say "Moving $repo to $shared_repo (sudo)."
   sudo mv "$repo" "$shared_repo"
-  sudo chown -R "$owner:wheel" "$shared_repo"
+  sudo chown -R "$USER:wheel" "$shared_repo"
   sudo chmod -R g+rwX "$shared_repo"
   sudo find "$shared_repo" -type d -exec chmod g+s {} +
   if command -v setfacl >/dev/null; then
@@ -1266,7 +1266,7 @@ share_existing() {
   section "Share the config"
   say "Moves $repo to $shared_repo, where every admin on this computer can edit it."
   confirm "Go ahead?" y || exit 0
-  share_repo "$USER"
+  share_repo
   if grep -q '^ *flakePath = "' machines/*/settings.nix; then
     say "A machine's settings.nix sets flakePath; set it to null (or \"$shared_repo\") to match."
   fi
