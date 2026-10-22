@@ -27,7 +27,7 @@
       cache = "f16";
       # Experts of 22 layers from RAM, to make room for the f16 cache (18 with q8_0
       # reached 98% VRAM). The reasoning budget cuts a thinking loop off; the
-      # message is Qwen's own
+      # message is Qwen's own. Prompt cache in RAM halved from 8GB: RAM reached 88%
       args = [
         "-ngl 99"
         "--load-mode none"
@@ -36,6 +36,7 @@
         "--top-k 20"
         "--min-p 0"
         "--reasoning-budget 8192"
+        "--cache-ram 4096"
         "--reasoning-budget-message 'Considering the limited time by the user, I have to give the solution based on the thinking directly now.'"
       ];
       # Qwen's general-chat sampling, for Open WebUI
@@ -67,7 +68,7 @@
       match = "*Q4_K_M*.gguf";
       context = 131072;
       # ~0.5GB per layer's experts: 23 in RAM, ~15.3GB (26 measured 13.9GB, 35 tok/s).
-      # Same reasoning budget and message as Qwen3.6
+      # Same reasoning budget, message and prompt cache as Qwen3.6
       args = [
         "-ngl 99"
         "--load-mode none"
@@ -76,6 +77,7 @@
         "--top-k 20"
         "--min-p 0"
         "--reasoning-budget 8192"
+        "--cache-ram 4096"
         "--reasoning-budget-message 'Considering the limited time by the user, I have to give the solution based on the thinking directly now.'"
       ];
       # The model card's coding sampling

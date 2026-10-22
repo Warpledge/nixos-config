@@ -125,6 +125,9 @@ and whatever only lived in context is lost.
 - **Start every multi-step task with a todo list** (`todowrite`), one item per file
   or step. After a compaction, read the list and run
   `git status --short && git diff --stat`; don't re-read files to catch up.
+- **After a compaction, the summary is not a source.** Before quoting a value, a
+  default or a `file:line` in your answer, re-read that line (`grep -n`) and quote
+  what the file says. A file the summary names may not exist: check it.
 - **Never read a large file whole.** `README.md` and `CLAUDE.md` (~40 KB each):
   `grep -n` the lines, then read that range with offset and limit. Same for any
   file over ~300 lines.
