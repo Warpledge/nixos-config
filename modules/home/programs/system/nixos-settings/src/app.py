@@ -816,6 +816,12 @@ class Window(Adw.ApplicationWindow):
         top = Adw.PreferencesGroup()
         top.add(ui.hero(ui.first_icon(page.icon, schema.FALLBACK_ICON), page.title, page.description))
         prefs.add(top)
+        if page.title in schema.PAGE_INTROS:
+            intro = Adw.PreferencesGroup()
+            box = Gtk.ListBox(css_classes=["boxed-list"], selection_mode=Gtk.SelectionMode.NONE)
+            box.append(self._description(schema.PAGE_INTROS[page.title]))
+            intro.add(box)
+            prefs.add(intro)
         has_user = any(s.domain == "user" for g in page.groups for s in g.settings)
         if self.multi and has_user:
             group = Adw.PreferencesGroup()
@@ -850,9 +856,13 @@ class Window(Adw.ApplicationWindow):
             group = Adw.PreferencesGroup(title=ui.esc(g.title), description=ui.esc(description))
             icons = any(s.icon for s in g.settings)
             for s in g.settings:
-                widget = self._row(s, icons, page)
-                widget.set_sensitive(g not in locked)
-                group.add(widget)
+                if ".".join(s.path) in schema.SWITCH_LISTS:
+                    widgets = self._switch_rows(s, group)
+                else:
+                    widgets = [self._row(s, icons, page)]
+                for widget in widgets:
+                    widget.set_sensitive(g not in locked)
+                    group.add(widget)
                 self.page_of[(s.domain, s.path)] = key
             for link in g.links:
                 group.add(ui.link_row(link, self.open_dms))
@@ -1046,6 +1056,52 @@ class Window(Adw.ApplicationWindow):
         else:
             label.set_text(ui.plain(text))
         return label
+
+    def _switch_rows(self, s, group):
+        """One switch per option of a list, or of a none-or-one choice (turning one on turns
+        the rest off), in the order descriptions.json labels them; the pending dot sits in
+        the group's header."""
+        key = (s.domain, s.path)
+        single = s.kind == "choice"
+        value = self.changes.get(key, self._value(s))
+        if single:
+            names = [c for c in s.choices if c is not None]
+        else:
+            names = s.options + [x for x in value or [] if x not in s.options]
+        order = list(s.labels)
+        names.sort(key=lambda n: order.index(n) if n in order else len(order))
+        switches, quiet = [], [False]
+
+        def toggled(sw, _, name):
+            if quiet[0]:
+                return
+            now = self.changes.get(key, self._value(s))
+            if single:
+                new = name if sw.get_active() else None if now == name else now
+            else:
+                new = [x for x in now or [] if x != name] + ([name] if sw.get_active() else [])
+            setter(new)
+
+        def setter(v):
+            quiet[0] = True
+            for n, sw in switches:
+                sw.set_active(n == v if single else n in (v or []))
+            quiet[0] = False
+            self.change(s, v)
+        for name in names:
+            title, _, subtitle = s.labels.get(str(name), str(name)).partition(" — ")
+            sw = Adw.SwitchRow(title=title, subtitle=subtitle, active=name == value if single
+                               else name in (value or []), use_markup=False)
+            sw.connect("notify::active", toggled, name)
+            switches.append((name, sw))
+        marker = Gtk.Box(css_classes=["pending-dot"], valign=Gtk.Align.CENTER, visible=key in self.changes,
+                         tooltip_text="Changed; Apply to use it")
+        group.set_header_suffix(marker)
+        self.setters[key] = setter
+        rows = [sw for _, sw in switches]
+        if rows:
+            self.rows[key] = (rows[0], marker)
+        return rows
 
     def _list_row(self, s, items, common):
         key = (s.domain, s.path)

@@ -116,14 +116,40 @@ PAGES = {
               "The local model server, the app that downloads models, and opencode, "
               "the coding agent that uses them.",
               [("", "", ["llamaSwap.enable", "lmstudio.enable", "opencode.enable", "openWebui.enable"])]),
-    "Code": ("localai", "applications-engineering-symbolic",
-             "The models llama-swap runs on this computer's GPU for opencode and Zed. "
-             "Download each one in LM Studio first.",
-             [("", "", ["localAi.code", "localAi.edit"])]),
-    "Chat": ("localai", "user-available-symbolic",
-             "Models for conversation rather than code, served by llama-swap. Chat with them "
-             "in Open WebUI (Tools) or llama-swap's Playground. Download each one in LM Studio first.",
-             [("", "", ["localAi.chat"])]),
+    "Models": ("localai", "applications-engineering-symbolic",
+               "The models llama-swap runs on this computer, each with its own tuned settings. "
+               "It loads one at a time, so switching models waits for a load.",
+               [("Code", "For opencode and Zed's agent panel. The first one turned on is the default, "
+                 "and each also gets a fast version with thinking off.", ["localAi.code"]),
+                ("Chat", "For conversation in Open WebUI (under Tools) or llama-swap's Playground "
+                 "(http://127.0.0.1:8090). The coding models are listed there too.", ["localAi.chat"]),
+                ("Inline Suggestions", "Zed's suggestions as you type (Tab accepts one). One at a "
+                 "time, on the CPU, so the GPU stays free.", ["localAi.edit"])]),
+}
+
+#--- List and none-or-one settings shown as one switch per model, straight in their group
+SWITCH_LISTS = {"localAi.code", "localAi.chat", "localAi.edit"}
+
+#--- Text shown above a page's groups, with descriptions.json's ** and !! marks
+PAGE_INTROS = {
+    "Models": "Download a model in **LM Studio** (turn it on under Tools) before turning it on "
+              "here: open its **Discover** tab, search for the repo, pick the named file from the "
+              "download options and download it. llama-swap finds it in ~/.lmstudio/models, so it "
+              "doesn't need loading in LM Studio.\n\n"
+              "Code\n"
+              "1. **Qwen3.6 35B A3B (Q4)**: unsloth/Qwen3.6-35B-A3B-GGUF, the UD-Q4_K_XL file "
+              "(~21 GB)\n"
+              "2. **Ornith 1.5 35B A3B**: ornith-ai/Ornith-1.5-35B-A3B-GGUF, the Q4_K_M file "
+              "(~23 GB)\n"
+              "3. **Qwen3.6 35B A3B**: unsloth/Qwen3.6-35B-A3B-GGUF, the UD-Q3_K_XL file (~17 GB)\n\n"
+              "Chat\n"
+              "4. **gpt-oss 20B**: ggml-org/gpt-oss-20b-GGUF (~13 GB)\n"
+              "5. **Gemma 4 26B A4B**: unsloth/gemma-4-26B-A4B-it-qat-GGUF, the UD-Q4_K_XL file "
+              "(~14 GB)\n\n"
+              "Inline Suggestions\n"
+              "6. **Sweep Next-Edit 1.5B**: sweepai/sweep-next-edit-1.5B\n"
+              "7. **Qwen2.5 Coder 1.5B**: ggml-org/Qwen2.5-Coder-1.5B-Q8_0-GGUF\n\n"
+              "!!Without the file, an app gets an error the first time it uses the model.!!",
 }
 FALLBACK_ICON = "applications-system-symbolic"
 

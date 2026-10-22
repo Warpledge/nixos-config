@@ -170,7 +170,7 @@
   localAi = {
     code = ["qwen3.6-35b-a3b-q4" "qwen3.6-35b-a3b" "ornith-1.5-35b-a3b"];
     edit = "sweep-next-edit-1.5b";
-    chat = ["gpt-oss-20b" "gemma-4-26b-a4b" "qwen3.6-35b-a3b-chat"];
+    chat = ["gpt-oss-20b" "gemma-4-26b-a4b"];
   };
 
   #--- Japanese Language & Game Support

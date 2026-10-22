@@ -118,26 +118,6 @@
       };
       fast = null;
     };
-    #--- The Q4 coding model's file, with Qwen's general-chat sampling
-    "qwen3.6-35b-a3b-chat" = {
-      name = "Qwen3.6 35B A3B";
-      dir = "unsloth/Qwen3.6-35B-A3B-GGUF";
-      match = "*UD-Q4_K_XL*.gguf";
-      context = 32768;
-      # 128K less cache than the coding entry: 2 more layers fit on the GPU
-      args = ["-ngl 99" "--load-mode none" "--n-cpu-moe 22" "--top-k 20" "--min-p 0"];
-      think = {
-        temperature = 1.0;
-        top_p = 0.95;
-        presence_penalty = 1.5;
-      };
-      fast = {
-        chat_template_kwargs.enable_thinking = false;
-        temperature = 0.7;
-        top_p = 0.8;
-        presence_penalty = 1.5;
-      };
-    };
   };
 
   #--------------------------------------------------------------------#
