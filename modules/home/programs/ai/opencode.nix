@@ -21,6 +21,9 @@
       enableMcpIntegration = true;
       settings.share = "disabled"; # No /share uploads to opencode.ai
       tui.theme = "dank"; # written by DMS's matugen (theme/matugen.nix)
+      #--- OpenCode Zen's free models whose provider keeps no data and doesn't train
+      #--- on it (opencode.ai/docs/zen); the rest are hidden
+      settings.provider.opencode.whitelist = ["deepseek-v4.1-flash-free" "glm-5.3-flash-free"];
       #--- Ask before touching paths outside the project (v1's default; v2 allows)
       settings.permissions = [
         {
