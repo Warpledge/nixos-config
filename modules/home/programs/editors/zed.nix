@@ -109,10 +109,8 @@ in {
       terminalFontFamily = config.stylix.fonts.monospace.name;
       jq = lib.getExe pkgs.jq;
 
-      #--- Reset on every rebuild; Stylix owns theming (rule 5)
+      #--- Reset on every rebuild; fonts come from Stylix
       locked = builtins.toJSON [
-        ["theme"]
-        ["theme_overrides"]
         ["icon_theme"]
         ["ui_font_family"]
         ["buffer_font_family"]
@@ -121,18 +119,8 @@ in {
 
       zedDeclarativeSettings = builtins.toJSON {
         #--- UI & Theme
-        theme = "Catppuccin Mocha - No Italics";
-        # The theme's Base (1e1e2e) swapped for Stylix's base00 (theme/stylix.nix)
-        theme_overrides."Catppuccin Mocha - No Italics" = let
-          base = config.lib.stylix.colors.withHashtag.base00;
-        in {
-          "toolbar.background" = base;
-          "tab.active_background" = base;
-          "editor.background" = base;
-          "editor.gutter.background" = base;
-          "terminal.background" = base;
-          "terminal.ansi.background" = base;
-        };
+        # DMS's matugen writes it to ~/.config/zed/themes on each theme change
+        theme = "DankShell Dark";
         icon_theme = "Catppuccin Mocha";
         base_keymap = "VSCode";
         vim_mode = false;

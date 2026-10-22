@@ -13,7 +13,7 @@
     mirrored
     // {
       currentThemeCategory = "custom";
-      customThemeFile = "${config.xdg.configHome}/DankMaterialShell/themes/stylix/theme.json";
+      customThemeFile = "${config.xdg.configHome}/DankMaterialShell/themes/catppuccin-crust/theme.json";
       cursorSettings = mirrored.cursorSettings // {inherit (config.stylix.cursor) size;};
     }
     // inputDefaults;
@@ -74,7 +74,7 @@ in {
     #--- Core features
     enableSystemMonitoring = true; # System monitoring widgets (dgop)
     enableVPN = true; # VPN management widget
-    enableDynamicTheming = false; # Wallpaper-based theming (matugen)
+    enableDynamicTheming = true; # matugen: writes each app's colours from the DMS theme
     enableAudioWavelength = true; # Audio visualizer (cava)
     enableCalendarEvents = false; # khal calendar: 0.13.0 broken in nixpkgs
     enableClipboardPaste = true; # Clipboard pasting via wtype

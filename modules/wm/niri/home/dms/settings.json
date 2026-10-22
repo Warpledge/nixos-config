@@ -139,6 +139,8 @@
   "lockBeforeSuspend": true,
   "fadeToDpmsGracePeriod": 10,
   "matugenTemplateNeovim": true,
+  "matugenTemplateNiri": false,
+  "matugenTemplateZenBrowser": false,
   "notificationOverlayEnabled": true,
   "osdPowerProfileEnabled": true,
   "osdWorkspaceEnabled": true,
