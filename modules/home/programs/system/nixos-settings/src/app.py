@@ -75,6 +75,20 @@ DOCS_SECTIONS = [("Proton", [("proton", "Launch Options", ("input-gaming-symboli
 
 
 USER_PACKAGES = ("user", ("userPackages",))
+#--- What's New items the user dismissed, as "domain:dotted.path"
+DISMISSED = os.path.join(GLib.get_user_state_dir(), "nixos-settings", "whats-new-dismissed.json")
+
+
+def new_id(domain, path):
+    return f"{domain}:{'.'.join(path)}"
+
+
+def read_dismissed():
+    try:
+        with open(DISMISSED) as f:
+            return set(json.load(f))
+    except (OSError, ValueError):
+        return set()
 
 
 def shown(setting, value):
@@ -448,9 +462,10 @@ class Window(Adw.ApplicationWindow):
         self.links = [l for p in state.pages for g in p.groups for l in g.links]
         self.new_items = []
         self.settings = {(s.domain, s.path): s for p in state.pages for g in p.groups for s in g.settings}
+        dismissed = read_dismissed()
         for domain, path, value in state.new:
             s = self.settings.get((domain, path))
-            if s is not None and (domain == "user" or self.direct):
+            if s is not None and (domain == "user" or self.direct) and new_id(domain, path) not in dismissed:
                 self.new_items.append((s, value))
 
         self.building = True
@@ -742,11 +757,17 @@ class Window(Adw.ApplicationWindow):
         add = Gtk.Button(label="Add Them With Their Defaults", halign=Gtk.Align.CENTER,
                          css_classes=["pill", "suggested-action"], margin_top=6)
         add.connect("clicked", self._adopt)
+        dismiss = Gtk.Button(label="Dismiss", css_classes=["pill"], margin_top=6, tooltip_text="Hide this page until "
+                             "something else is added; these settings keep their defaults")
+        dismiss.connect("clicked", self._dismiss_new)
+        buttons = Gtk.Box(spacing=8, halign=Gtk.Align.CENTER)
+        buttons.append(add)
+        buttons.append(dismiss)
         top.add(ui.hero("starred-symbolic", "What's New",
                         "These settings were added after your settings files were made, so the "
                         "files don't mention them yet and every switch here counts as off. Add "
                         "them with the values they come with, or set them one by one on their pages.",
-                        extra=add))
+                        extra=buttons))
         prefs.add(top)
         group = Adw.PreferencesGroup()
         for s, value in self.new_items:
@@ -760,6 +781,20 @@ class Window(Adw.ApplicationWindow):
             group.add(row)
         prefs.add(group)
         return prefs
+
+    def _dismiss_new(self, _):
+        """Hides What's New for the settings it lists now; a newer one brings it back."""
+        ids = read_dismissed() | {new_id(s.domain, s.path) for s, _ in self.new_items}
+        try:
+            os.makedirs(os.path.dirname(DISMISSED), exist_ok=True)
+            with open(DISMISSED, "w") as f:
+                json.dump(sorted(ids), f)
+        except OSError as e:
+            self.toast(f"Couldn't save that: {e.strerror}")
+            return
+        self.page_key = "overview"
+        self.build()
+        self.toast("What's New dismissed")
 
     def _adopt(self, _):
         """Stages every new setting at its template value, even where that matches
