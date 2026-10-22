@@ -60,6 +60,13 @@ def preview(attr):
     return info
 
 
+def titled(attr, version):
+    """A row title: the name, then its version in smaller, dimmer text."""
+    if not version:
+        return ui.esc(attr)
+    return f'{ui.esc(attr)}  <span size="small" alpha="60%" weight="normal">{ui.esc(version)}</span>'
+
+
 def search(index, query):
     """Names holding every word of `query`, best first: the name itself, then
     its start (or its last part's, for `python313Packages.x`), then anywhere."""
@@ -191,13 +198,11 @@ class PackagesPage(Adw.PreferencesPage):
     def _row(self, attr):
         """A result row, and the function that fills it in once its details are read."""
         row = Adw.ExpanderRow(title=ui.esc(attr), subtitle="…", subtitle_lines=2)
-        # An expander packs suffixes right to left: install, then version, then copy
+        # An expander packs suffixes right to left: install, then copy
         install = Gtk.Button(valign=Gtk.Align.CENTER)
         install.connect("clicked", lambda _: self._install(attr))
         row.add_suffix(install)
         self.buttons[attr] = install
-        version = Gtk.Label(css_classes=["dim-label", "numeric"], valign=Gtk.Align.CENTER)
-        row.add_suffix(version)
         copy = Gtk.Button(icon_name="edit-copy-symbolic", css_classes=["flat"], valign=Gtk.Align.CENTER,
                           tooltip_text="Copy the attribute name")
         copy.connect("clicked", lambda _: self._copy(attr))
@@ -206,7 +211,7 @@ class PackagesPage(Adw.PreferencesPage):
 
         def fill(info):
             row.set_subtitle(ui.esc(info["description"] or "No description"))
-            version.set_label(info["version"])
+            row.set_title(titled(attr, info["version"]))
             if info["broken"]:
                 row.add_suffix(ui.chip("Broken", "error", "nixpkgs marks it broken, so it may not build"))
             for home in info["homepage"]:
@@ -283,14 +288,11 @@ class UserPackagesPage(Adw.PreferencesPage):
         for attr in names:
             where = state(self.window, attr)
             description, version = self.details.get(attr, ("", ""))
-            row = Adw.ActionRow(title=ui.esc(attr), subtitle_lines=2, subtitle=ui.esc(description))
+            row = Adw.ActionRow(title=titled(attr, version), subtitle_lines=2, subtitle=ui.esc(description))
             if where == "adding":
                 row.add_suffix(ui.chip("Installs on Apply", "accent"))
             elif where == "removing":
                 row.add_suffix(ui.chip("Removed on Apply", "warning"))
-            if version:
-                row.add_suffix(Gtk.Label(label=version, css_classes=["dim-label", "numeric"],
-                                         valign=Gtk.Align.CENTER))
             if where == "removing":
                 button = Gtk.Button(label="Undo", valign=Gtk.Align.CENTER)
                 button.connect("clicked", lambda _, a=attr: self._undo(a))
