@@ -29,9 +29,11 @@ Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
 5. **DMS's matugen owns colours; Stylix owns fonts and cursor.** Never set colours,
    fonts, font sizes, theme presets or wallpaper in a module, including an app's
    own settings (`theme = "purple"`, `fontWeight`). An app's colours come from a
-   matugen template (`matugen.templates` in `modules/theme/matugen.nix`, files in
-   `modules/theme/matugen/`) whose rendered file its config includes; that file
-   must stay a plain file, never a home-manager link. Fonts come from
+   matugen template: an entry under `matugen.templates` (option in
+   `modules/theme/matugen.nix`; the entry sits there or in the app's module), with
+   the template in `modules/theme/matugen/` or beside the module. The app's config
+   includes the rendered file, which must stay a plain file, never a home-manager
+   link. Fonts come from
    `config.stylix.fonts`. Name a CSS template `.css.matugen`: its `{{ }}`
    placeholders run Zed's biome out of memory.
 6. **Commits** use Conventional Commits, `type(scope): subject` plus a bullet body;

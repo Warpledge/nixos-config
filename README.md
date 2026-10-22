@@ -49,8 +49,8 @@ Afterwards:
 
 Colors change live from the shell, with no rebuild:
 
-- **[Dux Shell][dms] + [matugen][matugen]:** Picking a theme in the shell's settings (a preset, a custom theme or the wallpaper's colors) runs matugen, which writes a color file for each app. Some apps get the shell's own templates (GTK, Qt, Kitty, Zed, niri's borders); the rest use templates kept in `modules/theme/matugen/`, made from the official Catppuccin ports. The default theme is Catppuccin Mocha Mauve.
-- **[Stylix][stylix]:** Only sets the fonts and the mouse cursor now.
+- **[Dux Shell][dms] + [matugen][matugen]:** Picking a theme in the shell's settings (a preset, a custom theme or the wallpaper's colors) runs matugen, which writes a color file for each app. Some apps get the shell's own templates (GTK, Qt, Kitty, Zed, Vesktop); the rest use templates in this repo, mostly in `modules/theme/matugen/` and made from the official Catppuccin ports. The default theme is Catppuccin Mocha Mauve.
+- **[Stylix][stylix]:** Sets the fonts and the mouse cursor, plus fixed Catppuccin colors for VS Code and the TTY.
 - **[catppuccin/nix][catppuccin-nix]:** Only themes the boot splash.
 
 ## System Management TUI Script
