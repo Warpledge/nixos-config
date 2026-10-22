@@ -38,7 +38,7 @@
 
   #--- A coding or chat model. One slot gets the whole context; q8_0 cache halves
   #--- its VRAM. Each ID gets its variant's sampling over whatever the client sent;
-  #--- the -instruct key also registers as an alias, so it needs no reload
+  #--- the -instruct and -chat keys also register as aliases, so they need no reload
   serve = id: model: {
     ${id} = {
       ttl = 600;
@@ -47,7 +47,8 @@
           ++ model.args);
       filters.setParamsByID =
         {${id} = model.think;}
-        // lib.optionalAttrs (model.fast != null) {"${id}-instruct" = model.fast;};
+        // lib.optionalAttrs (model.fast != null) {"${id}-instruct" = model.fast;}
+        // lib.optionalAttrs (model.chat or null != null) {"${id}-chat" = model.chat;};
     };
   };
 

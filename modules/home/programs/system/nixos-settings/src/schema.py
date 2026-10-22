@@ -122,7 +122,8 @@ PAGES = {
                [("Code", "For opencode and Zed's agent panel. The first one turned on is the default, "
                  "and each also gets a fast version with thinking off.", ["localAi.code"]),
                 ("Chat", "For conversation in Open WebUI (under Tools) or llama-swap's Playground "
-                 "(http://127.0.0.1:8090). The coding models are listed there too.", ["localAi.chat"]),
+                 "(http://127.0.0.1:8090). The coding models are listed there too, and Qwen3.6 also as a "
+                 "chat version with Qwen's chat sampling.", ["localAi.chat"]),
                 ("Inline Suggestions", "Zed's suggestions as you type (Tab accepts one). One at a "
                  "time, on the CPU, so the GPU stays free.", ["localAi.edit"])]),
 }

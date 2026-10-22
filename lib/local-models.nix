@@ -11,8 +11,9 @@
   #--------------------------------------------------------------------#
   #-- Coding Models
   #--------------------------------------------------------------------#
-  #--- `args` start the server; `think` and `fast` are request parameters llama-swap
-  #--- forces on <name> and its <name>-instruct alias, so both share one loaded model
+  #--- `args` start the server; `think`, `fast` and the optional `chat` are request
+  #--- parameters llama-swap forces on <name> and its <name>-instruct and <name>-chat
+  #--- aliases, so all three share one loaded model
   #--- --load-mode none: experts in RAM read into memory, not paged in from the file
   code = {
     #--- MoE, 3B active; 10 of its 40 layers keep a KV cache, so 128K is ~1.4GB
@@ -23,6 +24,12 @@
       context = 131072;
       # Experts of 18 layers from RAM: ~15GB VRAM (20 measured 80-85%, 37-39 tok/s)
       args = ["-ngl 99" "--load-mode none" "--n-cpu-moe 18" "-ub 2048" "--top-k 20" "--min-p 0"];
+      # Qwen's general-chat sampling, for Open WebUI
+      chat = {
+        temperature = 1.0;
+        top_p = 0.95;
+        presence_penalty = 1.5;
+      };
       # Qwen's thinking-mode coding sampling, and its non-thinking sampling;
       # presence_penalty (0-2 per Qwen) curbs the repetition loops a quant falls into
       think = {
@@ -44,6 +51,11 @@
       context = 131072;
       # Experts of 24 layers from RAM: measured ~89% VRAM, 38 tok/s
       args = ["-ngl 99" "--load-mode none" "--n-cpu-moe 24" "-ub 2048" "--top-k 20" "--min-p 0"];
+      chat = {
+        temperature = 1.0;
+        top_p = 0.95;
+        presence_penalty = 1.5;
+      };
       think = {
         temperature = 0.6;
         top_p = 0.95;
