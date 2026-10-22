@@ -1,46 +1,15 @@
 #=====================================================================#
 # CATPPUCCIN THEME CONFIGURATION
 #=====================================================================#
-{
-  lib,
-  inputs,
-  machine,
-  ...
-}: {
-  #--------------------------------------------------------------------#
-  #-- Home Manager Theme
-  #--------------------------------------------------------------------#
-  #--- Every user on the machine
-  home-manager.users =
-    lib.mapAttrs (_: _: {
-      imports = [inputs.catppuccin.homeModules.catppuccin];
-      catppuccin = lib.mkForce {
-        #--- Global Settings
-        enable = true;
-        autoEnable = true; # auto-enroll all ports
-        flavor = "mocha";
-        accent = "mauve";
-
-        gtk.icon.enable = true; # Papirus-Dark with Mauve folders
-        cursors.enable = false; # keep Stylix's cursor (pointerCursor conflict)
-        kvantum = {
-          enable = true;
-          apply = true; # Auto-apply theme via kvantum.kvconfig
-        };
-        zed.enable = false;
-        vscodium.profiles.default.enable = false; # Stylix's vscodium target owns it
-        opencode.enable = false; # stylix's opencode target owns tui.theme
-        mpv.enable = false; # its include overrides Stylix's black background-color
-      };
-    })
-    machine.users;
-
+{lib, ...}: {
   #--------------------------------------------------------------------#
   #-- System Theme
   #--------------------------------------------------------------------#
+  # Boot splash only: DMS's matugen themes the apps (theme/matugen.nix)
   catppuccin = lib.mkForce {
     enable = true;
-    autoEnable = true; # auto-enroll all ports
+    autoEnable = false;
+    plymouth.enable = true;
     flavor = "mocha";
     accent = "mauve";
     # Stylix's console target owns console.colors; with both set there are 32

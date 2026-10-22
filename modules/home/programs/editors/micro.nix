@@ -20,6 +20,7 @@
       "tabsize" = 4;
       "mkparents" = true;
       "colorcolumn" = 80;
+      "colorscheme" = "dank"; # written by DMS's matugen (theme/matugen.nix)
     };
   };
 

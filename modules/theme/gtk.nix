@@ -2,7 +2,6 @@
 # GTK THEME & ICON CONFIGURATION
 #=====================================================================#
 {
-  config,
   lib,
   pkgs,
   machine,
@@ -10,12 +9,34 @@
 }: {
   #--- Every user on the machine
   home-manager.users =
-    lib.mapAttrs (_: _: {
+    lib.mapAttrs (_: _: {config, ...}: {
       #--------------------------------------------------------------------#
-      #-- Icon Theme (for Quickshell & other apps)
+      #-- Theme, Font and Icon Theme
       #--------------------------------------------------------------------#
-      # Papirus-Dark with Mauve folders comes from catppuccin's gtk.icon port
-      gtk.enable = true;
+      # adw-gtk3 with DMS's matugen colours on top; DMS's live refresh only
+      # finds the theme under ~/.local/share/themes
+      gtk = {
+        enable = true;
+        theme = {
+          package = pkgs.adw-gtk3;
+          name = "adw-gtk3-dark";
+        };
+        gtk4.theme = config.gtk.theme; # as Stylix's gtk target set it
+        gtk3.extraCss = ''@import url("dank-colors.css");'';
+        gtk4.extraCss = ''@import url("dank-colors.css");'';
+        font = {
+          inherit (config.stylix.fonts.sansSerif) package name;
+          size = config.stylix.fonts.sizes.applications;
+        };
+        iconTheme = {
+          package = pkgs.papirus-icon-theme;
+          name = "Papirus-Dark";
+        };
+      };
+      home.pointerCursor.gtk.enable = true;
+      xdg.dataFile = lib.genAttrs ["themes/adw-gtk3" "themes/adw-gtk3-dark"] (t: {
+        source = "${pkgs.adw-gtk3}/share/${t}";
+      });
 
       #--------------------------------------------------------------------#
       #-- Icon Theme Packages

@@ -6,9 +6,7 @@
   lib,
   ...
 }: let
-  colors = config.lib.stylix.colors.withHashtag;
-
-  #--- Rules that need Nix (Stylix colours, the translucent app list), spliced in
+  #--- Rules that need Nix (the translucent app list), spliced in
   #--- where window-rules.json has {"include": "<name>"}
   included = {
     translucent = [
@@ -43,27 +41,7 @@
         ];
         shadow.enable = true;
       }
-      {
-        matches = [
-          {
-            is-window-cast-target = true;
-          }
-        ];
-        focus-ring = {
-          active.color = colors.base0E; # Mauve
-          inactive.color = colors.base00; # Dark base for inactive windows
-        };
-        border = {
-          inactive.color = colors.base00; # Same dark base for border inactive
-        };
-        shadow = {
-          color = "${colors.base00}70"; # Transparent dark shadow
-        };
-        tab-indicator = {
-          active.color = colors.base0E;
-          inactive.color = colors.base00;
-        };
-      }
+      # The cast-target rule's colours: dms/colors.kdl (theme/matugen/niri-colors.kdl)
     ];
   };
 

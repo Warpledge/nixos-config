@@ -20,6 +20,7 @@
       enable = true;
       enableMcpIntegration = true;
       settings.share = "disabled"; # No /share uploads to opencode.ai
+      tui.theme = "dank"; # written by DMS's matugen (theme/matugen.nix)
       #--- Ask before touching paths outside the project (v1's default; v2 allows)
       settings.permissions = [
         {

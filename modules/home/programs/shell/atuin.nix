@@ -27,6 +27,7 @@
       enter_accept = true;
       history_filter = ["shit"];
       keymap_mode = "vim-normal";
+      theme.name = "dank"; # written by DMS's matugen (theme/matugen.nix)
       sync = {
         records = true;
       };

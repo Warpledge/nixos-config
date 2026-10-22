@@ -7,9 +7,8 @@
   inputs,
   ...
 }: let
-  #--- Same theme file the catppuccin/nix Vesktop port loads
-  inherit (config.catppuccin) flavor accent;
-  catppuccinTheme = "catppuccin-${flavor}-${accent}.theme";
+  #--- Upstream's Catppuccin Discord theme, fixed (DMS has no GoofCord template)
+  catppuccinTheme = "catppuccin-mocha-mauve.theme";
   # Stylix's base00 in place of the theme's Base (modules/theme/stylix.nix)
   base = config.lib.stylix.colors.withHashtag.base00;
   inherit (config.lib.stylix.colors) base00-rgb-r base00-rgb-g base00-rgb-b;

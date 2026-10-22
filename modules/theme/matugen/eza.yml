@@ -1,0 +1,102 @@
+colourful: true
+
+filekinds:
+  normal: {foreground: "{{colors.on_surface.default.hex}}"}
+  directory: {foreground: "{{colors.primary.default.hex}}"}
+  symlink: {foreground: "{{dank16.color4.default.hex}}"}
+  pipe: {foreground: "{{colors.on_surface.default.hex}}"}
+  block_device: {foreground: "{{dank16.color9.default.hex}}"}
+  char_device: {foreground: "{{dank16.color9.default.hex}}"}
+  socket: {foreground: "{{colors.on_surface.default.hex}}"}
+  special: {foreground: "{{colors.primary.default.hex}}"}
+  executable: {foreground: "{{dank16.color2.default.hex}}"}
+  mount_point: {foreground: "{{dank16.color14.default.hex}}"}
+
+perms:
+  user_read: {foreground: "{{dank16.color1.default.hex}}", is_bold: true}
+  user_write: {foreground: "{{dank16.color3.default.hex}}", is_bold: true}
+  user_execute_file: {foreground: "{{dank16.color2.default.hex}}", is_bold: true}
+  user_execute_other: {foreground: "{{dank16.color2.default.hex}}", is_bold: true}
+  group_read: {foreground: "{{dank16.color1.default.hex}}"}
+  group_write: {foreground: "{{dank16.color3.default.hex}}"}
+  group_execute: {foreground: "{{dank16.color2.default.hex}}"}
+  other_read: {foreground: "{{dank16.color1.default.hex}}"}
+  other_write: {foreground: "{{dank16.color3.default.hex}}"}
+  other_execute: {foreground: "{{dank16.color2.default.hex}}"}
+  special_user_file: {foreground: "{{colors.primary.default.hex}}"}
+  special_other: {foreground: "{{colors.outline.default.hex}}"}
+  attribute: {foreground: "{{colors.on_surface_variant.default.hex}}"}
+
+size:
+  major: {foreground: "{{colors.on_surface_variant.default.hex}}"}
+  minor: {foreground: "{{dank16.color14.default.hex}}"}
+  number_byte: {foreground: "{{colors.on_surface.default.hex}}"}
+  number_kilo: {foreground: "{{colors.on_surface_variant.default.hex}}"}
+  number_mega: {foreground: "{{dank16.color4.default.hex}}"}
+  number_giga: {foreground: "{{colors.primary.default.hex}}"}
+  number_huge: {foreground: "{{colors.primary.default.hex}}"}
+  unit_byte: {foreground: "{{colors.on_surface_variant.default.hex}}"}
+  unit_kilo: {foreground: "{{dank16.color14.default.hex}}"}
+  unit_mega: {foreground: "{{colors.primary.default.hex}}"}
+  unit_giga: {foreground: "{{colors.primary.default.hex}}"}
+  unit_huge: {foreground: "{{dank16.color14.default.hex}}"}
+
+users:
+  user_you: {foreground: "{{colors.on_surface.default.hex}}"}
+  user_root: {foreground: "{{dank16.color1.default.hex}}"}
+  user_other: {foreground: "{{dank16.color9.default.hex}}"}
+  group_yours: {foreground: "{{colors.on_surface_variant.default.hex}}"}
+  group_other: {foreground: "{{colors.on_surface_variant.default.hex}}"}
+  group_root: {foreground: "{{dank16.color1.default.hex}}"}
+
+links:
+  normal: {foreground: "{{dank16.color4.default.hex}}"}
+  multi_link_file: {foreground: "{{dank16.color4.default.hex}}"}
+
+git:
+  new: {foreground: "{{dank16.color2.default.hex}}"}
+  modified: {foreground: "{{dank16.color3.default.hex}}"}
+  deleted: {foreground: "{{dank16.color9.default.hex}}"}
+  renamed: {foreground: "{{dank16.color14.default.hex}}"}
+  typechange: {foreground: "{{dank16.color13.default.hex}}"}
+  ignored: {foreground: "{{colors.outline.default.hex}}"}
+  conflicted: {foreground: "{{dank16.color11.default.hex}}"}
+
+git_repo:
+  branch_main: {foreground: "{{colors.on_surface_variant.default.hex}}"}
+  branch_other: {foreground: "{{colors.primary.default.hex}}"}
+  git_clean: {foreground: "{{dank16.color2.default.hex}}"}
+  git_dirty: {foreground: "{{dank16.color9.default.hex}}"}
+
+security_context:
+  colon: {foreground: "{{colors.outline.default.hex}}"}
+  user: {foreground: "{{colors.outline.default.hex}}"}
+  role: {foreground: "{{colors.primary.default.hex}}"}
+  typ: {foreground: "{{colors.outline.default.hex}}"}
+  range: {foreground: "{{colors.primary.default.hex}}"}
+
+file_type:
+  image: {foreground: "{{dank16.color3.default.hex}}"}
+  video: {foreground: "{{dank16.color1.default.hex}}"}
+  music: {foreground: "{{dank16.color2.default.hex}}"}
+  lossless: {foreground: "{{dank16.color14.default.hex}}"}
+  crypto: {foreground: "{{colors.outline.default.hex}}"}
+  document: {foreground: "{{colors.on_surface.default.hex}}"}
+  compressed: {foreground: "{{dank16.color13.default.hex}}"}
+  temp: {foreground: "{{dank16.color9.default.hex}}"}
+  compiled: {foreground: "{{dank16.color12.default.hex}}"}
+  source: {foreground: "{{dank16.color4.default.hex}}"}
+
+punctuation: {foreground: "{{colors.outline.default.hex}}"}
+date: {foreground: "{{dank16.color3.default.hex}}"}
+inode: {foreground: "{{colors.on_surface_variant.default.hex}}"}
+blocks: {foreground: "{{colors.outline.default.hex}}"}
+header: {foreground: "{{colors.on_surface.default.hex}}"}
+octal: {foreground: "{{dank16.color14.default.hex}}"}
+flags: {foreground: "{{colors.primary.default.hex}}"}
+
+symlink_path: {foreground: "{{dank16.color14.default.hex}}"}
+control_char: {foreground: "{{dank16.color12.default.hex}}"}
+broken_symlink: {foreground: "{{dank16.color1.default.hex}}"}
+broken_path_overlay: {foreground: "{{colors.outline.default.hex}}"}
+

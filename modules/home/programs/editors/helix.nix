@@ -1,12 +1,7 @@
 #=====================================================================#
 # HELIX EDITOR CONFIGURATION
 #=====================================================================#
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: {
+{pkgs, ...}: {
   #--------------------------------------------------------------------#
   #-- Editor Configuration
   #--------------------------------------------------------------------#
@@ -25,12 +20,8 @@
     enable = true;
     defaultEditor = false; # Zed is default
 
-    #--- catppuccin/nix's Mocha with Base swapped for Stylix's base00
-    settings.theme = lib.mkForce "catppuccin-mocha-stylix";
-    themes.catppuccin-mocha-stylix = {
-      inherits = "catppuccin-mocha";
-      palette.base = config.lib.stylix.colors.withHashtag.base00;
-    };
+    #--- Written by DMS's matugen to helix/themes (theme/matugen.nix)
+    settings.theme = "dank";
 
     #--- Editor Settings
     settings = {

@@ -35,7 +35,4 @@
       include dank-tabs.conf
     '';
   };
-
-  stylix.targets.kitty.enable = false;
-  catppuccin.kitty.enable = false;
 }
