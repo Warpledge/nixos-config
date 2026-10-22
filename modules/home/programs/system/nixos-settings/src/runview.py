@@ -604,21 +604,27 @@ class RunView(Gtk.Box):
             row = Adw.ActionRow(title_lines=1, subtitle_lines=1)
             icon = Gtk.Image(valign=Gtk.Align.CENTER)
             row.add_prefix(icon)
+            bar = Gtk.ProgressBar(width_request=140, valign=Gtk.Align.CENTER, visible=False)
+            row.add_suffix(bar)
             clock = Gtk.Label(css_classes=["dim-label", "numeric"], valign=Gtk.Align.CENTER)
             row.add_suffix(clock)
             self.running_list.append(row)
-            self.running_rows.append((row, icon, clock))
-        for i, (row, icon, clock) in enumerate(self.running_rows):
+            self.running_rows.append((row, icon, bar, clock))
+        for i, (row, icon, bar, clock) in enumerate(self.running_rows):
             if i >= len(items):
                 row.set_visible(False)
                 continue
             kind, name, detail, started = items[i]
             row.set_title(ui.esc(name or "…"))
+            bar.set_visible(False)
             if kind == "download":
                 done, total = detail
                 row.set_subtitle(f"Downloading · {closure.human_size(done)} of {closure.human_size(total)}"
                                  if total else "Downloading")
                 icon.set_from_icon_name(ui.first_icon("folder-download-symbolic"))
+                if total:
+                    bar.set_fraction(min(1.0, done / total))
+                    bar.set_visible(True)
             elif kind == "build":
                 row.set_subtitle(ui.esc(f"Building · {detail}" if detail else "Building"))
                 icon.set_from_icon_name(ui.first_icon("system-run-symbolic"))
