@@ -5,18 +5,27 @@
   config,
   options,
   inputs,
+  lib,
+  user,
   ...
 }: let
   inherit (config.lib.stylix.colors) base00-rgb-r base00-rgb-g base00-rgb-b;
+  #--- Electron can't map XDG_CURRENT_DESKTOP=niri to a keyring and falls back
+  #--- to plain text; point safeStorage at gnome-keyring's Secret Service
+  keyring = "--password-store=gnome-libsecret";
 in {
   imports = [inputs.nixcord.homeModules.nixcord];
 
   #--- GoofCord loads assets/Themes.css at start: DMS's Discord template fills it on
   #--- each theme change (theme/matugen.nix) instead of nixcord's copy
-  home.file."${config.xdg.configHome}/goofcord/GoofCord/assets/Themes.css".enable = false;
-  matugen.templates.goofcord = {
-    input = "${inputs.dms}/quickshell/matugen/templates/vesktop.css";
-    output = "${config.xdg.configHome}/goofcord/GoofCord/assets/Themes.css";
+  home.file = lib.mkIf user.discord.goofcord {
+    "${config.xdg.configHome}/goofcord/GoofCord/assets/Themes.css".enable = false;
+  };
+  matugen.templates = lib.mkIf user.discord.goofcord {
+    goofcord = {
+      input = "${inputs.dms}/quickshell/matugen/templates/vesktop.css";
+      output = "${config.xdg.configHome}/goofcord/GoofCord/assets/Themes.css";
+    };
   };
 
   #--------------------------------------------------------------------#
@@ -27,17 +36,24 @@ in {
     enable = true;
     #--- GoofCord asserts nixcord's pinned Node version, which our nixpkgs lacks
     useGlobalPkgs = false;
-    discord.enable = false; # disable default Discord, use GoofCord instead
-    vesktop.enable = false; # replaced by GoofCord
+    discord.enable = false; # disable default Discord, use GoofCord or Vesktop instead
     #--- arRPC is off by default: the standalone arrpc service owns port 1337
-    goofcord.enable = true;
-    #--- Electron can't map XDG_CURRENT_DESKTOP=niri to a keyring and falls back
-    #--- to plain text; point safeStorage at gnome-keyring's Secret Service
+    goofcord.enable = user.discord.goofcord;
     goofcord.package = options.programs.nixcord.goofcord.package.default.overrideAttrs (old: {
       postInstall =
         (old.postInstall or "")
         + ''
-          wrapProgramShell $out/bin/goofcord --add-flags "--password-store=gnome-libsecret"
+          wrapProgramShell $out/bin/goofcord --add-flags "${keyring}"
+        '';
+    });
+    #--- DMS's built-in Vesktop template writes themes/dank-discord.css, which
+    #--- Vencord reloads live (enabledThemes below)
+    vesktop.enable = user.discord.vesktop;
+    vesktop.package = options.programs.nixcord.vesktop.package.default.overrideAttrs (old: {
+      postFixup =
+        (old.postFixup or "")
+        + ''
+          wrapProgram $out/bin/vesktop --add-flags "${keyring}"
         '';
     });
     #--- Written wholesale to settings.json on every activation, like vesktop.settings
@@ -63,6 +79,7 @@ in {
     };
     config = {
       frameless = true; # set some Vencord options
+      enabledThemes = lib.optionals user.discord.vesktop ["dank-discord.css"];
       plugins = {
         biggerStreamPreview.enable = true;
         fakeNitro.enable = true;

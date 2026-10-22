@@ -48,6 +48,9 @@
         "app-id": "(?i)goofcord$"
       },
       {
+        "app-id": "(?i)^vesktop$"
+      },
+      {
         "app-id": "^mpv$"
       }
     ]

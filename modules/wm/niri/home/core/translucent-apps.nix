@@ -27,6 +27,7 @@
   {app-id = "Revolt";}
   {app-id = "discord";}
   {app-id = "(?i)goofcord$";}
+  {app-id = "(?i)^vesktop$";}
   {app-id = "heroic";}
   {app-id = "spotify";}
   {app-id = "org.prismlauncher.PrismLauncher";}

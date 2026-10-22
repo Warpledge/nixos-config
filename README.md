@@ -202,7 +202,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | **Audio** | [Reaper][reaper] (DAW, with [SWS][sws] and [ReaPack][reapack]) |
 | **Guitar** | [TONE3000][tone3000] (official NAM player, browses its capture and IR library in-app), [Guitarix][guitarix] (modular amp rig), [ir.lv2][ir-lv2] for cabinet IRs, [qpwgraph][qpwgraph] for patching, plus [FxFloorBoard][katana-fxfloorboard] to edit patches on the Boss Katana itself |
 | **Rhythm Games** | [feedBack][feedback] plays Guitar Pro tabs through its own audio engine, with VST hosting and amp modeling, so the Katana DI feed doubles as the game input; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs. [Rocksmith 2014][rocksmith] runs on Proton and reads the same DI through [PipeASIO][pipeasio] and [RS_ASIO][rs-asio]; the module writes their config, and the hand-done install steps live in `docs/gaming/rocksmith-2014.md` |
-| **Chat / Productivity** | [GoofCord][goofcord] via [nixcord][nixcord] (Vencord, with [arRPC][arrpc] running alongside it so Steam and Proton games show up as rich presence), [Ferdium][ferdium] (all your web messengers in one window), [Thunderbird][thunderbird], [Obsidian][obsidian] |
+| **Chat / Productivity** | [GoofCord][goofcord] or [Vesktop][vesktop] (follows the shell's theme live) via [nixcord][nixcord] (Vencord, with [arRPC][arrpc] running alongside it so Steam and Proton games show up as rich presence), [Ferdium][ferdium] (all your web messengers in one window), [Thunderbird][thunderbird], [Obsidian][obsidian] |
 | **AI Tooling** | [Claude Code][claude-code], [Claude Desktop][claude-desktop], [OpenCode][opencode], [LM Studio][lmstudio], [llama-swap][llama-swap], [Open WebUI][open-webui] |
 | **Android** | [scrcpy][scrcpy] (mirror and control a device over USB or wifi, nothing to install on the phone) |
 | **Video Trimming** | [Video Trimmer][video-trimmer] (cut a clip out of a video without re-encoding it), [Constrict][constrict] (re-encode a video to fit a chosen file size) |
@@ -321,6 +321,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 [qpwgraph]: https://gitlab.freedesktop.org/rncbc/qpwgraph
 [katana-fxfloorboard]: https://github.com/gumtown/Katana-MK2-FxFloorBoard
 [goofcord]: https://github.com/Milkshiift/GoofCord
+[vesktop]: https://github.com/Vencord/Vesktop
 [nixcord]: https://github.com/KaylorBen/nixcord
 [ferdium]: https://ferdium.org
 [thunderbird]: https://www.thunderbird.net
@@ -493,7 +494,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | `Mod+B` | Browser (Zen) |
 | `Mod+E` | File manager (Nautilus, or Dolphin when it's the default) |
 | `Mod+Shift+S` | Steam |
-| `Mod+Shift+D` | Discord (GoofCord) |
+| `Mod+Shift+D` | Discord (Vesktop, or GoofCord) |
 | `Mod+Shift+H` | Heroic |
 | `Mod+Shift+G` | Lutris (only while it's turned on) |
 | `Mod+Shift+M` | Spotify |
@@ -568,7 +569,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 
 | Keybind | Action |
 | --- | --- |
-| `Mod+1–9` | Focus workspace N (desktop: 1–6 on the main monitor, 7–9 on the second; Steam opens on 6, Spotify on 8, GoofCord on 9) |
+| `Mod+1–9` | Focus workspace N (desktop: 1–6 on the main monitor, 7–9 on the second; Steam opens on 6, Spotify on 8, Discord on 9) |
 | `Mod+Shift+1–9` | Move window to workspace N |
 | `Mod+0` | Show / hide the scratchpad windows over the current workspace (nirius) |
 | `Mod+Shift+0` | Move window to / out of the scratchpad (nirius) |
@@ -648,7 +649,7 @@ flake.nix
 | [`dux-greeter`](https://github.com/duxlabs-dev/dux-greeter) | Login screen that matches Dux Shell |
 | [`stylix`](https://github.com/nix-community/stylix) | Fonts and cursor |
 | [`catppuccin`](https://github.com/catppuccin/nix) | Catppuccin boot splash |
-| [`nixcord`](https://github.com/kaylorben/nixcord) | GoofCord / Vencord |
+| [`nixcord`](https://github.com/kaylorben/nixcord) | GoofCord / Vesktop / Vencord |
 | [`spicetify-nix`](https://github.com/gerg-l/spicetify-nix) | Spotify theming |
 | [`zen-browser`](https://github.com/0xc000022070/zen-browser-flake) | Zen Browser |
 | [`helium`](https://github.com/schembriaiden/helium-browser-nix-flake) | Helium Browser |

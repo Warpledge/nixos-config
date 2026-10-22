@@ -143,7 +143,15 @@
 
     #--- Apps
     "Mod+Shift+S" = bind "Steam" {spawn = ["steam"];};
-    "Mod+Shift+D" = lib.mkIf user.discord.goofcord (bind "Discord" {spawn = ["goofcord"];});
+    "Mod+Shift+D" = lib.mkIf (user.discord.goofcord || user.discord.vesktop) (bind "Discord" {
+      spawn = [
+        (
+          if user.discord.vesktop
+          then "vesktop"
+          else "goofcord"
+        )
+      ];
+    });
     "Mod+Shift+H" = bind "Heroic" {spawn = ["heroic"];};
     "Mod+Shift+G" = lib.mkIf user.gaming.lutris (bind "Lutris" {spawn = ["lutris"];});
     "Mod+Shift+Y" = bind "FreeTube" {spawn = ["freetube"];};

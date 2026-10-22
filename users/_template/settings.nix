@@ -190,6 +190,8 @@
 
   #--- Discord: GoofCord (Vencord), built from source with its own Node.js (slow)
   discord.goofcord = false;
+  #--- Discord: Vesktop (Vencord), recolours live with the DMS theme (slow first build)
+  discord.vesktop = false;
 
   #--- Discord Rich Presence (arRPC)
   # Standalone arRPC server for Steam/Proton game detection in GoofCord

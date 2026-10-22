@@ -114,6 +114,6 @@ user: {lib, ...}: {
     ++ lib.optionals (user.claude.enable || user.opencode.enable) [./ai/mcp.nix]
     ++ lib.optionals (user.opencode.enable || (user.editors.zed && (user.llamaSwap.enable || user.claude.enable))) [./ai/agent-skills.nix]
     #--- Discord (controlled by user settings)
-    ++ lib.optionals user.discord.goofcord [./discord/discord.nix]
+    ++ lib.optionals (user.discord.goofcord || user.discord.vesktop) [./discord/discord.nix]
     ++ lib.optionals user.discord.arrpc.enable [./discord/arrpc.nix];
 }
