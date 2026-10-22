@@ -142,6 +142,7 @@
 
     #--- Catppuccin Custom
     base16Scheme = {
+      variant = "dark"; # templates read it; Zed rejects a theme without it
       # Default Background: Crust, not Mocha's Base (1e1e2e), so translucent
       # windows contrast with the wallpaper. Apps themed outside Stylix
       # read base00 for the same swap.
