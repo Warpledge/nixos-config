@@ -168,7 +168,7 @@
   llamaSwap = {enable = true;};
   openWebui = {enable = true;};
   localAi = {
-    code = ["qwen3.6-35b-a3b-q4" "ornith-1.5-35b-a3b"];
+    code = ["ornith-1.5-35b-a3b" "qwen3.6-35b-a3b-q4"];
     edit = "sweep-next-edit-1.5b";
     chat = ["gpt-oss-20b" "gemma-4-26b-a4b"];
   };
