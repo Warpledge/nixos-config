@@ -38,6 +38,11 @@
       (bookmark ".local/share" "Local")
       (bookmark ".local/share/Steam/steamapps/common" "Steam")
       (bookmark ".local/share/Terraria/tModLoader" "tModLoader")
+      {
+        path = "trash:///";
+        label = "Trash";
+        icon = "";
+      }
     ];
   });
 in {
