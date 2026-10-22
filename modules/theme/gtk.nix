@@ -9,7 +9,12 @@
 }: {
   #--- Every user on the machine
   home-manager.users =
-    lib.mapAttrs (_: _: {config, ...}: {
+    lib.mapAttrs (_: _: {config, ...}: let
+      css = ''
+        @import url("dank-colors.css");
+        @define-color accent_color @accent_bg_color;
+      '';
+    in {
       #--------------------------------------------------------------------#
       #-- Theme, Font and Icon Theme
       #--------------------------------------------------------------------#
@@ -22,8 +27,10 @@
           name = "adw-gtk3-dark";
         };
         gtk4.theme = config.gtk.theme; # as Stylix's gtk target set it
-        gtk3.extraCss = ''@import url("dank-colors.css");'';
-        gtk4.extraCss = ''@import url("dank-colors.css");'';
+        # DMS's file sets accent_bg_color only; apps reading accent_color
+        # (NixOS Settings) would get Adwaita's stock accent instead
+        gtk3.extraCss = css;
+        gtk4.extraCss = css;
         font = {
           inherit (config.stylix.fonts.sansSerif) package name;
           size = config.stylix.fonts.sizes.applications;
