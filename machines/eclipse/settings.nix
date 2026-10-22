@@ -21,6 +21,19 @@
       defaultApps.fileManager = "duxFiles";
       fileBrowsers.nautilus = false;
       fileBrowsers.yazi = false;
+      artcraft.photocraft = true;
+      artcraft.lightcraft = true;
+      artcraft.vectorcraft = true;
+      artcraft.designcraft = true;
+      artcraft.figcraft = true;
+      artcraft.effectcraft = true;
+      artcraft.filmcraft = true;
+      artcraft.soundcraft = true;
+      artcraft.cadcraft = true;
+      artcraft.pdfcraft = true;
+      artcraft.wordcraft = true;
+      artcraft.gridcraft = true;
+      artcraft.deckcraft = true;
     };
   };
 

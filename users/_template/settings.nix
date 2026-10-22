@@ -104,6 +104,24 @@
     affinity = false;
   };
 
+  #--- ArtCraft Apps
+  # Rust creative and office suite, wrapped from upstream's AppImages
+  artcraft = {
+    photocraft = false; # Layered photo editor (PSD)
+    lightcraft = false; # Non-destructive RAW editor
+    vectorcraft = false; # Vector art and SVG
+    designcraft = false; # Page layout and print design
+    figcraft = false; # Interface design and prototyping
+    effectcraft = false; # Motion graphics and compositing
+    filmcraft = false; # Nonlinear video editor
+    soundcraft = false; # Audio recording and editing
+    cadcraft = false; # CAD and drafting
+    pdfcraft = false; # PDF reader and editor
+    wordcraft = false; # Word processor
+    gridcraft = false; # Spreadsheet
+    deckcraft = false; # Presentations
+  };
+
   #--- Audio Software Selection
   # Enable the music and audio applications you want installed
   audio = {

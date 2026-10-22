@@ -11,6 +11,7 @@ restore step.
 | fee[dB]ack | `home/programs/gaming/games/feedback.nix` | 0.3.0-unstable-2026-07-23 | not in nixpkgs; upstream ships only AppImages |
 | Streamlink Twitch GUI | `home/programs/media/streamlink-twitch-gui.nix` | 2.5.3 | not in nixpkgs under any name, checked 2026-09-22 |
 | Boorusama | `home/programs/media/boorusama.nix` | 4.5.0 | not in nixpkgs, checked 2026-10-04 |
+| ArtCraft apps (13) | `home/programs/artcraft/<app>.nix`, built by `mk-app.nix` | per app, as of 2026-10-21 | not in nixpkgs (only `craft-fonts`), checked 2026-10-21 |
 
 ## The pattern
 
