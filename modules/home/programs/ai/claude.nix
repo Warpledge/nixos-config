@@ -47,6 +47,7 @@
         freetube-sync = ./skills/freetube-sync;
         game-troubleshooting = ./skills/game-troubleshooting;
         moku-bump = ./skills/moku-bump;
+        pr-review = ./skills/pr-review;
         rpgm-setup = ./skills/rpgm-setup;
         vn-setup = ./skills/vn-setup;
       };

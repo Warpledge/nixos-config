@@ -265,6 +265,7 @@ steps.
 | `vn-setup`, `rpgm-setup` | Upscaling a visual novel or RPG Maker game |
 | `moku-bump` | Updating or repairing Moku/Tsunagu |
 | `android-debloat-redo` | Tablet debloat after an OTA |
+| `pr-review` | Reviewing a pull request, or "the PRs" |
 | `flake-update` | Only when the user runs `/flake-update`; never on your own |
 
 - `<skill-dir>` is `modules/home/programs/ai/skills/<name>`.
