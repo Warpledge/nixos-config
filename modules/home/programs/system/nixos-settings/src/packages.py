@@ -190,6 +190,11 @@ class PackagesPage(Adw.PreferencesPage):
     def _row(self, attr):
         """A result row, and the function that fills it in once its details are read."""
         row = Adw.ExpanderRow(title=ui.esc(attr), subtitle="…", subtitle_lines=2)
+        # An expander packs suffixes right to left: install, then version, then copy
+        install = Gtk.Button(valign=Gtk.Align.CENTER)
+        install.connect("clicked", lambda _: self._install(attr))
+        row.add_suffix(install)
+        self.buttons[attr] = install
         version = Gtk.Label(css_classes=["dim-label", "numeric"], valign=Gtk.Align.CENTER, max_width_chars=16,
                             ellipsize=Pango.EllipsizeMode.END)
         row.add_suffix(version)
@@ -197,10 +202,6 @@ class PackagesPage(Adw.PreferencesPage):
                           tooltip_text="Copy the attribute name")
         copy.connect("clicked", lambda _: self._copy(attr))
         row.add_suffix(copy)
-        install = Gtk.Button(valign=Gtk.Align.CENTER)
-        install.connect("clicked", lambda _: self._install(attr))
-        row.add_suffix(install)
-        self.buttons[attr] = install
         self._mark_one(attr, install)
 
         def fill(info):
@@ -252,7 +253,7 @@ class UserPackagesPage(Adw.PreferencesPage):
         super().__init__()
         self.window = window
         self.rows = []
-        self.details = {}  # attr -> description, read once per page
+        self.details = {}  # attr -> (description, version), read once per page
         top = Adw.PreferencesGroup()
         top.add(ui.hero(ui.first_icon("package-x-generic-symbolic"), "User Packages",
                         "Packages you added from Search, installed as they come with no settings "
@@ -279,12 +280,16 @@ class UserPackagesPage(Adw.PreferencesPage):
             return
         for attr in names:
             where = state(self.window, attr)
-            row = Adw.ActionRow(title=ui.esc(attr), subtitle_lines=2,
-                                subtitle=ui.esc(self.details.get(attr, "")))
+            description, version = self.details.get(attr, ("", ""))
+            row = Adw.ActionRow(title=ui.esc(attr), subtitle_lines=2, subtitle=ui.esc(description))
             if where == "adding":
                 row.add_suffix(ui.chip("Installs on Apply", "accent"))
             elif where == "removing":
                 row.add_suffix(ui.chip("Removed on Apply", "warning"))
+            if version:
+                row.add_suffix(Gtk.Label(label=version, css_classes=["dim-label", "numeric"],
+                                         valign=Gtk.Align.CENTER, max_width_chars=16,
+                                         ellipsize=Pango.EllipsizeMode.END))
             if where == "removing":
                 button = Gtk.Button(label="Undo", valign=Gtk.Align.CENTER)
                 button.connect("clicked", lambda _, a=attr: self._undo(a))
@@ -296,7 +301,7 @@ class UserPackagesPage(Adw.PreferencesPage):
             self._add(row)
         missing = [a for a in names if a not in self.details]
         if missing and GLib.find_program_in_path(TOOL):
-            ui.run_async(lambda: {a: preview(a)["description"] for a in missing}, self._described)
+            ui.run_async(lambda: {a: preview(a) for a in missing}, self._described)
 
     def _add(self, row):
         self.group.add(row)
@@ -305,7 +310,7 @@ class UserPackagesPage(Adw.PreferencesPage):
     def _described(self, found, error):
         if error is not None:
             return
-        self.details.update({a: d or "No description" for a, d in found.items()})
+        self.details.update({a: (i["description"] or "No description", i["version"]) for a, i in found.items()})
         self._render()
 
     def _uninstall(self, attr):
