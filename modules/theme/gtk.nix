@@ -9,7 +9,11 @@
 }: {
   #--- Every user on the machine
   home-manager.users =
-    lib.mapAttrs (_: _: {config, ...}: let
+    lib.mapAttrs (_: _: {
+      config,
+      lib,
+      ...
+    }: let
       css = ''
         @import url("dank-colors.css");
         @define-color accent_color @accent_bg_color;
@@ -44,6 +48,23 @@
       xdg.dataFile = lib.genAttrs ["themes/adw-gtk3" "themes/adw-gtk3-dark"] (t: {
         source = "${pkgs.adw-gtk3}/share/${t}";
       });
+
+      #--- gtk.css as plain files: DMS only reloads GTK apps live when it can
+      #--- read dank-colors.css in gtk.css, and it reads a link's target path
+      xdg.configFile."gtk-3.0/gtk.css".enable = false;
+      xdg.configFile."gtk-4.0/gtk.css".enable = false;
+      home.activation.gtkCss = lib.hm.dag.entryAfter ["linkGeneration"] (
+        lib.concatMapStrings (v: let
+          src = config.xdg.configFile."gtk-${v}.0/gtk.css".source;
+          f = "${config.xdg.configHome}/gtk-${v}.0/gtk.css";
+        in ''
+          if [[ ! -v DRY_RUN ]]; then
+            mkdir -p "$(dirname "${f}")"
+            rm -f "${f}"
+            cp --no-preserve=mode ${src} "${f}"
+          fi
+        '') ["3" "4"]
+      );
 
       #--------------------------------------------------------------------#
       #-- Icon Theme Packages
