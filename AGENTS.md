@@ -7,8 +7,9 @@ is here. For the rest, `grep -n` CLAUDE.md for the section; don't read it whole.
 
 NixOS flake for two machines: **eclipse** (desktop, RX 9070 XT) and **legion**
 (laptop, hybrid AMD/NVIDIA). Nixpkgs unstable, home-manager, Niri WM, Dux Shell
-(formerly DankMaterialShell, still called DMS in the code), Stylix theming
-(Catppuccin Mocha). Run `hostname` before anything machine-specific.
+(formerly DankMaterialShell, still called DMS in the code), colours from DMS's
+matugen (default Catppuccin Mocha), fonts and cursor from Stylix. Run `hostname`
+before anything machine-specific.
 
 ## Rules
 
@@ -25,9 +26,14 @@ Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
    the task didn't ask you to remove, including comments, commented-out code and
    disabled options. Changing code under a comment? Update the comment, keep it.
 4. **Public repo.** No passwords, API keys, tokens or secrets.
-5. **Stylix owns theming.** Never set colours, fonts, font sizes, theme presets or
-   wallpaper in a module, including an app's own settings (`theme = "purple"`,
-   `fontWeight`). Leave them at the app's default or enable its Stylix target.
+5. **DMS's matugen owns colours; Stylix owns fonts and cursor.** Never set colours,
+   fonts, font sizes, theme presets or wallpaper in a module, including an app's
+   own settings (`theme = "purple"`, `fontWeight`). An app's colours come from a
+   matugen template (`matugen.templates` in `modules/theme/matugen.nix`, files in
+   `modules/theme/matugen/`) whose rendered file its config includes; that file
+   must stay a plain file, never a home-manager link. Fonts come from
+   `config.stylix.fonts`. Name a CSS template `.css.matugen`: its `{{ }}`
+   placeholders run Zed's biome out of memory.
 6. **Commits** use Conventional Commits, `type(scope): subject` plus a bullet body;
    load the `commit` skill. Commit without asking; never push, amend or rebase.
    **Commit once, when the task is finished and checked**, not after each edit,

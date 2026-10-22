@@ -47,10 +47,11 @@ Afterwards:
 
 ## Theming
 
-Two tools split the job:
+Colors change live from the shell, with no rebuild:
 
-- **[Stylix][stylix]:** It takes the color scheme, the fonts and the mouse cursor and pushes them into every program that it supports automatically.
-- **[catppuccin/nix][catppuccin-nix]:** Some programs have an official Catppuccin port written by the Catppuccin project. I typically use this as a higher priority than Stylix in most cases because Base16 can be a bit limiting compared to an official Catppuccin port.
+- **[Dux Shell][dms] + [matugen][matugen]:** Picking a theme in the shell's settings (a preset, a custom theme or the wallpaper's colors) runs matugen, which writes a color file for each app. Some apps get the shell's own templates (GTK, Qt, Kitty, Zed, niri's borders); the rest use templates kept in `modules/theme/matugen/`, made from the official Catppuccin ports. The default theme is Catppuccin Mocha Mauve.
+- **[Stylix][stylix]:** Only sets the fonts and the mouse cursor now.
+- **[catppuccin/nix][catppuccin-nix]:** Only themes the boot splash.
 
 ## System Management TUI Script
 
@@ -156,7 +157,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | **Window Manager** | [Niri][niri] |
 | **Status Bar / Notifier / Launcher / Lock** | [Dux Shell][dms] (formerly DankMaterialShell) |
 | **Display Manager** | [dux-greeter][dms-greeter] via [greetd][greetd] |
-| **Color Scheme** | [Catppuccin][catppuccin] Mocha Mauve applied globally via [Stylix][stylix] + [catppuccin/nix][catppuccin-nix] |
+| **Color Scheme** | Picked live in [Dux Shell][dms] and written to each app by [matugen][matugen]; [Catppuccin][catppuccin] Mocha Mauve by default |
 | **Fonts** | [JetBrains Mono Nerd Font][nerd-fonts], Monaspace, Roboto, Nerd Fonts Symbols |
 | **Window Switcher** | Niri's built-in recent-windows switcher |
 | **Scratchpad** | [nirius][nirius] (Niri only) |
@@ -189,7 +190,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | | |
 | --- | --- |
 | **Browsers** | [Zen][zen] / [Mullvad Browser][mullvad-browser] / [Helium][helium] |
-| **File Manager** | [Nautilus][nautilus] (with an open-in-Kitty menu entry from [nautilus-open-any-terminal][nautilus-open-any-terminal]), [Dolphin][dolphin] (optional, themed through Kvantum and the Catppuccin KDE colour scheme, with [Ark][ark] for archives), [Yazi][yazi] (terminal file manager), [Dux Files][dux-files] (standalone file manager from Dux Labs) |
+| **File Manager** | [Nautilus][nautilus] (with an open-in-Kitty menu entry from [nautilus-open-any-terminal][nautilus-open-any-terminal]), [Dolphin][dolphin] (optional, colored from the shell's theme, with [Ark][ark] for archives), [Yazi][yazi] (terminal file manager), [Dux Files][dux-files] (standalone file manager from Dux Labs) |
 | **Media Player** | [mpv][mpv], [Spotify][spotify] via [spicetify-nix][spicetify], [FreeTube][freetube] |
 | **Twitch** | [Streamlink Twitch GUI][streamlink-twitch-gui] browses Twitch and hands the stream to [Streamlink][streamlink], which plays it in mpv, so there are no ads and the follow list stays local with no Twitch account attached; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs |
 | **Screenshot / Recording** | [Quick Capture][quick-capture] (Niri), [gpu-screen-recorder][gpu-screen-recorder] |
@@ -264,6 +265,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 
 [niri]: https://github.com/YaLTeR/niri
 [dms]: https://github.com/duxlabs-dev/dux-shell
+[matugen]: https://github.com/InioX/matugen
 [dms-greeter]: https://github.com/duxlabs-dev/dux-greeter
 [greetd]: https://git.sr.ht/~kennylevinsen/greetd
 [catppuccin]: https://github.com/catppuccin/catppuccin
@@ -618,7 +620,7 @@ modules/
   ├── default.nix                 # NixOS + one home-manager config per user
   ├── nixos/                      # system modules
   ├── home/                       # user modules
-  ├── theme/                      # stylix, catppuccin, fonts, GTK, QT, DMS
+  ├── theme/                      # matugen templates, DMS theme, GTK, Qt, fonts
   └── wm/                         # window managers
 docs/                           # personal notes I share between devices
 ```
@@ -644,8 +646,8 @@ flake.nix
 | [`dms-plugin-registry`](https://github.com/duxlabs-dev/dux-plugin-registry) | Dux Shell plugins (Claude Code usage, Quick Capture, AMD GPU monitor, ClipBoard+, Wallpaper Carousel, Linux Wallpaper Engine) |
 | [`dux-files`](https://github.com/duxlabs-dev/dux-files) | Dux Files, standalone file manager from Dux Labs |
 | [`dux-greeter`](https://github.com/duxlabs-dev/dux-greeter) | Login screen that matches Dux Shell |
-| [`stylix`](https://github.com/nix-community/stylix) | System-wide theming |
-| [`catppuccin`](https://github.com/catppuccin/nix) | Catppuccin theme module |
+| [`stylix`](https://github.com/nix-community/stylix) | Fonts and cursor |
+| [`catppuccin`](https://github.com/catppuccin/nix) | Catppuccin boot splash |
 | [`nixcord`](https://github.com/kaylorben/nixcord) | GoofCord / Vencord |
 | [`spicetify-nix`](https://github.com/gerg-l/spicetify-nix) | Spotify theming |
 | [`zen-browser`](https://github.com/0xc000022070/zen-browser-flake) | Zen Browser |
