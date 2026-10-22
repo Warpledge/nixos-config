@@ -17,6 +17,7 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Adw, Gio, GLib, GObject, Gtk, Pango  # noqa: E402
 
+import appreset  # noqa: E402
 import backend  # noqa: E402
 import closure  # noqa: E402
 import dms  # noqa: E402
@@ -930,6 +931,10 @@ class Window(Adw.ApplicationWindow):
         if control is not None:
             # An expander packs suffixes right to left, so its control goes in first
             row.add_suffix(control)
+        if kind == "bool":
+            app_reset = appreset.button(self, s)
+            if app_reset is not None:
+                row.add_suffix(app_reset)
         if kind != "bool":
             reset = Gtk.Button(icon_name="edit-undo-symbolic", css_classes=["flat"], valign=Gtk.Align.CENTER,
                                visible=value != s.default,
