@@ -77,6 +77,35 @@ def load_css():
     if display is not None:
         Gtk.StyleContext.add_provider_for_display(display, provider,
                                                   Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        _follow_dms_colors(display)
+
+
+#--- GTK 4 reads gtk.css once at startup, so DMS's theme changes would wait for a
+#--- restart; reload the colours matugen writes whenever the file changes
+_dms_monitor = None
+
+
+def _follow_dms_colors(display):
+    global _dms_monitor
+    path = GLib.build_filenamev([GLib.get_user_config_dir(), "gtk-4.0", "dank-colors.css"])
+    provider = Gtk.CssProvider()
+
+    def reload(*_):
+        try:
+            with open(path) as f:
+                css = f.read()
+        except OSError:
+            return
+        # Same alias as theme/gtk.nix: DMS's file sets accent_bg_color only
+        provider.load_from_string(css + "\n@define-color accent_color @accent_bg_color;\n")
+
+    reload()
+    Gtk.StyleContext.add_provider_for_display(display, provider,
+                                              Gtk.STYLE_PROVIDER_PRIORITY_USER + 1)
+    _dms_monitor = Gio.File.new_for_path(path).monitor_file(Gio.FileMonitorFlags.WATCH_MOVES, None)
+    _dms_monitor.connect("changed", lambda _m, _f, _o, event: reload() if event in (
+        Gio.FileMonitorEvent.CHANGES_DONE_HINT, Gio.FileMonitorEvent.CREATED,
+        Gio.FileMonitorEvent.RENAMED, Gio.FileMonitorEvent.MOVED_IN) else None)
 
 
 #--------------------------------------------------------------------#
