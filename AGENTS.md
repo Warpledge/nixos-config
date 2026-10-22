@@ -53,6 +53,12 @@ Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
     CLAUDE.md or this file and let the user decide.
 11. **`rm` takes literal absolute paths**, one deletion per command, never `$VAR`.
 
+## Starting a task
+
+Any task with more than two steps, a read-only audit included, starts with a todo
+list made with the `todowrite` tool (not a file), one item per file or step. Tick
+items off as you go; after a compaction, it's where you pick up.
+
 ## Finishing a task
 
 A task that changed files isn't done until all four steps are. Put them on your
@@ -122,9 +128,8 @@ this, in thinking and in tool calls alike:
 128K tokens, about 27K of it taken by tool definitions. Long tasks get compacted
 and whatever only lived in context is lost.
 
-- **Start every multi-step task with a todo list** (`todowrite`), one item per file
-  or step. After a compaction, read the list and run
-  `git status --short && git diff --stat`; don't re-read files to catch up.
+- **After a compaction**, read the todo list (see **Starting a task**) and run
+  `git status --short && git diff --stat`. Re-read only what you'll quote.
 - **After a compaction, the summary is not a source.** Before quoting a value, a
   default or a `file:line` in your answer, re-read that line (`grep -n`) and quote
   what the file says. A file the summary names may not exist: check it.
