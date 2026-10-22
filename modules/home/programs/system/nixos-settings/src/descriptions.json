@@ -82,7 +82,7 @@
   "system.resources": {"summary": "System and process monitor", "icon": ["org.gnome.Resources.desktop", "utilities-system-monitor"], "text": "**Resources**, a system and process monitor: what's running and how much it uses."},
   "scrcpy.enable": {"title": "scrcpy", "summary": "Show and control an Android device", "icon": ["guiscrcpy", "scrcpy.desktop"], "text": "Show and control an **Android** phone or tablet from your computer, over USB or wifi. Nothing gets installed on the device."},
 
-  "gaming.steam": {"summary": "Steam with GE-Proton", "note": "Installed for everyone on this computer", "icon": ["steam", "com.valvesoftware.Steam"], "text": "**Steam**, with **GE-Proton** for running Windows games. Installed for everyone on the computer once any user turns it on."},
+  "gaming.steam": {"summary": "Steam", "note": "Installed for everyone on this computer", "icon": ["steam", "com.valvesoftware.Steam"], "text": "**Steam**, for running Windows games through Proton. Installed for everyone on the computer once any user turns it on."},
   "gaming.heroic": {"summary": "Epic, GOG and Amazon games", "icon": ["heroic", "com.heroicgameslauncher.hgl"], "text": "Launcher for your **Epic**, **GOG** and **Amazon** games."},
   "gaming.prismlauncher": {"summary": "Minecraft launcher", "icon": ["org.prismlauncher.PrismLauncher", "minecraft"], "text": "**Prism Launcher** keeps separate Minecraft installs, each with its own game version and mods."},
   "gaming.lutris": {"summary": "Games through Wine and emulators", "icon": ["lutris", "net.lutris.Lutris"], "text": "**Lutris** installs and runs games through Wine and emulators, with **Winetricks**, **cabextract** and **7-Zip** for installers that need them."},

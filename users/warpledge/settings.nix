@@ -133,7 +133,7 @@
   # Enable the game launchers, games and gaming tools you want installed
   gaming = {
     # Launchers
-    steam = true; # NixOS programs.steam + GE-Proton
+    steam = true; # NixOS programs.steam
     heroic = true; # Epic / GOG / Amazon
     prismlauncher = true; # Minecraft
     lutris = false; # Wine launcher

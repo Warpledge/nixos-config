@@ -20,9 +20,6 @@
       dedicatedServer.openFirewall = false;
       extest.enable = true; # Enable Wayland input support (critical)
       protontricks.enable = true; # Protontricks for Proton prefix management
-      extraCompatPackages = [
-        pkgs.proton-ge-bin # GE-Proton (improved game compatibility)
-      ];
       extraPackages = with pkgs; [
         config.programs.gamescope.package # Gamescope (patched, tools/gamescope)
         pipewire # Audio server
