@@ -22,8 +22,8 @@
       dir = "unsloth/Qwen3.6-35B-A3B-GGUF";
       match = "*UD-Q4_K_XL*.gguf";
       context = 131072;
-      # Experts of 18 layers from RAM (24 measured ~89% VRAM, 38 tok/s). The
-      # reasoning budget cuts a thinking loop off; the message is Qwen's own
+      # Experts of 18 layers from RAM: measured 80-85% VRAM with other apps open.
+      # The reasoning budget cuts a thinking loop off; the message is Qwen's own
       args = [
         "-ngl 99"
         "--load-mode none"
