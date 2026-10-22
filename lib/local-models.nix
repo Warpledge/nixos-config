@@ -18,7 +18,7 @@
   code = {
     #--- MoE, 3B active; 10 of its 40 layers keep a KV cache, so 128K is ~1.4GB
     "qwen3.6-35b-a3b" = {
-      name = "Qwen3.6 35B A3B";
+      name = "Qwen3.6 35B A3B (Q3)";
       dir = "unsloth/Qwen3.6-35B-A3B-GGUF";
       match = "*UD-Q3_K_XL*.gguf";
       context = 131072;

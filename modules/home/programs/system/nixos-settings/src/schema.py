@@ -142,7 +142,7 @@ PAGE_INTROS = {
               "(~21 GB)\n"
               "2. **Ornith 1.5 35B A3B**: ornith-ai/Ornith-1.5-35B-A3B-GGUF, the Q4_K_M file "
               "(~23 GB)\n"
-              "3. **Qwen3.6 35B A3B**: unsloth/Qwen3.6-35B-A3B-GGUF, the UD-Q3_K_XL file (~17 GB)\n\n"
+              "3. **Qwen3.6 35B A3B (Q3)**: unsloth/Qwen3.6-35B-A3B-GGUF, the UD-Q3_K_XL file (~17 GB)\n\n"
               "Chat\n"
               "4. **gpt-oss 20B**: ggml-org/gpt-oss-20b-GGUF (~13 GB)\n"
               "5. **Gemma 4 26B A4B**: unsloth/gemma-4-26B-A4B-it-qat-GGUF, the UD-Q4_K_XL file "
