@@ -190,7 +190,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | | |
 | --- | --- |
 | **Browsers** | [Zen][zen] / [Mullvad Browser][mullvad-browser] / [Helium][helium] |
-| **File Manager** | [Nautilus][nautilus] (with an open-in-Kitty menu entry from [nautilus-open-any-terminal][nautilus-open-any-terminal]), [Dolphin][dolphin] (optional, colored from the shell's theme, with [Ark][ark] for archives), [Yazi][yazi] (terminal file manager), [Dux Files][dux-files] (standalone file manager from Dux Labs) |
+| **File Manager** | [Nautilus][nautilus] (with an open-in-Kitty menu entry from [nautilus-open-any-terminal][nautilus-open-any-terminal]), [Dolphin][dolphin] (optional, colored from the shell's theme, with [Ark][ark] for archives and a Convert Media menu entry using [FFmpeg][ffmpeg]), [Yazi][yazi] (terminal file manager), [Dux Files][dux-files] (standalone file manager from Dux Labs) |
 | **Media Player** | [mpv][mpv], [Spotify][spotify] via [spicetify-nix][spicetify], [FreeTube][freetube] |
 | **Twitch** | [Streamlink Twitch GUI][streamlink-twitch-gui] browses Twitch and hands the stream to [Streamlink][streamlink], which plays it in mpv, so there are no ads and the follow list stays local with no Twitch account attached; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs |
 | **Screenshot / Recording** | [Quick Capture][quick-capture] (Niri), [gpu-screen-recorder][gpu-screen-recorder] |
@@ -295,6 +295,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 [helium]: https://github.com/schembriaiden/helium-browser-nix-flake
 [ark]: https://invent.kde.org/utilities/ark
 [dolphin]: https://invent.kde.org/system/dolphin
+[ffmpeg]: https://www.ffmpeg.org/
 [nautilus]: https://apps.gnome.org/Nautilus
 [nautilus-open-any-terminal]: https://github.com/Stunkymonkey/nautilus-open-any-terminal
 [mpv]: https://mpv.io
