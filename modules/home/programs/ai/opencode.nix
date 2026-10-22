@@ -21,14 +21,20 @@
       enableMcpIntegration = true;
       settings.share = "disabled"; # No /share uploads to opencode.ai
       tui.theme = "dank"; # written by DMS's matugen (theme/matugen.nix)
-      #--- OpenCode Zen's free models whose provider keeps no data and doesn't train
-      #--- on it (opencode.ai/docs/zen); the rest are hidden
-      settings.provider.opencode.whitelist = [
-        "deepseek-v4.1-flash-free"
-        "glm-5.3-flash-free"
-        "longcat-2.5-preview-free"
-        "jev-1.13-free"
-      ];
+      #--- Hides OpenCode Zen's free models that keep or train on prompts
+      #--- (opencode.ai/docs/zen). v2 ignores `whitelist`; "deprecated" becomes v2's
+      #--- `disabled`, so a free model added later shows until it's listed here
+      settings.provider.opencode.models = lib.genAttrs [
+        "big-pickle"
+        "beam-free"
+        "flint-40b-free"
+        "mimo-v2.6-flash-free"
+        "mimo-v2.5-free"
+        "exo-free"
+        "nemotron-3-ultra-free"
+        "nemotron-3.5-lightning-free"
+        "nemotron-3.5-super-vl-free"
+      ] (_: {status = "deprecated";});
       #--- Ask before touching paths outside the project (v1's default; v2 allows),
       #--- except /tmp, where local models keep scratch notes. The last match wins
       settings.permissions = [
