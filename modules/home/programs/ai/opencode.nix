@@ -23,7 +23,12 @@
       tui.theme = "dank"; # written by DMS's matugen (theme/matugen.nix)
       #--- OpenCode Zen's free models whose provider keeps no data and doesn't train
       #--- on it (opencode.ai/docs/zen); the rest are hidden
-      settings.provider.opencode.whitelist = ["deepseek-v4.1-flash-free" "glm-5.3-flash-free"];
+      settings.provider.opencode.whitelist = [
+        "deepseek-v4.1-flash-free"
+        "glm-5.3-flash-free"
+        "longcat-2.5-preview-free"
+        "jev-1.13-free"
+      ];
       #--- Ask before touching paths outside the project (v1's default; v2 allows)
       settings.permissions = [
         {
