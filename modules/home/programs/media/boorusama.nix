@@ -33,6 +33,15 @@
       pkgs.mpv-unwrapped
     ];
 
+    #--- Streaming only: home and the game drives are read-only, so a download
+    #--- fails; the vault mount (data and cache) stays writable
+    extraBwrapArgs = [
+      "--ro-bind /home /home"
+      "--ro-bind-try /mnt /mnt"
+      "--ro-bind-try /run/media /run/media"
+      ''--bind "$HOME/.local/share/boorusama-open" "$HOME/.local/share/boorusama-open"''
+    ];
+
     #--- Desktop entry already carries bare Exec and Icon names
     extraInstallCommands = ''
       install -Dm444 ${contents}/${pname}.desktop -t $out/share/applications
