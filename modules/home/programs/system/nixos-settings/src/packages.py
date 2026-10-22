@@ -12,7 +12,7 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gdk, GLib, Gtk, Pango  # noqa: E402
+from gi.repository import Adw, Gdk, GLib, Gtk  # noqa: E402
 
 import ui  # noqa: E402
 
@@ -20,7 +20,7 @@ TOOL = "nix-search-tv"
 PREFIX = "nixpkgs/ "  # print also lists Home Manager, NixOS and NUR entries
 SHOWN = 50  # results listed at once
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
-TITLE = re.compile(r"^(\S+) \((.*)\)$")
+TITLE = re.compile(r"^(\S+) \(([^)]*)\)(.*)$")  # "name (version)", then "(broken)" if so
 
 
 def names():
@@ -35,13 +35,14 @@ def preview(attr):
     out = subprocess.run([TOOL, "preview", PREFIX + attr], capture_output=True, text=True, timeout=30)
     blocks = [b.splitlines() for b in ANSI.sub("", out.stdout).strip().split("\n\n") if b.strip()]
     info = {"version": "", "description": "", "about": "", "homepage": [], "licenses": [],
-            "unfree": False, "program": ""}
+            "unfree": False, "broken": False, "program": ""}
     if not blocks:
         return info
     head = blocks[0]
     m = TITLE.match(head[0].strip())
     if m:
         info["version"] = m.group(2)
+        info["broken"] = "broken" in m.group(3)
     info["description"] = " ".join(l.strip() for l in head[1:])
     for block in blocks[1:]:
         title, values = block[0].strip(), [l.strip() for l in block[1:] if l.strip()]
@@ -195,8 +196,7 @@ class PackagesPage(Adw.PreferencesPage):
         install.connect("clicked", lambda _: self._install(attr))
         row.add_suffix(install)
         self.buttons[attr] = install
-        version = Gtk.Label(css_classes=["dim-label", "numeric"], valign=Gtk.Align.CENTER, max_width_chars=16,
-                            ellipsize=Pango.EllipsizeMode.END)
+        version = Gtk.Label(css_classes=["dim-label", "numeric"], valign=Gtk.Align.CENTER)
         row.add_suffix(version)
         copy = Gtk.Button(icon_name="edit-copy-symbolic", css_classes=["flat"], valign=Gtk.Align.CENTER,
                           tooltip_text="Copy the attribute name")
@@ -207,6 +207,8 @@ class PackagesPage(Adw.PreferencesPage):
         def fill(info):
             row.set_subtitle(ui.esc(info["description"] or "No description"))
             version.set_label(info["version"])
+            if info["broken"]:
+                row.add_suffix(ui.chip("Broken", "error", "nixpkgs marks it broken, so it may not build"))
             for home in info["homepage"]:
                 link = Adw.ActionRow(title="Homepage", subtitle=ui.esc(home), activatable=True)
                 link.add_suffix(Gtk.Image(icon_name=ui.link_icon(), valign=Gtk.Align.CENTER))
@@ -288,8 +290,7 @@ class UserPackagesPage(Adw.PreferencesPage):
                 row.add_suffix(ui.chip("Removed on Apply", "warning"))
             if version:
                 row.add_suffix(Gtk.Label(label=version, css_classes=["dim-label", "numeric"],
-                                         valign=Gtk.Align.CENTER, max_width_chars=16,
-                                         ellipsize=Pango.EllipsizeMode.END))
+                                         valign=Gtk.Align.CENTER))
             if where == "removing":
                 button = Gtk.Button(label="Undo", valign=Gtk.Align.CENTER)
                 button.connect("clicked", lambda _, a=attr: self._undo(a))
