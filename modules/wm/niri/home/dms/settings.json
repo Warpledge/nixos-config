@@ -141,6 +141,7 @@
   "matugenTemplateNeovim": true,
   "matugenTemplateNiri": false,
   "matugenTemplateZenBrowser": false,
+  "matugenTemplateQt5ct": false,
   "notificationOverlayEnabled": true,
   "osdPowerProfileEnabled": true,
   "osdWorkspaceEnabled": true,

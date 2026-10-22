@@ -22,6 +22,11 @@
               type = lib.types.str;
               description = "Absolute path matugen writes; nothing else may own it.";
             };
+            postHook = lib.mkOption {
+              type = lib.types.nullOr lib.types.str;
+              default = null;
+              description = "Shell command matugen runs after writing the output.";
+            };
           };
         });
         default = {};
@@ -84,6 +89,7 @@
             [templates.repo-${name}]
             input_path = '${t.input}'
             output_path = '${t.output}'
+            ${lib.optionalString (t.postHook != null) "post_hook = '${t.postHook}'"}
 
           '')
           config.matugen.templates);

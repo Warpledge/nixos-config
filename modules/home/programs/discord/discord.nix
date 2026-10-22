@@ -7,13 +7,17 @@
   inputs,
   ...
 }: let
-  #--- Upstream's Catppuccin Discord theme, fixed (DMS has no GoofCord template)
-  catppuccinTheme = "catppuccin-mocha-mauve.theme";
-  # Stylix's base00 in place of the theme's Base (modules/theme/stylix.nix)
-  base = config.lib.stylix.colors.withHashtag.base00;
   inherit (config.lib.stylix.colors) base00-rgb-r base00-rgb-g base00-rgb-b;
 in {
   imports = [inputs.nixcord.homeModules.nixcord];
+
+  #--- GoofCord loads assets/Themes.css at start: DMS's Discord template fills it on
+  #--- each theme change (theme/matugen.nix) instead of nixcord's copy
+  home.file."${config.xdg.configHome}/goofcord/GoofCord/assets/Themes.css".enable = false;
+  matugen.templates.goofcord = {
+    input = "${inputs.dms}/quickshell/matugen/templates/vesktop.css";
+    output = "${config.xdg.configHome}/goofcord/GoofCord/assets/Themes.css";
+  };
 
   #--------------------------------------------------------------------#
   #-- Settings
@@ -59,25 +63,6 @@ in {
     };
     config = {
       frameless = true; # set some Vencord options
-      #--- Stylix's nixcord target skips GoofCord: load Catppuccin's upstream theme
-      themes.${catppuccinTheme} = ''
-        @import url("https://catppuccin.github.io/discord/dist/${catppuccinTheme}.css");
-
-        .visual-refresh.theme-dark,
-        .visual-refresh .theme-dark {
-          --background-secondary-alt: ${base} !important;
-          --background-surface-high: ${base} !important;
-          --background-base-low: ${base} !important;
-          --background-gradient-highest: ${base} !important;
-          --home-background: ${base} !important;
-          --chat-background: ${base} !important;
-          --chat-background-default: ${base} !important;
-          --modal-background: ${base} !important;
-          --modal-footer-background: ${base} !important;
-          --background-code: ${base} !important;
-        }
-      '';
-      enabledThemes = ["${catppuccinTheme}.css"];
       plugins = {
         biggerStreamPreview.enable = true;
         fakeNitro.enable = true;
