@@ -114,8 +114,6 @@ in {
     model = "llama-swap/${defaultId}";
     # Session titles and summaries: thinking there only delays the first reply
     small_model = "llama-swap/${defaultId}${lib.optionalString defaultFast "-instruct"}";
-    # Compacts at ~89K of the 131K window; Qwen3.6 starts looping past ~70% full
-    compaction.buffer = 42000;
     provider.llama-swap = {
       npm = "@ai-sdk/openai-compatible";
       name = "llama-swap (local)";
