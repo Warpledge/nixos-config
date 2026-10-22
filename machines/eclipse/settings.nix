@@ -23,7 +23,7 @@
       fileBrowsers.yazi = false;
       userPackages = [];
       claudeDesktop.enable = false;
-      localAi.code = ["ornith-1.5-35b-a3b" "qwen3.6-35b-a3b-q4"];
+      localAi.code = ["ornith-1.5-35b-a3b"];
       artcraft.photocraft = true;
       artcraft.lightcraft = true;
       artcraft.vectorcraft = true;
