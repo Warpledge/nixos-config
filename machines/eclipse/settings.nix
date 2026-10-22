@@ -37,6 +37,8 @@
       artcraft.wordcraft = true;
       artcraft.gridcraft = true;
       artcraft.deckcraft = true;
+      discord.vesktop = true;
+      discord.goofcord = false;
     };
   };
 
