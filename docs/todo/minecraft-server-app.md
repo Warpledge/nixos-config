@@ -1,19 +1,19 @@
 # Dedicated Minecraft server app
 
-**Goal:** a standalone app with its own interface for running the modded servers on the laptop, instead of the small Servers page in NixOS Settings.
+**Goal:** a standalone app with its own interface for running the modded servers on the laptop.
 
 Added 2026-10-21. Future project, nothing started.
 
 ## Why
 
-The Servers page only shows status and offers stop, console and log, which is enough for now. A separate app makes sense once the server needs more than that, and keeps NixOS Settings about settings. The other route is a custom interface on the Servers tab itself; either way, the pack docs come off the server page and the TerraFirmaGreg server is dropped for now.
+NixOS Settings' Servers tab (status, stop, console and log) was removed on 2026-10-21 to keep that app about settings, so the servers are run from a terminal for now. The first version leaves out the TerraFirmaGreg server.
 
 ## What's already in the repo
 
 - `machines/legion/minecraft-servers/{gtnh-server,tfg-server}.nix` write a `gtnh` and a `tfg` command each. With no argument it starts the server in a detached tmux session (`tmux new-session -d`) and attaches; `status`, `stop` and `log` do the rest. Stop sends `/stop` to the session.
-- Each server file writes `~/.config/nixos-settings/servers/<name>.json`, which `modules/home/programs/system/nixos-settings/src/servers.py` reads to list it. A new app can read the same files.
+- The removed Servers page (`src/servers.py`, git history before 2026-10-21) listed the servers from a JSON file each server module wrote, and called the same commands.
 - `mcservers.nix` is the fzf picker over the hardcoded pack list.
-- The server keeps running after NixOS Settings, the terminal or the session closes, since tmux holds it and nothing sets `KillUserProcesses`. Nothing starts it again after a reboot or a crash.
+- The server keeps running after the terminal or the session closes, since tmux holds it and nothing sets `KillUserProcesses`. Nothing starts it again after a reboot or a crash.
 
 ## What it could have
 
@@ -26,7 +26,6 @@ The Servers page only shows status and offers stop, console and log, which is en
 
 ## Steps left
 
-1. Decide between a separate app and a custom interface on the Servers tab.
-2. Consider moving each server to a systemd service first, with tmux kept for the console, so it starts at boot and restarts after a crash. Either interface would then read the service's state.
-3. Pick the toolkit (GTK4/libadwaita in Python like NixOS Settings, or something else) and how it reaches the console: tmux `capture-pane`/`send-keys`, or RCON.
-4. Package it as a home module for the legion machine, gated the way `minecraft-servers/` is.
+1. Consider moving each server to a systemd service first, with tmux kept for the console, so it starts at boot and restarts after a crash. The app would then read the service's state.
+2. Pick the toolkit (GTK4/libadwaita in Python like NixOS Settings, or something else) and how it reaches the console: tmux `capture-pane`/`send-keys`, or RCON.
+3. Package it as a home module for the legion machine, gated the way `minecraft-servers/` is.

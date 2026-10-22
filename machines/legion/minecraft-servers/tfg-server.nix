@@ -20,11 +20,7 @@
 #-   cd ~/Documents/Minecraft_Servers/TerraFirmaGreg-Modern-0.12.5
 #-   java -jar minecraft_server.jar nogui   # installs Forge, then exit
 #-   echo "eula=true" > eula.txt
-{
-  pkgs,
-  lib,
-  ...
-}: let
+{pkgs, ...}: let
   serverDir = "$HOME/Documents/Minecraft_Servers/TerraFirmaGreg-Modern-0.12.5";
   sessionName = "terrafirmagreg-modern";
 
@@ -142,13 +138,4 @@
     '';
 in {
   home.packages = [tfg-server];
-
-  #--- Lists the server on NixOS Settings' Servers tab
-  xdg.configFile."nixos-settings/servers/tfg.json".text = builtins.toJSON {
-    name = "TerraFirmaGreg Modern";
-    version = "0.12.5";
-    command = "tfg";
-    folder = lib.removePrefix "$HOME/" serverDir;
-    docs = "TerraFirmaGreg-Modern";
-  };
 }

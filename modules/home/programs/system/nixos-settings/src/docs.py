@@ -1,6 +1,5 @@
 """The notes under the repo's docs/gaming/, shown as pages: one per game note
-on the Docs tab, and the Minecraft modpack notes (docs/gaming/minecraft_servers/
-<pack>/) on the Servers tab. A small Markdown reader covers what the notes use:
+on the Docs tab. A small Markdown reader covers what the notes use:
 headings, paragraphs, lists, quotes, tables, code blocks and inline marks."""
 
 import os
@@ -16,7 +15,6 @@ from gi.repository import Adw, Gio, GLib, Gtk, Pango  # noqa: E402
 import ui  # noqa: E402
 
 GAMES = os.path.join("docs", "gaming")
-PACKS = os.path.join(GAMES, "minecraft_servers")
 
 FENCE = re.compile(r"^\s*(```|~~~)")
 HEADING = re.compile(r"^(#{1,6})\s+(.*?)\s*#*\s*$")
@@ -59,33 +57,6 @@ def _docs(folder, key_prefix):
 def game_docs(flake):
     """[Doc] for docs/gaming/*.md, by title."""
     return sorted(_docs(os.path.join(flake, GAMES), "doc:games/"), key=lambda d: d.title.lower())
-
-
-def packs(flake):
-    """[(pack title, [Doc])] for each modpack folder: its index first, as Overview."""
-    root = os.path.join(flake, PACKS)
-    try:
-        folders = sorted(d for d in os.listdir(root) if os.path.isdir(os.path.join(root, d)))
-    except OSError:
-        return []
-    out = []
-    for folder in folders:
-        docs = _docs(os.path.join(root, folder), f"doc:packs/{folder}/")
-        if not docs:
-            continue
-        index = next((d for d in docs if d.path.endswith("/index.md")), None)
-        title = re.sub(r"\s+Notes$", "", index.title) if index else folder
-        rest = []
-        for d in docs:
-            if d is index:
-                continue
-            # "Mods — TerraFirmaGreg-Modern" is just "Mods" under its pack
-            d.title = re.sub(rf"\s+[—-]\s+{re.escape(title)}$", "", d.title)
-            rest.append(d)
-        if index:
-            index.title = "Overview"
-        out.append((title, ([index] if index else []) + sorted(rest, key=lambda d: d.title.lower())))
-    return out
 
 
 SIDEBAR_CHARS = 22  # what fits the sidebar's narrowest width without cutting off

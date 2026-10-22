@@ -34,7 +34,6 @@ from overview import Overview, ShellPage  # noqa: E402
 from packages import PackagesPage, UserPackagesPage  # noqa: E402
 from people import PeoplePage  # noqa: E402
 from proton import ProtonPage, ProtonVersionsPage  # noqa: E402
-from servers import ServersPage  # noqa: E402
 from runview import RunView, fill_diff  # noqa: E402
 from windowrules import WindowRulesPage  # noqa: E402
 
@@ -49,12 +48,11 @@ OWNED = {"Cursor Theme": "cursor", "Cursor Size": "cursorSize", "Icon Theme": ""
          "Dark Mode Icon Theme": "", "Light Mode Icon Theme": "", "Normal Font": "", "Monospace Font": ""}
 
 #--- The master tabs across the top of the window, each with its own sidebar
-TABS = [("main", "Main"), ("packages", "Packages"), ("niri", "Niri"), ("ai", "AI"), ("servers", "Servers"), ("docs", "Docs")]
+TABS = [("main", "Main"), ("packages", "Packages"), ("niri", "Niri"), ("ai", "AI"), ("docs", "Docs")]
 TAB_ICONS = {"main": ("go-home-symbolic", "user-home-symbolic"),
              "packages": ("package-x-generic-symbolic", "system-software-install-symbolic"),
              "niri": ("view-grid-symbolic", "view-app-grid-symbolic"),
              "ai": ("applications-science-symbolic", "starred-symbolic"),
-             "servers": ("network-server-symbolic",),
              "docs": ("accessories-dictionary-symbolic", "help-browser-symbolic")}
 
 #--- Each tab's pages above its sidebar sections: key, title and icons to try.
@@ -68,7 +66,6 @@ TOP = {"main": [("overview", "Overview", ("computer-symbolic",)),
                 ("windowrules", "Window Rules",
                  ("window-new-symbolic", "preferences-system-windows-symbolic"))],
        "ai": [],
-       "servers": [("minecraft", "Minecraft", ("network-server-symbolic",))],
        "docs": []}
 
 #--- Docs tab sections ahead of the game notes: (title, [(key, title, icons)])
@@ -482,7 +479,6 @@ class Window(Adw.ApplicationWindow):
                   "people": lambda: PeoplePage(self),
                   "shell": lambda: ShellPage(self, self.links),
                   "windowrules": lambda: WindowRulesPage(self),
-                  "minecraft": lambda: ServersPage(self),
                   "proton": lambda: ProtonPage(self),
                   "protonversions": lambda: ProtonVersionsPage(self)}
         tops = {}
@@ -544,10 +540,8 @@ class Window(Adw.ApplicationWindow):
             self._packages_changed(self.user_packages())
             self.sidebars["packages"].append(section)
 
-        #--- Servers: each modpack's notes; Docs: Proton, then the game notes
-        doc_sections = [("servers", title, pack, "text-x-generic-symbolic")
-                        for title, pack in docs.packs(self.cfg.flake)]
-        doc_sections.append(("docs", "Games", docs.game_docs(self.cfg.flake), "input-gaming-symbolic"))
+        #--- Docs: Proton, then the game notes
+        doc_sections = [("docs", "Games", docs.game_docs(self.cfg.flake), "input-gaming-symbolic")]
         for title, items in DOCS_SECTIONS:
             section = Adw.SidebarSection(title=title)
             for key, item_title, icons in items:
