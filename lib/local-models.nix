@@ -15,6 +15,7 @@
   #--- parameters llama-swap forces on <name> and its <name>-instruct and <name>-chat
   #--- aliases, so all three share one loaded model
   #--- --load-mode none: experts in RAM read into memory, not paged in from the file
+  #--- `cache`, optional: the KV cache type in place of q8_0
   code = {
     #--- MoE, 3B active; 10 of its 40 layers keep a KV cache, so 128K is ~1.4GB
     "qwen3.6-35b-a3b-q4" = {
@@ -22,12 +23,15 @@
       dir = "unsloth/Qwen3.6-35B-A3B-GGUF";
       match = "*UD-Q4_K_XL*.gguf";
       context = 131072;
-      # Experts of 18 layers from RAM: measured 80-85% VRAM with other apps open.
-      # The reasoning budget cuts a thinking loop off; the message is Qwen's own
+      # f16 cache: q8_0's error weighs more with only 10 KV layers at long context
+      cache = "f16";
+      # Experts of 22 layers from RAM, to make room for the f16 cache (18 with q8_0
+      # reached 98% VRAM). The reasoning budget cuts a thinking loop off; the
+      # message is Qwen's own
       args = [
         "-ngl 99"
         "--load-mode none"
-        "--n-cpu-moe 18"
+        "--n-cpu-moe 22"
         "-ub 2048"
         "--top-k 20"
         "--min-p 0"
@@ -62,8 +66,18 @@
       dir = "ornith-ai/Ornith-1.5-35B-A3B-GGUF";
       match = "*Q4_K_M*.gguf";
       context = 131072;
-      # ~0.5GB per layer's experts: 23 in RAM, ~15.3GB (26 measured 13.9GB, 35 tok/s)
-      args = ["-ngl 99" "--load-mode none" "--n-cpu-moe 23" "-ub 2048" "--top-k 20" "--min-p 0"];
+      # ~0.5GB per layer's experts: 23 in RAM, ~15.3GB (26 measured 13.9GB, 35 tok/s).
+      # Same reasoning budget and message as Qwen3.6
+      args = [
+        "-ngl 99"
+        "--load-mode none"
+        "--n-cpu-moe 23"
+        "-ub 2048"
+        "--top-k 20"
+        "--min-p 0"
+        "--reasoning-budget 8192"
+        "--reasoning-budget-message 'Considering the limited time by the user, I have to give the solution based on the thinking directly now.'"
+      ];
       # The model card's coding sampling
       think = {
         temperature = 0.6;

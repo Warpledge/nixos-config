@@ -36,14 +36,15 @@
   '';
   cmd = model: args: lib.concatStringsSep " " ([launch "'${model.dir}'" "'${model.match}'" "--port \${PORT}"] ++ args);
 
-  #--- A coding or chat model. One slot gets the whole context; q8_0 cache halves
-  #--- its VRAM. Each ID gets its variant's sampling over whatever the client sent;
+  #--- A coding or chat model. One slot gets the whole context; a q8_0 cache halves
+  #--- its VRAM unless the model sets `cache`. Each ID gets its variant's sampling over
+  #--- whatever the client sent;
   #--- the -instruct and -chat keys also register as aliases, so they need no reload
   serve = id: model: {
     ${id} = {
       ttl = 600;
       cmd =
-        cmd model (["-c ${toString model.context}" "-np 1" "-fa on" "-ctk q8_0" "-ctv q8_0" "--no-webui"]
+        cmd model (["-c ${toString model.context}" "-np 1" "-fa on" "-ctk ${model.cache or "q8_0"}" "-ctv ${model.cache or "q8_0"}" "--no-webui"]
           ++ model.args);
       filters.setParamsByID =
         {${id} = model.think;}
@@ -113,6 +114,8 @@ in {
     model = "llama-swap/${defaultId}";
     # Session titles and summaries: thinking there only delays the first reply
     small_model = "llama-swap/${defaultId}${lib.optionalString defaultFast "-instruct"}";
+    # Compacts at ~89K of the 131K window; Qwen3.6 starts looping past ~70% full
+    compaction.buffer = 42000;
     provider.llama-swap = {
       npm = "@ai-sdk/openai-compatible";
       name = "llama-swap (local)";
