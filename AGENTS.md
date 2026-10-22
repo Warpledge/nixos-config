@@ -56,8 +56,9 @@ Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
 ## Starting a task
 
 Any task with more than two steps, a read-only audit included, starts with a todo
-list made with the `todowrite` tool (not a file), one item per file or step. Tick
-items off as you go; after a compaction, it's where you pick up.
+list made with the `todowrite` tool (or a file in `/tmp` without it), one item per
+step, not per file. Tick items off as you go; after a compaction, it's where you
+pick up. Read the files a step needs together, several `read` calls in one turn.
 
 ## Finishing a task
 
@@ -141,7 +142,8 @@ and whatever only lived in context is lost.
 - **Trim output at the source**: `| tail -n 30`, `| grep`. Never print a store
   listing, a derivation or a full build log.
 - **Small edits**: the shortest unique `oldString`. Finish one file before the next.
-- **Batch** independent shell commands into one call.
+- **Batch** independent shell commands into one call, and independent file reads
+  into one turn.
 - When asked "where are we?", give a short status (done, blocked, next) and wait.
 
 ## Where things go
