@@ -24,6 +24,8 @@ Stylix stays the theming engine; each preset is a base16 scheme picked from NixO
 - Write each preset so `base0E` is its accent: GTK, DMS and Kvantum already read the accent from that slot.
 - Make it a machine setting first; the login screen and system targets are per machine.
 - matugen (below) can generate a preset from one seed colour, such as Studio's `#8b7cf6`, converted to base16.
+- Stylix's Zed theme (tinted-zed's base16 template) was tried on 2026-10-22 and reverted: close to the Catppuccin extension, but no selected-row highlight and flatter sidebar text. Zed skips it unless the scheme sets `variant = "dark"` (otherwise `"appearance": "unspecified"`). Apps like Zed could take a hand-made theme named in the preset, falling back to the palette. Writing presets in Catppuccin's 26-colour layout and filling Catppuccin's port templates would give any preset the upstream ports' depth.
+- [librephoenix/nixos-config](https://github.com/librephoenix/nixos-config/tree/main/modules/themes) does this with about 60 Stylix themes, each a Nix attrset (base16 colours, polarity, wallpaper URL and hash), picked by a setting. Its themes don't keep the accent in `base0E`.
 
 1. **Decide the preset mechanism.** For example a machine or user setting (`theme = "catppuccin-mocha"`) read in `stylix.nix`, with each preset a `base16-schemes` name or a scheme file in `modules/theme/`. A new setting goes in the `_template` file and gets a `descriptions.json` entry so NixOS Settings shows it as a dropdown.
 2. **Handle catppuccin/nix.** Either turn its ports off for non-Catppuccin presets and let Stylix targets cover those apps, or keep it only for the Catppuccin preset. Check which apps lose theming when it's off.
@@ -41,16 +43,31 @@ Coverage, from the template list in DMS's `core/internal/matugen/matugen.go` (pi
 | --- | --- |
 | DMS template | GTK, qt5ct/qt6ct, kcolorscheme (Dolphin), niri, fcitx5, Zen, Kitty, Ghostty, Zed, VS Code, Neovim, Vesktop/Vencord/Equibop |
 | No template | Helix, yazi, bat, btop, starship, eza, delta, atuin, tmux, micro, fzf, FreeTube, Spotify, mpv, GoofCord, opencode, Open WebUI, Kvantum, Papirus folders |
-| Can't be live | Fonts, cursor, TTY console, GRUB/limine, Plymouth, login screen |
+| Can't be live | Fonts, cursor, TTY console, GRUB/limine, Plymouth |
 
-1. Set `enableDynamicTheming = true` and the default theme in DMS's `settings.json` (merged by `wm/dms-mutable.nix`). Presets become DMS's theme picker, not a NixOS Settings dropdown.
-2. Write a user template (`runUserMatugenTemplates`) in the repo for each "No template" app. FreeTube only has built-in themes and may not be templatable.
-3. For each app DMS themes, stop home-manager owning its colour file (store links are read-only, and a rebuild would overwrite DMS's write). Include a DMS-written file instead: Ghostty's `config-file`, Kitty's `include`, Zed's and Helix's theme folders.
-4. Trim Stylix to fonts, cursor and the TTY, boot and login screens; turn off its colour targets for apps. Drop catppuccin/nix once its apps have templates.
-5. Qt moves from Kvantum to qt5ct/qt6ct, which DMS themes.
-6. Update CLAUDE.md rule 5 ("Stylix owns theming") and AGENTS.md in the same commit.
+The login screen follows DMS: the greeter copies the main user's DMS theme, wallpaper and settings into `/var/lib/dms-greeter` on each greetd start (`wm/niri/session.nix`).
 
-Trade-offs: the chosen theme lives in DMS's runtime state, so a rebuild or second machine only gets the default; templates map onto Material roles, so a Catppuccin pick is close to the upstream ports but not identical.
+Target layout:
+
+- DMS + matugen: desktop, login screen, apps with a DMS template, live.
+- Repo-kept user templates (`runUserMatugenTemplates`): the "No template" apps.
+- catppuccin/nix cut down to GRUB/limine, Plymouth and `tty` (now off because Stylix's console target sets the console colours and the kernel rejects both), fixed to Catppuccin.
+- Fonts in `theme/fonts.nix`, cursor through `home.pointerCursor`, or Stylix kept for those two only.
+
+Steps, trial first (on a branch; this reverses rule 5):
+
+1. Phase 1: set `enableDynamicTheming = true` and let DMS theme two or three apps with built-in templates (Ghostty through `config-file`, Zed), Stylix untouched elsewhere. Judge the derived syntax colours (below) before going on.
+2. Set the default theme in DMS's `settings.json` (merged by `wm/dms-mutable.nix`). Presets become DMS's theme picker, not a NixOS Settings dropdown.
+3. Write a user template in the repo for each "No template" app. FreeTube only has built-in themes and may not be templatable.
+4. For each app DMS themes, stop home-manager owning its colour file (store links are read-only, and a rebuild would overwrite DMS's write). Include a DMS-written file instead: Ghostty's `config-file`, Kitty's `include`, Zed's and Helix's theme folders.
+5. Turn off Stylix's colour targets and cut catppuccin/nix down as above.
+6. Qt moves from Kvantum to qt5ct/qt6ct, which DMS themes.
+7. Update CLAUDE.md rule 5 ("Stylix owns theming") and AGENTS.md in the same commit.
+
+Trade-offs:
+
+- The chosen theme lives in DMS's runtime state, so a rebuild or second machine only gets the default.
+- Colour depth: a DMS theme JSON holds about a dozen roles (background, surfaces, text, outline, error, warning, info, accent; see `~/.config/DankMaterialShell/themes/catppuccin/theme.json`). The 16 terminal and syntax colours (`dank16`) are computed from the accent (`GeneratePalette` in DMS's `core/internal/dank16/dank16.go`), and `quickshell/matugen/templates/dank-zed.json` takes most syntax colours from them. A Catppuccin pick keeps Catppuccin's surfaces and Mauve but gets approximate reds, greens and yellows in Zed, Neovim and terminals.
 
 ### Tools ruled out (2026-10-21)
 
