@@ -309,6 +309,7 @@ in {
           {
             button = true;
             dock = "right";
+            threads_sidebar.position = "right";
             thinking_display = "always_collapsed";
 
             # Run tools without asking unless a rule below matches, like opencode
