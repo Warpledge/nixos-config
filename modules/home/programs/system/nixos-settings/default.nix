@@ -51,7 +51,7 @@
         --set NIXOS_SETTINGS_CLEAN_ARGS ${lib.escapeShellArg clean.extraArgs} \
         --set NIXOS_SETTINGS_CLEAN_DATES ${lib.escapeShellArg (lib.optionalString clean.enable clean.dates)} \
         --set NIXOS_SETTINGS_COMPAT_TOOLS ${lib.escapeShellArg compatTools} \
-        --prefix PATH : ${lib.makeBinPath [alejandra]}
+        --prefix PATH : ${lib.makeBinPath [alejandra pkgs.nix-search-tv]}
       runHook postInstall
     '';
   };

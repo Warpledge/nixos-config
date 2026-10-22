@@ -31,6 +31,7 @@ import docs  # noqa: E402
 from backups import BackupsPage  # noqa: E402
 from flatpaks import FlatpakPage  # noqa: E402
 from overview import Overview, ShellPage  # noqa: E402
+from packages import PackagesPage  # noqa: E402
 from people import PeoplePage  # noqa: E402
 from proton import ProtonPage, ProtonVersionsPage  # noqa: E402
 from servers import ServersPage  # noqa: E402
@@ -59,6 +60,7 @@ TAB_ICONS = {"main": ("go-home-symbolic", "user-home-symbolic"),
 #--- Shell shows only under niri, which also moves the Desktop section to Niri.
 TOP = {"main": [("overview", "Overview", ("computer-symbolic",)),
                 ("flatpaks", "Flatpaks", ("flatpak-symbolic", "system-software-install-symbolic")),
+                ("packages", "Packages", ("system-search-symbolic", "edit-find-symbolic")),
                 ("backups", "Backups", ("drive-harddisk-symbolic", "document-save-symbolic")),
                 ("people", "People", ("system-users-symbolic", "avatar-default-symbolic"))],
        "niri": [("shell", "Shell", ("view-app-grid-symbolic",)),
@@ -470,6 +472,7 @@ class Window(Adw.ApplicationWindow):
         makers = {"overview": lambda: Overview(self, self.info, self.wm, self.links),
                   "flatpaks": lambda: FlatpakPage(self, flatpak_page),
                   "backups": lambda: BackupsPage(self),
+                  "packages": lambda: PackagesPage(self),
                   "people": lambda: PeoplePage(self),
                   "shell": lambda: ShellPage(self, self.links),
                   "windowrules": lambda: WindowRulesPage(self),
