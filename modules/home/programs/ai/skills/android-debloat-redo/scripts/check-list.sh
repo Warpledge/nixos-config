@@ -5,7 +5,7 @@
 set -euo pipefail
 
 repo="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-dir="$repo/docs/android/debloat/Lenovo-Idea-Tab-Pro"
+dir="$repo/docs/personal/android/debloat/Lenovo-Idea-Tab-Pro"
 list="$dir/removal-list.txt"
 
 # Backticked package names in the table rows of the "Never remove these" section

@@ -19,7 +19,7 @@ given.
   level is the physical knob.
 - **The DI is quiet.** Hard strums peak around 0.06 of full scale on the
   `Line4` source, so apps need their own input boost (Rocksmith's is in
-  `docs/gaming/rocksmith-2014.md`).
+  `docs/personal/gaming/rocksmith-2014.md`).
 - **It used to clock every graph it joined.** Its capture node
   (`alsa_input.hw_KATANA_0`) ships with `priority.driver` 2100, the highest on
   the system, which forced 44.1 kHz on 48 kHz clients. Since 2026-10-05 a

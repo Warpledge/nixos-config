@@ -4,7 +4,7 @@
 {pkgs, ...}: let
   #--- Patch editor for the amp itself (Colin Willcocks' tool), not in nixpkgs.
   #--- Prebuilt bundle under ~/.local/opt, kept out of git and restored by hand;
-  #--- see docs/local/local-binary-installs.md. It ships its own libs
+  #--- see docs/personal/local/local-binary-installs.md. It ships its own libs
   #--- (RUNPATH -> ./lib) and runs via nix-ld, so the only thing it needs is
   #--- ALSA_CONFIG_PATH for RtMidi to reach the amp over the ALSA sequencer.
   katanaDir = "$HOME/.local/opt/katana-fxfloorboard";

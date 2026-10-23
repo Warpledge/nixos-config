@@ -6,7 +6,7 @@ description: Redo or change the de-Googled debloat of the Lenovo Idea Tab Pro (T
 # Tablet debloat redo
 
 The procedure, its reasons and the exact commands live in
-`docs/android/debloat/Lenovo-Idea-Tab-Pro/index.md`, with the package list in
+`docs/personal/android/debloat/Lenovo-Idea-Tab-Pro/index.md`, with the package list in
 `removal-list.txt` next to it. Read the note before touching the device; this skill adds
 the order and the checks that keep a mistake from costing a factory reset.
 

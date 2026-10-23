@@ -86,7 +86,7 @@
     boorusama = false; # Booru image board browser (AppImage)
 
     # Need a prebuilt bundle in ~/.local/opt that this repo doesn't ship
-    # (docs/local/local-binary-installs.md)
+    # (docs/personal/local/local-binary-installs.md)
     tonkatsuBox = false; # Collection manager (games, film, anime, manga, books)
   };
 
@@ -131,7 +131,8 @@
     guitarix = false; # Modular amp sim
     tone3000 = false; # Official NAM player with the TONE3000 capture/IR library
 
-    # Needs a prebuilt bundle in ~/.local/opt (docs/local/local-binary-installs.md)
+    # Needs a prebuilt bundle in ~/.local/opt
+    # (docs/personal/local/local-binary-installs.md)
     katanaFloorboard = false; # BOSS Katana MkII patch editor
   };
 
@@ -184,7 +185,8 @@
     ludusavi = false; # Daily game save backups to ~/SyncBackups/<host>/Ludusavi
     retroshelf = false; # ES-DE / RetroDECK library tidier
 
-    # Needs prebuilt bundles outside the repo (docs/local/local-binary-installs.md)
+    # Needs prebuilt bundles outside the repo
+    # (docs/personal/local/local-binary-installs.md)
     granblueRelinkMods = false; # GBFR mods: RelinkModOrganizer + Reloaded-II
   };
 

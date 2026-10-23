@@ -255,7 +255,7 @@ lines, `grep -n` that file for the part you need.
 - `docs/CLAUDE.md` indexes every note; adding, renaming or deleting a note
   updates its entry there.
 - Update a Minecraft pack's notes when its config or mods change, add a
-  `docs/local/local-binary-installs.md` entry per new `~/.local/opt` app, and a
+  `docs/personal/local/local-binary-installs.md` entry per new `~/.local/opt` app, and a
   `docs/nixpkgs/disabled-packages.md` row per package an update forces off.
 - In `docs/`: absolute dates and versions, and say where a claim came from.
 

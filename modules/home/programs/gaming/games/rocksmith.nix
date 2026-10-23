@@ -3,7 +3,7 @@
 #=====================================================================#
 #- Steam game; the Katana DI reaches it through RS_ASIO -> PipeASIO.
 #- The RS_ASIO/PipeASIO binaries and launch options are installed by
-#- hand, see docs/gaming/rocksmith-2014.md.
+#- hand, see docs/personal/gaming/rocksmith-2014.md.
 {...}: {
   #--------------------------------------------------------------------#
   #-- RS_ASIO

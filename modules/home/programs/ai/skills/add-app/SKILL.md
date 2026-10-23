@@ -17,10 +17,10 @@ that catches the step that usually gets missed.
   `autoPatchelfHook` (`gaming/launchers/twintail.nix`, `audio/guitar/tone3000.nix`), over its
   Flatpak (the user's call, after repeated Flatpak trouble on NixOS; Hytale is the only
   Flatpak left). An AppImage goes through `appimageTools` in the folder for what the app
-  *is* (`docs/local/appimage-wraps.md`). A Flatpak is the last resort when there's no native build, or the AppImage's bundled libraries clash with the
+  *is* (`docs/personal/local/appimage-wraps.md`). A Flatpak is the last resort when there's no native build, or the AppImage's bundled libraries clash with the
   host; it gets its own module gated on a toggle, not an inline entry in `flatpak.nix`.
   A prebuilt bundle in `~/.local/opt` gets a wrapper in the folder for what the app is,
-  a toggle in that category, and an entry in `docs/local/local-binary-installs.md`.
+  a toggle in that category, and an entry in `docs/personal/local/local-binary-installs.md`.
 - Set only what the user asked for, and no colors or fonts (CLAUDE.md rule 5). Colors
   come from DMS's matugen: use DMS's built-in template if it has one for the app,
   otherwise add a repo template under `matugen.templates` and have the app's config
