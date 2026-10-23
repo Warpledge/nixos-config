@@ -1,11 +1,13 @@
 # Warpledge's NixOS Configuration
 
-The NixOS configuration behind my desktop and laptop, both daily driven since 2022.
+The NixOS setup I run on my desktop and laptop, with the [Niri][niri] window manager and [Dux Shell][dms]. You can install it on your own computer, and after that the NixOS Settings app handles day-to-day changes, so you don't need to edit code.
 
 ## Contents
 
-- [Host Machines](#host-machines)
-- [Use It on Your Machine](#use-it-on-your-machine)
+- [Install](#install)
+- [Using It](#using-it)
+- [Getting My Updates](#getting-my-updates)
+- [How It Works](#how-it-works)
 - [Screenshots](#screenshots)
 - [Theming](#theming)
 - [System Management TUI Script](#system-management-tui-script)
@@ -15,29 +17,110 @@ The NixOS configuration behind my desktop and laptop, both daily driven since 20
 - [Structure](#structure)
 - [Flake Inputs](#flake-inputs)
 
-## Host Machines
+## Install
 
-- **Desktop:** Ryzen 5800X3D + RX 9070 XT (AMD-only), 280Hz OLED + 144Hz secondary
-- **Laptop:** Legion Slim 5, Ryzen 7735HS + hybrid AMD 680M / RTX 4070, 1600p@165Hz
+1. Install NixOS with the graphical installer. Disk encryption is fine; the computer has to boot in UEFI mode.
+2. Log in with the account the installer made, open a terminal and paste:
 
-## Use It on Your Machine
+   ```bash
+   nix-shell -p git --run "git clone https://github.com/Warpledge/nixos-config ~/nixos-config" && cd ~/nixos-config && ./setup.sh
+   ```
 
-Install NixOS first. The graphical installer works, disk encryption included, as long as the computer boots with UEFI. Then, logged in as the account the installer made, paste this into a terminal (it stops if the clone fails):
+3. Answer its questions: a name for the computer, who uses it, and which extra apps you want.
+4. Restart when it finishes.
+
+<details>
+<summary>What setup.sh does</summary>
+
+- Makes a folder for your computer in `machines/` and one for each person in `users/`
+- Fills in your hardware, time zone, language, keyboard, graphics drivers, monitors and disk unlock from what the installer set up
+- Moves the repo to `/etc/nixos-config`, so every admin can edit it (`~/nixos-config` stays as a link)
+- Builds the new system to start on the next boot
+
+Everyone starts with Zen, kitty, Helix, Zed, Nautilus, yazi, mpv, Steam and NixOS Settings.
+
+Other uses:
+
+- **Add a person:** `./setup.sh add-user`, or the People page in NixOS Settings
+- **Reinstall a computer already in the repo:** run `./setup.sh` and pick it; its settings are kept
+- **Move an older clone to `/etc/nixos-config`:** `./setup.sh share`
+
+</details>
+
+## Using It
+
+Open **NixOS Settings** with `Mod+C` (`Mod` is the Windows key). Change what you want and press **Apply**: it saves, checks and rebuilds, asking for your password once.
+
+| To | Go to |
+| --- | --- |
+| Turn apps on or off | **Packages** → Default Packages |
+| Install any other app from nixpkgs | **Packages** → Search → Install |
+| Change the kernel, services, firewall, language or keyboard | **Main**, the pages in the sidebar |
+| Update everything | **Main** → Overview → Update Now |
+| Go back to an earlier version | **Main** → Overview → Versions |
+| Free up disk space | **Main** → Overview → Clean Up Old Versions |
+| Add a person | **Main** → People |
+| Change monitors, shortcuts, mouse or theme | **Niri** (opens Dux Shell's settings) |
+| Make a window float, size or open on a workspace | **Niri** → Window Rules |
+| Copy a Proton launch option | **Docs** |
+
+If a rebuild fails, the run page offers **Undo My Changes**. If the computer won't start properly, pick an earlier version from the boot menu.
+
+## Getting My Updates
+
+Your computer's folder (`machines/<name>/`) and your folder (`users/<name>/`) exist only in your copy, so pulling my changes in keeps your settings.
+
+There are two kinds of update:
+
+- **Update Now** in NixOS Settings gets newer versions of your apps.
+- **Pulling from GitHub** gets my changes to the config: new apps, fixes and settings.
+
+<details>
+<summary>Pull my changes</summary>
+
+Run these in a terminal:
 
 ```bash
-nix-shell -p git --run "git clone https://github.com/Warpledge/nixos-config ~/nixos-config" && cd ~/nixos-config && ./setup.sh
+cd /etc/nixos-config
+git checkout flake.lock                # skip your own app update, take mine
+git add -A && git commit -m "My settings"
+git pull --rebase
 ```
 
-`setup.sh` asks what to call the computer and who will use it, copies `machines/_template` and `users/_template` into a folder for each, and fills them in: the hardware config, the time zone, language and keyboard picked in the installer, drivers for the graphics card it finds, and the lines an encrypted disk needs to unlock. Everyone starts with Zen, kitty, Helix, Zed, Nautilus, yazi, mpv, Steam and NixOS Settings and picks extras from a list. The new files are staged with git, since a flake ignores untracked files. The repo then moves to `/etc/nixos-config`, where every admin on the computer can edit it (`~/nixos-config` stays as a link), and the system is built to start on the next boot.
+The commit saves your settings first, so the pull can put my changes underneath them. If there's nothing new of yours to save, the commit says so and stops; run `git pull --rebase` on its own.
 
-Afterwards:
+Then open NixOS Settings and press **Rebuild Now** on the Overview. Settings I've added since show up on its **What's New** page.
 
-- **Apps:** each person's `users/<name>/settings.nix`, then `nixm rebuild`
-- **Services and hardware:** the machine's `machines/<name>/settings.nix` and `default.nix`
-- **Another person:** `./setup.sh add-user`
-- **Reinstalling a machine already in the repo:** run `./setup.sh` and pick it; it keeps the machine's settings and takes the new install's disks
-- **A clone set up before the move:** `./setup.sh share` moves it to `/etc/nixos-config`
-- **Every setting:** listed with a comment in the two `_template/settings.nix` files; anything your copy leaves out is off
+**If you forked the repo on GitHub**, your fork is `origin` and mine has to be added once:
+
+```bash
+git remote add upstream https://github.com/Warpledge/nixos-config
+```
+
+After that, use `git pull --rebase upstream main` in place of `git pull --rebase`, then `git push --force-with-lease` to save the result to your fork.
+
+</details>
+
+## How It Works
+
+<details>
+<summary>Settings files and what reads them</summary>
+
+Everything you can change sits in two kinds of file:
+
+- `machines/<name>/settings.nix`: the computer (kernel, services, firewall, graphics card, who can log in)
+- `users/<name>/settings.nix`: one person's apps, on every computer they use
+
+NixOS Settings edits these files for you. You can also edit them by hand and run `nixm rebuild`. The `_template` folders list every setting with a comment, and any setting your file leaves out is off.
+
+Everything else (`modules/`, `lib/`) is the config those settings switch on, so you shouldn't need to touch it. `nixm` is a terminal menu for the same jobs as the app; see [below](#system-management-tui-script).
+
+My two computers:
+
+- **Desktop:** Ryzen 5800X3D + RX 9070 XT, 280Hz OLED + 144Hz
+- **Laptop:** Legion Slim 5, Ryzen 7735HS + AMD 680M / RTX 4070, 1600p@165Hz
+
+</details>
 
 ## Screenshots
 
@@ -211,7 +294,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | **Finance** | [HomeBank][homebank] (personal accounting with labeled transactions and a running balance) |
 | **Collection Tracking** | [Tonkatsu Box][tonkatsu-box] (games, film, anime, manga, visual novels, books and music in one local database, imports from Steam and AniList; a prebuilt bundle kept in `~/.local/opt/` instead of nixpkgs) |
 | **Task Manager** | [Resources][resources] (system and process monitor) |
-| **Settings App** | NixOS Settings ([`modules/home/programs/system/nixos-settings/`](./modules/home/programs/system/nixos-settings/)), a GTK window over the settings files: switch apps on or off and pick the kernel, window manager, services, firewall ports, language and keyboard from menus, with a search box that also finds DankMaterialShell's settings and buttons that open the shell's own pages (monitors, shortcuts, mouse and touchpad, theme). Apply writes the files, checks them and rebuilds through a [polkit][polkit] helper, on a page that shows the downloads and builds as they run, what changed and which services restarted, with an undo if anything fails. Apply can also preview: it builds and shows what would change without switching. Its Overview checks for updates and installs all of them or the ones you tick, switches back to an earlier version, cleans up old versions with an estimate of the space freed, shows the config's git state and keeps the last failed run's log. Tabs across the top of the window split the sidebar into Main, Packages, Niri and Docs. Packages holds the app switches as Default Packages, a nixpkgs search whose Install button adds a package to that person's User Packages, and the list of those with an Uninstall button; under niri, the Niri tab also holds the desktop shell's pages and its shortcut buttons. Niri's Window Rules page makes a rule for a window you click or pick from a list (floating, size, workspace, opacity, hidden from screen capture and more) and lists every rule niri has, grouped by what it does, with each rule's effects as coloured tags and an edit and remove button. Docs has Proton's launch options (copied with a click) and installed Proton versions, and the game notes from `docs/gaming/`. Main also has a Flatpaks page that turns Flatpak on or off and updates, repairs and removes Flatpak apps, a Backups page for FreeTube and Zen, a People page where an admin adds a person with their first password, and which services are running on the Services page. Each person changes only their own apps; only admins change the computer-wide settings, update or switch versions. |
+| **Settings App** | NixOS Settings ([`modules/home/programs/system/nixos-settings/`](./modules/home/programs/system/nixos-settings/)), a GTK app over the settings files that rebuilds through a [polkit][polkit] helper (see [Using It](#using-it)). Each person changes only their own apps; only admins change computer-wide settings, update or switch versions. |
 | **Japanese** | [fcitx5][fcitx5] + [Mozc][mozc] for typing hiragana, katakana and kanji, plus [innoextract][innoextract], [cabextract][cabextract] and [mdf2iso][mdf2iso] for unpacking raw Japanese visual novels (off by default) |
 </details>
 
@@ -624,7 +707,8 @@ modules/
   ├── home/                       # user modules
   ├── theme/                      # matugen templates, DMS theme, GTK, Qt, fonts
   └── wm/                         # window managers
-docs/                           # personal notes I share between devices
+docs/                             # notes on Proton, security and the WM
+  └── personal/                   # notes for hardware and games only I use
 ```
 
 ```
