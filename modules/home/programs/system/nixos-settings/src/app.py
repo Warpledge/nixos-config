@@ -337,13 +337,17 @@ class Window(Adw.ApplicationWindow):
             following = child.get_next_sibling()
             self.git_badges.remove(child)
             child = following
-        for key, text, kind, tip in (("changed", "{}", "accent", "files not committed"),
-                                     ("ahead", "↑{}", "neutral", "commits to push"),
-                                     ("behind", "↓{}", "warning", "commits to pull"),
-                                     ("prs", "{} PR", "neutral", "open pull requests")):
+        for key, icons, kind, tip in (("changed", ("document-edit-symbolic",), "accent", "files not committed"),
+                                      ("ahead", ("go-up-symbolic",), "dim-label", "commits to push"),
+                                      ("behind", ("go-down-symbolic",), "warning", "commits to pull"),
+                                      ("prs", ("vcs-merge-request-symbolic", "merge-symbolic"), "accent",
+                                       "open pull requests")):
             n = self.git_counts.get(key)
             if n:
-                self.git_badges.append(ui.chip(text.format(n), kind, tooltip=f"{n} {tip}"))
+                badge = Gtk.Box(spacing=2, css_classes=[kind], tooltip_text=f"{n} {tip}")
+                badge.append(Gtk.Image(icon_name=ui.first_icon(*icons), pixel_size=12))
+                badge.append(Gtk.Label(label=str(n), css_classes=["caption", "numeric"]))
+                self.git_badges.append(badge)
 
     def toast(self, text):
         self.toasts.add_toast(Adw.Toast(title=GLib.markup_escape_text(text), timeout=4))
@@ -523,7 +527,7 @@ class Window(Adw.ApplicationWindow):
                     continue
                 suffix = None
                 if key == "git":
-                    suffix = self.git_badges = Gtk.Box(spacing=4, valign=Gtk.Align.CENTER)
+                    suffix = self.git_badges = Gtk.Box(spacing=8, valign=Gtk.Align.CENTER)
                     self.git_counts = {}
                     if GLib.find_program_in_path("git"):
                         ui.run_async(lambda: git_summary(self.cfg.flake),
