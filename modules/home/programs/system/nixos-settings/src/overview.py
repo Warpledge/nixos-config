@@ -2,17 +2,15 @@
 switch back to, and shortcuts into the shell's own settings."""
 
 import os
-import re
 
 import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gdk, Gio, GLib, Gtk  # noqa: E402
+from gi.repository import Adw, Gdk, Gtk  # noqa: E402
 
 import closure  # noqa: E402
 import runview  # noqa: E402
-import system  # noqa: E402
 import ui  # noqa: E402
 
 #--- DMS tabs shown as buttons on the Overview, in this order
@@ -137,20 +135,6 @@ class Overview(Adw.PreferencesPage):
         folder.add_suffix(Gtk.Image(icon_name=ui.link_icon(), valign=Gtk.Align.CENTER, css_classes=["dim-label"]))
         folder.connect("activated", lambda _: window.open_folder())
         group.add(folder)
-        zed = GLib.find_program_in_path("zeditor")
-        if zed or GLib.find_program_in_path("git"):
-            git = Adw.ActionRow(title="Manage Git" if zed else "Git", activatable=bool(zed),
-                                subtitle="Pull, commit and push the config folder in Zed" if zed else "")
-            git.add_prefix(Gtk.Image(icon_name=ui.first_icon("dev.zed.Zed", "zed", "vcs-normal"),
-                                     valign=Gtk.Align.CENTER))
-            self.git_chips = Gtk.Box(spacing=6, valign=Gtk.Align.CENTER)
-            git.add_suffix(self.git_chips)
-            if zed:
-                git.add_suffix(Gtk.Image(icon_name=ui.link_icon(), valign=Gtk.Align.CENTER,
-                                         css_classes=["dim-label"]))
-                git.connect("activated", lambda _: self._open_zed())
-            group.add(git)
-            ui.run_async(lambda: system.git_status(window.cfg.flake), self._git)
         failed = runview.last_failed()
         if failed:
             title, when, heading, _, _ = failed
@@ -209,25 +193,6 @@ class Overview(Adw.PreferencesPage):
                 group.add(row)
             self.add(group)
 
-    def _git(self, status, err):
-        if err is not None:
-            self.git_chips.append(ui.chip("Couldn't read", "warning", tooltip=str(err)))
-            return
-        chips = []
-        if status.changed:
-            chips.append(ui.chip(f"{status.changed} changed", "accent",
-                                 tooltip="Files with changes that aren't committed yet"))
-        if status.ahead:
-            chips.append(ui.chip(f"{status.ahead} to push", "neutral", tooltip="Commits not pushed yet"))
-        if status.behind:
-            chips.append(ui.chip(f"{status.behind} to pull", "warning",
-                                 tooltip="Commits on the remote, as of the last fetch"))
-        if not chips:
-            chips.append(ui.chip("Up to date" if status.upstream else "Committed", "success",
-                                 tooltip=f"Branch {status.branch}"))
-        for c in chips:
-            self.git_chips.append(c)
-
     def _show_failed(self, row):
         failed = runview.last_failed()
         if not failed:
@@ -268,18 +233,6 @@ class Overview(Adw.PreferencesPage):
         view.add_bottom_bar(bar)
         dialog.set_child(view)
         dialog.present(self.window)
-
-    def _open_zed(self):
-        """Focuses the Zed window on the config, or opens one, as Mod+Z does."""
-        flake = self.window.cfg.flake
-        argv = ["zeditor", flake]
-        if GLib.find_program_in_path("nirius"):
-            title = re.escape(os.path.basename(flake.rstrip("/")))
-            argv = ["nirius", "focus-or-spawn", "--app-id", r"^dev\.zed\.Zed$", "--title", title] + argv
-        try:
-            Gio.Subprocess.new(argv, Gio.SubprocessFlags.NONE)
-        except GLib.Error as e:
-            self.window.toast(f"Couldn't open Zed: {e.message}")
 
     #--------------------------------------------------------------------#
     #-- Update check

@@ -183,6 +183,7 @@ class Window(Adw.ApplicationWindow):
         self.previewing = False
         self.preview_restore = None  # puts back what a preview wrote
         self.package_listeners = []  # called with the userPackages list as it changes
+        self.git_timer = None
 
         self.builders = {}  # sidebar key -> makes that page, the first time it's shown
         self.toasts = Adw.ToastOverlay()
@@ -328,6 +329,17 @@ class Window(Adw.ApplicationWindow):
     @property
     def busy(self):
         return self.run_view is not None and self.run_view.running
+
+    def _git_tick(self):
+        """Every minute: the Git page reads everything again once it's made, or
+        the sidebar counts alone (git.remote limits the network calls)."""
+        page = self.stack.get_child_by_name("git")
+        if page is not None:
+            page.refresh(force=False, quiet=True)
+        else:
+            ui.run_async(lambda: git_summary(self.cfg.flake),
+                         lambda out, err: err is None and self.set_git_badges(**out))
+        return GLib.SOURCE_CONTINUE
 
     def set_git_badges(self, **counts):
         """The Git sidebar item's counts (changed, ahead, behind and prs), led by a
@@ -537,8 +549,9 @@ class Window(Adw.ApplicationWindow):
                     suffix = self.git_badges = Gtk.Box(spacing=8, valign=Gtk.Align.CENTER)
                     self.git_counts = {}
                     if GLib.find_program_in_path("git"):
-                        ui.run_async(lambda: git_summary(self.cfg.flake),
-                                     lambda out, err: err is None and self.set_git_badges(**out))
+                        self._git_tick()
+                        if self.git_timer is None:
+                            self.git_timer = GLib.timeout_add_seconds(60, self._git_tick)
                 self._sidebar_item(tab, tops[tab], key, title, ui.first_icon(*icons), suffix=suffix)
                 self.builders[key] = makers[key]
         for g in flatpak_page.groups if flatpak_page else []:

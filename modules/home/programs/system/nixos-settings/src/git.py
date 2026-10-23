@@ -8,6 +8,7 @@ import json
 import os
 import re
 import subprocess
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -29,6 +30,11 @@ LOG = "--format=%h%x1f%H%x1f%s%x1f%an%x1f%ct"
 STATES = {"M": "modified", "A": "added", "D": "deleted", "R": "renamed", "C": "copied", "?": "new",
           "U": "conflict"}
 MAX_FILES = 50
+#--- Seconds between fetches and GitHub calls; the local counts refresh every minute
+REMOTE_EVERY = 300
+FORCED_EVERY = 30
+_remote = {"at": float("-inf"), "fetch_err": None, "prs": None, "pr_err": None}
+_lock = threading.Lock()
 
 
 def git(flake, *args, timeout=20):
@@ -79,20 +85,34 @@ def pull_requests(repo):
         return json.load(r)
 
 
+def remote(flake, repo, force=False):
+    """Fetches and reads the open PRs, then hands back (fetch error, PRs, PR
+    error). Within REMOTE_EVERY of the last check (FORCED_EVERY for Refresh)
+    it hands back that check's results, keeping under GitHub's 60 requests an
+    hour without signing in."""
+    with _lock:
+        if time.monotonic() - _remote["at"] >= (FORCED_EVERY if force else REMOTE_EVERY):
+            _remote["at"] = time.monotonic()
+            try:
+                git(flake, "fetch", "--quiet", timeout=60)
+                _remote["fetch_err"] = None
+            except (RuntimeError, OSError, subprocess.TimeoutExpired) as e:
+                _remote["fetch_err"] = e
+            if repo:
+                try:
+                    _remote["prs"], _remote["pr_err"] = pull_requests(repo), None
+                except (OSError, ValueError, subprocess.TimeoutExpired) as e:
+                    _remote["prs"], _remote["pr_err"] = None, e
+        return _remote["fetch_err"], _remote["prs"], _remote["pr_err"]
+
+
 def summary(flake):
-    """The sidebar's counts, after a fetch; prs is left out when GitHub can't be read."""
-    try:
-        git(flake, "fetch", "--quiet", timeout=60)
-    except (RuntimeError, OSError, subprocess.TimeoutExpired):
-        pass
+    """The sidebar's counts; prs is left out when GitHub can't be read."""
+    _, prs, _ = remote(flake, github_repo(flake))
     status = system.git_status(flake)
     counts = {"changed": status.changed, "ahead": status.ahead, "behind": status.behind}
-    repo = github_repo(flake)
-    if repo:
-        try:
-            counts["prs"] = len(pull_requests(repo))
-        except (OSError, ValueError, subprocess.TimeoutExpired):
-            pass
+    if prs is not None:
+        counts["prs"] = len(prs)
     return counts
 
 
@@ -140,12 +160,13 @@ class GitPage(Adw.PreferencesPage):
                 group.set_header_suffix(button)
         for group in (self.status, self.changed, self.outgoing, self.incoming, self.prs, self.recent):
             self.add(group)
-        self.refresh()
+        self.refresh(force=False)
 
     #--------------------------------------------------------------------#
     #-- Loading
     #--------------------------------------------------------------------#
-    def refresh(self):
+    def refresh(self, force=True, quiet=False):
+        """Reads everything again; quiet keeps the rows up while it loads."""
         if not GLib.find_program_in_path("git"):
             self._fill(self.status, [self._note("git isn't installed")])
             for group in (self.changed, self.outgoing, self.incoming, self.prs, self.recent):
@@ -155,18 +176,22 @@ class GitPage(Adw.PreferencesPage):
         self.run += 1
         run = self.run
         self.refresh_button.set_sensitive(False)
-        for group in (self.status, self.prs, self.recent):
-            self._fill(group, [self._loading()])
-        ui.run_async(lambda: git(self.flake, "fetch", "--quiet", timeout=60),
-                     lambda _, err: run == self.run and self._fetched(run, err))
-        if self.repo:
-            ui.run_async(lambda: pull_requests(self.repo), lambda out, err: run == self.run and self._prs(out, err))
-        else:
+        if not quiet:
+            for group in (self.status, self.prs, self.recent):
+                self._fill(group, [self._loading()])
+        if not self.repo:
             self._fill(self.prs, [self._note("The origin remote isn't on GitHub")])
+        ui.run_async(lambda: (remote(self.flake, self.repo, force), snapshot(self.flake)),
+                     lambda out, err: run == self.run and self._loaded(out, err))
 
-    def _fetched(self, run, fetch_err):
-        ui.run_async(lambda: snapshot(self.flake),
-                     lambda out, err: run == self.run and self._show(out, err, fetch_err))
+    def _loaded(self, out, err):
+        if err is not None:
+            self._show(None, err, None)
+            return
+        (fetch_err, prs, pr_err), snap = out
+        self._show(snap, None, fetch_err)
+        if self.repo:
+            self._prs(prs, pr_err)
 
     def _show(self, out, err, fetch_err):
         self.refresh_button.set_sensitive(True)
