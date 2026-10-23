@@ -79,7 +79,7 @@ in {
     genericName = "System Settings";
     comment = "Pick apps and system options, rebuild and update";
     exec = "omni-settings";
-    icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+    icon = "${./icon.svg}";
     terminal = false;
     categories = ["Settings" "System"];
     settings.StartupWMClass = "dev.nixosconfig.Settings";
