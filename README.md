@@ -1,8 +1,8 @@
 # Warpledge's NixOS Configuration
 
-The NixOS setup I run on my desktop and laptop, with the [Niri][niri] window manager and [Dux Shell][dms]. You can install it on your own computer, and after that the NixOS Settings app handles most day-to-day changes, so you edit code far less often.
+The NixOS setup I run on my desktop and laptop, with the [Niri][niri] window manager and [Dux Shell][dms]. It's designed to install on anyone's computer, and the NixOS Settings app handles most day-to-day management, to make NixOS simpler for the average user.
 
-Every app and service is its own module behind an on/off setting, so each computer builds only what its people use. The repo also carries rules and skills for AI agents, so Claude Code, or a local model in opencode or Zed, can make changes the way the config expects.
+Every module in the config (packages, services, settings) can be switched on or off from NixOS Settings. The repo also carries rules and skills so local and cloud AI models can work efficiently within the system.
 
 ## Contents
 
