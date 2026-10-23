@@ -11,7 +11,7 @@
   users = {
     warpledge = {
       gaming.retroshelf = false;
-      fileBrowsers.dolphin = true;
+      fileBrowsers.dolphin = false;
       wallpaper = "carousel";
       editors.vscodium = false;
       localAi.chat = ["gemma-4-26b-a4b"];
@@ -19,7 +19,7 @@
       media.moku = false;
       media.boorusama = true;
       defaultApps.fileManager = "duxFiles";
-      fileBrowsers.nautilus = true;
+      fileBrowsers.nautilus = false;
       fileBrowsers.yazi = false;
       userPackages = {};
       claudeDesktop.enable = false;
