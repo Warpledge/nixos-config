@@ -279,6 +279,7 @@ steps.
 | `moku-bump` | Updating or repairing Moku/Tsunagu |
 | `android-debloat-redo` | Tablet debloat after an OTA |
 | `pr-review` | Reviewing a pull request, or "the PRs" |
+| `todo` | "Add X to the todo", or work a `docs/todo/` file tracks is done |
 | `flake-update` | Only when the user runs `/flake-update`; never on your own |
 
 - `<skill-dir>` is `modules/home/programs/ai/skills/<name>`.

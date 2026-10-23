@@ -49,6 +49,7 @@
         moku-bump = ./skills/moku-bump;
         pr-review = ./skills/pr-review;
         rpgm-setup = ./skills/rpgm-setup;
+        todo = ./skills/todo;
         vn-setup = ./skills/vn-setup;
       };
       agents = {
