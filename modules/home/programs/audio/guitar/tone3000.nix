@@ -6,12 +6,10 @@
   lib,
   ...
 }: let
-  #--- Official TONE3000 NAM player: browses the site's capture/IR library from
-  #--- inside the plugin. Not in nixpkgs; prebuilt release, so autoPatchelf it.
-  #--- JUCE dlopens libcurl and the X11 extensions by soname at runtime rather
-  #--- than linking them. dlopen resolves through the RUNPATH of the calling
-  #--- object, so appendRunpaths covers the plugins too (they load into a DAW
-  #--- and cannot be wrapped). Missing libcurl kills tone downloads.
+  #--- Official TONE3000 NAM player; a prebuilt release, so autoPatchelf it.
+  #--- JUCE loads libcurl and X11 extensions at runtime; appendRunpaths covers
+  #--- the plugins too, which load into a DAW and can't be wrapped. Without
+  #--- libcurl, tone downloads fail.
   tone3000 = pkgs.stdenv.mkDerivation (finalAttrs: {
     pname = "tone3000";
     version = "0.0.12";

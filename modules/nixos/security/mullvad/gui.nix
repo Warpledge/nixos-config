@@ -1,19 +1,13 @@
 #=====================================================================#
 # MULLVAD VPN GUI SETTINGS (HOME MANAGER)
 #=====================================================================#
-#- The tray app keeps its own settings, separate from the daemon:
-#- ~/.config/Mullvad VPN/gui_settings.json, not /etc/mullvad-vpn. The
-#- daemon's auto_connect (daemon.nix) is what actually
-#- raises the tunnel at boot; these two only govern the app window.
+#- The tray app's own settings (~/.config/Mullvad VPN/gui_settings.json),
+#- separate from the daemon's; the daemon's auto_connect (daemon.nix) raises
+#- the tunnel at boot. The app rewrites the file on exit, so it's patched
+#- with jq at activation: close the app before rebuilding.
 #-
-#- gui_settings.json is rewritten by the Electron app on exit, so it is
-#- patched with jq at activation rather than symlinked. Close the app
-#- before rebuilding or the change is clobbered.
-#-
-#- Startup is a systemd user unit, not an autostart .desktop: the app
-#- registers its tray icon once and never retries, so racing the tray
-#- host leaves it running with no icon and (with startMinimized) no
-#- window at all.
+#- It starts from a systemd user unit, not an autostart entry: it registers
+#- its tray icon once, so starting before the tray leaves it with no icon.
 {
   lib,
   machine,

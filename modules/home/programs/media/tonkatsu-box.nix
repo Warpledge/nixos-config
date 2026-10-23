@@ -1,15 +1,11 @@
 #=====================================================================#
 # TONKATSU BOX CONFIGURATION
 #=====================================================================#
-#- Local-first collection manager for games, movies, TV, anime, manga,
-#- visual novels, books and audio (hacan359). Imports from Steam, IGDB,
-#- MyAnimeList, AniList, Trakt and others; data stays on the device.
-#- Not in nixpkgs; this wraps the prebuilt Flutter Linux build.
+#- Local collection manager for games, film, anime, manga, books and music;
+#- wraps the prebuilt Flutter build, which isn't in nixpkgs.
 #-
-#- The bundle's RUNPATH is $ORIGIN/lib, so its own plugins resolve on
-#- their own. LD_LIBRARY_PATH only has to supply the GTK3 stack the
-#- Flutter engine links against, plus /run/opengl-driver/lib for the
-#- Impeller GL backend.
+#- The bundle finds its own plugins ($ORIGIN/lib); LD_LIBRARY_PATH adds the
+#- GTK3 libraries Flutter needs and /run/opengl-driver/lib for its GL backend.
 {
   config,
   pkgs,

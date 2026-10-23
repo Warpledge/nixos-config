@@ -1,13 +1,10 @@
 #=====================================================================#
 # MULLVAD VPN CONFIGURATION
 #=====================================================================#
-#- Settings are applied with the mullvad CLI from a oneshot unit rather
-#- than by templating /etc/mullvad-vpn/settings.json: the daemon owns
-#- that file and rewrites it, so a symlink or template is clobbered.
-#-
-#- Keys declared here are reasserted on every boot, so the GUI is
-#- advisory for them. Relay and entry selection are deliberately NOT
-#- managed, so switching exits by hand keeps working.
+#- Settings are applied with the mullvad CLI from a oneshot unit, since the
+#- daemon rewrites /etc/mullvad-vpn/settings.json. They're reasserted every
+#- boot, so the GUI can't keep a change to them. Relay and entry selection
+#- aren't managed, so exits can be switched by hand.
 {
   config,
   lib,

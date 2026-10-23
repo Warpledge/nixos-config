@@ -1,11 +1,8 @@
 #=====================================================================#
 # TML-PRELAUNCH - TMODLOADER PRE-LAUNCH PATCH SCRIPT
 #=====================================================================#
-#- Patches tModLoader.runtimeconfig.json with recommended performance
-#- and stability settings before each launch. Survives tModLoader updates
-#- since the file is re-patched on every launch via Steam pre-launch.
-#-
-#- Patches applied:
+#- Patches tModLoader.runtimeconfig.json on every launch (a Steam launch
+#- option), so the settings survive tModLoader updates:
 #-   DEFAULT_STACK_SIZE: 51200000           (512MB stack, prevents overflow)
 #-   System.GC.Server: true                 (multi-core GC)
 #-   System.GC.Concurrent: true             (concurrent GC, reduces stutter)

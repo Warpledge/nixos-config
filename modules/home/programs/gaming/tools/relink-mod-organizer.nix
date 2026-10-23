@@ -1,19 +1,13 @@
 #=====================================================================#
 # RELINK MOD ORGANIZER CONFIGURATION
 #=====================================================================#
-#- GUI mod manager for Granblue Fantasy: Relink (RokyZevon). Front end
-#- over GBFRDataTools: point it at the game, drop mods in its folder,
-#- toggle them, hit "Mod it" and it patches data.i for you.
-#- Not in nixpkgs; this wraps the prebuilt single-file Linux build.
+#- Mod manager for Granblue Fantasy: Relink, over GBFRDataTools; wraps the
+#- prebuilt Linux build, which isn't in nixpkgs.
 #-
-#- Self-contained .NET single-file app, so no external dotnet is needed,
-#- but the bundled Avalonia/Skia stack dlopens fontconfig, freetype, GL
-#- and X11 at runtime: nix-ld resolves the ELF interpreter and
-#- LD_LIBRARY_PATH supplies those libs. Invariant globalization avoids ICU.
-#-
-#- The window also needs /run/opengl-driver/lib and LIBGL_ALWAYS_SOFTWARE=1
-#- under Niri/XWayland on AMD; with hardware GLX the Avalonia window never
-#- maps. Software rendering is fine for a config UI.
+#- A self-contained .NET app whose Avalonia/Skia stack loads fontconfig,
+#- freetype, GL and X11 at runtime, so nix-ld and LD_LIBRARY_PATH supply
+#- them. On AMD under niri the window only appears with software rendering
+#- (LIBGL_ALWAYS_SOFTWARE=1). Invariant globalization avoids ICU.
 {
   pkgs,
   lib,

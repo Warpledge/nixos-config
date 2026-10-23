@@ -1,14 +1,12 @@
 #=====================================================================#
 # DMS PASSWORD PROMPT
 #=====================================================================#
-#- DMS is the session's polkit agent, so it asks for every admin password:
-#- NixOS Settings, pkexec, and nixm through NH_ELEVATION_STRATEGY (nix/nh.nix).
-#- Upstream asks in a floating window that other windows can take the keyboard
-#- from. This swaps in DMS's full-screen modal (upstream uses it only inside
-#- its updater popout): the screen dims, clicks outside the prompt are caught,
-#- and it keeps the keyboard until it closes. PolkitScreenBlockers.qml does the
-#- same for the other monitors. A DMS update that changes these lines fails the
-#- build here (--replace-fail).
+#- DMS is the polkit agent, so it asks for every admin password (NixOS
+#- Settings, pkexec, nixm via nix/nh.nix). This swaps upstream's floating
+#- window, which other windows can take the keyboard from, for DMS's
+#- full-screen modal: it dims the screen and keeps the keyboard until it
+#- closes. PolkitScreenBlockers.qml covers the other monitors. A DMS update
+#- that changes these lines fails the build (--replace-fail).
 {options, ...}: {
   programs.dank-material-shell.package = options.programs.dank-material-shell.package.default.overrideAttrs (old: {
     postInstall =

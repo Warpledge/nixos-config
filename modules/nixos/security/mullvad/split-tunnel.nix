@@ -1,26 +1,16 @@
 #=====================================================================#
 # MULLVAD SPLIT TUNNEL
 #=====================================================================#
-#- Routes chosen apps around the VPN, permanently.
+#- Routes chosen apps around the VPN. `mullvad-exclude` puts a process in
+#- the `mullvad-exclusions` cgroup at launch and its children inherit it,
+#- so wrapping a launcher covers every game it starts.
 #-
-#- Unlike Android, Mullvad on Linux keeps no per-app list: exclusion is
-#- decided at launch by `mullvad-exclude`, which puts the process in the
-#- `mullvad-exclusions` net_cls cgroup. Membership is inherited on fork
-#- and survives reparenting and systemd-run scopes, so wrapping a
-#- launcher also covers every game it spawns.
+#- Each wrapper shadows the real command in PATH, so desktop entries and
+#- the shell both go through it; Steam is single-instance, so its wrapper
+#- must own every entry point. Apps from home.packages get a home wrapper,
+#- since the home profile comes before /run/current-system/sw/bin.
 #-
-#- Each name here shadows the real command with a higher-priority
-#- wrapper, so the desktop entry (Exec=steam, resolved via PATH) and the
-#- shell both go through it. Steam is single-instance: an unwrapped
-#- instance started first would silently claim later launches, which is
-#- why the wrapper has to own every entry point.
-#-
-#- The home profile sits earlier in PATH than /run/current-system/sw/bin,
-#- so a system wrapper for a home-manager package is shadowed and never
-#- runs. Anything installed via home.packages is wrapped there instead.
-#-
-#- Mullvad's lockdown mode does NOT block excluded processes on Linux,
-#- so no allowlist is needed alongside this.
+#- Lockdown mode doesn't block excluded processes, so no allowlist is needed.
 {
   config,
   lib,

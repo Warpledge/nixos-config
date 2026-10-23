@@ -2,17 +2,12 @@
 # GUITARIX (PIPEWIRE JACK, X11 BACKEND)
 #=====================================================================#
 {pkgs, ...}: let
-  #--- Upstream links against libjack2; with no JACK server answering it falls
-  #--- back to ALSA at a fixed 256 frame period, which no graph setting can
-  #--- reach. PipeWire's libjack makes it a real JACK client, so it follows the
-  #--- graph buffer and handles buffer changes through the JACK callback.
-  #--- PIPEWIRE_LATENCY is read once at startup: changing the buffer on a live
-  #--- client deadlocks it, so it is set here rather than via pw-metadata.
-  #--- guitarix is JACK-only, so without it the app
-  #--- opens a "jack server is not running" prompt instead of starting.
-  #--- Its GTK3 UI builds degenerate under Wayland (a 792x168 window that
-  #--- refuses compositor resize), so pin the X11 backend. postFixup, not
-  #--- postInstall: wrap-gapps-hook wraps the binary during fixupPhase.
+  #--- PipeWire's libjack makes it a real JACK client that follows the graph
+  #--- buffer; upstream's libjack2 falls back to ALSA at a fixed 256-frame
+  #--- period or asks for a JACK server. PIPEWIRE_LATENCY is read once at
+  #--- startup, since changing a live client's buffer deadlocks it.
+  #--- X11 backend: its GTK3 window can't be resized under Wayland.
+  #--- postFixup, since wrap-gapps-hook wraps the binary during fixupPhase.
   guitarix = pkgs.guitarix.overrideAttrs (old: {
     nativeBuildInputs = (old.nativeBuildInputs or []) ++ [pkgs.makeWrapper];
     postFixup =

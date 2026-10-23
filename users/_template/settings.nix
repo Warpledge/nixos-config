@@ -41,7 +41,6 @@
   };
 
   #--- Browser Selection
-  # Enable the browsers you want installed
   browsers = {
     zen = true;
     mullvad = false;
@@ -50,14 +49,12 @@
   };
 
   #--- Terminal Selection
-  # Enable the terminals you want installed
   terminals = {
     kitty = true;
     ghostty = false;
   };
 
   #--- Editor Selection
-  # Enable the editors you want installed
   editors = {
     helix = true;
     zed = true;
@@ -65,7 +62,6 @@
   };
 
   #--- File Browser Selection
-  # Enable the file browsers you want installed
   fileBrowsers = {
     nautilus = true;
     dolphin = false; # KDE's file manager
@@ -74,7 +70,6 @@
   };
 
   #--- Media Selection
-  # Enable the media applications you want installed
   media = {
     mpv = true;
     spotify = false;
@@ -97,7 +92,6 @@
   wallpaper = "carousel";
 
   #--- Graphics Software Selection
-  # Enable the graphic design applications you want installed
   graphics = {
     blender = false;
     krita = false;
@@ -105,7 +99,7 @@
   };
 
   #--- ArtCraft
-  # Rust creative and office suite, wrapped from upstream's AppImages
+  # Rust creative and office suite
   artcraft = {
     photocraft = false; # Layered photo editor (PSD)
     lightcraft = false; # Non-destructive RAW editor
@@ -123,7 +117,6 @@
   };
 
   #--- Audio Software Selection
-  # Enable the music and audio applications you want installed
   audio = {
     reaper = false;
 
@@ -137,7 +130,6 @@
   };
 
   #--- Office Software Selection
-  # Enable the office and document applications you want installed
   office = {
     thunderbird = false; # Mail client
     obsidian = false; # Markdown note vaults
@@ -145,25 +137,22 @@
   };
 
   #--- Security Software Selection
-  # Enable the security and privacy applications you want installed
   security = {
     bleachbit = false; # Disk cleaner for caches, logs and browser leftovers
     keepassxc = false; # Offline password manager
   };
 
   #--- System Tools Selection
-  # Enable the system monitoring applications you want installed
   system = {
     resources = false; # GNOME system and process monitor
   };
 
   #--- Android Screen Mirroring (scrcpy)
-  # Mirror/control an Android device over USB or wifi; nothing is installed
-  # on the device, so it works on de-Googled phones/tablets
+  # Mirror and control an Android device over USB or wifi; nothing is
+  # installed on it
   scrcpy.enable = false;
 
   #--- Gaming
-  # Enable the game launchers, games and gaming tools you want installed
   gaming = {
     # Launchers
     steam = true; # NixOS programs.steam
@@ -196,7 +185,7 @@
   discord.vesktop = false;
 
   #--- Discord Rich Presence (arRPC)
-  # Standalone arRPC server for Steam/Proton game detection in GoofCord
+  # Shows the Steam or Proton game you're playing in GoofCord or Vesktop
   discord.arrpc.enable = false;
 
   #--- AI Tools

@@ -20,9 +20,8 @@
     # alice = {};
   };
 
-  #--- Who owns this config: the repo sits in their home folder, Syncthing
-  #--- runs as them and the login screen uses their theme. Must be an admin.
-  #--- null works when only one user is listed.
+  #--- Who owns this config: Syncthing runs as them and the login screen
+  #--- uses their theme. Must be an admin; null works with one user.
   mainUser = null;
 
   #--------------------------------------------------------------------#
@@ -46,8 +45,7 @@
 
   #--- Kernel Selection
   # Options: "zen" | "latest" | "xanmod" | "cachyos"
-  # "cachyos" compiles on this computer, which takes a long time (its binary
-  # cache is off in nix/substituters.nix), and needs an x86-64-v3 CPU (AVX2)
+  # "cachyos" compiles on this computer (slow) and needs an x86-64-v3 CPU (AVX2)
   kernel = "zen";
 
   #--- Mouse Cursor
@@ -119,7 +117,7 @@
   ssh.enable = false;
 
   #--- ClamAV Antivirus
-  # Enable ClamAV daemon, freshclam auto-updater, and ClamTK GUI
+  # Background scanner, definition updates and the ClamTK window
   clamav.enable = false;
 
   #--- Docker Containerization

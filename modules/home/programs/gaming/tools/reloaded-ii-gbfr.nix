@@ -1,19 +1,11 @@
 #=====================================================================#
 # RELOADED-II (GRANBLUE FANTASY RELINK) LAUNCHER
 #=====================================================================#
-#- Launcher entry for the Reloaded-II mod loader installed into GBFR's
-#- Proton prefix (appid 881020). Unlike RelinkModOrganizer (a native
-#- Linux binary), Reloaded-II is a Windows .exe, so it runs through Wine
-#- via protontricks-launch against the game's own prefix.
-#-
-#- Reloaded-II covers the code/hook mods RMO can't: memory-hook mods that
-#- ship a .dll and no GBFR/data tree (e.g. Mastery Point Multiplier, Smart
-#- Synthesis). Those inject at game launch via the deployed winmm ASI
-#- loader; this entry only opens the config GUI to add/enable/toggle mods.
-#-
-#- The bundle lives on the Linux side at
-#- ~/Desktop/Reloaded-II - Granblue Fantasy Relink/ (created by the
-#- Setup-Linux.exe installer, kept out of the repo like other local apps).
+#- Opens the Reloaded-II mod loader in GBFR's Proton prefix (appid 881020)
+#- through protontricks-launch, since it's a Windows .exe. It handles the
+#- code mods RelinkModOrganizer can't (a .dll, no data tree), which load at
+#- game launch through the winmm ASI loader; this only opens its config.
+#- Its installer puts it in ~/Desktop/Reloaded-II - Granblue Fantasy Relink/.
 {pkgs, ...}: let
   #-- Windows exe launched inside the GBFR Proton prefix
   appId = "881020";
