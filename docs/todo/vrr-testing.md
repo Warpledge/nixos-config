@@ -6,8 +6,8 @@ Added 2026-10-15.
 
 ## What's already in the repo
 
-- `modules/wm/niri/home/core/monitors.nix` sets `variable-refresh-rate = "on-demand"` on DP-2 (Dell AW2725D OLED) and DP-3 (LG ULTRAGEAR). Before the change, `niri msg outputs` listed both as `Variable refresh rate: supported, disabled` (2026-10-15).
-- With `"on-demand"`, niri turns VRR on only while a window matched by a `variable-refresh-rate = true` window rule is on that output (niri-flake's `docs.md`). The rule is in `modules/wm/niri/home/core/rules.nix` and matches these app-ids:
+- `machines/eclipse/wm/niri.nix` sets `variable-refresh-rate = "on-demand"` on DP-2 (Dell AW2725D OLED) and DP-3 (LG ULTRAGEAR). Before the change, `niri msg outputs` listed both as `Variable refresh rate: supported, disabled` (2026-10-15).
+- With `"on-demand"`, niri turns VRR on only while a window matched by a `variable-refresh-rate = true` window rule is on that output (niri-flake's `docs.md`). The rule is in `modules/wm/niri/home/core/window-rules.json` and matches these app-ids:
   - `^gamescope$`: nested gamescope (`nix-gamescope`, `nix-vn`, `nix-rpgm`), which sets this app-id itself (`src/Backends/WaylandBackend.cpp`)
   - `\.exe$`: Proton games on Wine's Wayland driver, which the global `PROTON_ENABLE_WAYLAND=1` turns on; winewayland names each window after the lowercased executable (`dlls/winewayland.drv/waylanddrv_main.c`)
   - `^steam_app_`: Proton games on X11, where Proton sets the window class to `steam_app_<id>` (`dlls/winex11.drv/window.c`)

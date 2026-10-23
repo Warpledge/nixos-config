@@ -1,6 +1,6 @@
 # TerraFirmaGreg-Modern Notes
 
-Version: `0.9.6`
+Version: `0.13.7` client (Prism, 2026-10-23); server `0.12.5`
 Instance: `TerraFirmaGreg-Modern` (Prism Launcher)
 Path: `~/.local/share/PrismLauncher/instances/TerraFirmaGreg-Modern/minecraft/`
 Loader: Forge 1.20.1
@@ -11,9 +11,7 @@ Loader: Forge 1.20.1
 
 ## Sub-Notes
 
-- [java-and-launch.md](./java-and-launch.md) — Java runtime, JVM args, launch options
 - [server.md](./server.md) — Server setup, server.properties, start script, JVM args
-- [base-pack.md](./base-pack.md) — All 220+ mods shipped with TerraFirmaGreg-Modern 0.9.6 (reference for identifying manual additions)
 - [mods.md](./mods.md) — Write-ups for any manually added or removed mods
 - [config-tweaks.md](./config-tweaks.md) — Config file changes (QoL, difficulty, balance)
 - [shaders.md](./shaders.md) — Shader setup, Eclipse block.properties TFC water fix, settings

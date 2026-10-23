@@ -73,7 +73,7 @@ then confirm the Proton processes are gone.
   none, so the variable is ignored there (checked 2026-10-12).
 - Vanilla vs modded exe, to tell a mod bug from an engine bug.
 - Env vars and wrappers by topic (JP locale, rendering backend, XWayland, esync/fsync,
-  audio, RPG Maker): `docs/gaming/launcher-env-variables.md`.
+  audio): the Launch Options list in `omni-settings/src/proton.py`.
 
 ## 6. Check for a native engine
 
@@ -98,12 +98,10 @@ A new one goes in through the `add-app` skill.
 
 | Game or bug | Where |
 | --- | --- |
-| Launch options for Morimens, Risk of Rain 2, tModLoader, No Rest for the Wicked, Arknights Endfield, Wuthering Waves, `System40.exe` mods | `docs/gaming/steam-launch-parameters.md` |
+| Launch options for Morimens, Risk of Rain 2, tModLoader, No Rest for the Wicked, Arknights Endfield, Wuthering Waves | `docs/gaming/launch-parameters.md` |
 | tModLoader paths and log queries | `docs/personal/gaming/tmodloader-debugging.md` |
 | Rocksmith 2014 (Katana DI, RS_ASIO) | `docs/personal/gaming/rocksmith-2014.md` |
 | feedBack audio settings, Guitar Pro import | `docs/personal/gaming/feedback.md` |
-| Arknights Endfield "Unable to start ACE Setup" | `docs/gaming/arknights-endfield.md` |
-| Steam client menus vanish under niri | `docs/gaming/steam-client-menu-bug.md` |
 | Minecraft servers (GTNH, TerraFirmaGreg) | `docs/personal/gaming/minecraft_servers/<pack>/index.md` |
 
 ## Afterwards: keep this current

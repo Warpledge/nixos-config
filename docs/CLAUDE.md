@@ -11,9 +11,7 @@ Security/privacy notes live under `docs/security/`:
 
 Game notes live under `docs/gaming/` (the `game-troubleshooting` skill indexes them; Omni Settings' Docs tab shows the top-level `gaming/*.md` notes):
 
-- `gaming/steam-launch-parameters.md` — per-game Steam launch flags; documents the `tml-prelaunch` script (`modules/home/programs/gaming/scripts/tml-prelaunch.nix`)
-- `gaming/launcher-env-variables.md` — common env vars + wrappers for Heroic/Lutris/Faugus/umu/Steam (JP locale, Proton WineD3D, XWayland wrapper, RPG Maker, perf wrappers)
-- `gaming/steam-client-menu-bug.md` — Steam's menus self-dismiss on niri because xwayland-satellite 0.8.2 focuses override-redirect windows; fixed in v0.8.3 (upstream `add2795`, PR #494), which nixpkgs ships, so `niri/home/core/xwayland.nix` uses the nixpkgs build again
+- `gaming/launch-parameters.md` — per-game launch options and why each is set. Common env vars and wrappers are on Omni Settings' Docs → Launch Options page (`omni-settings/src/proton.py`) and in `nixm launch-params`
 
 nixpkgs update notes live under `docs/nixpkgs/`:
 

@@ -91,11 +91,9 @@ youtube.com##yt-related-chip-cloud-renderer
 youtube.com##ytd-watch-next-secondary-results-renderer ytd-reel-shelf-renderer
 ! Show/hide chat button on live streams
 youtube.com###show-hide-button
-
-! ─── TWITCH ──────────────────────────────────────────────
-! Block Twitch video ads
-twitch.tv##+js(twitch-videoad)
 ```
+
+The Twitch ad filter needs a `userResourceLocation` script as well; both are under **Twitch Ad Blocking** in `blocklists.md`.
 
 ### Approximation Notes
 

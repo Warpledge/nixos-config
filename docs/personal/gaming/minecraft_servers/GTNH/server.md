@@ -3,7 +3,7 @@
 **Instance:** `GT_New_Horizons_2.8.4_Java_17-25` server pack
 **Host:** Laptop (Ryzen 7735HS), NixOS, Niri WM
 **Port:** `25566` (non-default, desktop client connects via LAN)
-**Java:** OpenJDK 25, ZGC (`-XX:+UseZGC`)
+**Java:** see [java-and-launch.md](./java-and-launch.md)
 
 ## server.properties
 

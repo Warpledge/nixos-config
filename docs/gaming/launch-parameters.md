@@ -1,4 +1,4 @@
-# Steam Game Launch Parameters
+# Launch Parameters
 
 Game-specific launch parameters, and why each one is set.
 
@@ -8,7 +8,7 @@ Game-specific launch parameters, and why each one is set.
 PROTON_ENABLE_WAYLAND=0 WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS="--no-sandbox" %command%
 ```
 
-**Notes:** `PROTON_ENABLE_WAYLAND=0` forces XWayland, required because Wine's native Wayland driver splits the WebView2 login child window into a separate Wayland surface that can't composite back into the Unity game window (shows as white box). XWayland handles child window compositing correctly. `--no-sandbox` keeps the Chromium renderer process stable under Wine. Also requires a niri window rule for `msedgewebview2.exe` with `clip-to-geometry = false` and `draw-border-with-background = true` (in `modules/wm/niri/home/core/rules.nix`).
+**Notes:** `PROTON_ENABLE_WAYLAND=0` forces XWayland, required because Wine's native Wayland driver splits the WebView2 login child window into a separate Wayland surface that can't composite back into the Unity game window (shows as white box). XWayland handles child window compositing correctly. `--no-sandbox` keeps the Chromium renderer process stable under Wine. Also requires a niri window rule for `msedgewebview2.exe` with `clip-to-geometry = false` and `draw-border-with-background = true` (in `modules/wm/niri/home/core/window-rules.json`).
 
 ---
 
@@ -32,48 +32,9 @@ tml-prelaunch && DOTNET_DefaultStackSize=51200000 gamemoderun %command%
 - `&& %command%` — required; chains the patch before the game launches
 - `DOTNET_DefaultStackSize=51200000` — redundant env var fallback, kept for safety
 
-**Pre-launch script:** declaratively managed in nixos-config
-- `modules/home/programs/gaming/scripts/tml-prelaunch.nix`
-- Uses `${pkgs.jq}/bin/jq` (nix store path, no PATH dependency)
-- Merges settings into existing JSON, preserving all other tModLoader properties
-- Idempotent — no-ops if file is missing
+**Pre-launch script:** `modules/home/programs/gaming/scripts/tml-prelaunch.nix` merges its settings into `~/.local/share/Steam/steamapps/common/tModLoader/tModLoader.runtimeconfig.json`; its header lists each one and why.
 
-### tModLoader.runtimeconfig.json Configuration
-
-**File location:** `/home/warpledge/.local/share/Steam/steamapps/common/tModLoader/tModLoader.runtimeconfig.json`
-
-**Recommended configuration (applied automatically by pre-launch script):**
-```json
-{
-	"runtimeOptions": {
-		"tfm": "net8.0",
-		"framework": {
-			"name": "Microsoft.NETCore.App",
-			"version": "8.0.0"
-		},
-		"configProperties": {
-			"DEFAULT_STACK_SIZE": "51200000",
-			"System.Reflection.Metadata.MetadataUpdater.IsSupported": false,
-			"System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization": false,
-			"System.GC.Server": true,
-			"System.GC.Concurrent": true,
-			"System.GC.HeapCount": 8,
-			"System.GC.HeapAffinitizeMask": 255
-		}
-	}
-}
-```
-
-**Property explanations:**
-- `DEFAULT_STACK_SIZE: 51200000` - 512MB per thread (prevents stack overflow with heavy modpacks)
-- `System.GC.Server: true` - Server garbage collection (multi-core optimized)
-- `System.GC.Concurrent: true` - Concurrent GC reduces stutter
-- `System.GC.HeapCount: 8` - One GC heap per core (8 cores on 5800X3D)
-- `System.GC.HeapAffinitizeMask: 255` - Pins heaps to cores 0-7 (binary 255 = 0xFF)
-
-**Notes:**
-- File is writable by default (tModLoader may regenerate it on update — pre-launch script handles this)
-- For Infernal Eclipse of Ragnarok modpack (Calamity + Infernum)
+**Notes:** For Infernal Eclipse of Ragnarok modpack (Calamity + Infernum)
 
 ---
 
@@ -146,24 +107,6 @@ Installed to `~/.local/share/Steam/steamapps/common/Wuthering Waves/Client/Saved
 - Game patches do not reset these files, so no reinstall needed per update. Re-pull if something breaks
 - Missing character shadows or blurry textures after a config change: switch graphics preset away and back, then re-customize
 - Depth of Field and Vignette are left enabled by default, uncomment `r.DepthOfFieldQuality=0` and `r.Tonemapper.Quality=1` in `Engine.ini` to kill them
-
----
-
-## System40.exe
-
-```
-bash -c 'exec "${@/GAME.exe/System40.exe}"' -- %command%
-```
-
-Under gamescope:
-
-```
-nix-gamescope bash -c 'exec "${@/GAME.exe/System40.exe}"' -- %command%
-```
-
-**Notes:** Replace `GAME.exe` with the exe Steam launches. Steam starts the game's own exe, but a fan mod for it needs the stock engine exe, `System40.exe`, in the same folder. The `bash` wrapper swaps the exe name inside `%command%`, so Proton and the prefix stay as Steam sets them, and a Steam update or file verify can't undo it the way overwriting the exe would. The engine reads the `.ini` named after its own exe (`System40.ini`). Use `nix-gamescope` rather than a bare `gamescope`: with the global `PROTON_ENABLE_WAYLAND=1` the game starts to a black screen in gamescope, and the wrapper switches that off and keeps Steam's overlay out of gamescope.
-
-**Requires GE-Proton9-27**, forced under Compatibility (tested 2026-10-08). GE-Proton11-5 to 11-7 froze the screen and input for 2 to 6 s after clicking a map node, with the same freeze under gamescope and under Proton's Wayland driver. A `PROTON_LOG=1` run with `WINEDEBUG=+timestamp,+tid,+cursor,+win` showed the cause: the game glides the cursor to its target with about 200 `SetCursorPos` calls, one per millisecond, and newer Wine queues a mouse-move message for each, which the main thread then works through one by one (every waypoint hit-tested 70 to 80 times) before it draws or takes input again. A ProtonDB report for the game describes the same freeze and the same GE-Proton9-27 fix.
 
 ---
 

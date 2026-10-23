@@ -108,9 +108,8 @@ up `data.i` to `orig_data.i`, then `GBFRDataTools add-external-files -i
 
 Settings -> Import -> Steam Library. Needs a Steam Web API key from
 <https://steamcommunity.com/dev/apikey>, a 64-bit SteamID, and a public game
-library. There is no OpenID browser login, which is what a Mullvad exit gets
-blocked on: Steam refused a browser sign-in over `us-chi-wg-202` on 2026-09-20
-because DataPacket netblocks register as GB. Fetching the API key still needs
+library. There is no OpenID browser login, which a DataPacket Mullvad exit gets
+blocked on (`docs/security/mullvad.md`). Fetching the API key still needs
 one signed-in page load, so do it from the Steam client's own browser, which is
 already authenticated and rides the real IP via `mullvad.splitTunnel`.
 

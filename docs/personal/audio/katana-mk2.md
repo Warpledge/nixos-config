@@ -37,6 +37,4 @@ services.pipewire.extraConfig.pipewire."10-rates" = {
 };
 ```
 
-To measure a source, record `Line3` or `Line4` on its own. A 4-channel
-`pw-record` of `alsa_input.hw_KATANA_0` downmixes the AUX channels and makes
-channels 3 and 4 look silent.
+To measure a source, see **Input level** in `docs/personal/gaming/rocksmith-2014.md`.
