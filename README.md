@@ -562,125 +562,19 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 
 ## Keybinds
 
-`Mod` is the Super (Windows) key.
+`Mod` is the Super (Windows) key. `Mod+/` shows every keybind. To add or change one, open Dux Shell's settings (`Mod+Comma`) → Keyboard Shortcuts; yours override the config's.
 
->**Note:** `Mod+/` opens a keybind overlay cheatsheet.
-
-<details>
-<summary>⌨️ Niri Keybinds</summary>
-
-#### Apps
+The few to know first:
 
 | Keybind | Action |
 | --- | --- |
-| `Mod+Return` | Terminal (Kitty) |
-| `Mod+Z` | Code editor (Zed) |
-| `Mod+B` | Browser (Zen) |
-| `Mod+E` | File manager (Nautilus, or Dolphin when it's the default) |
-| `Mod+Shift+S` | Steam |
-| `Mod+Shift+D` | Discord (Vesktop, or GoofCord) |
-| `Mod+Shift+H` | Heroic |
-| `Mod+Shift+G` | Lutris (only while it's turned on) |
-| `Mod+Shift+M` | Spotify |
-| `Mod+Shift+Y` | FreeTube |
-| `Mod+C` | NixOS Settings (focuses it when already open) |
-| `Ctrl+Alt+Delete` | Task manager (Resources) |
-
-#### Shell (DankMaterialShell)
-
-| Keybind | Action |
-| --- | --- |
-| `Mod+A` | App launcher (spotlight) |
-| `Mod+V` | Clipboard history |
-| `Mod+P` | Task manager |
-| `Mod+N` | Notepad |
-| `Mod+Comma` | DMS settings |
-| `Mod+K` | Power menu |
-| `Mod+L` | Lock screen |
-| `Mod+I` | Toggle idle inhibit (keep the screen awake) |
-| `Mod+W` | Browse wallpapers |
-| `Mod+Shift+N` | Toggle night mode |
 | `Mod+/` | Keybind cheatsheet |
-| `Mod+R` | Restart DMS |
-
-#### Window Management
-
-| Keybind | Action |
-| --- | --- |
+| `Mod+A` | App launcher |
+| `Mod+Return` | Terminal |
+| `Mod+C` | NixOS Settings |
+| `Mod+Comma` | Dux Shell settings |
 | `Mod+Q` | Close window |
-| `Mod+Space` | Toggle floating |
-| `Mod+Shift+Space` | Switch focus between floating and tiled windows |
-| `Mod+Shift+T` | Turn the window's opacity rule off and on |
-| `Mod+Y` | Same, and makes apps without an opacity rule (Zen) translucent too |
-| `Mod+T` | Cycle blur presets (Subtle, Default, Clear) |
-| `Mod+Escape` | Take shortcuts back from an app that inhibits them |
-| `Mod+F` | Maximize column |
-| `Mod+Shift+F` | Fullscreen |
-| `Mod+Tab` | Toggle overview |
-| `Mod+H` | Center column |
-| `Mod+S` | Cycle column width presets |
-| `Mod+D` | Expand column to available width |
-| `Mod+X` | Cycle window height presets |
-| `Mod+Shift+Z` | Reset window height |
-| `Mod+G` | Maximize window to screen edges |
-| `Mod+[` / `Mod+]` | Pull the window on the left/right into this column, or push this one out |
-| `Mod+\` | Toggle tabs for the column |
-
-#### Focus & Movement
-
-| Keybind | Action |
-| --- | --- |
-| `Mod+←/→` | Focus column left/right |
-| `Mod+↑/↓` | Focus the window above/below in the column, then the workspace above/below |
-| `Mod+Shift+←/→` | Move column left/right |
-| `Mod+Shift+↑/↓` | Move the window up/down in its column, then to the workspace above/below |
-| `Mod+Alt+←/→` | Focus monitor left/right |
-| `Mod+Alt+Shift+←/→` | Move column to the monitor left/right |
-| `Mod+Scroll` | Focus column left/right |
-| `Mod+Shift+Scroll` | Focus workspace up/down |
-
-#### Resize
-
-| Keybind | Action |
-| --- | --- |
-| `Mod+Ctrl+←/→` | Resize column ±80px |
-| `Mod+Ctrl+↑/↓` | Resize window height ±80px |
-| `Mod+−/+` | Resize column width ±10% |
-| `Mod+Shift+−/+` | Resize window height ±10% |
-| `Mod+Alt+1/2/3` | Set column width 33% / 50% / 66% |
-
-#### Workspaces
-
-| Keybind | Action |
-| --- | --- |
-| `Mod+1–9` | Focus workspace N (desktop: 1–6 on the main monitor, 7–9 on the second; Steam opens on 6, Spotify on 8, Discord on 9) |
-| `Mod+Shift+1–9` | Move window to workspace N |
-| `Mod+0` | Show / hide the scratchpad windows over the current workspace (nirius) |
-| `Mod+Shift+0` | Move window to / out of the scratchpad (nirius) |
-
-#### Media & Capture
-
-| Keybind | Action |
-| --- | --- |
-| `Print` | Region screenshot (Quick Capture, opens its editor) |
-| `Mod+Print` | Focused window screenshot |
-| `Mod+Shift+Print` | Focused output screenshot |
-| `Ctrl+Print` | All outputs screenshot |
-| `Mod+Ctrl+Print` | Scrolling capture |
-| `Mod+End` | Toggle screen recording (portal) |
-| `Volume Up/Down/Mute` | Volume, routed through DMS so the on-screen indicator shows; works on the lock screen |
-| `Mic Mute` | Mute the microphone; works on the lock screen |
-| `Brightness Up/Down` | Screen brightness |
-| `Play/Pause`, `Stop`, `Prev`, `Next` | Media controls for the player used last (playerctl); work on the lock screen |
-
-#### Window Switcher
-
-| Keybind | Action |
-| --- | --- |
-| `Alt+Tab` | Recent windows switcher; `Shift` goes back, `S` narrows it to the workspace or monitor |
-| `Alt+Tilde` | The same switcher, limited to the focused app's windows |
-
-</details>
+| `Mod+Tab` | Overview of all windows |
 
 ## Structure
 
