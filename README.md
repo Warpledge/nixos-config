@@ -115,6 +115,19 @@ git remote add upstream https://github.com/Warpledge/nixos-config
 
 After that, use `git pull --rebase upstream main` in place of `git pull --rebase`, then `git push --force-with-lease` to save the result to your fork.
 
+**If git stops with "CONFLICT"**, we both changed the same lines of a file; `git status` lists it under "both modified". Either way out is safe:
+
+- **Back out:** `git rebase --abort` puts everything back the way it was before the pull.
+- **Take my version of that file** and drop your change to it:
+
+  ```bash
+  git checkout --ours path/to/file       # during a pull --rebase, "ours" is GitHub's side
+  git add path/to/file
+  git -c core.editor=true rebase --continue
+  ```
+
+  If git then says there's nothing left to commit, run `git rebase --skip`.
+
 </details>
 
 ## Keybinds
