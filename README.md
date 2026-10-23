@@ -6,18 +6,32 @@ Every module in the config (packages, services, settings) can be switched on or 
 
 ## Contents
 
+- [Screenshots](#screenshots)
+- [Theming](#theming)
 - [Install](#install)
 - [Using It](#using-it)
 - [Getting My Updates](#getting-my-updates)
+- [Keybinds](#keybinds)
+- [Shell Shortcuts](#shell-shortcuts)
 - [How It Works](#how-it-works)
-- [Screenshots](#screenshots)
-- [Theming](#theming)
 - [System Management TUI Script](#system-management-tui-script)
 - [Components](#components)
-- [Shell Shortcuts](#shell-shortcuts)
-- [Keybinds](#keybinds)
 - [Structure](#structure)
 - [Flake Inputs](#flake-inputs)
+
+## Screenshots
+
+**Niri WM**
+
+![Niri desktop with fastfetch and NixOS Settings](./docs/screenshots/niri-desktop.png)
+
+## Theming
+
+Colors change live from the shell, with no rebuild:
+
+- **[Dux Shell][dms] + [matugen][matugen]:** Picking a theme in the shell's settings (a preset, a custom theme or the wallpaper's colors) runs matugen, which writes a color file for each app. Some apps get the shell's own templates (GTK, Qt, Kitty, Zed, Vesktop); the rest use templates in this repo, mostly in `modules/theme/matugen/` and made from the official Catppuccin ports. The default theme is Catppuccin Mocha Mauve. (still being worked on)
+- **[Stylix][stylix]:** Sets the TTY, fonts and the mouse cursor at the system level with Catppuccin mocha theme.
+- **[catppuccin/nix][catppuccin-nix]:** Only themes the boot splash.
 
 ## Install
 
@@ -103,6 +117,83 @@ After that, use `git pull --rebase upstream main` in place of `git pull --rebase
 
 </details>
 
+## Keybinds
+
+`Mod` is the Super (Windows) key. `Mod+/` shows every keybind. To add or change one, open Dux Shell's settings (`Mod+Comma`) → Keyboard Shortcuts; yours override the config's.
+
+The few to know first:
+
+| Keybind | Action |
+| --- | --- |
+| `Mod+/` | Keybind cheatsheet |
+| `Mod+A` | App launcher |
+| `Mod+Return` | Terminal |
+| `Mod+C` | NixOS Settings |
+| `Mod+Comma` | Dux Shell settings |
+| `Mod+Q` | Close window |
+| `Mod+Tab` | Overview of all windows |
+
+## Shell Shortcuts
+
+Short commands I use in place of longer ones, all set up in [`zsh.nix`](./modules/home/programs/shell/zsh.nix). The ones marked _(fn)_ take an argument.
+
+<details>
+<summary>⚡ All shell shortcuts</summary>
+
+#### Editors & Files
+
+| Shortcut | Runs |
+| --- | --- |
+| `v` / `vi` / `vim` | `hx` ([Helix][helix]) |
+| `nano` | `micro` |
+| `zed` | `zeditor` |
+| `cat` | `bat` |
+| `ls` / `l` / `ll` | `eza` |
+| `tree` | `eza --tree` |
+| `y` | `yazi` |
+| `open <file>` | `xdg-open` |
+
+#### Navigation
+
+| Shortcut | Runs |
+| --- | --- |
+| `temp` | `cd /tmp` |
+| `cdnix` | open the config (`flakePath`) in Zed |
+
+#### Git
+
+| Shortcut | Runs |
+| --- | --- |
+| `g` | `lazygit` |
+| `ga` | `git add` |
+| `gc` / `gcm` | `git commit` / `git commit -m` |
+| `gcu` | `git add . && git commit -m 'Update'` |
+| `gp` / `gpl` | `git push` / `git pull` |
+| `gs` / `gd` | `git status` / `git diff` |
+| `gco` / `gcb` | `git checkout` / `git checkout -b` |
+| `gbr` | `git branch` |
+
+#### Nix
+
+| Shortcut | Runs |
+| --- | --- |
+| `run <pkg>` _(fn)_ | try a package once without installing it (`nix run nixpkgs#<pkg>`) |
+| `listgen` | list system generations |
+| `bloat` | show current system closure size |
+
+#### System & Misc
+
+| Shortcut | Runs |
+| --- | --- |
+| `c` / `e` | `clear` / `exit` |
+| `us` / `rs` | `systemctl --user` / `sudo systemctl` |
+| `cleanram` | drop filesystem caches |
+| `fetch` | `fastfetch` |
+| `anime` | `ani-cli` |
+| `f` | `figlet` |
+
+</details>
+
 ## How It Works
 
 <details>
@@ -138,25 +229,13 @@ Turn the tools on in NixOS Settings' **AI** tab: Claude Code and Claude Desktop 
 
 </details>
 
-## Screenshots
-
-**Niri WM**
-
-![Niri desktop with fastfetch and NixOS Settings](./docs/screenshots/niri-desktop.png)
-
-## Theming
-
-Colors change live from the shell, with no rebuild:
-
-- **[Dux Shell][dms] + [matugen][matugen]:** Picking a theme in the shell's settings (a preset, a custom theme or the wallpaper's colors) runs matugen, which writes a color file for each app. Some apps get the shell's own templates (GTK, Qt, Kitty, Zed, Vesktop); the rest use templates in this repo, mostly in `modules/theme/matugen/` and made from the official Catppuccin ports. The default theme is Catppuccin Mocha Mauve.
-- **[Stylix][stylix]:** Sets the fonts and the mouse cursor, plus fixed Catppuccin colors for VS Code and the TTY.
-- **[catppuccin/nix][catppuccin-nix]:** Only themes the boot splash.
-
 ## System Management TUI Script
+
+Run `nixm` from the terminal to open the interactive selector of quick commands.
 
 ![nixm top level menu](./docs/screenshots/nixm-tui-main.png)
 
-The top level is a set of categories. Pick one and it opens into its own menu of sub-commands that I use often.
+The top level is a set of categories. Pick one and it opens into its own menu of sub-commands.
 
 ![nixm NixOS submenu](./docs/screenshots/nixm-tui-nixos.png)
 
@@ -514,84 +593,6 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 [fail2ban]: https://www.fail2ban.org/
 [gamescope]: https://github.com/ValveSoftware/gamescope
 
-## Shell Shortcuts
-
-Short commands I use in place of longer ones, all set up in [`zsh.nix`](./modules/home/programs/shell/zsh.nix). The ones marked _(fn)_ take an argument.
-
-<details>
-<summary>⚡ All shell shortcuts</summary>
-
-#### Editors & Files
-
-| Shortcut | Runs |
-| --- | --- |
-| `v` / `vi` / `vim` | `hx` ([Helix][helix]) |
-| `nano` | `micro` |
-| `zed` | `zeditor` |
-| `cat` | `bat` |
-| `ls` / `l` / `ll` | `eza` |
-| `tree` | `eza --tree` |
-| `y` | `yazi` |
-| `open <file>` | `xdg-open` |
-
-#### Navigation
-
-| Shortcut | Runs |
-| --- | --- |
-| `temp` | `cd /tmp` |
-| `cdnix` | open the config (`flakePath`) in Zed |
-
-#### Git
-
-| Shortcut | Runs |
-| --- | --- |
-| `g` | `lazygit` |
-| `ga` | `git add` |
-| `gc` / `gcm` | `git commit` / `git commit -m` |
-| `gcu` | `git add . && git commit -m 'Update'` |
-| `gp` / `gpl` | `git push` / `git pull` |
-| `gs` / `gd` | `git status` / `git diff` |
-| `gco` / `gcb` | `git checkout` / `git checkout -b` |
-| `gbr` | `git branch` |
-
-#### Nix
-
-| Shortcut | Runs |
-| --- | --- |
-| `run <pkg>` _(fn)_ | try a package once without installing it (`nix run nixpkgs#<pkg>`) |
-| `cleanup` | garbage-collect, keeping the last 5 generations |
-| `listgen` | list system generations |
-| `bloat` | show current system closure size |
-
-#### System & Misc
-
-| Shortcut | Runs |
-| --- | --- |
-| `c` / `e` | `clear` / `exit` |
-| `us` / `rs` | `systemctl --user` / `sudo systemctl` |
-| `cleanram` | drop filesystem caches |
-| `fetch` | `fastfetch` |
-| `anime` | `ani-cli` |
-| `f` | `figlet` |
-
-</details>
-
-## Keybinds
-
-`Mod` is the Super (Windows) key. `Mod+/` shows every keybind. To add or change one, open Dux Shell's settings (`Mod+Comma`) → Keyboard Shortcuts; yours override the config's.
-
-The few to know first:
-
-| Keybind | Action |
-| --- | --- |
-| `Mod+/` | Keybind cheatsheet |
-| `Mod+A` | App launcher |
-| `Mod+Return` | Terminal |
-| `Mod+C` | NixOS Settings |
-| `Mod+Comma` | Dux Shell settings |
-| `Mod+Q` | Close window |
-| `Mod+Tab` | Overview of all windows |
-
 ## Structure
 
 **Layout:** top-level directories and what lives in each:
@@ -602,7 +603,7 @@ setup.sh                          # sets up a new computer, or adds a person
 lib/settings.nix                  # reads and checks the settings files
 machines/
   ├── _template/                  # copied for a new computer
-  └── {eclipse,legion}/
+  └── {eclipse,legion}/           # my machine configs
         ├── settings.nix          # machine toggles, and who logs in
         ├── default.nix           # machine entry
         ├── hardware/             # hardware-configuration.nix, GPU, swapfile (laptop)
@@ -620,6 +621,8 @@ modules/
 docs/                             # notes on Proton, security and the WM
   └── personal/                   # notes for hardware and games only I use
 ```
+
+How everything is wired:
 
 ```
 flake.nix
