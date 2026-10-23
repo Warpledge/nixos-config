@@ -79,6 +79,23 @@ def pull_requests(repo):
         return json.load(r)
 
 
+def summary(flake):
+    """The sidebar's counts, after a fetch; prs is left out when GitHub can't be read."""
+    try:
+        git(flake, "fetch", "--quiet", timeout=60)
+    except (RuntimeError, OSError, subprocess.TimeoutExpired):
+        pass
+    status = system.git_status(flake)
+    counts = {"changed": status.changed, "ahead": status.ahead, "behind": status.behind}
+    repo = github_repo(flake)
+    if repo:
+        try:
+            counts["prs"] = len(pull_requests(repo))
+        except (OSError, ValueError, subprocess.TimeoutExpired):
+            pass
+    return counts
+
+
 def iso_epoch(text):
     try:
         return calendar.timegm(time.strptime(text, "%Y-%m-%dT%H:%M:%SZ"))
@@ -201,6 +218,7 @@ class GitPage(Adw.PreferencesPage):
         self._fill(self.recent, [self._commit(c) for c in recent] or [self._note("No commits yet")])
         for group, items in ((self.changed, changed), (self.outgoing, outgoing), (self.incoming, incoming)):
             group.set_visible(bool(items))
+        self.window.set_git_badges(changed=len(changed), ahead=len(outgoing), behind=len(incoming))
 
     def _prs(self, out, err):
         if isinstance(err, urllib.error.HTTPError) and err.code == 403:
@@ -208,10 +226,9 @@ class GitPage(Adw.PreferencesPage):
                                              "Sign in with gh auth login, or try again within the hour.")])
         elif err is not None:
             self._fill(self.prs, [self._note("Couldn't reach GitHub", str(err))])
-        elif not out:
-            self._fill(self.prs, [self._note("No open pull requests")])
         else:
-            self._fill(self.prs, [self._pr(pr) for pr in out])
+            self._fill(self.prs, [self._pr(pr) for pr in out] or [self._note("No open pull requests")])
+            self.window.set_git_badges(prs=len(out))
 
     #--------------------------------------------------------------------#
     #-- Rows

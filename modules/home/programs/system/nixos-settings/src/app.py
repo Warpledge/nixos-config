@@ -30,7 +30,7 @@ import ui  # noqa: E402
 import docs  # noqa: E402
 from backups import BackupsPage  # noqa: E402
 from flatpaks import FlatpakPage  # noqa: E402
-from git import GitPage  # noqa: E402
+from git import GitPage, summary as git_summary  # noqa: E402
 from overview import Overview, ShellPage  # noqa: E402
 from packages import PackagesPage, UserPackagesPage  # noqa: E402
 from people import PeoplePage  # noqa: E402
@@ -329,6 +329,22 @@ class Window(Adw.ApplicationWindow):
     def busy(self):
         return self.run_view is not None and self.run_view.running
 
+    def set_git_badges(self, **counts):
+        """The Git sidebar item's chips; counts are changed, ahead, behind and prs."""
+        self.git_counts.update(counts)
+        child = self.git_badges.get_first_child()
+        while child is not None:
+            following = child.get_next_sibling()
+            self.git_badges.remove(child)
+            child = following
+        for key, text, kind, tip in (("changed", "{}", "accent", "files not committed"),
+                                     ("ahead", "↑{}", "neutral", "commits to push"),
+                                     ("behind", "↓{}", "warning", "commits to pull"),
+                                     ("prs", "{} PR", "neutral", "open pull requests")):
+            n = self.git_counts.get(key)
+            if n:
+                self.git_badges.append(ui.chip(text.format(n), kind, tooltip=f"{n} {tip}"))
+
     def toast(self, text):
         self.toasts.add_toast(Adw.Toast(title=GLib.markup_escape_text(text), timeout=4))
 
@@ -505,7 +521,14 @@ class Window(Adw.ApplicationWindow):
             for key, title, icons in TOP[tab]:
                 if key == "shell" and self.wm != "niri":
                     continue
-                self._sidebar_item(tab, tops[tab], key, title, ui.first_icon(*icons))
+                suffix = None
+                if key == "git":
+                    suffix = self.git_badges = Gtk.Box(spacing=4, valign=Gtk.Align.CENTER)
+                    self.git_counts = {}
+                    if GLib.find_program_in_path("git"):
+                        ui.run_async(lambda: git_summary(self.cfg.flake),
+                                     lambda out, err: err is None and self.set_git_badges(**out))
+                self._sidebar_item(tab, tops[tab], key, title, ui.first_icon(*icons), suffix=suffix)
                 self.builders[key] = makers[key]
         for g in flatpak_page.groups if flatpak_page else []:
             for s in g.settings:
