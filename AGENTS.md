@@ -301,8 +301,12 @@ Every module opens with a banner; copy it byte for byte from a neighbour:
 
 - Sections: `#-- Name` between two `#----...----#` rules; items: `#--- text`.
 - Take only the arguments you use; `deadnix --no-lambda-arg <file>` finds the rest.
+- Comment only what the code doesn't make obvious; most lines need none.
 - Comments are short and say *why*: no narration ("we"), no restating the code,
   no alternatives. Lines within 89 columns: `awk 'length>89' <file>`.
+- Comments and user-facing text (NixOS Settings descriptions, template comments,
+  README) are plain, short and easy to read. Keep NixOS terms (rebuild,
+  generation, flake input, garbage collection) and explain them briefly.
 
 ## Writing style
 

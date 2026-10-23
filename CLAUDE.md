@@ -258,6 +258,8 @@ When reformatting an existing file: add headers, normalize spacing, convert inli
 
 ### Comment Style
 
+**Comment only what the code doesn't make obvious.** Most lines need none; a comment belongs where a reader couldn't otherwise tell how or why something works. Comments and user-facing text (NixOS Settings descriptions, template comments, README) are plain, short and easy to read. Keep NixOS's own terms (rebuild, generation, flake input, garbage collection) rather than swapping in friendlier words, and explain them briefly where needed.
+
 **Keep comments short. A comment earns its place by saving the next reader a trip to the docs, not by narrating.** One or two lines is normal; a paragraph is a smell.
 
 **Keep every comment line within 89 columns**, trailing `# ...` comments included. The user reads files in Zed at half-screen width, where a longer line wraps onto a second row. Shorten the wording first (a detail kept elsewhere, such as a doc, can be pointed at instead), and if it still doesn't fit, move the comment onto its own line above the code. Check with `awk 'length>89' <file>`.
