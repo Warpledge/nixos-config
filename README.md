@@ -126,7 +126,7 @@ My two computers:
 
 **Niri WM**
 
-![Niri desktop with Zed and fastfetch](./docs/screenshots/niri-desktop.png)
+![Niri desktop with fastfetch and NixOS Settings](./docs/screenshots/niri-desktop.png)
 
 ## Theming
 
