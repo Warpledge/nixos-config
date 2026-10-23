@@ -126,8 +126,8 @@ this, in thinking and in tool calls alike:
 
 ## Context budget
 
-128K tokens, about 27K of it taken by tool definitions (measured in opencode with
-the GitHub MCP on; opencode turned it off on 2026-10-23). Long tasks get compacted and whatever only
+128K tokens, about 10K of it taken by tool definitions in opencode (27K before
+it turned the GitHub MCP off on 2026-10-23; that server's schemas were ~17.7K). Long tasks get compacted and whatever only
 lived in context is lost.
 
 - **After a compaction**, read the todo list (see **Starting a task**) and run
