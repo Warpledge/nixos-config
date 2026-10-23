@@ -21,7 +21,7 @@ from gi.repository import Adw, GLib, Gtk  # noqa: E402
 import system  # noqa: E402
 import ui  # noqa: E402
 
-ICONS = ("vcs-normal", "folder-remote-symbolic", "emblem-shared-symbolic")
+ICONS = ("vcs-branch-symbolic", "branch-symbolic", "folder-remote-symbolic")
 #--- No password or passphrase prompt can hang the page
 ENV = dict(os.environ, GIT_TERMINAL_PROMPT="0", GIT_SSH_COMMAND="ssh -o BatchMode=yes")
 GITHUB = re.compile(r"github\.com[:/]([^/]+)/([^/]+?)(?:\.git)?/?$")

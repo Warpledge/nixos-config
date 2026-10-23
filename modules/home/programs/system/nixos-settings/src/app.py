@@ -59,7 +59,7 @@ TAB_ICONS = {"main": ("go-home-symbolic", "user-home-symbolic"),
 #--- Each tab's pages above its sidebar sections: key, title and icons to try.
 #--- Shell shows only under niri, which also moves the Desktop section to Niri.
 TOP = {"main": [("overview", "Overview", ("computer-symbolic",)),
-                ("git", "Git", ("vcs-normal", "folder-remote-symbolic", "emblem-shared-symbolic")),
+                ("git", "Git", ("vcs-branch-symbolic", "branch-symbolic", "folder-remote-symbolic")),
                 ("flatpaks", "Flatpaks", ("flatpak-symbolic", "system-software-install-symbolic")),
                 ("backups", "Backups", ("drive-harddisk-symbolic", "document-save-symbolic")),
                 ("people", "People", ("system-users-symbolic", "avatar-default-symbolic"))],
@@ -330,16 +330,23 @@ class Window(Adw.ApplicationWindow):
         return self.run_view is not None and self.run_view.running
 
     def set_git_badges(self, **counts):
-        """The Git sidebar item's chips; counts are changed, ahead, behind and prs."""
+        """The Git sidebar item's counts (changed, ahead, behind and prs), led by a
+        check while nothing waits to be pushed or pulled."""
         self.git_counts.update(counts)
         child = self.git_badges.get_first_child()
         while child is not None:
             following = child.get_next_sibling()
             self.git_badges.remove(child)
             child = following
+        if "ahead" in self.git_counts and not (self.git_counts["ahead"] or self.git_counts["behind"]):
+            self.git_badges.append(Gtk.Image(icon_name=ui.first_icon("object-select-symbolic", "emblem-ok-symbolic"),
+                                             pixel_size=12, css_classes=["success"],
+                                             tooltip_text="In step with the remote"))
         for key, icons, kind, tip in (("changed", ("document-edit-symbolic",), "accent", "files not committed"),
-                                      ("ahead", ("go-up-symbolic",), "dim-label", "commits to push"),
-                                      ("behind", ("go-down-symbolic",), "warning", "commits to pull"),
+                                      ("ahead", ("vcs-push-symbolic", "go-up-symbolic"), "dim-label",
+                                       "commits to push"),
+                                      ("behind", ("vcs-pull-symbolic", "go-down-symbolic"), "warning",
+                                       "commits to pull"),
                                       ("prs", ("vcs-merge-request-symbolic", "merge-symbolic"), "accent",
                                        "open pull requests")):
             n = self.git_counts.get(key)
