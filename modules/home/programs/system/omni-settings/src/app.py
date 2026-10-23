@@ -637,7 +637,8 @@ class Window(Adw.ApplicationWindow):
             self._packages_changed(self.user_packages())
 
         #--- Docs: the guides, then Gaming (the Proton pages, then the game notes)
-        doc_sections = [("Guides", [], docs.guide_docs(self.cfg.flake), "help-browser-symbolic"),
+        doc_sections = [("Guides", [], docs.guide_docs(self.cfg.flake),
+                         ui.first_icon("games-hint-symbolic", "help-browser-symbolic")),
                         ("Gaming", DOCS_GAMING, docs.game_docs(self.cfg.flake), "input-gaming-symbolic")]
         for title, pages, items, icon in doc_sections:
             if not pages and not items:
