@@ -2,6 +2,8 @@
 
 The NixOS setup I run on my desktop and laptop, with the [Niri][niri] window manager and [Dux Shell][dms]. You can install it on your own computer, and after that the NixOS Settings app handles most day-to-day changes, so you edit code far less often.
 
+Every app and service is its own module behind an on/off setting, so each computer builds only what its people use. The repo also carries rules and skills for AI agents, so Claude Code, or a local model in opencode or Zed, can make changes the way the config expects.
+
 ## Contents
 
 - [Install](#install)
@@ -115,10 +117,24 @@ NixOS Settings edits these files for you. You can also edit them by hand and run
 
 Everything else (`modules/`, `lib/`) is the config those settings switch on. You edit it for what the app has no setting for, such as an app's own options or a new module. `nixm` is a terminal menu for the same jobs as the app; see [below](#system-management-tui-script).
 
+Each app and service lives in its own module and loads only when its setting is on. Adding one is a module, a setting in the template and one import line; the `add-app` skill below does all three.
+
 My two computers:
 
 - **Desktop:** Ryzen 5800X3D + RX 9070 XT, 280Hz OLED + 144Hz
 - **Laptop:** Legion Slim 5, Ryzen 7735HS + AMD 680M / RTX 4070, 1600p@165Hz
+
+</details>
+
+<details>
+<summary>Managing it with AI</summary>
+
+Turn the tools on in NixOS Settings' **AI** tab: Claude Code and Claude Desktop under Cloud AI, and the model server, opencode and the models themselves under Local AI.
+
+- **Rules:** `CLAUDE.md` (plus one in several folders) tells Claude Code how the repo is laid out and what not to do, such as rebuilding on its own or committing a secret. `AGENTS.md` is a shorter copy for local models.
+- **Skills:** step-by-step jobs in `modules/home/programs/ai/skills/`, among them adding an app (`add-app`), updating and fixing what an update broke (`flake-update`, `disable-package`), troubleshooting a game (`game-troubleshooting`) and committing after a secret scan (`commit`). Claude Code, opencode and Zed's agent all read them.
+- **Lookups:** MCP servers search nixpkgs and NixOS options, library docs and GitHub, so answers come from current sources rather than the model's memory (`ai/mcp.nix`).
+- **Local models:** [llama-swap][llama-swap] serves the coding and chat models you pick to opencode, Zed and Open WebUI, with no cloud account.
 
 </details>
 
