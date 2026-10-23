@@ -15,7 +15,7 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gio, GLib, GObject, Gtk, Pango  # noqa: E402
+from gi.repository import Adw, Gdk, Gio, GLib, GObject, Gtk, Pango  # noqa: E402
 
 import appreset  # noqa: E402
 import backend  # noqa: E402
@@ -638,7 +638,7 @@ class Window(Adw.ApplicationWindow):
 
         #--- Docs: the guides, then Gaming (the Proton pages, then the game notes)
         doc_sections = [("Guides", [], docs.guide_docs(self.cfg.flake),
-                         ui.first_icon("games-hint-symbolic", "help-browser-symbolic")),
+                         ui.first_icon("omni-guide-symbolic", "help-browser-symbolic")),
                         ("Gaming", DOCS_GAMING, docs.game_docs(self.cfg.flake), "input-gaming-symbolic")]
         for title, pages, items, icon in doc_sections:
             if not pages and not items:
@@ -1882,6 +1882,9 @@ class App(Adw.Application):
     def do_startup(self):
         Adw.Application.do_startup(self)
         ui.load_css()
+        # The app's own icons, beside this file
+        Gtk.IconTheme.get_for_display(Gdk.Display.get_default()).add_search_path(
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "icons"))
         quit_action = Gio.SimpleAction.new("quit", None)
         quit_action.connect("activate", lambda *_: self._quit())
         self.add_action(quit_action)
