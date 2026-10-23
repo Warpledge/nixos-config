@@ -181,7 +181,7 @@ in {
           sticky_scroll = true;
           git_status_indicator = false;
           diagnostic_badges = true;
-          show_diagnostics = "all";
+          show_diagnostics = "errors";
           scrollbar = {
             horizontal_scroll = true;
             show = "system";
@@ -233,9 +233,11 @@ in {
         #--- Visual Indicators
         show_whitespaces = "selection";
         relative_line_numbers = "disabled";
+        diagnostics_max_severity = "error";
         scrollbar = {
           show = "auto";
           git_diff = true;
+          diagnostics = "error";
         };
 
         #--- Git Integration
