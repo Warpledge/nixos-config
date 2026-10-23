@@ -1,4 +1,4 @@
-# Launch Parameters
+# Per-Game Fixes
 
 Game-specific launch parameters, and why each one is set.
 
