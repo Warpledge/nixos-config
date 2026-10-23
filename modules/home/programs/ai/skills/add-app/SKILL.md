@@ -5,8 +5,8 @@ description: Add an application or service to this NixOS repo the way its conven
 
 # Add an app
 
-The workflow is **Add an application** in CLAUDE.md; this is its checklist plus a check
-that catches the step that usually gets missed.
+CLAUDE.md's **Add an application** points here; these are its steps plus a check that
+catches the step that usually gets missed.
 
 ## Before writing anything
 
@@ -16,7 +16,7 @@ that catches the step that usually gets missed.
 - Not in nixpkgs: prefer upstream's AppImage, or its `.deb`/tarball patched with
   `autoPatchelfHook` (`gaming/launchers/twintail.nix`, `audio/guitar/tone3000.nix`), over its
   Flatpak (the user's call, after repeated Flatpak trouble on NixOS; Hytale is the only
-  Flatpak left). An AppImage goes through `appimageTools` in the folder for what the app
+  Flatpak left, and the user wants Flatpak gone once it has another route). An AppImage goes through `appimageTools` in the folder for what the app
   *is* (`docs/personal/local/appimage-wraps.md`). A Flatpak is the last resort when there's no native build, or the AppImage's bundled libraries clash with the
   host; it gets its own module gated on a toggle, not an inline entry in `flatpak.nix`.
   A prebuilt bundle in `~/.local/opt` gets a wrapper in the folder for what the app is,
@@ -50,7 +50,11 @@ that catches the step that usually gets missed.
    `++ lib.optionals user.<category>.<app> [./<category>/<app>.nix]`. A NixOS-side gate on
    an app reads `anyUser.<category>.<app>` (on when any user of the machine has it), a
    service `machine.<name>.enable`. `gaming.steam` is the exception, wired in
-   `nixos/gaming/default.nix` on `anyUser.gaming.steam`.
+   `nixos/gaming/default.nix` on `anyUser.gaming.steam`. A guitar app goes in
+   `audio/guitar/default.nix`, with its toggle added to that folder's gate in
+   `programs/default.nix`. The other nested `default.nix` files (`browsers/zen/`,
+   `file-browsers/dolphin/`, `media/{freetube,moku}/`, `system/omni-settings/`,
+   `gaming/launchers/xsystem4/`) are module bundles, not routers.
 4. `git add <new files>` → `nix flake check` (a new module and import are the
    uncertain case CLAUDE.md rule 1 keeps the check for). The check only evaluates
    the module where its toggle is on, so step 1's toggle must be on somewhere first.
@@ -66,8 +70,9 @@ that catches the step that usually gets missed.
    add it to that parent's `choices` object in the same file.
 6. **README**: grep, never read it whole (`grep -n '^| \*\*' README.md`,
    `grep -n '^\[.*\]: http' README.md`), add the app to its Components row and a
-   `[label]: url` link (homepage from `nix eval --raw nixpkgs#<pkg>.meta.homepage`). No
-   `---` rules.
+   `[label]: url` link (homepage from `nix eval --raw nixpkgs#<pkg>.meta.homepage`), plus
+   `## Structure` for a new directory and `## Flake Inputs` for a new input. No `---`
+   rules; verify with `nix run nixpkgs#pulldown-cmark -- < README.md`.
 7. **Check the wiring**:
    ```bash
    bash <skill-dir>/scripts/check-app.sh <category>.<app> <module-path> <readme-label>
@@ -75,5 +80,6 @@ that catches the step that usually gets missed.
    It confirms the toggle in its template and its value on every machine, whether
    setup.sh offers it, the module staged, the router import pointing at that module (not
    just any file mentioning the toggle), and both README entries.
-8. Cut-only pass over any prose written (remove words, add none), then hand back for the
-   rebuild; never run it yourself.
+8. Cut-only pass over any prose written (remove words, add none: no new information or
+   claims, no rephrasing that smuggles either in), then hand back for the rebuild; never
+   run it yourself.
