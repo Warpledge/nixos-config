@@ -23,11 +23,11 @@
   matchTest = m:
     "{ "
     + lib.concatStringsSep " && " (lib.mapAttrsToList (k: v: let
-        var =
-          if k == "app-id"
-          then "\"$id\""
-          else "\"$title\"";
-      in "m ${var} ${lib.escapeShellArg v}")
+      var =
+        if k == "app-id"
+        then "\"$id\""
+        else "\"$title\"";
+    in "m ${var} ${lib.escapeShellArg v}")
     m)
     + "; } && return 0";
 
@@ -177,7 +177,7 @@
       files=(${lib.concatMapStringsSep " " (p: "${mkPreset p}") presets})
 
       current=$(sed -n '1s|^// preset: ||p' "$f" 2>/dev/null || true)
-      i=2 # Clear, until Mod+T picks another
+      i=1 # Default, until Mod+T picks another
       for k in "''${!names[@]}"; do
         if [[ ''${names[k]} == "$current" ]]; then
           i=$k
