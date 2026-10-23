@@ -1,0 +1,9 @@
+{
+  "typeCheckingMode": "standard",
+  "executionEnvironments": [
+    {
+      "root": "modules/home/programs/system/nixos-settings/src",
+      "reportMissingImports": "none"
+    }
+  ]
+}
