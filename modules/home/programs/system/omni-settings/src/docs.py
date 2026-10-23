@@ -217,7 +217,8 @@ class DocPage(Gtk.ScrolledWindow):
     def _label(self, markup, classes=()):
         label = Gtk.Label(wrap=True, wrap_mode=Pango.WrapMode.WORD_CHAR, xalign=0, selectable=True,
                           css_classes=list(classes))
-        if ui.valid_markup(markup):
+        # Pango's parser doesn't know <a>, which only GtkLabel handles
+        if ui.valid_markup(re.sub(r"</?a\b[^>]*>", "", markup)):
             label.set_markup(markup)
         else:
             label.set_text(re.sub(r"<[^>]+>", "", markup))
