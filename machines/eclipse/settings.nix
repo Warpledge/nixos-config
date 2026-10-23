@@ -100,7 +100,7 @@
     "spotify"
     "freetube"
     "ferdium"
-    "nixos-settings"
+    "omni-settings"
     "protonplus"
   ];
 

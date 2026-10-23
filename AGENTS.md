@@ -224,7 +224,7 @@ lines, `grep -n` that file for the part you need.
 - `services/ssh.nix` owns sshd and fail2ban; key-only auth, and an assertion
   fails the build if no user lists a key.
 
-**`modules/home/programs/system/nixos-settings/`** (a Python GTK app)
+**`modules/home/programs/system/omni-settings/`** (a Python GTK app)
 
 - It builds its pages from the `_template/settings.nix` layout (`#--` sections,
   `#---` headers, trailing comments), so keep that layout when adding a setting.
@@ -233,7 +233,7 @@ lines, `grep -n` that file for the part you need.
 - `userPackages` is a set of named lists (`{Media = ["vlc"];}`). A setting
   like that must be listed in both `GROUPED` (`src/schema.py`) and `grouped`
   (`lib/settings.nix`), or it's read as nested settings.
-- **Security:** its root helper (`nixos/system/user/nixos-settings-helper.nix`,
+- **Security:** its root helper (`nixos/system/user/omni-settings-helper.nix`,
   `src/helper.py`) must only accept typed values for the caller's own
   `users/_template` keys, never file text or Nix. Admin-only requests check
   wheel first. Don't loosen either.
@@ -307,7 +307,7 @@ Every module opens with a banner; copy it byte for byte from a neighbour:
 - Comment only what the code doesn't make obvious; most lines need none.
 - Comments are short and say *why*: no narration ("we"), no restating the code,
   no alternatives. Lines within 89 columns: `awk 'length>89' <file>`.
-- Comments and user-facing text (NixOS Settings descriptions, template comments,
+- Comments and user-facing text (Omni Settings descriptions, template comments,
   README) are plain, short and easy to read. Keep NixOS terms (rebuild,
   generation, flake input, garbage collection) and explain them briefly.
 

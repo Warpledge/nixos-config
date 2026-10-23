@@ -34,7 +34,7 @@
         # load at user priority and override apps' own CSS
         gtk4.theme = null;
         # DMS's file sets accent_bg_color only; apps reading accent_color
-        # (NixOS Settings) would get Adwaita's stock accent instead
+        # (Omni Settings) would get Adwaita's stock accent instead
         gtk3.extraCss = css;
         gtk4.extraCss = css;
         font = {

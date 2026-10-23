@@ -1,4 +1,4 @@
-"""NixOS Settings: pick apps and system options from menus, then rebuild."""
+"""Omni Settings: pick apps and system options from menus, then rebuild."""
 
 import difflib
 import grp
@@ -38,8 +38,8 @@ from proton import ProtonPage, ProtonVersionsPage  # noqa: E402
 from runview import RunView, fill_diff  # noqa: E402
 from windowrules import WindowRulesPage  # noqa: E402
 
-#--- The root helper every rebuild goes through (nixos/system/user/nixos-settings-helper.nix)
-HELPER = "/run/current-system/sw/bin/nixos-settings-apply"
+#--- The root helper every rebuild goes through (nixos/system/user/omni-settings-helper.nix)
+HELPER = "/run/current-system/sw/bin/omni-settings-apply"
 APP_ID = "dev.nixosconfig.Settings"
 VERSION = "2.0"
 
@@ -79,7 +79,7 @@ DOCS_SECTIONS = [("Proton", [("proton", "Launch Options", ("input-gaming-symboli
 USER_PACKAGES = ("user", ("userPackages",))
 #--- The user's default text editor from lib/default-apps.nix: its command and .desktop id
 try:
-    EDITOR = json.loads(os.environ["NIXOS_SETTINGS_EDITOR"])
+    EDITOR = json.loads(os.environ["OMNI_SETTINGS_EDITOR"])
 except (KeyError, ValueError):
     EDITOR = {"launch": ["zeditor"], "desktop": "dev.zed.Zed.desktop"}
 
@@ -91,7 +91,7 @@ def editor_name():
         info = None
     return info.get_name() if info else EDITOR["launch"][-1]
 #--- What's New items the user dismissed, as "domain:dotted.path"
-DISMISSED = os.path.join(GLib.get_user_state_dir(), "nixos-settings", "whats-new-dismissed.json")
+DISMISSED = os.path.join(GLib.get_user_state_dir(), "omni-settings", "whats-new-dismissed.json")
 
 
 def new_id(domain, path):
@@ -129,23 +129,23 @@ def choice_label(setting, value):
     return value[:1].upper() + value[1:]
 
 
-#--- This build's store path: <package>/share/nixos-settings/app.py, three levels up
+#--- This build's store path: <package>/share/omni-settings/app.py, three levels up
 RUNNING = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 
 def installed_package():
-    """The store path of the NixOS Settings the profile now holds, which a
+    """The store path of the Omni Settings the profile now holds, which a
     switch replaces while this build keeps running; None if it can't be found."""
-    path = GLib.find_program_in_path("nixos-settings")
+    path = GLib.find_program_in_path("omni-settings")
     if not path:
         return None
     real = os.path.realpath(path)
     package = os.path.dirname(os.path.dirname(real))
-    if not os.path.exists(os.path.join(package, "share", "nixos-settings", "app.py")):
+    if not os.path.exists(os.path.join(package, "share", "omni-settings", "app.py")):
         #--- A wrapper on PATH (the Mullvad split tunnel's) names the build it runs
         try:
             with open(real, errors="replace") as f:
-                found = re.search(r"/nix/store/[^/\s'\"]+/bin/nixos-settings", f.read(65536))
+                found = re.search(r"/nix/store/[^/\s'\"]+/bin/omni-settings", f.read(65536))
         except OSError:
             return None
         if not found:
@@ -169,7 +169,7 @@ def in_wheel():
 #--------------------------------------------------------------------#
 class Window(Adw.ApplicationWindow):
     def __init__(self, app, cfg):
-        super().__init__(application=app, title="NixOS Settings", default_width=1080, default_height=780,
+        super().__init__(application=app, title="Omni Settings", default_width=1080, default_height=780,
                          width_request=360, height_request=294)
         self.cfg = cfg
         self.state = None
@@ -255,7 +255,7 @@ class Window(Adw.ApplicationWindow):
         menu.append_section(None, section)
         section = Gio.Menu()
         section.append("Keyboard Shortcuts", "win.shortcuts")
-        section.append("About NixOS Settings", "win.about")
+        section.append("About Omni Settings", "win.about")
         menu.append_section(None, section)
         master = Adw.HeaderBar(title_widget=tabs_scroll, css_classes=["master-bar"])
         master.pack_start(Gtk.MenuButton(icon_name="open-menu-symbolic", menu_model=menu,
@@ -295,7 +295,7 @@ class Window(Adw.ApplicationWindow):
 
         self.split = Adw.NavigationSplitView(min_sidebar_width=230, max_sidebar_width=300,
                                              sidebar_width_fraction=0.27)
-        self.split.set_sidebar(Adw.NavigationPage(title="NixOS Settings", child=side))
+        self.split.set_sidebar(Adw.NavigationPage(title="Omni Settings", child=side))
         self.split.set_content(self.content_page)
         #--- Too narrow for every master tab's name: icons only. Only the last
         #--- matching breakpoint applies, so the narrow one repeats this.
@@ -660,7 +660,7 @@ class Window(Adw.ApplicationWindow):
 
         self.banner.set_title("")
         if not self.helper:
-            self.banner.set_title("The NixOS Settings helper isn't installed, so changes can't be applied")
+            self.banner.set_title("The Omni Settings helper isn't installed, so changes can't be applied")
         elif self.admin and not self.direct:
             self.banner.set_title(f"You can't edit the files in {self.cfg.flake}")
         self.banner.set_revealed(bool(self.banner.get_title()))
@@ -1809,7 +1809,7 @@ class Window(Adw.ApplicationWindow):
             self.run_undo = None
             GLib.timeout_add(700, self._offer_restart)
         if not self.is_active():
-            note = Gio.Notification.new("NixOS Settings")
+            note = Gio.Notification.new("Omni Settings")
             note.set_body(heading)
             self.get_application().send_notification("run", note)
 
@@ -1819,8 +1819,8 @@ class Window(Adw.ApplicationWindow):
         if package is None or package == RUNNING:
             return False
         dialog = Adw.AlertDialog(
-            heading="Restart NixOS Settings?",
-            body="This rebuild updated NixOS Settings itself. Restart it to use the version "
+            heading="Restart Omni Settings?",
+            body="This rebuild updated Omni Settings itself. Restart it to use the version "
                  "just installed; until then this window keeps running the old one.")
         dialog.add_response("later", "Later")
         dialog.add_response("restart", "Restart")
@@ -1831,7 +1831,7 @@ class Window(Adw.ApplicationWindow):
         def chosen(_, response):
             if response == "restart" and not self.busy:
                 app = self.get_application()
-                app.restart_into = os.path.join(package, "bin", "nixos-settings")
+                app.restart_into = os.path.join(package, "bin", "omni-settings")
                 app.quit()
         dialog.connect("response", chosen)
         dialog.present(self)
@@ -1867,7 +1867,7 @@ class Window(Adw.ApplicationWindow):
         dialog.present(self)
 
     def _about(self):
-        dialog = Adw.AboutDialog(application_name="NixOS Settings", version=VERSION,
+        dialog = Adw.AboutDialog(application_name="Omni Settings", version=VERSION,
                                  application_icon=ui.first_icon("nix-snowflake", "distributor-logo-nixos"),
                                  comments="Pick apps and system options for this NixOS config, then "
                                           "rebuild, update or switch back to an earlier version.")

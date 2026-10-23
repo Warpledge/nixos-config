@@ -109,9 +109,9 @@ class CleanPolicy:
 
 
 def clean_policy():
-    """The weekly nh clean job's arguments (NIXOS_SETTINGS_CLEAN_ARGS, from nh.nix),
+    """The weekly nh clean job's arguments (OMNI_SETTINGS_CLEAN_ARGS, from nh.nix),
     which the helper's clean-up uses as well."""
-    args = shlex.split(os.environ.get("NIXOS_SETTINGS_CLEAN_ARGS", "--keep-since 5d --keep 5"))
+    args = shlex.split(os.environ.get("OMNI_SETTINGS_CLEAN_ARGS", "--keep-since 5d --keep 5"))
     keep, since, text = 1, 0.0, ""
     for i, arg in enumerate(args):
         name, _, value = arg.partition("=")
@@ -126,7 +126,7 @@ def clean_policy():
                 count = int(m.group(1))
                 since = count * SECONDS[unit]
                 text = UNIT_NAMES[unit] if count == 1 else f"{count} {UNIT_NAMES[unit]}s"
-    return CleanPolicy(keep, since, text, os.environ.get("NIXOS_SETTINGS_CLEAN_DATES", ""))
+    return CleanPolicy(keep, since, text, os.environ.get("OMNI_SETTINGS_CLEAN_DATES", ""))
 
 
 def to_delete(generations, policy):
@@ -207,7 +207,7 @@ class InputChange:
 
 def runtime_dir():
     base = os.environ.get("XDG_RUNTIME_DIR") or f"/run/user/{os.getuid()}"
-    path = os.path.join(base, "nixos-settings")
+    path = os.path.join(base, "omni-settings")
     os.makedirs(path, mode=0o700, exist_ok=True)
     return path
 

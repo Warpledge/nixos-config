@@ -47,7 +47,7 @@
       ./system/user/shell.nix
       ./system/user/user.nix
       ./system/user/config-repo.nix
-      ./system/user/nixos-settings-helper.nix
+      ./system/user/omni-settings-helper.nix
     ]
     #--- Graphics drivers (controlled by machine settings; null: the machine's own files)
     ++ lib.optionals (machine.gpu.type != null) [./services/hardware/gpu.nix]

@@ -2,7 +2,7 @@
 # USER PACKAGES
 #=====================================================================#
 #- The nixpkgs packages in the user's userPackages categories, added from
-#- NixOS Settings' Packages tab; a dotted name reaches a package set's member
+#- Omni Settings' Packages tab; a dotted name reaches a package set's member
 {
   lib,
   pkgs,

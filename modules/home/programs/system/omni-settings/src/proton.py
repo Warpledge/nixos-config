@@ -289,7 +289,7 @@ class ProtonVersionsPage(Adw.PreferencesPage):
         self.add(top)
 
         default = steam_default()
-        nix = [t for t in os.environ.get("NIXOS_SETTINGS_COMPAT_TOOLS", "").split(";") if t]
+        nix = [t for t in os.environ.get("OMNI_SETTINGS_COMPAT_TOOLS", "").split(";") if t]
         if nix:
             group = Adw.PreferencesGroup(title="From This Config",
                                          description="Added to Steam by programs.steam.extraCompatPackages, "

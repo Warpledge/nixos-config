@@ -2,7 +2,7 @@
   "typeCheckingMode": "standard",
   "executionEnvironments": [
     {
-      "root": "modules/home/programs/system/nixos-settings/src",
+      "root": "modules/home/programs/system/omni-settings/src",
       "reportMissingImports": "none"
     }
   ]

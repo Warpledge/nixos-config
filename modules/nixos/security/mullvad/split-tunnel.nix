@@ -81,10 +81,10 @@
       # RateYourMusic and similar sites reject Mullvad exit IPs
       bin = "${pkgs.ferdium}/bin/ferdium";
     };
-    nixos-settings = {
+    omni-settings = {
       home = true;
       enable = true; # imported for every user, no toggle
-      bin = "${hm.nixos-settings.package}/bin/nixos-settings";
+      bin = "${hm.omni-settings.package}/bin/omni-settings";
     };
     protonplus = {
       home = true;

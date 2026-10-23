@@ -1,6 +1,6 @@
-"""nixos-settings-apply: run as root by pkexec after the caller types their own
+"""omni-settings-apply: run as root by pkexec after the caller types their own
 password. Builds this machine's system from the repo, shows what changes and
-switches to it, printing progress for NixOS Settings: nix's JSON log lines
+switches to it, printing progress for Omni Settings: nix's JSON log lines
 (`@nix {...}`), the helper's own events (`@ns {...}`) and plain text.
 
 Anyone on the machine may apply their own app settings: only template keys,
@@ -9,16 +9,16 @@ the file of a machine that lists them. A change for another machine is only
 saved; that machine picks it up when it rebuilds. Rebuilding as-is, and switching to an older version,
 are for admins (wheel), who could run nixos-rebuild anyway.
 
-Usage: nixos-settings-apply '{"mode": "switch"|"boot", "machine": name|null,
+Usage: omni-settings-apply '{"mode": "switch"|"boot", "machine": name|null,
                               "changes": [[["media", "mpv"], true], ...]}'
        (machine: whose block takes the changes; null for the caller's own file)
-       nixos-settings-apply '{"rebuild": true, "mode": "switch"|"boot"|"auto"|"build"}'
-       nixos-settings-apply '{"rebuild": true, "mode": ..., "newUser": name}'
+       omni-settings-apply '{"rebuild": true, "mode": "switch"|"boot"|"auto"|"build"}'
+       omni-settings-apply '{"rebuild": true, "mode": ..., "newUser": name}'
        (stdin's first line: the first password for that newly listed person)
-       nixos-settings-apply '{"activate": "/nix/store/...", "mode": ...}'
-       nixos-settings-apply '{"collectGarbage": true}'
-       nixos-settings-apply '{"clean": true}'  (drop settings the templates lost)
-       nixos-settings-apply '{"session": true}'  (stdin: NixOS Settings' socket;
+       omni-settings-apply '{"activate": "/nix/store/...", "mode": ...}'
+       omni-settings-apply '{"collectGarbage": true}'
+       omni-settings-apply '{"clean": true}'  (drop settings the templates lost)
+       omni-settings-apply '{"session": true}'  (stdin: Omni Settings' socket;
                                                  runs each request it sends, see session())
 
 "auto" switches now unless the new system changes a package that froze the
@@ -48,10 +48,10 @@ import nixfile  # noqa: E402
 import nixlog  # noqa: E402
 import schema  # noqa: E402
 
-LOCK = "/run/nixos-settings-apply.lock"
-RUN_DIR = "/run/nixos-settings"
+LOCK = "/run/omni-settings-apply.lock"
+RUN_DIR = "/run/omni-settings"
 #--- The weekly nh clean job's own arguments (the wrapper reads nh.nix)
-CLEAN_ARGS = shlex.split(os.environ.get("NIXOS_SETTINGS_CLEAN_ARGS", "--keep-since 5d --keep 5"))
+CLEAN_ARGS = shlex.split(os.environ.get("OMNI_SETTINGS_CLEAN_ARGS", "--keep-since 5d --keep 5"))
 DELETED_SYSTEM = re.compile(r"^- DEL /nix/var/nix/profiles/system-\d+-link")
 FREED = re.compile(r"(\d+) store paths deleted, ([\d.]+ \w+) freed")
 #--- What nh and nixos-rebuild run switch-to-configuration with, so a lost
@@ -286,7 +286,7 @@ def serve(request, conn):
 
 
 def session():
-    """Stays root for the NixOS Settings window that started it (src/session.py).
+    """Stays root for the Omni Settings window that started it (src/session.py).
     Each message on stdin, a socket pair only that window holds, is a request plus
     the socket for its output; it ends when the window closes its end."""
     try:
@@ -294,8 +294,8 @@ def session():
         if ctl.type != socket.SOCK_SEQPACKET:
             raise OSError
     except OSError:
-        refuse("a session is only for NixOS Settings")
-    os.environ["NIXOS_SETTINGS_SESSION"] = "1"
+        refuse("a session is only for Omni Settings")
+    os.environ["OMNI_SETTINGS_SESSION"] = "1"
     ctl.send(b"ready")
     while True:
         try:
@@ -389,8 +389,8 @@ def main():
     admin = in_wheel(caller.pw_name, caller.pw_gid)
     emit(step="auth", state="done")
 
-    cfg = backend.Config(os.environ["NIXOS_SETTINGS_FLAKE"], os.environ["NIXOS_SETTINGS_MACHINE"],
-                         caller.pw_name, os.environ["NIXOS_SETTINGS_LIB"])
+    cfg = backend.Config(os.environ["OMNI_SETTINGS_FLAKE"], os.environ["OMNI_SETTINGS_MACHINE"],
+                         caller.pw_name, os.environ["OMNI_SETTINGS_LIB"])
     try:
         request = json.loads(sys.argv[1])
     except (IndexError, ValueError):
@@ -398,7 +398,7 @@ def main():
     if not isinstance(request, dict):
         refuse("bad request")
     if request.get("session") is True:
-        if os.environ.get("NIXOS_SETTINGS_SESSION"):
+        if os.environ.get("OMNI_SETTINGS_SESSION"):
             refuse("bad request")
         session()
         return

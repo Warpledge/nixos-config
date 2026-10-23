@@ -216,7 +216,7 @@
     "open-floating": true
   },
   {
-    "name": "NixOS Settings",
+    "name": "Omni Settings",
     "note": "Mod+C. Tiled; with Zed (Mod+Z) at 61.2% the two fill the screen side by side.",
     "default-column-width": {
       "proportion": 0.388
@@ -229,7 +229,7 @@
   },
   {
     "name": "Zed",
-    "note": "Mod+Z. Leaves 38.8% beside it for NixOS Settings.",
+    "note": "Mod+Z. Leaves 38.8% beside it for Omni Settings.",
     "default-column-width": {
       "proportion": 0.612
     },

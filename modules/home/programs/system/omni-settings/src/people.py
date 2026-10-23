@@ -135,7 +135,7 @@ class PeoplePage(Adw.PreferencesPage):
         top = Adw.PreferencesGroup()
         top.add(ui.hero(ui.first_icon("system-users-symbolic", "avatar-default-symbolic"), "People",
                         "Who can log in to this computer. Each person picks their own apps by "
-                        "opening NixOS Settings on their own account."))
+                        "opening Omni Settings on their own account."))
         self.add(top)
 
         group = Adw.PreferencesGroup(title="On This Computer")

@@ -3,7 +3,7 @@ with it, and the rule is added to modules/wm/niri/home/core/window-rules.json,
 which rules.nix turns into niri's window rules; a rebuild applies it. Every
 rule in that file can be edited or removed here. The rules that need Nix
 (theme colours, the translucent app list, a machine's own rules) are listed
-read-only from the copy rules.nix writes to ~/.config/nixos-settings/."""
+read-only from the copy rules.nix writes to ~/.config/omni-settings/."""
 
 import json
 import os
@@ -17,7 +17,7 @@ from gi.repository import Adw, Gio, GLib, Gtk  # noqa: E402
 import ui  # noqa: E402
 
 RULES_FILE = os.path.join("modules", "wm", "niri", "home", "core", "window-rules.json")
-APPLIED_FILE = os.path.join(GLib.get_user_config_dir(), "nixos-settings", "niri-window-rules.json")
+APPLIED_FILE = os.path.join(GLib.get_user_config_dir(), "omni-settings", "niri-window-rules.json")
 
 #--- Characters niri's (Rust) regex treats as special
 SPECIAL = set("\\.+*?()|[]{}^$")

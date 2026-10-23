@@ -20,7 +20,7 @@ result-*
 *.log
 *.tmp
 
-# Python bytecode (NixOS Settings run from the repo)
+# Python bytecode (Omni Settings run from the repo)
 __pycache__/
 
 # WIP / personal scratchpad

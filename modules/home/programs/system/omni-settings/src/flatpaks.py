@@ -25,7 +25,7 @@ COLUMNS = "application,name,version,branch,origin,installation,size,ref,runtime"
 NOISE = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]|[█▉▊▋▌▍▎▏▒░▓]+")
 SIZE = re.compile(r"([\d.]+)\s*([kMGT]?)B")
 #--- Apps switched off here: {"<installation>:<id>": Ref fields}
-OFF_FILE = os.path.join(GLib.get_user_state_dir(), "nixos-settings", "flatpaks-off.json")
+OFF_FILE = os.path.join(GLib.get_user_state_dir(), "omni-settings", "flatpaks-off.json")
 
 
 @dataclass

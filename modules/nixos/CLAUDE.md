@@ -2,8 +2,8 @@
 
 <!-- Claude Code loads this file when it reads a file in this folder. -->
 
-NixOS Settings' root helper (`system/user/nixos-settings-helper.nix`) is described in
-`modules/home/programs/system/nixos-settings/CLAUDE.md`; read it before changing the helper.
+Omni Settings' root helper (`system/user/omni-settings-helper.nix`) is described in
+`modules/home/programs/system/omni-settings/CLAUDE.md`; read it before changing the helper.
 
 ## Network
 

@@ -1,6 +1,6 @@
 ---
 name: add-app
-description: Add an application or service to this NixOS repo the way its conventions require (a toggle in the settings template and the user's settings, module, router import, setup.sh's app list, README row and link, NixOS Settings description), then check it is wired everywhere. Use whenever the user asks to install, add, enable or package an app, a game launcher, a Flatpak, an AppImage or a system service in this config, even if they only say "can you get X on here".
+description: Add an application or service to this NixOS repo the way its conventions require (a toggle in the settings template and the user's settings, module, router import, setup.sh's app list, README row and link, Omni Settings description), then check it is wired everywhere. Use whenever the user asks to install, add, enable or package an app, a game launcher, a Flatpak, an AppImage or a system service in this config, even if they only say "can you get X on here".
 ---
 
 # Add an app
@@ -54,10 +54,10 @@ that catches the step that usually gets missed.
 4. `git add <new files>` → `nix flake check` (a new module and import are the
    uncertain case CLAUDE.md rule 1 keeps the check for). The check only evaluates
    the module where its toggle is on, so step 1's toggle must be on somewhere first.
-5. **NixOS Settings**: add a `descriptions.json` entry for the new setting. Grep for the
+5. **Omni Settings**: add a `descriptions.json` entry for the new setting. Grep for the
    file's last entry to find where to append:
    ```bash
-   grep -n '^\s*"[^"]*":' modules/home/programs/system/nixos-settings/src/descriptions.json | tail -1
+   grep -n '^\s*"[^"]*":' modules/home/programs/system/omni-settings/src/descriptions.json | tail -1
    ```
    Add an object with at least `summary` and `text` (use the package's description from
    `nix eval --raw nixpkgs#<pkg>.meta.description` or write a one-liner). Include `icon`

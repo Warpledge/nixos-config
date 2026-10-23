@@ -22,7 +22,7 @@ class Link:
 
 
 #--- Left out: Default Apps (mimeapps.list is the config's), Users, Greeter and
-#--- System Updater (NixOS Settings and the config own those). Mouse & Touchpad
+#--- System Updater (Omni Settings and the config own those). Mouse & Touchpad
 #--- and Keyboard write niri/dms/input.kdl, which only niri loads.
 LINKS = [
     Link("display_config", "Monitors", "Resolution, refresh rate, scale and arrangement",

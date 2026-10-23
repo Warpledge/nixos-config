@@ -6,7 +6,7 @@
 #- `dir` under ~/.lmstudio/models, where LM Studio saves a download of the
 #- `dir` repo. Offload and context are tuned for eclipse's 16GB RX 9070 XT.
 #- lib/settings.nix takes the dropdown choices from the attribute names;
-#- NixOS Settings' labels and download notes are in its descriptions.json.
+#- Omni Settings' labels and download notes are in its descriptions.json.
 {
   #--------------------------------------------------------------------#
   #-- Coding Models

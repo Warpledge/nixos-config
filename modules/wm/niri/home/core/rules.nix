@@ -45,7 +45,7 @@
     ];
   };
 
-  #--- Every other rule lives in window-rules.json, which NixOS Settings' Window
+  #--- Every other rule lives in window-rules.json, which Omni Settings' Window
   #--- Rules page edits; its name and note fields are labels for that page
   windowRules =
     lib.concatMap
@@ -80,9 +80,9 @@ in {
     ];
   };
 
-  #--- For NixOS Settings' Window Rules page: every rule niri gets (machine ones
+  #--- For Omni Settings' Window Rules page: every rule niri gets (machine ones
   #--- too) and the window-rules.json this build used
-  xdg.configFile."nixos-settings/niri-window-rules.json".text = builtins.toJSON {
+  xdg.configFile."omni-settings/niri-window-rules.json".text = builtins.toJSON {
     all = config.programs.niri.settings.window-rules;
     file = lib.importJSON ./window-rules.json;
   };

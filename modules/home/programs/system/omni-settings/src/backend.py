@@ -48,10 +48,10 @@ class Config:
     @classmethod
     def from_env(cls):
         return cls(
-            os.environ.get("NIXOS_SETTINGS_FLAKE", "/etc/nixos-config"),
-            os.environ["NIXOS_SETTINGS_MACHINE"],
-            os.environ.get("NIXOS_SETTINGS_USER", os.environ.get("USER", "")),
-            os.environ["NIXOS_SETTINGS_LIB"],
+            os.environ.get("OMNI_SETTINGS_FLAKE", "/etc/nixos-config"),
+            os.environ["OMNI_SETTINGS_MACHINE"],
+            os.environ.get("OMNI_SETTINGS_USER", os.environ.get("USER", "")),
+            os.environ["OMNI_SETTINGS_LIB"],
         )
 
     def file(self, domain, machine=None):

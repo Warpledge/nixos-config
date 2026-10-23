@@ -21,7 +21,7 @@ user: {lib, ...}: {
       ./media/screen-capture.nix
 
       #--- Settings app (every user)
-      ./system/nixos-settings
+      ./system/omni-settings
 
       #--- Shell
       ./shell/p10k/p10k.nix
@@ -43,7 +43,7 @@ user: {lib, ...}: {
       ./options.nix
       ./utilities.nix
     ]
-    #--- Packages added from NixOS Settings' Packages tab
+    #--- Packages added from Omni Settings' Packages tab
     ++ lib.optionals (user.userPackages != {}) [./user-packages.nix]
     #--- File Browsers (controlled by user settings)
     ++ lib.optionals user.fileBrowsers.nautilus [./file-browsers/nautilus.nix]

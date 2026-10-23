@@ -9,7 +9,7 @@ Security/privacy notes live under `docs/security/`:
 - `security/mullvad.md` — DataPacket-hosted relays read as London to registry-based services (Steam); pick a Tzulo relay in the same city
 - `security/apparmor.md` — the per-app AppArmor profiles: what each attaches to, reading `apparmor="ALLOWED"` log lines, moving a profile to enforce, and what breaks first when you do
 
-Game notes live under `docs/gaming/` (the `game-troubleshooting` skill indexes them; NixOS Settings' Docs tab shows the top-level `gaming/*.md` notes):
+Game notes live under `docs/gaming/` (the `game-troubleshooting` skill indexes them; Omni Settings' Docs tab shows the top-level `gaming/*.md` notes):
 
 - `gaming/steam-launch-parameters.md` — per-game Steam launch flags; documents the `tml-prelaunch` script (`modules/home/programs/gaming/scripts/tml-prelaunch.nix`)
 - `gaming/launcher-env-variables.md` — common env vars + wrappers for Heroic/Lutris/Faugus/umu/Steam (JP locale, Proton WineD3D, XWayland wrapper, RPG Maker, perf wrappers)

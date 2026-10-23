@@ -1,8 +1,8 @@
 # Warpledge's NixOS Configuration
 
-The NixOS setup I run on my desktop and laptop, with the [Niri][niri] window manager and [Dux Shell][dms]. It's designed to install on anyone's computer, and the NixOS Settings app handles most day-to-day management, to make NixOS simpler for the average user.
+The NixOS setup I run on my desktop and laptop, with the [Niri][niri] window manager and [Dux Shell][dms]. It's designed to install on anyone's computer, and the Omni Settings app handles most day-to-day management, to make NixOS simpler for the average user.
 
-Every module in the config (packages, services, settings) can be switched on or off from NixOS Settings. The repo also carries rules and skills so local and cloud AI models can work efficiently within the system.
+Every module in the config (packages, services, settings) can be switched on or off from Omni Settings. The repo also carries rules and skills so local and cloud AI models can work efficiently within the system.
 
 ## Contents
 
@@ -23,7 +23,7 @@ Every module in the config (packages, services, settings) can be switched on or 
 
 **Niri WM**
 
-![Niri desktop with fastfetch and NixOS Settings](./docs/screenshots/niri-desktop.png)
+![Niri desktop with fastfetch and Omni Settings](./docs/screenshots/niri-desktop.png)
 
 ## Theming
 
@@ -53,11 +53,11 @@ Colors change live from the shell, with no rebuild:
 - Moves the repo to `/etc/nixos-config`, so every admin can edit it (`~/nixos-config` stays as a link)
 - Builds the new system to start on the next boot
 
-Everyone starts with Zen, kitty, Helix, Zed, Nautilus, yazi, mpv, Steam and NixOS Settings.
+Everyone starts with Zen, kitty, Helix, Zed, Nautilus, yazi, mpv, Steam and Omni Settings.
 
 Other uses:
 
-- **Add a person:** `./setup.sh add-user`, or the People page in NixOS Settings
+- **Add a person:** `./setup.sh add-user`, or the People page in Omni Settings
 - **Reinstall a computer already in the repo:** run `./setup.sh` and pick it; its settings are kept
 - **Move an older clone to `/etc/nixos-config`:** `./setup.sh share`
 
@@ -65,7 +65,7 @@ Other uses:
 
 ## Using It
 
-Open **NixOS Settings** with `Mod+C` (`Mod` is the Windows key). Change what you want and press **Apply**: it saves, checks and rebuilds, asking for your password once.
+Open **Omni Settings** with `Mod+C` (`Mod` is the Windows key). Change what you want and press **Apply**: it saves, checks and rebuilds, asking for your password once.
 
 | To | Go to |
 | --- | --- |
@@ -88,7 +88,7 @@ Your computer's folder (`machines/<name>/`) and your folder (`users/<name>/`) ex
 
 There are two kinds of update:
 
-- **Update Now** in NixOS Settings gets newer versions of your apps.
+- **Update Now** in Omni Settings gets newer versions of your apps.
 - **Pulling from GitHub** gets my changes to the config: new apps, fixes and settings.
 
 <details>
@@ -105,7 +105,7 @@ git pull --rebase
 
 The commit saves your settings first, so the pull can put my changes underneath them. That's what `--rebase` means: git takes my new commits, then replays yours on top. If there's nothing new of yours to save, the commit says so and stops; run `git pull --rebase` on its own.
 
-Then open NixOS Settings and press **Rebuild Now** on the Overview. Settings I've added since show up on its **What's New** page.
+Then open Omni Settings and press **Rebuild Now** on the Overview. Settings I've added since show up on its **What's New** page.
 
 **If you forked the repo on GitHub**, your fork is `origin` and mine has to be added once:
 
@@ -141,7 +141,7 @@ The few to know first:
 | `Mod+/` | Keybind cheatsheet |
 | `Mod+A` | App launcher |
 | `Mod+Return` | Terminal |
-| `Mod+C` | NixOS Settings |
+| `Mod+C` | Omni Settings |
 | `Mod+Comma` | Dux Shell settings |
 | `Mod+Q` | Close window |
 | `Mod+Tab` | Overview of all windows |
@@ -217,7 +217,7 @@ Everything you can change sits in two kinds of file:
 - `machines/<name>/settings.nix`: the computer (kernel, services, firewall, graphics card, who can log in)
 - `users/<name>/settings.nix`: one person's apps, on every computer they use
 
-NixOS Settings edits these files for you. You can also edit them by hand and run `nixm rebuild`. The `_template` folders list every setting with a comment, and any setting your file leaves out is off.
+Omni Settings edits these files for you. You can also edit them by hand and run `nixm rebuild`. The `_template` folders list every setting with a comment, and any setting your file leaves out is off.
 
 Everything else (`modules/`, `lib/`) is the config those settings switch on. You edit it for what the app has no setting for, such as an app's own options or a new module. `nixm` is a terminal menu for the same jobs as the app; see [below](#system-management-tui-script).
 
@@ -233,7 +233,7 @@ My two computers:
 <details>
 <summary>Managing it with AI</summary>
 
-Turn the tools on in NixOS Settings' **AI** tab: Claude Code and Claude Desktop under Cloud AI, and the model server, opencode and the models themselves under Local AI.
+Turn the tools on in Omni Settings' **AI** tab: Claude Code and Claude Desktop under Cloud AI, and the model server, opencode and the models themselves under Local AI.
 
 - **Rules:** `CLAUDE.md` (plus one in several folders) tells Claude Code how the repo is laid out and what not to do, such as rebuilding on its own or committing a secret. `AGENTS.md` is a shorter copy for local models.
 - **Skills:** step-by-step jobs in `modules/home/programs/ai/skills/`, among them adding an app (`add-app`), updating and fixing what an update broke (`flake-update`, `disable-package`), troubleshooting a game (`game-troubleshooting`) and committing after a secret scan (`commit`). Claude Code, opencode and Zed's agent all read them.
@@ -402,7 +402,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | **Finance** | [HomeBank][homebank] (personal accounting with labeled transactions and a running balance) |
 | **Collection Tracking** | [Tonkatsu Box][tonkatsu-box] (games, film, anime, manga, visual novels, books and music in one local database, imports from Steam and AniList; a prebuilt bundle kept in `~/.local/opt/` instead of nixpkgs) |
 | **Task Manager** | [Resources][resources] (system and process monitor) |
-| **Settings App** | NixOS Settings ([`modules/home/programs/system/nixos-settings/`](./modules/home/programs/system/nixos-settings/)), a GTK app over the settings files that rebuilds through a [polkit][polkit] helper (see [Using It](#using-it)). Each person changes only their own apps; only admins change computer-wide settings, update or switch versions. |
+| **Settings App** | Omni Settings ([`modules/home/programs/system/omni-settings/`](./modules/home/programs/system/omni-settings/)), a GTK app over the settings files that rebuilds through a [polkit][polkit] helper (see [Using It](#using-it)). Each person changes only their own apps; only admins change computer-wide settings, update or switch versions. |
 | **Japanese** | [fcitx5][fcitx5] + [Mozc][mozc] for typing hiragana, katakana and kanji, plus [innoextract][innoextract], [cabextract][cabextract] and [mdf2iso][mdf2iso] for unpacking raw Japanese visual novels (off by default) |
 </details>
 

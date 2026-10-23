@@ -1,10 +1,10 @@
 #=====================================================================#
-# NIXOS SETTINGS CONFIGURATION
+# OMNI SETTINGS CONFIGURATION
 #=====================================================================#
 #- GTK4/libadwaita app for the settings files: pick apps and machine
 #- options from menus, and Apply writes them, checks them with
 #- lib/settings.nix and rebuilds through the root helper
-#- (nixos/system/user/nixos-settings-helper.nix), which also updates the
+#- (nixos/system/user/omni-settings-helper.nix), which also updates the
 #- flake inputs and switches back to earlier versions
 {
   pkgs,
@@ -27,15 +27,15 @@
   #--- The user's default text editor, which the Default Packages pages open modules in
   editor = ((import ../../../../../lib/default-apps.nix {inherit lib;}).forUser user).textEditor;
 
-  nixos-settings = pkgs.stdenvNoCC.mkDerivation {
-    pname = "nixos-settings";
+  omni-settings = pkgs.stdenvNoCC.mkDerivation {
+    pname = "omni-settings";
     version = "2.0";
     src = ./src;
     nativeBuildInputs = [pkgs.wrapGAppsHook4 pkgs.gobject-introspection pkgs.makeWrapper];
     buildInputs = [pkgs.gtk4 pkgs.libadwaita];
     installPhase = ''
       runHook preInstall
-      share=$out/share/nixos-settings
+      share=$out/share/omni-settings
       install -Dm644 -t $share *.py descriptions.json
       #--- Pick lists for Language & Input; only the names reach the closure
       tar -xJOf ${pkgs.glibc.src} --wildcards '*/localedata/SUPPORTED' \
@@ -44,41 +44,41 @@
         ${pkgs.xkeyboard-config}/share/xkeyboard-config-2/rules/evdev.lst > $share/layouts.txt
       find ${pkgs.kbd}/share/keymaps -name '*.map.gz' -printf '%f\n' \
         | sed 's/\.map\.gz$//' | sort -u > $share/keymaps.txt
-      makeWrapper ${python}/bin/python3 $out/bin/nixos-settings \
+      makeWrapper ${python}/bin/python3 $out/bin/omni-settings \
         --add-flags $share/app.py \
-        --set NIXOS_SETTINGS_FLAKE ${lib.escapeShellArg machine.flakePath} \
-        --set NIXOS_SETTINGS_MACHINE ${lib.escapeShellArg machine.name} \
-        --set NIXOS_SETTINGS_USER ${lib.escapeShellArg user.name} \
-        --set NIXOS_SETTINGS_LIB ${pkgs.path}/lib \
-        --set NIXOS_SETTINGS_CLEAN_ARGS ${lib.escapeShellArg clean.extraArgs} \
-        --set NIXOS_SETTINGS_CLEAN_DATES ${lib.escapeShellArg (lib.optionalString clean.enable clean.dates)} \
-        --set NIXOS_SETTINGS_COMPAT_TOOLS ${lib.escapeShellArg compatTools} \
-        --set NIXOS_SETTINGS_EDITOR ${lib.escapeShellArg (builtins.toJSON {inherit (editor) launch desktop;})} \
+        --set OMNI_SETTINGS_FLAKE ${lib.escapeShellArg machine.flakePath} \
+        --set OMNI_SETTINGS_MACHINE ${lib.escapeShellArg machine.name} \
+        --set OMNI_SETTINGS_USER ${lib.escapeShellArg user.name} \
+        --set OMNI_SETTINGS_LIB ${pkgs.path}/lib \
+        --set OMNI_SETTINGS_CLEAN_ARGS ${lib.escapeShellArg clean.extraArgs} \
+        --set OMNI_SETTINGS_CLEAN_DATES ${lib.escapeShellArg (lib.optionalString clean.enable clean.dates)} \
+        --set OMNI_SETTINGS_COMPAT_TOOLS ${lib.escapeShellArg compatTools} \
+        --set OMNI_SETTINGS_EDITOR ${lib.escapeShellArg (builtins.toJSON {inherit (editor) launch desktop;})} \
         --prefix PATH : ${lib.makeBinPath [alejandra pkgs.nix-search-tv]}
       runHook postInstall
     '';
   };
 in {
   #--- Read by the Mullvad split tunnel (nixos/security/mullvad/split-tunnel.nix)
-  options.nixos-settings.package = lib.mkOption {
+  options.omni-settings.package = lib.mkOption {
     type = lib.types.package;
     readOnly = true;
-    description = "The NixOS Settings build in home.packages.";
+    description = "The Omni Settings build in home.packages.";
   };
 
-  config.nixos-settings.package = nixos-settings;
+  config.omni-settings.package = omni-settings;
 
-  config.home.packages = [nixos-settings];
+  config.home.packages = [omni-settings];
 
   #--------------------------------------------------------------------#
   #-- Desktop Entry
   #--------------------------------------------------------------------#
 
-  config.xdg.desktopEntries.nixos-settings = {
-    name = "NixOS Settings";
+  config.xdg.desktopEntries.omni-settings = {
+    name = "Omni Settings";
     genericName = "System Settings";
     comment = "Pick apps and system options, rebuild and update";
-    exec = "nixos-settings";
+    exec = "omni-settings";
     icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
     terminal = false;
     categories = ["Settings" "System"];

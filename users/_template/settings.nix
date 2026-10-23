@@ -212,7 +212,7 @@
   };
 
   #--- User Packages
-  # nixpkgs packages added from NixOS Settings' Packages tab, installed as they
+  # nixpkgs packages added from Omni Settings' Packages tab, installed as they
   # come with no settings of their own, sorted into categories you name,
   # e.g. {Office = ["obsidian"]; Media = ["kdePackages.kdenlive"];}
   userPackages = {};

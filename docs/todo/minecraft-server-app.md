@@ -6,7 +6,7 @@ Added 2026-10-21. Future project, nothing started.
 
 ## Why
 
-NixOS Settings' Servers tab (status, stop, console and log) was removed on 2026-10-21 to keep that app about settings, so the servers are run from a terminal for now. The first version leaves out the TerraFirmaGreg server.
+Omni Settings' Servers tab (status, stop, console and log) was removed on 2026-10-21 to keep that app about settings, so the servers are run from a terminal for now. The first version leaves out the TerraFirmaGreg server.
 
 ## What's already in the repo
 
@@ -27,5 +27,5 @@ NixOS Settings' Servers tab (status, stop, console and log) was removed on 2026-
 ## Steps left
 
 1. Consider moving each server to a systemd service first, with tmux kept for the console, so it starts at boot and restarts after a crash. The app would then read the service's state.
-2. Pick the toolkit (GTK4/libadwaita in Python like NixOS Settings, or something else) and how it reaches the console: tmux `capture-pane`/`send-keys`, or RCON.
+2. Pick the toolkit (GTK4/libadwaita in Python like Omni Settings, or something else) and how it reaches the console: tmux `capture-pane`/`send-keys`, or RCON.
 3. Package it as a home module for the legion machine, gated the way `minecraft-servers/` is.

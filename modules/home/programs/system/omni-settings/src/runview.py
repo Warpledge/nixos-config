@@ -32,7 +32,7 @@ STEPS = {
 RUNNING_HEIGHT = 360  # px before the Working On list scrolls
 LOG_LIMIT = 6000  # lines kept in the log view
 #--- The last failed run, kept for the Overview after the window closes
-FAILED_LOG = os.path.join(GLib.get_user_state_dir(), "nixos-settings", "last-failed-run.txt")
+FAILED_LOG = os.path.join(GLib.get_user_state_dir(), "omni-settings", "last-failed-run.txt")
 
 
 def save_failed(title, heading, reason, log):
