@@ -86,7 +86,8 @@
 
     #--- gitleaks: the commit skill's secret scan
     #--- python3: the skill-creator and claude-security plugins' scripts
-    home.packages = [pkgs.gitleaks pkgs.python3];
+    #--- ruff: the edit hook's check on Omni Settings' Python
+    home.packages = [pkgs.gitleaks pkgs.python3 pkgs.ruff];
 
     #--- Turn off Claude-drafted feedback (the SendFeedback tool)
     home.sessionVariables.CLAUDE_CODE_SEND_FEEDBACK = "0";

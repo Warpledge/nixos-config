@@ -6,7 +6,19 @@ f=$(jq -r '.tool_input.file_path // .tool_response.filePath // empty' <<<"$in")
 new=$(jq -r '.tool_input.new_string // .tool_input.content // empty' <<<"$in")
 msg=()
 case $f in
-  *.nix) alejandra -q "$f" 2>/dev/null ;;
+  *.nix)
+    alejandra -q "$f" 2>/dev/null
+    # Only the new text, so lines the edit didn't touch aren't re-reported
+    long=$(awk 'length > 89 && /(^|[[:space:]])#/' <<<"$new")
+    [[ -n $long ]] && msg+=("Comment lines over 89 columns (CLAUDE.md Comment Style); shorten or move above the code:
+$long")
+    ;;
+  *.py)
+    # Pyflakes and syntax errors only; the style rules report old code on every edit
+    command -v ruff >/dev/null && out=$(ruff check --isolated --select F,E9 --output-format concise --quiet "$f" 2>&1)
+    [[ -n $out ]] && msg+=("ruff:
+$out")
+    ;;
   */README.md) grep -qx -- '---' "$f" && msg+=("README.md now has a --- line; Zed pairs these like front-matter delimiters (CLAUDE.md). Remove it.") ;;
 esac
 case $f in */machines/*/settings.nix | */users/*/settings.nix)
