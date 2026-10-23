@@ -5,17 +5,6 @@
   #--------------------------------------------------------------------#
   #-- Editor Configuration
   #--------------------------------------------------------------------#
-  #--- Helix is a modern modal editor with vim-like keybinds
-  #--- but with a more intuitive "selection -> action" model
-  #---
-  #--- Basic usage:
-  #--- - Normal mode: navigate and select text
-  #--- - Insert mode: press 'i' to enter, ESC to exit
-  #--- - Selection: use motions (w=word, e=end of word, b=back)
-  #--- - Actions: d=delete, c=change, y=yank (copy), p=paste
-  #--- - Space bar: opens command palette
-  #--- - ? : shows keybind help
-
   programs.helix = {
     enable = true;
     defaultEditor = false; # Zed is default
@@ -182,49 +171,4 @@
     ripgrep
     fd
   ];
-
-  #--------------------------------------------------------------------#
-  #-- Quick Start Guide
-  #--------------------------------------------------------------------#
-  #--- Run: hx <file>
-  #---
-  #--- Essential keybinds:
-  #--- - i = insert mode (before cursor)
-  #--- - a = insert mode (after cursor)
-  #--- - ESC or jk = back to normal mode
-  #--- - Space = command palette (shows all commands)
-  #--- - ? = keybind help
-  #---
-  #--- Navigation (normal mode):
-  #--- - h/j/k/l = left/down/up/right
-  #--- - w = next word start
-  #--- - e = next word end
-  #--- - b = previous word
-  #--- - gg = go to file start
-  #--- - ge = go to file end
-  #--- - / = search forward
-  #---
-  #--- Selection (extends as you move):
-  #--- - v = toggle selection mode
-  #--- - x = select line
-  #--- - ; = collapse selection to cursor
-  #---
-  #--- Actions (on selections):
-  #--- - d = delete selection
-  #--- - c = change selection (delete + insert)
-  #--- - y = yank (copy)
-  #--- - p = paste after
-  #--- - P = paste before
-  #--- - u = undo
-  #--- - U = redo
-  #---
-  #--- Custom keybinds:
-  #--- - Space w = save
-  #--- - Space q = quit
-  #--- - Space f = format document
-  #--- - Space Space = file picker
-  #--- - Space b = buffer picker
-  #--- - Space s = symbol picker (LSP)
-  #--- - Space d = diagnostics
-  #--------------------------------------------------------------------#
 }
