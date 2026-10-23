@@ -122,6 +122,43 @@ def known(template, path):
     return True
 
 
+#--- A router line `lib.optionals user.<toggle> [./file]`, or one whose condition
+#--- is toggles joined by ||; `(import ./dir user)` too
+ROUTE = re.compile(r"lib\.optionals?\s+(\([^()]*\)|(?:user|anyUser)\.[\w.]+)\s+\[\s*\(?(?:import\s+)?(\./[\w./-]+)")
+EITHER = re.compile(r"\(\s*(?:(?:user|anyUser)\.[\w.]+\s*\|\|\s*)+(?:user|anyUser)\.[\w.]+\s*\)")
+TOGGLE = re.compile(r"(user|anyUser)\.([\w.]+)")
+
+
+def toggle_modules(flake):
+    """{setting path: the .nix file its toggle imports}, read from the routers
+    under modules/. A toggle's own line wins over a shared || one, and a home
+    module over a system one; a folder gives its default.nix."""
+    found = {}  # path -> (rank, file); lower rank wins
+    for root, _, files in os.walk(os.path.join(flake, "modules")):
+        for name in files:
+            if not name.endswith(".nix"):
+                continue
+            try:
+                with open(os.path.join(root, name)) as f:
+                    text = f.read()
+            except OSError:
+                continue
+            for cond, target in ROUTE.findall(text):
+                shared = cond.startswith("(")
+                if shared and not EITHER.fullmatch(cond):
+                    continue
+                path = os.path.normpath(os.path.join(root, target))
+                if os.path.isdir(path):
+                    path = os.path.join(path, "default.nix")
+                if not os.path.isfile(path):
+                    continue
+                for who, dotted in TOGGLE.findall(cond):
+                    key, rank = tuple(dotted.split(".")), (who != "user") * 2 + shared
+                    if key not in found or rank < found[key][0]:
+                        found[key] = (rank, path)
+    return {key: path for key, (_, path) in found.items()}
+
+
 def read_tree(path):
     with open(path) as f:
         return nixfile.to_python(nixfile.parse(f.read()).root)

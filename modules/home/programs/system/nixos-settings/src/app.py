@@ -531,6 +531,7 @@ class Window(Adw.ApplicationWindow):
         self.tab_of = {}
         self.titles = {"new": "What's New", "search": "Search"}
         self.doc_keys = {}  # a note's path -> its sidebar key
+        self.module_of = backend.toggle_modules(self.cfg.flake)  # toggle path -> its module
 
         #--- Overview, Flatpaks (whose switch is a schema page's setting) and
         #--- What's New on Main, then the other tabs' pages
@@ -968,6 +969,20 @@ class Window(Adw.ApplicationWindow):
         launcher = Gtk.FileLauncher.new(Gio.File.new_for_path(self.cfg.flake))
         launcher.launch(self, None, None, None)
 
+    def open_in_zed(self, path):
+        """Opens `path` in Zed, which reuses the window that has the config open,
+        then brings that window forward."""
+        try:
+            Gio.Subprocess.new(["zeditor", path], Gio.SubprocessFlags.NONE)
+        except GLib.Error as e:
+            self.toast(f"Couldn't open Zed: {e.message}")
+            return
+        if GLib.find_program_in_path("nirius"):
+            title = re.escape(os.path.basename(self.cfg.flake.rstrip("/")))
+            GLib.timeout_add(400, lambda: Gio.Subprocess.new(
+                ["nirius", "focus", "--app-id", r"^dev\.zed\.Zed$", "--title", title],
+                Gio.SubprocessFlags.STDERR_SILENCE) and False)
+
     def _value(self, s):
         """What a row shows: user settings as they are on the computer picked in
         Change For (this one when it's All)."""
@@ -1065,6 +1080,15 @@ class Window(Adw.ApplicationWindow):
             app_reset = appreset.button(self, s)
             if app_reset is not None:
                 row.add_suffix(app_reset)
+            module = self.module_of.get(s.path)
+            if module and self.tab_of.get(f"page:{page.title}") == "packages" \
+                    and GLib.find_program_in_path("zeditor"):
+                rel = os.path.relpath(module, self.cfg.flake)
+                edit = Gtk.Button(icon_name=ui.first_icon("dev.zed.Zed", "zed", "text-x-script-symbolic"),
+                                  css_classes=["flat"], valign=Gtk.Align.CENTER,
+                                  tooltip_text=f"Open {rel} in Zed")
+                edit.connect("clicked", lambda _, m=module: self.open_in_zed(m))
+                row.add_suffix(edit)
         if kind != "bool":
             reset = Gtk.Button(icon_name="edit-undo-symbolic", css_classes=["flat"], valign=Gtk.Align.CENTER,
                                visible=value != s.default,
