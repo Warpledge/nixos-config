@@ -92,6 +92,14 @@ def sidebar_title(title):
 #--------------------------------------------------------------------#
 #-- Markdown
 #--------------------------------------------------------------------#
+TABLE_CHARS = 28  # widest a table column gets before the last one
+
+
+def plain(text):
+    """A line of Markdown as the text it shows, for measuring."""
+    return re.sub(r"\*\*|`", "", LINK.sub(r"\1", text))
+
+
 def inline(text):
     """Pango markup for one line of Markdown text."""
     # Code spans and links are set aside first, so bold can wrap around them
@@ -261,15 +269,27 @@ class DocPage(Gtk.ScrolledWindow):
                 box.append(row)
             return box
         if kind == "table":
-            grid = Gtk.Grid(column_spacing=18, row_spacing=8, margin_top=10, margin_bottom=10,
-                            margin_start=12, margin_end=12)
+            # Rows of boxes, not a Gtk.Grid: a grid's minimum height is its height
+            # at the narrowest column widths, whatever width it gets. Columns but
+            # the last are as wide as their longest cell, up to TABLE_CHARS.
+            columns = max(len(cells) for cells in data)
+            widths = [min(TABLE_CHARS, max(len(plain(cells[c])) if c < len(cells) else 0 for cells in data))
+                      for c in range(columns - 1)]
+            card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, css_classes=["card"])
             for r, cells in enumerate(data):
+                if r:
+                    card.append(Gtk.Separator())
+                row = Gtk.Box(spacing=18, margin_start=12, margin_end=12, margin_top=8, margin_bottom=8)
                 for c, cell in enumerate(cells):
                     label = self._label(f"<b>{inline(cell)}</b>" if r == 0 else inline(cell))
-                    label.set_max_width_chars(40)
-                    grid.attach(label, c, r, 1, 1)
-            card = Gtk.ScrolledWindow(child=grid, vscrollbar_policy=Gtk.PolicyType.NEVER,
-                                      propagate_natural_height=True, css_classes=["card"])
+                    label.set_valign(Gtk.Align.START)
+                    if c < len(widths):
+                        label.set_width_chars(widths[c])
+                        label.set_max_width_chars(widths[c])
+                    else:
+                        label.set_hexpand(True)
+                    row.append(label)
+                card.append(row)
             return card
         return None
 
