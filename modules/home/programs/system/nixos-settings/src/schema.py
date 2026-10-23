@@ -65,9 +65,7 @@ PAGES = {
                  ("Mouse Pointer", "", ["cursor", "cursorSize"])]),
     "Network & Firewall": ("computer", "network-workgroup-symbolic",
                            "What other devices may reach on this computer, and what it blocks.",
-                           [("Open Ports", "Other devices can connect to this computer on these. "
-                             "SSH, Syncthing, Sunshine, Steam and printing open their own "
-                             "ports while they're on.",
+                           [("Open Ports", "Other devices can connect to this computer on these.",
                              ["firewall.openTCPPorts", "firewall.openUDPPorts"]),
                             ("Ad & Tracker Blocking", "",
                              ["blocklist.enable", "blocklist.extra"])]),
@@ -77,8 +75,7 @@ PAGES = {
                   ("Sharing & Streaming", "", ["syncthing.enable", "sunshine.enable", "suwayomi.enable"]),
                   ("Containers & Scanning", "", ["docker.enable", "clamav.enable"])]),
     "Appearance": ("desktop", "applications-graphics-symbolic",
-                   "Wallpaper and the shell's look. Colors, fonts and icons "
-                   "come from the Catppuccin theme this config sets.",
+                   "Wallpaper and the shell's look.",
                    [("Wallpaper", "", ["wallpaper"])]),
     "Displays": ("desktop", "video-display-symbolic",
                  "Monitors, night light and what each screen shows.", []),
@@ -119,15 +116,12 @@ PAGES = {
               "the coding agent that uses them.",
               [("", "", ["llamaSwap.enable", "lmstudio.enable", "opencode.enable", "openWebui.enable"])]),
     "Models": ("localai", "applications-engineering-symbolic",
-               "The models llama-swap runs on this computer, each with its own tuned settings. "
-               "It loads one at a time, so switching models waits for a load.",
-               [("Code", "For opencode and Zed's agent panel. The first one turned on is the default, "
-                 "and each also gets a fast version with thinking off.", ["localAi.code"]),
-                ("Chat", "For conversation in Open WebUI (under Tools) or llama-swap's Playground "
-                 "(http://127.0.0.1:8090). The coding models are listed there too, and Qwen3.6 also as a "
-                 "chat version with Qwen's chat sampling.", ["localAi.chat"]),
-                ("Inline Suggestions", "Zed's suggestions as you type (Tab accepts one). One at a "
-                 "time, on the CPU, so the GPU stays free.", ["localAi.edit"])]),
+               "The models llama-swap runs on this computer, one at a time.",
+               [("Code", "For opencode and Zed's agent panel.", ["localAi.code"]),
+                ("Chat", "For conversation in Open WebUI or llama-swap's Playground, which also "
+                 "list the coding models.", ["localAi.chat"]),
+                ("Inline Suggestions", "Zed's suggestions as you type, run on the CPU so the GPU "
+                 "stays free.", ["localAi.edit"])]),
 }
 
 #--- List and none-or-one settings shown as one switch per model, straight in their group
