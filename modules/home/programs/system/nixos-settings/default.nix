@@ -24,6 +24,8 @@
   compatTools = lib.concatMapStringsSep ";" (p: "${lib.getName p} ${lib.getVersion p}") (
     lib.optionals steam.enable steam.extraCompatPackages
   );
+  #--- The user's default text editor, which the Default Packages pages open modules in
+  editor = ((import ../../../../../lib/default-apps.nix {inherit lib;}).forUser user).textEditor;
 
   nixos-settings = pkgs.stdenvNoCC.mkDerivation {
     pname = "nixos-settings";
@@ -51,6 +53,7 @@
         --set NIXOS_SETTINGS_CLEAN_ARGS ${lib.escapeShellArg clean.extraArgs} \
         --set NIXOS_SETTINGS_CLEAN_DATES ${lib.escapeShellArg (lib.optionalString clean.enable clean.dates)} \
         --set NIXOS_SETTINGS_COMPAT_TOOLS ${lib.escapeShellArg compatTools} \
+        --set NIXOS_SETTINGS_EDITOR ${lib.escapeShellArg (builtins.toJSON {inherit (editor) launch desktop;})} \
         --prefix PATH : ${lib.makeBinPath [alejandra pkgs.nix-search-tv]}
       runHook postInstall
     '';

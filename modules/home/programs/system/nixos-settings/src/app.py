@@ -77,6 +77,19 @@ DOCS_SECTIONS = [("Proton", [("proton", "Launch Options", ("input-gaming-symboli
 
 
 USER_PACKAGES = ("user", ("userPackages",))
+#--- The user's default text editor from lib/default-apps.nix: its command and .desktop id
+try:
+    EDITOR = json.loads(os.environ["NIXOS_SETTINGS_EDITOR"])
+except (KeyError, ValueError):
+    EDITOR = {"launch": ["zeditor"], "desktop": "dev.zed.Zed.desktop"}
+
+
+def editor_name():
+    try:
+        info = ui.DesktopAppInfo.new(EDITOR["desktop"])
+    except (TypeError, GLib.Error):
+        info = None
+    return info.get_name() if info else EDITOR["launch"][-1]
 #--- What's New items the user dismissed, as "domain:dotted.path"
 DISMISSED = os.path.join(GLib.get_user_state_dir(), "nixos-settings", "whats-new-dismissed.json")
 
@@ -969,15 +982,15 @@ class Window(Adw.ApplicationWindow):
         launcher = Gtk.FileLauncher.new(Gio.File.new_for_path(self.cfg.flake))
         launcher.launch(self, None, None, None)
 
-    def open_in_zed(self, path):
-        """Opens `path` in Zed, which reuses the window that has the config open,
-        then brings that window forward."""
+    def open_in_editor(self, path):
+        """Opens `path` in the user's default text editor. Zed reuses the window
+        that has the config open, so that window is brought forward too."""
         try:
-            Gio.Subprocess.new(["zeditor", path], Gio.SubprocessFlags.NONE)
+            Gio.Subprocess.new(EDITOR["launch"] + [path], Gio.SubprocessFlags.NONE)
         except GLib.Error as e:
-            self.toast(f"Couldn't open Zed: {e.message}")
+            self.toast(f"Couldn't open {editor_name()}: {e.message}")
             return
-        if GLib.find_program_in_path("nirius"):
+        if EDITOR["launch"][0] == "zeditor" and GLib.find_program_in_path("nirius"):
             title = re.escape(os.path.basename(self.cfg.flake.rstrip("/")))
             GLib.timeout_add(400, lambda: Gio.Subprocess.new(
                 ["nirius", "focus", "--app-id", r"^dev\.zed\.Zed$", "--title", title],
@@ -1082,12 +1095,12 @@ class Window(Adw.ApplicationWindow):
                 row.add_suffix(app_reset)
             module = self.module_of.get(s.path)
             if module and self.tab_of.get(f"page:{page.title}") == "packages" \
-                    and GLib.find_program_in_path("zeditor"):
+                    and GLib.find_program_in_path(EDITOR["launch"][0]):
                 rel = os.path.relpath(module, self.cfg.flake)
-                edit = Gtk.Button(icon_name=ui.first_icon("dev.zed.Zed", "zed", "text-x-script-symbolic"),
-                                  css_classes=["flat"], valign=Gtk.Align.CENTER,
-                                  tooltip_text=f"Open {rel} in Zed")
-                edit.connect("clicked", lambda _, m=module: self.open_in_zed(m))
+                image = ui.app_image([EDITOR["desktop"]], size=16) or Gtk.Image(icon_name="text-x-script-symbolic")
+                edit = Gtk.Button(child=image, css_classes=["flat"], valign=Gtk.Align.CENTER,
+                                  tooltip_text=f"Open {rel} in {editor_name()}")
+                edit.connect("clicked", lambda _, m=module: self.open_in_editor(m))
                 row.add_suffix(edit)
         if kind != "bool":
             reset = Gtk.Button(icon_name="edit-undo-symbolic", css_classes=["flat"], valign=Gtk.Align.CENTER,

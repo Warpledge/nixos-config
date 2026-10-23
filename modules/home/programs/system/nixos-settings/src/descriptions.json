@@ -34,7 +34,7 @@
   "ssh.authorizedKeys": {"title": "SSH Keys", "summary": "Public keys that may log in as you", "icon": ["seahorse"], "text": "Public keys allowed to log in over SSH on a computer with the SSH server on. A public key isn't a secret, so it's safe in the repo."},
 
   "defaultApps.browser": {"title": "Web Browser", "summary": "Opens links from every app", "icon": ["web-browser"], "choices": {"zen": "Zen", "mullvad": "Mullvad Browser", "helium": "Helium"}, "text": "With **FreeTube** on, YouTube links go there instead. If the browser picked here is switched off, the first one that's on is used."},
-  "defaultApps.textEditor": {"title": "Text Editor", "summary": "Opens text and code files", "icon": ["text-editor"], "choices": {"zed": "Zed", "helix": "Helix"}, "text": "If the editor picked here is switched off, the first one that's on is used."},
+  "defaultApps.textEditor": {"title": "Text Editor", "summary": "Opens text and code files", "icon": ["text-editor"], "choices": {"zed": "Zed", "helix": "Helix", "vscodium": "VSCodium"}, "text": "If the editor picked here is switched off, the first one that's on is used."},
   "defaultApps.terminal": {"title": "Terminal", "summary": "Runs terminal programs from the launcher", "icon": ["utilities-terminal"], "choices": {"kitty": "Kitty", "ghostty": "Ghostty"}, "text": "Also used by file managers. If the terminal picked here is switched off, the first one that's on is used."},
   "defaultApps.fileManager": {"title": "File Manager", "summary": "Opens folders", "icon": ["system-file-manager"], "choices": {"nautilus": "Nautilus", "dolphin": "Dolphin", "yazi": "Yazi", "duxFiles": "Dux Files"}, "text": "If the file manager picked here is switched off, the first one that's on is used."},
 

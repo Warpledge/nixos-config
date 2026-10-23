@@ -21,6 +21,7 @@ in rec {
     textEditor = [
       (app "zed" ["editors" "zed"] "dev.zed.Zed.desktop" ["zeditor"])
       (app "helix" ["editors" "helix"] "Helix.desktop" ["xdg-terminal-exec" "hx"])
+      (app "vscodium" ["editors" "vscodium"] "codium.desktop" ["codium"])
     ];
     terminal = [
       (app "kitty" ["terminals" "kitty"] "kitty.desktop" ["kitty"])
