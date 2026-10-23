@@ -70,10 +70,10 @@ TOP = {"main": [("overview", "Overview", ("computer-symbolic",)),
        "ai": [],
        "docs": []}
 
-#--- Docs tab sections ahead of the game notes: (title, [(key, title, icons)])
-DOCS_SECTIONS = [("Proton", [("proton", "Launch Options", ("input-gaming-symbolic",)),
-                             ("protonversions", "Proton Versions",
-                              ("system-software-install-symbolic", "input-gaming-symbolic"))])]
+#--- Docs tab Gaming pages ahead of the game notes: [(key, title, icons)]
+DOCS_GAMING = [("proton", "Launch Options", ("input-gaming-symbolic",)),
+               ("protonversions", "Proton Versions",
+                ("system-software-install-symbolic", "input-gaming-symbolic"))]
 
 
 USER_PACKAGES = ("user", ("userPackages",))
@@ -636,18 +636,17 @@ class Window(Adw.ApplicationWindow):
             self.sidebars["packages"].append(section)
             self._packages_changed(self.user_packages())
 
-        #--- Docs: Proton, then the game notes
-        doc_sections = [("docs", "Games", docs.game_docs(self.cfg.flake), "input-gaming-symbolic")]
-        for title, items in DOCS_SECTIONS:
-            section = Adw.SidebarSection(title=title)
-            for key, item_title, icons in items:
-                self._sidebar_item("docs", section, key, item_title, ui.first_icon(*icons))
-                self.builders[key] = makers[key]
-            self.sidebars["docs"].append(section)
-        for tab, title, items, icon in doc_sections:
-            if not items:
+        #--- Docs: the guides, then Gaming (the Proton pages, then the game notes)
+        doc_sections = [("Guides", [], docs.guide_docs(self.cfg.flake), "help-browser-symbolic"),
+                        ("Gaming", DOCS_GAMING, docs.game_docs(self.cfg.flake), "input-gaming-symbolic")]
+        for title, pages, items, icon in doc_sections:
+            if not pages and not items:
                 continue
+            tab = "docs"
             section = Adw.SidebarSection(title=title)
+            for key, item_title, icons in pages:
+                self._sidebar_item(tab, section, key, item_title, ui.first_icon(*icons))
+                self.builders[key] = makers[key]
             for doc in items:
                 short, rest = docs.sidebar_title(doc.title)
                 item = self._sidebar_item(tab, section, doc.key, short, icon)

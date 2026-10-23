@@ -1,5 +1,5 @@
-"""The notes under the repo's docs/gaming/, shown as pages: one per game note
-on the Docs tab. A small Markdown reader covers what the notes use:
+"""The notes under the repo's docs/guide/ and docs/gaming/, shown as pages: one
+per guide and game note on the Docs tab. A small Markdown reader covers what the notes use:
 headings, paragraphs, lists, quotes, tables, code blocks and inline marks."""
 
 import os
@@ -15,6 +15,7 @@ from gi.repository import Adw, Gio, GLib, Gtk, Pango  # noqa: E402
 import ui  # noqa: E402
 
 GAMES = os.path.join("docs", "gaming")
+GUIDES = os.path.join("docs", "guide")
 
 FENCE = re.compile(r"^\s*(```|~~~)")
 HEADING = re.compile(r"^(#{1,6})\s+(.*?)\s*#*\s*$")
@@ -57,6 +58,11 @@ def _docs(folder, key_prefix):
 def game_docs(flake):
     """[Doc] for docs/gaming/*.md, by title."""
     return sorted(_docs(os.path.join(flake, GAMES), "doc:games/"), key=lambda d: d.title.lower())
+
+
+def guide_docs(flake):
+    """[Doc] for docs/guide/*.md, in file name order (the names are numbered)."""
+    return _docs(os.path.join(flake, GUIDES), "doc:guide/")
 
 
 SIDEBAR_CHARS = 22  # what fits the sidebar's narrowest width without cutting off
@@ -268,10 +274,16 @@ class DocPage(Gtk.ScrolledWindow):
         return None
 
     def _link(self, _, uri):
-        """Opens a link to another note on its page."""
+        """Opens a link to another note on its page, and one to any other file or
+        folder in the text editor. {user} and {machine} stand for this login's."""
         if re.match(r"^[a-z][a-z0-9+.-]*:", uri):
             return False  # a web link: GTK opens it
+        uri = uri.replace("{user}", GLib.get_user_name()).replace("{machine}", self.window.cfg.machine)
         target = os.path.normpath(os.path.join(os.path.dirname(self.doc.path), uri.split("#")[0]))
-        if not self.window.open_doc(target):
+        if self.window.open_doc(target):
+            pass
+        elif os.path.exists(target):
+            self.window.open_in_editor(target)
+        else:
             self.window.toast(f"No page for {os.path.basename(target)}")
         return True

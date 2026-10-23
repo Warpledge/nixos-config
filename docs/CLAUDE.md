@@ -9,6 +9,10 @@ Security/privacy notes live under `docs/security/`:
 - `security/mullvad.md` — DataPacket-hosted relays read as London to registry-based services (Steam); pick a Tzulo relay in the same city
 - `security/apparmor.md` — the per-app AppArmor profiles: what each attaches to, reading `apparmor="ALLOWED"` log lines, moving a profile to enforce, and what breaks first when you do
 
+Beginner guides to using this setup day to day live under `docs/guide/`, shown in file name order as the Guides section of Omni Settings' Docs tab. Keep them in step when a page, button, keybind or `nixm` command they describe changes; links to repo files open in the user's text editor (`{user}` and `{machine}` stand for the login and machine):
+
+- `guide/01-start-here.md` to `guide/08-when-things-go-wrong.md` — the terms, Omni Settings, installing apps, updates and versions, the desktop and keybinds, backups and git, `nixm`, and recovering from a failed rebuild
+
 Game notes live under `docs/gaming/` (the `game-troubleshooting` skill indexes them; Omni Settings' Docs tab shows the top-level `gaming/*.md` notes):
 
 - `gaming/launch-parameters.md` — per-game launch options and why each is set. Common env vars and wrappers are on Omni Settings' Docs → Launch Options page (`omni-settings/src/proton.py`) and in `nixm launch-params`
