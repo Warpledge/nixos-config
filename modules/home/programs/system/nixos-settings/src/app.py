@@ -574,9 +574,12 @@ class Window(Adw.ApplicationWindow):
                 continue
             section = sections.get(page.section) or sections["apps"]
             key = f"page:{page.title}"
-            count = Gtk.Label(css_classes=["dim-label", "caption", "numeric"])
-            self.counts[key] = (page, count)
             tab = section_tab.get(page.section if page.section in sections else "apps", "main")
+            #--- Counts of switches turned on show only on the Packages tab
+            count = None
+            if tab == "packages":
+                count = Gtk.Label(css_classes=["dim-label", "caption", "numeric"])
+                self.counts[key] = (page, count)
             self._sidebar_item(tab, section, key, page.title, page.icon, suffix=count)
             self.builders[key] = lambda page=page, key=key: self._page(page, key)
             for g in page.groups:
