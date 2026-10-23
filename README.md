@@ -103,7 +103,7 @@ git add -A && git commit -m "My settings"
 git pull --rebase
 ```
 
-The commit saves your settings first, so the pull can put my changes underneath them. If there's nothing new of yours to save, the commit says so and stops; run `git pull --rebase` on its own.
+The commit saves your settings first, so the pull can put my changes underneath them. That's what `--rebase` means: git takes my new commits, then replays yours on top. If there's nothing new of yours to save, the commit says so and stops; run `git pull --rebase` on its own.
 
 Then open NixOS Settings and press **Rebuild Now** on the Overview. Settings I've added since show up on its **What's New** page.
 
