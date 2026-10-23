@@ -38,6 +38,12 @@ PAGE_TITLES = {
 }
 MOVES = {  # setting -> (page, group on that page)
     ("japanese", "vn"): ("Gaming", "Japanese Visual Novels"),
+    #--- Each ArtCraft app with others of its kind; a new one stays on the ArtCraft page
+    **{("artcraft", app): ("Graphics", "ArtCraft") for app in
+       ("photocraft", "lightcraft", "vectorcraft", "designcraft", "figcraft", "effectcraft", "cadcraft")},
+    ("artcraft", "filmcraft"): ("Media", "ArtCraft"),
+    ("artcraft", "soundcraft"): ("Audio", "ArtCraft"),
+    **{("artcraft", app): ("Office", "ArtCraft") for app in ("pdfcraft", "wordcraft", "gridcraft", "deckcraft")},
 }
 
 #--- Sidebar sections, top to bottom; under niri, Desktop is on the Niri tab, and
