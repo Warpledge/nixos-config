@@ -1,6 +1,6 @@
 # Warpledge's NixOS Configuration
 
-The NixOS setup I run on my desktop and laptop, with the [Niri][niri] window manager and [Dux Shell][dms]. You can install it on your own computer, and after that the NixOS Settings app handles day-to-day changes, so you don't need to edit code.
+The NixOS setup I run on my desktop and laptop, with the [Niri][niri] window manager and [Dux Shell][dms]. You can install it on your own computer, and after that the NixOS Settings app handles most day-to-day changes, so you edit code far less often.
 
 ## Contents
 
@@ -113,7 +113,7 @@ Everything you can change sits in two kinds of file:
 
 NixOS Settings edits these files for you. You can also edit them by hand and run `nixm rebuild`. The `_template` folders list every setting with a comment, and any setting your file leaves out is off.
 
-Everything else (`modules/`, `lib/`) is the config those settings switch on, so you shouldn't need to touch it. `nixm` is a terminal menu for the same jobs as the app; see [below](#system-management-tui-script).
+Everything else (`modules/`, `lib/`) is the config those settings switch on. You edit it for what the app has no setting for, such as an app's own options or a new module. `nixm` is a terminal menu for the same jobs as the app; see [below](#system-management-tui-script).
 
 My two computers:
 
