@@ -94,7 +94,8 @@ class Overview(Adw.PreferencesPage):
         #--- Updates
         self.updates_group = Adw.PreferencesGroup(title="Updates")
         self.status_row = Adw.ActionRow(title="Sources",
-                                        subtitle=ui.esc(f"From {ui.day(info.updated)} ({ui.ago(info.updated)})"))
+                                        subtitle=ui.esc(f"Flake inputs, locked {ui.day(info.updated)} "
+                                                        f"({ui.ago(info.updated)})"))
         self.status_row.add_prefix(Gtk.Image(icon_name=ui.first_icon("software-update-available-symbolic",
                                                                      "emblem-synchronizing-symbolic"),
                                              valign=Gtk.Align.CENTER))
@@ -113,7 +114,7 @@ class Overview(Adw.PreferencesPage):
         #--- Actions
         group = Adw.PreferencesGroup(title="Maintenance")
         rebuild = Adw.ActionRow(title="Rebuild Now", activatable=True,
-                                subtitle="Build and switch to the settings files as they are, "
+                                subtitle="nixos-rebuild switch on your settings files as they are, "
                                          "for example after editing them by hand")
         rebuild.add_prefix(Gtk.Image(icon_name=ui.first_icon("view-refresh-symbolic"), valign=Gtk.Align.CENTER))
         rebuild.add_suffix(Gtk.Image(icon_name="go-next-symbolic", valign=Gtk.Align.CENTER))
@@ -123,8 +124,8 @@ class Overview(Adw.PreferencesPage):
         free, total = info.disk
         space = f" {closure.human_size(free)} of {closure.human_size(total)} free now." if free else ""
         collect = Adw.ActionRow(title="Clean Up Old Versions", activatable=True, subtitle_lines=3,
-                                subtitle=ui.esc("Garbage collection: deletes old versions and every file "
-                                                "only they use, to free disk space." + space))
+                                subtitle=ui.esc("Garbage collection: deletes old generations and the store "
+                                                "files only they use." + space))
         collect.add_prefix(Gtk.Image(icon_name=ui.first_icon("user-trash-symbolic"), valign=Gtk.Align.CENTER))
         collect.add_suffix(Gtk.Image(icon_name="go-next-symbolic", valign=Gtk.Align.CENTER))
         collect.connect("activated", lambda _: window.confirm_collect())
@@ -172,9 +173,9 @@ class Overview(Adw.PreferencesPage):
         gens = info.generations[:HISTORY]
         if gens:
             group = Adw.PreferencesGroup(title="Versions",
-                                         description="Each rebuild makes a new version; the boot menu "
-                                                     "keeps the last ten. Switching back doesn't change "
-                                                     "your settings files, so the next rebuild uses them again.")
+                                         description="Generations: each rebuild saves one, and the boot menu "
+                                                     "keeps the last ten. Switching back leaves your settings "
+                                                     "files as they are.")
             running_path = os.path.realpath(closure.CURRENT)
             booted_path = os.path.realpath(closure.BOOTED)
             default_path = os.path.realpath(closure.SYSTEM_PROFILE)

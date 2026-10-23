@@ -1442,9 +1442,9 @@ class Window(Adw.ApplicationWindow):
             self.toast("Apply or discard your changes first")
             return
         dialog = Adw.AlertDialog(heading="Rebuild now?",
-                                 body="This builds the system from the settings files as they are "
-                                      "and switches to it. Preview builds it and shows what would "
-                                      "change, without switching.")
+                                 body="Rebuilds from your settings files as they are (nixos-rebuild "
+                                      "switch). At Next Restart uses nixos-rebuild boot; Preview "
+                                      "only builds and shows what would change.")
         dialog.add_response("cancel", "Cancel")
         dialog.add_response("preview", "Preview")
         dialog.add_response("boot", "At Next Restart")
@@ -1479,14 +1479,13 @@ class Window(Adw.ApplicationWindow):
         kept = f"the newest {policy.keep}" + (f" and any made in the last {policy.since_text}"
                                                if policy.since else "")
         if doomed:
-            first = (f"This deletes {len(doomed)} of the {len(gens)} system versions, the oldest ones "
-                     f"(versions {doomed[0].number} to {doomed[-1].number}), keeping {kept}. ")
+            first = (f"This deletes {len(doomed)} of the {len(gens)} system generations "
+                     f"({doomed[0].number} to {doomed[-1].number}), keeping {kept}. ")
         else:
-            first = f"No system version is old enough to delete yet; the clean-up keeps {kept}. "
-        body = (first + "Older versions of each person's apps and settings follow the same rule.\n\n"
-                "Then every file in the Nix store that no remaining version uses is deleted, which "
-                "is what frees the space, and the boot menu is rewritten to list only what's left. "
-                "You can't switch back to a deleted version.")
+            first = f"No generation is old enough to delete yet; the clean-up keeps {kept}. "
+        body = (first + "Home-manager generations follow the same rule.\n\n"
+                "Garbage collection then deletes every store path no remaining generation uses, "
+                "and the boot menu drops the deleted ones. You can't switch back to them.")
         if policy.schedule:
             body += f"\n\nThe same clean-up also runs on its own ({policy.schedule})."
         dialog = Adw.AlertDialog(heading="Clean up old versions?",
@@ -1494,8 +1493,8 @@ class Window(Adw.ApplicationWindow):
 
         def estimated(size, err):
             if err is None and size:
-                dialog.set_body(body + f"\n\nThe old system versions alone free about {closure.human_size(size)}"
-                                       ", more if older versions of apps or other unused files go too.")
+                dialog.set_body(body + f"\n\nThe old system generations alone free about "
+                                       f"{closure.human_size(size)}, more with other unused store paths.")
             else:
                 dialog.set_body(body)
         if doomed:
@@ -1532,11 +1531,11 @@ class Window(Adw.ApplicationWindow):
         which = f"{len(names)} of the {len(changes)} sources" if some else f"{len(changes)} sources"
         dialog = Adw.AlertDialog(
             heading="Update this computer?",
-            body=f"{which} move to their newest versions. The new system is "
-                 "downloaded and built, then switched to. If it changes systemd, glibc, niri or "
-                 "xwayland-satellite, it starts at the next restart instead, since switching to "
-                 "those live has frozen the desktop before.\n\nPreview builds it and shows what "
-                 "would change, then puts flake.lock back.")
+            body=f"{which} move to their newest versions (nix flake update), then the system "
+                 "rebuilds and switches. If systemd, glibc, niri or xwayland-satellite change, it "
+                 "switches at the next restart instead, since switching those live has frozen the "
+                 "desktop.\n\nPreview only builds and shows what would change, then puts "
+                 "flake.lock back.")
         dialog.add_response("cancel", "Cancel")
         dialog.add_response("build", "Preview")
         dialog.add_response("boot", "At Next Restart")
@@ -1582,9 +1581,9 @@ class Window(Adw.ApplicationWindow):
             return
         dialog = Adw.AlertDialog(
             heading=f"Switch to version {generation.number}?",
-            body=f"Version {generation.number} was made {ui.when(generation.when).lower()}. "
-                 "Your settings files stay as they are, so the next rebuild or update goes "
-                 "back to them.")
+            body=f"Rolls back to generation {generation.number}, made "
+                 f"{ui.when(generation.when).lower()}. Your settings files stay as they are, so "
+                 "the next rebuild goes back to them.")
         dialog.add_response("cancel", "Cancel")
         dialog.add_response("boot", "At Next Restart")
         dialog.add_response("auto", "Switch Now")
@@ -1675,7 +1674,7 @@ class Window(Adw.ApplicationWindow):
             return False
         dialog = Adw.AlertDialog(
             heading="Restart NixOS Settings?",
-            body="This rebuild changed NixOS Settings itself. Restart it to use the version "
+            body="This rebuild updated NixOS Settings itself. Restart it to use the version "
                  "just installed; until then this window keeps running the old one.")
         dialog.add_response("later", "Later")
         dialog.add_response("restart", "Restart")
