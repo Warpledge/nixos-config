@@ -126,11 +126,13 @@ this, in thinking and in tool calls alike:
 
 ## Context budget
 
-128K tokens, about 27K of it taken by tool definitions. Long tasks get compacted
-and whatever only lived in context is lost.
+128K tokens, about 27K of it taken by tool definitions (measured in opencode with
+the GitHub MCP on; opencode turned it off on 2026-10-23). Long tasks get compacted and whatever only
+lived in context is lost.
 
 - **After a compaction**, read the todo list (see **Starting a task**) and run
-  `git status --short && git diff --stat`. Re-read only what you'll quote.
+  `git status --short && git diff --stat && git log --oneline -3`. Re-read only
+  what you'll quote.
 - **After a compaction, the summary is not a source.** Before quoting a value, a
   default or a `file:line` in your answer, re-read that line (`grep -n`) and quote
   what the file says. A file the summary names may not exist: check it.
@@ -252,6 +254,10 @@ lines, `grep -n` that file for the part you need.
   secret goes in it. Its Bash allow rules stay read-only.
 - MCP API keys are read at launch from `~/.nixos-config-mcp/`, never written into
   the repo or the store.
+- In opencode the GitHub MCP is off (its tool list fills too much context); Zed's
+  agent still has it. Without it, for upstream releases, issues and files use `gh`
+  read-only: `gh release list -R
+  <owner>/<repo>`, `gh api repos/<owner>/<repo>/contents/<path>`.
 
 **`docs/`**
 

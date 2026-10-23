@@ -503,7 +503,7 @@ in {
           biome.settings.linter.rules.correctness.noUnknownTypeSelector = "off";
         };
 
-        #--- MCP Servers: the ones opencode keeps on for the local model (opencode.nix)
+        #--- MCP Servers (opencode turns GitHub's off for its local models; opencode.nix)
         context_servers = {
           nixos = {
             command = lib.getExe pkgs.mcp-nixos;

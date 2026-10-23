@@ -71,6 +71,13 @@
         url = "https://mcp.grep.app";
         enabled = true;
       };
+      #--- Off: opencode loads every tool schema up front and GitHub's are the bulk;
+      #--- the local models use `gh` instead
+      settings.mcp.github = {
+        type = "local";
+        command = [(lib.getExe pkgs.github-mcp-server) "stdio" "--read-only"];
+        enabled = false;
+      };
     };
   };
 }
