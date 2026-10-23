@@ -11,7 +11,7 @@ in {
   security = {
     sudo-rs.enable = mkForce false; # Disable sudo-rs (Rust rewrite, feature-incomplete)
     sudo = {
-      enable = true; # Enable traditional sudo
+      enable = true;
       keepTerminfo = true; # Fix sudo in modern terminal emulators
       wheelNeedsPassword = mkDefault true;
       execWheelOnly = mkForce true;

@@ -32,7 +32,6 @@
           enableReleaseChecks = true;
 
           targets = {
-            #--- Enable targets
             vesktop.enable = true;
             mpv.enable = true;
 

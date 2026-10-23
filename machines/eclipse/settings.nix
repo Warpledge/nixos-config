@@ -110,11 +110,11 @@
   ssh.enable = false;
 
   #--- ClamAV Antivirus
-  # Enable ClamAV daemon, freshclam auto-updater, and ClamTK GUI
+  # Background scanner, definition updates and the ClamTK window
   clamav.enable = false;
 
   #--- Docker Containerization
-  # Enable Docker and Docker Compose for container management
+  # Docker and Docker Compose; admins join the docker group
   docker = {
     enable = false;
   };

@@ -10,7 +10,7 @@
   #--------------------------------------------------------------------#
   #-- RTKit for Real-Time Priority
   #--------------------------------------------------------------------#
-  security.rtkit.enable = true; # Enable RTKit for PipeWire real-time scheduling
+  security.rtkit.enable = true; # Real-time scheduling for PipeWire
 
   #--- RTKit only covers clients that ask it over D-Bus. Audio apps that call
   #--- sched_setscheduler directly need a non-zero RLIMIT_RTPRIO, which

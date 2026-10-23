@@ -10,7 +10,7 @@
   #-- Nix Helper Configuration
   #--------------------------------------------------------------------#
   programs.nh = {
-    enable = true; # Enable nh (Nix Helper)
+    enable = true;
     clean = {
       enable = true;
       extraArgs = "--keep-since 5d --keep 5"; # Keep 5 days + 5 generations

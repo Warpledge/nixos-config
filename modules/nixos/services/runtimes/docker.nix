@@ -29,8 +29,6 @@
   #--------------------------------------------------------------------#
   #-- User Configuration
   #--------------------------------------------------------------------#
-  # Add admins to docker group for docker command access
-  # Note: Rootless mode is preferred over group-based access for security
   users.groups.docker = {
     members = lib.attrNames (lib.filterAttrs (_: user: user.admin) machine.users);
   };

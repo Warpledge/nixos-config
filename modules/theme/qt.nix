@@ -52,7 +52,6 @@ in {
         qt6ctSettings = qtctSettings "qt6ct";
       };
 
-      #--- Install qt6ct for Qt theming
       home.packages = with pkgs; [
         qt6Packages.qt6ct
       ];

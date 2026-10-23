@@ -42,7 +42,7 @@
   #-- Nix-LD Configuration
   #--------------------------------------------------------------------#
   programs.nix-ld = {
-    enable = true; # Enable nix-ld for unpatched Linux binaries
+    enable = true; # Runs unpatched Linux binaries
     libraries = with pkgs; [
       stdenv.cc.cc # C compiler runtime
       openssl # TLS/SSL library

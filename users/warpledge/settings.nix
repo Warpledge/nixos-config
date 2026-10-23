@@ -24,7 +24,6 @@
   #-- Apps
   #--------------------------------------------------------------------#
   #--- Browser Selection
-  # Enable the browsers you want installed
   browsers = {
     zen = true;
     mullvad = true;
@@ -33,21 +32,18 @@
   };
 
   #--- Terminal Selection
-  # Enable the terminals you want installed
   terminals = {
     kitty = true;
     ghostty = false;
   };
 
   #--- Editor Selection
-  # Enable the editors you want installed
   editors = {
     helix = true;
     zed = true;
   };
 
   #--- File Browser Selection
-  # Enable the file browsers you want installed
   fileBrowsers = {
     nautilus = true;
     yazi = true;
@@ -64,7 +60,6 @@
   };
 
   #--- Media Selection
-  # Enable the media applications you want installed
   media = {
     mpv = true;
     spotify = true;
@@ -83,7 +78,6 @@
   wallpaper = "engine"; # Animated Steam Workshop wallpapers (DP-2/DP-3)
 
   #--- Graphics Software Selection
-  # Enable the graphic design applications you want installed
   graphics = {
     blender = false;
     krita = false;
@@ -91,7 +85,6 @@
   };
 
   #--- Audio Software Selection
-  # Enable the music and audio applications you want installed
   audio = {
     reaper = true;
 
@@ -104,7 +97,6 @@
   };
 
   #--- Office Software Selection
-  # Enable the office and document applications you want installed
   office = {
     thunderbird = true; # Mail client
     obsidian = true; # Markdown note vaults
@@ -112,25 +104,22 @@
   };
 
   #--- Security Software Selection
-  # Enable the security and privacy applications you want installed
   security = {
     bleachbit = true; # Disk cleaner for caches, logs and browser leftovers
     keepassxc = true; # Offline password manager (vault synced with Syncthing)
   };
 
   #--- System Tools Selection
-  # Enable the system monitoring applications you want installed
   system = {
     resources = true; # GNOME system and process monitor
   };
 
   #--- Android Screen Mirroring (scrcpy)
-  # Mirror/control an Android device over USB or wifi; nothing is installed
-  # on the device, so it works on de-Googled phones/tablets
+  # Mirror and control an Android device over USB or wifi; nothing is
+  # installed on it
   scrcpy.enable = true;
 
   #--- Gaming
-  # Enable the game launchers, games and gaming tools you want installed
   gaming = {
     # Launchers
     steam = true; # NixOS programs.steam
@@ -156,7 +145,7 @@
   };
 
   #--- Discord Rich Presence (arRPC)
-  # Standalone arRPC server for Steam/Proton game detection in GoofCord
+  # Shows the Steam or Proton game you're playing in GoofCord or Vesktop
   discord.goofcord = true;
   discord.arrpc.enable = true;
 
