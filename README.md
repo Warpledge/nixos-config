@@ -619,7 +619,7 @@ machines/
   └── {eclipse,legion}/           # my machine configs
         ├── settings.nix          # machine toggles, and who logs in
         ├── default.nix           # machine entry
-        ├── hardware/             # hardware-configuration.nix, GPU, swapfile (laptop)
+        ├── hardware/             # hardware-configuration.nix, GPU, LUKS game drives (desktop), swapfile (laptop)
         ├── wm/                   # per-machine WM settings, monitors included
         └── minecraft-servers/    # GTNH + TerraFirmaGreg servers (laptop)
 users/

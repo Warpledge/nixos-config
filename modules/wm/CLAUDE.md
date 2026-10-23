@@ -23,8 +23,6 @@ DMS runs as a systemd user service (`systemd.enable`, `niri.enableSpawn = false`
 
 **Login:** Niri starts from the DMS greeter (greetd, through the `dux-greeter` input, set up in `niri/session.nix`).
 
-**Niri-only directories:** `core/blur-presets.nix`, `core/portals.nix`, `core/rules.nix` (plus `core/window-rules.json`), `core/translucent-apps.nix`, `core/vrr.nix`, `core/xwayland.nix`, `nirius.nix`.
-
 Per-machine WM overrides exist where needed, each applied to every user on the machine:
 - `machines/legion/wm/niri.nix` — hybrid-GPU env, Solaar autostart, the internal panel's outputs, DMS auto-lock off
 - `machines/eclipse/wm/niri.nix` — monitor layout and workspace assignment (1–6 on DP-2, 7–9 on DP-3), app placement, and the DMS bars (an auto-hiding copy of the main bar on the OLED)
