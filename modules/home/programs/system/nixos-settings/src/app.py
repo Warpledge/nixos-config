@@ -330,6 +330,11 @@ class Window(Adw.ApplicationWindow):
     def busy(self):
         return self.run_view is not None and self.run_view.running
 
+    def set_services_count(self, found):
+        """The Services sidebar item's count of units running, as Running Now shows them."""
+        running = sum(1 for active, _, _ in found.values() if active == "active")
+        self.services_count.set_label(str(running) if running else "")
+
     def _git_tick(self):
         """Every minute: the Git page reads everything again once it's made, or
         the sidebar counts alone (git.remote limits the network calls)."""
@@ -580,6 +585,10 @@ class Window(Adw.ApplicationWindow):
             if tab == "packages":
                 count = Gtk.Label(css_classes=["dim-label", "caption", "numeric"])
                 self.counts[key] = (page, count)
+            elif page.title == "Services":
+                count = self.services_count = Gtk.Label(css_classes=["success", "caption", "numeric"],
+                                                        tooltip_text="Services running now")
+                ui.run_async(services.states, lambda found, err: err is None and self.set_services_count(found))
             self._sidebar_item(tab, section, key, page.title, page.icon, suffix=count)
             self.builders[key] = lambda page=page, key=key: self._page(page, key)
             for g in page.groups:

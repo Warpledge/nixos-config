@@ -78,6 +78,8 @@ class RunningGroup(Adw.PreferencesGroup):
         ui.run_async(states, self._loaded)
 
     def _loaded(self, found, err):
+        if err is None:
+            self.window.set_services_count(found)
         if self.placeholder is not None:
             self.remove(self.placeholder)
             self.placeholder = None
