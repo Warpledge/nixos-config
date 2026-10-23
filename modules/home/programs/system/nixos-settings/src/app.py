@@ -30,6 +30,7 @@ import ui  # noqa: E402
 import docs  # noqa: E402
 from backups import BackupsPage  # noqa: E402
 from flatpaks import FlatpakPage  # noqa: E402
+from git import GitPage  # noqa: E402
 from overview import Overview, ShellPage  # noqa: E402
 from packages import PackagesPage, UserPackagesPage  # noqa: E402
 from people import PeoplePage  # noqa: E402
@@ -58,6 +59,7 @@ TAB_ICONS = {"main": ("go-home-symbolic", "user-home-symbolic"),
 #--- Each tab's pages above its sidebar sections: key, title and icons to try.
 #--- Shell shows only under niri, which also moves the Desktop section to Niri.
 TOP = {"main": [("overview", "Overview", ("computer-symbolic",)),
+                ("git", "Git", ("vcs-normal", "folder-remote-symbolic", "emblem-shared-symbolic")),
                 ("flatpaks", "Flatpaks", ("flatpak-symbolic", "system-software-install-symbolic")),
                 ("backups", "Backups", ("drive-harddisk-symbolic", "document-save-symbolic")),
                 ("people", "People", ("system-users-symbolic", "avatar-default-symbolic"))],
@@ -489,6 +491,7 @@ class Window(Adw.ApplicationWindow):
         makers = {"overview": lambda: Overview(self, self.info, self.wm, self.links),
                   "flatpaks": lambda: FlatpakPage(self, flatpak_page),
                   "backups": lambda: BackupsPage(self),
+                  "git": lambda: GitPage(self),
                   "packages": lambda: PackagesPage(self),
                   "userpackages": lambda: UserPackagesPage(self),
                   "people": lambda: PeoplePage(self),
