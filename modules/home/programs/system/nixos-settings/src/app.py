@@ -32,7 +32,7 @@ from backups import BackupsPage  # noqa: E402
 from flatpaks import FlatpakPage  # noqa: E402
 from git import GitPage, summary as git_summary  # noqa: E402
 from overview import Overview, ShellPage  # noqa: E402
-from packages import PackagesPage, UserPackagesPage  # noqa: E402
+from packages import PackagesPage, UserPackagesPage, flat as flat_packages  # noqa: E402
 from people import PeoplePage  # noqa: E402
 from proton import ProtonPage, ProtonVersionsPage  # noqa: E402
 from runview import RunView, fill_diff  # noqa: E402
@@ -96,6 +96,9 @@ def read_dismissed():
 def shown(setting, value):
     if setting.kind == "bool":
         return "On" if value else "Off"
+    if isinstance(value, dict):
+        n = sum(len(v) for v in value.values())
+        return f"{n} in {len(value)} categor{'y' if len(value) == 1 else 'ies'}" if n else "Not set"
     if value is None or value == "" or value == []:
         return "Not set"
     if isinstance(value, list):
@@ -604,18 +607,20 @@ class Window(Adw.ApplicationWindow):
 
         #--- User Packages, under Default Packages on the Packages tab
         self.package_listeners = []
+        self.package_items = {}  # category -> (sidebar item, key, count)
         packages_setting = self.settings.get(USER_PACKAGES)
         if packages_setting is not None:
-            section = Adw.SidebarSection(title="User Packages")
+            section = self.package_section = Adw.SidebarSection(title="User Packages")
             count = Gtk.Label(css_classes=["dim-label", "caption", "numeric"])
-            self._sidebar_item("packages", section, "userpackages", "Installed", "package-x-generic-symbolic",
+            self._sidebar_item("packages", section, "userpackages", "All", "package-x-generic-symbolic",
                                suffix=count)
             self.builders["userpackages"] = makers["userpackages"]
             self.page_of[USER_PACKAGES] = "userpackages"
             self.setters[USER_PACKAGES] = self._packages_changed
-            self.package_listeners.append(lambda names: count.set_label(str(len(names)) if names else ""))
-            self._packages_changed(self.user_packages())
+            self.package_listeners.append(lambda groups: count.set_label(str(len(flat_packages(groups)))
+                                                                         if groups else ""))
             self.sidebars["packages"].append(section)
+            self._packages_changed(self.user_packages())
 
         #--- Docs: Proton, then the game notes
         doc_sections = [("docs", "Games", docs.game_docs(self.cfg.flake), "input-gaming-symbolic")]
@@ -1236,20 +1241,62 @@ class Window(Adw.ApplicationWindow):
     #-- User Packages (shared by the Search and Installed pages)
     #--------------------------------------------------------------------#
     def user_packages(self, saved=False):
-        """The userPackages list with pending changes, or as saved."""
+        """The userPackages categories, {name: [packages]}, with pending changes or as saved."""
         s = self.settings.get(USER_PACKAGES)
         if s is None:
-            return []
+            return {}
         value = self._value(s) if saved else self.changes.get(USER_PACKAGES, self._value(s))
-        return list(value or [])
+        return {cat: list(names) for cat, names in value.items()} if isinstance(value, dict) else {}
 
-    def set_user_packages(self, names):
-        self.change(self.settings[USER_PACKAGES], list(names))
-        self._packages_changed(list(names))
+    def set_user_packages(self, groups):
+        groups = {cat: list(names) for cat, names in groups.items() if names}
+        self.change(self.settings[USER_PACKAGES], groups)
+        self._packages_changed(groups)
 
-    def _packages_changed(self, names):
+    def _packages_changed(self, groups):
+        groups = groups if isinstance(groups, dict) else {}
+        self._package_items()
         for listener in list(self.package_listeners):
-            listener(list(names or []))
+            listener(groups)
+
+    def _package_items(self):
+        """One sidebar item per category, saved or pending, under All."""
+        now, saved = self.user_packages(), self.user_packages(saved=True)
+        cats = sorted({c for c, n in now.items() if n} | {c for c, n in saved.items() if n}, key=str.lower)
+        keys = self.tab_keys["packages"]
+        self.switching = True
+        for cat in [c for c in self.package_items if c not in cats]:
+            item, key, _ = self.package_items.pop(cat)
+            self.package_section.remove(item)
+            keys.remove(key)
+            self.tab_of.pop(key, None)
+            self.builders.pop(key, None)
+            child = self.stack.get_child_by_name(key)
+            if child is not None:
+                if self.page_key == key:
+                    # Its last package moved or was undone: show All instead
+                    self.page_key = self.tab_page["packages"] = "userpackages"
+                    self._ensure("userpackages")
+                    self.stack.set_visible_child_name("userpackages")
+                    self.content_page.set_title(self.titles["userpackages"])
+                self.stack.remove(child)
+        first = keys.index("userpackages") + 1
+        for i, cat in enumerate(cats):
+            if cat not in self.package_items:
+                key = f"userpkgs:{cat}"
+                count = Gtk.Label(css_classes=["dim-label", "caption", "numeric"])
+                item = Adw.SidebarItem(title=cat, icon_name=ui.first_icon("folder-symbolic"))
+                item.set_suffix(count)
+                self.package_section.insert(item, i + 1)
+                keys.insert(first + i, key)
+                self.tab_of[key] = "packages"
+                self.titles[key] = cat
+                self.builders[key] = lambda cat=cat: UserPackagesPage(self, cat)
+                self.package_items[cat] = (item, key, count)
+            self.package_items[cat][2].set_label(str(len(now.get(cat, []))) if now.get(cat) else "")
+        if self.tab_of.get(self.page_key) == "packages" and self.page_key in keys:
+            self.sidebars["packages"].set_selected(keys.index(self.page_key))
+        self.switching = False
 
     #--------------------------------------------------------------------#
     #-- Changes

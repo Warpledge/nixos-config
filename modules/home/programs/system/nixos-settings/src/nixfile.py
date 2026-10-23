@@ -220,13 +220,13 @@ def nix_value(value):
         return json.dumps(value, ensure_ascii=False).replace("${", "\\${")
     if isinstance(value, list):
         return "[" + " ".join(nix_value(v) for v in value) + "]"
-    if value == {}:
-        return "{}"
+    if isinstance(value, dict):
+        return "{" + "".join(f"{nix_key(k)} = {nix_value(v)}; " for k, v in value.items()).rstrip() + "}"
     raise NixError(f"cannot write {value!r}")
 
 
 def nix_key(key):
-    return key if IDENT.fullmatch(key) and key not in ("true", "false", "null") else json.dumps(key)
+    return key if IDENT.fullmatch(key) and key not in ("true", "false", "null") else nix_value(key)
 
 
 #--- Lookup

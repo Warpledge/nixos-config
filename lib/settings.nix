@@ -36,6 +36,9 @@
     "localAi.chat" = lib.attrNames (import ./local-models.nix).chat;
   };
   portLists = ["firewall.openTCPPorts" "firewall.openUDPPorts"];
+  #--- Sets of named lists of text, e.g. userPackages = {Media = ["vlc"];};
+  #--- a machine's users.<name> block replaces the user's whole set
+  grouped = ["userPackages"];
   userChoices =
     {
       wallpaper = ["carousel" "engine"];
@@ -70,6 +73,10 @@
       then ["${name} is not a setting (check the spelling against the _template file)"]
       else if defaults.${key} == null
       then []
+      else if lib.elem (lib.concatStringsSep "." at) grouped
+      then
+        lib.optional (!(lib.isAttrs value && lib.all (l: lib.isList l && lib.all lib.isString l) (lib.attrValues value)))
+        "${name} should be a set of lists of names in quotes, e.g. {Media = [\"vlc\"];}"
       else if lib.isAttrs defaults.${key} && lib.isAttrs value
       then problems defaults.${key} value at
       else if builtins.typeOf value != builtins.typeOf defaults.${key}
@@ -135,10 +142,12 @@ in {
     missing = lib.filter (user: !builtins.pathExists ../users/${user}/settings.nix) names;
 
     #--- Defaults, then the user's own file, then this machine's changes
-    resolveUser = user:
-      lib.recursiveUpdate
-      (lib.recursiveUpdate userDefaults (import ../users/${user}/settings.nix))
-      listed.${user}
+    resolveUser = user: let
+      own = import ../users/${user}/settings.nix;
+      merged = lib.recursiveUpdate (lib.recursiveUpdate userDefaults own) listed.${user};
+    in
+      merged
+      // lib.genAttrs grouped (key: listed.${user}.${key} or own.${key} or userDefaults.${key})
       // {name = user;};
 
     merged = lib.recursiveUpdate machineDefaults (removeAttrs own ["users"]);

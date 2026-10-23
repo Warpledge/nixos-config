@@ -213,6 +213,7 @@
 
   #--- User Packages
   # nixpkgs packages added from NixOS Settings' Packages tab, installed as they
-  # come with no settings of their own, e.g. ["obsidian" "kdePackages.kdenlive"]
-  userPackages = [];
+  # come with no settings of their own, sorted into categories you name,
+  # e.g. {Office = ["obsidian"]; Media = ["kdePackages.kdenlive"];}
+  userPackages = {};
 }

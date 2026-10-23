@@ -105,7 +105,7 @@ def lookup(tree, path):
 def leaf_paths(tree, prefix=()):
     for key, value in tree.items():
         path = prefix + (key,)
-        if isinstance(value, dict):
+        if isinstance(value, dict) and path not in schema.GROUPED:
             yield from leaf_paths(value, path)
         else:
             yield path, value
@@ -113,8 +113,8 @@ def leaf_paths(tree, prefix=()):
 
 def known(template, path):
     """Whether lib/settings.nix accepts `path`: a template key, or under a null one."""
-    for key in path:
-        if template is None:
+    for i, key in enumerate(path):
+        if template is None or tuple(path[:i]) in schema.GROUPED:
             return True
         if not isinstance(template, dict) or key not in template:
             return False

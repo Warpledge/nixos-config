@@ -1,8 +1,8 @@
 #=====================================================================#
 # USER PACKAGES
 #=====================================================================#
-#- The nixpkgs packages in the user's userPackages list, added from NixOS
-#- Settings' Packages tab; a dotted name reaches a package set's member
+#- The nixpkgs packages in the user's userPackages categories, added from
+#- NixOS Settings' Packages tab; a dotted name reaches a package set's member
 {
   lib,
   pkgs,
@@ -16,5 +16,5 @@
         (throw "userPackages: nixpkgs has no package called ${name}")
         pkgs
     )
-    user.userPackages;
+    (lib.unique (lib.concatLists (lib.attrValues user.userPackages)));
 }

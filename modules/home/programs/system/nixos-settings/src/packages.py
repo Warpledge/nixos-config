@@ -21,6 +21,8 @@ PREFIX = "nixpkgs/ "  # print also lists Home Manager, NixOS and NUR entries
 SHOWN = 50  # results listed at once
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
 TITLE = re.compile(r"^(\S+) \(([^)]*)\)(.*)$")  # "name (version)", then "(broken)" if so
+#--- Categories Install offers before any are in use; a new name can be typed too
+STARTER = ["Media", "Gaming", "Development", "Graphics", "Office", "Internet", "Utilities"]
 
 
 def names():
@@ -86,9 +88,54 @@ def search(index, query):
     return [h[3] for h in hits]
 
 
+def flat(groups):
+    """Every package name in a userPackages set, over all its categories."""
+    return [name for names in groups.values() for name in names]
+
+
+def category_of(groups, attr):
+    return next((cat for cat, names in groups.items() if attr in names), None)
+
+
+def pick_category(window, attr, on_pick, current=None):
+    """Asks which category `attr` goes under: one in use, a starter one or a
+    new name, then calls on_pick(name)."""
+    groups = window.user_packages()
+    used = sorted((cat for cat, names in groups.items() if names), key=str.lower)
+    taken = {cat.lower() for cat in used}
+    dialog = Adw.Dialog(title="Move To" if current else "Install Under", content_width=380, content_height=560)
+
+    def choose(name):
+        name = name.strip()[:40]
+        if not name or name == current:
+            return
+        dialog.close()
+        on_pick(next((cat for cat in used if cat.lower() == name.lower()), name))
+
+    page = Adw.PreferencesPage()
+    group = Adw.PreferencesGroup(description=f"The User Packages category {attr} is listed under.")
+    for name in used + [cat for cat in STARTER if cat.lower() not in taken]:
+        row = Adw.ActionRow(title=ui.esc(name), activatable=name != current)
+        row.add_prefix(Gtk.Image(icon_name=ui.first_icon("folder-symbolic")))
+        if name == current:
+            row.add_suffix(ui.chip("Now", "accent"))
+        elif groups.get(name):
+            row.add_suffix(Gtk.Label(label=str(len(groups[name])), css_classes=["dim-label", "numeric"]))
+        row.connect("activated", lambda _, n=name: choose(n))
+        group.add(row)
+    entry = Adw.EntryRow(title="New category", show_apply_button=True)
+    entry.connect("apply", lambda e: choose(e.get_text()))
+    group.add(entry)
+    page.add(group)
+    view = Adw.ToolbarView(content=page)
+    view.add_top_bar(Adw.HeaderBar())
+    dialog.set_child(view)
+    dialog.present(window)
+
+
 def state(window, attr):
     """Where `attr` stands: installed, adding (on Apply), removing, or None."""
-    now, saved = attr in window.user_packages(), attr in window.user_packages(saved=True)
+    now, saved = attr in flat(window.user_packages()), attr in flat(window.user_packages(saved=True))
     if now:
         return "installed" if saved else "adding"
     return "removing" if saved else None
@@ -229,10 +276,15 @@ class PackagesPage(Adw.PreferencesPage):
         return row, fill
 
     def _install(self, attr):
-        names = self.window.user_packages()
-        if attr not in names:
-            self.window.set_user_packages(names + [attr])
-            self.window.toast(f"{attr} will be installed when you apply")
+        if attr in flat(self.window.user_packages()):
+            return
+
+        def add(cat):
+            groups = self.window.user_packages()
+            groups.setdefault(cat, []).append(attr)
+            self.window.set_user_packages(groups)
+            self.window.toast(f"{attr} will be installed under {cat} when you apply")
+        pick_category(self.window, attr, add)
 
     def _mark(self):
         for attr, button in self.buttons.items():
@@ -253,62 +305,100 @@ class PackagesPage(Adw.PreferencesPage):
 
 
 class UserPackagesPage(Adw.PreferencesPage):
-    """The userPackages list: what Search installed, each with an Uninstall
-    button, plus pending removals that can still be undone."""
+    """The userPackages categories (all of them, or `category` alone): what
+    Search installed, each with Move and Uninstall buttons, plus pending
+    removals that can still be undone."""
 
-    def __init__(self, window):
+    def __init__(self, window, category=None):
         super().__init__()
         self.window = window
-        self.rows = []
+        self.category = category
+        self.groups = []
         self.details = {}  # attr -> (description, version), read once per page
         top = Adw.PreferencesGroup()
-        top.add(ui.hero(ui.first_icon("package-x-generic-symbolic"), "User Packages",
-                        "Packages you added from Search, installed as they come with no settings "
-                        "of their own. Apps with settings made for them are under Default Packages."))
+        if category:
+            top.add(ui.hero(ui.first_icon("folder-symbolic"), category,
+                            f"User packages sorted under {category}. Move one to list it under "
+                            f"another category."))
+        else:
+            top.add(ui.hero(ui.first_icon("package-x-generic-symbolic"), "User Packages",
+                            "Packages you added from Search, installed as they come with no settings "
+                            "of their own, sorted into categories you pick. Apps with settings made "
+                            "for them are under Default Packages."))
         self.add(top)
-        self.group = Adw.PreferencesGroup(title="Installed")
-        self.add(self.group)
         window.package_listeners.append(lambda _: self._render())
         self._render()
 
     def _render(self):
-        for row in self.rows:
-            self.group.remove(row)
-        self.rows = []
+        for group in self.groups:
+            self.remove(group)
+        self.groups = []
         now, saved = self.window.user_packages(), self.window.user_packages(saved=True)
-        names = now + [n for n in saved if n not in now]
-        self.group.set_description(f"Saved for {self.window._where()}." if names else None)
-        if not names:
+        current = flat(now)
+        cats = [self.category] if self.category else \
+            sorted({c for c, n in now.items() if n} | {c for c, n in saved.items() if n}, key=str.lower)
+        shown = []
+        for cat in cats:
+            # Pending removals stay listed, under the category they were saved in
+            names = now.get(cat, []) + [n for n in saved.get(cat, []) if n not in current]
+            if not names:
+                continue
+            group = self._group(cat if not self.category else "Installed")
+            for attr in sorted(names, key=str.lower):
+                group.add(self._row(cat, attr, saved))
+            shown += names
+        if not shown:
+            group = self._group("Installed")
             empty = Adw.ActionRow(title="No user packages yet", activatable=True,
                                   subtitle="Find one on the Search page and press Install.")
             empty.add_suffix(Gtk.Image(icon_name="go-next-symbolic", valign=Gtk.Align.CENTER))
             empty.connect("activated", lambda _: self.window._show("packages"))
-            self._add(empty)
+            group.add(empty)
             return
-        for attr in names:
-            where = state(self.window, attr)
-            description, version = self.details.get(attr, ("", ""))
-            row = Adw.ActionRow(title=titled(attr, version), subtitle_lines=2, subtitle=ui.esc(description))
-            if where == "adding":
-                row.add_suffix(ui.chip("Installs on Apply", "accent"))
-            elif where == "removing":
-                row.add_suffix(ui.chip("Removed on Apply", "warning"))
-            if where == "removing":
-                button = Gtk.Button(label="Undo", valign=Gtk.Align.CENTER)
-                button.connect("clicked", lambda _, a=attr: self._undo(a))
-            else:
-                button = Gtk.Button(label="Uninstall", valign=Gtk.Align.CENTER,
-                                    css_classes=["destructive-action"])
-                button.connect("clicked", lambda _, a=attr: self._uninstall(a))
-            row.add_suffix(button)
-            self._add(row)
-        missing = [a for a in names if a not in self.details]
+        self.groups[0].set_description(f"Saved for {self.window._where()}.")
+        missing = [a for a in shown if a not in self.details]
         if missing and GLib.find_program_in_path(TOOL):
             ui.run_async(lambda: {a: preview(a) for a in missing}, self._described)
 
-    def _add(self, row):
-        self.group.add(row)
-        self.rows.append(row)
+    def _group(self, title):
+        group = Adw.PreferencesGroup(title=ui.esc(title))
+        self.add(group)
+        self.groups.append(group)
+        return group
+
+    def _row(self, cat, attr, saved):
+        where = state(self.window, attr)
+        description, version = self.details.get(attr, ("", ""))
+        row = Adw.ActionRow(title=titled(attr, version), subtitle_lines=2, subtitle=ui.esc(description))
+        was = category_of(saved, attr)
+        if where == "adding":
+            row.add_suffix(ui.chip("Installs on Apply", "accent"))
+        elif where == "removing":
+            row.add_suffix(ui.chip("Removed on Apply", "warning"))
+        elif was != cat:
+            row.add_suffix(ui.chip("Moves here on Apply", "accent", tooltip=f"Saved under {was}"))
+        if where == "removing":
+            button = Gtk.Button(label="Undo", valign=Gtk.Align.CENTER)
+            button.connect("clicked", lambda _: self._undo(cat, attr))
+            row.add_suffix(button)
+            return row
+        move = Gtk.Button(icon_name=ui.first_icon("folder-move-symbolic", "folder-symbolic"), css_classes=["flat"],
+                          valign=Gtk.Align.CENTER, tooltip_text="Move to another category")
+        move.connect("clicked", lambda _: self._move(cat, attr))
+        button = Gtk.Button(label="Uninstall", valign=Gtk.Align.CENTER, css_classes=["destructive-action"])
+        button.connect("clicked", lambda _: self._uninstall(attr))
+        row.add_suffix(move)
+        row.add_suffix(button)
+        return row
+
+    def _move(self, cat, attr):
+        def to(new):
+            groups = self.window.user_packages()
+            groups[cat] = [n for n in groups.get(cat, []) if n != attr]
+            groups.setdefault(new, []).append(attr)
+            self.window.set_user_packages(groups)
+            self.window.toast(f"{attr} moves to {new} when you apply")
+        pick_category(self.window, attr, to, current=cat)
 
     def _described(self, found, error):
         if error is not None:
@@ -317,11 +407,12 @@ class UserPackagesPage(Adw.PreferencesPage):
         self._render()
 
     def _uninstall(self, attr):
-        self.window.set_user_packages([n for n in self.window.user_packages() if n != attr])
+        groups = self.window.user_packages()
+        self.window.set_user_packages({cat: [n for n in names if n != attr] for cat, names in groups.items()})
         if state(self.window, attr) == "removing":
             self.window.toast(f"{attr} will be removed when you apply")
 
-    def _undo(self, attr):
-        saved = self.window.user_packages(saved=True)
-        names = self.window.user_packages() + [attr]
-        self.window.set_user_packages([n for n in saved if n in names] + [n for n in names if n not in saved])
+    def _undo(self, cat, attr):
+        groups = self.window.user_packages()
+        groups.setdefault(cat, []).append(attr)
+        self.window.set_user_packages(groups)

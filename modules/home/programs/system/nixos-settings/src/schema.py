@@ -12,6 +12,9 @@ import nixfile
 
 #--- Never shown: account plumbing, hardware, and values set once at install
 HIDDEN = {"users", "mainUser", "stateVersion", "flakePath", "gpu", "admin"}
+#--- Settings whose value is a set of named lists, read and written whole
+#--- (lib/settings.nix checks them the same way)
+GROUPED = {("userPackages",)}
 
 #--- Template sections whose `#---` headers each get their own page
 SPLIT_SECTIONS = {"Apps"}
@@ -216,7 +219,7 @@ def comment_text(c):
 def leaves(attrset, prefix=()):
     for b in attrset.bindings:
         path = prefix + tuple(b.path)
-        if isinstance(b.value, nixfile.AttrSet):
+        if isinstance(b.value, nixfile.AttrSet) and path not in GROUPED:
             yield from leaves(b.value, path)
         else:
             yield path, b, prefix
@@ -342,6 +345,8 @@ def make_setting(domain, path, b, values, choices, labels, doc, lead, header_tit
         s.kind, s.choices = "choice", choices[dotted]
     elif isinstance(value, bool):
         s.kind = "bool"
+    elif path in GROUPED:
+        s.kind = "groups"
     elif isinstance(value, list):
         s.kind = "list"
         s.ports = path in PORT_LISTS

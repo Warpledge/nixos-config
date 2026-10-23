@@ -322,6 +322,9 @@ def same_kind(template, value):
         return isinstance(value, list) and all(isinstance(v, str) for v in value)
     if template is None or isinstance(template, str):
         return value is None or isinstance(value, str)
+    if isinstance(template, dict):
+        return isinstance(value, dict) and all(isinstance(k, str) and k.strip() and same_kind([], v)
+                                               for k, v in value.items())
     return False
 
 
@@ -339,7 +342,8 @@ def user_changes(cfg, raw):
             refuse("bad request")
         path, value = item
         found, default = backend.lookup(template, path)
-        if not found or path[0] in schema.HIDDEN or isinstance(default, dict):
+        if not found or path[0] in schema.HIDDEN or (isinstance(default, dict)
+                                                     and tuple(path) not in schema.GROUPED):
             refuse(f"`{'.'.join(path)}` can't be changed here")
         if not same_kind(default, value):
             refuse(f"`{'.'.join(path)}` got the wrong kind of value")

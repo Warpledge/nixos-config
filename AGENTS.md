@@ -230,6 +230,9 @@ lines, `grep -n` that file for the part you need.
   `#---` headers, trailing comments), so keep that layout when adding a setting.
   Row text is `src/descriptions.json`; hidden settings and page layout are in
   `src/schema.py`.
+- `userPackages` is a set of named lists (`{Media = ["vlc"];}`). A setting
+  like that must be listed in both `GROUPED` (`src/schema.py`) and `grouped`
+  (`lib/settings.nix`), or it's read as nested settings.
 - **Security:** its root helper (`nixos/system/user/nixos-settings-helper.nix`,
   `src/helper.py`) must only accept typed values for the caller's own
   `users/_template` keys, never file text or Nix. Admin-only requests check
