@@ -4,16 +4,15 @@
 
 Niri is the only WM. Hyprland was removed on 2026-10-21; its modules, machine files and the `hyprland-verify` skill are on the `hyprland-backup` branch.
 
-Niri uses attribute-set actions, and **spawns with arguments must be lists**, not strings (`modules/wm/niri/home/core/binds.nix`):
+Binds go in `niri.keybinds.<id>` (`key`, `title`, `action`, `group`, plus `hidden`, `allowWhenLocked`, `allowInhibiting`, `enable`), never `programs.niri.settings.binds`: `niri/home/core/keybinds.nix` declares the option and turns it into niri's binds, so a machine file or override names a bind by id and survives a key change (eclipse's workspace binds force `action` alone). The repo's binds are in `core/binds.nix`, DMS's in `dms/default.nix`, nirius's in `nirius.nix`. Niri uses attribute-set actions, and **spawns with arguments must be lists**, not strings:
 ```nix
-programs.niri.settings.binds = {
-  "Mod+Return".action.spawn = "kitty";                            # single command, string OK
-  "XF86AudioPlay".action.spawn = ["playerctl" "play-pause"];      # args → must be a list
-  "Mod+Left".action.focus-column-left = {};
+niri.keybinds = {
+  terminal = {key = "Mod+Return"; title = "Terminal"; action.spawn = "kitty";};  # single command, string OK
+  play-pause = {key = "XF86AudioPlay"; title = "Play / pause"; action.spawn = ["playerctl" "play-pause"];};  # args → list
 };
 ```
 
-A string like `"dms ipc call spotlight"` in Niri only runs `dms` and drops the rest, so use `["dms" "ipc" "call"] ++ lib.splitString " " action`. An assertion in `niri/home/core/binds.nix` fails the build on a `spawn` string containing a space.
+A string like `"dms ipc call spotlight"` in Niri only runs `dms` and drops the rest, so use `["dms" "ipc" "call"] ++ lib.splitString " " action`. Assertions in `core/keybinds.nix` fail the build on a `spawn` string containing a space and on two enabled binds sharing a key (compared case-insensitively).
 
 **DMS** (DankMaterialShell): declarative config lives at `modules/wm/niri/home/dms/` (`default.nix`, `settings.json` and `clsettings.json`). Its DMS keybind helper is list concat. The module points `settings.json`'s `customThemeFile` at the current user's `~/.config`, since the mirrored file names one home folder, and merges a machine's `dms.extraSettings` (its bars, the laptop's lock timeout) over the file last. Neither file is a store link: the module hands them to `dms.mutableFiles` (`modules/wm/dms-mutable.nix`), which writes real files the DMS settings GUI saves to (the merge itself is `lib/mutable-merge.jq`, shared with Zed). On each activation a key takes the repo's value only when it's missing, still matches what the repo last applied (kept in `~/.local/state/dms-declared/`), or is listed in `dms.lockedSettings` (fonts, cursor, and the wallpaper keys under `wallpaper = "engine"`; the theme keys are only seeded, so the picker's choice survives rebuilds), so every other GUI change survives rebuilds and a fresh install gets the repo's file. Under niri the GUI's keybinds and monitors work too: `dms/binds.kdl`, `dms/outputs.kdl` and `dms/colors.kdl` (borders and focus ring, from the repo's matugen template; DMS's own niri template is off) are plain files (`dms.writableFiles`), binds.kdl loads after `hm.kdl` so its binds override the repo's, and outputs.kdl loads before it, since niri uses the first `output` block per monitor. So do its Mouse & Touchpad and Keyboard pages: `dms/input.kdl` loads after `hm.kdl`, and what DMS writes there (pointer acceleration, scrolling, tapping, disable-while-typing, middle-click emulation, Num Lock) is seeded as DMS settings (`inputDefaults` in niri's `dms/default.nix`) rather than set in `core/settings.nix`. DMS leaves a switched-off flag out instead of writing `false`, so a flag `hm.kdl` sets could never be turned off; niri-flake turns touchpad `tap` and `natural-scroll` on by default, hence their explicit `false` there. The keyboard layout stays the machine's `keyboardLayout` until layouts are added on DMS's Keyboard page. Plugin settings go in `dms.pluginSettings.<plugin>`, not `plugins.<plugin>.settings`: niri writes `plugin_settings.json` itself (`managePluginSettings = false`), and DMS warns it ignores `plugins.*.settings` then.
 

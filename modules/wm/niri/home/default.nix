@@ -13,6 +13,7 @@
 
     #--- Core Configuration
     ./core/binds.nix
+    ./core/keybinds.nix
     ./core/blur-presets.nix
     ./core/portals.nix
     ./core/rules.nix

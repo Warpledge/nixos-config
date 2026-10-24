@@ -60,16 +60,6 @@ in {
             else "DP-3";
         });
 
-        #--- Number keys go to the named workspaces, not per-monitor indexes
-        binds = lib.mkMerge (map (n: let
-            name = toString n;
-          in {
-            # Forcing the action alone keeps the cheatsheet title from binds.nix
-            "Mod+${name}".action = lib.mkForce {focus-workspace = name;};
-            "Mod+Shift+${name}".action = lib.mkForce {move-column-to-workspace = name;};
-          })
-          numbers);
-
         #--- App placement on the named workspaces
         window-rules = [
           {
@@ -86,6 +76,16 @@ in {
           }
         ];
       };
+
+      #--- Number keys go to the named workspaces, not per-monitor indexes
+      niri.keybinds = lib.mkMerge (map (n: let
+          name = toString n;
+        in {
+          # Forcing the action alone keeps the key and title from binds.nix
+          "workspace-${name}".action = lib.mkForce {focus-workspace = name;};
+          "to-workspace-${name}".action = lib.mkForce {move-column-to-workspace = name;};
+        })
+        numbers);
 
       #--------------------------------------------------------------------#
       #-- DMS Bars

@@ -106,66 +106,74 @@ in {
   #--------------------------------------------------------------------#
   #-- DankMaterialShell NIRI KEYBINDS --#
   #--------------------------------------------------------------------#
-  programs.niri.settings.binds = let
+  # Ids are what overrides name (option in core/keybinds.nix)
+  niri.keybinds = let
     dms = action: ["dms" "ipc" "call"] ++ (lib.splitString " " action);
     # A DMS bind titled for the Mod+/ cheatsheet
-    dmsBind = title: action: {
+    dmsBind = key: title: action: {
+      inherit key title;
       action.spawn = dms action;
-      hotkey-overlay.title = title;
+      group = "Shell";
     };
     # Hardware keys: still fire while the lock screen is up, left off the cheatsheet
-    dmsLocked = action: {
-      action.spawn = dms action;
-      allow-when-locked = true;
-      hotkey-overlay.hidden = true;
-    };
+    dmsLocked = key: title: action:
+      dmsBind key title action
+      // {
+        allowWhenLocked = true;
+        hidden = true;
+        group = "Media";
+      };
   in {
     #--- DankMaterialShell Controls
-    "Mod+space" = dmsBind "App launcher" "spotlight toggle";
-    "Mod+P" = dmsBind "Task manager" "processlist toggle";
-    "Mod+Comma" = dmsBind "Shell settings" "settings toggle";
-    "Mod+N" = dmsBind "Notepad" "notepad toggle";
-    "Mod+K" = dmsBind "Power menu" "powermenu toggle";
-    "Mod+W" = dmsBind "Wallpapers" (
+    launcher = dmsBind "Mod+space" "App launcher" "spotlight toggle";
+    task-manager = dmsBind "Mod+P" "Task manager" "processlist toggle";
+    shell-settings = dmsBind "Mod+Comma" "Shell settings" "settings toggle";
+    notepad = dmsBind "Mod+N" "Notepad" "notepad toggle";
+    power-menu = dmsBind "Mod+K" "Power menu" "powermenu toggle";
+    wallpapers = dmsBind "Mod+W" "Wallpapers" (
       if user.wallpaper == "engine"
       then "linuxWallpaperEngine picker"
       else "wallpaperCarousel toggle"
     );
-    "Mod+L" = dmsBind "Lock screen" "lock lock";
-    "Mod+slash" = dmsBind "Show keybinds" "keybinds toggle niri";
-    "Mod+R" = {
+    lock-screen = dmsBind "Mod+L" "Lock screen" "lock lock";
+    show-keybinds = dmsBind "Mod+slash" "Show keybinds" "keybinds toggle niri";
+    restart-shell = {
+      key = "Mod+R";
+      title = "Restart shell";
       action.spawn = ["dms" "restart"];
-      hotkey-overlay.title = "Restart shell";
+      group = "Shell";
     };
 
     #--- Quick Capture: screenshots open in its editor
-    "Print" = dmsBind "Screenshot region" "quickCapture screenshot region edit";
-    "Mod+Print" = dmsBind "Screenshot window" "quickCapture screenshot window edit";
-    "Mod+Shift+Print" = dmsBind "Screenshot monitor" "quickCapture screenshot full edit";
-    "Ctrl+Print" = dmsBind "Screenshot all monitors" "quickCapture screenshot all edit";
-    "Mod+Ctrl+Print" =
-      dmsBind "Scrolling screenshot" "quickCapture screenshot scroll edit";
+    screenshot-region =
+      dmsBind "Print" "Screenshot region" "quickCapture screenshot region edit";
+    screenshot-window =
+      dmsBind "Mod+Print" "Screenshot window" "quickCapture screenshot window edit";
+    screenshot-monitor =
+      dmsBind "Mod+Shift+Print" "Screenshot monitor" "quickCapture screenshot full edit";
+    screenshot-all =
+      dmsBind "Ctrl+Print" "Screenshot all monitors" "quickCapture screenshot all edit";
+    screenshot-scroll =
+      dmsBind "Mod+Ctrl+Print" "Scrolling screenshot" "quickCapture screenshot scroll edit";
 
     #--- Quick Capture: recording
     # portal only: the gpu-screen-recorder screen/region modes capture via KMS,
     # which bypasses niri's block-out-from rules.
-    "Mod+End" = dmsBind "Start / stop recording" "quickCapture recordToggle portal";
+    record = dmsBind "Mod+End" "Start / stop recording" "quickCapture recordToggle portal";
 
     #--- Audio controls
-    "XF86AudioRaiseVolume" = dmsLocked "audio increment 3"; # Volume Up
-    "XF86AudioLowerVolume" = dmsLocked "audio decrement 3"; # Volume Down
-    "XF86AudioMute" = dmsLocked "audio mute"; # Mute Audio
-    "XF86AudioMicMute" = dmsLocked "audio micmute"; # Mute Microphone
+    volume-up = dmsLocked "XF86AudioRaiseVolume" "Volume up" "audio increment 3";
+    volume-down = dmsLocked "XF86AudioLowerVolume" "Volume down" "audio decrement 3";
+    mute = dmsLocked "XF86AudioMute" "Mute audio" "audio mute";
+    mic-mute = dmsLocked "XF86AudioMicMute" "Mute microphone" "audio micmute";
 
     #--- Brightness controls
-    "XF86MonBrightnessUp" = {
-      action.spawn = dms "brightness increment 5";
-      hotkey-overlay.hidden = true;
-    };
-    "XF86MonBrightnessDown" = {
-      action.spawn = dms "brightness decrement 5";
-      hotkey-overlay.hidden = true;
-    };
+    brightness-up =
+      dmsBind "XF86MonBrightnessUp" "Brightness up" "brightness increment 5"
+      // {hidden = true;};
+    brightness-down =
+      dmsBind "XF86MonBrightnessDown" "Brightness down" "brightness decrement 5"
+      // {hidden = true;};
   };
 
   #--------------------------------------------------------------------#

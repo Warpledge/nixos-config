@@ -199,6 +199,9 @@ lines, `grep -n` that file for the part you need.
 **`modules/wm/`** (also `machines/*/wm/` and `modules/home/variables.nix`)
 
 - Niri is the only WM; Hyprland's config is on the `hyprland-backup` branch.
+- Binds go in `niri.keybinds.<id>` (`key`, `title`, `action`, `group`), not
+  `programs.niri.settings.binds`; `core/keybinds.nix` converts them, and the
+  build fails on two binds sharing a key.
 - **Niri spawns with arguments are lists** (`spawn = ["dms" "ipc" "call" ...]`);
   a spaced string fails the build.
 - DMS `settings.json` in `<wm>/home/dms/` is shared by every machine and written

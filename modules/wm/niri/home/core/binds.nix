@@ -2,7 +2,6 @@
 # NIRI KEYBINDS
 #=====================================================================#
 {
-  config,
   lib,
   machine,
   user,
@@ -11,190 +10,237 @@
   #--------------------------------------------------------------------#
   #-- Niri Keybindings
   #--------------------------------------------------------------------#
-  programs.niri.settings.binds = let
+  # Ids are what overrides and machine files name (option in keybinds.nix)
+  niri.keybinds = let
     # The user's defaultApps, for the app binds
     chosen = (import ../../../../../lib/default-apps.nix {inherit lib;}).forUser user;
+    # Each bind in a section gets its group, the heading Omni Settings shows
+    section = group: lib.mapAttrs (_: b: b // {inherit group;});
     # The title is what the Mod+/ cheatsheet (DMS) shows for the bind
-    bind = title: action: {
-      inherit action;
-      hotkey-overlay.title = title;
-    };
+    bind = key: title: action: {inherit key title action;};
     # Left out of the cheatsheet
-    hidden = action: {
-      inherit action;
-      hotkey-overlay.hidden = true;
-    };
+    hidden = key: title: action: bind key title action // {hidden = true;};
     # A hidden spawn bind that still fires while the DMS lock screen is up
-    locked = cmd: {
-      action.spawn = cmd;
-      allow-when-locked = true;
-      hotkey-overlay.hidden = true;
-    };
-  in {
-    #--- Media Player Controls
-    "XF86AudioPlay" = locked ["playerctl" "play-pause"];
-    "XF86AudioStop" = locked ["playerctl" "pause"];
-    "XF86AudioPrev" = locked ["playerctl" "previous"];
-    "XF86AudioNext" = locked ["playerctl" "next"];
+    locked = key: title: cmd: hidden key title {spawn = cmd;} // {allowWhenLocked = true;};
+    numbers = lib.range 1 9;
+  in
+    lib.mkMerge [
+      #--- Media Player Controls
+      (section "Media" {
+        play-pause = locked "XF86AudioPlay" "Play / pause" ["playerctl" "play-pause"];
+        pause = locked "XF86AudioStop" "Pause" ["playerctl" "pause"];
+        previous-track = locked "XF86AudioPrev" "Previous track" ["playerctl" "previous"];
+        next-track = locked "XF86AudioNext" "Next track" ["playerctl" "next"];
+      })
 
-    #--- Applications
-    # Screenshot binds live with the other DMS commands in dms/default.nix
-    "Mod+Return" = bind "Terminal" {spawn = chosen.terminal.launch;};
-    "Mod+T" = bind "Terminal" {spawn = chosen.terminal.launch;};
+      #--- Applications
+      # Screenshot binds live with the other DMS commands in dms/default.nix
+      (section "Apps" {
+        terminal = bind "Mod+Return" "Terminal" {spawn = chosen.terminal.launch;};
+        terminal-t = bind "Mod+T" "Terminal" {spawn = chosen.terminal.launch;};
+      })
 
-    "Mod+Q" = bind "Close window" {close-window = {};};
-    "Mod+G" = bind "Cycle column width" {switch-preset-column-width = {};};
-    "Mod+D" = bind "Fill empty space" {expand-column-to-available-width = {};};
-    "Mod+F" = bind "Maximize column" {maximize-column = {};};
-    "Mod+Shift+F" = bind "Fullscreen" {fullscreen-window = {};};
-    "Mod+shift+G" = bind "Maximize to screen edges" {maximize-window-to-edges = {};};
-    "Mod+grave" = bind "Float / tile window" {toggle-window-floating = {};};
-    "Mod+Shift+Space" =
-      bind "Switch focus floating / tiled" {switch-focus-between-floating-and-tiling = {};};
-    # Turn the window's opacity rule (rules.nix) off and on
-    "Mod+Shift+T" = bind "Window transparency on / off" {toggle-window-rule-opacity = {};};
-    # Same, and also works on apps without an opacity rule (blur-presets.nix)
-    "Mod+Shift+Y" = bind "Transparency on / off, any app" {spawn = "niri-opacity-toggle";};
-    # Cycle the blur and translucency presets (blur-presets.nix)
-    "Mod+Y" = bind "Cycle blur preset" {spawn = "niri-blur-preset";};
-    # Takes shortcuts back from an app that inhibits them
-    "Mod+Escape" = {
-      action.toggle-keyboard-shortcuts-inhibit = {};
-      allow-inhibiting = false;
-      hotkey-overlay.title = "Take shortcuts back from app";
-    };
+      (section "Windows" {
+        close-window = bind "Mod+Q" "Close window" {close-window = {};};
+        cycle-column-width =
+          bind "Mod+G" "Cycle column width" {switch-preset-column-width = {};};
+        fill-empty-space =
+          bind "Mod+D" "Fill empty space" {expand-column-to-available-width = {};};
+        maximize-column = bind "Mod+F" "Maximize column" {maximize-column = {};};
+        fullscreen = bind "Mod+Shift+F" "Fullscreen" {fullscreen-window = {};};
+        maximize-to-edges =
+          bind "Mod+shift+G" "Maximize to screen edges" {maximize-window-to-edges = {};};
+        toggle-floating =
+          bind "Mod+grave" "Float / tile window" {toggle-window-floating = {};};
+        switch-focus-floating = bind "Mod+Shift+Space" "Switch focus floating / tiled" {
+          switch-focus-between-floating-and-tiling = {};
+        };
+        # Turn the window's opacity rule (rules.nix) off and on
+        toggle-opacity = bind "Mod+Shift+T" "Window transparency on / off" {
+          toggle-window-rule-opacity = {};
+        };
+        # Same, and also works on apps without an opacity rule (blur-presets.nix)
+        toggle-opacity-any =
+          bind "Mod+Shift+Y" "Transparency on / off, any app" {spawn = "niri-opacity-toggle";};
+        # Cycle the blur and translucency presets (blur-presets.nix)
+        blur-preset = bind "Mod+Y" "Cycle blur preset" {spawn = "niri-blur-preset";};
+        # Takes shortcuts back from an app that inhibits them
+        shortcuts-inhibit =
+          bind "Mod+Escape" "Take shortcuts back from app" {
+            toggle-keyboard-shortcuts-inhibit = {};
+          }
+          // {allowInhibiting = false;};
+      })
 
-    "Mod+Alt+1" = bind "Column width 1/3" {set-column-width = "33.333%";};
-    "Mod+Alt+2" = bind "Column width 1/2" {set-column-width = "50%";};
-    "Mod+Alt+3" = bind "Column width 2/3" {set-column-width = "66.667%";};
+      (section "Resize" {
+        column-third = bind "Mod+Alt+1" "Column width 1/3" {set-column-width = "33.333%";};
+        column-half = bind "Mod+Alt+2" "Column width 1/2" {set-column-width = "50%";};
+        column-two-thirds =
+          bind "Mod+Alt+3" "Column width 2/3" {set-column-width = "66.667%";};
 
-    "Mod+Minus" = bind "Narrower column" {set-column-width = "-10%";};
-    "Mod+Plus" = bind "Wider column" {set-column-width = "+10%";};
-    "Mod+Shift+Minus" = bind "Shorter window" {set-window-height = "-10%";};
-    "Mod+Shift+Plus" = bind "Taller window" {set-window-height = "+10%";};
+        narrower-column = bind "Mod+Minus" "Narrower column" {set-column-width = "-10%";};
+        wider-column = bind "Mod+Plus" "Wider column" {set-column-width = "+10%";};
+        shorter-window =
+          bind "Mod+Shift+Minus" "Shorter window" {set-window-height = "-10%";};
+        taller-window = bind "Mod+Shift+Plus" "Taller window" {set-window-height = "+10%";};
+      })
 
-    "Mod+WheelScrollUp" = hidden {focus-column-left = {};};
-    "Mod+WheelScrollDown" = hidden {focus-column-right = {};};
-    "Mod+Shift+WheelScrollUp" = hidden {focus-workspace-up = {};};
-    "Mod+Shift+WheelScrollDown" = hidden {focus-workspace-down = {};};
+      (section "Focus" {
+        scroll-focus-left =
+          hidden "Mod+WheelScrollUp" "Focus left (scroll)" {focus-column-left = {};};
+        scroll-focus-right =
+          hidden "Mod+WheelScrollDown" "Focus right (scroll)" {focus-column-right = {};};
+        scroll-workspace-up = hidden "Mod+Shift+WheelScrollUp" "Workspace above (scroll)" {
+          focus-workspace-up = {};
+        };
+        scroll-workspace-down = hidden "Mod+Shift+WheelScrollDown" "Workspace below (scroll)" {
+          focus-workspace-down = {};
+        };
 
-    #--- Focus Window
-    "Mod+Left" = bind "Focus left" {focus-column-left = {};};
-    "Mod+Right" = bind "Focus right" {focus-column-right = {};};
-    # Walk the windows of a stacked or tabbed column before leaving the workspace
-    "Mod+Up" = bind "Focus up / workspace above" {focus-window-or-workspace-up = {};};
-    "Mod+Down" =
-      bind "Focus down / workspace below" {focus-window-or-workspace-down = {};};
+        #--- Focus Window
+        focus-left = bind "Mod+Left" "Focus left" {focus-column-left = {};};
+        focus-right = bind "Mod+Right" "Focus right" {focus-column-right = {};};
+        # Walk the windows of a stacked or tabbed column before leaving the workspace
+        focus-up = bind "Mod+Up" "Focus up / workspace above" {
+          focus-window-or-workspace-up = {};
+        };
+        focus-down = bind "Mod+Down" "Focus down / workspace below" {
+          focus-window-or-workspace-down = {};
+        };
+      })
 
-    #--- Window Movement
-    "Mod+Shift+Left" = bind "Move left" {move-column-left = {};};
-    "Mod+Shift+Right" = bind "Move right" {move-column-right = {};};
-    "Mod+Shift+Up" =
-      bind "Move up / to workspace above" {move-window-up-or-to-workspace-up = {};};
-    "Mod+Shift+Down" =
-      bind "Move down / to workspace below" {move-window-down-or-to-workspace-down = {};};
+      #--- Window Movement
+      (section "Movement" {
+        move-left = bind "Mod+Shift+Left" "Move left" {move-column-left = {};};
+        move-right = bind "Mod+Shift+Right" "Move right" {move-column-right = {};};
+        move-up = bind "Mod+Shift+Up" "Move up / to workspace above" {
+          move-window-up-or-to-workspace-up = {};
+        };
+        move-down = bind "Mod+Shift+Down" "Move down / to workspace below" {
+          move-window-down-or-to-workspace-down = {};
+        };
+      })
 
-    #--- Monitors
-    "Mod+Alt+Left" = bind "Focus monitor left" {focus-monitor-left = {};};
-    "Mod+Alt+Right" = bind "Focus monitor right" {focus-monitor-right = {};};
-    "Mod+Alt+Shift+Left" = bind "Move to monitor left" {move-column-to-monitor-left = {};};
-    "Mod+Alt+Shift+Right" =
-      bind "Move to monitor right" {move-column-to-monitor-right = {};};
+      #--- Monitors
+      (section "Monitors" {
+        focus-monitor-left =
+          bind "Mod+Alt+Left" "Focus monitor left" {focus-monitor-left = {};};
+        focus-monitor-right =
+          bind "Mod+Alt+Right" "Focus monitor right" {focus-monitor-right = {};};
+        move-to-monitor-left = bind "Mod+Alt+Shift+Left" "Move to monitor left" {
+          move-column-to-monitor-left = {};
+        };
+        move-to-monitor-right = bind "Mod+Alt+Shift+Right" "Move to monitor right" {
+          move-column-to-monitor-right = {};
+        };
+      })
 
-    #--- Column Stacking
-    # Pull the neighbouring window into this column, or push this one out of it
-    "Mod+BracketLeft" = bind "Stack / unstack left" {consume-or-expel-window-left = {};};
-    "Mod+BracketRight" =
-      bind "Stack / unstack right" {consume-or-expel-window-right = {};};
-    "Mod+Backslash" = bind "Tabbed column on / off" {toggle-column-tabbed-display = {};};
+      #--- Column Stacking
+      (section "Columns" {
+        # Pull the neighbouring window into this column, or push this one out of it
+        stack-left = bind "Mod+BracketLeft" "Stack / unstack left" {
+          consume-or-expel-window-left = {};
+        };
+        stack-right = bind "Mod+BracketRight" "Stack / unstack right" {
+          consume-or-expel-window-right = {};
+        };
+        tabbed-column = bind "Mod+Backslash" "Tabbed column on / off" {
+          toggle-column-tabbed-display = {};
+        };
+      })
 
-    #--- Window Resize
-    "Mod+Ctrl+Left" = bind "Shrink width" {set-column-width = "-80";};
-    "Mod+Ctrl+Right" = bind "Grow width" {set-column-width = "+80";};
-    "Mod+Ctrl+Up" = bind "Shrink height" {set-window-height = "-80";};
-    "Mod+Ctrl+Down" = bind "Grow height" {set-window-height = "+80";};
+      #--- Window Resize
+      (section "Resize" {
+        shrink-width = bind "Mod+Ctrl+Left" "Shrink width" {set-column-width = "-80";};
+        grow-width = bind "Mod+Ctrl+Right" "Grow width" {set-column-width = "+80";};
+        shrink-height = bind "Mod+Ctrl+Up" "Shrink height" {set-window-height = "-80";};
+        grow-height = bind "Mod+Ctrl+Down" "Grow height" {set-window-height = "+80";};
+      })
 
-    "Mod+Tab" = bind "Overview" {toggle-overview = {};};
-    "Mod+C" = bind "Center column" {center-column = {};};
-    "Mod+H" = bind "Cycle window height" {switch-preset-window-height = {};};
-    "Mod+Shift+H" = bind "Reset window height" {reset-window-height = {};};
+      (section "Windows" {
+        overview = bind "Mod+Tab" "Overview" {toggle-overview = {};};
+        center-column = bind "Mod+C" "Center column" {center-column = {};};
+        cycle-window-height =
+          bind "Mod+H" "Cycle window height" {switch-preset-window-height = {};};
+        reset-window-height =
+          bind "Mod+Shift+H" "Reset window height" {reset-window-height = {};};
+      })
 
-    #--- Workspace Navigation (Number Keys)
-    # 2-9 are hidden so the cheatsheet lists the number keys once
-    "Mod+1" = bind "Go to workspace 1-9" {focus-workspace = 1;};
-    "Mod+2" = hidden {focus-workspace = 2;};
-    "Mod+3" = hidden {focus-workspace = 3;};
-    "Mod+4" = hidden {focus-workspace = 4;};
-    "Mod+5" = hidden {focus-workspace = 5;};
-    "Mod+6" = hidden {focus-workspace = 6;};
-    "Mod+7" = hidden {focus-workspace = 7;};
-    "Mod+8" = hidden {focus-workspace = 8;};
-    "Mod+9" = hidden {focus-workspace = 9;};
+      #--- Workspace Navigation (Number Keys)
+      # 2-9 are hidden so the cheatsheet lists the number keys once
+      (section "Workspaces" (lib.listToAttrs (map (n: let
+        name = toString n;
+      in
+        lib.nameValuePair "workspace-${name}" (
+          if n == 1
+          then bind "Mod+1" "Go to workspace 1-9" {focus-workspace = 1;}
+          else hidden "Mod+${name}" "Go to workspace ${name}" {focus-workspace = n;}
+        ))
+      numbers)))
 
-    #--- Move Window to Workspace (Number Keys)
-    "Mod+Shift+1" = bind "Send window to workspace 1-9" {move-column-to-workspace = 1;};
-    "Mod+Shift+2" = hidden {move-column-to-workspace = 2;};
-    "Mod+Shift+3" = hidden {move-column-to-workspace = 3;};
-    "Mod+Shift+4" = hidden {move-column-to-workspace = 4;};
-    "Mod+Shift+5" = hidden {move-column-to-workspace = 5;};
-    "Mod+Shift+6" = hidden {move-column-to-workspace = 6;};
-    "Mod+Shift+7" = hidden {move-column-to-workspace = 7;};
-    "Mod+Shift+8" = hidden {move-column-to-workspace = 8;};
-    "Mod+Shift+9" = hidden {move-column-to-workspace = 9;};
+      #--- Move Window to Workspace (Number Keys)
+      (section "Workspaces" (lib.listToAttrs (map (n: let
+        name = toString n;
+      in
+        lib.nameValuePair "to-workspace-${name}" (
+          if n == 1
+          then bind "Mod+Shift+1" "Send window to workspace 1-9" {move-column-to-workspace = 1;}
+          else
+            hidden "Mod+Shift+${name}" "Send window to workspace ${name}" {
+              move-column-to-workspace = n;
+            }
+        ))
+      numbers)))
 
-    #--- Apps
-    "Mod+Ctrl+S" = bind "Steam" {spawn = ["steam"];};
-    "Mod+Ctrl+D" = lib.mkIf (user.discord.goofcord || user.discord.vesktop) (bind "Discord" {
-      spawn = [
-        (
-          if user.discord.vesktop
-          then "vesktop"
-          else "goofcord"
-        )
-      ];
-    });
-    "Mod+Ctrl+H" = bind "Heroic" {spawn = ["heroic"];};
-    "Mod+Ctrl+G" = lib.mkIf user.gaming.lutris (bind "Lutris" {spawn = ["lutris"];});
-    "Mod+Ctrl+Y" = bind "FreeTube" {spawn = ["freetube"];};
-    #--- Opens the config in the default editor; focuses an open Zed window on it
-    "Mod+Z" = bind "Editor on the config" {
-      spawn =
-        if chosen.textEditor.name == "zed"
-        then
-          [
-            "nirius"
-            "focus-or-spawn"
-            "--app-id"
-            "^dev\\.zed\\.Zed$"
-            "--title"
-            (lib.escapeRegex (baseNameOf machine.flakePath))
-          ]
-          ++ chosen.textEditor.launch
-          ++ [machine.flakePath]
-        else chosen.textEditor.launch ++ [machine.flakePath];
-    };
-    "Mod+B" = bind "Web browser" {spawn = chosen.browser.launch;};
-    "Mod+E" = bind "Files" {spawn = chosen.fileManager.launch;};
-    "Mod+Ctrl+M" = bind "Spotify" {spawn = ["spotify"];};
-    "Ctrl+Alt+Delete" = bind "Resources (system monitor)" {spawn = ["resources"];};
-    #--- Omni Settings: the DMS panel (omni-settings/plugin/), or the window
-    "Mod+S" = bind "Omni Settings panel" {
-      spawn = ["dms" "ipc" "call" "omniSettings" "toggle"];
-    };
-    #--- Claude Code / opencode panel on the left edge (ai/ai-panel.nix)
-    "Mod+A" = lib.mkIf (user.terminals.kitty && (user.claude.enable || user.opencode.enable)) (bind "AI panel" {spawn = ["ai-panel"];});
-  };
-
-  #--------------------------------------------------------------------#
-  #-- Assertion
-  #--------------------------------------------------------------------#
-  # A string spawn runs its first word only; arguments go in a list
-  assertions = let
-    bad = lib.attrNames (lib.filterAttrs (_: b: lib.isString (b.action.spawn or null) && lib.hasInfix " " b.action.spawn) config.programs.niri.settings.binds);
-  in [
-    {
-      assertion = bad == [];
-      message = "niri bind(s) ${lib.concatStringsSep ", " bad} pass a spawn command with arguments as a string; use a list, e.g. [\"playerctl\" \"play-pause\"].";
-    }
-  ];
+      #--- Apps
+      (section "Apps" ({
+          steam = bind "Mod+Ctrl+S" "Steam" {spawn = ["steam"];};
+          heroic = bind "Mod+Ctrl+H" "Heroic" {spawn = ["heroic"];};
+          freetube = bind "Mod+Ctrl+Y" "FreeTube" {spawn = ["freetube"];};
+          #--- Opens the config in the default editor; focuses an open Zed window on it
+          config-editor = bind "Mod+Z" "Editor on the config" {
+            spawn =
+              if chosen.textEditor.name == "zed"
+              then
+                [
+                  "nirius"
+                  "focus-or-spawn"
+                  "--app-id"
+                  "^dev\\.zed\\.Zed$"
+                  "--title"
+                  (lib.escapeRegex (baseNameOf machine.flakePath))
+                ]
+                ++ chosen.textEditor.launch
+                ++ [machine.flakePath]
+              else chosen.textEditor.launch ++ [machine.flakePath];
+          };
+          browser = bind "Mod+B" "Web browser" {spawn = chosen.browser.launch;};
+          files = bind "Mod+E" "Files" {spawn = chosen.fileManager.launch;};
+          spotify = bind "Mod+Ctrl+M" "Spotify" {spawn = ["spotify"];};
+          system-monitor =
+            bind "Ctrl+Alt+Delete" "Resources (system monitor)" {spawn = ["resources"];};
+          #--- Omni Settings: the DMS panel (omni-settings/plugin/), or the window
+          omni-settings = bind "Mod+S" "Omni Settings panel" {
+            spawn = ["dms" "ipc" "call" "omniSettings" "toggle"];
+          };
+        }
+        // lib.optionalAttrs (user.discord.goofcord || user.discord.vesktop) {
+          discord = bind "Mod+Ctrl+D" "Discord" {
+            spawn = [
+              (
+                if user.discord.vesktop
+                then "vesktop"
+                else "goofcord"
+              )
+            ];
+          };
+        }
+        // lib.optionalAttrs user.gaming.lutris {
+          lutris = bind "Mod+Ctrl+G" "Lutris" {spawn = ["lutris"];};
+        }
+        #--- Claude Code / opencode panel on the left edge (ai/ai-panel.nix)
+        // lib.optionalAttrs (user.terminals.kitty && (user.claude.enable || user.opencode.enable)) {
+          ai-panel = bind "Mod+A" "AI panel" {spawn = ["ai-panel"];};
+        }))
+    ];
 }

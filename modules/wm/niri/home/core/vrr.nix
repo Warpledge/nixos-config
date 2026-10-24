@@ -41,8 +41,10 @@ in {
   #--------------------------------------------------------------------#
   home.packages = [vrrToggle];
 
-  programs.niri.settings.binds."Mod+Shift+V" = {
+  niri.keybinds.vrr-toggle = {
+    key = "Mod+Shift+V";
+    title = "VRR off / on demand";
     action.spawn = "niri-vrr-toggle";
-    hotkey-overlay.title = "VRR off / on demand";
+    group = "Monitors";
   };
 }
