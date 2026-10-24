@@ -476,17 +476,6 @@ Item {
         spacing: 10
         visible: !omni.reviewing && !omni.running && omni.sheet === null
 
-        //--- Header
-        Text {
-            text: "Omni Settings"
-            color: Theme.text
-            font.pixelSize: 18
-            font.weight: Font.DemiBold
-            horizontalAlignment: Text.AlignHCenter
-            Layout.fillWidth: true
-            Layout.topMargin: 4
-        }
-
         Text {
             visible: !!omni.info && omni.info.banner !== ""
             text: omni.info ? omni.info.banner : ""
