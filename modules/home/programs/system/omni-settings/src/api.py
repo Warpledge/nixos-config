@@ -23,6 +23,7 @@ import closure  # noqa: E402
 import flatpakstate  # noqa: E402
 import gitstate  # noqa: E402
 import nixfile  # noqa: E402
+import packagestate  # noqa: E402
 import peoplestate  # noqa: E402
 import schema  # noqa: E402
 import servicestate  # noqa: E402
@@ -241,7 +242,9 @@ def cmd_load(cfg, _args):
     for key, title in schema.SECTIONS:
         if by_section[key]:
             nav[section_tab.get(key, "main")].append({"id": key, "title": title, "items": by_section[key]})
-    if any((s.domain, s.path) == USER_PACKAGES for p in state.pages for g in p.groups for s in g.settings):
+    user_packages = next((s for p in state.pages for g in p.groups for s in g.settings
+                          if (s.domain, s.path) == USER_PACKAGES), None)
+    if user_packages:
         nav["packages"].append({"id": "userpkgs", "title": "User Packages",
                                 "items": [{"id": "userpackages", "title": "All",
                                            "subtitle": NAV_SUBTITLES["userpackages"],
@@ -265,6 +268,8 @@ def cmd_load(cfg, _args):
             "banner": banner, "userMachines": state.user_machines,
             "tabs": [{"id": t, "title": title, "icon": list(TAB_ICONS[t])} for t, title in TABS],
             "nav": nav, "pages": pages, "whatsNew": new, "quick": QUICK,
+            "userPackages": user_packages and setting_json(cfg, state, user_packages, multi, modules),
+            "starter": packagestate.STARTER,
             "dmsSearch": [{"label": e.label, "description": e.description, "keywords": e.keywords,
                            "tab": e.link.tab, "page": e.link.page} for e in state.dms_entries]}
 
@@ -652,6 +657,25 @@ def cmd_ports(cfg, _args):
     return [{"proto": proto, "port": port, "who": who} for proto, port, who in system.open_ports(state.resolved)]
 
 
+def cmd_package_names(_cfg, _args):
+    """Every nixpkgs name Search matches on, or {missing} without nix-search-tv."""
+    if not shutil.which(packagestate.TOOL):
+        return {"missing": f"{packagestate.TOOL} isn't installed"}
+    try:
+        return {"names": packagestate.names()}
+    except subprocess.CalledProcessError as e:
+        detail = (e.stderr or "").strip()
+        raise OSError(detail.splitlines()[-1] if detail else str(e)) from e
+
+
+def cmd_package_previews(_cfg, args):
+    """Each of args.attrs' details as a JSON line on stderr, in order, as it's read."""
+    if shutil.which(packagestate.TOOL):
+        for attr in args.get("attrs") or []:
+            print(json.dumps(dict(packagestate.preview(attr), attr=attr)), file=sys.stderr, flush=True)
+    return {}
+
+
 COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cmd_save,
             "dismiss": cmd_dismiss,
             "stale": cmd_stale, "removeStale": cmd_remove_stale,
@@ -663,7 +687,8 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "backups": cmd_backups, "backup": cmd_backup,
             "people": cmd_people, "checkPerson": cmd_check_person,
             "services": cmd_services, "serviceLog": cmd_service_log, "serviceRestart": cmd_service_restart,
-            "ports": cmd_ports}
+            "ports": cmd_ports,
+            "packageNames": cmd_package_names, "packagePreviews": cmd_package_previews}
 
 
 def run(cfg, cmd, args):

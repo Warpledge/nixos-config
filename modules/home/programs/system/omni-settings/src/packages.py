@@ -5,9 +5,6 @@ days off this system's flake.lock. `print` lists every name and `preview`
 gives one package's details; the page matches on names and reads the details
 of the results it shows."""
 
-import re
-import subprocess
-
 import gi
 
 gi.require_version("Gtk", "4.0")
@@ -15,51 +12,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Adw, Gdk, GLib, Gtk  # noqa: E402
 
 import ui  # noqa: E402
-
-TOOL = "nix-search-tv"
-PREFIX = "nixpkgs/ "  # print also lists Home Manager, NixOS and NUR entries
-SHOWN = 50  # results listed at once
-ANSI = re.compile(r"\x1b\[[0-9;]*m")
-TITLE = re.compile(r"^(\S+) \(([^)]*)\)(.*)$")  # "name (version)", then "(broken)" if so
-#--- Categories Install offers before any are in use; a new name can be typed too
-STARTER = ["Media", "Gaming", "Development", "Graphics", "Office", "Internet", "Utilities"]
-
-
-def names():
-    """Every nixpkgs attribute name in nix-search-tv's index."""
-    out = subprocess.run([TOOL, "print"], capture_output=True, text=True, timeout=600, check=True)
-    return sorted(line[len(PREFIX):] for line in out.stdout.splitlines() if line.startswith(PREFIX))
-
-
-def preview(attr):
-    """A package's details from `nix-search-tv preview`: version, description,
-    about, homepage, licence, unfree and the program it runs."""
-    out = subprocess.run([TOOL, "preview", PREFIX + attr], capture_output=True, text=True, timeout=30)
-    blocks = [b.splitlines() for b in ANSI.sub("", out.stdout).strip().split("\n\n") if b.strip()]
-    info = {"version": "", "description": "", "about": "", "homepage": [], "licenses": [],
-            "unfree": False, "broken": False, "program": ""}
-    if not blocks:
-        return info
-    head = blocks[0]
-    m = TITLE.match(head[0].strip())
-    if m:
-        info["version"] = m.group(2)
-        info["broken"] = "broken" in m.group(3)
-    info["description"] = " ".join(l.strip() for l in head[1:])
-    for block in blocks[1:]:
-        title, values = block[0].strip(), [l.strip() for l in block[1:] if l.strip()]
-        if title == "homepage":
-            info["homepage"] = values
-        elif title.startswith("license"):
-            info["licenses"] = values
-            info["unfree"] = "unfree" in title
-        elif title == "main program":
-            info["program"] = next((v.strip("│ ").removeprefix("$ ") for v in values if "$" in v), "")
-        elif title in ("platforms", "outputs"):
-            continue
-        elif not info["about"]:
-            info["about"] = " ".join(l.strip() for l in block)
-    return info
+from packagestate import STARTER, SHOWN, TOOL, category_of, flat, names, preview, search  # noqa: E402
 
 
 def titled(attr, version):
@@ -67,34 +20,6 @@ def titled(attr, version):
     if not version:
         return ui.esc(attr)
     return f'{ui.esc(attr)}  <span size="small" alpha="60%" weight="normal">{ui.esc(version)}</span>'
-
-
-def search(index, query):
-    """Names holding every word of `query`, best first: the name itself, then
-    its start (or its last part's, for `python313Packages.x`), then anywhere."""
-    q = query.strip().lower()
-    words = q.split()
-    if not words:
-        return []
-    hits = []
-    for name in index:
-        low = name.lower()
-        if not all(w in low for w in words):
-            continue
-        last = low.rsplit(".", 1)[-1]
-        rank = 0 if low == q else 1 if low.startswith(q) or last.startswith(q) else 2
-        hits.append((rank, low.count("."), len(low), name))
-    hits.sort()
-    return [h[3] for h in hits]
-
-
-def flat(groups):
-    """Every package name in a userPackages set, over all its categories."""
-    return [name for names in groups.values() for name in names]
-
-
-def category_of(groups, attr):
-    return next((cat for cat, names in groups.items() if attr in names), None)
 
 
 def pick_category(window, attr, on_pick, current=None):

@@ -62,6 +62,8 @@ Item {
                 for (const g of pg.groups)
                     for (const s of g.settings)
                         out[s.key] = s
+        if (info && info.userPackages)
+            out[info.userPackages.key] = info.userPackages
         return out
     }
     readonly property var navItems: {
@@ -158,6 +160,78 @@ Item {
     }
 
     function discard() { pending = {} }
+
+    //--------------------------------------------------------------------//
+    //-- User Packages
+    //--------------------------------------------------------------------//
+
+    //--- The userPackages categories, {name: [packages]}, with pending changes or as saved
+    function userPackages(saved) {
+        const s = info ? info.userPackages : null
+        const v = !s ? null : saved ? scopedValue(s) : valueOf(s)
+        const out = {}
+        if (v && typeof v === "object" && !Array.isArray(v))
+            for (const [c, n] of Object.entries(v))
+                out[c] = n.slice()
+        return out
+    }
+
+    function setUserPackages(groups) {
+        const out = {}
+        for (const [c, n] of Object.entries(groups))
+            if (n.length)
+                out[c] = n
+        change(info.userPackages, out)
+    }
+
+    function flatPackages(groups) { return Object.values(groups).reduce((all, n) => all.concat(n), []) }
+
+    function categoryOf(groups, attr) { return Object.keys(groups).find(c => groups[c].includes(attr)) || "" }
+
+    //--- Where attr stands: "installed", "adding" (on Apply), "removing", or ""
+    function packageState(attr) {
+        const now = flatPackages(userPackages(false)).includes(attr)
+        const saved = flatPackages(userPackages(true)).includes(attr)
+        return now ? (saved ? "installed" : "adding") : saved ? "removing" : ""
+    }
+
+    function pickCategory(attr, current, done) { categories.open(attr, current, done) }
+
+    //--- Search's index of nixpkgs names (api.py's packageNames), read once per window
+    property var packageNames: null
+    property var packageLower: []
+    property string packageError: ""
+    function loadPackageNames() {
+        if (packageNames !== null || packageError)
+            return
+        Backend.call("packageNames", {}, reply => {
+            if (!reply.ok)
+                packageError = reply.error
+            else if (reply.data.missing)
+                packageError = reply.data.missing
+            else {
+                packageLower = reply.data.names.map(n => n.toLowerCase())
+                packageNames = reply.data.names
+            }
+        })
+    }
+
+    //--- Package details (api.py's packagePreviews) by name, kept for the window
+    property var packageInfo: ({})
+    function describe(attrs) {
+        const missing = attrs.filter(a => !(a in packageInfo))
+        if (!missing.length)
+            return
+        Backend.stream("packagePreviews", { attrs: missing }, line => {
+            let d
+            try {
+                d = JSON.parse(line)
+            } catch (e) {
+                return
+            }
+            packageInfo = Object.assign({}, packageInfo, { [d.attr]: d })
+        })
+    }
 
     //--- As api.py's shown()
     function shownOf(s, v) {
@@ -720,11 +794,21 @@ Item {
         onLoaded: item.forceActiveFocus()
     }
 
+    CategorySheet {
+        id: categories
+        anchors.fill: parent
+        anchors.margins: 14
+        z: 1
+        view: omni
+    }
+
     ConfirmDialog { id: confirm; anchors.fill: parent; z: 2 }
 
     //--- Custom pages by id; each is ported from the GTK app in turn
     readonly property var custom: ({ overview: overviewPage, shell: shellPage, git: gitPage,
-                                      flatpaks: flatpaksPage, backups: backupsPage, people: peoplePage })
+                                      flatpaks: flatpaksPage, backups: backupsPage, people: peoplePage,
+                                      packages: packagesPage })
+    Component { id: packagesPage; PackagesPage { view: omni } }
     Component { id: peoplePage; PeoplePage { view: omni } }
     Component { id: backupsPage; BackupsPage { view: omni } }
     Component { id: flatpaksPage; FlatpaksPage { view: omni } }
