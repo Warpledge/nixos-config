@@ -49,7 +49,7 @@ TOP = {"main": [("overview", "Overview", ("computer-symbolic",)),
                 ("git", "Git", ("vcs-branch-symbolic", "branch-symbolic", "folder-remote-symbolic")),
                 ("flatpaks", "Flatpaks", ("flatpak-symbolic", "system-software-install-symbolic")),
                 ("backups", "Backups", ("drive-harddisk-symbolic", "document-save-symbolic")),
-                ("people", "People", ("system-users-symbolic", "avatar-default-symbolic"))],
+                ("people", "Users", ("system-users-symbolic", "avatar-default-symbolic"))],
        "packages": [("packages", "Search", ("system-search-symbolic", "edit-find-symbolic"))],
        "niri": [("shell", "Shell", ("view-app-grid-symbolic",)),
                 ("windowrules", "Window Rules",
@@ -213,7 +213,7 @@ def cmd_load(cfg, _args):
     for page in state.pages:
         if page.section == "userpkgs":
             continue
-        pid = "flatpaks" if page.section == "top" else f"page:{page.title}"
+        pid = schema.TOP_PAGES[page.title] if page.section == "top" else f"page:{page.title}"
         groups = []
         for g in page.groups:
             locked = not direct and any(s.domain == "machine" for s in g.settings)
@@ -594,7 +594,7 @@ def cmd_backup(_cfg, args):
 
 
 #--------------------------------------------------------------------#
-#-- People
+#-- Users
 #--------------------------------------------------------------------#
 def cmd_people(cfg, _args):
     """Who can log in here; adding someone is the job service's `person` job."""

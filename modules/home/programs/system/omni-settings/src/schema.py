@@ -53,11 +53,16 @@ SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
 
 #--- Each page's sidebar section, icon and blurb, and for the curated ones
 #--- their groups: (title, description, [setting paths]). Pages in the apps
-#--- section keep the template's groups; the one "top" page is the Flatpaks
-#--- page's switch (flatpaks.py lays it out), and the "userpkgs" one the list
-#--- the Packages tab's pages edit (packages.py).
+#--- section keep the template's groups; "top" pages are settings a custom page
+#--- lays out (TOP_PAGES), and the "userpkgs" one the list the Packages tab's
+#--- pages edit (packages.py).
+#--- "top" pages: the custom page (its id in app.py and api.py) each one's settings show on
+TOP_PAGES = {"Flatpaks": "flatpaks", "Users": "people"}
+
 PAGES = {
     "Flatpaks": ("top", "system-software-install-symbolic", "", [("", "", ["flatpak.enable"])]),
+    "Users": ("top", "system-users-symbolic", "",
+              [("Commit As", "Your name and email on git commits you make.", ["git.name", "git.email"])]),
     "User Packages": ("userpkgs", "package-x-generic-symbolic", "", [("", "", ["userPackages"])]),
     "System": ("computer", "computer-symbolic",
                "The name, desktop and kernel this computer runs, the same for everyone on it.",
@@ -76,7 +81,9 @@ PAGES = {
                            [("Open Ports", "Other devices can connect to this computer on these.",
                              ["firewall.openTCPPorts", "firewall.openUDPPorts"]),
                             ("Ad & Tracker Blocking", "",
-                             ["blocklist.enable", "blocklist.extra"])]),
+                             ["blocklist.enable", "blocklist.extra"]),
+                            ("Remote Login", "Keys that may log in as you while SSH is on (Services).",
+                             ["ssh.authorizedKeys"])]),
     "Services": ("computer", "network-server-symbolic",
                  "Background services for everyone on this computer.",
                  [("VPN & Remote Access", "", ["mullvad.enable", "mullvad.splitTunnel", "ssh.enable"]),
@@ -93,10 +100,6 @@ PAGES = {
                       "The bar, dock, launcher, notifications and widgets.", []),
     "Power & Lock": ("desktop", "system-lock-screen-symbolic",
                      "Idle timers, the lock screen and the power menu.", []),
-    "Account": ("personal", "avatar-default-symbolic",
-                "Your name on git commits and the keys that may log in as you.",
-                [("Git", "", ["git.name", "git.email"]),
-                 ("Remote Login", "", ["ssh.authorizedKeys"])]),
     "Default Apps": ("personal", "emblem-default-symbolic",
                      "Which app opens links, text files, terminal programs and folders.",
                      [("", "", ["defaultApps.browser", "defaultApps.textEditor",

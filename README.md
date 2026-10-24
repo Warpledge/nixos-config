@@ -57,7 +57,7 @@ Everyone starts with Zen, kitty, Helix, Zed, Nautilus, yazi, mpv, Steam and Omni
 
 Other uses:
 
-- **Add a person:** `./setup.sh add-user`, or the People page in Omni Settings
+- **Add a person:** `./setup.sh add-user`, or the Users page in Omni Settings
 - **Reinstall a computer already in the repo:** run `./setup.sh` and pick it; its settings are kept
 - **Move an older clone to `/etc/nixos-config`:** `./setup.sh share`
 
@@ -75,7 +75,7 @@ Open **Omni Settings** with `Mod+C` (`Mod` is the Windows key). Change what you 
 | Update everything | **Main** → Overview → Update Now |
 | Go back to an earlier version | **Main** → Overview → Versions |
 | Free up disk space | **Main** → Overview → Clean Up Old Versions |
-| Add a person | **Main** → People |
+| Add a person | **Main** → Users |
 | Change monitors, shortcuts, mouse or theme | **Niri** (opens Dux Shell's settings) |
 | Make a window float, size or open on a workspace | **Niri** → Window Rules |
 | Copy a Proton launch option | **Docs** |

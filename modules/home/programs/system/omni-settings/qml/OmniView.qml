@@ -562,8 +562,7 @@ Item {
                             }
                             Text {
                                 visible: text !== ""
-                                text: (omni.info && omni.info.pages[omni.page] && omni.info.pages[omni.page].description)
-                                    || (omni.current ? omni.current.subtitle || omni.current.group : "")
+                                text: omni.current ? omni.current.subtitle || omni.current.group : ""
                                 color: Theme.dim
                                 font.pixelSize: 13
                                 elide: Text.ElideRight
@@ -614,7 +613,7 @@ Item {
                     model: search.text.trim() ? omni.results
                         : omni.navItems.filter(i => i.tab === omni.tab)
                             .map(i => ({ kind: "page", tab: i.tab, page: i.id, title: i.title, group: i.group,
-                                         icon: i.icon, subtitle: (omni.info.pages[i.id] || {}).description || i.subtitle || "" }))
+                                         icon: i.icon, subtitle: i.subtitle || "" }))
 
                     function pick(r) {
                         if (r.kind === "dms")

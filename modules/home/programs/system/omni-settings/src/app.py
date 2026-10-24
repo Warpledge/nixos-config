@@ -470,14 +470,15 @@ class Window(Adw.ApplicationWindow):
 
         #--- Overview, Flatpaks (whose switch is a schema page's setting) and
         #--- What's New on Main, then the other tabs' pages
-        flatpak_page = next((p for p in state.pages if p.section == "top"), None)
+        flatpak_page = next((p for p in state.pages if p.title == "Flatpaks"), None)
+        users_page = next((p for p in state.pages if p.title == "Users"), None)
         makers = {"overview": lambda: Overview(self, self.info, self.wm, self.links),
                   "flatpaks": lambda: FlatpakPage(self, flatpak_page),
                   "backups": lambda: BackupsPage(self),
                   "git": lambda: GitPage(self),
                   "packages": lambda: PackagesPage(self),
                   "userpackages": lambda: UserPackagesPage(self),
-                  "people": lambda: PeoplePage(self),
+                  "people": lambda: PeoplePage(self, users_page),
                   "shell": lambda: ShellPage(self, self.links),
                   "windowrules": lambda: WindowRulesPage(self),
                   "proton": lambda: ProtonPage(self),

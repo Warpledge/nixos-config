@@ -1,4 +1,4 @@
-"""The People page: who can log in here, and for admins a form that adds a
+"""The Users page: who can log in here and the user's git identity, and for admins a form that adds a
 person the way `./setup.sh add-user` does (peoplestate.py), then a rebuild
 that makes the account and sets its first password."""
 
@@ -13,13 +13,13 @@ from peoplestate import add, check  # noqa: E402
 
 
 class PeoplePage(Adw.PreferencesPage):
-    def __init__(self, window):
+    def __init__(self, window, page):
         super().__init__()
         self.window = window
         state = window.state
         self.listed = list(state.resolved["users"])
         top = Adw.PreferencesGroup()
-        top.add(ui.hero(ui.first_icon("system-users-symbolic", "avatar-default-symbolic"), "People",
+        top.add(ui.hero(ui.first_icon("system-users-symbolic", "avatar-default-symbolic"), "Users",
                         "Who can log in to this computer. Each person picks their own apps by "
                         "opening Omni Settings on their own account."))
         self.add(top)
@@ -40,6 +40,13 @@ class PeoplePage(Adw.PreferencesPage):
             row.add_suffix(tags)
             group.add(row)
         self.add(group)
+
+        #--- Commit As: the schema's "Users" page, the user's own settings
+        for g in page.groups if page is not None else []:
+            settings = Adw.PreferencesGroup(title=ui.esc(g.title), description=ui.esc(g.description))
+            for s in g.settings:
+                settings.add(window._row(s, True, page))
+            self.add(settings)
 
         form = Adw.PreferencesGroup(title="Add a Person",
                                     description="Makes their settings file from the template, lets them "

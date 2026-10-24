@@ -6,7 +6,7 @@ Open Omni Settings with `Mod+C`, or from the app launcher (`Mod+A`).
 
 The tabs across the top swap the sidebar:
 
-- **Main**: the Overview (updates, versions, clean-up), Git, Flatpaks, Backups, People, and the computer and personal setting pages
+- **Main**: the Overview (updates, versions, clean-up), Git, Flatpaks, Backups, Users, and the computer and personal setting pages
 - **Packages**: searching for software, the app switches (Default Packages) and what you've installed yourself (User Packages)
 - **Niri**: the desktop's shell settings and window rules
 - **AI**: Claude and the local AI models
@@ -54,13 +54,12 @@ When the config gains a setting your file doesn't have yet, a **What's New** pag
 - **System**: the computer's name, desktop and kernel
 - **Language & Input**: time zone, language and keyboard layout
 - **Devices**: Bluetooth, printing and the mouse pointer
-- **Network & Firewall**: what other devices can reach here, and what this computer blocks
+- **Network & Firewall**: what other devices can reach here, what this computer blocks, and the SSH keys that may log in as you
 - **Services**: background services, and under **Running Now** each one's state, last log lines and a restart button
-- **Account**: your name on git commits and the SSH keys that may log in as you
 - **Default Apps**: which app opens links, text files, terminal programs and folders. Change these here: picking a default in the shell's settings doesn't survive a rebuild. The choices are listed in [`lib/default-apps.nix`](../../lib/default-apps.nix).
 
 Monitors, sound, Wi-Fi, keyboard shortcuts, the bar, wallpaper and lock screen are the shell's own settings. Their pages (on the Niri tab) open the matching tab of the shell's settings window, and those changes save straight away with no rebuild.
 
-## People
+## Users
 
-People lists who can log in. An admin can add someone: a login name, a password, and whether they're an admin. **Add and Rebuild** creates their settings and rebuilds. Each person changes their own apps by logging in as themselves.
+Users lists who can log in, and holds your name and email for git commits. An admin can add someone: a login name, a password, and whether they're an admin. **Add and Rebuild** creates their settings and rebuilds. Each person changes their own apps by logging in as themselves.

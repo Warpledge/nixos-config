@@ -1,5 +1,6 @@
-// The People page: who can log in, and for admins adding someone (api.py's
-// `people` and `checkPerson`, then the job service's `person` job)
+// The Users page: who can log in, the user's git identity (the schema's "Users" page),
+// and for admins adding someone (api.py's `people` and `checkPerson`, then the job
+// service's `person` job)
 import QtQuick
 import QtQuick.Layouts
 
@@ -81,7 +82,7 @@ ColumnLayout {
             ColumnLayout {
                 spacing: 2
                 Layout.fillWidth: true
-                Text { text: "People"; color: Theme.text; font.pixelSize: 22; font.weight: Font.Bold }
+                Text { text: "Users"; color: Theme.text; font.pixelSize: 22; font.weight: Font.Bold }
                 Text {
                     text: "Who can log in to this computer. Each person picks their own apps by opening "
                           + "Omni Settings on their own account."
@@ -145,6 +146,36 @@ ColumnLayout {
                 Chip { visible: personRow.modelData.you; accent: true; text: "You" }
                 Chip { visible: personRow.modelData.owner; text: "Owns the config" }
                 Chip { visible: personRow.modelData.admin; text: "Admin" }
+            }
+        }
+    }
+
+    //--- Commit As: the user's own settings, so anyone can change them
+    Repeater {
+        model: page.view.info.pages["people"] ? page.view.info.pages["people"].groups : []
+        ColumnLayout {
+            id: group
+            required property var modelData
+            Layout.fillWidth: true
+            spacing: 6
+            Section { text: group.modelData.title }
+            Text {
+                visible: text !== ""
+                text: group.modelData.description
+                color: Theme.dim
+                font.pixelSize: 13
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+                Layout.leftMargin: 6
+            }
+            Repeater {
+                model: group.modelData.settings
+                SettingRow {
+                    required property var modelData
+                    setting: modelData
+                    view: page.view
+                    pageGlyph: "person"
+                }
             }
         }
     }

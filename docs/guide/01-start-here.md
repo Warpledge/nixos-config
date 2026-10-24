@@ -26,7 +26,7 @@ There are two kinds of settings, and Omni Settings keeps them apart:
 
 Every setting either file can hold is listed, with a comment saying what it does, in the templates: [`users/_template/settings.nix`](../../users/_template/settings.nix) and [`machines/_template/settings.nix`](../../machines/_template/settings.nix). Links like these open the file in your text editor.
 
-Admins can change both. Everyone else can change their own settings, and sees the computer ones locked. An admin is someone with **Admin** on in People, which also lets them use `sudo`.
+Admins can change both. Everyone else can change their own settings, and sees the computer ones locked. An admin is someone with **Admin** on in Users, which also lets them use `sudo`.
 
 ## The One Rule
 
