@@ -49,7 +49,7 @@ Added 2026-10-23.
 ## Layout
 
 - DMS's settings look: each row its own rounded block with a circular icon badge, sections headed in the primary colour, pill buttons.
-- Top tabs (Main, Packages, Niri, AI, Docs) as a segmented row under the header.
+- Top tabs (Main, Packages, Niri, AI, Docs) as a row of icons under the header, the hovered one stretching right to show its name.
 - The sidebar becomes a narrow icon rail, since a 480 px panel has no room for a sidebar: it drops over the dimmed page while the menu button right of the top tabs is hovered, stays open while the cursor is on the tabs or the rail, and a hovered icon's plate stretches left to show the page's name. Typing while no field has focus opens search.
 
 ## Steps

@@ -497,48 +497,54 @@ Item {
             Layout.leftMargin: 6
         }
 
-        //--- Top tabs
+        //--- Top tabs: icons, the hovered one stretching right to show its name
         Rectangle {
             id: tabsBar
-            Layout.fillWidth: true
-            Layout.rightMargin: pagesButton.width + 8
+            Layout.preferredWidth: tabsRow.implicitWidth + 6
             // An open rail stays open while the cursor is on the tabs, to scan each tab's pages
             HoverHandler {
                 id: tabsArea
                 onHoveredChanged: if (!hovered) railClose.restart()
             }
-            implicitHeight: 40
-            radius: 20
+            implicitHeight: 44
+            radius: 22
             color: Theme.card
             RowLayout {
-                anchors.fill: parent
-                anchors.margins: 4
+                id: tabsRow
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.leftMargin: 3
                 spacing: 2
                 Repeater {
                     model: omni.info ? omni.info.tabs : []
                     Rectangle {
                         required property var modelData
                         readonly property bool active: omni.tab === modelData.id
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        radius: 16
+                        Layout.preferredWidth: tabHover.hovered ? tabLabel.x + tabLabel.implicitWidth + 14 : 38
+                        Layout.preferredHeight: 38
+                        Behavior on Layout.preferredWidth { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+                        radius: 19
+                        clip: true
                         color: active ? Theme.primary : tabHover.hovered ? Theme.cardHover : "transparent"
                         Behavior on color { ColorAnimation { duration: 150 } }
-                        RowLayout {
-                            anchors.centerIn: parent
-                            spacing: 4
-                            Icon {
-                                icon: Theme.glyph(modelData.icon)
-                                size: 16
-                                fill: active
-                                color: active ? Theme.inkPrimary : Theme.dim
-                            }
-                            Text {
-                                text: modelData.title
-                                font.pixelSize: 15
-                                font.weight: Font.Bold
-                                color: active ? Theme.inkPrimary : Theme.dim
-                            }
+                        Icon {
+                            x: 9
+                            anchors.verticalCenter: parent.verticalCenter
+                            icon: Theme.glyph(modelData.icon)
+                            size: 20
+                            fill: active
+                            color: active ? Theme.inkPrimary : Theme.dim
+                        }
+                        Text {
+                            id: tabLabel
+                            x: 36
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: modelData.title
+                            font.pixelSize: 15
+                            font.weight: Font.Bold
+                            color: active ? Theme.inkPrimary : Theme.text
+                            opacity: tabHover.hovered ? 1 : 0
+                            Behavior on opacity { NumberAnimation { duration: 150 } }
                         }
                         HoverHandler { id: tabHover; cursorShape: Qt.PointingHandCursor }
                         TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: omni.go(modelData.id) }
