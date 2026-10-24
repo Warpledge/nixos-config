@@ -821,6 +821,7 @@ apps=(
   "Security|security.keepassxc|KeePassXC password manager"
   "Security|security.bleachbit|BleachBit disk cleaner"
   "System|system.resources|Resources system monitor"
+  "System|system.devTools|Developer tools: Go, Node.js, gdb, lazygit"
   "System|scrcpy.enable|scrcpy: show and control an Android phone"
   "System|androidDev.enable|Android development: adb, Flutter, Gradle"
   "Gaming|gaming.heroic|Heroic: Epic, GOG and Amazon games"

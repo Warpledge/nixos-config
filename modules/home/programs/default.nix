@@ -103,6 +103,7 @@ user: {lib, ...}: {
     ++ lib.optionals user.security.keepassxc [./security/keepassxc.nix]
     #--- System Tools (controlled by user settings)
     ++ lib.optionals user.system.resources [./system/resources.nix]
+    ++ lib.optionals user.system.devTools [./system/dev-tools.nix]
     #--- Android mirroring and development (controlled by user settings)
     ++ lib.optionals user.scrcpy.enable [./android/scrcpy.nix]
     ++ lib.optionals user.androidDev.enable [./android/android.nix]

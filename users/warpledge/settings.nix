@@ -112,6 +112,7 @@
   #--- System Tools Selection
   system = {
     resources = true; # GNOME system and process monitor
+    devTools = true; # Go, Node.js, gdb, make, lazygit, onefetch, ILSpy
   };
 
   #--- Android
@@ -171,5 +172,11 @@
   japanese = {
     ime = false;
     vn = false;
+  };
+
+  #--- User Packages
+  userPackages = {
+    Fun = ["ani-cli" "cmatrix" "figlet" "ttyper"];
+    Media = ["yt-dlp"];
   };
 }

@@ -28,21 +28,14 @@
     gnome-text-editor
     loupe
     evince
-    resources
 
     #--- CLI
     deadnix
     statix
     gtrash
-    ttyper
-    onefetch
-    lazygit
     man-pages
     tdf
     tldr
-    figlet
-    ani-cli
-    yt-dlp
     zenity
 
     #--- System Tools
@@ -57,16 +50,8 @@
     pciutils
 
     #--- Dev
-    go
-    gdb
-    gnumake
-    nodejs
     jq
     glibc
-    ilspycmd
-
-    #--- Cool
-    cmatrix
 
     #--- Qt Theme Support
     qt6.qt5compat
