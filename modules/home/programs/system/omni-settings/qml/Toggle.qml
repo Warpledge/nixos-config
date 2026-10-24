@@ -19,7 +19,7 @@ Rectangle {
         radius: width / 2
         anchors.verticalCenter: parent.verticalCenter
         x: toggle.checked ? parent.width - width - 4 : 6
-        color: toggle.checked ? Theme.onPrimary : Theme.dim
+        color: toggle.checked ? Theme.inkPrimary : Theme.dim
         Behavior on x { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
     }
     HoverHandler { cursorShape: toggle.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor }

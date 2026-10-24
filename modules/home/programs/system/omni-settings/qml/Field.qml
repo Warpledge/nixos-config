@@ -27,7 +27,7 @@ Rectangle {
             Layout.fillWidth: true
             color: Theme.text
             selectionColor: Theme.primary
-            selectedTextColor: Theme.onPrimary
+            selectedTextColor: Theme.inkPrimary
             font.pixelSize: 13
             clip: true
             onAccepted: field.accepted()

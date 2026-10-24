@@ -28,16 +28,16 @@ Singleton {
     readonly property color dim: col("on_surface_variant")
     readonly property color line: col("outline_variant")
     readonly property color primary: col("primary")
-    readonly property color onPrimary: col("on_primary")
+    readonly property color inkPrimary: col("on_primary")
     readonly property color primaryContainer: col("primary_container")
-    readonly property color onPrimaryContainer: col("on_primary_container")
+    readonly property color inkContainer: col("on_primary_container")
     readonly property color selected: col("secondary_container")
-    readonly property color onSelected: col("on_secondary_container")
+    readonly property color inkSelected: col("on_secondary_container")
     readonly property color caution: col("tertiary")
     readonly property color error: col("error")
-    readonly property color onError: col("on_error")
+    readonly property color inkError: col("on_error")
     readonly property color toast: col("inverse_surface")
-    readonly property color onToast: col("inverse_on_surface")
+    readonly property color inkToast: col("inverse_on_surface")
 
     FileView {
         path: Quickshell.env("HOME") + "/.cache/DankMaterialShell/dms-colors.json"

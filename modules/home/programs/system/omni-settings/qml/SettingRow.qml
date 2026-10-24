@@ -191,7 +191,7 @@ Rectangle {
                         anchors.rightMargin: 10
                         Text {
                             text: modelData.label
-                            color: chosen ? Theme.onSelected : Theme.text
+                            color: chosen ? Theme.inkSelected : Theme.text
                             font.pixelSize: 13
                             elide: Text.ElideRight
                             Layout.fillWidth: true

@@ -335,13 +335,13 @@ Item {
                                 icon: Theme.glyph(modelData.icon)
                                 size: 16
                                 fill: active
-                                color: active ? Theme.onPrimary : Theme.dim
+                                color: active ? Theme.inkPrimary : Theme.dim
                             }
                             Text {
                                 text: modelData.title
                                 font.pixelSize: 12
                                 font.weight: Font.DemiBold
-                                color: active ? Theme.onPrimary : Theme.dim
+                                color: active ? Theme.inkPrimary : Theme.dim
                             }
                         }
                         HoverHandler { id: tabHover; cursorShape: Qt.PointingHandCursor }
@@ -354,12 +354,12 @@ Item {
         //--- Page picker: the current page, opening into the page list and search
         Rectangle {
             Layout.fillWidth: true
-            Layout.maximumHeight: omni.picking ? omni.height * 0.7 : 60
-            implicitHeight: omni.picking ? pickerCol.implicitHeight : 60
+            // Opens in place, pushing the dimmed page down
+            Layout.preferredHeight: omni.picking ? Math.min(pickerCol.implicitHeight, omni.height * 0.72) : 60
             radius: 16
             color: Theme.card
             clip: true
-            Behavior on implicitHeight { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+            Behavior on Layout.preferredHeight { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
 
             ColumnLayout {
                 id: pickerCol
@@ -438,7 +438,8 @@ Item {
                     boundsBehavior: Flickable.StopAtBounds
                     model: search.text.trim() ? omni.results
                         : omni.navItems.filter(i => i.tab === omni.tab)
-                            .map(i => ({ kind: "page", tab: i.tab, page: i.id, title: i.title, group: i.group, icon: i.icon }))
+                            .map(i => ({ kind: "page", tab: i.tab, page: i.id, title: i.title, group: i.group,
+                                         icon: i.icon, subtitle: (omni.info.pages[i.id] || {}).description || "" }))
 
                     function pick(r) {
                         if (r.kind === "dms")
@@ -482,7 +483,18 @@ Item {
             contentHeight: body.implicitHeight + 16
             clip: true
             boundsBehavior: Flickable.StopAtBounds
-            visible: !omni.picking
+            interactive: !omni.picking
+            opacity: omni.picking ? 0.35 : 1
+            Behavior on opacity { NumberAnimation { duration: 150 } }
+
+            //--- A tap on the dimmed page closes the picker
+            MouseArea {
+                z: 1
+                parent: bodyFlick
+                anchors.fill: parent
+                enabled: omni.picking
+                onClicked: omni.picking = false
+            }
 
             ColumnLayout {
                 id: body
@@ -513,7 +525,7 @@ Item {
                         Text {
                             readonly property int n: omni.info ? omni.info.whatsNew.length : 0
                             text: `${n} new setting${n === 1 ? "" : "s"} your files don't list yet`
-                            color: Theme.onPrimaryContainer
+                            color: Theme.inkContainer
                             font.weight: Font.DemiBold
                         }
                         RowLayout {
@@ -641,7 +653,7 @@ Item {
             anchors.centerIn: parent
             width: Math.min(implicitWidth, omni.width - 60)
             text: omni.toast
-            color: Theme.onToast
+            color: Theme.inkToast
             wrapMode: Text.Wrap
         }
     }

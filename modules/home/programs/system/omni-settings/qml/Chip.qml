@@ -19,7 +19,7 @@ Rectangle {
             id: label
             anchors.verticalCenter: parent.verticalCenter
             font.pixelSize: 12
-            color: chip.accent ? Theme.onPrimaryContainer : Theme.dim
+            color: chip.accent ? Theme.inkContainer : Theme.dim
         }
         Icon {
             visible: chip.icon !== ""

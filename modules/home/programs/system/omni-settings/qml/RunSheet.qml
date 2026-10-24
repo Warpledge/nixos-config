@@ -44,7 +44,7 @@ Rectangle {
             implicitHeight: outcome.implicitHeight + 24
             radius: 16
             color: sheet.job && sheet.job.outcome === "failed" ? Theme.error : Theme.primaryContainer
-            readonly property color ink: sheet.job && sheet.job.outcome === "failed" ? Theme.onError : Theme.onPrimaryContainer
+            readonly property color ink: sheet.job && sheet.job.outcome === "failed" ? Theme.inkError : Theme.inkContainer
             ColumnLayout {
                 id: outcome
                 anchors.fill: parent
