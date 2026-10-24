@@ -15,11 +15,32 @@ Item {
     property string pluginId
     property var pluginService
 
-    function show() {
+    function show(screen) {
         // One slideout, moved to the focused screen, so pending changes aren't split
         if (!slideout.isVisible)
-            slideout.modelData = CompositorService.getFocusedScreen() ?? Quickshell.screens[0] ?? null
+            slideout.modelData = screen ?? CompositorService.getFocusedScreen() ?? Quickshell.screens[0] ?? null
         slideout.show()
+    }
+
+    //--- Hot corner: the top-right pixel of each screen, over the bar
+    Variants {
+        model: Quickshell.screens
+        PanelWindow {
+            required property var modelData
+            screen: modelData
+            anchors.top: true
+            anchors.right: true
+            implicitWidth: 1
+            implicitHeight: 1
+            color: "transparent"
+            WlrLayershell.namespace: "dms:omni-settings-corner"
+            WlrLayershell.layer: WlrLayer.Overlay
+            WlrLayershell.exclusiveZone: -1
+            WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+            HoverHandler {
+                onHoveredChanged: if (hovered) root.show(modelData)
+            }
+        }
     }
 
     DSlideout {
