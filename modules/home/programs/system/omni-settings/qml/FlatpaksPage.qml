@@ -354,7 +354,7 @@ ColumnLayout {
                 icon: "shield"
                 onClicked: Backend.call("flatseal", { app: appRow.app.id })
             }
-            Chip { visible: appRow.flatsealItself; accent: true; text: "Comes with Flatpak" }
+            Chip { tappable: false; visible: appRow.flatsealItself; accent: true; text: "Comes with Flatpak" }
             IconButton {
                 visible: !!appRow.app.off
                 icon: "close"

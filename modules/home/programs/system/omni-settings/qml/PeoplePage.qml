@@ -143,9 +143,9 @@ ColumnLayout {
                         Layout.fillWidth: true
                     }
                 }
-                Chip { visible: personRow.modelData.you; accent: true; text: "You" }
-                Chip { visible: personRow.modelData.owner; text: "Owns the config" }
-                Chip { visible: personRow.modelData.admin; text: "Admin" }
+                Chip { tappable: false; visible: personRow.modelData.you; accent: true; text: "You" }
+                Chip { tappable: false; visible: personRow.modelData.owner; text: "Owns the config" }
+                Chip { tappable: false; visible: personRow.modelData.admin; text: "Admin" }
             }
         }
     }

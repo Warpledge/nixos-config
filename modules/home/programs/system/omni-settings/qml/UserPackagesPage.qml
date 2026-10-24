@@ -169,6 +169,7 @@ ColumnLayout {
                 }
             }
             Chip {
+                tappable: false
                 visible: text !== ""
                 accent: true
                 tone: row.where === "removing" ? "caution" : row.where === "adding" ? "success" : ""

@@ -20,7 +20,7 @@ Rectangle {
     Layout.fillWidth: true
     implicitHeight: col.implicitHeight + 20
     radius: 14
-    color: hover.hovered && !open ? Theme.cardHover : Theme.card
+    color: hover.hovered && !open ? Theme.hover : Theme.card
     opacity: locked ? 0.6 : 1
     Behavior on color { ColorAnimation { duration: 120 } }
 
@@ -190,7 +190,7 @@ Rectangle {
                     width: choices.width
                     height: 34
                     radius: 10
-                    color: chosen ? Theme.selected : optHover.hovered ? Theme.cardHover : "transparent"
+                    color: chosen ? Theme.selected : optHover.hovered ? Theme.hover : "transparent"
                     RowLayout {
                         anchors.fill: parent
                         anchors.leftMargin: 10

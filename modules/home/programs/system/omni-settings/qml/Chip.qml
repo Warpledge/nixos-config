@@ -8,12 +8,15 @@ Rectangle {
     property bool success: false
     property string tone: success ? "success" : ""
     property string icon: ""
+    property bool tappable: true  // false for a label: no hover or hand cursor
     signal tapped
     implicitWidth: row.implicitWidth + 16
     implicitHeight: 26
     radius: 13
-    color: tone ? Qt.alpha(Theme.toneColor(tone), 0.2) : accent ? Qt.alpha(Theme.primary, 0.2)
-         : hover.hovered ? Theme.line : Theme.cardHover
+    readonly property bool lit: tappable && hover.hovered
+    color: tone ? Qt.alpha(Theme.toneColor(tone), lit ? 0.34 : 0.2)
+         : accent ? Qt.alpha(Theme.primary, lit ? 0.34 : 0.2)
+         : lit ? Theme.hover : Theme.cardHover
     Row {
         id: row
         anchors.centerIn: parent
@@ -32,6 +35,6 @@ Rectangle {
             color: label.color
         }
     }
-    HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
+    HoverHandler { id: hover; cursorShape: chip.tappable ? Qt.PointingHandCursor : Qt.ArrowCursor }
     TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: chip.tapped() }
 }

@@ -194,9 +194,10 @@ ColumnLayout {
                 Flow {
                     Layout.fillWidth: true
                     spacing: 6
-                    Chip { text: page.view.info.wm; accent: true }
-                    Chip { text: page.ov ? `Linux ${page.ov.kernel}` : "" }
+                    Chip { tappable: false; text: page.view.info.wm; accent: true }
+                    Chip { tappable: false; text: page.ov ? `Linux ${page.ov.kernel}` : "" }
                     Chip {
+                        tappable: false
                         visible: !!page.ov && page.ov.generation > 0
                         text: page.ov ? `Version ${page.ov.generation}` : ""
                     }
@@ -246,7 +247,7 @@ ColumnLayout {
             Layout.fillWidth: true
             implicitHeight: 52
             radius: 14
-            color: srcHover.hovered ? Theme.cardHover : Theme.card
+            color: srcHover.hovered ? Theme.hover : Theme.card
             RowLayout {
                 anchors.fill: parent
                 anchors.leftMargin: 14
@@ -396,9 +397,9 @@ ColumnLayout {
                         visible: g.running || g.next || g.booted
                         Layout.fillWidth: true
                         spacing: 4
-                        Chip { visible: g.running; tone: "success"; text: "Running" }
-                        Chip { visible: g.next && !g.running; accent: true; text: "Next start" }
-                        Chip { visible: g.booted && !g.running; text: "Started with" }
+                        Chip { tappable: false; visible: g.running; tone: "success"; text: "Running" }
+                        Chip { tappable: false; visible: g.next && !g.running; accent: true; text: "Next start" }
+                        Chip { tappable: false; visible: g.booted && !g.running; text: "Started with" }
                     }
                 }
                 IconButton {

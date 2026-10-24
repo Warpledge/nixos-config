@@ -24,8 +24,8 @@ Rectangle {
     radius: 14
     opacity: enabled ? 1 : 0.5
     color: selected ? Theme.selected
-         : tone ? Theme.toneFill(tone, hover.hovered ? Theme.cardHover : Theme.card)
-         : hover.hovered ? Theme.cardHover : compact ? "transparent" : Theme.card
+         : tone ? Theme.toneFill(tone, hover.hovered ? Theme.hover : Theme.card)
+         : hover.hovered ? Theme.hover : compact ? "transparent" : Theme.card
     Behavior on color { ColorAnimation { duration: 120 } }
 
     ColumnLayout {
@@ -65,7 +65,7 @@ Rectangle {
                     Layout.fillWidth: true
                 }
             }
-            Chip { visible: row.tag !== ""; text: row.tag; accent: !row.tagSuccess; success: row.tagSuccess }
+            Chip { tappable: false; visible: row.tag !== ""; text: row.tag; accent: !row.tagSuccess; success: row.tagSuccess }
             Pill { visible: row.button !== ""; text: row.button; onClicked: row.clicked() }
             Icon { visible: row.chevron; icon: "chevron_right" }
             Icon { visible: row.trailing !== ""; icon: row.trailing; size: 18 }

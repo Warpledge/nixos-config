@@ -97,6 +97,7 @@ ColumnLayout {
                     }
                 }
                 Chip {
+                    tappable: false
                     text: unitRow.look[0]
                     tone: unitRow.look[1]
                 }

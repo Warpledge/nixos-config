@@ -31,8 +31,11 @@ Singleton {
     readonly property color inkPrimary: col("on_primary")
     readonly property color primaryContainer: col("primary_container")
     readonly property color inkContainer: col("on_primary_container")
-    readonly property color selected: col("secondary_container")
-    readonly property color inkSelected: col("on_secondary_container")
+    // Tints of primary: DMS's schemes can make secondary_container the card colour
+    // and outline_variant the background, so neither shows a hover or a choice
+    readonly property color hover: Qt.tint(cardHover, Qt.alpha(primary, 0.16))
+    readonly property color selected: Qt.tint(card, Qt.alpha(primary, 0.3))
+    readonly property color inkSelected: text
     readonly property color error: col("error")
     readonly property color inkError: col("on_error")
     readonly property color toast: col("inverse_surface")

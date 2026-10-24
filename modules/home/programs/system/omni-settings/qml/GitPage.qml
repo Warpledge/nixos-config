@@ -67,22 +67,26 @@ ColumnLayout {
                 Flow {
                     Layout.fillWidth: true
                     spacing: 6
-                    Chip { visible: page.error !== ""; tone: "error"; text: "Couldn't read" }
+                    Chip { tappable: false; visible: page.error !== ""; tone: "error"; text: "Couldn't read" }
                     Chip {
+                        tappable: false
                         visible: !!page.repo && page.repo.changed.length > 0
                         tone: "caution"
                         text: page.repo ? `${page.repo.changed.length + page.repo.moreChanged} changed` : ""
                     }
                     Chip {
+                        tappable: false
                         visible: !!page.repo && page.repo.outgoing.length > 0
                         text: page.repo ? `${page.repo.outgoing.length} to push` : ""
                     }
                     Chip {
+                        tappable: false
                         visible: !!page.repo && page.repo.incoming.length > 0
                         tone: "caution"
                         text: page.repo ? `${page.repo.incoming.length} to pull` : ""
                     }
                     Chip {
+                        tappable: false
                         visible: !!page.repo && !page.repo.changed.length && !page.repo.outgoing.length
                                  && !page.repo.incoming.length
                         icon: "check"
@@ -155,6 +159,7 @@ ColumnLayout {
                     Layout.fillWidth: true
                 }
                 Chip {
+                    tappable: false
                     text: modelData.state
                     tone: ({ conflict: "error", deleted: "error", modified: "caution", added: "success",
                              new: "success" })[modelData.state] || ""

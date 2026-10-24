@@ -510,38 +510,51 @@ Item {
                 spacing: 2
                 Repeater {
                     model: omni.info ? omni.info.tabs : []
-                    Rectangle {
+                    // Only the current tab's name takes room in the row; a hovered tab's
+                    // plate draws over its neighbours, so no tab moves under the cursor
+                    Item {
+                        id: tab
                         required property var modelData
                         readonly property bool active: omni.tab === modelData.id
                         readonly property bool open: active || tabHover.hovered
-                        Layout.preferredWidth: open ? tabLabel.x + tabLabel.implicitWidth + 14 : 38
+                        readonly property real full: tabLabel.x + tabLabel.implicitWidth + 14
+                        Layout.preferredWidth: active ? full : 38
                         Layout.preferredHeight: 38
                         Behavior on Layout.preferredWidth { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-                        radius: 19
-                        clip: true
-                        color: active ? Theme.primary : tabHover.hovered ? Theme.cardHover : "transparent"
-                        Behavior on color { ColorAnimation { duration: 150 } }
-                        Icon {
-                            x: 9
-                            anchors.verticalCenter: parent.verticalCenter
-                            icon: Theme.glyph(modelData.icon)
-                            size: 20
-                            fill: active
-                            color: active ? Theme.inkPrimary : Theme.dim
-                        }
-                        Text {
-                            id: tabLabel
-                            x: 36
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: modelData.title
-                            font.pixelSize: 15
-                            font.weight: Font.Bold
-                            color: active ? Theme.inkPrimary : Theme.text
-                            opacity: parent.open ? 1 : 0
-                            Behavior on opacity { NumberAnimation { duration: 150 } }
-                        }
+                        z: tabHover.hovered ? 2 : 0
                         HoverHandler { id: tabHover; cursorShape: Qt.PointingHandCursor }
-                        TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: omni.go(modelData.id) }
+                        TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: omni.go(tab.modelData.id) }
+                        Rectangle {
+                            readonly property var modelData: tab.modelData
+                            readonly property bool active: tab.active
+                            readonly property bool open: tab.open
+                            width: open ? tab.full : 38
+                            height: 38
+                            Behavior on width { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+                            radius: 19
+                            clip: true
+                            color: active ? Theme.primary : tabHover.hovered ? Theme.hover : "transparent"
+                            Behavior on color { ColorAnimation { duration: 150 } }
+                            Icon {
+                                x: 9
+                                anchors.verticalCenter: parent.verticalCenter
+                                icon: Theme.glyph(modelData.icon)
+                                size: 20
+                                fill: active
+                                color: active ? Theme.inkPrimary : tabHover.hovered ? Theme.inkSelected : Theme.dim
+                            }
+                            Text {
+                                id: tabLabel
+                                x: 36
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: modelData.title
+                                font.pixelSize: 15
+                                font.weight: Font.Bold
+                                color: active ? Theme.inkPrimary : Theme.inkSelected
+                                opacity: parent.open ? 1 : 0
+                                Behavior on opacity { NumberAnimation { duration: 150 } }
+                            }
+                        }
                     }
                 }
             }
@@ -941,7 +954,7 @@ Item {
                         width: 38
                         height: 38
                         radius: 19
-                        color: railItem.active ? Theme.primary : railHover.hovered ? Theme.cardHover : "transparent"
+                        color: railItem.active ? Theme.primary : railHover.hovered ? Theme.hover : "transparent"
                         Behavior on color { ColorAnimation { duration: 120 } }
                         Icon {
                             anchors.centerIn: parent

@@ -510,7 +510,7 @@ ColumnLayout {
             spacing: 8
             Icon { icon: Theme.glyph(group.icon, "settings"); size: 18; color: Theme.primary }
             Text { text: group.title; color: Theme.primary; font.pixelSize: 15; font.weight: Font.DemiBold }
-            Chip { text: String(group.rules.length); tone: group.tone; accent: group.tone === "" && group.title !== "Set in Nix" }
+            Chip { tappable: false; text: String(group.rules.length); tone: group.tone; accent: group.tone === "" && group.title !== "Set in Nix" }
         }
         Text {
             visible: text !== ""
@@ -537,7 +537,7 @@ ColumnLayout {
         Layout.fillWidth: true
         implicitHeight: ruleCol.implicitHeight + 22
         radius: 14
-        color: hover.hovered ? Theme.cardHover : Theme.card
+        color: hover.hovered ? Theme.hover : Theme.card
         HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
         TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: row.open = !row.open }
         ColumnLayout {
@@ -569,6 +569,7 @@ ColumnLayout {
                         Repeater {
                             model: row.rule.tags
                             Chip {
+                                tappable: false
                                 required property var modelData
                                 text: modelData.text
                                 tone: page.tone(modelData.kind)
@@ -639,7 +640,7 @@ ColumnLayout {
                             Layout.fillWidth: true
                         }
                     }
-                    Chip { visible: modelData.out; text: "Left out"; tone: "caution" }
+                    Chip { tappable: false; visible: modelData.out; text: "Left out"; tone: "caution" }
                 }
             }
         }

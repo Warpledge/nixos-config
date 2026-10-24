@@ -13,9 +13,10 @@ Rectangle {
     Layout.fillWidth: true
     implicitHeight: 38
     radius: 19
-    color: Theme.cardHover
+    color: fieldHover.hovered && !input.activeFocus ? Theme.hover : Theme.cardHover
     border.width: input.activeFocus ? 2 : 0
     border.color: Theme.primary
+    HoverHandler { id: fieldHover; cursorShape: Qt.IBeamCursor }
     RowLayout {
         anchors.fill: parent
         anchors.leftMargin: 12

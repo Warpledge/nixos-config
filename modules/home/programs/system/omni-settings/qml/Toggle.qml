@@ -9,7 +9,8 @@ Rectangle {
     implicitHeight: 26
     radius: 13
     opacity: enabled ? 1 : 0.45
-    color: checked ? Theme.primary : Theme.cardHover
+    color: checked ? (switchHover.hovered ? Qt.lighter(Theme.primary, 1.12) : Theme.primary)
+         : switchHover.hovered ? Theme.hover : Theme.cardHover
     border.width: checked ? 0 : 2
     border.color: Theme.line
     Behavior on color { ColorAnimation { duration: 120 } }
@@ -22,6 +23,6 @@ Rectangle {
         color: toggle.checked ? Theme.inkPrimary : Theme.dim
         Behavior on x { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
     }
-    HoverHandler { cursorShape: toggle.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor }
+    HoverHandler { id: switchHover; cursorShape: toggle.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor }
     TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: toggle.toggled(!toggle.checked) }
 }

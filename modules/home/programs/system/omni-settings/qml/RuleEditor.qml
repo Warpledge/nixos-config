@@ -244,7 +244,7 @@ Sheet {
                     onTapped: pe.pick = index
                 }
             }
-            Chip { visible: pe.e.control === "size" && pe.pick === -1; accent: true; text: `Now ${pe.e.text.replace(/^(Width|Height) /, "")}` }
+            Chip { tappable: false; visible: pe.e.control === "size" && pe.pick === -1; accent: true; text: `Now ${pe.e.text.replace(/^(Width|Height) /, "")}` }
         }
         Field {
             visible: pe.e.control === "size" && pe.pick === ed.pixelsIndex

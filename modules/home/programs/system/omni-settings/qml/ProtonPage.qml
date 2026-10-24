@@ -83,7 +83,7 @@ ColumnLayout {
         spacing: 6
         Repeater {
             model: page.lo ? page.lo.session : []
-            Chip { required property var modelData; text: modelData }
+            Chip { tappable: false; required property var modelData; text: modelData }
         }
     }
 
@@ -129,7 +129,7 @@ ColumnLayout {
         Layout.fillWidth: true
         implicitHeight: optionCol.implicitHeight + 22
         radius: 14
-        color: hover.hovered ? Theme.cardHover : Theme.card
+        color: hover.hovered ? Theme.hover : Theme.card
         RowLayout {
             id: optionCol
             anchors.verticalCenter: parent.verticalCenter

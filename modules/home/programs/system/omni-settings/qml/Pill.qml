@@ -11,8 +11,9 @@ Rectangle {
     implicitHeight: 34
     radius: 17
     opacity: enabled ? 1 : 0.45
-    color: danger ? Theme.error : quiet ? (hover.hovered ? Theme.line : Theme.cardHover)
-         : Theme.primary
+    color: danger ? (hover.hovered ? Qt.lighter(Theme.error, 1.12) : Theme.error)
+         : quiet ? (hover.hovered ? Theme.hover : Theme.cardHover)
+         : hover.hovered ? Qt.lighter(Theme.primary, 1.12) : Theme.primary
     Text {
         id: pillText
         anchors.centerIn: parent
