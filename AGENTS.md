@@ -249,7 +249,10 @@ lines, `grep -n` that file for the part you need.
   `docs/todo/omni-settings-qml.md` say how. Never name a QML property `on`
   plus a capital (it's read as a handler) or after an `Item` property
   (`data`, `state`), and give tap handlers
-  `gesturePolicy: TapHandler.ReleaseWithinBounds`.
+  `gesturePolicy: TapHandler.ReleaseWithinBounds`. JSON sent back from QML
+  loses `.0` and can have its keys sorted, so write files from data the
+  backend read; a `Repeater` delegate's `modelData` is a copy, so edit the
+  source list by index.
 
 **`modules/home/programs/media/freetube/`**
 
