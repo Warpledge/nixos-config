@@ -9,6 +9,8 @@ import grp
 import json
 import os
 import pwd
+import shutil
+import socket
 import subprocess
 import sys
 import time
@@ -16,6 +18,7 @@ import time
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 
 import backend  # noqa: E402
+import backupstate  # noqa: E402
 import closure  # noqa: E402
 import flatpakstate  # noqa: E402
 import gitstate  # noqa: E402
@@ -559,6 +562,34 @@ def cmd_flatseal(_cfg, args):
     return True
 
 
+#--------------------------------------------------------------------#
+#-- Backups
+#--------------------------------------------------------------------#
+def cmd_backups(cfg, _args):
+    """The backups that apply to the user, each with its folder and newest copy."""
+    user = loaded(cfg).resolved["users"][cfg.user]
+    base = os.path.join(backupstate.ROOT, socket.gethostname())
+    kinds = []
+    for command, title, what, _, folder in backupstate.kinds(user):
+        path = os.path.join(base, folder)
+        kinds.append({"command": command, "title": title, "what": what, "folder": path,
+                      "exists": os.path.isdir(path), "last": backupstate.newest(path)})
+    return {"base": base, "kinds": kinds, "freetubeOpen": backupstate.freetube_open(),
+            "nixm": bool(shutil.which("nixm"))}
+
+
+def cmd_backup(_cfg, args):
+    """Runs one backup, or all of them for "backup"; answers what nixm printed."""
+    command = args.get("command")
+    if command != "backup" and command not in {k[0] for k in backupstate.KINDS}:
+        raise ValueError(f"unknown backup: {command}")
+    try:
+        ok, output = backupstate.run(command)
+    except subprocess.TimeoutExpired:
+        ok, output = False, "nixm took longer than 10 minutes"
+    return {"ok": ok, "output": output}
+
+
 COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cmd_save,
             "dismiss": cmd_dismiss,
             "stale": cmd_stale, "removeStale": cmd_remove_stale,
@@ -566,7 +597,8 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "compare": cmd_compare, "failedLog": cmd_failed_log, "forgetFailed": cmd_forget_failed,
             "git": cmd_git, "gitSummary": cmd_git_summary,
             "flatpaks": cmd_flatpaks, "flatpakUpdates": cmd_flatpak_updates, "flatpakRun": cmd_flatpak_run,
-            "flatpakForget": cmd_flatpak_forget, "flatseal": cmd_flatseal}
+            "flatpakForget": cmd_flatpak_forget, "flatseal": cmd_flatseal,
+            "backups": cmd_backups, "backup": cmd_backup}
 
 
 def run(cfg, cmd, args):

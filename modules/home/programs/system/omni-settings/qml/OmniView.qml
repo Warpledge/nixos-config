@@ -709,7 +709,8 @@ Item {
 
     //--- Custom pages by id; each is ported from the GTK app in turn
     readonly property var custom: ({ overview: overviewPage, shell: shellPage, git: gitPage,
-                                      flatpaks: flatpaksPage })
+                                      flatpaks: flatpaksPage, backups: backupsPage })
+    Component { id: backupsPage; BackupsPage { view: omni } }
     Component { id: flatpaksPage; FlatpaksPage { view: omni } }
     Component { id: overviewPage; OverviewPage { view: omni } }
     Component { id: gitPage; GitPage { view: omni } }

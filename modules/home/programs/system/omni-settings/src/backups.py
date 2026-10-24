@@ -4,10 +4,7 @@ playlists, history) and Zen's bookmarks go to dated folders under
 keeps the newest ten of each."""
 
 import os
-import re
 import socket
-import subprocess
-import time
 
 import gi
 
@@ -16,36 +13,8 @@ gi.require_version("Adw", "1")
 from gi.repository import Adw, Gio, GLib, Gtk, Pango  # noqa: E402
 
 import ui  # noqa: E402
-
-ROOT = os.path.join(os.path.expanduser("~"), "SyncBackups")
-STAMP = re.compile(r"^(\d{4})-(\d\d)-(\d\d)_(\d\d)-(\d\d)-(\d\d)$")
-#--- (nixm command, title, what it saves, user setting it needs, its folder)
-KINDS = [
-    ("freetube-backup", "FreeTube", "Subscriptions, playlists, history and settings",
-     ("media", "freetube"), "FreeTube"),
-    ("zen-backup", "Zen Bookmarks", "Every bookmark, as a bookmarks.html any browser imports",
-     ("browsers", "zen"), "Zen"),
-]
-
-
-def newest(folder):
-    """When the newest dated backup in `folder` was made (epoch), or None."""
-    try:
-        stamps = sorted(n for n in os.listdir(folder) if STAMP.match(n))
-    except OSError:
-        return None
-    if not stamps:
-        return None
-    return time.mktime(time.strptime(stamps[-1], "%Y-%m-%d_%H-%M-%S"))
-
-
-def freetube_open():
-    """Whether FreeTube is running, as nixm's own check sees it."""
-    try:
-        out = subprocess.run(["pgrep", "-f", "freetube/resources/app.asar"], capture_output=True)
-    except OSError:
-        return False
-    return out.returncode == 0
+from backupstate import ROOT, freetube_open, kinds, newest  # noqa: E402
+import backupstate  # noqa: E402
 
 
 class BackupsPage(Adw.PreferencesPage):
@@ -55,7 +24,7 @@ class BackupsPage(Adw.PreferencesPage):
         self.host = socket.gethostname()
         self.rows = {}
         user = window.state.resolved["users"][window.cfg.user]
-        self.kinds = [k for k in KINDS if (user.get(k[3][0]) or {}).get(k[3][1])]
+        self.kinds = kinds(user)
 
         top = Adw.PreferencesGroup()
         everything = None
@@ -133,10 +102,8 @@ class BackupsPage(Adw.PreferencesPage):
             self._busy(False, command)
             for c in self.rows:
                 self._subtitle(c)
-            text = str(err) if err is not None else (out.stdout + out.stderr).strip()
+            ok, text = (False, str(err)) if err is not None else out
             self.output.set_text(text or "(no output)")
             self.output_group.set_visible(True)
-            ok = err is None and out.returncode == 0
             self.window.toast(f"{title} backed up" if ok else f"{title}: the backup didn't finish; see below")
-        ui.run_async(lambda: subprocess.run(["nixm", command], capture_output=True, text=True, timeout=600,
-                                            stdin=subprocess.DEVNULL), done)
+        ui.run_async(lambda: backupstate.run(command), done)
