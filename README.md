@@ -371,6 +371,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | | |
 | --- | --- |
 | **Editors / IDE** | [Zed][zed], [Helix][helix], [VSCodium][vscodium], [micro][micro] (quick edits) |
+| **Terminal Toys** | [cmatrix][cmatrix], [figlet][figlet], [ttyper][ttyper] (typing test) |
 | **Developer Tools** | [Rust][rustup] through rustup, [Go][go], Node.js, gdb, make, [lazygit][lazygit], onefetch and ilspycmd |
 | **Formatter** | [alejandra][alejandra] v3.0.0 |
 | **Rebuild Wrapper** | [`nixm`](./modules/home/nixm.nix) (fzf menu over [nh][nh]) |
@@ -383,7 +384,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | --- | --- |
 | **Browsers** | [Zen][zen] / [Mullvad Browser][mullvad-browser] / [Helium][helium] |
 | **File Manager** | [Nautilus][nautilus] (with an open-in-Kitty menu entry from [nautilus-open-any-terminal][nautilus-open-any-terminal]), [Dolphin][dolphin] (optional, colored from the shell's theme, with [Ark][ark] for archives and a Convert Media menu entry using [FFmpeg][ffmpeg]), [Yazi][yazi] (terminal file manager), [Dux Files][dux-files] (standalone file manager from Dux Labs) |
-| **Media Player** | [mpv][mpv], [Spotify][spotify] via [spicetify-nix][spicetify], [FreeTube][freetube] |
+| **Media Player** | [mpv][mpv], [Spotify][spotify] via [spicetify-nix][spicetify], [FreeTube][freetube], [yt-dlp][yt-dlp] (downloader), [ani-cli][ani-cli] (anime in mpv) |
 | **Twitch** | [Streamlink Twitch GUI][streamlink-twitch-gui] browses Twitch and hands the stream to [Streamlink][streamlink], which plays it in mpv, so there are no ads and the follow list stays local with no Twitch account attached; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs |
 | **Screenshot / Recording** | [Quick Capture][quick-capture] (Niri), [gpu-screen-recorder][gpu-screen-recorder] |
 | **Clipboard** | [ClipBoard+][clipboard-plus] (Niri) |
@@ -479,6 +480,11 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 [ghostty]: https://ghostty.org
 [tmux]: https://github.com/tmux/tmux
 [zed]: https://zed.dev
+[cmatrix]: https://github.com/abishekvashok/cmatrix
+[figlet]: http://www.figlet.org/
+[ttyper]: https://github.com/max-niederman/ttyper
+[yt-dlp]: https://github.com/yt-dlp/yt-dlp/
+[ani-cli]: https://github.com/pystardust/ani-cli
 [rustup]: https://www.rustup.rs/
 [go]: https://go.dev/
 [lazygit]: https://github.com/jesseduffield/lazygit

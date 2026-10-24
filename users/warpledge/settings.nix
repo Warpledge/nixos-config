@@ -69,6 +69,8 @@
     moku = true; # Manga, novel and anime reader (source build with UI fixes)
     streamlinkTwitchGui = true; # Twitch browser via streamlink + mpv (AppImage)
     boorusama = true; # Booru image board browser (AppImage)
+    ytDlp = true; # Download video and audio from YouTube and other sites
+    aniCli = true; # Browse and play anime from the terminal
 
     # Local (~/.local/opt bundles, kept out of git)
     tonkatsuBox = true; # Collection manager (games, film, anime, manga, books)
@@ -112,6 +114,13 @@
   #--- System Tools Selection
   system = {
     resources = true; # GNOME system and process monitor
+  };
+
+  #--- Fun
+  fun = {
+    cmatrix = true; # The Matrix's falling characters in the terminal
+    figlet = true; # Big letters made out of ordinary text
+    ttyper = true; # Terminal typing test
   };
 
   #--- Dev
@@ -179,11 +188,5 @@
   japanese = {
     ime = false;
     vn = false;
-  };
-
-  #--- User Packages
-  userPackages = {
-    Fun = ["ani-cli" "cmatrix" "figlet" "ttyper"];
-    Media = ["yt-dlp"];
   };
 }

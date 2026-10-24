@@ -68,6 +68,8 @@ user: {lib, ...}: {
     ++ lib.optionals user.media.streamlinkTwitchGui [./media/streamlink-twitch-gui.nix]
     ++ lib.optionals user.media.moku [./media/moku]
     ++ lib.optionals user.media.boorusama [./media/boorusama.nix]
+    ++ lib.optionals user.media.ytDlp [./media/yt-dlp.nix]
+    ++ lib.optionals user.media.aniCli [./media/ani-cli.nix]
     ++ lib.optionals (user.wallpaper == "engine") [./media/wallpaper-engine.nix]
     ++ lib.optionals user.media.tonkatsuBox [./media/tonkatsu-box.nix]
     #--- Terminals (controlled by user settings)
@@ -103,6 +105,10 @@ user: {lib, ...}: {
     ++ lib.optionals user.security.keepassxc [./security/keepassxc.nix]
     #--- System Tools (controlled by user settings)
     ++ lib.optionals user.system.resources [./system/resources.nix]
+    #--- Terminal toys (controlled by user settings)
+    ++ lib.optionals user.fun.cmatrix [./fun/cmatrix.nix]
+    ++ lib.optionals user.fun.figlet [./fun/figlet.nix]
+    ++ lib.optionals user.fun.ttyper [./fun/ttyper.nix]
     #--- Programming languages and developer tools (controlled by user settings)
     ++ lib.optionals user.dev.rust [./dev/rust.nix]
     ++ lib.optionals user.dev.go [./dev/go.nix]

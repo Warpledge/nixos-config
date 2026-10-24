@@ -79,6 +79,8 @@
     moku = false; # Manga, novel and anime reader (built from source: slow)
     streamlinkTwitchGui = false; # Twitch browser via streamlink + mpv (AppImage)
     boorusama = false; # Booru image board browser (AppImage)
+    ytDlp = false; # Download video and audio from YouTube and other sites
+    aniCli = false; # Browse and play anime from the terminal
 
     # Need a prebuilt bundle in ~/.local/opt that this repo doesn't ship
     # (docs/personal/local/local-binary-installs.md)
@@ -145,6 +147,13 @@
   #--- System Tools Selection
   system = {
     resources = false; # GNOME system and process monitor
+  };
+
+  #--- Fun
+  fun = {
+    cmatrix = false; # The Matrix's falling characters in the terminal
+    figlet = false; # Big letters made out of ordinary text
+    ttyper = false; # Terminal typing test
   };
 
   #--- Dev

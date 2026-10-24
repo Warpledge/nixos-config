@@ -93,6 +93,11 @@
   "security.bleachbit": {"summary": "Clear caches and leftovers", "icon": ["bleachbit"], "text": "**BleachBit** clears caches, logs and browser leftovers when you run it; nothing runs on a schedule."},
   "security.keepassxc": {"summary": "Offline password manager", "icon": ["keepassxc", "org.keepassxc.KeePassXC"], "text": "**KeePassXC**, an offline password manager. Its vault file can be synced between devices with **Syncthing**."},
 
+  "media.ytDlp": {"title": "yt-dlp", "summary": "Download video and audio", "icon": ["yt-dlp", "folder-download"], "text": "**yt-dlp** downloads video and audio from YouTube and many other sites, from the terminal."},
+  "media.aniCli": {"title": "ani-cli", "summary": "Anime from the terminal", "icon": ["ani-cli", "utilities-terminal"], "text": "**ani-cli** searches for anime and plays it in mpv, from the terminal."},
+  "fun.cmatrix": {"title": "cmatrix", "summary": "The Matrix in your terminal", "icon": ["utilities-terminal"], "text": "**cmatrix** fills the terminal with The Matrix's falling characters."},
+  "fun.figlet": {"title": "figlet", "summary": "Big letters out of text", "icon": ["utilities-terminal"], "text": "**figlet** prints text as big letters made of ordinary characters."},
+  "fun.ttyper": {"title": "ttyper", "summary": "Typing test", "icon": ["utilities-terminal"], "text": "**ttyper** is a typing test in the terminal."},
   "dev.rust": {"title": "Rust", "summary": "Rust through rustup", "icon": ["rust", "text-x-rust"], "text": "**rustup** installs and switches Rust toolchains. Run `rustup default stable` once to download one; tools from `cargo install` land on your PATH."},
   "dev.go": {"title": "Go", "summary": "The Go compiler and tools", "icon": ["text-x-go", "text-x-script"], "text": "**Go**, with `go build`, `go run` and the rest of its tools."},
   "dev.node": {"title": "Node.js", "summary": "JavaScript runtime with npm", "icon": ["nodejs", "text-x-javascript"], "text": "**Node.js** with **npm** and **npx**."},
