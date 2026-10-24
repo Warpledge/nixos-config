@@ -73,6 +73,12 @@ Item {
                 for (const g of info.nav[t.id])
                     for (const it of g.items)
                         out.push(Object.assign({ tab: t.id, group: g.title }, it))
+        // User Packages: one item per category, saved or pending, after All
+        const at = out.findIndex(i => i.id === "userpackages") + 1
+        if (at > 0)
+            out.splice(at, 0, ...packageCategories.map(c => ({ tab: "packages", group: "User Packages",
+                id: `userpackages:${c}`, title: c, icon: ["folder"], custom: true,
+                subtitle: `${userPackages(false)[c] ? userPackages(false)[c].length : 0} installed` })))
         return out
     }
     readonly property var current: navItems.find(i => i.id === page) || null
@@ -196,6 +202,15 @@ Item {
     }
 
     function pickCategory(attr, current, done) { categories.open(attr, current, done) }
+
+    readonly property var packageCategories: {
+        const now = userPackages(false), saved = userPackages(true)
+        const cats = Object.keys(now).filter(c => now[c].length)
+        for (const c of Object.keys(saved))
+            if (saved[c].length && !cats.includes(c))
+                cats.push(c)
+        return cats.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+    }
 
     //--- Search's index of nixpkgs names (api.py's packageNames), read once per window
     property var packageNames: null
@@ -691,7 +706,7 @@ Item {
                 Loader {
                     Layout.fillWidth: true
                     Layout.preferredHeight: item ? item.implicitHeight : 0
-                    active: !!omni.info && !!omni.info.pages[omni.page] && omni.custom[omni.page] === undefined
+                    active: !!omni.info && !!omni.info.pages[omni.page] && omni.pageComponent === undefined
                     sourceComponent: SettingsPage {
                         model: omni.info.pages[omni.page]
                         view: omni
@@ -702,13 +717,13 @@ Item {
                 Loader {
                     Layout.fillWidth: true
                     Layout.preferredHeight: item ? item.implicitHeight : 0
-                    active: !!omni.info && omni.custom[omni.page] !== undefined
-                    sourceComponent: omni.custom[omni.page] || null
+                    active: !!omni.info && omni.pageComponent !== undefined
+                    sourceComponent: omni.pageComponent || null
                 }
 
                 //--- Pages not ported yet
                 ColumnLayout {
-                    visible: !!omni.info && !omni.info.pages[omni.page] && omni.custom[omni.page] === undefined
+                    visible: !!omni.info && !omni.info.pages[omni.page] && omni.pageComponent === undefined
                     Layout.fillWidth: true
                     Layout.topMargin: 40
                     spacing: 12
@@ -807,8 +822,11 @@ Item {
     //--- Custom pages by id; each is ported from the GTK app in turn
     readonly property var custom: ({ overview: overviewPage, shell: shellPage, git: gitPage,
                                       flatpaks: flatpaksPage, backups: backupsPage, people: peoplePage,
-                                      packages: packagesPage })
+                                      packages: packagesPage, userpackages: userPackagesPage })
+    readonly property var pageComponent: custom[page]
+        || (page.startsWith("userpackages:") ? userPackagesPage : undefined)
     Component { id: packagesPage; PackagesPage { view: omni } }
+    Component { id: userPackagesPage; UserPackagesPage { view: omni } }
     Component { id: peoplePage; PeoplePage { view: omni } }
     Component { id: backupsPage; BackupsPage { view: omni } }
     Component { id: flatpaksPage; FlatpaksPage { view: omni } }
