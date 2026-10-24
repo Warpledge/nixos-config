@@ -4,6 +4,7 @@
 {
   pkgs,
   config,
+  lib,
   ...
 }: {
   #--------------------------------------------------------------------#
@@ -17,7 +18,9 @@
     ilspycmd
     lazygit
     onefetch
-    rustup # Toolchains on first `rustup default stable`
+    #--- Toolchains on first `rustup default stable`. lowPrio: Zed's nixpkgs
+    #--- rust-analyzer wins over rustup's proxy of the same name
+    (lib.lowPrio rustup)
   ];
 
   #--- Where `cargo install` puts binaries
