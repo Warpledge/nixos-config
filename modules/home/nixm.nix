@@ -516,8 +516,9 @@
           add_presets nix-vn "VN, NVL upscale"
           add_param "nix-rpgm" "RPG Maker, res from the engine, NVL"
           add_presets nix-rpgm "RPG Maker forced"
-          add_param "tml-prelaunch && DOTNET_DefaultStackSize=51200000 gamemoderun" \
-            "tModLoader runtimeconfig patch"
+          command -v tml-prelaunch >/dev/null &&
+            add_param "tml-prelaunch && DOTNET_DefaultStackSize=51200000 gamemoderun" \
+              "tModLoader runtimeconfig patch"
           #--- Longer rows (the tModLoader one) overflow instead of widening all
           width=0
           for p in "''${params[@]}"; do

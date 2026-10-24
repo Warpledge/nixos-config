@@ -12,9 +12,6 @@
   #--------------------------------------------------------------------#
   imports =
     [
-      #--- Gaming
-      ./gaming
-
       #--- Network
       ./network
 
@@ -48,6 +45,8 @@
       ./system/user/config-repo.nix
       ./system/user/omni-settings-helper.nix
     ]
+    #--- Gaming: GameMode, gamescope, Java, scx_lavd (any user with a gaming.* app)
+    ++ lib.optionals (lib.any lib.id (lib.attrValues anyUser.gaming)) [./gaming]
     #--- Graphics drivers (controlled by machine settings; null: the machine's own files)
     ++ lib.optionals (machine.gpu.type != null) [./services/hardware/gpu.nix]
     #--- Caps Lock remap, Bluetooth and printing (controlled by machine settings)

@@ -168,9 +168,11 @@
     # Games
     feedback = false; # Guitar rhythm game, reads Guitar Pro tabs (AppImage)
     rocksmith = false; # Rocksmith 2014 (Steam), set up for a BOSS Katana as input
+    tmodloader = false; # tml-prelaunch runtime patch, .NET 8 and Mono
 
     # Tools
     r2modman = false; # Thunderstore mod manager
+    satisfactoryModManager = false; # Satisfactory mod manager
     pathOfBuilding = false; # Path of Exile build planner (Rusty PoB)
     ludusavi = false; # Daily game save backups to ~/SyncBackups/<host>/Ludusavi
     retroshelf = false; # ES-DE / RetroDECK library tidier

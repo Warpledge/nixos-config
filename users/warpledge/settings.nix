@@ -135,9 +135,11 @@
     # Games
     feedback = true; # Guitar rhythm game, reads Guitar Pro tabs (AppImage)
     rocksmith = true; # Rocksmith 2014 (Steam), RS_ASIO + PipeASIO on Katana DI
+    tmodloader = true; # tml-prelaunch runtime patch, .NET 8 and Mono
 
     # Tools
     r2modman = true; # Thunderstore mod manager
+    satisfactoryModManager = true; # Satisfactory mod manager
     pathOfBuilding = true; # Path of Exile build planner (Rusty PoB)
     ludusavi = true; # Daily game save backups to ~/SyncBackups/<host>/Ludusavi
 

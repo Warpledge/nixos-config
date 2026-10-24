@@ -37,11 +37,12 @@ user: {lib, ...}: {
       ./shell/zsh.nix
 
       #--- Other
-      (import ./gaming user)
       ./git/git.nix
       ./options.nix
       ./utilities.nix
     ]
+    #--- Wine, Proton and the game wrappers, once any gaming.* app is on
+    ++ lib.optionals (lib.any lib.id (lib.attrValues user.gaming)) [(import ./gaming user)]
     #--- Packages added from Omni Settings' Packages tab
     ++ lib.optionals (user.userPackages != {}) [./user-packages.nix]
     #--- File Browsers (controlled by user settings)

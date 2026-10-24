@@ -42,5 +42,9 @@
       fi
     '';
 in {
-  home.packages = [tml-prelaunch];
+  home.packages = [
+    tml-prelaunch
+    pkgs.dotnet-sdk_8
+    pkgs.mono
+  ];
 }

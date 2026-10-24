@@ -43,7 +43,6 @@ user: {
       mangohud
       goverlay
       antimicrox
-      satisfactorymodmanager
 
       #--- Wine
       wineWow64Packages.waylandFull
@@ -61,10 +60,6 @@ user: {
       vulkan-loader
       vulkan-tools
       vulkan-validation-layers
-
-      #--- For tModLoader support
-      dotnet-sdk_8
-      mono
 
       #--- Other Dependencies
       lua5
@@ -116,7 +111,6 @@ user: {
       ./scripts/nix-performance.nix
       ./scripts/nix-vn.nix
       ./scripts/nix-rpgm.nix
-      ./scripts/tml-prelaunch.nix
     ]
     #--- Launchers (steam is in nixos/gaming; Hytale's is a Flatpak installed by hand)
     ++ lib.optionals user.gaming.heroic [./launchers/heroic.nix]
@@ -129,8 +123,10 @@ user: {
     #--- Games
     ++ lib.optionals user.gaming.feedback [./games/feedback.nix]
     ++ lib.optionals user.gaming.rocksmith [./games/rocksmith.nix]
+    ++ lib.optionals user.gaming.tmodloader [./scripts/tml-prelaunch.nix]
     #--- Tools
     ++ lib.optionals user.gaming.r2modman [./tools/r2modman.nix]
+    ++ lib.optionals user.gaming.satisfactoryModManager [./tools/satisfactory-mod-manager.nix]
     ++ lib.optionals user.gaming.pathOfBuilding [./tools/path-of-building.nix]
     ++ lib.optionals user.gaming.ludusavi [./tools/ludusavi.nix]
     ++ lib.optionals user.gaming.retroshelf [./tools/retroshelf.nix]
