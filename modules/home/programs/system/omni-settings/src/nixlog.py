@@ -18,8 +18,11 @@ ERROR, WARN, NOTICE, INFO, TALKATIVE = 0, 1, 2, 3, 4
 STORE_PATH = re.compile(r"/nix/store/[0-9a-z]{32}-([^/'\s]+)")
 WILL_BUILD = re.compile(r"^th(?:is|ese) (?:(\d+) )?derivations? will be built")
 WILL_FETCH = re.compile(r"^th(?:is|ese) (?:(\d+) )?paths? will be fetched(?: \(([\d.]+ \w+) download)?")
+PLANNED_PATH = re.compile(r"^\s+(/nix/store/[0-9a-z]{32}-\S+)$")
+INPUT_DRV = re.compile(r'"(/nix/store/[0-9a-z]{32}-[^"]+\.drv)"')
 PHASE_NAME = re.compile(r"Phase$")
 BUILDER_FAILED = re.compile(r"(?:builder for|Cannot build) '([^']+\.drv)'(?:.*?exit code (\d+))?", re.S)
+GRAPH_ROWS = 30  # dependency graph rows shown, nearest the top-level builds
 
 
 def store_name(path):
@@ -57,7 +60,30 @@ class Activity:
     last_line: str = ""
     done: int = 0
     expected: int = 0
+    drv: str = ""
     lines: deque = field(default_factory=lambda: deque(maxlen=40))
+
+
+@dataclass
+class Drv:
+    """One derivation in the build plan, for the dependency graph."""
+    path: str
+    name: str
+    state: str = "planned"  # planned, running, done or failed
+    started: float = 0.0
+    ended: float = 0.0
+    phase: str = ""
+    inputs: list = None  # input .drv paths, read from the store when first drawn
+
+
+def duration(seconds):
+    """12s, 3m 4s or 1h 2m, the way nom words it."""
+    s = int(seconds)
+    if s < 60:
+        return f"{s}s"
+    if s < 3600:
+        return f"{s // 60}m {s % 60}s"
+    return f"{s // 3600}h {s % 3600 // 60}m"
 
 
 class Progress:
@@ -77,6 +103,9 @@ class Progress:
         self.errors = []
         self.warnings = []
         self.finished_logs = {}  # build name -> its last lines, for failures
+        self.started = time.monotonic()
+        self.drvs = {}  # .drv path -> Drv, in the order nix planned or started them
+        self.listing = None  # "build" or "fetch" while nix lists its plan
 
     #--- Totals
     def downloaded(self):
@@ -94,17 +123,17 @@ class Progress:
 
     def running(self):
         """Builds, downloads and fetches in flight, oldest first, as
-        (kind, name, detail, started)."""
+        (kind, name, detail, started, phase)."""
         out = []
         for a in sorted(self.acts.values(), key=lambda a: a.started):
+            phase = PHASE_NAME.sub("", a.phase) if a.phase else ""
             if a.type == BUILD:
-                detail = a.last_line or (PHASE_NAME.sub("", a.phase) if a.phase else "")
-                out.append(("build", a.name, detail, a.started))
+                out.append(("build", a.name, a.last_line or phase, a.started, phase))
             elif a.type == SUBSTITUTE:
                 done, total = self._bytes_under(a.id)
-                out.append(("download", a.name, (done, total), a.started))
+                out.append(("download", a.name, (done, total), a.started, ""))
             elif a.type == FETCH_TREE:
-                out.append(("fetch", a.text, "", a.started))
+                out.append(("fetch", a.text, "", a.started, ""))
         return out
 
     def _bytes_under(self, act_id):
@@ -130,6 +159,9 @@ class Progress:
         if action == "stop":
             a = self.acts.pop(data.get("id"), None)
             if a is not None and a.type == BUILD:
+                d = self.drvs.get(a.drv)
+                if d is not None and d.state == "running":
+                    d.state, d.ended = "done", time.monotonic()
                 self.finished_logs[a.name] = list(a.lines)
                 if len(self.finished_logs) > 30:
                     self.finished_logs.pop(next(iter(self.finished_logs)))
@@ -146,7 +178,13 @@ class Progress:
                 self.eval_files += 1
             return []
         plain = strip_ansi(text)
+        if self._plan(plain):
+            return [("info", plain)]
         if level <= ERROR:
+            m = BUILDER_FAILED.search(plain)
+            d = self.drvs.get(m.group(1)) if m else None
+            if d is not None:
+                d.state, d.ended = "failed", d.ended or time.monotonic()
             self.errors.append(plain)
             return [("error", plain)]
         if level == WARN:
@@ -169,6 +207,9 @@ class Progress:
         a = Activity(data.get("id"), kind, data.get("text", ""), data.get("parent", 0), time.monotonic())
         if kind == BUILD:
             a.name = store_name(fields[0] if fields else a.text)
+            a.drv = str(fields[0]) if fields else ""
+            d = self.drvs.setdefault(a.drv, Drv(a.drv, a.name))
+            d.state, d.started = "running", a.started
             self.evaluating = False
         elif kind == SUBSTITUTE:
             a.name = store_name(fields[0] if fields else a.text)
@@ -202,6 +243,8 @@ class Progress:
             return [("build", line)]
         if kind == SET_PHASE and fields and a is not None:
             a.phase = str(fields[0])
+            if a.drv in self.drvs:
+                self.drvs[a.drv].phase = PHASE_NAME.sub("", a.phase)
             return []
         if kind == PROGRESS and len(fields) >= 2:
             if a is None:
@@ -217,6 +260,104 @@ class Progress:
         if kind == SET_EXPECTED and len(fields) >= 2 and fields[0] == FILE_TRANSFER:
             self.expected_bytes[data.get("id")] = int(fields[1])
         return []
+
+
+    #--- Dependency graph
+    def _plan(self, plain):
+        """Reads nix's list of what it will build or fetch, one path a line;
+        true for a line of it."""
+        if WILL_BUILD.match(plain):
+            self.listing = "build"
+            return False
+        if WILL_FETCH.match(plain):
+            self.listing = "fetch"
+            return False
+        m = PLANNED_PATH.match(plain)
+        if m and self.listing:
+            if self.listing == "build" and m.group(1).endswith(".drv"):
+                self.drvs.setdefault(m.group(1), Drv(m.group(1), store_name(m.group(1))))
+            return True
+        self.listing = None
+        return False
+
+    def _inputs(self, d):
+        if d.inputs is None:
+            try:
+                with open(d.path) as f:
+                    d.inputs = list(dict.fromkeys(INPUT_DRV.findall(f.read())))
+            except OSError:
+                d.inputs = []
+        return [p for p in d.inputs if p in self.drvs and p != d.path]
+
+    def graph(self, final=False):
+        """nix-output-monitor's dependency graph and totals, as rows of
+        (text, tone) pieces: top-level builds at the bottom, what they wait
+        on above. Only branches leading to a running or failed build show,
+        so a finished run is down to its top-level builds."""
+        now = time.monotonic()
+        children = {p: self._inputs(d) for p, d in self.drvs.items()}
+        used = {c for cs in children.values() for c in cs}
+        roots = [p for p in self.drvs if p not in used]
+        busy = {}
+
+        def interesting(p):
+            if p not in busy:
+                busy[p] = False
+                d = self.drvs[p]
+                busy[p] = d.state == "failed" or (d.state == "running" and not final) \
+                    or any(interesting(c) for c in children[p])
+            return busy[p]
+
+        rows, drawn = [], set()
+
+        def draw(p, lead, last, top):
+            drawn.add(p)
+            d = self.drvs[p]
+            glyph, tone = {"running": ("⏵", "primary"), "done": ("✔", "success"),
+                           "failed": ("⚠", "error")}.get(d.state, ("⏳", "dim"))
+            if final and d.state == "running":
+                glyph, tone = "⏹", "dim"
+            pieces = [("┃ " + lead + ("" if top else ("┌─ " if last else "├─ ")), "dim"),
+                      (glyph + " ", tone), (d.name, "text" if d.state != "planned" else "dim")]
+            if d.state == "running" and d.phase and not final:
+                pieces.append((f" ({d.phase})", "dim"))
+            if d.started:
+                pieces.append((f" ⏱ {duration((d.ended or now) - d.started)}", "dim"))
+            rows.append(pieces)
+            kids = [c for c in children[p] if c not in drawn and interesting(c)]
+            for i, c in enumerate(kids):
+                draw(c, lead + ("" if top else ("   " if last else "│  ")), i == len(kids) - 1, False)
+
+        for p in roots:
+            draw(p, "", True, True)
+        # Drawn top-down, shown bottom-up as nom does
+        rows = rows[:GRAPH_ROWS]
+        rows.reverse()
+        states = [d.state for d in self.drvs.values()]
+        running_downloads = sum(1 for a in self.acts.values() if a.type == SUBSTITUTE)
+        fetch_total = max(self.copies[1], self.will_fetch)
+        totals = [("┗━ ∑ ", "dim"), (f"⏵ {states.count('running')}", "primary"), (" │ ", "dim"),
+                  (f"✔ {states.count('done')}", "success"), (" │ ", "dim")]
+        if states.count("failed"):
+            totals += [(f"⚠ {states.count('failed')}", "error"), (" │ ", "dim")]
+        totals += [(f"⏳ {states.count('planned')}", "dim"), (" │ ", "dim"),
+                   (f"↓ {running_downloads}", "primary"), (" │ ", "dim"),
+                   (f"✔ {self.copies[0]}", "success"), (" │ ", "dim"),
+                   (f"⏳ {max(0, fetch_total - self.copies[0] - running_downloads)}", "dim")]
+        if self.downloaded():
+            totals.append((f" │ ↓ {size(self.downloaded())}", "dim"))
+        totals.append((f" │ ⏱ {duration(now - self.started)}", "dim"))
+        head = [[("┏━ Dependency Graph:", "dim")]] if rows else []
+        return head + rows + [[("┣━━━ Builds │ Downloads", "dim")], totals]
+
+
+def size(b):
+    units = ["B", "KiB", "MiB", "GiB"]
+    i = 0
+    while b >= 1024 and i < len(units) - 1:
+        b /= 1024
+        i += 1
+    return f"{b:.1f} {units[i]}" if i else f"{b:.0f} B"
 
 
 #--------------------------------------------------------------------#

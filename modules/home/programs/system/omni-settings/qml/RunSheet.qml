@@ -22,6 +22,23 @@ Rectangle {
         return `${b.toFixed(i ? 1 : 0)} ${units[i]}`
     }
 
+    function seconds(s) {
+        s = Math.floor(s)
+        return s < 60 ? `${s}s` : s < 3600 ? `${Math.floor(s / 60)}m ${s % 60}s`
+             : `${Math.floor(s / 3600)}h ${Math.floor(s % 3600 / 60)}m`
+    }
+
+    //--- A graph row's (text, tone) pieces as StyledText, spaces kept
+    function graphRow(pieces) {
+        const tones = { primary: Theme.primary, success: Theme.success, error: Theme.error,
+                        text: Theme.text, dim: Theme.dim }
+        return pieces.map(([t, tone]) => {
+            const esc = t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+                         .replace(/ /g, "&nbsp;")
+            return `<font color="${tones[tone] || Theme.dim}">${esc}</font>`
+        }).join("")
+    }
+
     ColumnLayout {
         anchors.fill: parent
         spacing: 10
@@ -154,18 +171,6 @@ Rectangle {
                 font.pixelSize: 13
                 Layout.leftMargin: 4
             }
-            Repeater {
-                model: sheet.p ? sheet.p.running.slice(0, 4) : []
-                Text {
-                    required property var modelData
-                    text: `${modelData.name} · ${Math.round(modelData.seconds)} s`
-                    color: Theme.dim
-                    font.pixelSize: 13
-                    elide: Text.ElideMiddle
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 4
-                }
-            }
         }
 
         //--- Errors nix reported
@@ -210,21 +215,56 @@ Rectangle {
             Layout.fillHeight: true
             radius: 14
             color: Theme.card
-            ListView {
-                id: log
+            ColumnLayout {
                 anchors.fill: parent
                 anchors.margins: 10
-                clip: true
-                model: sheet.showLog ? Jobs.log : null
-                onCountChanged: if (atYEnd || count < 50) positionViewAtEnd()
-                delegate: Text {
-                    required property var model
-                    width: log.width
-                    text: model.text
-                    font.family: "monospace"
-                    font.pixelSize: 12
-                    wrapMode: Text.WrapAnywhere
-                    color: model.style === "error" ? Theme.error : Theme.dim
+                spacing: 6
+                ListView {
+                    id: log
+                    // Follows the newest line until scrolled up, and again once back at the end
+                    property bool follow: true
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    clip: true
+                    model: sheet.showLog ? Jobs.log : null
+                    onModelChanged: { follow = true; Qt.callLater(positionViewAtEnd) }
+                    onCountChanged: if (follow) Qt.callLater(positionViewAtEnd)
+                    onMovementEnded: follow = atYEnd
+                    delegate: Text {
+                        required property var model
+                        width: log.width
+                        text: model.text
+                        font.family: "monospace"
+                        font.pixelSize: 12
+                        wrapMode: model.style === "graph" ? Text.NoWrap : Text.WrapAnywhere
+                        elide: model.style === "graph" ? Text.ElideRight : Text.ElideNone
+                        color: model.style === "error" ? Theme.error : Theme.dim
+                    }
+                }
+                //--- nom's dependency graph under the log while it builds
+                Rectangle {
+                    visible: graph.visible
+                    Layout.fillWidth: true
+                    implicitHeight: 1
+                    color: Theme.line
+                }
+                ColumnLayout {
+                    id: graph
+                    visible: !sheet.done && !!sheet.p && sheet.p.graph.length > 0
+                    Layout.fillWidth: true
+                    spacing: 0
+                    Repeater {
+                        model: graph.visible ? sheet.p.graph : []
+                        Text {
+                            required property var modelData
+                            text: sheet.graphRow(modelData)
+                            textFormat: Text.StyledText
+                            font.family: "monospace"
+                            font.pixelSize: 12
+                            elide: Text.ElideRight
+                            Layout.fillWidth: true
+                        }
+                    }
                 }
             }
         }
@@ -274,6 +314,94 @@ Rectangle {
                 visible: sheet.done
                 text: "Done"
                 onClicked: sheet.view.closeRun()
+            }
+        }
+
+        //--- What's building and downloading right now
+        Rectangle {
+            id: busy
+            readonly property var items: sheet.p && !sheet.done ? sheet.p.running : []
+            visible: items.length > 0
+            Layout.fillWidth: true
+            implicitHeight: now.implicitHeight + 20
+            radius: 16
+            color: Theme.card
+            ColumnLayout {
+                id: now
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.margins: 10
+                spacing: 8
+                Repeater {
+                    model: busy.items.slice(0, 5)
+                    RowLayout {
+                        id: item
+                        required property var modelData
+                        readonly property bool download: modelData.kind === "download"
+                        readonly property var bytes: download ? modelData.detail : [0, 0]
+                        Layout.fillWidth: true
+                        spacing: 10
+                        Icon {
+                            icon: item.download ? "download" : modelData.kind === "fetch" ? "sync" : "construction"
+                            color: Theme.primary
+                            Layout.alignment: Qt.AlignTop
+                        }
+                        ColumnLayout {
+                            spacing: 3
+                            Layout.fillWidth: true
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Text {
+                                    text: modelData.name
+                                    color: Theme.text
+                                    font.pixelSize: 14
+                                    elide: Text.ElideMiddle
+                                    Layout.fillWidth: true
+                                }
+                                Text {
+                                    text: sheet.seconds(modelData.seconds)
+                                    color: Theme.dim
+                                    font.pixelSize: 13
+                                }
+                            }
+                            Rectangle {
+                                visible: item.download
+                                Layout.fillWidth: true
+                                height: 4
+                                radius: 2
+                                color: Theme.cardHover
+                                Rectangle {
+                                    height: parent.height
+                                    radius: 2
+                                    width: item.bytes[1] ? parent.width * Math.min(1, item.bytes[0] / item.bytes[1]) : 0
+                                    color: Theme.primary
+                                    Behavior on width { NumberAnimation { duration: 300 } }
+                                }
+                            }
+                            Text {
+                                text: item.download
+                                    ? (item.bytes[1] ? `${sheet.size(item.bytes[0])} of ${sheet.size(item.bytes[1])}`
+                                                     : "Starting")
+                                    : modelData.kind === "fetch" ? "Fetching"
+                                    : [modelData.phase, modelData.detail !== modelData.phase ? modelData.detail : ""]
+                                        .filter(t => t).join(" · ") || "Starting"
+                                color: Theme.dim
+                                font.family: "monospace"
+                                font.pixelSize: 12
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                            }
+                        }
+                    }
+                }
+                Text {
+                    visible: busy.items.length > 5
+                    text: `and ${busy.items.length - 5} more`
+                    color: Theme.dim
+                    font.pixelSize: 13
+                    Layout.leftMargin: 32
+                }
             }
         }
     }

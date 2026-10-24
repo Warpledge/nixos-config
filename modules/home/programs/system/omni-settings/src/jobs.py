@@ -113,14 +113,15 @@ class Job:
     def progress_json(self):
         p, now = self.progress, time.monotonic()
         running = []
-        for kind, name, detail, started in p.running():
-            running.append({"kind": kind, "name": name, "seconds": now - started,
+        for kind, name, detail, started, phase in p.running():
+            running.append({"kind": kind, "name": name, "seconds": now - started, "phase": phase,
                             "detail": list(detail) if isinstance(detail, tuple) else detail})
         return {"evaluating": p.evaluating, "evalFiles": p.eval_files,
                 "downloads": [p.copies[0], max(p.copies[1], p.will_fetch)],
                 "bytes": [p.downloaded(), p.download_total()],
                 "builds": [p.builds[0], max(p.builds[1], p.will_build), p.builds[2]],
-                "fraction": p.fraction(), "running": running, "deleted": self.deleted}
+                "fraction": p.fraction(), "running": running, "deleted": self.deleted,
+                "graph": [] if p.evaluating else p.graph()}
 
     def changed(self):
         self.service.broadcast({"event": "job", "job": self.snapshot()})
@@ -288,6 +289,10 @@ class Job:
             self.undo = None
         if outcome == "ok":
             self.undo = None
+        # The last graph stays at the end of the log, as nom leaves it in a terminal
+        if not self.progress.evaluating:
+            for row in self.progress.graph(final=True):
+                self.append("graph", "".join(text for text, _ in row))
         if outcome == "failed":
             save_failed(self.title, heading, detail, "\n".join(t for _, t in self.log))
         if outcome in ("ok", "failed"):
