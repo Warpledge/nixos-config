@@ -64,8 +64,8 @@ Item {
             return !!view && (view.sheet !== null || view.dialog.visible || (!!f && "cursorPosition" in f))
         }
         readonly property bool focused: slideout.contentItem.Window.active
-        onFocusedChanged: if (!focused && isVisible) hide()
-        // Only once the cursor has been on it: moving screens can end a stale hover
+        onFocusedChanged: if (!focused && isVisible && entered) hide()
+        // Both close only once the cursor has been on it, since focus follows the mouse
         property bool entered: false
         onKeepOpenChanged: leave.restart()
         onIsVisibleChanged: {
