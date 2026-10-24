@@ -246,7 +246,7 @@ window, over a Python backend)
   wheel first. Don't loosen either.
 - Passwords reach the helper on stdin, never as an argument.
 - The front end is `qml/` (the window, `omni-settings`) and `plugin/` (DMS's
-  panel, Mod+C); data comes from `src/api.py`, jobs from the
+  panel, Mod+S); data comes from `src/api.py`, jobs from the
   `omni-settings-jobs` service. Never name a QML property `on`
   plus a capital (it's read as a handler) or after an `Item` property
   (`data`, `state`), and give tap handlers

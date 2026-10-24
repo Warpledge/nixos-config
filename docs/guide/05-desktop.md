@@ -14,15 +14,15 @@ Workspaces stack vertically, one row of columns each. `Mod+1` to `Mod+9` jump to
 
 | Keys | What it does |
 | --- | --- |
-| `Mod+A` | App launcher |
-| `Mod+Return` | Terminal |
+| `Mod+Space` | App launcher |
+| `Mod+Return` / `Mod+T` | Terminal |
 | `Mod+B` / `Mod+E` | Browser / files |
-| `Mod+C` / `Mod+Shift+C` | Omni Settings panel / window |
+| `Mod+S` | Omni Settings |
 | `Mod+Comma` | Shell settings |
 | `Mod+Q` | Close the window |
 | `Mod+F` / `Mod+Shift+F` | Maximize / fullscreen |
-| `Mod+Space` | Float or tile the window |
-| `Mod+S` | Cycle the column's width |
+| `` Mod+` `` | Float or tile the window |
+| `Mod+G` | Cycle the column's width |
 | `Mod+Alt+1` / `2` / `3` | Column width 1/3, 1/2, 2/3 |
 | `Mod+Shift+Left` / `Right` | Move the column |
 | `Mod+Shift+1` to `9` | Send the window to a workspace |
@@ -34,8 +34,6 @@ Workspaces stack vertically, one row of columns each. `Mod+1` to `Mod+9` jump to
 | `Mod+P` | Task manager |
 | `Ctrl+Alt+Delete` | Resources, the system monitor |
 | `Mod+L` / `Mod+K` | Lock screen / power menu |
-| `Mod+I` | Keep awake on or off |
-| `Mod+Shift+N` | Night mode on or off |
 | `Print` | Screenshot a region (`Mod+Print` a window, `Mod+Shift+Print` the monitor) |
 | `Mod+End` | Start or stop a screen recording |
 | `Mod+W` | Wallpapers |
@@ -48,7 +46,7 @@ Add your own shortcuts in the shell settings (Keyboard Shortcuts); yours win ove
 
 Pick a wallpaper with `Mod+W` and a colour theme in the shell settings (`Mod+Comma` → Theme & Colors). The theme recolours the shell and most apps: terminals, GTK and Qt apps, Zed, Discord and others. GTK 4 apps pick up a new theme when they next start. Fonts, icons and the mouse pointer come from the config ([`modules/theme/`](../../modules/theme/)).
 
-`Mod+T` cycles blur presets, and `Mod+Shift+T` or `Mod+Y` turns a window's see-through effect off and on.
+`Mod+Y` cycles blur presets, and `Mod+Shift+T` or `Mod+Shift+Y` turns a window's see-through effect off and on.
 
 ## Window Rules
 

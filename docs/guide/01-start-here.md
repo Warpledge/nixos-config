@@ -2,7 +2,7 @@
 
 NixOS builds the whole computer from a set of text files. Apps, services, settings and the desktop are all written down in one folder, and nothing changes until you rebuild from it. If a change goes wrong you can go back to the version from before, because each rebuild is kept.
 
-On this setup you don't have to edit those files yourself. Omni Settings (`Mod+C`) shows them as switches, lists and dropdowns, and does the rebuild for you.
+On this setup you don't have to edit those files yourself. Omni Settings (`Mod+S`) shows them as switches, lists and dropdowns, and does the rebuild for you.
 
 ## The Words You'll See
 

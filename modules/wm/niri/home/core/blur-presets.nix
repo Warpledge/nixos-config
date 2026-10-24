@@ -1,8 +1,8 @@
 #=====================================================================#
 # NIRI BLUR PRESETS
 #=====================================================================#
-# Mod+T cycles these. The chosen one is copied to blur-preset.kdl, which
-# dms/wpblur.kdl includes; niri reloads it live. Mod+Y (niri-opacity-toggle)
+# Mod+Y cycles these. The chosen one is copied to blur-preset.kdl, which
+# dms/wpblur.kdl includes; niri reloads it live. Mod+Shift+Y (niri-opacity-toggle)
 # makes apps without an opacity rule translucent at the preset's opacity.
 {
   config,
@@ -200,7 +200,7 @@
       files=(${lib.concatMapStringsSep " " (p: "${mkPreset p}") presets})
 
       current=$(sed -n '1s|^// preset: ||p' "$f" 2>/dev/null || true)
-      i=1 # Default, until Mod+T picks another
+      i=1 # Default, until Mod+Y picks another
       for k in "''${!names[@]}"; do
         if [[ ''${names[k]} == "$current" ]]; then
           i=$k

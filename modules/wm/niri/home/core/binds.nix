@@ -40,22 +40,23 @@
     #--- Applications
     # Screenshot binds live with the other DMS commands in dms/default.nix
     "Mod+Return" = bind "Terminal" {spawn = chosen.terminal.launch;};
+    "Mod+T" = bind "Terminal" {spawn = chosen.terminal.launch;};
 
     "Mod+Q" = bind "Close window" {close-window = {};};
-    "Mod+S" = bind "Cycle column width" {switch-preset-column-width = {};};
+    "Mod+G" = bind "Cycle column width" {switch-preset-column-width = {};};
     "Mod+D" = bind "Fill empty space" {expand-column-to-available-width = {};};
     "Mod+F" = bind "Maximize column" {maximize-column = {};};
     "Mod+Shift+F" = bind "Fullscreen" {fullscreen-window = {};};
-    "Mod+G" = bind "Maximize to screen edges" {maximize-window-to-edges = {};};
-    "Mod+Space" = bind "Float / tile window" {toggle-window-floating = {};};
+    "Mod+shift+G" = bind "Maximize to screen edges" {maximize-window-to-edges = {};};
+    "Mod+grave" = bind "Float / tile window" {toggle-window-floating = {};};
     "Mod+Shift+Space" =
       bind "Switch focus floating / tiled" {switch-focus-between-floating-and-tiling = {};};
     # Turn the window's opacity rule (rules.nix) off and on
     "Mod+Shift+T" = bind "Window transparency on / off" {toggle-window-rule-opacity = {};};
     # Same, and also works on apps without an opacity rule (blur-presets.nix)
-    "Mod+Y" = bind "Transparency on / off, any app" {spawn = "niri-opacity-toggle";};
+    "Mod+Shift+Y" = bind "Transparency on / off, any app" {spawn = "niri-opacity-toggle";};
     # Cycle the blur and translucency presets (blur-presets.nix)
-    "Mod+T" = bind "Cycle blur preset" {spawn = "niri-blur-preset";};
+    "Mod+Y" = bind "Cycle blur preset" {spawn = "niri-blur-preset";};
     # Takes shortcuts back from an app that inhibits them
     "Mod+Escape" = {
       action.toggle-keyboard-shortcuts-inhibit = {};
@@ -114,9 +115,9 @@
     "Mod+Ctrl+Down" = bind "Grow height" {set-window-height = "+80";};
 
     "Mod+Tab" = bind "Overview" {toggle-overview = {};};
-    "Mod+H" = bind "Center column" {center-column = {};};
-    "Mod+X" = bind "Cycle window height" {switch-preset-window-height = {};};
-    "Mod+Shift+Z" = bind "Reset window height" {reset-window-height = {};};
+    "Mod+C" = bind "Center column" {center-column = {};};
+    "Mod+H" = bind "Cycle window height" {switch-preset-window-height = {};};
+    "Mod+Shift+H" = bind "Reset window height" {reset-window-height = {};};
 
     #--- Workspace Navigation (Number Keys)
     # 2-9 are hidden so the cheatsheet lists the number keys once
@@ -142,8 +143,8 @@
     "Mod+Shift+9" = hidden {move-column-to-workspace = 9;};
 
     #--- Apps
-    "Mod+Shift+S" = bind "Steam" {spawn = ["steam"];};
-    "Mod+Shift+D" = lib.mkIf (user.discord.goofcord || user.discord.vesktop) (bind "Discord" {
+    "Mod+Ctrl+S" = bind "Steam" {spawn = ["steam"];};
+    "Mod+Ctrl+D" = lib.mkIf (user.discord.goofcord || user.discord.vesktop) (bind "Discord" {
       spawn = [
         (
           if user.discord.vesktop
@@ -152,9 +153,9 @@
         )
       ];
     });
-    "Mod+Shift+H" = bind "Heroic" {spawn = ["heroic"];};
-    "Mod+Shift+G" = lib.mkIf user.gaming.lutris (bind "Lutris" {spawn = ["lutris"];});
-    "Mod+Shift+Y" = bind "FreeTube" {spawn = ["freetube"];};
+    "Mod+Ctrl+H" = bind "Heroic" {spawn = ["heroic"];};
+    "Mod+Ctrl+G" = lib.mkIf user.gaming.lutris (bind "Lutris" {spawn = ["lutris"];});
+    "Mod+Ctrl+Y" = bind "FreeTube" {spawn = ["freetube"];};
     #--- Opens the config in the default editor; focuses an open Zed window on it
     "Mod+Z" = bind "Editor on the config" {
       spawn =
@@ -174,25 +175,14 @@
     };
     "Mod+B" = bind "Web browser" {spawn = chosen.browser.launch;};
     "Mod+E" = bind "Files" {spawn = chosen.fileManager.launch;};
-    "Mod+Shift+M" = bind "Spotify" {spawn = ["spotify"];};
+    "Mod+Ctrl+M" = bind "Spotify" {spawn = ["spotify"];};
     "Ctrl+Alt+Delete" = bind "Resources (system monitor)" {spawn = ["resources"];};
     #--- Omni Settings: the DMS panel (omni-settings/plugin/), or the window
-    "Mod+C" = bind "Omni Settings panel" {
+    "Mod+S" = bind "Omni Settings panel" {
       spawn = ["dms" "ipc" "call" "omniSettings" "toggle"];
     };
     #--- Claude Code / opencode panel on the left edge (ai/ai-panel.nix)
-    "Mod+Shift+A" = lib.mkIf (user.terminals.kitty && (user.claude.enable || user.opencode.enable)) (bind "AI panel" {spawn = ["ai-panel"];});
-    "Mod+Shift+C" = bind "Omni Settings" {
-      spawn = [
-        "nirius"
-        "focus-or-spawn"
-        "--app-id"
-        "^org\\.quickshell$"
-        "--title"
-        "^Omni Settings$"
-        "omni-settings"
-      ];
-    };
+    "Mod+A" = lib.mkIf (user.terminals.kitty && (user.claude.enable || user.opencode.enable)) (bind "AI panel" {spawn = ["ai-panel"];});
   };
 
   #--------------------------------------------------------------------#

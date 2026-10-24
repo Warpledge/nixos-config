@@ -65,7 +65,7 @@ Other uses:
 
 ## Using It
 
-Open **Omni Settings** with `Mod+C` (`Mod` is the Windows key). Change what you want and press **Apply**: it saves, checks and rebuilds, asking for your password once.
+Open **Omni Settings** with `Mod+S` (`Mod` is the Windows key). Change what you want and press **Apply**: it saves, checks and rebuilds, asking for your password once.
 
 | To | Go to |
 | --- | --- |
@@ -139,9 +139,9 @@ The few to know first:
 | Keybind | Action |
 | --- | --- |
 | `Mod+/` | Keybind cheatsheet |
-| `Mod+A` | App launcher |
-| `Mod+Return` | Terminal |
-| `Mod+C` / `Mod+Shift+C` | Omni Settings panel / window |
+| `Mod+Space` | App launcher |
+| `Mod+Return` / `Mod+T` | Terminal |
+| `Mod+S` | Omni Settings |
 | `Mod+Comma` | Dux Shell settings |
 | `Mod+Q` | Close window |
 | `Mod+Tab` | Overview of all windows |

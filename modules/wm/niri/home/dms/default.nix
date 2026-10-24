@@ -61,7 +61,7 @@ in {
       claudeCodeUsage.enable = user.claude.enable;
       quickCapture.enable = true;
 
-      # Omni Settings' QML front end as a slideout (Mod+C)
+      # Omni Settings' QML front end as a slideout (Mod+S)
       omniSettings.src = "${config.omni-settings.package}/share/omni-settings/plugin";
 
       # A bar widget: its IPC target only exists while it sits in a bar
@@ -121,8 +121,7 @@ in {
     };
   in {
     #--- DankMaterialShell Controls
-    "Mod+A" = dmsBind "App launcher" "spotlight toggle";
-    "Mod+V" = dmsBind "Clipboard history" "clipboardPlus togglePanel";
+    "Mod+space" = dmsBind "App launcher" "spotlight toggle";
     "Mod+P" = dmsBind "Task manager" "processlist toggle";
     "Mod+Comma" = dmsBind "Shell settings" "settings toggle";
     "Mod+N" = dmsBind "Notepad" "notepad toggle";
@@ -132,9 +131,7 @@ in {
       then "linuxWallpaperEngine picker"
       else "wallpaperCarousel toggle"
     );
-    "Mod+Shift+N" = dmsBind "Night mode on / off" "night toggle";
     "Mod+L" = dmsBind "Lock screen" "lock lock";
-    "Mod+I" = dmsBind "Keep awake on / off" "inhibit toggle";
     "Mod+slash" = dmsBind "Show keybinds" "keybinds toggle niri";
     "Mod+R" = {
       action.spawn = ["dms" "restart"];
@@ -227,7 +224,7 @@ in {
     };
 
     ".config/niri/dms/wpblur.kdl" = {
-      # Blur and translucency come from the Mod+T preset (core/blur-presets.nix)
+      # Blur and translucency come from the Mod+Y preset (core/blur-presets.nix)
       text = ''
         include optional=true "${config.xdg.configHome}/niri/dms/blur-preset.kdl"
         include optional=true "${config.xdg.configHome}/niri/dms/opacity-extra.kdl"

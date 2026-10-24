@@ -88,6 +88,18 @@
       #--- Recent Windows Switcher (Alt+Tab)
       # Matches the window corner radius in rules.nix
       recent-windows.highlight.corner-radius = 12;
+      # Setting binds drops niri's defaults, so the Alt ones are restated.
+      # Mod+Tab and Mod+grave are taken by the overview and float binds.
+      recent-windows.binds = {
+        "Alt+Tab".action.next-window = {};
+        "Alt+Shift+Tab".action.previous-window = {};
+        "Alt+grave".action.next-window = {filter = "app-id";};
+        "Alt+Shift+grave".action.previous-window = {filter = "app-id";};
+        "Ctrl+Alt+Tab".action.next-window = {
+          scope = "workspace";
+          filter = "app-id";
+        };
+      };
 
       #--- Layout Configuration
       layout = {
