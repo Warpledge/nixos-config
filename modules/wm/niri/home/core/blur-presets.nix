@@ -69,14 +69,26 @@
   mkPreset = p:
     pkgs.writeText "niri-blur-${lib.toLower p.name}.kdl" ''
       // preset: ${p.name}
-      ${lib.optionalString (p.blur != null) ''
-        blur {
-            passes ${toString p.blur.passes}
-            offset ${p.blur.offset}
-            noise 0.0
-            saturation 1.2
-        }
-      ''}
+      ${
+        if p.blur != null
+        then ''
+          blur {
+              passes ${toString p.blur.passes}
+              offset ${p.blur.offset}
+              noise 0.0
+              saturation 1.2
+          }
+        ''
+        else ''
+          // Unblurred, so DMS's requested blur is plain xray over its region
+          blur {
+              passes 1
+              offset 0.0
+              noise 0.0
+              saturation 1.0
+          }
+        ''
+      }
       window-rule {
       ${matchLines}
           opacity ${p.opacity}
@@ -99,17 +111,6 @@
               xray true
           }
       }
-      ${lib.optionalString (p.blur == null) ''
-
-        // Layers that send a blur region; without one, xray covers the whole surface
-        layer-rule {
-            match namespace="^dms:(app-launcher|bar|control-center|dash|dock|notification-popup|omni-settings|osd|plugins:plugin|process-list-popout|slideout)$"
-            background-effect {
-                blur false
-                xray true
-            }
-        }
-      ''}
 
       window-rule {
           exclude app-id="^steam$"
