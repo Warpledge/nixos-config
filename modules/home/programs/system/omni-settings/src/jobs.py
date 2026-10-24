@@ -335,7 +335,8 @@ class Service:
         if self.shown:
             return
         try:
-            subprocess.Popen(["busctl", "--user", "call", "org.freedesktop.Notifications",
+            # "--" so busctl doesn't read the -1 timeout as an option
+            subprocess.Popen(["busctl", "--user", "call", "--", "org.freedesktop.Notifications",
                               "/org/freedesktop/Notifications", "org.freedesktop.Notifications",
                               "Notify", "susssasa{sv}i", "Omni Settings", "0",
                               os.environ.get("OMNI_SETTINGS_ICON", ""), summary, body, "0",
