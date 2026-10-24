@@ -112,7 +112,14 @@
   #--- System Tools Selection
   system = {
     resources = true; # GNOME system and process monitor
-    devTools = true; # Rust (rustup), Go, Node.js, gdb, make, lazygit, onefetch, ILSpy
+  };
+
+  #--- Dev
+  dev = {
+    rust = true; # Rust through rustup; run `rustup default stable` once
+    go = true; # Go compiler and tools
+    node = true; # Node.js and npm
+    tools = true; # gdb, make, lazygit, onefetch, ilspycmd
   };
 
   #--- Android

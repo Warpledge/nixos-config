@@ -114,6 +114,7 @@ PAGES = {
     "Security": ("apps", "security-high-symbolic", "Passwords and clean-up.", None),
     "System Tools": ("apps", "utilities-system-monitor-symbolic", "Monitoring tools.", None),
     "Android": ("apps", "phone-symbolic", "Phones and tablets.", None),
+    "Dev": ("apps", "applications-engineering-symbolic", "Programming languages and developer tools.", None),
     "Gaming": ("apps", "applications-games-symbolic", "Launchers, games and gaming tools.", None),
     "Discord": ("apps", "user-available-symbolic", "Discord and showing what you play.", None),
     "Claude": ("cloudai", "applications-science-symbolic",
