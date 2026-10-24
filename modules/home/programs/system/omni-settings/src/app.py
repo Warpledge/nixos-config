@@ -1846,6 +1846,10 @@ def focus_own_window():
 
 
 if __name__ == "__main__":
+    # The QML front end, beside this one until it matches (docs/todo/omni-settings-qml.md)
+    if "--qml" in sys.argv[1:]:
+        qs = os.environ.get("OMNI_SETTINGS_QS", "qs")
+        os.execvp(qs, [qs, "-p", os.environ["OMNI_SETTINGS_QML"]])
     app = App()
     status = app.run(sys.argv)
     if app.restart_into:

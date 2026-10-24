@@ -10,6 +10,8 @@ Added 2026-10-23.
 
 **Status (2026-10-23):** steps 2 and 3 tested: a preview rebuild through the service asks with DMS's polkit dialog; attaching mid-job replays the log, a second start is refused and cancel stops the build (with a stand-in helper). A job that finishes or fails while no front end reports `shown` sends a silent notification (`suppress-sound`) through `busctl`. Next: step 4, the QML shell and shared widgets.
 
+**Status (2026-10-23):** step 4, part 1 is written: `qml/` (Quickshell, run by `omni-settings --qml` as `qs -p`) holds the shell, tabs, page picker with search (pages, settings, DMS's index), shared widgets, every generated page with each kind of editor, Change For, What's New, and Review (api.py's `review`) leading to Apply, Preview or At Next Restart as an `apply` job, with the run page attached to the job service (steps, progress, log, Stop, Undo). Pending changes stay in `OmniView.qml`. Checked offscreen: every page loads and every row opens without QML errors. Not yet tested on a rebuilt system: a real apply through the job service. Custom pages show a link to the GTK version. Next: the custom pages, one at a time, starting with Overview.
+
 ## What's already in the repo
 
 - `modules/home/programs/system/omni-settings/src/`: about 9,700 lines of Python (2026-10-23). About 3,700 of them are already GTK-free and stay as the backend: `helper.py`, `schema.py`, `backend.py`, `system.py`, `nixfile.py`, `nixlog.py`, `dms.py`, `closure.py`, `session.py`. The rest (`app.py`, `windowrules.py`, `runview.py`, `flatpaks.py`, `packages.py`, `overview.py` and smaller pages) mixes logic with GTK calls.

@@ -38,6 +38,7 @@
       share=$out/share/omni-settings
       install -Dm644 -t $share *.py descriptions.json
       install -Dm644 -t $share/icons icons/*.svg
+      install -Dm644 -t $share/qml ${./qml}/*.qml
       #--- Pick lists for Language & Input; only the names reach the closure
       tar -xJOf ${pkgs.glibc.src} --wildcards '*/localedata/SUPPORTED' \
         | sed -n 's|^\([^/ ]*\)/UTF-8.*|\1|p' | sort -u > $share/locales.txt
@@ -55,6 +56,9 @@
         --set OMNI_SETTINGS_CLEAN_DATES ${lib.escapeShellArg (lib.optionalString clean.enable clean.dates)} \
         --set OMNI_SETTINGS_COMPAT_TOOLS ${lib.escapeShellArg compatTools} \
         --set OMNI_SETTINGS_EDITOR ${lib.escapeShellArg (builtins.toJSON {inherit (editor) launch desktop;})} \
+        --set OMNI_SETTINGS_QS ${pkgs.quickshell}/bin/qs \
+        --set OMNI_SETTINGS_QML $share/qml/shell.qml \
+        --set OMNI_SETTINGS_BACKEND $out/bin/omni-settings-backend \
         --prefix PATH : ${lib.makeBinPath [alejandra pkgs.nix-search-tv]}
       #--- The same backend as JSON, for the QML front end (src/api.py)
       makeWrapper ${pkgs.python3}/bin/python3 $out/bin/omni-settings-backend \
