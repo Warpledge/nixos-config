@@ -8,12 +8,14 @@ import grp
 import json
 import os
 import pwd
+import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 
 import backend  # noqa: E402
 import closure  # noqa: E402
+import gitstate  # noqa: E402
 import nixfile  # noqa: E402
 import schema  # noqa: E402
 import system  # noqa: E402
@@ -393,11 +395,51 @@ def cmd_forget_failed(_cfg, _args):
     return True
 
 
+#--------------------------------------------------------------------#
+#-- Git
+#--------------------------------------------------------------------#
+def commit_json(c):
+    short, full, subject, author, stamp = c
+    return {"short": short, "hash": full, "subject": subject, "author": author, "when": int(stamp)}
+
+
+def cmd_git(cfg, args):
+    """Where the config repo stands; args.force for Refresh (gitstate.remote
+    limits how often it fetches and calls GitHub)."""
+    repo = gitstate.github_repo(cfg.flake)
+    fetch_err, prs, pr_err, limited = gitstate.remote(cfg.flake, repo, bool(args.get("force")))
+    try:
+        status, upstream, changed, outgoing, incoming, recent, fetched = gitstate.snapshot(cfg.flake)
+    except (RuntimeError, subprocess.TimeoutExpired) as e:
+        raise ValueError(f"Couldn't read the repo: {e}")
+    files = [{"path": line[3:], "state": gitstate.STATES.get(line[:2].strip()[:1], line[:2].strip())}
+             for line in changed[:gitstate.MAX_FILES]]
+    return {"repo": repo, "branch": status.branch, "upstream": upstream, "fetched": fetched,
+            "fetchErr": fetch_err, "changed": files, "moreChanged": max(0, len(changed) - gitstate.MAX_FILES),
+            "outgoing": [commit_json(c) for c in outgoing], "incoming": [commit_json(c) for c in incoming],
+            "recent": [commit_json(c) for c in recent],
+            "prs": None if prs is None else [
+                {"number": p.get("number"), "title": p.get("title", ""), "url": p.get("html_url", ""),
+                 "author": (p.get("user") or {}).get("login", "?"), "branch": (p.get("head") or {}).get("label", ""),
+                 "updated": gitstate.iso_epoch(p.get("updated_at")), "draft": bool(p.get("draft"))}
+                for p in prs],
+            "prErr": pr_err, "limited": limited}
+
+
+def cmd_git_summary(cfg, _args):
+    """The counts the page list shows beside Git."""
+    try:
+        return gitstate.summary(cfg.flake)
+    except (RuntimeError, subprocess.TimeoutExpired) as e:
+        raise ValueError(str(e))
+
+
 COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cmd_save,
             "dismiss": cmd_dismiss,
             "stale": cmd_stale, "removeStale": cmd_remove_stale,
             "overview": cmd_overview, "freed": cmd_freed, "checkUpdates": cmd_check_updates,
-            "compare": cmd_compare, "failedLog": cmd_failed_log, "forgetFailed": cmd_forget_failed}
+            "compare": cmd_compare, "failedLog": cmd_failed_log, "forgetFailed": cmd_forget_failed,
+            "git": cmd_git, "gitSummary": cmd_git_summary}
 
 
 def run(cfg, cmd, args):

@@ -14,6 +14,7 @@ Rectangle {
     property bool chevron: false
     property bool selected: false
     property bool compact: false
+    property int titleLines: 1
     property real bar: -1  // a usage bar under the text, 0 to 1
     signal clicked
     Layout.fillWidth: true
@@ -44,6 +45,8 @@ Rectangle {
                     color: Theme.text
                     font.pixelSize: 14
                     font.weight: Font.DemiBold
+                    wrapMode: Text.Wrap
+                    maximumLineCount: row.titleLines
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }

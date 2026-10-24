@@ -14,6 +14,8 @@ Added 2026-10-23.
 
 **Status (2026-10-23):** part 1 tested on the desktop: navigation, editors, Review and a live apply through the job service work. Part 2, the Overview and the Niri tab's Shell page, is written: api.py answers `overview`, `freed`, `checkUpdates`, `compare`, `failedLog` and `forgetFailed` (`QUICK` and `HISTORY` moved there from `overview.py`), and the page starts the existing `rebuild`, `update`, `activate` and `collect` jobs behind the GTK app's confirmations (`ConfirmDialog.qml`). The run page shows the closure diff (`DiffView.qml`) and offers Rebuild Now or Update Now after a preview. Custom pages get a short line in the page list (`NAV_SUBTITLES`). Next: Git.
 
+**Status (2026-10-23):** Overview tested on the desktop, after fixing clicks that reached rows under a closing dialog. Git is ported: its GTK-free half moved to `src/gitstate.py`, whose fetch and GitHub cache now lives in a runtime file both front ends share, since each backend call is a new process. api.py answers `git` and `gitSummary`; the page list shows Git's counts, refreshed every minute. Next: Flatpaks.
+
 ## What's already in the repo
 
 - `modules/home/programs/system/omni-settings/src/`: about 9,700 lines of Python (2026-10-23). About 3,700 of them are already GTK-free and stay as the backend: `helper.py`, `schema.py`, `backend.py`, `system.py`, `nixfile.py`, `nixlog.py`, `dms.py`, `closure.py`, `session.py`. The rest (`app.py`, `windowrules.py`, `runview.py`, `flatpaks.py`, `packages.py`, `overview.py` and smaller pages) mixes logic with GTK calls.

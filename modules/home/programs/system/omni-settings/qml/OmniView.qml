@@ -25,6 +25,24 @@ Item {
     property string scope: ""  // a machine, or "" for all of them
     property var lists: ({})
 
+    //--- Git's counts for the page list (changed, ahead, behind, prs), every minute
+    property var gitCounts: null
+    readonly property string gitTag: {
+        const c = gitCounts
+        if (!c)
+            return ""
+        const parts = [c.changed ? `${c.changed} changed` : "", c.ahead ? `${c.ahead} to push` : "",
+                       c.behind ? `${c.behind} to pull` : "", c.prs ? `${c.prs} PR${c.prs === 1 ? "" : "s"}` : ""]
+        return parts.filter(p => p).join(" · ") || "In step"
+    }
+    Timer {
+        interval: 60000
+        repeat: true
+        running: !!omni.info
+        triggeredOnStart: true
+        onTriggered: Backend.call("gitSummary", {}, reply => { if (reply.ok) omni.gitCounts = reply.data })
+    }
+
     //--- Every DMS link the pages carry
     readonly property var links: !info ? [] : Object.values(info.pages)
         .reduce((all, pg) => pg.groups.reduce((acc, g) => acc.concat(g.links), all), [])
@@ -496,6 +514,7 @@ Item {
                             subtitle: modelData.subtitle || ""
                             selected: modelData.kind === "page" && omni.page === modelData.page && !search.text
                             trailing: modelData.kind === "dms" ? "open_in_new" : ""
+                            tag: modelData.page === "git" ? omni.gitTag : ""
                             compact: true
                             onClicked: list.pick(modelData)
                         }
@@ -688,8 +707,9 @@ Item {
     ConfirmDialog { id: confirm; anchors.fill: parent; z: 2 }
 
     //--- Custom pages by id; each is ported from the GTK app in turn
-    readonly property var custom: ({ overview: overviewPage, shell: shellPage })
+    readonly property var custom: ({ overview: overviewPage, shell: shellPage, git: gitPage })
     Component { id: overviewPage; OverviewPage { view: omni } }
+    Component { id: gitPage; GitPage { view: omni } }
     Component { id: shellPage; ShellPage { view: omni } }
 
     //--- Toast

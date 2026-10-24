@@ -3,15 +3,7 @@ opens, so the commits to pull are current, then lists changed files, commits
 to push and pull, open pull requests (GitHub's API, signed in through gh when
 it is) and recent commits."""
 
-import calendar
-import json
-import os
-import re
-import subprocess
 import threading
-import time
-import urllib.error
-import urllib.request
 
 import gi
 
@@ -19,108 +11,18 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Adw, GLib, Gtk  # noqa: E402
 
-import system  # noqa: E402
 import ui  # noqa: E402
+from gitstate import (MAX_FILES, STATES, github_repo, iso_epoch, remote, snapshot,  # noqa: E402, F401
+                      summary)
 
 ICONS = ("vcs-branch-symbolic", "branch-symbolic", "folder-remote-symbolic")
-#--- No password or passphrase prompt can hang the page
-ENV = dict(os.environ, GIT_TERMINAL_PROMPT="0", GIT_SSH_COMMAND="ssh -o BatchMode=yes")
-GITHUB = re.compile(r"github\.com[:/]([^/]+)/([^/]+?)(?:\.git)?/?$")
-LOG = "--format=%h%x1f%H%x1f%s%x1f%an%x1f%ct"
-STATES = {"M": "modified", "A": "added", "D": "deleted", "R": "renamed", "C": "copied", "?": "new",
-          "U": "conflict"}
-MAX_FILES = 50
-#--- Seconds between fetches and GitHub calls; the local counts refresh every minute
-REMOTE_EVERY = 300
-FORCED_EVERY = 30
-_remote = {"at": float("-inf"), "fetch_err": None, "prs": None, "pr_err": None}
+#--- One fetch at a time from this window's threads
 _lock = threading.Lock()
 
 
-def git(flake, *args, timeout=20):
-    out = subprocess.run(["git", "-C", flake, *args], capture_output=True, text=True, timeout=timeout,
-                         env=ENV, stdin=subprocess.DEVNULL)
-    if out.returncode != 0:
-        raise RuntimeError(out.stderr.strip() or f"git {args[0]} failed")
-    return out.stdout
-
-
-def github_repo(flake):
-    """"owner/name" of the origin remote on GitHub, or None."""
-    try:
-        m = GITHUB.search(git(flake, "remote", "get-url", "origin").strip())
-    except (RuntimeError, OSError, subprocess.TimeoutExpired):
-        return None
-    return f"{m.group(1)}/{m.group(2)}" if m else None
-
-
-def commits(flake, *rev):
-    return [line.split("\x1f") for line in git(flake, "log", LOG, *rev).splitlines() if line]
-
-
-def last_fetch(flake):
-    try:
-        return os.path.getmtime(os.path.join(flake, git(flake, "rev-parse", "--git-path", "FETCH_HEAD").strip()))
-    except (RuntimeError, OSError):
-        return None
-
-
-def snapshot(flake):
-    status = system.git_status(flake)
-    changed = [line for line in git(flake, "status", "--porcelain").splitlines() if line]
-    upstream = git(flake, "rev-parse", "--abbrev-ref", "@{u}").strip() if status.upstream else ""
-    outgoing = commits(flake, "@{u}..HEAD") if upstream else []
-    incoming = commits(flake, "HEAD..@{u}") if upstream else []
-    return status, upstream, changed, outgoing, incoming, commits(flake, "-15"), last_fetch(flake)
-
-
-def pull_requests(repo):
-    req = urllib.request.Request(f"https://api.github.com/repos/{repo}/pulls?state=open&per_page=30",
-                                 headers={"Accept": "application/vnd.github+json"})
-    if GLib.find_program_in_path("gh"):
-        out = subprocess.run(["gh", "auth", "token"], capture_output=True, text=True, timeout=10)
-        if out.returncode == 0 and out.stdout.strip():
-            req.add_header("Authorization", f"Bearer {out.stdout.strip()}")
-    with urllib.request.urlopen(req, timeout=15) as r:
-        return json.load(r)
-
-
-def remote(flake, repo, force=False):
-    """Fetches and reads the open PRs, then hands back (fetch error, PRs, PR
-    error). Within REMOTE_EVERY of the last check (FORCED_EVERY for Refresh)
-    it hands back that check's results, keeping under GitHub's 60 requests an
-    hour without signing in."""
+def locked_remote(flake, repo, force):
     with _lock:
-        if time.monotonic() - _remote["at"] >= (FORCED_EVERY if force else REMOTE_EVERY):
-            _remote["at"] = time.monotonic()
-            try:
-                git(flake, "fetch", "--quiet", timeout=60)
-                _remote["fetch_err"] = None
-            except (RuntimeError, OSError, subprocess.TimeoutExpired) as e:
-                _remote["fetch_err"] = e
-            if repo:
-                try:
-                    _remote["prs"], _remote["pr_err"] = pull_requests(repo), None
-                except (OSError, ValueError, subprocess.TimeoutExpired) as e:
-                    _remote["prs"], _remote["pr_err"] = None, e
-        return _remote["fetch_err"], _remote["prs"], _remote["pr_err"]
-
-
-def summary(flake):
-    """The sidebar's counts; prs is left out when GitHub can't be read."""
-    _, prs, _ = remote(flake, github_repo(flake))
-    status = system.git_status(flake)
-    counts = {"changed": status.changed, "ahead": status.ahead, "behind": status.behind}
-    if prs is not None:
-        counts["prs"] = len(prs)
-    return counts
-
-
-def iso_epoch(text):
-    try:
-        return calendar.timegm(time.strptime(text, "%Y-%m-%dT%H:%M:%SZ"))
-    except (TypeError, ValueError):
-        return None
+        return remote(flake, repo, force)
 
 
 class GitPage(Adw.PreferencesPage):
@@ -181,17 +83,17 @@ class GitPage(Adw.PreferencesPage):
                 self._fill(group, [self._loading()])
         if not self.repo:
             self._fill(self.prs, [self._note("The origin remote isn't on GitHub")])
-        ui.run_async(lambda: (remote(self.flake, self.repo, force), snapshot(self.flake)),
+        ui.run_async(lambda: (locked_remote(self.flake, self.repo, force), snapshot(self.flake)),
                      lambda out, err: run == self.run and self._loaded(out, err))
 
     def _loaded(self, out, err):
         if err is not None:
             self._show(None, err, None)
             return
-        (fetch_err, prs, pr_err), snap = out
+        (fetch_err, prs, pr_err, limited), snap = out
         self._show(snap, None, fetch_err)
         if self.repo:
-            self._prs(prs, pr_err)
+            self._prs(prs, pr_err, limited)
 
     def _show(self, out, err, fetch_err):
         self.refresh_button.set_sensitive(True)
@@ -245,8 +147,8 @@ class GitPage(Adw.PreferencesPage):
             group.set_visible(bool(items))
         self.window.set_git_badges(changed=len(changed), ahead=len(outgoing), behind=len(incoming))
 
-    def _prs(self, out, err):
-        if isinstance(err, urllib.error.HTTPError) and err.code == 403:
+    def _prs(self, out, err, limited):
+        if limited:
             self._fill(self.prs, [self._note("GitHub's limit for requests without signing in is used up",
                                              "Sign in with gh auth login, or try again within the hour.")])
         elif err is not None:
