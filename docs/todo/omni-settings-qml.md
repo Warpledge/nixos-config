@@ -20,7 +20,7 @@ Added 2026-10-23.
 
 **Status (2026-10-23):** Flatpaks tested: update, Flatseal and runtimes work. Open: Repair answered "omni-settings-backend gave no answer"; the user installation's half works through `api.run_streamed`, so the system half (`pkexec flatpak repair --system`) is the suspect. Since `079f063` the dialog shows the backend's last stderr lines; get those first. The warning `quickshell.desktopentry: invalid line … "\r"` during Flatpak jobs comes from a leftover `~/.local/share/applications/Reloaded-II - Granblue Fantasy Relink.desktop` (Windows line endings), not from the app. Working notes for the port are in Omni Settings' `CLAUDE.md` (QML front end section).
 
-**Status (2026-10-23):** Repair fixed: the repair finished, then `flatpakRun`'s reply crashed reading the app name with no app picked (update did the same). Backups is ported: its GTK-free half moved to `src/backupstate.py`; api.py answers `backups` and `backup`, which runs `nixm <command>` and returns what it printed for the page's Last Run. Next: People.
+**Status (2026-10-23):** Repair fixed: the repair finished, then `flatpakRun`'s reply crashed reading the app name with no app picked (update did the same). Backups is ported: its GTK-free half moved to `src/backupstate.py`; api.py answers `backups` and `backup`, which runs `nixm <command>` and returns what it printed for the page's Last Run. Repair, update and Backups tested on the desktop. Next: People.
 
 ## What's already in the repo
 
