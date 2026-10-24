@@ -530,8 +530,9 @@ def cmd_flatpak_run(_cfg, args):
         # Each installation with nothing to remove says so
         nothing = sum("Nothing unused" in line for line in tail) >= len(commands)
         return "Nothing unused to remove" if nothing else "Unused runtimes removed"
-    return {"runtime": f"{ref.name} can start now", "update": "Flatpaks updated",
-            "repair": "Repair finished"}[action]
+    if action == "runtime":
+        return f"{ref.name} can start now"
+    return {"update": "Flatpaks updated", "repair": "Repair finished"}[action]
 
 
 def cmd_flatpak_forget(_cfg, args):
