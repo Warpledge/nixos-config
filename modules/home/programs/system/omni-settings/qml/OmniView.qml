@@ -19,7 +19,7 @@ Item {
     //--- The top tab whose page list the hover flyout shows, and the one under the cursor
     property string flyTab: ""
     property string hoverTab: ""
-    property var railTip: null  // { title, y } of the rail icon under the cursor
+    property var railTip: null  // { id, title, icon, y } of the rail icon under the cursor
     property bool reviewing: false
     property bool running: false
     property bool attached: false
@@ -460,7 +460,7 @@ Item {
         id: mainCol
         anchors.fill: parent
         anchors.margins: 14
-        anchors.leftMargin: rail.width + 10
+        anchors.rightMargin: rail.width + 10
         spacing: 10
         visible: !omni.reviewing && !omni.running && omni.sheet === null
 
@@ -884,19 +884,19 @@ Item {
         }
     }
 
-    //--- Page rail: the current tab's pages as icons on the window's left edge
+    //--- Page rail: the current tab's pages as icons on the window's right edge
     Rectangle {
         id: rail
         visible: mainCol.visible
-        anchors.left: parent.left
+        anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.topMargin: mainCol.y + tabsBar.y
         anchors.bottomMargin: 14
         width: 52
         color: Theme.card
-        topRightRadius: 20
-        bottomRightRadius: 20
+        topLeftRadius: 20
+        bottomLeftRadius: 20
         opacity: omni.flyTab ? 0.35 : 1
 
         ListView {
@@ -951,9 +951,10 @@ Item {
                         cursorShape: Qt.PointingHandCursor
                         onHoveredChanged: {
                             if (hovered)
-                                omni.railTip = { title: railItem.modelData.title,
+                                omni.railTip = { id: railItem.modelData.id, title: railItem.modelData.title,
+                                                 icon: railItem.modelData.icon,
                                                  y: parent.mapToItem(omni, 0, 0).y + 21 }
-                            else if (omni.railTip && omni.railTip.title === railItem.modelData.title)
+                            else if (omni.railTip && omni.railTip.id === railItem.modelData.id)
                                 omni.railTip = null
                         }
                     }
@@ -966,23 +967,48 @@ Item {
         }
     }
 
-    //--- The rail icon's name, flown out over the page
+    //--- The hovered rail icon's plate, stretching left over the page to show its name
     Rectangle {
-        visible: !!omni.railTip && rail.visible
-        x: rail.width + 4
-        y: omni.railTip ? omni.railTip.y - height / 2 : 0
+        id: plate
+        property var tip: null  // the last hovered icon, kept while the plate shrinks back
+        readonly property bool open: !!omni.railTip
+        readonly property bool active: !!tip && omni.page === tip.id
+        Connections {
+            target: omni
+            function onRailTipChanged() { if (omni.railTip) plate.tip = omni.railTip }
+        }
+        visible: rail.visible && !!tip && (open || width > 38.5)
+        anchors.right: parent.right
+        anchors.rightMargin: rail.width / 2 - 19
+        y: tip ? tip.y - 19 : 0
         z: 1
-        width: tipText.implicitWidth + 24
-        height: 32
-        radius: 16
-        color: Theme.toast
+        width: open ? plateText.implicitWidth + 38 + 22 : 38
+        height: 38
+        radius: 19
+        clip: true
+        color: active ? Theme.primary : Theme.cardHover
+        Behavior on width { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
         Text {
-            id: tipText
-            anchors.centerIn: parent
-            text: omni.railTip ? omni.railTip.title : ""
-            color: Theme.inkToast
-            font.pixelSize: 14
+            id: plateText
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: plateIcon.left
+            anchors.rightMargin: 8
+            text: plate.tip ? plate.tip.title : ""
+            color: plate.active ? Theme.inkPrimary : Theme.text
+            font.pixelSize: 15
             font.weight: Font.DemiBold
+            opacity: plate.open ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: 150 } }
+        }
+        Icon {
+            id: plateIcon
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: parent.right
+            anchors.rightMargin: 9
+            icon: Theme.glyph(plate.tip ? plate.tip.icon : [])
+            size: 20
+            fill: plate.active
+            color: plate.active ? Theme.inkPrimary : Theme.dim
         }
     }
 
