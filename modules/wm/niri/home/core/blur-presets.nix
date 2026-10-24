@@ -84,7 +84,7 @@
 
       // DMS popouts; not their :background click-catchers, which cover the screen
       layer-rule {
-          match namespace="^dms:(app-launcher|control-center|dash|plugins:plugin|process-list-popout|slideout)$"
+          match namespace="^dms:(app-launcher|control-center|dash|omni-settings|plugins:plugin|process-list-popout|slideout)$"
           match namespace="^dms-clipboardPlus-panel-"
           opacity ${p.opacity}
       }
