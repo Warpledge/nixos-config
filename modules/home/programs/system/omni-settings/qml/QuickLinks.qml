@@ -54,6 +54,7 @@ ColumnLayout {
                 }
                 HoverHandler { id: tileHover; cursorShape: Qt.PointingHandCursor }
                 TapHandler {
+                    gesturePolicy: TapHandler.ReleaseWithinBounds
                     onTapped: Quickshell.execDetached(["dms", "ipc", "call", "settings", "openWith", modelData.tab])
                 }
             }

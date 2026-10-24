@@ -21,5 +21,6 @@ Rectangle {
         color: pill.danger ? Theme.inkError : pill.quiet ? Theme.text : Theme.inkPrimary
     }
     HoverHandler { id: hover; cursorShape: pill.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor }
-    TapHandler { onTapped: pill.clicked() }
+    // Takes the press, so a dialog closing on release doesn't hand it to what's below
+    TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: pill.clicked() }
 }

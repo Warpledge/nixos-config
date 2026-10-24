@@ -26,8 +26,9 @@ Rectangle {
         visible = false
         const callback = done
         done = null
+        // After the click that closed it has been handled
         if (callback && value !== undefined)
-            callback(value)
+            Qt.callLater(callback, value)
     }
 
     Keys.onEscapePressed: close()

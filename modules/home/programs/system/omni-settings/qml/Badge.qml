@@ -13,11 +13,17 @@ Rectangle {
     radius: 19
     color: appPath ? "transparent" : strong ? Theme.primary : Theme.primaryContainer
     Icon {
+        id: glyph
         visible: !badge.appPath
         anchors.centerIn: parent
         icon: badge.icon
         size: Math.round(badge.width * 0.53)
         color: badge.strong ? Theme.inkPrimary : Theme.inkContainer
+        RotationAnimation on rotation {
+            running: badge.icon === "progress_activity"
+            from: 0; to: 360; duration: 1200; loops: Animation.Infinite
+            onStopped: glyph.rotation = 0
+        }
     }
     IconImage {
         visible: !!badge.appPath

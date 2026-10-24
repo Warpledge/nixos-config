@@ -30,5 +30,5 @@ Rectangle {
         }
     }
     HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
-    TapHandler { onTapped: chip.tapped() }
+    TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: chip.tapped() }
 }

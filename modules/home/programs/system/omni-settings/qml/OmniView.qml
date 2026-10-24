@@ -373,7 +373,7 @@ Item {
                             }
                         }
                         HoverHandler { id: tabHover; cursorShape: Qt.PointingHandCursor }
-                        TapHandler { onTapped: omni.go(modelData.id) }
+                        TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: omni.go(modelData.id) }
                     }
                 }
             }
@@ -432,6 +432,7 @@ Item {
                     }
                     HoverHandler { id: currentHover; cursorShape: Qt.PointingHandCursor }
                     TapHandler {
+                        gesturePolicy: TapHandler.ReleaseWithinBounds
                         onTapped: {
                             omni.picking = !omni.picking
                             if (omni.picking)
@@ -512,6 +513,9 @@ Item {
             clip: true
             boundsBehavior: Flickable.StopAtBounds
             interactive: !omni.picking
+            // A page that got shorter, or came back from a run, keeps no blank space
+            onContentHeightChanged: returnToBounds()
+            onVisibleChanged: if (visible) returnToBounds()
             opacity: omni.picking ? 0.35 : 1
             Behavior on opacity { NumberAnimation { duration: 150 } }
 

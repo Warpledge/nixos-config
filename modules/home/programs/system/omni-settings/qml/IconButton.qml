@@ -14,5 +14,5 @@ Rectangle {
     color: filled || hover.hovered ? Theme.cardHover : "transparent"
     Icon { anchors.centerIn: parent; icon: btn.icon; size: 18; color: btn.tint }
     HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
-    TapHandler { onTapped: btn.clicked() }
+    TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: btn.clicked() }
 }

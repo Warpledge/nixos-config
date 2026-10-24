@@ -113,7 +113,7 @@ Rectangle {
                 rotation: row.open ? 180 : 0
                 Behavior on rotation { NumberAnimation { duration: 150 } }
             }
-            TapHandler { onTapped: row.open = !row.open }
+            TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: row.open = !row.open }
         }
 
         //--- Opened
@@ -199,7 +199,7 @@ Rectangle {
                         Icon { visible: chosen; icon: "check"; size: 18; color: Theme.primary }
                     }
                     HoverHandler { id: optHover; cursorShape: Qt.PointingHandCursor }
-                    TapHandler { onTapped: row.view.change(row.s, modelData.value) }
+                    TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: row.view.change(row.s, modelData.value) }
                 }
             }
         }

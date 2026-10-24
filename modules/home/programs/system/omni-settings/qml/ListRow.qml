@@ -81,5 +81,5 @@ Rectangle {
     }
 
     HoverHandler { id: hover; cursorShape: row.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor }
-    TapHandler { onTapped: row.clicked() }
+    TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: row.clicked() }
 }

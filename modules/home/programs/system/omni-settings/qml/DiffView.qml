@@ -72,7 +72,7 @@ ColumnLayout {
                         }
                     }
                     Icon { icon: "expand_more"; rotation: group.open ? 180 : 0 }
-                    TapHandler { onTapped: group.open = !group.open }
+                    TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: group.open = !group.open }
                 }
                 Repeater {
                     model: group.open ? group.modelData.items.slice(0, 300) : []

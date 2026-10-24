@@ -29,7 +29,12 @@ ColumnLayout {
     Component.onCompleted: load()
     Connections {
         target: Jobs
-        function onEnded() { page.load() }
+        function onEnded(job) {
+            // The checked versions are in flake.lock now
+            if (job.kind === "update" && job.outcome === "ok" && !job.preview)
+                page.updates = null
+            page.load()
+        }
     }
 
     //--- Whether a job may start now; says why not
@@ -270,6 +275,7 @@ ColumnLayout {
             }
             HoverHandler { id: srcHover; cursorShape: Qt.PointingHandCursor }
             TapHandler {
+                gesturePolicy: TapHandler.ReleaseWithinBounds
                 onTapped: {
                     const p = Object.assign({}, page.picked)
                     p[modelData.name] = !p[modelData.name]

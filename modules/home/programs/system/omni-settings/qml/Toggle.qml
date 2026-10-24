@@ -23,5 +23,5 @@ Rectangle {
         Behavior on x { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
     }
     HoverHandler { cursorShape: toggle.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor }
-    TapHandler { onTapped: toggle.toggled(!toggle.checked) }
+    TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: toggle.toggled(!toggle.checked) }
 }
