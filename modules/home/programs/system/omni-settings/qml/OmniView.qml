@@ -16,6 +16,10 @@ Item {
     property string page: "overview"
     property var lastPage: ({})
     property bool picking: false
+    //--- The top tab whose page list the hover flyout shows, and the one under the cursor
+    property string flyTab: ""
+    property string hoverTab: ""
+    property var railTip: null  // { title, y } of the rail icon under the cursor
     property bool reviewing: false
     property bool running: false
     property bool attached: false
@@ -396,6 +400,7 @@ Item {
             page = lastPage[tabId] || (first ? first.id : "")
         }
         picking = false
+        flyTab = ""
         search.text = ""
         bodyFlick.contentY = 0
     }
@@ -442,6 +447,7 @@ Item {
 
     Keys.onEscapePressed: {
         if (picking) picking = false
+        else if (flyTab) flyTab = ""
         else if (reviewing) reviewing = false
         else if (running) running = false
         else omni.closeRequested()
@@ -451,8 +457,10 @@ Item {
     //-- Layout
     //--------------------------------------------------------------------//
     ColumnLayout {
+        id: mainCol
         anchors.fill: parent
         anchors.margins: 14
+        anchors.leftMargin: rail.width + 10
         spacing: 10
         visible: !omni.reviewing && !omni.running && omni.sheet === null
 
@@ -483,6 +491,7 @@ Item {
 
         //--- Top tabs
         Rectangle {
+            id: tabsBar
             Layout.fillWidth: true
             implicitHeight: 40
             radius: 20
@@ -517,7 +526,20 @@ Item {
                                 color: active ? Theme.inkPrimary : Theme.dim
                             }
                         }
-                        HoverHandler { id: tabHover; cursorShape: Qt.PointingHandCursor }
+                        HoverHandler {
+                            id: tabHover
+                            cursorShape: Qt.PointingHandCursor
+                            onHoveredChanged: {
+                                if (hovered) {
+                                    omni.hoverTab = modelData.id
+                                    if (omni.flyTab) omni.flyTab = modelData.id
+                                    else flyOpen.restart()
+                                } else if (omni.hoverTab === modelData.id) {
+                                    omni.hoverTab = ""
+                                    flyClose.restart()
+                                }
+                            }
+                        }
                         TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: omni.go(modelData.id) }
                     }
                 }
@@ -665,7 +687,7 @@ Item {
             // A page that got shorter, or came back from a run, keeps no blank space
             onContentHeightChanged: returnToBounds()
             onVisibleChanged: if (visible) returnToBounds()
-            opacity: omni.picking ? 0.35 : 1
+            opacity: omni.picking || omni.flyTab ? 0.35 : 1
             Behavior on opacity { NumberAnimation { duration: 150 } }
 
             //--- A tap on the dimmed page closes the picker
@@ -857,6 +879,163 @@ Item {
                         omni.reviewing = true
                         review.load()
                     }
+                }
+            }
+        }
+    }
+
+    //--- Page rail: the current tab's pages as icons on the window's left edge
+    Rectangle {
+        id: rail
+        visible: mainCol.visible
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.topMargin: mainCol.y + tabsBar.y
+        anchors.bottomMargin: 14
+        width: 52
+        color: Theme.card
+        topRightRadius: 20
+        bottomRightRadius: 20
+        opacity: omni.flyTab ? 0.35 : 1
+
+        ListView {
+            id: railList
+            anchors.fill: parent
+            anchors.topMargin: 6
+            anchors.bottomMargin: 6
+            clip: true
+            boundsBehavior: Flickable.StopAtBounds
+            model: omni.navItems.filter(i => i.tab === omni.tab)
+            onContentYChanged: omni.railTip = null
+
+            delegate: Column {
+                id: railItem
+                required property var modelData
+                required property int index
+                readonly property var prev: index > 0 ? railList.model[index - 1] : null
+                readonly property bool active: omni.page === modelData.id
+                width: railList.width
+                //--- A short line where the page list starts a new group
+                Item {
+                    visible: !!railItem.prev && railItem.prev.group !== railItem.modelData.group
+                    width: parent.width
+                    height: 9
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: 22
+                        height: 1
+                        color: Theme.line
+                    }
+                }
+                Item {
+                    width: parent.width
+                    height: 42
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: 38
+                        height: 38
+                        radius: 19
+                        color: railItem.active ? Theme.primary : railHover.hovered ? Theme.cardHover : "transparent"
+                        Behavior on color { ColorAnimation { duration: 120 } }
+                        Icon {
+                            anchors.centerIn: parent
+                            icon: Theme.glyph(railItem.modelData.icon)
+                            size: 20
+                            fill: railItem.active
+                            color: railItem.active ? Theme.inkPrimary : Theme.dim
+                        }
+                    }
+                    HoverHandler {
+                        id: railHover
+                        cursorShape: Qt.PointingHandCursor
+                        onHoveredChanged: {
+                            if (hovered)
+                                omni.railTip = { title: railItem.modelData.title,
+                                                 y: parent.mapToItem(omni, 0, 0).y + 21 }
+                            else if (omni.railTip && omni.railTip.title === railItem.modelData.title)
+                                omni.railTip = null
+                        }
+                    }
+                    TapHandler {
+                        gesturePolicy: TapHandler.ReleaseWithinBounds
+                        onTapped: omni.go(omni.tab, railItem.modelData.id)
+                    }
+                }
+            }
+        }
+    }
+
+    //--- The rail icon's name, flown out over the page
+    Rectangle {
+        visible: !!omni.railTip && rail.visible
+        x: rail.width + 4
+        y: omni.railTip ? omni.railTip.y - height / 2 : 0
+        z: 1
+        width: tipText.implicitWidth + 24
+        height: 32
+        radius: 16
+        color: Theme.toast
+        Text {
+            id: tipText
+            anchors.centerIn: parent
+            text: omni.railTip ? omni.railTip.title : ""
+            color: Theme.inkToast
+            font.pixelSize: 14
+            font.weight: Font.DemiBold
+        }
+    }
+
+    //--- Tab flyout: hovering a top tab lists its pages over the dimmed page
+    Timer { id: flyOpen; interval: 250; onTriggered: if (omni.hoverTab) omni.flyTab = omni.hoverTab }
+    Timer { id: flyClose; interval: 300; onTriggered: if (!omni.hoverTab && !flyHover.hovered) omni.flyTab = "" }
+    Rectangle {
+        id: flyout
+        visible: omni.flyTab !== "" && mainCol.visible
+        x: mainCol.x
+        y: mainCol.y + tabsBar.y + tabsBar.height + 6
+        z: 1
+        width: mainCol.width
+        height: Math.min(flyList.contentHeight + 16, omni.height - y - 14)
+        radius: 16
+        color: Theme.card
+        border.color: Theme.line
+        HoverHandler {
+            id: flyHover
+            onHoveredChanged: if (!hovered) flyClose.restart()
+        }
+
+        ListView {
+            id: flyList
+            anchors.fill: parent
+            anchors.margins: 8
+            clip: true
+            spacing: 2
+            boundsBehavior: Flickable.StopAtBounds
+            model: omni.navItems.filter(i => i.tab === omni.flyTab)
+
+            delegate: ColumnLayout {
+                required property var modelData
+                required property int index
+                width: flyList.width
+                spacing: 2
+                Section {
+                    readonly property var prev: index > 0 ? flyList.model[index - 1] : null
+                    visible: !!modelData.group && (!prev || prev.group !== modelData.group)
+                    text: modelData.group || ""
+                    Layout.leftMargin: 8
+                }
+                ListRow {
+                    icon: Theme.glyph(modelData.icon)
+                    title: modelData.title
+                    subtitle: modelData.subtitle || ""
+                    selected: omni.page === modelData.id
+                    tag: modelData.id === "git" ? omni.gitTag
+                         : modelData.id === "page:Services" && omni.servicesRunning > 0
+                         ? `${omni.servicesRunning} running` : ""
+                    tagSuccess: modelData.id === "page:Services"
+                    compact: true
+                    onClicked: omni.go(modelData.tab, modelData.id)
                 }
             }
         }
