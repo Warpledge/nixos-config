@@ -57,7 +57,8 @@ GROUPS = [("Floating", "Windows that open above the tiled ones.", "focus-windows
           ("Other", "", "applications-system-symbolic", "neutral")]
 GROUP = {g[0]: g for g in GROUPS}
 
-NOT_PROPERTIES = ("name", "note", "matches", "excludes")
+NOT_PROPERTIES = ("name", "note", "category", "matches", "excludes")
+LABELS = ("name", "note", "category")  # the page's own fields, which rules.nix strips
 
 
 #--------------------------------------------------------------------#
@@ -79,8 +80,8 @@ def clean(value):
 
 
 def bare(rule):
-    """A rule as rules.nix hands it to niri: without its name and note."""
-    return clean({k: v for k, v in rule.items() if k not in ("name", "note")})
+    """A rule as rules.nix hands it to niri: without the page's labels."""
+    return clean({k: v for k, v in rule.items() if k not in LABELS})
 
 
 def load(path):
@@ -159,15 +160,18 @@ def listing(path):
     return rules, from_nix, waiting
 
 
-def add_rule(rules, match, name, prop, value):
+def add_rule(rules, match, name, prop, value, category=""):
     """Sets `prop` for `match` in `rules`: one rule per window, so a second
-    property for it joins the first."""
+    property for it joins the first. A blank category leaves the rule's own."""
     rule = next((r for r in rules if r.get("matches") == [match] and not r.get("excludes")), None)
     if rule is None:
         rule = {"name": name, "matches": [match]}
         rules.append(rule)
     else:
         rule["name"] = name
+    if category:
+        rule["category"] = category
+        rule.update({k: rule.pop(k) for k in list(rule) if k not in ("name", "note", "category")})
     rule[prop] = floats(value, prop)
     return rule
 
@@ -190,7 +194,7 @@ def edited(rule, original):
     wherever the edit left it equal."""
     rule = floats(rule)
     new = [k for k in rule if k not in original]
-    labels = [k for k in ("name", "note") if k in new]
+    labels = [k for k in LABELS if k in new]
     order = labels + [k for k in original if k in rule] + [k for k in new if k not in labels]
     return {k: original[k] if k in original and original[k] == rule[k] else rule[k] for k in order}
 

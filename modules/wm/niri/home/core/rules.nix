@@ -46,13 +46,13 @@
   };
 
   #--- Every other rule lives in window-rules.json, which Omni Settings' Window
-  #--- Rules page edits; its name and note fields are labels for that page
+  #--- Rules page edits; its name, note and category fields are labels for that page
   windowRules =
     lib.concatMap
     (r:
       if r ? include
       then included.${r.include}
-      else [(removeAttrs r ["name" "note"])])
+      else [(removeAttrs r ["name" "note" "category"])])
     (lib.importJSON ./window-rules.json);
 in {
   programs.niri.settings = {

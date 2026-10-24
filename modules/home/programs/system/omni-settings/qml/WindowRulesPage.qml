@@ -142,7 +142,8 @@ ColumnLayout {
         const v = value()
         if (v === undefined)
             return
-        Backend.call("addWindowRule", { appId: app, title, name: nameField.text, prop: kind.prop, value: v },
+        Backend.call("addWindowRule", { appId: app, title, name: nameField.text, prop: kind.prop, value: v,
+                                         category: categoryField.text },
                      saved)
     }
 
@@ -167,14 +168,17 @@ ColumnLayout {
     //-- Search and order
     //--------------------------------------------------------------------//
     property string query: ""
-    property string order: "group"  // group, az (by name) or file (as niri reads them)
+    // category, group (by kind), az (by name) or file (as niri reads them); until
+    // one is picked, by category once any rule has one
+    property string pickedOrder: ""
+    readonly property string order: pickedOrder || (wr && wr.categories.length ? "category" : "group")
 
     function found(r) {
         const q = query.trim().toLowerCase()
         if (!q)
             return true
         const windows = r.matches.concat(r.excludes).map(m => `${m.name} ${m.pattern}`)
-        return [r.title, r.note].concat(r.tags.map(t => t.text), windows).join("\n").toLowerCase().includes(q)
+        return [r.title, r.note, r.category].concat(r.tags.map(t => t.text), windows).join("\n").toLowerCase().includes(q)
     }
 
     readonly property var shownGroups: {
@@ -184,6 +188,13 @@ ColumnLayout {
             return wr.groups.map(g => Object.assign({}, g, { rules: g.rules.filter(found) }))
                 .filter(g => g.rules.length)
         const all = wr.groups.reduce((acc, g) => acc.concat(g.rules), []).filter(found)
+        if (order === "category") {
+            all.sort((a, b) => a.index - b.index)
+            return wr.categories.concat([""]).map(c => ({
+                title: c || "No Category", description: "", icon: "folder", kind: "accent",
+                rules: all.filter(r => r.category === c)
+            })).filter(g => g.rules.length)
+        }
         all.sort(order === "az" ? (a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase())
                                 : (a, b) => a.index - b.index)
         return all.length ? [{ title: order === "az" ? "By Name" : "In File Order",
@@ -316,6 +327,8 @@ ColumnLayout {
             }
             Label { text: "Name" }
             Field { id: nameField; placeholder: "What the list calls it" }
+            Label { text: "Category" }
+            CategoryPicker { id: categoryField; options: page.wr ? page.wr.categories : [] }
             Label { text: "App ID" }
             Field { id: appField; placeholder: "^org\\.example\\.App$" }
             RowLayout {
@@ -449,12 +462,13 @@ ColumnLayout {
         Layout.leftMargin: 4
         spacing: 6
         Repeater {
-            model: [{ id: "group", label: "Grouped" }, { id: "az", label: "A to Z" }, { id: "file", label: "File Order" }]
+            model: [{ id: "category", label: "By Category" }, { id: "group", label: "By Kind" },
+                    { id: "az", label: "A to Z" }, { id: "file", label: "File Order" }]
             Chip {
                 required property var modelData
                 text: modelData.label
                 accent: page.order === modelData.id
-                onTapped: page.order = modelData.id
+                onTapped: page.pickedOrder = modelData.id
             }
         }
     }

@@ -742,6 +742,7 @@ def rule_json(rule, index):
     matches = rule.get("matches") or []
     one_app = len(matches) == 1 and "app-id" in matches[0]
     return {"index": index, "title": wr.rule_title(rule), "note": rule.get("note", ""),
+            "category": rule.get("category", ""),
             "app": wr.plain(matches[0]["app-id"]) if one_app else "",
             "tags": [{"text": wr.tag_text(p, v), "kind": wr.tag_kind(p)} for p, v in wr.properties(rule)],
             "matches": [match_json(m) for m in matches],
@@ -764,7 +765,9 @@ def cmd_window_rules(cfg, _args):
         if "include" not in r:
             grouped[wr.group_of(r)].append(rule_json(r, i))
     workspaces, outputs = wr.places()
-    return {"editable": rules_editable(cfg), "waiting": waiting,
+    categories = sorted({r["category"] for r in rules if isinstance(r.get("category"), str) and r["category"]},
+                        key=str.lower)
+    return {"editable": rules_editable(cfg), "waiting": waiting, "categories": categories,
             "groups": [{"title": t, "description": d, "icon": icon, "kind": k, "rules": grouped[t]}
                        for t, d, icon, k in wr.GROUPS if grouped[t]],
             "fromNix": [rule_json(r, None) for r in from_nix],
@@ -834,7 +837,7 @@ def cmd_add_window_rule(cfg, args):
     name = (args.get("name") or "").strip() or match.get("app-id") or match["title"]
     path, before = rules_to_change(cfg)
     rules = json.loads(json.dumps(before))
-    wr.add_rule(rules, match, name, prop, value)
+    wr.add_rule(rules, match, name, prop, value, (args.get("category") or "").strip()[:40])
     return save_rules(path, rules, f"{wr.property_text(prop, value)} added for {name}")
 
 

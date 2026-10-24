@@ -24,6 +24,7 @@ Sheet {
         nameField.text = raw.name || ""
         noteField.text = raw.note || ""
         noteField.input.cursorPosition = 0
+        categoryField.text = raw.category || ""
         matches = (raw.matches || []).map(matchEntry)
         excludes = (raw.excludes || []).map(matchEntry)
         props = ed.rule.props.map(p => entry(p.prop, p.value, p.text))
@@ -120,6 +121,8 @@ Sheet {
             out.name = nameField.text.trim()
         if (noteField.text.trim())
             out.note = noteField.text.trim()
+        if (categoryField.text.trim())
+            out.category = categoryField.text.trim().slice(0, 40)
         out.matches = matchList(matches)
         const left = matchList(excludes)
         if (left.length)
@@ -151,6 +154,8 @@ Sheet {
     Field { id: nameField; placeholder: "What the list calls it" }
     Label { text: "Note" }
     Field { id: noteField; placeholder: "Why the rule is there" }
+    Label { text: "Category" }
+    CategoryPicker { id: categoryField; options: ed.wr.categories }
 
     //--- What it does
     Section { text: "What It Does" }
