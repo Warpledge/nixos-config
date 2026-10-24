@@ -95,7 +95,7 @@ Singleton {
         "preferences-desktop-wallpaper": "wallpaper",
         "preferences-system-notifications": "notifications",
         "preferences-system-time": "schedule", "preferences-system-windows": "view_quilt",
-        "security-high": "shield", "system-lock-screen": "lock",
+        "security-high": "shield", "speedometer": "speed", "system-lock-screen": "lock",
         "system-run": "rocket_launch", "system-search": "search",
         "system-shutdown": "power_settings_new", "system-software-install": "install_desktop",
         "system-users": "group", "user-available": "chat",

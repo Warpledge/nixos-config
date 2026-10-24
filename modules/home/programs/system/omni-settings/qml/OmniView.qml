@@ -1050,7 +1050,9 @@ Item {
     readonly property var custom: ({ overview: overviewPage, shell: shellPage, git: gitPage,
                                       flatpaks: flatpaksPage, backups: backupsPage, people: peoplePage,
                                       packages: packagesPage, userpackages: userPackagesPage,
-                                      proton: protonPage, protonversions: protonVersionsPage })
+                                      proton: protonPage, protonversions: protonVersionsPage,
+                                      windowrules: windowRulesPage })
+    Component { id: windowRulesPage; WindowRulesPage { view: omni } }
     Component { id: protonPage; ProtonPage { view: omni } }
     Component { id: docPage; DocPage { view: omni } }
     Component { id: protonVersionsPage; ProtonVersionsPage { view: omni } }

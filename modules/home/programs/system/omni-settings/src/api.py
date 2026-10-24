@@ -31,6 +31,7 @@ import protonstate  # noqa: E402
 import schema  # noqa: E402
 import servicestate  # noqa: E402
 import system  # noqa: E402
+import windowrulestate as wr  # noqa: E402
 
 #--- The root helper every rebuild goes through (nixos/system/user/omni-settings-helper.nix)
 HELPER = "/run/current-system/sw/bin/omni-settings-apply"
@@ -699,6 +700,106 @@ def cmd_proton_versions(_cfg, _args):
     return protonstate.versions()
 
 
+#--------------------------------------------------------------------#
+#-- Window Rules (niri)
+#--------------------------------------------------------------------#
+def rules_path(cfg):
+    return os.path.join(cfg.flake, wr.RULES_FILE)
+
+
+def rules_editable(cfg):
+    path = rules_path(cfg)
+    return in_wheel() and backend.writable(cfg) and os.access(path, os.W_OK)
+
+
+def match_json(match):
+    return {"name": wr.window_name(match), "pattern": wr.match_pattern(match),
+            "app": wr.plain(match.get("app-id", ""))}
+
+
+def rule_json(rule, index):
+    matches = rule.get("matches") or []
+    one_app = len(matches) == 1 and "app-id" in matches[0]
+    return {"index": index, "title": wr.rule_title(rule), "note": rule.get("note", ""),
+            "app": wr.plain(matches[0]["app-id"]) if one_app else "",
+            "tags": [{"text": wr.tag_text(p, v), "kind": wr.tag_kind(p)} for p, v in wr.properties(rule)],
+            "matches": [match_json(m) for m in matches],
+            "excludes": [match_json(m) for m in rule.get("excludes") or []]}
+
+
+def window_json(w):
+    app_id, title = w.get("app_id") or "", w.get("title") or ""
+    return {"appId": app_id, "title": title, "name": wr.app_name(app_id) or app_id or title,
+            "size": (w.get("layout") or {}).get("window_size") or []}
+
+
+def cmd_window_rules(cfg, _args):
+    """The rules in window-rules.json by group, the ones Nix sets, and the form's choices."""
+    rules, from_nix, waiting = wr.listing(rules_path(cfg))
+    grouped = {g[0]: [] for g in wr.GROUPS}
+    for i, r in enumerate(rules):
+        if "include" not in r:
+            grouped[wr.group_of(r)].append(rule_json(r, i))
+    workspaces, outputs = wr.places()
+    return {"editable": rules_editable(cfg), "waiting": waiting,
+            "groups": [{"title": t, "description": d, "icon": icon, "kind": k, "rules": grouped[t]}
+                       for t, d, icon, k in wr.GROUPS if grouped[t]],
+            "fromNix": [rule_json(r, None) for r in from_nix],
+            "kinds": [{"prop": p, "title": t, "control": c, "choices": [{"label": lb, "value": v} for lb, v in ch]}
+                      for p, t, _, c, ch in wr.KINDS],
+            "sizes": [{"label": lb, "value": v} for lb, v in wr.SIZES],
+            "workspaces": workspaces, "outputs": outputs}
+
+
+def own_window(w):
+    return w.get("app_id") == "dev.nixosconfig.Settings" or (
+        w.get("app_id") == "org.quickshell" and w.get("title") == "Omni Settings")
+
+
+def cmd_niri_windows(_cfg, _args):
+    """The windows open now, but this app's own."""
+    windows = [w for w in wr.niri(["windows"], 5) or [] if not own_window(w)]
+    windows.sort(key=lambda w: ((w.get("app_id") or "").lower(), w.get("title") or ""))
+    return [window_json(w) for w in windows]
+
+
+def cmd_pick_window(_cfg, _args):
+    """The window clicked next (`niri msg pick-window`), or None when cancelled."""
+    w = wr.niri(["pick-window"])
+    return window_json(w) if isinstance(w, dict) else None
+
+
+def cmd_add_window_rule(cfg, args):
+    """Sets args.prop to args.value for the window args.appId and args.title match."""
+    if not rules_editable(cfg):
+        raise PermissionError("only an admin who can edit the config's files changes window rules")
+    prop, value = args.get("prop"), args.get("value")
+    if prop not in wr.KIND or value is None or value == "":
+        raise ValueError("pick what the rule does")
+    match = {k: args[a].strip() for k, a in (("app-id", "appId"), ("title", "title")) if (args.get(a) or "").strip()}
+    if not match:
+        raise ValueError("pick a window, or type an app ID or title")
+    name = (args.get("name") or "").strip() or match.get("app-id") or match["title"]
+    path = rules_path(cfg)
+    rules = wr.load(path)
+    wr.add_rule(rules, match, name, prop, value)
+    wr.save(path, rules)
+    return f"{wr.property_text(prop, value)} added for {name}"
+
+
+def cmd_remove_window_rule(cfg, args):
+    """Takes rule args.index out of window-rules.json."""
+    if not rules_editable(cfg):
+        raise PermissionError("only an admin who can edit the config's files changes window rules")
+    path = rules_path(cfg)
+    rules, index = wr.load(path), args.get("index")
+    if not isinstance(index, int) or not 0 <= index < len(rules) or "include" in rules[index]:
+        raise ValueError("that rule isn't in the file any more")
+    rule = rules.pop(index)
+    wr.save(path, rules)
+    return f"Removed {wr.rule_title(rule)}"
+
+
 COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cmd_save,
             "dismiss": cmd_dismiss,
             "stale": cmd_stale, "removeStale": cmd_remove_stale,
@@ -712,7 +813,9 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "services": cmd_services, "serviceLog": cmd_service_log, "serviceRestart": cmd_service_restart,
             "ports": cmd_ports,
             "packageNames": cmd_package_names, "packagePreviews": cmd_package_previews,
-            "resetApp": cmd_reset_app, "doc": cmd_doc, "docLink": cmd_doc_link, "launchOptions": cmd_launch_options, "protonVersions": cmd_proton_versions}
+            "resetApp": cmd_reset_app, "doc": cmd_doc, "docLink": cmd_doc_link, "launchOptions": cmd_launch_options, "protonVersions": cmd_proton_versions,
+            "windowRules": cmd_window_rules, "niriWindows": cmd_niri_windows, "pickWindow": cmd_pick_window,
+            "addWindowRule": cmd_add_window_rule, "removeWindowRule": cmd_remove_window_rule}
 
 
 def run(cfg, cmd, args):
