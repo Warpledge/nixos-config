@@ -611,8 +611,11 @@ Item {
                     }
                 }
 
+                // Height from the page itself: one set by the layout would carry over
+                // to the next page loaded, leaving blank space above a shorter one
                 Loader {
                     Layout.fillWidth: true
+                    Layout.preferredHeight: item ? item.implicitHeight : 0
                     active: !!omni.info && !!omni.info.pages[omni.page] && omni.custom[omni.page] === undefined
                     sourceComponent: SettingsPage {
                         model: omni.info.pages[omni.page]
@@ -623,6 +626,7 @@ Item {
                 //--- Pages not made from the templates
                 Loader {
                     Layout.fillWidth: true
+                    Layout.preferredHeight: item ? item.implicitHeight : 0
                     active: !!omni.info && omni.custom[omni.page] !== undefined
                     sourceComponent: omni.custom[omni.page] || null
                 }
