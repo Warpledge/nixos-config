@@ -39,6 +39,39 @@
   #--- Sets of named lists of text, e.g. userPackages = {Media = ["vlc"];};
   #--- a machine's users.<name> block replaces the user's whole set
   grouped = ["userPackages"];
+  #--- Changes to niri keybinds by id (wm/niri/home/core/keybinds.nix), also
+  #--- replaced whole by a machine's users.<name> block
+  keybindFields = {
+    key = lib.isString;
+    title = lib.isString;
+    enable = lib.isBool;
+    spawn = v: lib.isList v && v != [] && lib.all lib.isString v;
+    action = lib.isString;
+    argument = lib.isString;
+  };
+  keybindProblems = value:
+    if !(lib.isAttrs value && lib.all lib.isAttrs (lib.attrValues value))
+    then ["`keybinds` should be a set of sets, e.g. {terminal = {key = \"Mod+Alt+T\";};}"]
+    else
+      lib.concatLists (lib.mapAttrsToList (id: b: let
+        at = "`keybinds.${id}`";
+        custom = lib.hasPrefix "custom-" id;
+        allowed =
+          if custom
+          then lib.attrNames keybindFields
+          else ["key" "title" "enable"];
+      in
+        map (k: "${at} can't set ${k} (use ${lib.concatStringsSep ", " allowed})")
+        (lib.filter (k: !(lib.elem k allowed)) (lib.attrNames b))
+        ++ map (k: "`keybinds.${id}.${k}` has the wrong kind of value")
+        (lib.filter (k: lib.elem k allowed && !(keybindFields.${k} b.${k})) (lib.attrNames b))
+        ++ lib.optional (custom && !(b ? key && b ? title))
+        "${at} needs a key and a title"
+        ++ lib.optional (custom && (b ? spawn) == (b ? action))
+        "${at} needs one of spawn or action"
+        ++ lib.optional (b ? argument && !(b ? action))
+        "${at} has an argument but no action")
+      value);
   userChoices =
     {
       wallpaper = ["carousel" "engine"];
@@ -73,6 +106,8 @@
       then ["${name} is not a setting (check the spelling against the _template file)"]
       else if defaults.${key} == null
       then []
+      else if at == ["keybinds"]
+      then keybindProblems value
       else if lib.elem (lib.concatStringsSep "." at) grouped
       then
         lib.optional (!(lib.isAttrs value && lib.all (l: lib.isList l && lib.all lib.isString l) (lib.attrValues value)))
@@ -164,7 +199,7 @@ in rec {
       merged = lib.recursiveUpdate (lib.recursiveUpdate userDefaults own) listed.${user};
     in
       merged
-      // lib.genAttrs grouped (key: listed.${user}.${key} or own.${key} or userDefaults.${key})
+      // lib.genAttrs (grouped ++ ["keybinds"]) (key: listed.${user}.${key} or own.${key} or userDefaults.${key})
       // {name = user;};
 
     merged = lib.recursiveUpdate machineDefaults (removeAttrs own ["users"]);

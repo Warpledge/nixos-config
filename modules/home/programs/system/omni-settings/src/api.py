@@ -24,6 +24,7 @@ import dms  # noqa: E402
 import docstate  # noqa: E402
 import flatpakstate  # noqa: E402
 import gitstate  # noqa: E402
+import keybindstate  # noqa: E402
 import nixfile  # noqa: E402
 import packagestate  # noqa: E402
 import peoplestate  # noqa: E402
@@ -55,7 +56,8 @@ TOP = {"main": [("overview", "Overview", ("computer-symbolic",)),
        "packages": [("packages", "Search", ("system-search-symbolic", "edit-find-symbolic"))],
        "niri": [("shell", "Shell", ("view-app-grid-symbolic",)),
                 ("windowrules", "Window Rules",
-                 ("window-new-symbolic", "preferences-system-windows-symbolic"))],
+                 ("window-new-symbolic", "preferences-system-windows-symbolic")),
+                ("keybinds", "Keybinds", ("input-keyboard-symbolic", "preferences-desktop-keyboard-symbolic"))],
        "ai": [],
        "docs": []}
 
@@ -69,6 +71,7 @@ NAV_SUBTITLES = {"overview": "Updates, rebuild, versions", "git": "Changes, comm
                  "flatpaks": "Apps, updates, repair", "backups": "Back up app data",
                  "people": "Who can log in", "packages": "Find packages in nixpkgs",
                  "shell": "DankMaterialShell's settings", "windowrules": "Rules for each app's windows",
+                 "keybinds": "Change, add and turn off shortcuts",
                  "userpackages": "Packages you added from Search",
                  "proton": "Launch options to copy", "protonversions": "Proton builds installed"}
 
@@ -81,6 +84,7 @@ HISTORY = 8  # versions the Overview lists
 SECTION_TAB = {"cloudai": "ai", "localai": "ai", "apps": "packages"}
 
 USER_PACKAGES = ("user", ("userPackages",))
+KEYBINDS = ("user", schema.KEYBINDS)
 
 STATE_DIR = os.path.join(os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state"),
                          "omni-settings")
@@ -113,6 +117,8 @@ def read_dismissed():
 def shown(setting, value):
     if setting.kind == "bool":
         return "On" if value else "Off"
+    if setting.kind == "keybinds":
+        return f"{len(value)} keybind{'' if len(value) == 1 else 's'} changed" if value else "Not set"
     if isinstance(value, dict):
         n = sum(len(v) for v in value.values())
         return f"{n} in {len(value)} categor{'y' if len(value) == 1 else 'ies'}" if n else "Not set"
@@ -224,7 +230,7 @@ def cmd_load(cfg, _args):
     shell_links = wm == "niri"
     shell = {}
     for page in state.pages:
-        if page.section == "userpkgs":
+        if page.section in ("userpkgs", "keybinds"):
             continue
         pid = schema.TOP_PAGES[page.title] if page.section == "top" else f"page:{page.title}"
         groups = []
@@ -259,6 +265,8 @@ def cmd_load(cfg, _args):
                                 "items": [{"id": "userpackages", "title": "All",
                                            "subtitle": NAV_SUBTITLES["userpackages"],
                                            "icon": ["package-x-generic-symbolic"], "custom": True}]})
+    keybinds = next((s for p in state.pages for g in p.groups for s in g.settings
+                     if (s.domain, s.path) == KEYBINDS), None)
     guides = [{"id": d.key, "title": d.title, "icon": ["help-browser-symbolic"], "custom": True}
               for d in docstate.guide_docs(cfg.flake)]
     if guides:
@@ -286,6 +294,7 @@ def cmd_load(cfg, _args):
             "nav": nav, "pages": pages, "whatsNew": new, "quick": QUICK,
             "shellLinks": shell_categories(shell),
             "userPackages": user_packages and setting_json(cfg, state, user_packages, multi, modules),
+            "keybinds": keybinds and setting_json(cfg, state, keybinds, multi, modules),
             "starter": packagestate.STARTER,
             "dmsSearch": [{"label": e.label, "description": e.description, "keywords": e.keywords,
                            "tab": e.link.tab, "page": e.link.page} for e in state.dms_entries]}
@@ -795,6 +804,17 @@ def cmd_pick_window(_cfg, _args):
     return window_json(w) if isinstance(w, dict) else None
 
 
+def cmd_keybinds(_cfg, _args):
+    """The binds the last build gave niri, niri's actions, the keybind changes that
+    build applied, and the keys DMS's shortcut editor sets on top."""
+    return {"applied": keybindstate.load_applied(), "dmsKeys": keybindstate.dms_keys()}
+
+
+def cmd_launch_command(_cfg, args):
+    """The command a picked window's app launches with, from its .desktop file."""
+    return keybindstate.launch_command(str(args.get("appId") or ""))
+
+
 def rules_to_change(cfg):
     """(the path, its rules) for a change, which only admins who can edit the files make."""
     if not rules_editable(cfg):
@@ -900,7 +920,8 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "windowRules": cmd_window_rules, "niriWindows": cmd_niri_windows, "pickWindow": cmd_pick_window,
             "addWindowRule": cmd_add_window_rule, "removeWindowRule": cmd_remove_window_rule,
             "undoWindowRules": cmd_undo_window_rules,
-            "saveWindowRule": cmd_save_window_rule}
+            "saveWindowRule": cmd_save_window_rule,
+            "keybinds": cmd_keybinds, "launchCommand": cmd_launch_command}
 
 
 def run(cfg, cmd, args):

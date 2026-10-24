@@ -235,4 +235,11 @@
   # come with no settings of their own, sorted into categories you name,
   # e.g. {Office = ["obsidian"]; Media = ["kdePackages.kdenlive"];}
   userPackages = {};
+
+  #--- Keybinds
+  # Changes to the config's niri keybinds, made on Omni Settings' Keybinds page,
+  # by bind id: {terminal = {key = "Mod+Alt+T";}; steam = {enable = false;};}.
+  # Your own binds have ids starting custom-, a key, a title, and spawn (a
+  # command as a list) or a niri action with an optional argument.
+  keybinds = {};
 }

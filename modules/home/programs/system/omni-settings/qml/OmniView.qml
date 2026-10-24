@@ -67,6 +67,8 @@ Item {
                         out[s.key] = s
         if (info && info.userPackages)
             out[info.userPackages.key] = info.userPackages
+        if (info && info.keybinds)
+            out[info.keybinds.key] = info.keybinds
         return out
     }
     readonly property var navItems: {
@@ -1017,8 +1019,9 @@ Item {
                                       flatpaks: flatpaksPage, backups: backupsPage, people: peoplePage,
                                       packages: packagesPage, userpackages: userPackagesPage,
                                       proton: protonPage, protonversions: protonVersionsPage,
-                                      windowrules: windowRulesPage })
+                                      windowrules: windowRulesPage, keybinds: keybindsPage })
     Component { id: windowRulesPage; WindowRulesPage { view: omni } }
+    Component { id: keybindsPage; KeybindsPage { view: omni } }
     Component { id: protonPage; ProtonPage { view: omni } }
     Component { id: docPage; DocPage { view: omni } }
     Component { id: protonVersionsPage; ProtonVersionsPage { view: omni } }

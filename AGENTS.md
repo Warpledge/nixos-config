@@ -200,8 +200,8 @@ lines, `grep -n` that file for the part you need.
 
 - Niri is the only WM; Hyprland's config is on the `hyprland-backup` branch.
 - Binds go in `niri.keybinds.<id>` (`key`, `title`, `action`, `group`), not
-  `programs.niri.settings.binds`; `core/keybinds.nix` converts them, and the
-  build fails on two binds sharing a key.
+  `programs.niri.settings.binds`; `core/keybinds.nix` converts them, applies
+  each user's `keybinds` setting, and fails the build on two binds sharing a key.
 - **Niri spawns with arguments are lists** (`spawn = ["dms" "ipc" "call" ...]`);
   a spaced string fails the build.
 - DMS `settings.json` in `<wm>/home/dms/` is shared by every machine and written
@@ -239,7 +239,9 @@ window, over a Python backend)
   `src/schema.py`.
 - `userPackages` is a set of named lists (`{Media = ["vlc"];}`). A setting
   like that must be listed in both `GROUPED` (`src/schema.py`) and `grouped`
-  (`lib/settings.nix`), or it's read as nested settings.
+  (`lib/settings.nix`), or it's read as nested settings. `keybinds` (the
+  Keybinds page's changes by bind id) is in `GROUPED` too, with its own checks:
+  `keybindProblems` in `lib/settings.nix` and `keybinds_ok` in `src/helper.py`.
 - `userPackages` is only for what the user installs from Search. An app the
   config ships gets a toggle and module under Default Packages (`add-app`),
   never a `userPackages` entry.

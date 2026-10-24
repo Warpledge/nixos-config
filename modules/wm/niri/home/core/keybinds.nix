@@ -1,14 +1,54 @@
 #=====================================================================#
 # NIRI KEYBIND OPTION
 #=====================================================================#
-# Modules add binds to niri.keybinds by id; this turns them into niri's binds
+# Modules add binds to niri.keybinds by id; this applies the user's keybinds
+# setting (Omni Settings' Keybinds page) and turns them into niri's binds
 {
   config,
   lib,
+  user,
   ...
 }: let
   inherit (lib) mkOption types;
-  enabled = lib.filter (b: b.enable) (lib.attrValues config.niri.keybinds);
+
+  #--- Actions whose number argument niri reads as an index, not a name
+  indexActions = [
+    "focus-workspace"
+    "move-column-to-workspace"
+    "move-window-to-workspace"
+    "focus-column"
+    "focus-window-in-column"
+    "move-column-to-index"
+    "move-workspace-to-index"
+  ];
+  argOf = name: o:
+    if (o.argument or "") == ""
+    then {}
+    else if lib.elem name indexActions && builtins.match "[0-9]+" o.argument != null
+    then lib.toInt o.argument
+    else o.argument;
+  actionOf = o:
+    if o ? spawn
+    then {inherit (o) spawn;}
+    else {${o.action} = argOf o.action o;};
+
+  #--- The config's binds with the user's changes, then the user's own binds
+  defaults = lib.mapAttrs (_: b: removeAttrs b ["_module"]) config.niri.keybinds;
+  changed = lib.mapAttrs (id: b:
+    b // lib.filterAttrs (k: _: lib.elem k ["key" "title" "enable"]) (user.keybinds.${id} or {}))
+  defaults;
+  custom = lib.mapAttrs (id: o: {
+    inherit id;
+    inherit (o) key title;
+    action = actionOf o;
+    group = "Yours";
+    hidden = false;
+    allowWhenLocked = false;
+    allowInhibiting = true;
+    enable = o.enable or true;
+  }) (lib.filterAttrs (id: _: lib.hasPrefix "custom-" id) user.keybinds);
+  final = changed // custom;
+  enabled = lib.filter (b: b.enable) (lib.attrValues final);
 in {
   #--------------------------------------------------------------------#
   #-- Option
@@ -67,6 +107,24 @@ in {
         // lib.optionalAttrs b.allowWhenLocked {allow-when-locked = true;}
         // lib.optionalAttrs (!b.allowInhibiting) {allow-inhibiting = false;}))
     enabled);
+
+    #--- For Omni Settings' Keybinds page: each bind as built, with the config's
+    #--- own key, title and on/off, niri's action names and the changes applied
+    xdg.configFile."omni-settings/niri-keybinds.json".text = builtins.toJSON {
+      overrides = user.keybinds;
+      binds = lib.mapAttrsToList (id: b:
+        b
+        // {
+          default = {inherit (defaults.${id} or b) key title enable;};
+          custom = custom ? ${id};
+        })
+      final;
+      # niri-flake's list misses some that take an argument; the binds' own fill in
+      actions = lib.sort lib.lessThan (lib.unique (lib.filter (a: a != "recent-windows")
+        (lib.attrNames config.lib.niri.actions
+          ++ indexActions
+          ++ lib.concatMap (b: lib.attrNames b.action) (lib.attrValues defaults))));
+    };
 
     #------------------------------------------------------------------#
     #-- Assertions

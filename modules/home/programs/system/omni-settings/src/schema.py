@@ -12,9 +12,10 @@ import nixfile
 
 #--- Never shown: account plumbing, hardware, and values set once at install
 HIDDEN = {"users", "mainUser", "stateVersion", "flakePath", "gpu", "admin"}
-#--- Settings whose value is a set of named lists, read and written whole
-#--- (lib/settings.nix checks them the same way)
-GROUPED = {("userPackages",)}
+#--- Settings read and written whole: sets of named lists, and the keybind
+#--- changes by id (lib/settings.nix checks both)
+KEYBINDS = ("keybinds",)
+GROUPED = {("userPackages",), KEYBINDS}
 
 #--- Template sections whose `#---` headers each get their own page
 SPLIT_SECTIONS = {"Apps"}
@@ -54,8 +55,8 @@ SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
 #--- Each page's sidebar section, icon and blurb, and for the curated ones
 #--- their groups: (title, description, [setting paths]). Pages in the apps
 #--- section keep the template's groups; "top" pages are settings a custom page
-#--- lays out (TOP_PAGES), and the "userpkgs" one the list the Packages tab's
-#--- pages edit (UserPackagesPage.qml).
+#--- lays out (TOP_PAGES), the "userpkgs" one the list the Packages tab's
+#--- pages edit (UserPackagesPage.qml), and "keybinds" the Keybinds page's set.
 #--- "top" pages: the custom page (its id in api.py and OmniView.qml) each one's settings show on
 TOP_PAGES = {"Flatpaks": "flatpaks", "Users": "people"}
 
@@ -64,6 +65,7 @@ PAGES = {
     "Users": ("top", "system-users-symbolic", "",
               [("Commit As", "Your name and email on git commits you make.", ["git.name", "git.email"])]),
     "User Packages": ("userpkgs", "package-x-generic-symbolic", "", [("", "", ["userPackages"])]),
+    "Keybinds": ("keybinds", "input-keyboard-symbolic", "", [("", "", ["keybinds"])]),
     "System": ("computer", "computer-symbolic",
                "The name, desktop and kernel this computer runs, the same for everyone on it.",
                [("", "", ["hostName", "windowManager", "kernel"])]),
@@ -361,6 +363,8 @@ def make_setting(domain, path, b, values, choices, labels, doc, lead, header_tit
         s.kind, s.choices = "choice", choices[dotted]
     elif isinstance(value, bool):
         s.kind = "bool"
+    elif path == KEYBINDS:
+        s.kind = "keybinds"
     elif path in GROUPED:
         s.kind = "groups"
     elif isinstance(value, list):

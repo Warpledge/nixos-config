@@ -284,6 +284,27 @@ def same_kind(template, value):
     return False
 
 
+#--- The fields a keybind change may set, as lib/settings.nix's keybindFields
+KEYBIND_FIELDS = {"key": str, "title": str, "enable": bool, "spawn": list, "action": str, "argument": str}
+
+
+def keybinds_ok(value):
+    """Whether `value` is a set of keybind changes by id: a config bind's key, title
+    or on/off, or a custom- bind's fields, each of its own kind."""
+    if not isinstance(value, dict):
+        return False
+    for bind_id, b in value.items():
+        if not (isinstance(bind_id, str) and re.fullmatch(r"[A-Za-z0-9_-]+", bind_id) and isinstance(b, dict)):
+            return False
+        allowed = KEYBIND_FIELDS if bind_id.startswith("custom-") else ("key", "title", "enable")
+        for k, v in b.items():
+            if k not in allowed or not isinstance(v, KEYBIND_FIELDS[k]):
+                return False
+            if k == "spawn" and not (v and all(isinstance(a, str) for a in v)):
+                return False
+    return True
+
+
 def user_changes(cfg, raw):
     """The request's changes, refused unless each is a user template key with
     the template's kind of value."""
@@ -301,7 +322,7 @@ def user_changes(cfg, raw):
         if not found or path[0] in schema.HIDDEN or (isinstance(default, dict)
                                                      and tuple(path) not in schema.GROUPED):
             refuse(f"`{'.'.join(path)}` can't be changed here")
-        if not same_kind(default, value):
+        if not (keybinds_ok(value) if tuple(path) == schema.KEYBINDS else same_kind(default, value)):
             refuse(f"`{'.'.join(path)}` got the wrong kind of value")
         changes[("user", tuple(path))] = value
     return changes

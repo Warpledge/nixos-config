@@ -40,7 +40,7 @@ Workspaces stack vertically, one row of columns each. `Mod+1` to `Mod+9` jump to
 | `Mod+R` | Restart the shell, if the bar or a panel misbehaves |
 | `Mod+Escape` | Take shortcuts back from an app (games and remote desktops can hold them) |
 
-Add your own shortcuts in the shell settings (Keyboard Shortcuts); yours win over the config's. The config's are in [`binds.nix`](../../modules/wm/niri/home/core/binds.nix), and the shell's (launcher, screenshots, lock and so on) in [`dms/default.nix`](../../modules/wm/niri/home/dms/default.nix).
+Change, turn off or add shortcuts on Omni Settings' Keybinds page (Niri tab). Changes there are yours alone and apply with a rebuild, like other settings; you can pick a window to make a shortcut that opens or focuses its app. The shell settings have their own Keyboard Shortcuts page, whose shortcuts win over both. The config's are in [`binds.nix`](../../modules/wm/niri/home/core/binds.nix), and the shell's (launcher, screenshots, lock and so on) in [`dms/default.nix`](../../modules/wm/niri/home/dms/default.nix).
 
 ## Look and Colours
 
