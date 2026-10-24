@@ -24,6 +24,8 @@
     edge left
     columns 120
     focus_policy on-demand
+    # Opaque like kitty.nix; niri's blur preset sets the translucency
+    background_opacity 1.0
     kitty_override startup_session=ai-panel-session.conf
   '';
 

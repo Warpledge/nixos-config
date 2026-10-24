@@ -89,6 +89,16 @@
           match namespace="^dms-clipboardPlus-panel-"
           opacity ${p.opacity}
       }
+
+      // kitty's quick-access panel (ai/ai-panel.nix), styled like the kitty window
+      layer-rule {
+          match namespace="^kitty-quick-access$"
+          opacity ${p.opacity}
+          background-effect {
+              blur ${lib.boolToString (p.blur != null)}
+              xray true
+          }
+      }
       ${lib.optionalString (p.blur == null) ''
 
         // Layers that send a blur region; without one, xray covers the whole surface
