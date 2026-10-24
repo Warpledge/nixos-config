@@ -16,7 +16,7 @@ Rectangle {
         visible: !badge.appPath
         anchors.centerIn: parent
         icon: badge.icon
-        size: 20
+        size: Math.round(badge.width * 0.53)
         color: badge.strong ? Theme.inkPrimary : Theme.inkContainer
     }
     IconImage {

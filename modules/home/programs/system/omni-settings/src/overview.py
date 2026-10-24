@@ -12,11 +12,7 @@ from gi.repository import Adw, Gdk, Gtk  # noqa: E402
 import closure  # noqa: E402
 import runview  # noqa: E402
 import ui  # noqa: E402
-
-#--- DMS tabs shown as buttons on the Overview, in this order
-QUICK = ["display_config", "keybinds", "mouse_touchpad", "theme", "wallpaper", "dankbar_settings",
-         "notifications", "network_wifi", "audio"]
-HISTORY = 8
+from api import HISTORY, QUICK  # noqa: E402
 
 
 def quick_links(window, links):

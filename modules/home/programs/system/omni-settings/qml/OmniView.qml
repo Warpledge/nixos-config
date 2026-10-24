@@ -25,6 +25,10 @@ Item {
     property string scope: ""  // a machine, or "" for all of them
     property var lists: ({})
 
+    //--- Every DMS link the pages carry
+    readonly property var links: !info ? [] : Object.values(info.pages)
+        .reduce((all, pg) => pg.groups.reduce((acc, g) => acc.concat(g.links), all), [])
+
     readonly property var settings: {
         const out = {}
         if (info)
@@ -193,15 +197,39 @@ Item {
             })
             return
         }
-        Jobs.start("apply", { changes: pending, machine: machineArg(), mode }, reply => {
+        startJob("apply", { changes: pending, machine: machineArg(), mode })
+    }
+
+    //--- Starts a job service job and shows its run page; lastJob lets a
+    //--- finished preview start the same job for real
+    property var lastJob: null
+    function startJob(kind, args) {
+        Jobs.start(kind, args, reply => {
             if (!reply.ok) {
                 say(reply.error)
                 return
             }
+            lastJob = { kind, args }
             reviewing = false
             running = true
         })
     }
+
+    //--- Runs the previewed job again, switching
+    function runPreviewed() {
+        const kind = lastJob.kind
+        if (kind === "apply")
+            apply("switch")
+        else
+            startJob(kind, Object.assign({}, lastJob.args, { mode: kind === "update" ? "auto" : "switch" }))
+    }
+
+    //--- A modal question: ask({heading, body, buttons}, done(value))
+    function ask(spec, done) { dialog.open(spec, done) }
+    readonly property alias dialog: confirm
+
+    //--- A Sheet component shown over everything; null closes it
+    property Component sheet: null
 
     function closeRun() {
         if (Jobs.job && Jobs.job.ended)
@@ -281,7 +309,7 @@ Item {
         anchors.fill: parent
         anchors.margins: 14
         spacing: 10
-        visible: !omni.reviewing && !omni.running
+        visible: !omni.reviewing && !omni.running && omni.sheet === null
 
         //--- Header
         RowLayout {
@@ -389,7 +417,7 @@ Item {
                             Text {
                                 visible: text !== ""
                                 text: omni.info && omni.info.pages[omni.page] ? omni.info.pages[omni.page].description
-                                    : omni.current ? omni.current.group : ""
+                                    : omni.current ? omni.current.subtitle || omni.current.group : ""
                                 color: Theme.dim
                                 font.pixelSize: 12
                                 elide: Text.ElideRight
@@ -439,7 +467,7 @@ Item {
                     model: search.text.trim() ? omni.results
                         : omni.navItems.filter(i => i.tab === omni.tab)
                             .map(i => ({ kind: "page", tab: i.tab, page: i.id, title: i.title, group: i.group,
-                                         icon: i.icon, subtitle: (omni.info.pages[i.id] || {}).description || "" }))
+                                         icon: i.icon, subtitle: (omni.info.pages[i.id] || {}).description || i.subtitle || "" }))
 
                     function pick(r) {
                         if (r.kind === "dms")
@@ -558,9 +586,16 @@ Item {
                     }
                 }
 
+                //--- Pages not made from the templates
+                Loader {
+                    Layout.fillWidth: true
+                    active: !!omni.info && omni.custom[omni.page] !== undefined
+                    sourceComponent: omni.custom[omni.page] || null
+                }
+
                 //--- Pages not ported yet
                 ColumnLayout {
-                    visible: !!omni.info && !omni.info.pages[omni.page]
+                    visible: !!omni.info && !omni.info.pages[omni.page] && omni.custom[omni.page] === undefined
                     Layout.fillWidth: true
                     Layout.topMargin: 40
                     spacing: 12
@@ -637,6 +672,21 @@ Item {
         visible: omni.running && !!Jobs.job
         view: omni
     }
+
+    Loader {
+        anchors.fill: parent
+        anchors.margins: 14
+        active: omni.sheet !== null
+        sourceComponent: omni.sheet
+        onLoaded: item.forceActiveFocus()
+    }
+
+    ConfirmDialog { id: confirm; anchors.fill: parent; z: 2 }
+
+    //--- Custom pages by id; each is ported from the GTK app in turn
+    readonly property var custom: ({ overview: overviewPage, shell: shellPage })
+    Component { id: overviewPage; OverviewPage { view: omni } }
+    Component { id: shellPage; ShellPage { view: omni } }
 
     //--- Toast
     Rectangle {

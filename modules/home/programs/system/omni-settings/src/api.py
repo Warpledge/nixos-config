@@ -13,8 +13,10 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 
 import backend  # noqa: E402
+import closure  # noqa: E402
 import nixfile  # noqa: E402
 import schema  # noqa: E402
+import system  # noqa: E402
 
 #--- The root helper every rebuild goes through (nixos/system/user/omni-settings-helper.nix)
 HELPER = "/run/current-system/sw/bin/omni-settings-apply"
@@ -45,6 +47,19 @@ TOP = {"main": [("overview", "Overview", ("computer-symbolic",)),
 DOCS_GAMING = [("proton", "Launch Options", ("input-gaming-symbolic",)),
                ("protonversions", "Proton Versions",
                 ("system-software-install-symbolic", "input-gaming-symbolic"))]
+
+#--- The line under each page in the page list that has no description of its own
+NAV_SUBTITLES = {"overview": "Updates, rebuild, versions", "git": "Changes, commits, pull requests",
+                 "flatpaks": "Apps, updates, repair", "backups": "Back up app data",
+                 "people": "Who can log in", "packages": "Find packages in nixpkgs",
+                 "shell": "DankMaterialShell's settings", "windowrules": "Rules for each app's windows",
+                 "userpackages": "Packages you added from Search",
+                 "proton": "Launch options to copy", "protonversions": "Proton builds installed"}
+
+#--- DMS tabs shown as buttons on the Overview (Shell page under niri), in this order
+QUICK = ["display_config", "keybinds", "mouse_touchpad", "theme", "wallpaper", "dankbar_settings",
+         "notifications", "network_wifi", "audio"]
+HISTORY = 8  # versions the Overview lists
 
 #--- Sections shown on a tab other than Main
 SECTION_TAB = {"cloudai": "ai", "localai": "ai", "apps": "packages"}
@@ -189,7 +204,8 @@ def cmd_load(cfg, _args):
 
     nav = {tab: [] for tab, _ in TABS}
     for tab, _ in TABS:
-        items = [{"id": key, "title": title, "icon": list(icons), "custom": True}
+        items = [{"id": key, "title": title, "icon": list(icons), "custom": True,
+                  "subtitle": NAV_SUBTITLES.get(key, "")}
                  for key, title, icons in TOP[tab] if key != "shell" or wm == "niri"]
         if items:
             nav[tab].append({"id": "", "title": "", "items": items})
@@ -218,9 +234,11 @@ def cmd_load(cfg, _args):
     if any((s.domain, s.path) == USER_PACKAGES for p in state.pages for g in p.groups for s in g.settings):
         nav["packages"].append({"id": "userpkgs", "title": "User Packages",
                                 "items": [{"id": "userpackages", "title": "All",
+                                           "subtitle": NAV_SUBTITLES["userpackages"],
                                            "icon": ["package-x-generic-symbolic"], "custom": True}]})
     nav["docs"].append({"id": "gaming", "title": "Gaming",
-                        "items": [{"id": k, "title": t, "icon": list(i), "custom": True}
+                        "items": [{"id": k, "title": t, "icon": list(i), "custom": True,
+                                   "subtitle": NAV_SUBTITLES.get(k, "")}
                                   for k, t, i in DOCS_GAMING]})
 
     dismissed = read_dismissed()
@@ -236,7 +254,7 @@ def cmd_load(cfg, _args):
             "admin": admin, "direct": direct, "canApply": bool(helper()) and (direct or not admin),
             "banner": banner, "userMachines": state.user_machines,
             "tabs": [{"id": t, "title": title, "icon": list(TAB_ICONS[t])} for t, title in TABS],
-            "nav": nav, "pages": pages, "whatsNew": new,
+            "nav": nav, "pages": pages, "whatsNew": new, "quick": QUICK,
             "dmsSearch": [{"label": e.label, "description": e.description, "keywords": e.keywords,
                            "tab": e.link.tab, "page": e.link.page} for e in state.dms_entries]}
 
@@ -312,9 +330,74 @@ def cmd_remove_stale(cfg, _args):
     return True
 
 
+#--------------------------------------------------------------------#
+#-- Overview
+#--------------------------------------------------------------------#
+def cmd_overview(cfg, _args):
+    """What this computer runs, the versions it can switch to, the clean-up's
+    plan and the last failed run."""
+    import jobs  # jobs.py imports this module
+    i = system.info(cfg.flake)
+    running, booted, default = (os.path.realpath(p) for p in
+                                (closure.CURRENT, closure.BOOTED, closure.SYSTEM_PROFILE))
+    policy = system.clean_policy()
+    doomed = sorted(g.number for g in system.to_delete(i.generations, policy))
+    failed = jobs.last_failed()
+    free, total = i.disk
+    return {"hostname": i.hostname, "pretty": i.pretty, "kernel": i.kernel, "generation": i.generation,
+            "pending": i.pending, "newKernel": i.new_kernel, "updated": i.updated,
+            "diskFree": free, "diskTotal": total,
+            "generations": [{"number": g.number, "when": g.when, "version": g.version, "kernel": g.kernel,
+                             "path": g.path, "running": g.path == running, "booted": g.path == booted,
+                             "next": g.path == default} for g in i.generations[:HISTORY]],
+            "cleanUp": {"total": len(i.generations), "doomed": doomed, "keep": policy.keep,
+                        "since": policy.since_text, "schedule": policy.schedule},
+            "lastFailed": dict(zip(("title", "when", "heading", "reason"), failed[:4])) if failed else None}
+
+
+def cmd_freed(_cfg, _args):
+    """Bytes only the generations a clean-up deletes use; slow, so asked for apart."""
+    gens = closure.generations()
+    doomed = system.to_delete(gens, system.clean_policy())
+    return system.freed_estimate(doomed, [g for g in gens if g not in doomed]) if doomed else 0
+
+
+def cmd_check_updates(cfg, _args):
+    """The newest version of each flake input, locked into a separate file the
+    update job takes as args.lock; flake.lock stays as it is."""
+    lock, changes = system.check_updates(cfg.flake)
+    return {"lock": lock, "changes": [{"name": c.name, "old": c.old, "new": c.new, "link": c.link}
+                                      for c in changes]}
+
+
+def cmd_compare(_cfg, args):
+    """What switching from the running system to generation args.number changes."""
+    gen = next((g for g in closure.generations() if g.number == args.get("number")), None)
+    if gen is None:
+        raise ValueError("no such version")
+    return closure.diff(closure.CURRENT, gen.path).as_json()
+
+
+def cmd_failed_log(_cfg, _args):
+    import jobs
+    failed = jobs.last_failed()
+    return dict(zip(("title", "when", "heading", "reason", "log"), failed)) if failed else None
+
+
+def cmd_forget_failed(_cfg, _args):
+    import jobs
+    try:
+        os.remove(jobs.FAILED_LOG)
+    except FileNotFoundError:
+        pass
+    return True
+
+
 COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cmd_save,
             "dismiss": cmd_dismiss,
-            "stale": cmd_stale, "removeStale": cmd_remove_stale}
+            "stale": cmd_stale, "removeStale": cmd_remove_stale,
+            "overview": cmd_overview, "freed": cmd_freed, "checkUpdates": cmd_check_updates,
+            "compare": cmd_compare, "failedLog": cmd_failed_log, "forgetFailed": cmd_forget_failed}
 
 
 def run(cfg, cmd, args):
@@ -326,7 +409,7 @@ def run(cfg, cmd, args):
         return {"ok": True, "data": fn(cfg, args if isinstance(args, dict) else {})}
     except backend.SettingsError as e:
         return {"ok": False, "error": str(e), "settings": True}
-    except (OSError, ValueError, PermissionError, nixfile.NixError) as e:
+    except (OSError, ValueError, PermissionError, nixfile.NixError, system.UpdateError) as e:
         return {"ok": False, "error": str(e)}
 
 

@@ -16,6 +16,7 @@ Rectangle {
     Text {
         id: pillText
         anchors.centerIn: parent
+        font.pixelSize: 13
         font.weight: Font.DemiBold
         color: pill.danger ? Theme.inkError : pill.quiet ? Theme.text : Theme.inkPrimary
     }

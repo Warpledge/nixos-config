@@ -185,12 +185,27 @@ Rectangle {
             text: sheet.showLog ? "Hide the log" : `Show the log (${Jobs.log.count} lines)`
             onTapped: sheet.showLog = !sheet.showLog
         }
+        //--- What changed, once compared; the log takes its place when shown
+        Flickable {
+            visible: !sheet.showLog
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            contentHeight: diffLoader.implicitHeight
+            clip: true
+            boundsBehavior: Flickable.StopAtBounds
+            Loader {
+                id: diffLoader
+                width: parent.width
+                active: !!sheet.job && !!sheet.job.diff
+                sourceComponent: DiffView { diff: sheet.job.diff }
+            }
+        }
         Rectangle {
+            visible: sheet.showLog
             Layout.fillWidth: true
             Layout.fillHeight: true
             radius: 14
             color: Theme.card
-            opacity: sheet.showLog ? 1 : 0
             ListView {
                 id: log
                 anchors.fill: parent
@@ -231,11 +246,13 @@ Rectangle {
                 })
             }
             Pill {
-                visible: sheet.done && sheet.job.preview && sheet.job.kind === "apply"
-                         && sheet.job.outcome === "ok" && sheet.view.pendingCount > 0
+                readonly property var labels: ({ apply: "Apply Now", rebuild: "Rebuild Now", update: "Update Now" })
+                visible: sheet.done && sheet.job.preview && sheet.job.outcome === "ok"
+                         && !!sheet.view.lastJob && sheet.view.lastJob.kind === sheet.job.kind
+                         && (sheet.job.kind !== "apply" || sheet.view.pendingCount > 0)
                 quiet: true
-                text: "Apply Now"
-                onClicked: sheet.view.apply("switch")
+                text: labels[sheet.job ? sheet.job.kind : ""] || ""
+                onClicked: sheet.view.runPreviewed()
             }
             Pill {
                 visible: sheet.done
