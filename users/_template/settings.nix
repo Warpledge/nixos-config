@@ -147,10 +147,11 @@
     resources = false; # GNOME system and process monitor
   };
 
-  #--- Android Screen Mirroring (scrcpy)
-  # Mirror and control an Android device over USB or wifi; nothing is
+  #--- Android
+  # scrcpy: mirror and control an Android device over USB or wifi; nothing is
   # installed on it
   scrcpy.enable = false;
+  androidDev.enable = false; # adb, Flutter, Gradle and the Android SDK paths
 
   #--- Gaming
   gaming = {

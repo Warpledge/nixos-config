@@ -95,6 +95,7 @@
 
   "system.resources": {"summary": "System and process monitor", "icon": ["org.gnome.Resources.desktop", "utilities-system-monitor"], "text": "**Resources**, a system and process monitor: what's running and how much it uses."},
   "scrcpy.enable": {"title": "scrcpy", "summary": "Show and control an Android device", "icon": ["guiscrcpy", "scrcpy.desktop"], "text": "Show and control an **Android** phone or tablet from your computer, over USB or wifi. Nothing gets installed on the device."},
+  "androidDev.enable": {"title": "Android development", "summary": "adb, Flutter and Gradle", "icon": ["android-studio", "phone"], "note": "adb is installed for everyone on this computer", "text": "**adb** and **fastboot** for talking to a phone or tablet over USB, **Universal Android Debloater**, and **Flutter** and **Gradle** with the Android SDK paths set to `~/Android/Sdk`."},
 
   "gaming.steam": {"summary": "Steam", "note": "Installed for everyone on this computer", "icon": ["steam", "com.valvesoftware.Steam"], "text": "**Steam**, for running Windows games through Proton."},
   "gaming.heroic": {"summary": "Epic, GOG and Amazon games", "icon": ["heroic", "com.heroicgameslauncher.hgl"], "text": "Launcher for your **Epic**, **GOG** and **Amazon** games."},

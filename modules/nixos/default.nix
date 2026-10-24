@@ -30,7 +30,6 @@
 
       #--- System Services
       ./services/desktop.nix
-      ./services/hardware/adb.nix
       ./services/hardware/power.nix
       ./services/hardware/sound.nix
       ./services/runtimes/runners.nix
@@ -74,6 +73,8 @@
     #--- FlareSolverr for Moku's Cloudflare-protected sources (any user with Moku)
     ++ lib.optionals anyUser.media.moku [./services/servers/flaresolverr.nix]
     ++ lib.optionals anyUser.openWebui.enable [./services/servers/open-webui.nix]
+    #--- adb and the Android debloater (any user with androidDev)
+    ++ lib.optionals anyUser.androidDev.enable [./services/hardware/adb.nix]
     #--- Japanese Input Method (any user with japanese.ime)
     ++ lib.optionals anyUser.japanese.ime [./system/language/japanese-ime.nix];
 }

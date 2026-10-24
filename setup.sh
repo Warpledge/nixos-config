@@ -822,6 +822,7 @@ apps=(
   "Security|security.bleachbit|BleachBit disk cleaner"
   "System|system.resources|Resources system monitor"
   "System|scrcpy.enable|scrcpy: show and control an Android phone"
+  "System|androidDev.enable|Android development: adb, Flutter, Gradle"
   "Gaming|gaming.heroic|Heroic: Epic, GOG and Amazon games"
   "Gaming|gaming.prismlauncher|Prism Launcher: Minecraft"
   "Gaming|gaming.lutris|Lutris"

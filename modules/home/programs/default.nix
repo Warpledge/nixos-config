@@ -37,7 +37,6 @@ user: {lib, ...}: {
       ./shell/zsh.nix
 
       #--- Other
-      ./android/android.nix
       (import ./gaming user)
       ./git/git.nix
       ./options.nix
@@ -103,8 +102,9 @@ user: {lib, ...}: {
     ++ lib.optionals user.security.keepassxc [./security/keepassxc.nix]
     #--- System Tools (controlled by user settings)
     ++ lib.optionals user.system.resources [./system/resources.nix]
-    #--- Android Screen Mirroring (controlled by user settings)
+    #--- Android mirroring and development (controlled by user settings)
     ++ lib.optionals user.scrcpy.enable [./android/scrcpy.nix]
+    ++ lib.optionals user.androidDev.enable [./android/android.nix]
     #--- AI Tools (controlled by user settings)
     ++ lib.optionals user.claude.enable [./ai/claude.nix]
     ++ lib.optionals user.claudeDesktop.enable [./ai/claude-desktop.nix]

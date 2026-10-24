@@ -395,7 +395,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | **Rhythm Games** | [feedBack][feedback] plays Guitar Pro tabs through its own audio engine, with VST hosting and amp modeling, so the Katana DI feed doubles as the game input; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs. [Rocksmith 2014][rocksmith] runs on Proton and reads the same DI through [PipeASIO][pipeasio] and [RS_ASIO][rs-asio]; the module writes their config, and the hand-done install steps live in `docs/personal/gaming/rocksmith-2014.md` |
 | **Chat / Productivity** | [GoofCord][goofcord] or [Vesktop][vesktop] (follows the shell's theme live) via [nixcord][nixcord] (Vencord, with [arRPC][arrpc] running alongside it so Steam and Proton games show up as rich presence), [Ferdium][ferdium] (all your web messengers in one window), [Thunderbird][thunderbird], [Obsidian][obsidian] |
 | **AI Tooling** | [Claude Code][claude-code], [Claude Desktop][claude-desktop], [OpenCode][opencode], [LM Studio][lmstudio], [llama-swap][llama-swap], [Open WebUI][open-webui] |
-| **Android** | [scrcpy][scrcpy] (mirror and control a device over USB or wifi, nothing to install on the phone) |
+| **Android** | [scrcpy][scrcpy] (mirror and control a device over USB or wifi, nothing to install on the phone), [Flutter][flutter] and [Gradle][gradle] with adb |
 | **Video Trimming** | [Video Trimmer][video-trimmer] (cut a clip out of a video without re-encoding it), [Constrict][constrict] (re-encode a video to fit a chosen file size) |
 | **Manga / Anime Reader** | [Suwayomi][suwayomi] is a local manga reader, opened from the launcher as a [Helium][helium] app window (`localhost:4567`) after a password prompt. [Moku][moku] covers manga, light novels and anime, built from source with a fix for overlapping search results, a per-source filter panel and a button that opens the current episode in mpv, with a local [FlareSolverr][flaresolverr] for Cloudflare-protected sources |
 | **Image Boards** | [Boorusama][boorusama] browses booru sites; it's the desktop build of the Android client, wrapped from the upstream AppImage with `appimageTools` since it is not in nixpkgs. Its data, cache and backups sit in a [gocryptfs][gocryptfs] vault that the launcher unlocks with a password and locks again on exit |
@@ -519,6 +519,8 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 [thunderbird]: https://www.thunderbird.net
 [obsidian]: https://obsidian.md
 [scrcpy]: https://github.com/Genymobile/scrcpy
+[flutter]: https://flutter.dev
+[gradle]: https://www.gradle.org/
 [yazi]: https://github.com/sxyazi/yazi
 [dux-files]: https://github.com/duxlabs-dev/dux-files
 [arrpc]: https://arrpc.openasar.dev

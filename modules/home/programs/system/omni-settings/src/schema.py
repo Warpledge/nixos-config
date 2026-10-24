@@ -32,7 +32,6 @@ DATA_CHOICES = {("timeZone",): "timezones", ("locale",): "locales",
 #--- Page names and moves the template headers don't give
 PAGE_TITLES = {
     "Wallpaper Picker (Mod+W)": "Wallpaper",
-    "Android Screen Mirroring (scrcpy)": "Android",
     "Language & Keyboard": "Language & Input",  # fits the sidebar's width
     "Artcraft": "ArtCraft",  # humanize() of the artcraft key
 }
