@@ -44,10 +44,6 @@
       };
       efi.canTouchEfiVariables = true;
     };
-    initrd = {
-      systemd.enable = true; # Use systemd in initrd
-      verbose = false;
-    };
     plymouth = {
       enable = true; # Show graphical boot splash screen
     };
