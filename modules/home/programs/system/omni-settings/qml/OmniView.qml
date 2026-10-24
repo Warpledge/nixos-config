@@ -1101,10 +1101,11 @@ Item {
                 text: omni.toastAction ? omni.toastAction.label : ""
                 color: Theme.toast.hslLightness > 0.5 ? Theme.primaryContainer : Theme.primary
                 font.weight: Font.Bold
-                HoverHandler { cursorShape: Qt.PointingHandCursor }
-                TapHandler {
-                    gesturePolicy: TapHandler.ReleaseWithinBounds
-                    onTapped: {
+                MouseArea {
+                    anchors.fill: parent
+                    anchors.margins: -8
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
                         const run = omni.toastAction.run
                         omni.toast = ""
                         omni.toastAction = null
@@ -1113,5 +1114,7 @@ Item {
                 }
             }
         }
+        // The toast stays while the cursor is on it
+        HoverHandler { onHoveredChanged: hovered ? toastTimer.stop() : toastTimer.restart() }
     }
 }
