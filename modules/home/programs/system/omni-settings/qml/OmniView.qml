@@ -926,8 +926,11 @@ Item {
             id: railArea
             onHoveredChanged: if (!hovered) railClose.restart()
         }
-        // Wide enough for the longest page name beside its icon
-        property real nameWidth: 0
+        // Wide enough for the longest page or group name beside its icon
+        readonly property real nameWidth: railList.model.reduce((w, i) =>
+            Math.max(w, railFont.advanceWidth(i.title), groupFont.advanceWidth(i.group) + 40), 0)
+        FontMetrics { id: railFont; font.pixelSize: 15; font.weight: Font.DemiBold }
+        FontMetrics { id: groupFont; font.pixelSize: 12; font.weight: Font.Bold }
         width: Math.min(44 + nameWidth + 22, omni.width - 28)
         radius: 22
         color: Theme.card
@@ -940,7 +943,6 @@ Item {
             clip: true
             boundsBehavior: Flickable.StopAtBounds
             model: omni.navItems.filter(i => i.tab === omni.tab)
-            onModelChanged: rail.nameWidth = 0
 
             delegate: Column {
                 id: railItem
@@ -950,16 +952,40 @@ Item {
                 readonly property bool active: omni.page === modelData.id
                 readonly property string glyph: Theme.glyph(modelData.icon)
                 width: railList.width
-                //--- A short line where the page list starts a new group
+                //--- Where the page list starts a new group: its title between two lines
                 Item {
-                    visible: !!railItem.prev && railItem.prev.group !== railItem.modelData.group
+                    readonly property bool starts: railItem.prev ? railItem.prev.group !== railItem.modelData.group
+                                                                 : railItem.modelData.group !== ""
+                    visible: starts
                     width: parent.width
-                    height: 9
+                    height: railItem.modelData.group ? 24 : 9
                     Rectangle {
-                        anchors.centerIn: parent
-                        width: 22
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.left: parent.left
+                        anchors.leftMargin: 12
+                        anchors.right: groupTitle.visible ? groupTitle.left : parent.right
+                        anchors.rightMargin: groupTitle.visible ? 8 : 12
                         height: 1
-                        color: Theme.line
+                        color: Qt.alpha(Theme.primary, 0.35)
+                    }
+                    Text {
+                        id: groupTitle
+                        visible: text !== ""
+                        anchors.centerIn: parent
+                        text: railItem.modelData.group
+                        color: Theme.primary
+                        font.pixelSize: 12
+                        font.weight: Font.Bold
+                    }
+                    Rectangle {
+                        visible: groupTitle.visible
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.left: groupTitle.right
+                        anchors.leftMargin: 8
+                        anchors.right: parent.right
+                        anchors.rightMargin: 12
+                        height: 1
+                        color: Qt.alpha(Theme.primary, 0.35)
                     }
                 }
                 Item {
@@ -984,7 +1010,6 @@ Item {
                             font.pixelSize: 15
                             font.weight: Font.DemiBold
                             elide: Text.ElideRight
-                            Component.onCompleted: rail.nameWidth = Math.max(rail.nameWidth, implicitWidth)
                         }
                         Icon {
                             id: railIcon
