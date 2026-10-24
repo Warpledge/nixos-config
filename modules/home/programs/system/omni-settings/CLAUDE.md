@@ -42,6 +42,8 @@ Gotchas:
 - Each `api.py` call is a new process, so state that must outlast one (the Git fetch limit) goes in a file under `$XDG_RUNTIME_DIR/omni-settings/`.
 - Don't name a property after one `Item` already has (`data`, `state`): the page fails to load.
 - A `Loader` in a layout takes `Layout.preferredHeight: item ? item.implicitHeight : 0`, or the next page it loads keeps the last one's height.
+- A `Loader` whose item wraps text (a `Text` sized by width) gets only `width` from its parent, inside an `Item` taking the item's `implicitHeight`; sizing it from a layout loops (`DocPage.qml`).
+- The backend wrapper `--set`s `OMNI_SETTINGS_FLAKE`, so a test against a scratch copy of the settings needs its own wrapper: the installed one's lines with the variable exported after them.
 - Matugen has no success or warning colour, and its `tertiary` needn't be yellow: `Theme.success` and `Theme.caution` are DMS's terminal green and yellow (`dank16` color2 and color3). Status colours go through a `tone` on `ListRow`, `Badge` and `Chip`.
 - The job service runs from the installed system, so a new or changed job kind in `jobs.py` needs a rebuild before the built package can use it.
 - Testing without a rebuild: build `.#nixosConfigurations.<machine>.config.home-manager.users.<user>.omni-settings.package` and run its `bin/omni-settings --qml`. For checks without a window, run `src/api.py` with the `OMNI_SETTINGS_*` variables from the installed wrapper, and load a throwaway `qml/zz*.qml` under `QT_QPA_PLATFORM=offscreen`, saving `grabToImage` renders; delete it afterwards.
