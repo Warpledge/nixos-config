@@ -9,6 +9,7 @@ Item {
 
     signal closeRequested
 
+    property int edge: 14  // gap between the view and the window's edges
     property var info: null
     property string loadError: ""
     property var stale: null  // api.py's `stale`, when the settings files don't evaluate
@@ -468,8 +469,8 @@ Item {
     ColumnLayout {
         id: mainCol
         anchors.fill: parent
-        anchors.margins: 14
-        anchors.rightMargin: 14 + rail.width + 10
+        anchors.margins: omni.edge
+        anchors.rightMargin: omni.edge + rail.width + 10
         spacing: 10
         visible: !omni.reviewing && !omni.running && omni.sheet === null
 
@@ -859,9 +860,10 @@ Item {
         id: rail
         visible: mainCol.visible
         anchors.top: parent.top
-        anchors.bottom: parent.bottom
         anchors.right: parent.right
-        anchors.margins: 14
+        anchors.margins: omni.edge
+        // As tall as its icons, up to the window's bottom margin
+        height: Math.min(railList.contentHeight + 8, parent.height - 2 * omni.edge)
         width: 48
         radius: 24
         color: Theme.card
@@ -959,21 +961,21 @@ Item {
     ReviewSheet {
         id: review
         anchors.fill: parent
-        anchors.margins: 14
+        anchors.margins: omni.edge
         visible: omni.reviewing
         view: omni
     }
 
     RunSheet {
         anchors.fill: parent
-        anchors.margins: 14
+        anchors.margins: omni.edge
         visible: omni.running && !!Jobs.job
         view: omni
     }
 
     Loader {
         anchors.fill: parent
-        anchors.margins: 14
+        anchors.margins: omni.edge
         active: omni.sheet !== null
         sourceComponent: omni.sheet
         onLoaded: item.forceActiveFocus()
@@ -982,7 +984,7 @@ Item {
     CategorySheet {
         id: categories
         anchors.fill: parent
-        anchors.margins: 14
+        anchors.margins: omni.edge
         z: 1
         view: omni
     }

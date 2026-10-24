@@ -54,7 +54,15 @@ Item {
         id: slideout
         layerNamespace: "dms:omni-settings"
         slideEdge: "right"
-        slideoutWidth: 538  // DSlideout's 480, plus the page rail and its gap
+        // DSlideout's 480, plus the page rail and its gap, less the margins dropped below
+        slideoutWidth: 490
+        // Drops DSlideout's own content margin; OmniView's edge is the only gap
+        Component.onCompleted: {
+            container.anchors.topMargin = 0
+            container.anchors.bottomMargin = 0
+            container.anchors.leftMargin = 0
+            container.anchors.rightMargin = 0
+        }
 
         //--- Between the bars on the top and bottom edges, auto-hiding ones included
         readonly property real topInset: ShellLayout.edge(modelData, "top")?.occupancy ?? 0
@@ -66,6 +74,7 @@ Item {
 
         content: Component {
             OmniView {
+                edge: 6
                 focus: true
                 onCloseRequested: slideout.hide()
             }
