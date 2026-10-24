@@ -25,6 +25,7 @@ import gitstate  # noqa: E402
 import nixfile  # noqa: E402
 import packagestate  # noqa: E402
 import peoplestate  # noqa: E402
+import protonstate  # noqa: E402
 import schema  # noqa: E402
 import servicestate  # noqa: E402
 import system  # noqa: E402
@@ -676,6 +677,14 @@ def cmd_package_previews(_cfg, args):
     return {}
 
 
+def cmd_launch_options(_cfg, _args):
+    return protonstate.launch_options()
+
+
+def cmd_proton_versions(_cfg, _args):
+    return protonstate.versions()
+
+
 COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cmd_save,
             "dismiss": cmd_dismiss,
             "stale": cmd_stale, "removeStale": cmd_remove_stale,
@@ -688,7 +697,8 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "people": cmd_people, "checkPerson": cmd_check_person,
             "services": cmd_services, "serviceLog": cmd_service_log, "serviceRestart": cmd_service_restart,
             "ports": cmd_ports,
-            "packageNames": cmd_package_names, "packagePreviews": cmd_package_previews}
+            "packageNames": cmd_package_names, "packagePreviews": cmd_package_previews,
+            "launchOptions": cmd_launch_options, "protonVersions": cmd_proton_versions}
 
 
 def run(cfg, cmd, args):

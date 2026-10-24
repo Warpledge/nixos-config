@@ -822,7 +822,10 @@ Item {
     //--- Custom pages by id; each is ported from the GTK app in turn
     readonly property var custom: ({ overview: overviewPage, shell: shellPage, git: gitPage,
                                       flatpaks: flatpaksPage, backups: backupsPage, people: peoplePage,
-                                      packages: packagesPage, userpackages: userPackagesPage })
+                                      packages: packagesPage, userpackages: userPackagesPage,
+                                      proton: protonPage, protonversions: protonVersionsPage })
+    Component { id: protonPage; ProtonPage { view: omni } }
+    Component { id: protonVersionsPage; ProtonVersionsPage { view: omni } }
     readonly property var pageComponent: custom[page]
         || (page.startsWith("userpackages:") ? userPackagesPage : undefined)
     Component { id: packagesPage; PackagesPage { view: omni } }

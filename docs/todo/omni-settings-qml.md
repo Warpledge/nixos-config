@@ -28,6 +28,8 @@ Added 2026-10-23.
 
 **Status (2026-10-24):** Packages tab, part 2: the User Packages pages are ported (`UserPackagesPage.qml`): All, then one page per category in use, saved or pending (`packageCategories`, added to the page list after All as `userpackages:<name>`), each package with Move, Uninstall, and Undo for a pending removal. The open-module button on each Default Packages switch was already in `SettingRow.qml` (`module` from `backend.toggle_modules` in `load`). Checked offscreen with stand-in saved packages: install, move, removal and undo states, the category pages and 86 switches carrying a module. Tested on the desktop. Next: the Niri tab's Window Rules.
 
+**Status (2026-10-24):** the Proton pages are ported: their GTK-free half moved to `src/protonstate.py`, whose `launch_options()` and `versions()` build what api.py's `launchOptions` and `protonVersions` answer (`ProtonPage.qml`, `ProtonVersionsPage.qml`). The backend wrapper gets `OMNI_SETTINGS_COMPAT_TOOLS` too. Checked offscreen. Next: the Docs tab's notes, then the app reset button and the settings error page, then Window Rules.
+
 ## What's already in the repo
 
 - `modules/home/programs/system/omni-settings/src/`: about 9,700 lines of Python (2026-10-23). About 3,700 of them are already GTK-free and stay as the backend: `helper.py`, `schema.py`, `backend.py`, `system.py`, `nixfile.py`, `nixlog.py`, `dms.py`, `closure.py`, `session.py`. The rest (`app.py`, `windowrules.py`, `runview.py`, `flatpaks.py`, `packages.py`, `overview.py` and smaller pages) mixes logic with GTK calls.

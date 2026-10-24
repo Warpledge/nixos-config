@@ -67,6 +67,7 @@
         --set OMNI_SETTINGS_MACHINE ${lib.escapeShellArg machine.name} \
         --set OMNI_SETTINGS_USER ${lib.escapeShellArg user.name} \
         --set OMNI_SETTINGS_LIB ${pkgs.path}/lib \
+        --set OMNI_SETTINGS_COMPAT_TOOLS ${lib.escapeShellArg compatTools} \
         --prefix PATH : ${lib.makeBinPath [alejandra pkgs.nix-search-tv]}
       #--- The job service (src/jobs.py): pkexec and nix from the system, not the session
       makeWrapper ${pkgs.python3}/bin/python3 $out/bin/omni-settings-jobs \
