@@ -47,4 +47,8 @@
     #--- Disk-unlock lines setup.sh copied from the installer's configuration.nix
     ++ lib.optional (builtins.pathExists ./hardware/boot.nix) ./hardware/boot.nix
     ++ (lib.optional (machine.windowManager == "niri") ./wm/niri.nix);
+
+  #--- Desktop-only home-manager modules (the game sits on /mnt/games)
+  home-manager.users.${machine.mainUser}.imports =
+    lib.optional machine.users.${machine.mainUser}.gaming.easyrpg ./games/tobira-no-densetsu.nix;
 }

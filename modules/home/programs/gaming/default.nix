@@ -129,7 +129,6 @@ user: {
     #--- Games
     ++ lib.optionals user.gaming.feedback [./games/feedback.nix]
     ++ lib.optionals user.gaming.rocksmith [./games/rocksmith.nix]
-    ++ lib.optionals user.gaming.easyrpg [./games/tobira-no-densetsu.nix]
     #--- Tools
     ++ lib.optionals user.gaming.r2modman [./tools/r2modman.nix]
     ++ lib.optionals user.gaming.pathOfBuilding [./tools/path-of-building.nix]
