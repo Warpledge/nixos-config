@@ -227,7 +227,8 @@ lines, `grep -n` that file for the part you need.
 - `services/ssh.nix` owns sshd and fail2ban; key-only auth, and an assertion
   fails the build if no user lists a key.
 
-**`modules/home/programs/system/omni-settings/`** (a Python GTK app)
+**`modules/home/programs/system/omni-settings/`** (a QML app, DMS panel and
+window, over a Python backend)
 
 - It builds its pages from the `_template/settings.nix` layout (`#--` sections,
   `#---` headers, trailing comments), so keep that layout when adding a setting.
@@ -244,9 +245,9 @@ lines, `grep -n` that file for the part you need.
   `users/_template` keys, never file text or Nix. Admin-only requests check
   wheel first. Don't loosen either.
 - Passwords reach the helper on stdin, never as an argument.
-- A QML front end in `qml/` (`omni-settings --qml`) is replacing the GTK one
-  on branch `omni-settings-qml`; its folder CLAUDE.md section and
-  `docs/todo/omni-settings-qml.md` say how. Never name a QML property `on`
+- The front end is `qml/` (the window, `omni-settings`) and `plugin/` (DMS's
+  panel, Mod+C); data comes from `src/api.py`, jobs from the
+  `omni-settings-jobs` service. Never name a QML property `on`
   plus a capital (it's read as a handler) or after an `Item` property
   (`data`, `state`), and give tap handlers
   `gesturePolicy: TapHandler.ReleaseWithinBounds`. JSON sent back from QML

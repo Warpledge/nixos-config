@@ -1,10 +1,10 @@
 # Changing Settings
 
-Open Omni Settings with `Mod+C`, or from the app launcher (`Mod+A`).
+`Mod+C` opens Omni Settings as a panel on the right of the screen, and so does pushing the mouse into the top-right corner. It closes when the mouse leaves it, or when you press `Mod+C` or `Esc` again, but stays open while you're typing or a question is up. `Mod+Shift+C`, or the app launcher (`Mod+A`), opens it as a window instead. Both show the same thing, and a rebuild keeps going if you close either.
 
 ## Finding Your Way Around
 
-The tabs across the top swap the sidebar:
+The icons across the top are tabs. Hover one, or the menu button beside them, to see that tab's pages:
 
 - **Main**: the Overview (updates, versions, clean-up), Git, Flatpaks, Backups, Users, and the computer and personal setting pages
 - **Packages**: searching for software, the app switches (Default Packages) and what you've installed yourself (User Packages)
@@ -12,26 +12,26 @@ The tabs across the top swap the sidebar:
 - **AI**: Claude and the local AI models
 - **Docs**: these guides, and under Gaming the launch options, Proton versions and game notes
 
-`Ctrl+F` searches every setting, including the shell's own settings. `Ctrl+?` lists the other shortcuts.
+Start typing anywhere outside a text field to search every page and setting, including the shell's own settings.
 
 ## Making a Change
 
 1. Change a switch, dropdown or text field. Nothing happens to the system yet: the row is marked as changed, and the Apply button lights up.
 2. Make as many changes as you like across any pages.
-3. **Review** shows every pending change, with an undo button on each, and the lines it will change in each file.
+3. **Review** shows every pending change and the lines it will change in each file.
 4. **Discard** throws them all away.
-5. **Apply** (`Ctrl+S`) asks how to use them:
+5. **Apply** asks how to use them:
    - **Apply Now** saves, rebuilds and switches. Most changes work straight away.
    - **At Next Restart** saves and rebuilds, and the new version starts when you restart. Apply suggests this for kernel and window manager changes.
    - **Preview** builds and shows what would change, then puts everything back. Your pending changes stay, and the run page offers Apply Now.
 
-Your password is asked once per window, in the shell's full-screen prompt.
+Your password is asked once per run, in the shell's full-screen prompt.
 
 ## While It Runs
 
 The run page shows each step, what it's building, and at the end what changed (packages added, removed or updated, and services restarted). **Stop** cancels the build and nothing is switched. If the run fails, **Undo My Changes** puts your files back; see [When Things Go Wrong](08-when-things-go-wrong.md).
 
-When a run updates Omni Settings itself, it offers to restart the app.
+Closing Omni Settings doesn't stop a run. Open it again to see where it's got to; when a run finishes with Omni Settings closed, you get a notification.
 
 ## Going Back to the Default
 

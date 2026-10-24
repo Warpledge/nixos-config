@@ -141,7 +141,7 @@ The few to know first:
 | `Mod+/` | Keybind cheatsheet |
 | `Mod+A` | App launcher |
 | `Mod+Return` | Terminal |
-| `Mod+C` | Omni Settings |
+| `Mod+C` / `Mod+Shift+C` | Omni Settings panel / window |
 | `Mod+Comma` | Dux Shell settings |
 | `Mod+Q` | Close window |
 | `Mod+Tab` | Overview of all windows |
@@ -404,7 +404,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | **Finance** | [HomeBank][homebank] (personal accounting with labeled transactions and a running balance) |
 | **Collection Tracking** | [Tonkatsu Box][tonkatsu-box] (games, film, anime, manga, visual novels, books and music in one local database, imports from Steam and AniList; a prebuilt bundle kept in `~/.local/opt/` instead of nixpkgs) |
 | **Task Manager** | [Resources][resources] (system and process monitor) |
-| **Settings App** | Omni Settings ([`modules/home/programs/system/omni-settings/`](./modules/home/programs/system/omni-settings/)), a GTK app over the settings files that rebuilds through a [polkit][polkit] helper (see [Using It](#using-it)). Each person changes only their own apps; only admins change computer-wide settings, update or switch versions. |
+| **Settings App** | Omni Settings ([`modules/home/programs/system/omni-settings/`](./modules/home/programs/system/omni-settings/)), a [Quickshell][quickshell] app over the settings files, as a Dux Shell panel or a window, that rebuilds through a [polkit][polkit] helper (see [Using It](#using-it)). Each person changes only their own apps; only admins change computer-wide settings, update or switch versions. |
 | **Japanese** | [fcitx5][fcitx5] + [Mozc][mozc] for typing hiragana, katakana and kanji, plus [innoextract][innoextract], [cabextract][cabextract] and [mdf2iso][mdf2iso] for unpacking raw Japanese visual novels (off by default) |
 </details>
 
@@ -543,6 +543,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 [gocryptfs]: https://nuetzlich.net/gocryptfs/
 [resources]: https://gitlab.gnome.org/GNOME/Incubator/resources
 [polkit]: https://github.com/polkit-org/polkit
+[quickshell]: https://quickshell.org
 [streamlink-twitch-gui]: https://github.com/streamlink/streamlink-twitch-gui
 [feedback]: https://github.com/got-feedBack/feedBack-desktop
 [rocksmith]: https://store.steampowered.com/app/221680/

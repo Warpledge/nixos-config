@@ -25,4 +25,4 @@ The config is a git repository, a folder that records every change made to it. M
 - commits waiting to be pushed to GitHub, or pulled from it
 - recent commits, and open pull requests
 
-Its sidebar item shows a check when everything's in step, or a count of what's waiting. Changes Omni Settings makes stay uncommitted until an admin commits them, so the Git page is where to see what's been changed since.
+Its line in the page list says "In step" when everything is, or counts what's waiting. Changes Omni Settings makes stay uncommitted until an admin commits them, so the Git page is where to see what's been changed since.
