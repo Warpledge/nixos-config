@@ -33,14 +33,20 @@ Singleton {
             id: sproc
             property var done
             property var each  // not onLine: QML reads on<Capital> names as handlers
-            stderr: SplitParser { onRead: line => sproc.each(line) }
+            property var last: []  // stderr's last lines, for a reply that never came
+            stderr: SplitParser {
+                onRead: line => {
+                    sproc.last = sproc.last.slice(-5).concat([line])
+                    sproc.each(line)
+                }
+            }
             stdout: StdioCollector {
                 onStreamFinished: {
                     let reply
                     try {
                         reply = JSON.parse(text)
                     } catch (e) {
-                        reply = { ok: false, error: "omni-settings-backend gave no answer" }
+                        reply = { ok: false, error: "omni-settings-backend gave no answer\n\n" + sproc.last.join("\n") }
                     }
                     if (sproc.done)
                         sproc.done(reply)

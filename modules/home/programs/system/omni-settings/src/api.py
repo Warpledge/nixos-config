@@ -579,6 +579,8 @@ def run(cfg, cmd, args):
         return {"ok": False, "error": str(e), "settings": True}
     except (OSError, ValueError, PermissionError, nixfile.NixError, system.UpdateError) as e:
         return {"ok": False, "error": str(e)}
+    except Exception as e:  # noqa: BLE001 - the front end always gets a reply
+        return {"ok": False, "error": f"{type(e).__name__}: {e}"}
 
 
 def main():
