@@ -769,10 +769,22 @@ def cmd_pick_window(_cfg, _args):
     return window_json(w) if isinstance(w, dict) else None
 
 
-def cmd_add_window_rule(cfg, args):
-    """Sets args.prop to args.value for the window args.appId and args.title match."""
+def rules_to_change(cfg):
+    """(the path, its rules) for a change, which only admins who can edit the files make."""
     if not rules_editable(cfg):
         raise PermissionError("only an admin who can edit the config's files changes window rules")
+    path = rules_path(cfg)
+    return path, wr.load(path)
+
+
+def save_rules(path, before, after, text):
+    """Saves `after`; the reply carries both lists for undoWindowRules."""
+    wr.save(path, after)
+    return {"text": text, "undo": {"before": before, "after": after}}
+
+
+def cmd_add_window_rule(cfg, args):
+    """Sets args.prop to args.value for the window args.appId and args.title match."""
     prop, value = args.get("prop"), args.get("value")
     if prop not in wr.KIND or value is None or value == "":
         raise ValueError("pick what the rule does")
@@ -780,24 +792,29 @@ def cmd_add_window_rule(cfg, args):
     if not match:
         raise ValueError("pick a window, or type an app ID or title")
     name = (args.get("name") or "").strip() or match.get("app-id") or match["title"]
-    path = rules_path(cfg)
-    rules = wr.load(path)
+    path, before = rules_to_change(cfg)
+    rules = json.loads(json.dumps(before))
     wr.add_rule(rules, match, name, prop, value)
-    wr.save(path, rules)
-    return f"{wr.property_text(prop, value)} added for {name}"
+    return save_rules(path, before, rules, f"{wr.property_text(prop, value)} added for {name}")
 
 
 def cmd_remove_window_rule(cfg, args):
     """Takes rule args.index out of window-rules.json."""
-    if not rules_editable(cfg):
-        raise PermissionError("only an admin who can edit the config's files changes window rules")
-    path = rules_path(cfg)
-    rules, index = wr.load(path), args.get("index")
-    if not isinstance(index, int) or not 0 <= index < len(rules) or "include" in rules[index]:
+    path, before = rules_to_change(cfg)
+    index = args.get("index")
+    if not isinstance(index, int) or not 0 <= index < len(before) or "include" in before[index]:
         raise ValueError("that rule isn't in the file any more")
-    rule = rules.pop(index)
-    wr.save(path, rules)
-    return f"Removed {wr.rule_title(rule)}"
+    rules = before[:index] + before[index + 1:]
+    return save_rules(path, before, rules, f"Removed {wr.rule_title(before[index])}")
+
+
+def cmd_undo_window_rules(cfg, args):
+    """Puts back args.before, if the file still holds args.after."""
+    path, current = rules_to_change(cfg)
+    if current != args.get("after") or not isinstance(args.get("before"), list):
+        raise ValueError("the rules changed since, so this can't be undone")
+    wr.save(path, args["before"])
+    return "Undone"
 
 
 COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cmd_save,
@@ -815,7 +832,8 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "packageNames": cmd_package_names, "packagePreviews": cmd_package_previews,
             "resetApp": cmd_reset_app, "doc": cmd_doc, "docLink": cmd_doc_link, "launchOptions": cmd_launch_options, "protonVersions": cmd_proton_versions,
             "windowRules": cmd_window_rules, "niriWindows": cmd_niri_windows, "pickWindow": cmd_pick_window,
-            "addWindowRule": cmd_add_window_rule, "removeWindowRule": cmd_remove_window_rule}
+            "addWindowRule": cmd_add_window_rule, "removeWindowRule": cmd_remove_window_rule,
+            "undoWindowRules": cmd_undo_window_rules}
 
 
 def run(cfg, cmd, args):

@@ -414,12 +414,16 @@ Item {
         Quickshell.execDetached((editor.launch || ["xdg-open"]).concat([path]))
     }
 
-    function say(text) {
+    //--- A toast; `action` ({label, run}) adds a button and keeps it up longer
+    property var toastAction: null
+    function say(text, action) {
         toast = text
+        toastAction = action || null
+        toastTimer.interval = action ? 6000 : 3000
         toastTimer.restart()
     }
 
-    Timer { id: toastTimer; interval: 3000; onTriggered: omni.toast = "" }
+    Timer { id: toastTimer; interval: 3000; onTriggered: { omni.toast = ""; omni.toastAction = null } }
 
     //--- Search: pages, then settings, then DMS's own settings
     readonly property var results: {
@@ -1074,17 +1078,40 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottomMargin: 80
         visible: omni.toast !== ""
-        width: Math.min(toastText.implicitWidth + 28, omni.width - 32)
+        readonly property real actionWidth: omni.toastAction ? toastButton.implicitWidth + 12 : 0
+        width: Math.min(toastText.implicitWidth + actionWidth + 28, omni.width - 32)
         height: toastText.implicitHeight + 16
         radius: 18
         color: Theme.toast
-        Text {
-            id: toastText
+        Row {
             anchors.centerIn: parent
-            width: Math.min(implicitWidth, omni.width - 60)
-            text: omni.toast
-            color: Theme.inkToast
-            wrapMode: Text.Wrap
+            spacing: 12
+            Text {
+                id: toastText
+                anchors.verticalCenter: parent.verticalCenter
+                width: Math.min(implicitWidth, omni.width - 60 - parent.parent.actionWidth)
+                text: omni.toast
+                color: Theme.inkToast
+                wrapMode: Text.Wrap
+            }
+            Text {
+                id: toastButton
+                visible: !!omni.toastAction
+                anchors.verticalCenter: parent.verticalCenter
+                text: omni.toastAction ? omni.toastAction.label : ""
+                color: Theme.toast.hslLightness > 0.5 ? Theme.primaryContainer : Theme.primary
+                font.weight: Font.Bold
+                HoverHandler { cursorShape: Qt.PointingHandCursor }
+                TapHandler {
+                    gesturePolicy: TapHandler.ReleaseWithinBounds
+                    onTapped: {
+                        const run = omni.toastAction.run
+                        omni.toast = ""
+                        omni.toastAction = null
+                        run()
+                    }
+                }
+            }
         }
     }
 }

@@ -143,22 +143,25 @@ ColumnLayout {
         if (v === undefined)
             return
         Backend.call("addWindowRule", { appId: app, title, name: nameField.text, prop: kind.prop, value: v },
-                     reply => {
-            view.say(reply.ok ? reply.data : `Couldn't save the rules: ${reply.error}`)
-            if (reply.ok)
-                load()
-        })
+                     saved)
     }
 
     function remove(rule) {
-        view.ask({ heading: `Remove ${rule.title}?`,
-                   body: "It comes out of window-rules.json. A rebuild applies it.",
-                   buttons: [{ label: "Remove", value: "remove", danger: true }] }, () => {
-            Backend.call("removeWindowRule", { index: rule.index }, reply => {
-                view.say(reply.ok ? reply.data : `Couldn't save the rules: ${reply.error}`)
-                load()
-            })
-        })
+        Backend.call("removeWindowRule", { index: rule.index }, saved)
+    }
+
+    //--- A change's reply: its toast offers Undo, which puts the file back as it was
+    function saved(reply) {
+        if (!reply.ok) {
+            view.say(`Couldn't save the rules: ${reply.error}`)
+            return
+        }
+        const undo = reply.data.undo
+        view.say(reply.data.text, { label: "Undo", run: () => Backend.call("undoWindowRules", undo, r => {
+            view.say(r.ok ? r.data : `Couldn't undo: ${r.error}`)
+            load()
+        }) })
+        load()
     }
 
     function rebuild() {
