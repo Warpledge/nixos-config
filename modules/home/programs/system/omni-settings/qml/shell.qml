@@ -6,7 +6,7 @@ ShellRoot {
     FloatingWindow {
         id: win
         title: "Omni Settings"
-        implicitWidth: 560
+        implicitWidth: 618  // 560 for the page, plus the page rail and its gap
         implicitHeight: 880
         color: Theme.bg
         onClosed: Qt.quit()

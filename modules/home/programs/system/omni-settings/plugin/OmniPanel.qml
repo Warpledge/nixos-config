@@ -54,6 +54,7 @@ Item {
         id: slideout
         layerNamespace: "dms:omni-settings"
         slideEdge: "right"
+        slideoutWidth: 538  // DSlideout's 480, plus the page rail and its gap
 
         //--- Between the bars on the top and bottom edges, auto-hiding ones included
         readonly property real topInset: ShellLayout.edge(modelData, "top")?.occupancy ?? 0

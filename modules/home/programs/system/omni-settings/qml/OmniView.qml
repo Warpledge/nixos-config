@@ -16,7 +16,6 @@ Item {
     property string page: "overview"
     property var lastPage: ({})
     property bool picking: false
-    property bool railOpen: false  // the rail hangs below the search button while hovered
     property bool reviewing: false
     property bool running: false
     property bool attached: false
@@ -449,7 +448,6 @@ Item {
         if (t.length !== 1 || t <= " " || t === "\x7f" || !mainCol.visible
                 || event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier))
             return
-        railOpen = false
         picking = true
         search.text = t
         search.input.forceActiveFocus()
@@ -471,14 +469,9 @@ Item {
         id: mainCol
         anchors.fill: parent
         anchors.margins: 14
+        anchors.rightMargin: 14 + rail.width + 10
         spacing: 10
         visible: !omni.reviewing && !omni.running && omni.sheet === null
-        // The rail closes once the cursor rests here off the tabs and the rail
-        HoverHandler {
-            id: pageHover
-            onHoveredChanged: if (hovered) railClose.restart()
-            onPointChanged: if (!railClose.running && omni.railOpen) railClose.restart()
-        }
 
         Text {
             visible: !!omni.info && omni.info.banner !== ""
@@ -495,11 +488,6 @@ Item {
             id: tabsBar
             z: 3  // a hovered tab's name hangs below it, over the page
             Layout.preferredWidth: tabsRow.implicitWidth + 6
-            // Hovering the tabs drops the rail too, to scan each tab's pages
-            HoverHandler {
-                id: tabsArea
-                onHoveredChanged: if (hovered && !omni.picking) omni.railOpen = true
-            }
             implicitHeight: 44
             radius: 22
             color: Theme.card
@@ -671,7 +659,7 @@ Item {
             // A page that got shorter, or came back from a run, keeps no blank space
             onContentHeightChanged: returnToBounds()
             onVisibleChanged: if (visible) returnToBounds()
-            opacity: omni.picking || omni.railOpen ? 0.35 : 1
+            opacity: omni.picking ? 0.35 : 1
             Behavior on opacity { NumberAnimation { duration: 150 } }
 
             //--- A tap on the dimmed page closes the picker
@@ -866,75 +854,22 @@ Item {
         }
     }
 
-    //--- Pages button, level with the top tabs: hovering drops the rail
-    Timer {
-        id: railClose
-        interval: 600  // time to cross the page from the top tabs to the rail
-        // The cursor resting on the page, or leaving the window, closes the rail
-        onTriggered: if ((pageHover.hovered || !windowHover.hovered) && !railArea.hovered
-                         && !pagesHover.hovered && !tabsArea.hovered)
-            omni.railOpen = false
-    }
-    HoverHandler {
-        id: windowHover
-        onHoveredChanged: if (!hovered) railClose.restart()
-    }
-    Rectangle {
-        id: pagesButton
-        visible: mainCol.visible
-        anchors.right: rail.right
-        y: mainCol.y + tabsBar.y + (tabsBar.height - height) / 2
-        width: 44
-        height: 44
-        radius: width / 2
-        color: omni.railOpen ? Theme.cardHover : Theme.card
-        Behavior on color { ColorAnimation { duration: 120 } }
-        Icon {
-            anchors.centerIn: parent
-            icon: "menu"
-            size: 20
-            color: Theme.dim
-        }
-        HoverHandler {
-            id: pagesHover
-            onHoveredChanged: {
-                if (hovered && !omni.picking) omni.railOpen = true
-                else railClose.restart()
-            }
-        }
-    }
-
-    //--- Page rail: the current tab's pages as icons, dropping over the page from the search button
+    //--- Page rail: the current tab's pages as icons down the right edge
     Rectangle {
         id: rail
-        visible: mainCol.visible && height > 0
+        visible: mainCol.visible
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
         anchors.right: parent.right
-        anchors.rightMargin: 14
-        y: pagesButton.y + pagesButton.height + 6
-        z: 1
-        // As tall as its icons, up to the window's bottom margin
-        height: omni.railOpen ? Math.min(railList.contentHeight + 4, omni.height - y - 14) : 0
-        Behavior on height { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
-        clip: true
-        border.color: Theme.line
-        HoverHandler {
-            id: railArea
-            onHoveredChanged: if (!hovered) railClose.restart()
-        }
-        // Wide enough for the longest page or group name beside its icon
-        readonly property real nameWidth: railList.model.reduce((w, i) =>
-            Math.max(w, railFont.advanceWidth(i.title), groupFont.advanceWidth(i.group) + 40), 0)
-        FontMetrics { id: railFont; font.pixelSize: 15; font.weight: Font.DemiBold }
-        FontMetrics { id: groupFont; font.pixelSize: 12; font.weight: Font.Bold }
-        width: Math.min(44 + nameWidth + 22, omni.width - 28)
-        radius: 22
+        anchors.margins: 14
+        width: 48
+        radius: 24
         color: Theme.card
 
         ListView {
             id: railList
             anchors.fill: parent
-            anchors.topMargin: 2
-            anchors.bottomMargin: 2
+            anchors.margins: 4
             clip: true
             boundsBehavior: Flickable.StopAtBounds
             model: omni.navItems.filter(i => i.tab === omni.tab)
@@ -945,84 +880,78 @@ Item {
                 required property int index
                 readonly property var prev: index > 0 ? railList.model[index - 1] : null
                 readonly property bool active: omni.page === modelData.id
-                readonly property string glyph: Theme.glyph(modelData.icon)
                 width: railList.width
-                //--- Where the page list starts a new group: its title between two lines
+                //--- A line where the page list starts a new group
                 Item {
-                    readonly property bool starts: railItem.prev ? railItem.prev.group !== railItem.modelData.group
-                                                                 : railItem.modelData.group !== ""
-                    visible: starts
+                    visible: !!railItem.prev && railItem.prev.group !== railItem.modelData.group
                     width: parent.width
-                    height: railItem.modelData.group ? 24 : 9
+                    height: 13
                     Rectangle {
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.left: parent.left
-                        anchors.leftMargin: 12
-                        anchors.right: groupTitle.visible ? groupTitle.left : parent.right
-                        anchors.rightMargin: groupTitle.visible ? 8 : 12
-                        height: 1
-                        color: Qt.alpha(Theme.primary, 0.35)
-                    }
-                    Text {
-                        id: groupTitle
-                        visible: text !== ""
                         anchors.centerIn: parent
-                        text: railItem.modelData.group
-                        color: Theme.primary
-                        font.pixelSize: 12
-                        font.weight: Font.Bold
-                    }
-                    Rectangle {
-                        visible: groupTitle.visible
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.left: groupTitle.right
-                        anchors.leftMargin: 8
-                        anchors.right: parent.right
-                        anchors.rightMargin: 12
+                        width: parent.width - 12
                         height: 1
                         color: Qt.alpha(Theme.primary, 0.35)
                     }
                 }
-                Item {
+                Rectangle {
+                    id: railButton
+                    readonly property var entry: railItem.modelData
                     width: parent.width
                     height: 40
-                    Rectangle {
-                        anchors.fill: parent
-                        anchors.margins: 1
-                        anchors.leftMargin: 4
-                        anchors.rightMargin: 2
-                        radius: 19
-                        color: railItem.active ? Theme.primary : railHover.hovered ? Theme.hover : "transparent"
-                        Behavior on color { ColorAnimation { duration: 120 } }
-                        Text {
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.left: parent.left
-                            anchors.leftMargin: 14
-                            anchors.right: railIcon.left
-                            anchors.rightMargin: 8
-                            text: railItem.modelData.title
-                            color: railItem.active ? Theme.inkPrimary : Theme.text
-                            font.pixelSize: 15
-                            font.weight: Font.DemiBold
-                            elide: Text.ElideRight
-                        }
-                        Icon {
-                            id: railIcon
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.right: parent.right
-                            anchors.rightMargin: 9
-                            icon: railItem.glyph
-                            size: 20
-                            fill: railItem.active
-                            color: railItem.active ? Theme.inkPrimary : Theme.dim
+                    radius: 20
+                    color: railItem.active ? Theme.primary : railHover.hovered ? Theme.hover : "transparent"
+                    Behavior on color { ColorAnimation { duration: 120 } }
+                    Icon {
+                        anchors.centerIn: parent
+                        icon: Theme.glyph(railItem.modelData.icon)
+                        size: 20
+                        fill: railItem.active
+                        color: railItem.active ? Theme.inkPrimary : railHover.hovered ? Theme.inkSelected : Theme.dim
+                    }
+                    HoverHandler {
+                        id: railHover
+                        cursorShape: Qt.PointingHandCursor
+                        onHoveredChanged: {
+                            if (hovered) railTip.target = railButton
+                            else if (railTip.target === railButton) railTip.target = null
                         }
                     }
-                    HoverHandler { id: railHover; cursorShape: Qt.PointingHandCursor }
                     TapHandler {
                         gesturePolicy: TapHandler.ReleaseWithinBounds
                         onTapped: omni.go(omni.tab, railItem.modelData.id)
                     }
                 }
+            }
+        }
+    }
+
+    //--- The hovered rail page's name and group, left of its icon
+    Rectangle {
+        id: railTip
+        property Item target: null
+        visible: target !== null && rail.visible
+        z: 4
+        x: rail.x - width - 8
+        y: target ? target.mapToItem(omni, 0, 0).y + (target.height - height) / 2 : 0
+        width: tipCol.implicitWidth + 24
+        height: tipCol.implicitHeight + 12
+        radius: Math.min(height / 2, 16)
+        color: Theme.toast
+        Column {
+            id: tipCol
+            anchors.centerIn: parent
+            Text {
+                text: railTip.target ? railTip.target.entry.title : ""
+                color: Theme.inkToast
+                font.pixelSize: 13
+                font.weight: Font.DemiBold
+            }
+            Text {
+                visible: text !== ""
+                text: railTip.target ? railTip.target.entry.group : ""
+                color: Theme.inkToast
+                opacity: 0.7
+                font.pixelSize: 11
             }
         }
     }
