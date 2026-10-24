@@ -82,12 +82,24 @@
           opacity ${p.opacity}
       }
 
-      // DMS popouts; not their :background click-catchers, which cover the screen
+      // DMS popouts; not their :background click-catchers, which cover the screen.
+      // They blur through the region DMS sends, since popupTransparency is under 1
       layer-rule {
           match namespace="^dms:(app-launcher|control-center|dash|omni-settings|plugins:plugin|process-list-popout|slideout)$"
           match namespace="^dms-clipboardPlus-panel-"
           opacity ${p.opacity}
       }
+      ${lib.optionalString (p.blur == null) ''
+
+        // Layers that send a blur region; without one, xray covers the whole surface
+        layer-rule {
+            match namespace="^dms:(app-launcher|bar|control-center|dash|dock|notification-popup|omni-settings|osd|plugins:plugin|process-list-popout|slideout)$"
+            background-effect {
+                blur false
+                xray true
+            }
+        }
+      ''}
 
       window-rule {
           exclude app-id="^steam$"

@@ -8,6 +8,7 @@
   "barElevationEnabled": false,
   "blurEnabled": true,
   "blurredWallpaperLayer": true,
+  "popupTransparency": 0.99,
   "controlCenterWidgets": [
     {
       "id": "user",
