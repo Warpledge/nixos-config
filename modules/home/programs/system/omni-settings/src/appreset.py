@@ -14,20 +14,9 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Adw, Gtk  # noqa: E402
 
+from api import APPS  # noqa: E402
+
 HOME = os.path.expanduser("~")
-#--- user setting -> (app, its live file, the config's copy, pgrep -f pattern
-#--- of a running app that rewrites the file on exit, extra warning)
-#--- .db files are NeDB logs (one {"_id", "value"} per line), the rest JSON
-APPS = {
-    ("editors", "zed"): ("Zed", ".config/zed/settings.json",
-                         ".config/zed/declarative-settings.json", None, ""),
-    ("fileBrowsers", "duxFiles"): ("Dux Files", ".config/dfiles/ui-settings.json",
-                                   ".local/state/dfiles-declared/ui-settings.json", None, ""),
-    ("media", "freetube"): ("FreeTube", ".config/FreeTube/settings.db", ".config/FreeTube/hm_settings.db",
-                            "freetube/resources/app.asar",
-                            " Channels blocked in FreeTube but not yet synced to the config are "
-                            "unblocked too."),
-}
 
 
 def button(window, setting):

@@ -1,10 +1,8 @@
 """Omni Settings: pick apps and system options from menus, then rebuild."""
 
 import difflib
-import grp
 import json
 import os
-import pwd
 import re
 import subprocess
 import sys
@@ -19,6 +17,8 @@ from gi.repository import Adw, Gdk, Gio, GLib, GObject, Gtk, Pango  # noqa: E402
 
 import appreset  # noqa: E402
 import backend  # noqa: E402
+from api import (DISMISSED, DOCS_GAMING, HELPER, TAB_ICONS, TABS, TOP, USER_PACKAGES,  # noqa: E402
+                 choice_label, in_wheel, new_id, read_dismissed, shown)
 import closure  # noqa: E402
 import dms  # noqa: E402
 import nixfile  # noqa: E402
@@ -38,8 +38,6 @@ from proton import ProtonPage, ProtonVersionsPage  # noqa: E402
 from runview import RunView, fill_diff  # noqa: E402
 from windowrules import WindowRulesPage  # noqa: E402
 
-#--- The root helper every rebuild goes through (nixos/system/user/omni-settings-helper.nix)
-HELPER = "/run/current-system/sw/bin/omni-settings-apply"
 APP_ID = "dev.nixosconfig.Settings"
 VERSION = "2.0"
 
@@ -48,35 +46,6 @@ VERSION = "2.0"
 OWNED = {"Cursor Theme": "cursor", "Cursor Size": "cursorSize", "Icon Theme": "",
          "Dark Mode Icon Theme": "", "Light Mode Icon Theme": "", "Normal Font": "", "Monospace Font": ""}
 
-#--- The master tabs across the top of the window, each with its own sidebar
-TABS = [("main", "Main"), ("packages", "Packages"), ("niri", "Niri"), ("ai", "AI"), ("docs", "Docs")]
-TAB_ICONS = {"main": ("go-home-symbolic", "user-home-symbolic"),
-             "packages": ("package-x-generic-symbolic", "system-software-install-symbolic"),
-             "niri": ("view-grid-symbolic", "view-app-grid-symbolic"),
-             "ai": ("applications-science-symbolic", "starred-symbolic"),
-             "docs": ("accessories-dictionary-symbolic", "help-browser-symbolic")}
-
-#--- Each tab's pages above its sidebar sections: key, title and icons to try.
-#--- Shell shows only under niri, which also moves the Desktop section to Niri.
-TOP = {"main": [("overview", "Overview", ("computer-symbolic",)),
-                ("git", "Git", ("vcs-branch-symbolic", "branch-symbolic", "folder-remote-symbolic")),
-                ("flatpaks", "Flatpaks", ("flatpak-symbolic", "system-software-install-symbolic")),
-                ("backups", "Backups", ("drive-harddisk-symbolic", "document-save-symbolic")),
-                ("people", "People", ("system-users-symbolic", "avatar-default-symbolic"))],
-       "packages": [("packages", "Search", ("system-search-symbolic", "edit-find-symbolic"))],
-       "niri": [("shell", "Shell", ("view-app-grid-symbolic",)),
-                ("windowrules", "Window Rules",
-                 ("window-new-symbolic", "preferences-system-windows-symbolic"))],
-       "ai": [],
-       "docs": []}
-
-#--- Docs tab Gaming pages ahead of the game notes: [(key, title, icons)]
-DOCS_GAMING = [("proton", "Launch Options", ("input-gaming-symbolic",)),
-               ("protonversions", "Proton Versions",
-                ("system-software-install-symbolic", "input-gaming-symbolic"))]
-
-
-USER_PACKAGES = ("user", ("userPackages",))
 #--- The user's default text editor from lib/default-apps.nix: its command and .desktop id
 try:
     EDITOR = json.loads(os.environ["OMNI_SETTINGS_EDITOR"])
@@ -90,43 +59,6 @@ def editor_name():
     except (TypeError, GLib.Error):
         info = None
     return info.get_name() if info else EDITOR["launch"][-1]
-#--- What's New items the user dismissed, as "domain:dotted.path"
-DISMISSED = os.path.join(GLib.get_user_state_dir(), "omni-settings", "whats-new-dismissed.json")
-
-
-def new_id(domain, path):
-    return f"{domain}:{'.'.join(path)}"
-
-
-def read_dismissed():
-    try:
-        with open(DISMISSED) as f:
-            return set(json.load(f))
-    except (OSError, ValueError):
-        return set()
-
-
-def shown(setting, value):
-    if setting.kind == "bool":
-        return "On" if value else "Off"
-    if isinstance(value, dict):
-        n = sum(len(v) for v in value.values())
-        return f"{n} in {len(value)} categor{'y' if len(value) == 1 else 'ies'}" if n else "Not set"
-    if value is None or value == "" or value == []:
-        return "Not set"
-    if isinstance(value, list):
-        return ", ".join(str(v) for v in value)
-    return choice_label(setting, value) if setting.kind == "choice" else str(value)
-
-
-def choice_label(setting, value):
-    if str(value) in setting.labels:
-        return setting.labels[str(value)]
-    if value is None:
-        return "None"
-    if isinstance(value, int):
-        return f"{value} px" if setting.path == ("cursorSize",) else str(value)
-    return value[:1].upper() + value[1:]
 
 
 #--- This build's store path: <package>/share/omni-settings/app.py, three levels up
@@ -152,16 +84,6 @@ def installed_package():
             return None
         package = os.path.dirname(os.path.dirname(found.group(0)))
     return package if package.startswith("/nix/store/") else None
-
-
-def in_wheel():
-    """From /etc/group, as the helper checks it, not the session's groups,
-    which stay as they were at login."""
-    try:
-        me = pwd.getpwuid(os.getuid())
-        return grp.getgrnam("wheel").gr_gid in os.getgrouplist(me.pw_name, me.pw_gid)
-    except KeyError:
-        return False
 
 
 #--------------------------------------------------------------------#

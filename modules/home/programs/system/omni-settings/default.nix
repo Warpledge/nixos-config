@@ -56,6 +56,14 @@
         --set OMNI_SETTINGS_COMPAT_TOOLS ${lib.escapeShellArg compatTools} \
         --set OMNI_SETTINGS_EDITOR ${lib.escapeShellArg (builtins.toJSON {inherit (editor) launch desktop;})} \
         --prefix PATH : ${lib.makeBinPath [alejandra pkgs.nix-search-tv]}
+      #--- The same backend as JSON, for the QML front end (src/api.py)
+      makeWrapper ${pkgs.python3}/bin/python3 $out/bin/omni-settings-backend \
+        --add-flags $share/api.py \
+        --set OMNI_SETTINGS_FLAKE ${lib.escapeShellArg machine.flakePath} \
+        --set OMNI_SETTINGS_MACHINE ${lib.escapeShellArg machine.name} \
+        --set OMNI_SETTINGS_USER ${lib.escapeShellArg user.name} \
+        --set OMNI_SETTINGS_LIB ${pkgs.path}/lib \
+        --prefix PATH : ${lib.makeBinPath [alejandra]}
       runHook postInstall
     '';
   };

@@ -4,6 +4,8 @@
 
 Added 2026-10-23.
 
+**Status (2026-10-23, branch `omni-settings-qml`):** step 1's core is done: `src/api.py`, run as `omni-settings-backend <cmd> ['<json args>']`, answers `load` (tabs, nav and every generated page with values), `list`, `review`, `save`, `dismiss`, `stale` and `removeStale`; `app.py` and `appreset.py` import the shared helpers from it. Each custom page's commands move into it as that page is ported (step 4). Pending changes stay in the QML client. Next: step 2, the job service.
+
 ## What's already in the repo
 
 - `modules/home/programs/system/omni-settings/src/`: about 9,700 lines of Python (2026-10-23). About 3,700 of them are already GTK-free and stay as the backend: `helper.py`, `schema.py`, `backend.py`, `system.py`, `nixfile.py`, `nixlog.py`, `dms.py`, `closure.py`, `session.py`. The rest (`app.py`, `windowrules.py`, `runview.py`, `flatpaks.py`, `packages.py`, `overview.py` and smaller pages) mixes logic with GTK calls.
