@@ -23,6 +23,13 @@ INPUT_DRV = re.compile(r'"(/nix/store/[0-9a-z]{32}-[^"]+\.drv)"')
 PHASE_NAME = re.compile(r"Phase$")
 BUILDER_FAILED = re.compile(r"(?:builder for|Cannot build) '([^']+\.drv)'(?:.*?exit code (\d+))?", re.S)
 GRAPH_ROWS = 30  # dependency graph rows shown, nearest the top-level builds
+#--- curl's progress meter in a fetchurl build: % total % received % xferd
+#--- dload upload, then times and current speed. A terminal redraws it in
+#--- place; here each redraw is a line, so it's read as progress instead
+SIZE = r"[\d.]+[kMGTP]?"
+CURL_METER = re.compile(rf"^\s*\d+\s+({SIZE})\s+\d+\s+({SIZE})\s+\d+\s+{SIZE}\s+({SIZE})\s+{SIZE}\b(.*)$")
+CURL_HEADER = re.compile(r"^\s*(% Total\s+% Received|Dload\s+Upload)")
+CURL_SCRAP = re.compile(r"^[\s\d.kMGTP:%-]*$")  # a meter line cut short
 
 
 def store_name(path):
@@ -61,7 +68,19 @@ class Activity:
     done: int = 0
     expected: int = 0
     drv: str = ""
+    curl: list = None  # [received, total, bytes/s] once a fetchurl build's meter shows
     lines: deque = field(default_factory=lambda: deque(maxlen=40))
+
+
+def curl_bytes(text):
+    """curl's sizes (`87734`, `224.9k`, `1.69M`) in bytes; its units are 1024."""
+    mult = {"k": 1 << 10, "M": 1 << 20, "G": 1 << 30, "T": 1 << 40, "P": 1 << 50}
+    try:
+        if text and text[-1] in mult:
+            return int(float(text[:-1]) * mult[text[-1]])
+        return int(float(text))
+    except ValueError:
+        return 0
 
 
 @dataclass
@@ -122,18 +141,24 @@ class Progress:
         return min(1.0, (self.builds[0] + self.copies[0]) / expected)
 
     def running(self):
-        """Builds, downloads and fetches in flight, oldest first, as
-        (kind, name, detail, started, phase)."""
-        out = []
+        """Builds, downloads and fetches in flight, oldest first: kind, name,
+        seconds, phase, the build's last line, and [done, total, bytes/s]
+        for a download or a fetchurl build (None otherwise)."""
+        out, now = [], time.monotonic()
         for a in sorted(self.acts.values(), key=lambda a: a.started):
-            phase = PHASE_NAME.sub("", a.phase) if a.phase else ""
+            item = {"name": a.name, "seconds": now - a.started, "phase": "", "line": "",
+                    "bytes": None}
             if a.type == BUILD:
-                out.append(("build", a.name, a.last_line or phase, a.started, phase))
+                item.update(kind="build", phase=PHASE_NAME.sub("", a.phase) if a.phase else "",
+                            line=a.last_line, bytes=a.curl)
             elif a.type == SUBSTITUTE:
                 done, total = self._bytes_under(a.id)
-                out.append(("download", a.name, (done, total), a.started, ""))
+                item.update(kind="download", bytes=[done, total, done / max(1.0, now - a.started)])
             elif a.type == FETCH_TREE:
-                out.append(("fetch", a.text, "", a.started, ""))
+                item.update(kind="fetch", name=a.text)
+            else:
+                continue
+            out.append(item)
         return out
 
     def _bytes_under(self, act_id):
@@ -234,7 +259,9 @@ class Progress:
         fields = data.get("fields") or []
         a = self.acts.get(data.get("id"))
         if kind in (BUILD_LOG_LINE, POST_BUILD_LOG_LINE) and fields:
-            line = strip_ansi(str(fields[0])).rstrip()
+            line = strip_ansi(str(fields[0])).rstrip().split("\r")[-1]
+            if a is not None and self._curl(a, line):
+                return []
             if a is not None:
                 a.lines.append(line)
                 if line.strip():
@@ -261,6 +288,22 @@ class Progress:
             self.expected_bytes[data.get("id")] = int(fields[1])
         return []
 
+
+    def _curl(self, a, line):
+        """True for a line of curl's meter, which updates the build's
+        download progress instead of going to the log."""
+        if CURL_HEADER.match(line):
+            a.curl = a.curl or [0, 0, 0]
+            return True
+        if a.curl is None:
+            return False
+        m = CURL_METER.match(line)
+        if m:
+            speed = (m.group(4).split() or [m.group(3)])[-1]
+            a.curl = [curl_bytes(m.group(2)), curl_bytes(m.group(1)),
+                      curl_bytes(speed if re.fullmatch(SIZE, speed) else m.group(3))]
+            return True
+        return bool(CURL_SCRAP.match(line))
 
     #--- Dependency graph
     def _plan(self, plain):

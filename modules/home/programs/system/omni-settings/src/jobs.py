@@ -111,16 +111,12 @@ class Job:
                 "undo": self.undo_label if self.undo is not None and self.outcome in ("failed",) else None}
 
     def progress_json(self):
-        p, now = self.progress, time.monotonic()
-        running = []
-        for kind, name, detail, started, phase in p.running():
-            running.append({"kind": kind, "name": name, "seconds": now - started, "phase": phase,
-                            "detail": list(detail) if isinstance(detail, tuple) else detail})
+        p = self.progress
         return {"evaluating": p.evaluating, "evalFiles": p.eval_files,
                 "downloads": [p.copies[0], max(p.copies[1], p.will_fetch)],
                 "bytes": [p.downloaded(), p.download_total()],
                 "builds": [p.builds[0], max(p.builds[1], p.will_build), p.builds[2]],
-                "fraction": p.fraction(), "running": running, "deleted": self.deleted,
+                "fraction": p.fraction(), "running": p.running(), "deleted": self.deleted,
                 "graph": [] if p.evaluating else p.graph()}
 
     def changed(self):

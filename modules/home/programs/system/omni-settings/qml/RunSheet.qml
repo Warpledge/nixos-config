@@ -28,15 +28,40 @@ Rectangle {
              : `${Math.floor(s / 3600)}h ${Math.floor(s % 3600 / 60)}m`
     }
 
-    //--- A graph row's (text, tone) pieces as StyledText, spaces kept
+    function speed(b) { return `${size(b)}/s` }
+
+    //--- StyledText pieces; runs of spaces are kept, single ones still wrap
+    function esc(t) {
+        return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+                .replace(/  /g, " &nbsp;").replace(/^ /, "&nbsp;")
+    }
+    function ink(c, t) { return `<font color="${c}">${t}</font>` }
+
+    //--- A graph row's (text, tone) pieces
     function graphRow(pieces) {
         const tones = { primary: Theme.primary, success: Theme.success, error: Theme.error,
                         text: Theme.text, dim: Theme.dim }
-        return pieces.map(([t, tone]) => {
-            const esc = t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-                         .replace(/ /g, "&nbsp;")
-            return `<font color="${tones[tone] || Theme.dim}">${esc}</font>`
-        }).join("")
+        return pieces.map(([t, tone]) => ink(tones[tone] || Theme.dim, esc(t))).join("")
+    }
+
+    //--- A log line: the build's name picked out, status glyphs in colour
+    function logLine(style, text) {
+        if (style === "build") {
+            const m = text.match(/^([^\s>]+)> ?(.*)$/)
+            return m ? ink(Theme.primary, esc(m[1])) + ink(Theme.line, " │ ") + ink(Theme.dim, esc(m[2]))
+                     : ink(Theme.dim, esc(text))
+        }
+        if (style === "graph")
+            return esc(text).replace(/[✔⏵⚠]/g, g => ink(g === "✔" ? Theme.success : g === "⚠" ? Theme.error
+                                                                                       : Theme.primary, g))
+        if (style === "dim") {
+            const m = text.match(/^(Building|Downloading) (.*)$/)
+            if (m)
+                return ink(Theme.primary, m[1] === "Building" ? "⏵ " : "↓ ") + ink(Theme.dim, m[1] + " ")
+                     + ink(Theme.text, esc(m[2]))
+            return ink(Theme.dim, esc(text))
+        }
+        return ink(style === "error" ? Theme.error : style === "warning" ? Theme.caution : Theme.text, esc(text))
     }
 
     ColumnLayout {
@@ -199,9 +224,10 @@ Rectangle {
         Rectangle {
             id: busy
             readonly property var items: sheet.p && !sheet.done ? sheet.p.running : []
+            readonly property int building: items.filter(i => i.kind === "build").length
             visible: items.length > 0
             Layout.fillWidth: true
-            implicitHeight: now.implicitHeight + 20
+            implicitHeight: now.implicitHeight + 28
             radius: 16
             color: Theme.card
             ColumnLayout {
@@ -209,66 +235,109 @@ Rectangle {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                anchors.margins: 10
-                spacing: 8
+                anchors.margins: 14
+                spacing: 12
+                Text {
+                    text: [busy.building ? `Building ${busy.building}` : "",
+                           busy.items.length > busy.building ? `Downloading ${busy.items.length - busy.building}` : ""]
+                          .filter(t => t).join(" · ")
+                    color: Theme.dim
+                    font.pixelSize: 13
+                    font.weight: Font.DemiBold
+                }
                 Repeater {
                     model: busy.items.slice(0, 5)
                     RowLayout {
                         id: item
                         required property var modelData
-                        readonly property bool download: modelData.kind === "download"
-                        readonly property var bytes: download ? modelData.detail : [0, 0]
+                        readonly property var bytes: modelData.bytes
+                        readonly property bool sized: !!bytes && bytes[1] > 0
                         Layout.fillWidth: true
-                        spacing: 10
-                        Icon {
-                            icon: item.download ? "download" : modelData.kind === "fetch" ? "sync" : "construction"
-                            color: Theme.primary
+                        spacing: 12
+                        Rectangle {
+                            implicitWidth: 34
+                            implicitHeight: 34
+                            radius: 17
+                            color: Qt.alpha(Theme.primary, 0.16)
                             Layout.alignment: Qt.AlignTop
+                            Icon {
+                                anchors.centerIn: parent
+                                size: 18
+                                color: Theme.primary
+                                icon: modelData.kind === "download" ? "download"
+                                    : modelData.kind === "fetch" ? "sync"
+                                    : item.bytes ? "cloud_download" : "construction"
+                            }
                         }
                         ColumnLayout {
-                            spacing: 3
+                            spacing: 5
                             Layout.fillWidth: true
                             RowLayout {
                                 Layout.fillWidth: true
+                                spacing: 8
                                 Text {
                                     text: modelData.name
                                     color: Theme.text
                                     font.pixelSize: 14
+                                    font.weight: Font.Medium
                                     elide: Text.ElideMiddle
                                     Layout.fillWidth: true
+                                }
+                                Chip {
+                                    visible: text !== ""
+                                    tappable: false
+                                    text: modelData.phase
                                 }
                                 Text {
                                     text: sheet.seconds(modelData.seconds)
                                     color: Theme.dim
                                     font.pixelSize: 13
-                                }
-                            }
-                            Rectangle {
-                                visible: item.download
-                                Layout.fillWidth: true
-                                height: 4
-                                radius: 2
-                                color: Theme.cardHover
-                                Rectangle {
-                                    height: parent.height
-                                    radius: 2
-                                    width: item.bytes[1] ? parent.width * Math.min(1, item.bytes[0] / item.bytes[1]) : 0
-                                    color: Theme.primary
-                                    Behavior on width { NumberAnimation { duration: 300 } }
+                                    font.features: { "tnum": 1 }
                                 }
                             }
                             Text {
-                                text: item.download
-                                    ? (item.bytes[1] ? `${sheet.size(item.bytes[0])} of ${sheet.size(item.bytes[1])}`
-                                                     : "Starting")
-                                    : modelData.kind === "fetch" ? "Fetching"
-                                    : [modelData.phase, modelData.detail !== modelData.phase ? modelData.detail : ""]
-                                        .filter(t => t).join(" · ") || "Starting"
+                                visible: !item.bytes && text !== ""
+                                text: modelData.line
                                 color: Theme.dim
                                 font.family: "monospace"
                                 font.pixelSize: 12
                                 elide: Text.ElideRight
                                 Layout.fillWidth: true
+                            }
+                            Rectangle {
+                                visible: !!item.bytes
+                                Layout.fillWidth: true
+                                implicitHeight: 6
+                                radius: 3
+                                color: Theme.cardHover
+                                Rectangle {
+                                    height: parent.height
+                                    radius: 3
+                                    width: item.sized ? parent.width * Math.min(1, item.bytes[0] / item.bytes[1]) : 0
+                                    color: Theme.primary
+                                    Behavior on width { NumberAnimation { duration: 400 } }
+                                }
+                            }
+                            RowLayout {
+                                visible: !!item.bytes
+                                Layout.fillWidth: true
+                                Text {
+                                    text: !item.sized ? "Starting"
+                                        : `${sheet.size(item.bytes[0])} of ${sheet.size(item.bytes[1])}`
+                                          + (item.bytes[2] ? `  ·  ${sheet.speed(item.bytes[2])}` : "")
+                                    color: Theme.dim
+                                    font.pixelSize: 12
+                                    font.features: { "tnum": 1 }
+                                    Layout.fillWidth: true
+                                }
+                                Text {
+                                    visible: item.sized
+                                    text: item.sized ? `${Math.floor(100 * Math.min(1, item.bytes[0] / item.bytes[1]))}%` : ""
+                                    color: Theme.primary
+                                    font.pixelSize: 12
+                                    font.weight: Font.DemiBold
+                                    font.features: { "tnum": 1 }
+                                }
                             }
                         }
                     }
@@ -278,7 +347,7 @@ Rectangle {
                     text: `and ${busy.items.length - 5} more`
                     color: Theme.dim
                     font.pixelSize: 13
-                    Layout.leftMargin: 32
+                    Layout.leftMargin: 46
                 }
             }
         }
@@ -322,12 +391,15 @@ Rectangle {
                     delegate: Text {
                         required property var model
                         width: log.width
-                        text: model.text
+                        text: sheet.logLine(model.style, model.text)
+                        textFormat: Text.StyledText
                         font.family: "monospace"
                         font.pixelSize: 12
-                        wrapMode: model.style === "graph" ? Text.NoWrap : Text.WrapAnywhere
+                        // Graph rows touch so its box lines join up
+                        lineHeight: model.style === "graph" ? 1 : 1.2
+                        wrapMode: model.style === "graph" ? Text.NoWrap : Text.WrapAtWordBoundaryOrAnywhere
                         elide: model.style === "graph" ? Text.ElideRight : Text.ElideNone
-                        color: model.style === "error" ? Theme.error : Theme.dim
+                        color: Theme.dim
                     }
                 }
                 //--- nom's dependency graph under the log while it builds
