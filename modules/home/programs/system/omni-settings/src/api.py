@@ -26,6 +26,7 @@ import gitstate  # noqa: E402
 import nixfile  # noqa: E402
 import packagestate  # noqa: E402
 import peoplestate  # noqa: E402
+import resetstate  # noqa: E402
 import protonstate  # noqa: E402
 import schema  # noqa: E402
 import servicestate  # noqa: E402
@@ -78,21 +79,6 @@ HISTORY = 8  # versions the Overview lists
 SECTION_TAB = {"cloudai": "ai", "localai": "ai", "apps": "packages"}
 
 USER_PACKAGES = ("user", ("userPackages",))
-
-#--- App switches with a reset (appreset.py): user setting -> (app, its live file,
-#--- the config's copy, pgrep -f pattern of a running app that rewrites the file
-#--- on exit, extra warning). .db files are NeDB logs (one {"_id", "value"} per
-#--- line), the rest JSON
-APPS = {
-    ("editors", "zed"): ("Zed", ".config/zed/settings.json",
-                         ".config/zed/declarative-settings.json", None, ""),
-    ("fileBrowsers", "duxFiles"): ("Dux Files", ".config/dfiles/ui-settings.json",
-                                   ".local/state/dfiles-declared/ui-settings.json", None, ""),
-    ("media", "freetube"): ("FreeTube", ".config/FreeTube/settings.db", ".config/FreeTube/hm_settings.db",
-                            "freetube/resources/app.asar",
-                            " Channels blocked in FreeTube but not yet synced to the config are "
-                            "unblocked too."),
-}
 
 STATE_DIR = os.path.join(os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state"),
                          "omni-settings")
@@ -199,8 +185,9 @@ def setting_json(cfg, state, s, multi, modules):
     if s.domain == "user" and multi:
         out["overridden"] = state.overridden(s)
         out["elsewhere"] = {m: state.value(cfg, s, m) for m in state.user_machines if m != cfg.machine}
-    if s.domain == "user" and s.path in APPS:
-        out["resettable"] = APPS[s.path][0]
+    reset = s.domain == "user" and resetstate.available(s.path)
+    if reset:
+        out["resettable"] = {"app": reset[0], "file": os.path.basename(reset[1]), "extra": reset[4]}
     if s.path in modules:
         out["module"] = os.path.relpath(modules[s.path], cfg.flake)
     return out
@@ -340,8 +327,9 @@ def cmd_stale(cfg, _args):
     """Settings the templates dropped, which stop the files evaluating."""
     direct = in_wheel() and backend.writable(cfg)
     stale = backend.stale_settings(cfg, everyone=direct)
-    return [{"where": w, "user": u, "key": ".".join(p), "mine": direct or w != "machine"}
-            for w, u, p in stale]
+    return {"machine": cfg.machine, "direct": direct, "helper": bool(helper()),
+            "items": [{"where": w, "user": u, "key": ".".join(p), "mine": direct or w != "machine"}
+                      for w, u, p in stale]}
 
 
 def cmd_remove_stale(cfg, _args):
@@ -684,6 +672,15 @@ def cmd_package_previews(_cfg, args):
     return {}
 
 
+def cmd_reset_app(_cfg, args):
+    """Resets the app of user setting args.key (an app switch) to the config's values."""
+    domain, path = parse_id(args.get("key", ""))
+    if domain != "user" or not resetstate.available(path):
+        raise ValueError("that switch has no reset")
+    resetstate.reset(path)
+    return resetstate.APPS[path][0]
+
+
 def cmd_doc(cfg, args):
     """One note's page (args.key, a nav id), its Markdown as blocks of Qt rich text."""
     return docstate.doc_json(cfg.flake, args.get("key", ""))
@@ -715,7 +712,7 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "services": cmd_services, "serviceLog": cmd_service_log, "serviceRestart": cmd_service_restart,
             "ports": cmd_ports,
             "packageNames": cmd_package_names, "packagePreviews": cmd_package_previews,
-            "doc": cmd_doc, "docLink": cmd_doc_link, "launchOptions": cmd_launch_options, "protonVersions": cmd_proton_versions}
+            "resetApp": cmd_reset_app, "doc": cmd_doc, "docLink": cmd_doc_link, "launchOptions": cmd_launch_options, "protonVersions": cmd_proton_versions}
 
 
 def run(cfg, cmd, args):

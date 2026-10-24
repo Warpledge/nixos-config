@@ -98,6 +98,12 @@ Rectangle {
                 onClicked: row.view.openFile(row.s.module)
             }
             IconButton {
+                visible: !!row.s.resettable
+                icon: "restart_alt"
+                tip: row.s.resettable ? `Reset ${row.s.resettable.app}'s settings to the config's` : ""
+                onClicked: row.view.resetApp(row.s)
+            }
+            IconButton {
                 visible: row.s.kind !== "bool" && !row.atDefault && !row.locked
                 icon: "settings_backup_restore"
                 onClicked: row.view.change(row.s, row.s.default)

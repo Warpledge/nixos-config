@@ -11,6 +11,7 @@ Item {
 
     property var info: null
     property string loadError: ""
+    property var stale: null  // api.py's `stale`, when the settings files don't evaluate
     property string tab: "main"
     property string page: "overview"
     property var lastPage: ({})
@@ -93,9 +94,12 @@ Item {
         Backend.call("load", {}, reply => {
             if (!reply.ok) {
                 loadError = reply.error
+                if (reply.settings)
+                    Backend.call("stale", {}, r => stale = r.ok && r.data.items.length ? r.data : null)
                 return
             }
             loadError = ""
+            stale = null
             const first = !info
             info = reply.data
             if (first)
@@ -166,6 +170,31 @@ Item {
     }
 
     function discard() { pending = {} }
+
+    //--- Settings the templates dropped: an admin who can edit the files removes
+    //--- them here, anyone else through the helper as a job
+    function removeStale() {
+        if (!stale.direct) {
+            startJob("clean", {})
+            return
+        }
+        Backend.call("removeStale", {}, reply => {
+            say(reply.ok ? "Old settings removed" : reply.error)
+            reload()
+        })
+    }
+
+    //--- An app switch's reset (api.py's resetApp)
+    function resetApp(s) {
+        const r = s.resettable
+        ask({ heading: `Reset ${r.app} settings?`,
+              body: `Every setting the config sets for ${r.app} goes back to the config's value, losing `
+                    + `what was changed in ${r.app}; settings the config leaves alone stay as they are. `
+                    + `The old file is kept as ${r.file}.old.${r.extra}`,
+              buttons: [{ label: "Reset", value: "reset", danger: true }] },
+            () => Backend.call("resetApp", { key: s.key },
+                               reply => say(reply.ok ? `${r.app} settings reset` : reply.error)))
+    }
 
     //--------------------------------------------------------------------//
     //-- User Packages
@@ -525,7 +554,7 @@ Item {
                             spacing: 1
                             Layout.fillWidth: true
                             Text {
-                                text: omni.current ? omni.current.title : omni.info ? "" : "Loading…"
+                                text: omni.current ? omni.current.title : omni.info ? "" : omni.loadError ? "Not loaded" : "Loading…"
                                 color: Theme.text
                                 font.pixelSize: 15
                                 font.weight: Font.DemiBold
@@ -654,13 +683,58 @@ Item {
                 width: parent.width
                 spacing: 6
 
-                Text {
+                //--- The settings files don't evaluate
+                Rectangle {
                     visible: omni.loadError !== ""
-                    text: omni.loadError
-                    color: Theme.error
-                    wrapMode: Text.Wrap
                     Layout.fillWidth: true
-                    Layout.margins: 6
+                    implicitHeight: failed.implicitHeight + 28
+                    radius: 16
+                    color: Theme.card
+                    ColumnLayout {
+                        id: failed
+                        anchors.fill: parent
+                        anchors.margins: 14
+                        spacing: 10
+                        readonly property var mine: omni.stale ? omni.stale.items.filter(i => i.mine) : []
+                        function where(i) {
+                            const file = `machines/${omni.stale.machine}/settings.nix`
+                            return { user: `users/${i.user}/settings.nix`, machine: file,
+                                     override: `${file}, ${i.user}'s block` }[i.where]
+                        }
+                        RowLayout {
+                            spacing: 14
+                            Badge { implicitWidth: 56; implicitHeight: 56; radius: 28; icon: "error" }
+                            Text {
+                                text: "Couldn't read the settings"
+                                color: Theme.text
+                                font.pixelSize: 20
+                                font.weight: Font.Bold
+                                wrapMode: Text.Wrap
+                                Layout.fillWidth: true
+                            }
+                        }
+                        Text {
+                            text: !omni.stale ? omni.loadError
+                                : "These settings aren't in the templates any more, so the files can't be read:\n"
+                                  + omni.stale.items.map(i => `• ${i.key}  (${failed.where(i)})`).join("\n")
+                                  + (failed.mine.length < omni.stale.items.length
+                                     ? "\n\nAn admin needs to remove the computer-wide ones." : "")
+                            color: omni.stale ? Theme.text : Theme.error
+                            font.pixelSize: 13
+                            wrapMode: Text.Wrap
+                            Layout.fillWidth: true
+                        }
+                        RowLayout {
+                            Layout.alignment: Qt.AlignHCenter
+                            spacing: 12
+                            Pill { text: "Try Again"; quiet: true; onClicked: omni.reload() }
+                            Pill {
+                                visible: failed.mine.length > 0 && (omni.stale.direct || omni.stale.helper)
+                                text: "Remove Them"
+                                onClicked: omni.removeStale()
+                            }
+                        }
+                    }
                 }
 
                 //--- What's New: template settings the user's files leave out
