@@ -12,6 +12,16 @@ Rectangle {
     property bool showLog: false
     color: Theme.bg
 
+    //--- 0 to 1 and back for the building bars; kept here because each progress
+    //--- event rebuilds their rows, which would restart an animation of their own
+    property real bounce: 0
+    SequentialAnimation on bounce {
+        running: busy.visible
+        loops: Animation.Infinite
+        NumberAnimation { from: 0; to: 1; duration: 1100; easing.type: Easing.InOutQuad }
+        NumberAnimation { from: 1; to: 0; duration: 1100; easing.type: Easing.InOutQuad }
+    }
+
     readonly property var stepGlyph: ({ waiting: "radio_button_unchecked", running: "progress_activity",
                                         done: "check_circle", failed: "error", skipped: "remove_circle" })
 
@@ -360,21 +370,12 @@ Rectangle {
                                     Behavior on width { NumberAnimation { duration: 400 } }
                                 }
                                 Rectangle {
-                                    id: slide
-                                    // 0 to 1 and back; x follows the track's width as it settles
-                                    property real t: 0
                                     visible: !item.sized
                                     height: parent.height
                                     radius: 3
                                     width: parent.width * 0.3
-                                    x: (parent.width - width) * t
+                                    x: (parent.width - width) * sheet.bounce
                                     color: Qt.alpha(Theme.primary, 0.7)
-                                    SequentialAnimation on t {
-                                        running: slide.visible
-                                        loops: Animation.Infinite
-                                        NumberAnimation { from: 0; to: 1; duration: 1100; easing.type: Easing.InOutQuad }
-                                        NumberAnimation { from: 1; to: 0; duration: 1100; easing.type: Easing.InOutQuad }
-                                    }
                                 }
                             }
                         }
