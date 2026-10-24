@@ -56,7 +56,7 @@ Rectangle {
             Text {
                 text: dialog.heading
                 color: Theme.text
-                font.pixelSize: 18
+                font.pixelSize: 20
                 font.weight: Font.DemiBold
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
@@ -65,7 +65,7 @@ Rectangle {
                 visible: text !== ""
                 text: dialog.body
                 color: Theme.dim
-                font.pixelSize: 13
+                font.pixelSize: 15
                 wrapMode: Text.Wrap
                 lineHeight: 1.15
                 Layout.fillWidth: true

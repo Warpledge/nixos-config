@@ -70,7 +70,7 @@ ColumnLayout {
                 Text {
                     text: page.category || "User Packages"
                     color: Theme.text
-                    font.pixelSize: 20
+                    font.pixelSize: 22
                     font.weight: Font.Bold
                 }
                 Text {
@@ -80,7 +80,7 @@ ColumnLayout {
                           + "sorted into categories you pick. Apps with settings made for them are under Default "
                           + "Packages."
                     color: Theme.dim
-                    font.pixelSize: 12
+                    font.pixelSize: 13
                     wrapMode: Text.Wrap
                     Layout.fillWidth: true
                 }
@@ -92,7 +92,7 @@ ColumnLayout {
         visible: page.groups.length > 0
         text: `Saved for ${page.view.scopeTitle()}.`
         color: Theme.dim
-        font.pixelSize: 12
+        font.pixelSize: 13
         Layout.leftMargin: 6
     }
 
@@ -152,7 +152,7 @@ ColumnLayout {
                         ? `  <font size="2" color="${Theme.dim}">${row.info.version}</font>` : "")
                     textFormat: Text.StyledText
                     color: Theme.text
-                    font.pixelSize: 14
+                    font.pixelSize: 16
                     font.weight: Font.DemiBold
                     elide: Text.ElideRight
                     Layout.fillWidth: true
@@ -161,7 +161,7 @@ ColumnLayout {
                     visible: text !== ""
                     text: row.info ? row.info.description || "No description" : ""
                     color: Theme.dim
-                    font.pixelSize: 12
+                    font.pixelSize: 13
                     wrapMode: Text.Wrap
                     maximumLineCount: 2
                     elide: Text.ElideRight

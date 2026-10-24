@@ -463,7 +463,7 @@ Item {
             Text {
                 text: "Omni Settings"
                 color: Theme.text
-                font.pixelSize: 16
+                font.pixelSize: 18
                 font.weight: Font.DemiBold
                 horizontalAlignment: Text.AlignHCenter
                 Layout.fillWidth: true
@@ -475,7 +475,7 @@ Item {
             visible: !!omni.info && omni.info.banner !== ""
             text: omni.info ? omni.info.banner : ""
             color: Theme.caution
-            font.pixelSize: 12
+            font.pixelSize: 13
             wrapMode: Text.Wrap
             Layout.fillWidth: true
             Layout.leftMargin: 6
@@ -512,7 +512,7 @@ Item {
                             }
                             Text {
                                 text: modelData.title
-                                font.pixelSize: 13
+                                font.pixelSize: 15
                                 font.weight: Font.Bold
                                 color: active ? Theme.inkPrimary : Theme.dim
                             }
@@ -556,7 +556,7 @@ Item {
                             Text {
                                 text: omni.current ? omni.current.title : omni.info ? "" : omni.loadError ? "Not loaded" : "Loading…"
                                 color: Theme.text
-                                font.pixelSize: 15
+                                font.pixelSize: 16
                                 font.weight: Font.DemiBold
                                 Layout.fillWidth: true
                             }
@@ -565,7 +565,7 @@ Item {
                                 text: (omni.info && omni.info.pages[omni.page] && omni.info.pages[omni.page].description)
                                     || (omni.current ? omni.current.subtitle || omni.current.group : "")
                                 color: Theme.dim
-                                font.pixelSize: 12
+                                font.pixelSize: 13
                                 elide: Text.ElideRight
                                 Layout.fillWidth: true
                             }
@@ -707,7 +707,7 @@ Item {
                             Text {
                                 text: "Couldn't read the settings"
                                 color: Theme.text
-                                font.pixelSize: 20
+                                font.pixelSize: 22
                                 font.weight: Font.Bold
                                 wrapMode: Text.Wrap
                                 Layout.fillWidth: true
@@ -720,7 +720,7 @@ Item {
                                   + (failed.mine.length < omni.stale.items.length
                                      ? "\n\nAn admin needs to remove the computer-wide ones." : "")
                             color: omni.stale ? Theme.text : Theme.error
-                            font.pixelSize: 13
+                            font.pixelSize: 15
                             wrapMode: Text.Wrap
                             Layout.fillWidth: true
                         }

@@ -58,7 +58,7 @@ ColumnLayout {
                         Text {
                             text: `${group.modelData.title} (${group.modelData.items.length})`
                             color: Theme.text
-                            font.pixelSize: 14
+                            font.pixelSize: 16
                             font.weight: Font.DemiBold
                         }
                         Text {
@@ -66,7 +66,7 @@ ColumnLayout {
                             text: group.modelData.items.slice(0, 6).map(i => i[0]).join(", ")
                                   + (group.modelData.items.length > 6 ? "…" : "")
                             color: Theme.dim
-                            font.pixelSize: 12
+                            font.pixelSize: 13
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }
@@ -82,14 +82,14 @@ ColumnLayout {
                         Text {
                             text: modelData[0]
                             color: Theme.text
-                            font.pixelSize: 12
+                            font.pixelSize: 13
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }
                         Text {
                             text: modelData[1]
                             color: Theme.dim
-                            font.pixelSize: 12
+                            font.pixelSize: 13
                         }
                     }
                 }

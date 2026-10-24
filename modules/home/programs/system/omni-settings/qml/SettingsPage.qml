@@ -15,7 +15,7 @@ ColumnLayout {
         text: Theme.rich(page.model.intro || page.model.description)
         textFormat: Text.StyledText
         color: Theme.dim
-        font.pixelSize: 13
+        font.pixelSize: 15
         wrapMode: Text.Wrap
         Layout.fillWidth: true
         Layout.leftMargin: 6
@@ -59,7 +59,7 @@ ColumnLayout {
                 text: Theme.rich(group.modelData.description)
                 textFormat: Text.StyledText
                 color: Theme.dim
-                font.pixelSize: 12
+                font.pixelSize: 13
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
                 Layout.leftMargin: 6
@@ -68,7 +68,7 @@ ColumnLayout {
                 visible: group.modelData.locked
                 text: "Only an admin can change these."
                 color: Theme.caution
-                font.pixelSize: 12
+                font.pixelSize: 13
                 Layout.leftMargin: 6
             }
             Repeater {

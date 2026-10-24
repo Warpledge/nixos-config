@@ -187,7 +187,7 @@ ColumnLayout {
                 Text {
                     text: page.ov ? page.ov.hostname : ""
                     color: Theme.text
-                    font.pixelSize: 22
+                    font.pixelSize: 24
                     font.weight: Font.Bold
                 }
                 Text { text: page.ov ? page.ov.pretty : ""; color: Theme.dim }
@@ -236,7 +236,7 @@ ColumnLayout {
         visible: !!page.ov && !page.admin
         text: "Only an admin can update this computer."
         color: Theme.dim
-        font.pixelSize: 12
+        font.pixelSize: 13
         Layout.leftMargin: 6
     }
     Repeater {
@@ -260,11 +260,11 @@ ColumnLayout {
                 ColumnLayout {
                     spacing: 1
                     Layout.fillWidth: true
-                    Text { text: modelData.name; color: Theme.text; font.pixelSize: 14; font.weight: Font.DemiBold }
+                    Text { text: modelData.name; color: Theme.text; font.pixelSize: 16; font.weight: Font.DemiBold }
                     Text {
                         text: `${Fmt.day(modelData.old)}  →  ${Fmt.day(modelData.new)}`
                         color: Theme.dim
-                        font.pixelSize: 12
+                        font.pixelSize: 13
                     }
                 }
                 IconButton {
@@ -351,7 +351,7 @@ ColumnLayout {
         text: "Generations: each rebuild saves one, and the boot menu keeps the last ten. "
               + "Switching back leaves your settings files as they are."
         color: Theme.dim
-        font.pixelSize: 12
+        font.pixelSize: 13
         wrapMode: Text.Wrap
         Layout.fillWidth: true
         Layout.leftMargin: 6
@@ -380,7 +380,7 @@ ColumnLayout {
                     Text {
                         text: `Version ${g.number}`
                         color: Theme.text
-                        font.pixelSize: 14
+                        font.pixelSize: 16
                         font.weight: Font.DemiBold
                     }
                     Text {
@@ -388,7 +388,7 @@ ColumnLayout {
                                g.version ? "NixOS " + g.version.split(".").slice(0, 2).join(".") : "",
                                g.kernel ? `Linux ${g.kernel}` : ""].filter(t => t).join(" · ")
                         color: Theme.dim
-                        font.pixelSize: 12
+                        font.pixelSize: 13
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -438,7 +438,7 @@ ColumnLayout {
             Text {
                 text: `What switching from the running version to version ${page.compareNumber} would change.`
                 color: Theme.dim
-                font.pixelSize: 13
+                font.pixelSize: 15
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
                 Layout.margins: 6
@@ -489,7 +489,7 @@ ColumnLayout {
             Text {
                 text: failed.run ? failed.run.heading : "Loading…"
                 color: Theme.text
-                font.pixelSize: 15
+                font.pixelSize: 16
                 font.weight: Font.DemiBold
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
@@ -499,7 +499,7 @@ ColumnLayout {
                 visible: !!failed.run
                 text: failed.run ? `${failed.run.title}, ${Fmt.when(failed.run.when).toLowerCase()}. ${failed.run.reason}` : ""
                 color: Theme.dim
-                font.pixelSize: 13
+                font.pixelSize: 15
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
                 Layout.leftMargin: 6
@@ -521,7 +521,7 @@ ColumnLayout {
                     color: Theme.dim
                     selectionColor: Theme.primary
                     font.family: "monospace"
-                    font.pixelSize: 11
+                    font.pixelSize: 12
                     wrapMode: TextEdit.WrapAnywhere
                 }
             }

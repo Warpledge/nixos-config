@@ -37,11 +37,11 @@ ColumnLayout {
             ColumnLayout {
                 spacing: 2
                 Layout.fillWidth: true
-                Text { text: "Launch Options"; color: Theme.text; font.pixelSize: 20; font.weight: Font.Bold }
+                Text { text: "Launch Options"; color: Theme.text; font.pixelSize: 22; font.weight: Font.Bold }
                 Text {
                     text: "Launch options for Steam, Heroic and Lutris. Click one to copy it."
                     color: Theme.dim
-                    font.pixelSize: 12
+                    font.pixelSize: 13
                     wrapMode: Text.Wrap
                     Layout.fillWidth: true
                 }
@@ -113,7 +113,7 @@ ColumnLayout {
             visible: text !== ""
             text: head.description
             color: Theme.dim
-            font.pixelSize: 12
+            font.pixelSize: 13
             wrapMode: Text.Wrap
             Layout.fillWidth: true
             Layout.leftMargin: 6
@@ -145,14 +145,14 @@ ColumnLayout {
                     text: row.option
                     color: Theme.text
                     font.family: "monospace"
-                    font.pixelSize: 13
+                    font.pixelSize: 15
                     wrapMode: Text.WrapAnywhere
                     Layout.fillWidth: true
                 }
                 Text {
                     text: row.text
                     color: Theme.dim
-                    font.pixelSize: 12
+                    font.pixelSize: 13
                     wrapMode: Text.Wrap
                     Layout.fillWidth: true
                 }

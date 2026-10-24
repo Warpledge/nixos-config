@@ -49,7 +49,7 @@ ColumnLayout {
         Text {
             text: page.doc ? page.doc.path : ""
             color: Theme.dim
-            font.pixelSize: 11
+            font.pixelSize: 12
             elide: Text.ElideMiddle
             Layout.fillWidth: true
             Layout.leftMargin: 6
@@ -92,7 +92,7 @@ ColumnLayout {
         textFormat: Text.RichText
         color: Theme.text
         linkColor: Theme.primary
-        font.pixelSize: 13
+        font.pixelSize: 15
         wrapMode: Text.Wrap
         onLinkActivated: href => page.follow(href)
         HoverHandler { cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor }
@@ -102,7 +102,7 @@ ColumnLayout {
         id: heading
         Rich {
             text: parent.block.html
-            font.pixelSize: ({ 1: 24, 2: 18, 3: 15 })[parent.block.level] || 14
+            font.pixelSize: ({ 1: 26, 2: 20, 3: 17 })[parent.block.level] || 16
             font.weight: Font.Bold
         }
     }
@@ -147,7 +147,7 @@ ColumnLayout {
                 color: Theme.text
                 selectionColor: Theme.primary
                 font.family: "monospace"
-                font.pixelSize: 12
+                font.pixelSize: 13
                 wrapMode: TextEdit.WrapAnywhere
             }
         }
@@ -168,7 +168,7 @@ ColumnLayout {
                     Text {
                         text: parent.modelData.marker
                         color: Theme.dim
-                        font.pixelSize: 13
+                        font.pixelSize: 15
                         Layout.alignment: Qt.AlignTop
                     }
                     Rich { text: parent.modelData.html; Layout.fillWidth: true }

@@ -56,14 +56,14 @@ ColumnLayout {
                 ColumnLayout {
                     spacing: 2
                     Layout.fillWidth: true
-                    Text { text: "Backups"; color: Theme.text; font.pixelSize: 20; font.weight: Font.Bold }
+                    Text { text: "Backups"; color: Theme.text; font.pixelSize: 22; font.weight: Font.Bold }
                     Text {
                         text: "Copies of app data the config can't rebuild, in dated folders under "
                               + (page.bk ? page.bk.base.replace(/^\/home\/[^/]+/, "~") : "~/SyncBackups")
                               + ". Syncthing carries them to your other computers, and the newest ten of each "
                               + "are kept."
                         color: Theme.dim
-                        font.pixelSize: 12
+                        font.pixelSize: 13
                         wrapMode: Text.Wrap
                         Layout.fillWidth: true
                     }
@@ -126,7 +126,7 @@ ColumnLayout {
             color: page.last && !page.last.ok ? Theme.error : Theme.dim
             selectionColor: Theme.primary
             font.family: "monospace"
-            font.pixelSize: 11
+            font.pixelSize: 12
             wrapMode: TextEdit.WrapAnywhere
         }
     }
@@ -160,7 +160,7 @@ ColumnLayout {
                 Text {
                     text: kindRow.kind.title
                     color: Theme.text
-                    font.pixelSize: 14
+                    font.pixelSize: 16
                     font.weight: Font.DemiBold
                     elide: Text.ElideRight
                     Layout.fillWidth: true
@@ -170,7 +170,7 @@ ColumnLayout {
                         : kindRow.kind.last ? `Last backed up ${Fmt.when(kindRow.kind.last).toLowerCase()}`
                         : "Not backed up yet")
                     color: Theme.dim
-                    font.pixelSize: 12
+                    font.pixelSize: 13
                     wrapMode: Text.Wrap
                     Layout.fillWidth: true
                 }
@@ -178,7 +178,7 @@ ColumnLayout {
                     visible: kindRow.kind.command === "freetube-backup" && page.bk.freetubeOpen
                     text: "Close FreeTube first, so its data is all on disk."
                     color: Theme.caution
-                    font.pixelSize: 12
+                    font.pixelSize: 13
                     wrapMode: Text.Wrap
                     Layout.fillWidth: true
                 }

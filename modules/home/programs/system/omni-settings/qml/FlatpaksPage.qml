@@ -83,7 +83,7 @@ ColumnLayout {
     Text {
         text: "Apps nixpkgs doesn't have: update them, clean up, and switch each one on or off."
         color: Theme.dim
-        font.pixelSize: 13
+        font.pixelSize: 15
         wrapMode: Text.Wrap
         Layout.fillWidth: true
         Layout.leftMargin: 6
@@ -114,7 +114,7 @@ ColumnLayout {
         visible: !page.view.info.direct
         text: "Only an admin can turn Flatpak on or off. It's on or off for everyone who uses this computer."
         color: Theme.caution
-        font.pixelSize: 12
+        font.pixelSize: 13
         wrapMode: Text.Wrap
         Layout.fillWidth: true
         Layout.leftMargin: 6
@@ -184,7 +184,7 @@ ColumnLayout {
             text: "Switching an app off uninstalls it and keeps its settings and files, so switching it on "
                   + "brings it back as it was."
             color: Theme.dim
-            font.pixelSize: 12
+            font.pixelSize: 13
             wrapMode: Text.Wrap
             Layout.fillWidth: true
             Layout.leftMargin: 6
@@ -228,7 +228,7 @@ ColumnLayout {
                         Text {
                             text: page.fp && page.fp.installed ? `Runtimes (${page.fp.runtimes.length})` : ""
                             color: Theme.text
-                            font.pixelSize: 14
+                            font.pixelSize: 16
                             font.weight: Font.DemiBold
                             Layout.fillWidth: true
                         }
@@ -236,7 +236,7 @@ ColumnLayout {
                             text: page.fp && page.fp.installed
                                 ? `Shared parts the apps run on, ${Fmt.size(page.fp.runtimeBytes)} in all` : ""
                             color: Theme.dim
-                            font.pixelSize: 12
+                            font.pixelSize: 13
                             Layout.fillWidth: true
                         }
                     }
@@ -256,14 +256,14 @@ ColumnLayout {
                         Text {
                             text: modelData.id
                             color: Theme.text
-                            font.pixelSize: 13
+                            font.pixelSize: 15
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }
                         Text {
                             text: [modelData.branch, page.where(modelData), modelData.size].filter(t => t).join(" · ")
                             color: Theme.dim
-                            font.pixelSize: 12
+                            font.pixelSize: 13
                         }
                     }
                 }
@@ -318,7 +318,7 @@ ColumnLayout {
                 Text {
                     text: appRow.app.name
                     color: Theme.text
-                    font.pixelSize: 14
+                    font.pixelSize: 16
                     font.weight: Font.DemiBold
                     elide: Text.ElideRight
                     Layout.fillWidth: true
@@ -329,7 +329,7 @@ ColumnLayout {
                         : [appRow.app.version, page.where(appRow.app), appRow.app.size].filter(t => t).join(" · ")
                           + (appRow.app.bundle ? " · from a downloaded file" : "")
                     color: Theme.dim
-                    font.pixelSize: 12
+                    font.pixelSize: 13
                     wrapMode: Text.Wrap
                     maximumLineCount: 3
                     elide: Text.ElideRight
@@ -339,7 +339,7 @@ ColumnLayout {
                     visible: !!appRow.app.missing
                     text: `Can't start: it needs the ${appRow.app.runtime} runtime, which isn't installed`
                     color: Theme.caution
-                    font.pixelSize: 12
+                    font.pixelSize: 13
                     wrapMode: Text.Wrap
                     Layout.fillWidth: true
                 }

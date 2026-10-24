@@ -22,7 +22,7 @@ Rectangle {
             Text {
                 text: sheet.title
                 color: Theme.text
-                font.pixelSize: 16
+                font.pixelSize: 18
                 font.weight: Font.DemiBold
                 elide: Text.ElideRight
                 Layout.fillWidth: true

@@ -41,7 +41,7 @@ Sheet {
     Text {
         text: `The User Packages category ${picker.attr} is listed under.`
         color: Theme.dim
-        font.pixelSize: 12
+        font.pixelSize: 13
         wrapMode: Text.Wrap
         Layout.fillWidth: true
         Layout.margins: 6

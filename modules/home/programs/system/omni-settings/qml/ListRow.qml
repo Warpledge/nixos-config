@@ -47,7 +47,7 @@ Rectangle {
                 Text {
                     text: row.title
                     color: Theme.text
-                    font.pixelSize: 14
+                    font.pixelSize: 16
                     font.weight: Font.DemiBold
                     wrapMode: Text.Wrap
                     maximumLineCount: row.titleLines
@@ -58,7 +58,7 @@ Rectangle {
                     visible: text !== ""
                     text: row.subtitle
                     color: Theme.dim
-                    font.pixelSize: 12
+                    font.pixelSize: 13
                     wrapMode: Text.Wrap
                     maximumLineCount: row.compact ? 1 : 3
                     elide: Text.ElideRight

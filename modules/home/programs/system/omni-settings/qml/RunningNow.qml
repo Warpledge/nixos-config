@@ -32,7 +32,7 @@ ColumnLayout {
     Text {
         text: "The services this computer runs right now. Changes above show up here after Apply."
         color: Theme.dim
-        font.pixelSize: 12
+        font.pixelSize: 13
         wrapMode: Text.Wrap
         Layout.fillWidth: true
         Layout.leftMargin: 6
@@ -82,7 +82,7 @@ ColumnLayout {
                     Text {
                         text: unitRow.unit.name
                         color: Theme.text
-                        font.pixelSize: 14
+                        font.pixelSize: 16
                         font.weight: Font.DemiBold
                         Layout.fillWidth: true
                     }
@@ -91,7 +91,7 @@ ColumnLayout {
                               + (unitRow.unit.active === "active" && unitRow.unit.since
                                  ? `\nSince ${unitRow.unit.since}` : "")
                         color: Theme.dim
-                        font.pixelSize: 12
+                        font.pixelSize: 13
                         wrapMode: Text.Wrap
                         Layout.fillWidth: true
                     }
@@ -135,7 +135,7 @@ ColumnLayout {
                     color: Theme.dim
                     selectionColor: Theme.primary
                     font.family: "monospace"
-                    font.pixelSize: 11
+                    font.pixelSize: 12
                     wrapMode: TextEdit.WrapAnywhere
                 }
             }

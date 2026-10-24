@@ -28,7 +28,7 @@ Rectangle {
             color: Theme.text
             selectionColor: Theme.primary
             selectedTextColor: Theme.inkPrimary
-            font.pixelSize: 13
+            font.pixelSize: 15
             clip: true
             onAccepted: field.accepted()
             Keys.onEscapePressed: field.escaped()
@@ -36,7 +36,7 @@ Rectangle {
                 visible: !parent.text && !parent.preeditText
                 text: field.placeholder
                 color: Theme.dim
-                font.pixelSize: 13
+                font.pixelSize: 15
             }
         }
     }

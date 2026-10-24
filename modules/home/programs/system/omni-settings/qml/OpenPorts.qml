@@ -19,7 +19,7 @@ ColumnLayout {
     Text {
         text: "What the running system accepts from other devices. Changes above show up here after Apply."
         color: Theme.dim
-        font.pixelSize: 12
+        font.pixelSize: 13
         wrapMode: Text.Wrap
         Layout.fillWidth: true
         Layout.leftMargin: 6

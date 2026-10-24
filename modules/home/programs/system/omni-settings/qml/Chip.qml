@@ -21,7 +21,7 @@ Rectangle {
         Text {
             id: label
             anchors.verticalCenter: parent.verticalCenter
-            font.pixelSize: 12
+            font.pixelSize: 13
             color: chip.tone ? Theme.toneColor(chip.tone) : chip.accent ? Theme.primary : Theme.dim
         }
         Icon {

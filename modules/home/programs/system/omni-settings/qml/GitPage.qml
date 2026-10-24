@@ -51,12 +51,12 @@ ColumnLayout {
                 ColumnLayout {
                     spacing: 2
                     Layout.fillWidth: true
-                    Text { text: "Git"; color: Theme.text; font.pixelSize: 20; font.weight: Font.Bold }
+                    Text { text: "Git"; color: Theme.text; font.pixelSize: 22; font.weight: Font.Bold }
                     Text {
                         text: `Where the config repo stands: ${page.view.info.flake}`
                               + (page.repo && page.repo.repo ? `, on github.com/${page.repo.repo}` : "") + "."
                         color: Theme.dim
-                        font.pixelSize: 12
+                        font.pixelSize: 13
                         wrapMode: Text.Wrap
                         Layout.fillWidth: true
                     }
@@ -150,7 +150,7 @@ ColumnLayout {
                 Text {
                     text: modelData.path
                     color: Theme.text
-                    font.pixelSize: 13
+                    font.pixelSize: 15
                     elide: Text.ElideMiddle
                     Layout.fillWidth: true
                 }
@@ -167,7 +167,7 @@ ColumnLayout {
         visible: !!page.repo && page.repo.moreChanged > 0
         text: page.repo ? `And ${page.repo.moreChanged} more` : ""
         color: Theme.dim
-        font.pixelSize: 12
+        font.pixelSize: 13
         Layout.leftMargin: 6
     }
 

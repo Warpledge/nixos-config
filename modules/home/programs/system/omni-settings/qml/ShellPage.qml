@@ -11,7 +11,7 @@ ColumnLayout {
         text: "DankMaterialShell, the bar, launcher and lock screen niri runs with. "
               + "The pages below hold the rest of its settings."
         color: Theme.dim
-        font.pixelSize: 13
+        font.pixelSize: 15
         wrapMode: Text.Wrap
         Layout.fillWidth: true
         Layout.leftMargin: 6

@@ -33,7 +33,7 @@ Rectangle {
             Text {
                 text: `${sheet.elsewhere ? "Save" : "Apply"} ${sheet.count} Change${sheet.count === 1 ? "" : "s"}`
                 color: Theme.text
-                font.pixelSize: 16
+                font.pixelSize: 18
                 font.weight: Font.DemiBold
                 Layout.fillWidth: true
             }
@@ -86,7 +86,7 @@ Rectangle {
                             : "Preview builds it and shows what would change, without switching or saving."
                     ].filter(t => t).join("\n\n")
                     color: Theme.dim
-                    font.pixelSize: 13
+                    font.pixelSize: 15
                     wrapMode: Text.Wrap
                     Layout.fillWidth: true
                     Layout.margins: 6
@@ -117,7 +117,7 @@ Rectangle {
                                         width: diff.width
                                         text: modelData
                                         font.family: "monospace"
-                                        font.pixelSize: 12
+                                        font.pixelSize: 13
                                         wrapMode: Text.WrapAnywhere
                                         color: modelData.startsWith("+") ? Theme.primary
                                              : modelData.startsWith("-") ? Theme.error

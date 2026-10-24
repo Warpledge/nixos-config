@@ -77,13 +77,13 @@ ColumnLayout {
                 ColumnLayout {
                     spacing: 2
                     Layout.fillWidth: true
-                    Text { text: "Search"; color: Theme.text; font.pixelSize: 20; font.weight: Font.Bold }
+                    Text { text: "Search"; color: Theme.text; font.pixelSize: 22; font.weight: Font.Bold }
                     Text {
                         text: "Search nixpkgs by package name and install what you need; it's added to User "
                               + "Packages and installed when you apply. Expand a result for its homepage, "
                               + "licence and the program it runs."
                         color: Theme.dim
-                        font.pixelSize: 12
+                        font.pixelSize: 13
                         wrapMode: Text.Wrap
                         Layout.fillWidth: true
                     }
@@ -129,7 +129,7 @@ ColumnLayout {
                 ? `first ${page.shown} of ${page.found.length.toLocaleString(Qt.locale("en_US"), "f", 0)}`
                 : page.found.length ? String(page.found.length) : ""
             color: Theme.dim
-            font.pixelSize: 11
+            font.pixelSize: 12
             Layout.rightMargin: 6
         }
     }
@@ -175,7 +175,7 @@ ColumnLayout {
                             ? `  <font size="2" color="${Theme.dim}">${result.info.version}</font>` : "")
                         textFormat: Text.StyledText
                         color: Theme.text
-                        font.pixelSize: 14
+                        font.pixelSize: 16
                         font.weight: Font.DemiBold
                         elide: Text.ElideRight
                         Layout.fillWidth: true
@@ -183,7 +183,7 @@ ColumnLayout {
                     Text {
                         text: !result.info ? "…" : result.info.description || "No description"
                         color: Theme.dim
-                        font.pixelSize: 12
+                        font.pixelSize: 13
                         wrapMode: Text.Wrap
                         maximumLineCount: 2
                         elide: Text.ElideRight
@@ -212,7 +212,7 @@ ColumnLayout {
                 visible: !!result.info && result.info.broken
                 text: "nixpkgs marks it broken, so it may not build."
                 color: Theme.caution
-                font.pixelSize: 12
+                font.pixelSize: 13
                 Layout.leftMargin: 50
             }
 
@@ -249,11 +249,11 @@ ColumnLayout {
         property bool link: false
         spacing: 0
         Layout.fillWidth: true
-        Text { text: detail.label; color: Theme.text; font.pixelSize: 12; font.weight: Font.DemiBold }
+        Text { text: detail.label; color: Theme.text; font.pixelSize: 13; font.weight: Font.DemiBold }
         Text {
             text: detail.value
             color: detail.link ? Theme.primary : Theme.dim
-            font.pixelSize: 12
+            font.pixelSize: 13
             wrapMode: Text.Wrap
             Layout.fillWidth: true
             HoverHandler { enabled: detail.link; cursorShape: Qt.PointingHandCursor }

@@ -32,7 +32,7 @@ Rectangle {
             Text {
                 text: sheet.job ? sheet.job.title : ""
                 color: Theme.text
-                font.pixelSize: 16
+                font.pixelSize: 18
                 font.weight: Font.DemiBold
                 Layout.fillWidth: true
             }
@@ -56,7 +56,7 @@ Rectangle {
                 Text {
                     text: sheet.job ? (sheet.job.heading || sheet.job.done) : ""
                     color: parent.parent.ink
-                    font.pixelSize: 15
+                    font.pixelSize: 16
                     font.weight: Font.DemiBold
                     wrapMode: Text.Wrap
                     Layout.fillWidth: true
@@ -65,7 +65,7 @@ Rectangle {
                     visible: text !== ""
                     text: sheet.job ? (sheet.job.detail || "") : ""
                     color: parent.parent.ink
-                    font.pixelSize: 13
+                    font.pixelSize: 15
                     wrapMode: Text.Wrap
                     Layout.fillWidth: true
                 }
@@ -109,14 +109,14 @@ Rectangle {
                             Text {
                                 text: modelData.title
                                 color: modelData.state === "waiting" ? Theme.dim : Theme.text
-                                font.pixelSize: 13
+                                font.pixelSize: 15
                                 font.weight: modelData.state === "running" ? Font.DemiBold : Font.Normal
                             }
                             Text {
                                 visible: text !== ""
                                 text: modelData.detail || ""
                                 color: Theme.dim
-                                font.pixelSize: 12
+                                font.pixelSize: 13
                                 wrapMode: Text.Wrap
                                 Layout.fillWidth: true
                             }
@@ -151,7 +151,7 @@ Rectangle {
                          + (sheet.p.bytes[1] ? ` (${sheet.size(sheet.p.bytes[0])} of ${sheet.size(sheet.p.bytes[1])})` : ""),
                        sheet.p.deleted ? `deleted ${sheet.p.deleted}` : ""].filter(t => t).join(" · ")
                 color: Theme.dim
-                font.pixelSize: 12
+                font.pixelSize: 13
                 Layout.leftMargin: 4
             }
             Repeater {
@@ -160,7 +160,7 @@ Rectangle {
                     required property var modelData
                     text: `${modelData.name} · ${Math.round(modelData.seconds)} s`
                     color: Theme.dim
-                    font.pixelSize: 12
+                    font.pixelSize: 13
                     elide: Text.ElideMiddle
                     Layout.fillWidth: true
                     Layout.leftMargin: 4
@@ -176,7 +176,7 @@ Rectangle {
                 text: modelData
                 color: Theme.error
                 font.family: "monospace"
-                font.pixelSize: 12
+                font.pixelSize: 13
                 wrapMode: Text.Wrap
                 maximumLineCount: 8
                 elide: Text.ElideRight
@@ -222,7 +222,7 @@ Rectangle {
                     width: log.width
                     text: model.text
                     font.family: "monospace"
-                    font.pixelSize: 11
+                    font.pixelSize: 12
                     wrapMode: Text.WrapAnywhere
                     color: model.style === "error" ? Theme.error : Theme.dim
                 }

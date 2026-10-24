@@ -49,7 +49,7 @@ Rectangle {
                     Text {
                         text: row.s.title
                         color: Theme.text
-                        font.pixelSize: 14
+                        font.pixelSize: 16
                         font.weight: Font.DemiBold
                         elide: Text.ElideRight
                         Layout.fillWidth: true
@@ -64,7 +64,7 @@ Rectangle {
                     visible: text !== ""
                     text: row.s.subtitle
                     color: Theme.dim
-                    font.pixelSize: 12
+                    font.pixelSize: 13
                     wrapMode: Text.Wrap
                     Layout.fillWidth: true
                 }
@@ -72,7 +72,7 @@ Rectangle {
                     visible: row.s.note !== ""
                     text: Theme.rich(row.s.note.includes("!!") ? row.s.note : `!!${row.s.note}!!`)
                     textFormat: Text.StyledText
-                    font.pixelSize: 12
+                    font.pixelSize: 13
                     color: Theme.caution
                     wrapMode: Text.Wrap
                     Layout.fillWidth: true
@@ -81,13 +81,13 @@ Rectangle {
                     visible: row.overridden
                     text: "Set for this computer only"
                     color: Theme.primary
-                    font.pixelSize: 12
+                    font.pixelSize: 13
                 }
                 Text {
                     visible: row.s.kind !== "bool" && !row.open
                     text: row.view.shownOf(row.s, row.value)
                     color: Theme.primary
-                    font.pixelSize: 12
+                    font.pixelSize: 13
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }
@@ -128,7 +128,7 @@ Rectangle {
             text: Theme.rich(row.s.description)
             textFormat: Text.StyledText
             color: Theme.dim
-            font.pixelSize: 13
+            font.pixelSize: 15
             wrapMode: Text.Wrap
             lineHeight: 1.15
             Layout.fillWidth: true
@@ -138,7 +138,7 @@ Rectangle {
             visible: row.open && row.s.kind !== "bool"
             text: `Default: ${row.s.defaultShown}`
             color: Theme.dim
-            font.pixelSize: 12
+            font.pixelSize: 13
             Layout.leftMargin: 50
         }
         Loader {
@@ -198,7 +198,7 @@ Rectangle {
                         Text {
                             text: modelData.label
                             color: chosen ? Theme.inkSelected : Theme.text
-                            font.pixelSize: 13
+                            font.pixelSize: 15
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }
@@ -244,7 +244,7 @@ Rectangle {
                     Text {
                         text: modelData
                         color: Theme.text
-                        font.pixelSize: 13
+                        font.pixelSize: 15
                         Layout.fillWidth: true
                     }
                     Toggle {

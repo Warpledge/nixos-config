@@ -15,7 +15,7 @@ ColumnLayout {
     Text {
         text: "Open DankMaterialShell's settings on one page."
         color: Theme.dim
-        font.pixelSize: 12
+        font.pixelSize: 13
         Layout.leftMargin: 6
     }
     GridLayout {
@@ -44,7 +44,7 @@ ColumnLayout {
                     Text {
                         text: modelData.title
                         color: Theme.text
-                        font.pixelSize: 12
+                        font.pixelSize: 13
                         horizontalAlignment: Text.AlignHCenter
                         wrapMode: Text.Wrap
                         maximumLineCount: 2

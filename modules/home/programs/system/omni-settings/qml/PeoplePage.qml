@@ -81,12 +81,12 @@ ColumnLayout {
             ColumnLayout {
                 spacing: 2
                 Layout.fillWidth: true
-                Text { text: "People"; color: Theme.text; font.pixelSize: 20; font.weight: Font.Bold }
+                Text { text: "People"; color: Theme.text; font.pixelSize: 22; font.weight: Font.Bold }
                 Text {
                     text: "Who can log in to this computer. Each person picks their own apps by opening "
                           + "Omni Settings on their own account."
                     color: Theme.dim
-                    font.pixelSize: 12
+                    font.pixelSize: 13
                     wrapMode: Text.Wrap
                     Layout.fillWidth: true
                 }
@@ -129,7 +129,7 @@ ColumnLayout {
                     Text {
                         text: personRow.modelData.name
                         color: Theme.text
-                        font.pixelSize: 14
+                        font.pixelSize: 16
                         font.weight: Font.DemiBold
                         elide: Text.ElideRight
                         Layout.fillWidth: true
@@ -137,7 +137,7 @@ ColumnLayout {
                     Text {
                         text: `users/${personRow.modelData.name}/settings.nix`
                         color: Theme.dim
-                        font.pixelSize: 12
+                        font.pixelSize: 13
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -156,7 +156,7 @@ ColumnLayout {
                              + "They can change their apps afterwards from their own account."
                            : "Only an admin can add people."
         color: Theme.dim
-        font.pixelSize: 12
+        font.pixelSize: 13
         wrapMode: Text.Wrap
         Layout.fillWidth: true
         Layout.leftMargin: 6
@@ -189,11 +189,11 @@ ColumnLayout {
                 ColumnLayout {
                     spacing: 1
                     Layout.fillWidth: true
-                    Text { text: "Admin"; color: Theme.text; font.pixelSize: 14; font.weight: Font.DemiBold }
+                    Text { text: "Admin"; color: Theme.text; font.pixelSize: 16; font.weight: Font.DemiBold }
                     Text {
                         text: "Can use sudo, rebuild and change this computer's settings"
                         color: Theme.dim
-                        font.pixelSize: 12
+                        font.pixelSize: 13
                         wrapMode: Text.Wrap
                         Layout.fillWidth: true
                     }
@@ -237,7 +237,7 @@ ColumnLayout {
                 visible: message !== ""
                 text: message
                 color: page.problem !== "" || page.mismatch ? Theme.error : Theme.dim
-                font.pixelSize: 12
+                font.pixelSize: 13
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
             }

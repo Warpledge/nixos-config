@@ -42,12 +42,12 @@ ColumnLayout {
                 ColumnLayout {
                     spacing: 2
                     Layout.fillWidth: true
-                    Text { text: "Proton Versions"; color: Theme.text; font.pixelSize: 20; font.weight: Font.Bold }
+                    Text { text: "Proton Versions"; color: Theme.text; font.pixelSize: 22; font.weight: Font.Bold }
                     Text {
                         text: "The Proton and Wine builds each launcher can run games with. Pick one per game "
                               + "in the launcher, or Steam's default under Settings, Compatibility."
                         color: Theme.dim
-                        font.pixelSize: 12
+                        font.pixelSize: 13
                         wrapMode: Text.Wrap
                         Layout.fillWidth: true
                     }
@@ -89,7 +89,7 @@ ColumnLayout {
                 visible: text !== ""
                 text: group.modelData.description
                 color: Theme.dim
-                font.pixelSize: 12
+                font.pixelSize: 13
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
                 Layout.leftMargin: 6
@@ -130,7 +130,7 @@ ColumnLayout {
                 Text {
                     text: row.tool.name
                     color: Theme.text
-                    font.pixelSize: 14
+                    font.pixelSize: 16
                     font.weight: Font.DemiBold
                     elide: Text.ElideRight
                     Layout.fillWidth: true
@@ -138,7 +138,7 @@ ColumnLayout {
                 Text {
                     text: row.tool.subtitle
                     color: Theme.dim
-                    font.pixelSize: 12
+                    font.pixelSize: 13
                     elide: Text.ElideMiddle
                     Layout.fillWidth: true
                 }
