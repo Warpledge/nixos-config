@@ -48,7 +48,9 @@
     ++ lib.optional (builtins.pathExists ./hardware/boot.nix) ./hardware/boot.nix
     ++ (lib.optional (machine.windowManager == "niri") ./wm/niri.nix);
 
-  #--- Desktop-only home-manager modules (the game sits on /mnt/games)
+  #--- Desktop-only home-manager modules: xsystem4 always, Tobira (its game sits
+  #--- on /mnt/games) with EasyRPG
   home-manager.users.${machine.mainUser}.imports =
-    lib.optional machine.users.${machine.mainUser}.gaming.easyrpg ./games/tobira-no-densetsu.nix;
+    [./games/xsystem4]
+    ++ lib.optional machine.users.${machine.mainUser}.gaming.easyrpg ./games/tobira-no-densetsu.nix;
 }

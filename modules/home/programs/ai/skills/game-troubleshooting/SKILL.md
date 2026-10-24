@@ -80,8 +80,9 @@ then confirm the Proton processes are gone.
 When a game stays broken under Proton, search for a native reimplementation of its
 engine and that project's compatibility list. In this repo:
 
-- `gaming.xsystem4`: Wonderland Soft's System 4 (Lance 7, added 2026-10-13 after a
-  freeze on every Proton setup). Steam launch option
+- xsystem4 (always on eclipse, `machines/eclipse/games/xsystem4/`): Wonderland
+  Soft's System 4 (Lance 7, added 2026-10-13 after a freeze on every Proton
+  setup). Steam launch option
   `nix-vn-720p xsystem4 "<game dir>" # %command%`: gamescope upscales it with
   the NVL CNN, so the preset must match `ViewWidth`/`ViewHeight` in `System40.ini`.
   Saves go to `~/.xsystem4/<GameName from System40.ini>/<SaveFolder>/`, not the game

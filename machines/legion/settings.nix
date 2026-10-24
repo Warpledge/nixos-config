@@ -20,7 +20,6 @@
       gaming = {
         heroic = false;
         easyrpg = false;
-        xsystem4 = false;
         r2modman = false;
         pathOfBuilding = false;
         retroshelf = false;

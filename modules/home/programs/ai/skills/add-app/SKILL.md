@@ -53,8 +53,8 @@ catches the step that usually gets missed.
    `nixos/gaming/default.nix` on `anyUser.gaming.steam`. A guitar app goes in
    `audio/guitar/default.nix`, with its toggle added to that folder's gate in
    `programs/default.nix`. The other nested `default.nix` files (`browsers/zen/`,
-   `file-browsers/dolphin/`, `media/{freetube,moku}/`, `system/omni-settings/`,
-   `gaming/launchers/xsystem4/`) are module bundles, not routers.
+   `file-browsers/dolphin/`, `media/{freetube,moku}/`, `system/omni-settings/`)
+   are module bundles, not routers.
 4. `git add <new files>` → `nix flake check` (a new module and import are the
    uncertain case CLAUDE.md rule 1 keeps the check for). The check only evaluates
    the module where its toggle is on, so step 1's toggle must be on somewhere first.

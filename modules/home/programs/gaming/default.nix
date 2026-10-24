@@ -118,7 +118,6 @@ user: {
     ++ lib.optionals user.gaming.lutris [./launchers/lutris.nix]
     ++ lib.optionals user.gaming.faugus [./launchers/faugus.nix]
     ++ lib.optionals user.gaming.easyrpg [./launchers/easyrpg.nix]
-    ++ lib.optionals user.gaming.xsystem4 [./launchers/xsystem4]
     ++ lib.optionals user.gaming.twintail [./launchers/twintail.nix]
     #--- Games
     ++ lib.optionals user.gaming.feedback [./games/feedback.nix]

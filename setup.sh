@@ -838,7 +838,6 @@ apps=(
   "Gaming|gaming.faugus|Faugus Launcher: Windows games through Proton"
   "Gaming|gaming.twintail|Twintail: gacha games"
   "Gaming|gaming.easyrpg|EasyRPG Player: RPG Maker 2000/2003 games"
-  "Gaming|gaming.xsystem4|xsystem4: System 4 engine games"
   "Gaming|gaming.feedback|feedBack guitar rhythm game"
   "Gaming|gaming.rocksmith|Rocksmith 2014 (set up for a BOSS Katana as the input)"
   "Gaming|gaming.tmodloader|tModLoader: runtime patch, .NET 8 and Mono"

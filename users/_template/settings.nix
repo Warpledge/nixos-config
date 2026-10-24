@@ -180,7 +180,6 @@
     faugus = false; # UMU/Proton launcher
     twintail = false; # Gacha game launcher
     easyrpg = false; # RPG Maker 2000/2003 game interpreter
-    xsystem4 = false; # System 4 engine games, native
 
     # Games
     feedback = false; # Guitar rhythm game, reads Guitar Pro tabs (AppImage)

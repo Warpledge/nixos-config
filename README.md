@@ -413,7 +413,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 
 | | |
 | --- | --- |
-| **Launchers** | [Steam][steam] ([Gamescope][gamescope]), [Heroic][heroic], [Prism Launcher][prismlauncher], [Hytale][hytale] (a Flatpak, installed by hand), [EasyRPG Player][easyrpg] (RPG Maker 2000/2003 games, plus a Tobira no Densetsu launcher upscaled in gamescope), [xsystem4][xsystem4] (System 4 engine games), [Faugus Launcher][faugus-launcher], plus [Twintail][twintail] (gacha games) and [Lutris][lutris], those two off by default |
+| **Launchers** | [Steam][steam] ([Gamescope][gamescope]), [Heroic][heroic], [Prism Launcher][prismlauncher], [Hytale][hytale] (a Flatpak, installed by hand), [EasyRPG Player][easyrpg] (RPG Maker 2000/2003 games, plus a Tobira no Densetsu launcher upscaled in gamescope), [xsystem4][xsystem4] (System 4 engine games, on the desktop), [Faugus Launcher][faugus-launcher], plus [Twintail][twintail] (gacha games) and [Lutris][lutris], those two off by default |
 | **Tools** | [GameMode][gamemode], [MangoHud][mangohud], [Goverlay][goverlay], [r2modman][r2modman], [ProtonPlus][protonplus], [Satisfactory Mod Manager][smm], [AntimicroX][antimicrox], [Rusty PoB][rpob], [Ludusavi][ludusavi] (daily game save backups), [RetroShelf][retroshelf] (ES-DE / RetroDECK library tidier) |
 | **Game Streaming** | [Sunshine][sunshine] streams games to [Moonlight][moonlight] clients on the LAN (off by default) |
 | **Granblue Relink Mods** | [RelinkModOrganizer][rmo] for data mods and [Reloaded-II][reloaded-ii] for code mods, both prebuilt bundles kept out of nixpkgs: RelinkModOrganizer in `~/.local/opt/`, Reloaded-II in the Desktop folder its installer makes, run in the game's Proton prefix (off by default) |
