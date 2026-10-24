@@ -38,6 +38,8 @@ Added 2026-10-23.
 
 **Status (2026-10-24):** colours, text sizes (titles 16 px, DMS's bar text here; buttons and tabs 15; descriptions 13) and the Users change are tested on the desktop. People is renamed Users and carries the git name and email (`Commit As`, the schema's second `"top"` page, `TOP_PAGES`); the SSH keys moved to Network & Firewall, and the Account page is gone. The page list shows only the short lines of custom pages. Left, in order: Window Rules (`src/windowrules.py`, about 920 lines: the window picker, add, edit and remove in `window-rules.json`, the read-only Set in Nix list), probably in two parts; then step 5 (the DMS panel), step 6 (the window without DMS) and step 7 (drop GTK). Open questions for later: whether text sizes should follow DMS's `fontScale`, and the `userPackages = {};` an emptied set leaves in a machine block.
 
+**Status (2026-10-24):** page navigation (quick-todos item 39): the page card and its dropdown list are gone; the current tab's pages are an icon rail on the right edge (`rail` in `OmniView.qml`), each hovered icon's plate stretching left over the page with its name (`plate`), and search opens from a button in the header. A hover flyout on the top tabs was tried beside it and dropped. Checked offscreen. Next: Window Rules.
+
 ## What's already in the repo
 
 - `modules/home/programs/system/omni-settings/src/`: about 9,700 lines of Python (2026-10-23). About 3,700 of them are already GTK-free and stay as the backend: `helper.py`, `schema.py`, `backend.py`, `system.py`, `nixfile.py`, `nixlog.py`, `dms.py`, `closure.py`, `session.py`. The rest (`app.py`, `windowrules.py`, `runview.py`, `flatpaks.py`, `packages.py`, `overview.py` and smaller pages) mixes logic with GTK calls.
@@ -48,7 +50,7 @@ Added 2026-10-23.
 
 - DMS's settings look: each row its own rounded block with a circular icon badge, sections headed in the primary colour, pill buttons.
 - Top tabs (Main, Packages, Niri, AI, Docs) as a segmented row under the header.
-- The sidebar becomes a current-page card that opens into the grouped page list with a search field, since a 480 px panel has no room for a sidebar.
+- The sidebar becomes a narrow icon rail on the right edge, since a 480 px panel has no room for a sidebar: a hovered icon's plate stretches left to show the page's name. Search opens from a header button.
 
 ## Steps
 
