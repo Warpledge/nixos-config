@@ -16,10 +16,7 @@ Item {
     property string page: "overview"
     property var lastPage: ({})
     property bool picking: false
-    //--- The top tab whose page list the hover flyout shows, and the one under the cursor
-    property var railTip: null  // { id, title, glyph, y } of the rail icon under the cursor
     property bool railOpen: false  // the rail hangs below the search button while hovered
-    onRailOpenChanged: if (!railOpen) railTip = null
     property bool reviewing: false
     property bool running: false
     property bool attached: false
@@ -480,6 +477,12 @@ Item {
         anchors.margins: 14
         spacing: 10
         visible: !omni.reviewing && !omni.running && omni.sheet === null
+        // The rail closes once the cursor rests here off the tabs and the rail
+        HoverHandler {
+            id: pageHover
+            onHoveredChanged: if (hovered) railClose.restart()
+            onPointChanged: if (!railClose.running && omni.railOpen) railClose.restart()
+        }
 
         Text {
             visible: !!omni.info && omni.info.banner !== ""
@@ -494,6 +497,7 @@ Item {
         //--- Top tabs: icons, the hovered one stretching right to show its name
         Rectangle {
             id: tabsBar
+            z: 3  // a hovered tab's name hangs below it, over the page
             Layout.preferredWidth: tabsRow.implicitWidth + 6
             // Hovering the tabs drops the rail too, to scan each tab's pages
             HoverHandler {
@@ -511,13 +515,13 @@ Item {
                 spacing: 2
                 Repeater {
                     model: omni.info ? omni.info.tabs : []
-                    // Only the current tab's name takes room in the row; a hovered tab's
-                    // plate draws over its neighbours, so no tab moves under the cursor
+                    // Only the current tab shows its name in the row; a hovered tab's name
+                    // shows below its icon, so no tab moves under the cursor
                     Item {
                         id: tab
                         required property var modelData
                         readonly property bool active: omni.tab === modelData.id
-                        readonly property bool open: active || tabHover.hovered
+                        readonly property bool open: active
                         readonly property real full: tabLabel.x + tabLabel.implicitWidth + 14
                         Layout.preferredWidth: active ? full : 38
                         Layout.preferredHeight: 38
@@ -554,6 +558,24 @@ Item {
                                 color: active ? Theme.inkPrimary : Theme.inkSelected
                                 opacity: parent.open ? 1 : 0
                                 Behavior on opacity { NumberAnimation { duration: 150 } }
+                            }
+                        }
+                        Rectangle {
+                            visible: tabHover.hovered && !tab.active
+                            anchors.top: parent.bottom
+                            anchors.topMargin: 8
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            width: tabTip.implicitWidth + 20
+                            height: tabTip.implicitHeight + 10
+                            radius: height / 2
+                            color: Theme.toast
+                            Text {
+                                id: tabTip
+                                anchors.centerIn: parent
+                                text: tab.modelData.title
+                                color: Theme.inkToast
+                                font.pixelSize: 13
+                                font.weight: Font.DemiBold
                             }
                         }
                     }
@@ -654,15 +676,6 @@ Item {
             onContentHeightChanged: returnToBounds()
             onVisibleChanged: if (visible) returnToBounds()
             opacity: omni.picking || omni.railOpen ? 0.35 : 1
-            // On the view itself, not the content, so a short page's empty space counts
-            Item {
-                parent: bodyFlick
-                anchors.fill: parent
-                HoverHandler {
-                    id: pageHover
-                    onHoveredChanged: if (hovered) railClose.restart()
-                }
-            }
             Behavior on opacity { NumberAnimation { duration: 150 } }
 
             //--- A tap on the dimmed page closes the picker
@@ -876,8 +889,8 @@ Item {
         visible: mainCol.visible
         anchors.right: rail.right
         y: mainCol.y + tabsBar.y + (tabsBar.height - height) / 2
-        width: rail.width
-        height: rail.width
+        width: 44
+        height: 44
         radius: width / 2
         color: omni.railOpen ? Theme.cardHover : Theme.card
         Behavior on color { ColorAnimation { duration: 120 } }
@@ -913,7 +926,9 @@ Item {
             id: railArea
             onHoveredChanged: if (!hovered) railClose.restart()
         }
-        width: 44
+        // Wide enough for the longest page name beside its icon
+        property real nameWidth: 0
+        width: Math.min(44 + nameWidth + 22, omni.width - 28)
         radius: 22
         color: Theme.card
 
@@ -925,7 +940,7 @@ Item {
             clip: true
             boundsBehavior: Flickable.StopAtBounds
             model: omni.navItems.filter(i => i.tab === omni.tab)
-            onContentYChanged: omni.railTip = null
+            onModelChanged: rail.nameWidth = 0
 
             delegate: Column {
                 id: railItem
@@ -951,83 +966,44 @@ Item {
                     width: parent.width
                     height: 40
                     Rectangle {
-                        anchors.centerIn: parent
-                        width: 38
-                        height: 38
+                        anchors.fill: parent
+                        anchors.margins: 1
+                        anchors.leftMargin: 4
+                        anchors.rightMargin: 2
                         radius: 19
                         color: railItem.active ? Theme.primary : railHover.hovered ? Theme.hover : "transparent"
                         Behavior on color { ColorAnimation { duration: 120 } }
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.left: parent.left
+                            anchors.leftMargin: 14
+                            anchors.right: railIcon.left
+                            anchors.rightMargin: 8
+                            text: railItem.modelData.title
+                            color: railItem.active ? Theme.inkPrimary : Theme.text
+                            font.pixelSize: 15
+                            font.weight: Font.DemiBold
+                            elide: Text.ElideRight
+                            Component.onCompleted: rail.nameWidth = Math.max(rail.nameWidth, implicitWidth)
+                        }
                         Icon {
-                            anchors.centerIn: parent
+                            id: railIcon
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.right: parent.right
+                            anchors.rightMargin: 9
                             icon: railItem.glyph
                             size: 20
                             fill: railItem.active
                             color: railItem.active ? Theme.inkPrimary : Theme.dim
                         }
                     }
-                    HoverHandler {
-                        id: railHover
-                        cursorShape: Qt.PointingHandCursor
-                        onHoveredChanged: {
-                            if (hovered)
-                                omni.railTip = { id: railItem.modelData.id, title: railItem.modelData.title,
-                                                 glyph: railItem.glyph,
-                                                 y: parent.mapToItem(omni, 0, 0).y + 20 }
-                            else if (omni.railTip && omni.railTip.id === railItem.modelData.id)
-                                omni.railTip = null
-                        }
-                    }
+                    HoverHandler { id: railHover; cursorShape: Qt.PointingHandCursor }
                     TapHandler {
                         gesturePolicy: TapHandler.ReleaseWithinBounds
                         onTapped: omni.go(omni.tab, railItem.modelData.id)
                     }
                 }
             }
-        }
-    }
-
-    //--- The hovered rail icon's plate, stretching left over the page to show its name
-    Rectangle {
-        id: plate
-        property var tip: null  // the last hovered icon, kept while the plate shrinks back
-        readonly property bool open: !!omni.railTip
-        readonly property bool active: !!tip && omni.page === tip.id
-        Connections {
-            target: omni
-            function onRailTipChanged() { if (omni.railTip) plate.tip = omni.railTip }
-        }
-        visible: rail.visible && !!tip && (open || width > 38.5)
-        anchors.right: parent.right
-        anchors.rightMargin: rail.anchors.rightMargin + rail.width / 2 - 19
-        y: tip ? tip.y - 19 : 0
-        z: 1
-        width: open ? plateText.implicitWidth + 38 + 22 : 38
-        height: 38
-        radius: 19
-        clip: true
-        color: active ? Theme.primary : Theme.cardHover
-        Behavior on width { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-        Text {
-            id: plateText
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.right: plateIcon.left
-            anchors.rightMargin: 8
-            text: plate.tip ? plate.tip.title : ""
-            color: plate.active ? Theme.inkPrimary : Theme.text
-            font.pixelSize: 15
-            font.weight: Font.DemiBold
-            opacity: plate.open ? 1 : 0
-            Behavior on opacity { NumberAnimation { duration: 150 } }
-        }
-        Icon {
-            id: plateIcon
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.right: parent.right
-            anchors.rightMargin: 9
-            icon: plate.tip ? plate.tip.glyph : ""
-            size: 20
-            fill: plate.active
-            color: plate.active ? Theme.inkPrimary : Theme.dim
         }
     }
 
