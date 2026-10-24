@@ -862,11 +862,13 @@ Item {
         anchors.top: parent.top
         anchors.right: parent.right
         anchors.margins: omni.edge
+        anchors.topMargin: omni.edge + 44  // starts an icon below the top tabs
         // As tall as its icons, up to the window's bottom margin
-        height: Math.min(railList.contentHeight + 8, parent.height - 2 * omni.edge)
+        height: Math.min(railList.contentHeight + 8, parent.height - anchors.topMargin - omni.edge)
         width: 48
         radius: 24
         color: Theme.card
+        HoverHandler { id: railArea }
 
         ListView {
             id: railList
@@ -896,8 +898,6 @@ Item {
                     }
                 }
                 Rectangle {
-                    id: railButton
-                    readonly property var entry: railItem.modelData
                     width: parent.width
                     height: 40
                     radius: 20
@@ -910,14 +910,7 @@ Item {
                         fill: railItem.active
                         color: railItem.active ? Theme.inkPrimary : railHover.hovered ? Theme.inkSelected : Theme.dim
                     }
-                    HoverHandler {
-                        id: railHover
-                        cursorShape: Qt.PointingHandCursor
-                        onHoveredChanged: {
-                            if (hovered) railTip.target = railButton
-                            else if (railTip.target === railButton) railTip.target = null
-                        }
-                    }
+                    HoverHandler { id: railHover; cursorShape: Qt.PointingHandCursor }
                     TapHandler {
                         gesturePolicy: TapHandler.ReleaseWithinBounds
                         onTapped: omni.go(omni.tab, railItem.modelData.id)
@@ -927,33 +920,61 @@ Item {
         }
     }
 
-    //--- The hovered rail page's name and group, left of its icon
-    Rectangle {
-        id: railTip
-        property Item target: null
-        visible: target !== null && rail.visible
+    //--- Every page's name, left of its icon, while the cursor is on the rail or the names
+    Item {
+        id: railNames
+        visible: rail.visible && (railArea.hovered || namesArea.hovered)
         z: 4
-        x: rail.x - width - 8
-        y: target ? target.mapToItem(omni, 0, 0).y + (target.height - height) / 2 : 0
-        width: tipCol.implicitWidth + 24
-        height: tipCol.implicitHeight + 12
-        radius: Math.min(height / 2, 16)
-        color: Theme.toast
+        anchors.right: rail.left
+        y: rail.y + railList.y
+        height: railList.height
+        width: namesCol.implicitWidth + 8  // the gap to the rail counts as hovering the names
+        clip: true
+        HoverHandler { id: namesArea }
+        // Laid out like the rail's list and scrolled with it
         Column {
-            id: tipCol
-            anchors.centerIn: parent
-            Text {
-                text: railTip.target ? railTip.target.entry.title : ""
-                color: Theme.inkToast
-                font.pixelSize: 13
-                font.weight: Font.DemiBold
-            }
-            Text {
-                visible: text !== ""
-                text: railTip.target ? railTip.target.entry.group : ""
-                color: Theme.inkToast
-                opacity: 0.7
-                font.pixelSize: 11
+            id: namesCol
+            y: -railList.contentY
+            Repeater {
+                model: railList.model
+                Column {
+                    id: nameItem
+                    required property var modelData
+                    required property int index
+                    readonly property var prev: index > 0 ? railList.model[index - 1] : null
+                    readonly property bool active: omni.page === modelData.id
+                    x: namesCol.width - width
+                    Item {
+                        visible: !!nameItem.prev && nameItem.prev.group !== nameItem.modelData.group
+                        width: 1
+                        height: 13
+                    }
+                    Item {
+                        width: namePill.width
+                        height: 40
+                        Rectangle {
+                            id: namePill
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: nameText.implicitWidth + 24
+                            height: 28
+                            radius: 14
+                            color: nameItem.active ? Theme.primary : Theme.toast
+                            Text {
+                                id: nameText
+                                anchors.centerIn: parent
+                                text: nameItem.modelData.title
+                                color: nameItem.active ? Theme.inkPrimary : Theme.inkToast
+                                font.pixelSize: 13
+                                font.weight: Font.DemiBold
+                            }
+                            HoverHandler { cursorShape: Qt.PointingHandCursor }
+                            TapHandler {
+                                gesturePolicy: TapHandler.ReleaseWithinBounds
+                                onTapped: omni.go(omni.tab, nameItem.modelData.id)
+                            }
+                        }
+                    }
+                }
             }
         }
     }
