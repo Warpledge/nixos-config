@@ -20,6 +20,7 @@ sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 import backend  # noqa: E402
 import backupstate  # noqa: E402
 import closure  # noqa: E402
+import docstate  # noqa: E402
 import flatpakstate  # noqa: E402
 import gitstate  # noqa: E402
 import nixfile  # noqa: E402
@@ -250,10 +251,16 @@ def cmd_load(cfg, _args):
                                 "items": [{"id": "userpackages", "title": "All",
                                            "subtitle": NAV_SUBTITLES["userpackages"],
                                            "icon": ["package-x-generic-symbolic"], "custom": True}]})
+    guides = [{"id": d.key, "title": d.title, "icon": ["help-browser-symbolic"], "custom": True}
+              for d in docstate.guide_docs(cfg.flake)]
+    if guides:
+        nav["docs"].append({"id": "guides", "title": "Guides", "items": guides})
     nav["docs"].append({"id": "gaming", "title": "Gaming",
                         "items": [{"id": k, "title": t, "icon": list(i), "custom": True,
                                    "subtitle": NAV_SUBTITLES.get(k, "")}
-                                  for k, t, i in DOCS_GAMING]})
+                                  for k, t, i in DOCS_GAMING]
+                        + [{"id": d.key, "title": d.title, "icon": ["input-gaming-symbolic"], "custom": True}
+                           for d in docstate.game_docs(cfg.flake)]})
 
     dismissed = read_dismissed()
     new = [{"key": new_id(d, p), "value": v} for d, p, v in state.new
@@ -677,6 +684,16 @@ def cmd_package_previews(_cfg, args):
     return {}
 
 
+def cmd_doc(cfg, args):
+    """One note's page (args.key, a nav id), its Markdown as blocks of Qt rich text."""
+    return docstate.doc_json(cfg.flake, args.get("key", ""))
+
+
+def cmd_doc_link(cfg, args):
+    """Where a relative link (args.href) in note args.key leads."""
+    return docstate.link(cfg.flake, args.get("key", ""), args.get("href", ""), cfg.user, cfg.machine)
+
+
 def cmd_launch_options(_cfg, _args):
     return protonstate.launch_options()
 
@@ -698,7 +715,7 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "services": cmd_services, "serviceLog": cmd_service_log, "serviceRestart": cmd_service_restart,
             "ports": cmd_ports,
             "packageNames": cmd_package_names, "packagePreviews": cmd_package_previews,
-            "launchOptions": cmd_launch_options, "protonVersions": cmd_proton_versions}
+            "doc": cmd_doc, "docLink": cmd_doc_link, "launchOptions": cmd_launch_options, "protonVersions": cmd_proton_versions}
 
 
 def run(cfg, cmd, args):

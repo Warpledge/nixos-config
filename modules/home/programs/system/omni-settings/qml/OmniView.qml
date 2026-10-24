@@ -376,7 +376,8 @@ Item {
         try {
             editor = JSON.parse(Quickshell.env("OMNI_SETTINGS_EDITOR") || "{}")
         } catch (e) {}
-        Quickshell.execDetached((editor.launch || ["xdg-open"]).concat([`${info.flake}/${rel}`]))
+        const path = rel.startsWith("/") ? rel : `${info.flake}/${rel}`
+        Quickshell.execDetached((editor.launch || ["xdg-open"]).concat([path]))
     }
 
     function say(text) {
@@ -825,9 +826,11 @@ Item {
                                       packages: packagesPage, userpackages: userPackagesPage,
                                       proton: protonPage, protonversions: protonVersionsPage })
     Component { id: protonPage; ProtonPage { view: omni } }
+    Component { id: docPage; DocPage { view: omni } }
     Component { id: protonVersionsPage; ProtonVersionsPage { view: omni } }
     readonly property var pageComponent: custom[page]
-        || (page.startsWith("userpackages:") ? userPackagesPage : undefined)
+        || (page.startsWith("userpackages:") ? userPackagesPage
+            : page.startsWith("doc:") ? docPage : undefined)
     Component { id: packagesPage; PackagesPage { view: omni } }
     Component { id: userPackagesPage; UserPackagesPage { view: omni } }
     Component { id: peoplePage; PeoplePage { view: omni } }

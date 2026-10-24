@@ -72,7 +72,7 @@ Singleton {
         "computer": "computer", "dialog-information": "info", "drive-harddisk": "backup",
         "edit-paste": "content_paste", "emblem-default": "check_circle",
         "face-smile-big": "mood", "flatpak": "widgets", "focus-windows": "select_window",
-        "folder": "folder", "folder-download": "download", "go-home": "home",
+        "folder": "folder", "folder-download": "download", "go-home": "home", "help-browser": "lightbulb",
         "input-gaming": "sports_esports", "input-keyboard": "keyboard", "input-mouse": "mouse",
         "multimedia-player": "play_circle", "network-server": "dns",
         "network-vpn": "vpn_lock", "network-wired": "lan", "network-wireless": "wifi",
