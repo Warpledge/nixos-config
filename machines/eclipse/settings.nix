@@ -38,6 +38,7 @@
       artcraft.deckcraft = true;
       discord.vesktop = true;
       discord.goofcord = false;
+      userPackages = {};
     };
   };
 
