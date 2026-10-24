@@ -50,7 +50,7 @@ Added 2026-10-23.
 
 - DMS's settings look: each row its own rounded block with a circular icon badge, sections headed in the primary colour, pill buttons.
 - Top tabs (Main, Packages, Niri, AI, Docs) as a segmented row under the header.
-- The sidebar becomes a narrow icon rail, since a 480 px panel has no room for a sidebar: it drops over the page while the search button right of the top tabs is hovered, and a hovered icon's plate stretches left to show the page's name. A click on the button opens search.
+- The sidebar becomes a narrow icon rail, since a 480 px panel has no room for a sidebar: it drops over the dimmed page while the menu button right of the top tabs is hovered, stays open while the cursor is on the tabs, and a hovered icon's plate stretches left to show the page's name. Search is the rail's first item.
 
 ## Steps
 

@@ -17,7 +17,7 @@ Item {
     property var lastPage: ({})
     property bool picking: false
     //--- The top tab whose page list the hover flyout shows, and the one under the cursor
-    property var railTip: null  // { id, title, icon, y } of the rail icon under the cursor
+    property var railTip: null  // { id, title, glyph, y } of the rail icon under the cursor
     property bool railOpen: false  // the rail hangs below the search button while hovered
     onRailOpenChanged: if (!railOpen) railTip = null
     property bool reviewing: false
@@ -400,7 +400,6 @@ Item {
             page = lastPage[tabId] || (first ? first.id : "")
         }
         picking = false
-        railOpen = false
         search.text = ""
         bodyFlick.contentY = 0
     }
@@ -487,7 +486,12 @@ Item {
         Rectangle {
             id: tabsBar
             Layout.fillWidth: true
-            Layout.rightMargin: searchButton.width + 8
+            Layout.rightMargin: pagesButton.width + 8
+            // An open rail stays open while the cursor is on the tabs, to scan each tab's pages
+            HoverHandler {
+                id: tabsArea
+                onHoveredChanged: if (!hovered) railClose.restart()
+            }
             implicitHeight: 40
             radius: 20
             color: Theme.card
@@ -817,30 +821,30 @@ Item {
         }
     }
 
-    //--- Search, level with the top tabs: a click opens the search field, hovering drops the rail
+    //--- Pages button, level with the top tabs: hovering drops the rail, a click closes search
     Timer {
         id: railClose
         interval: 300
-        onTriggered: if (!searchHover.hovered && !railArea.hovered) omni.railOpen = false
+        onTriggered: if (!pagesHover.hovered && !railArea.hovered && !tabsArea.hovered) omni.railOpen = false
     }
     Rectangle {
-        id: searchButton
+        id: pagesButton
         visible: mainCol.visible
         anchors.right: rail.right
         y: mainCol.y + tabsBar.y + (tabsBar.height - height) / 2
         width: rail.width
         height: rail.width
         radius: width / 2
-        color: omni.picking ? Theme.primary : searchHover.hovered ? Theme.cardHover : Theme.card
+        color: omni.picking ? Theme.primary : pagesHover.hovered || omni.railOpen ? Theme.cardHover : Theme.card
         Behavior on color { ColorAnimation { duration: 120 } }
         Icon {
             anchors.centerIn: parent
-            icon: "search"
+            icon: omni.picking ? "close" : "menu"
             size: 20
             color: omni.picking ? Theme.inkPrimary : Theme.dim
         }
         HoverHandler {
-            id: searchHover
+            id: pagesHover
             cursorShape: Qt.PointingHandCursor
             onHoveredChanged: {
                 if (hovered && !omni.picking) omni.railOpen = true
@@ -850,12 +854,11 @@ Item {
         TapHandler {
             gesturePolicy: TapHandler.ReleaseWithinBounds
             onTapped: {
-                omni.railOpen = false
-                omni.picking = !omni.picking
-                if (omni.picking)
-                    search.input.forceActiveFocus()
-                else
+                if (omni.picking) {
+                    omni.picking = false
                     search.text = ""
+                } else
+                    omni.railOpen = !omni.railOpen
             }
         }
     }
@@ -866,7 +869,7 @@ Item {
         visible: mainCol.visible && height > 0
         anchors.right: parent.right
         anchors.rightMargin: 14
-        y: searchButton.y + searchButton.height + 6
+        y: pagesButton.y + pagesButton.height + 6
         z: 1
         // As tall as its icons, up to the window's bottom margin
         height: omni.railOpen ? Math.min(railList.contentHeight + 4, omni.height - y - 14) : 0
@@ -888,7 +891,9 @@ Item {
             anchors.bottomMargin: 2
             clip: true
             boundsBehavior: Flickable.StopAtBounds
-            model: omni.navItems.filter(i => i.tab === omni.tab)
+            // Search first, then the tab's pages
+            model: [{ id: "__search", title: "Search", glyph: "manage_search", group: "" }]
+                .concat(omni.navItems.filter(i => i.tab === omni.tab))
             onContentYChanged: omni.railTip = null
 
             delegate: Column {
@@ -897,6 +902,7 @@ Item {
                 required property int index
                 readonly property var prev: index > 0 ? railList.model[index - 1] : null
                 readonly property bool active: omni.page === modelData.id
+                readonly property string glyph: modelData.glyph || Theme.glyph(modelData.icon)
                 width: railList.width
                 //--- A short line where the page list starts a new group
                 Item {
@@ -922,7 +928,7 @@ Item {
                         Behavior on color { ColorAnimation { duration: 120 } }
                         Icon {
                             anchors.centerIn: parent
-                            icon: Theme.glyph(railItem.modelData.icon)
+                            icon: railItem.glyph
                             size: 20
                             fill: railItem.active
                             color: railItem.active ? Theme.inkPrimary : Theme.dim
@@ -934,7 +940,7 @@ Item {
                         onHoveredChanged: {
                             if (hovered)
                                 omni.railTip = { id: railItem.modelData.id, title: railItem.modelData.title,
-                                                 icon: railItem.modelData.icon,
+                                                 glyph: railItem.glyph,
                                                  y: parent.mapToItem(omni, 0, 0).y + 20 }
                             else if (omni.railTip && omni.railTip.id === railItem.modelData.id)
                                 omni.railTip = null
@@ -942,7 +948,14 @@ Item {
                     }
                     TapHandler {
                         gesturePolicy: TapHandler.ReleaseWithinBounds
-                        onTapped: omni.go(omni.tab, railItem.modelData.id)
+                        onTapped: {
+                            omni.railOpen = false
+                            if (railItem.modelData.id === "__search") {
+                                omni.picking = true
+                                search.input.forceActiveFocus()
+                            } else
+                                omni.go(omni.tab, railItem.modelData.id)
+                        }
                     }
                 }
             }
@@ -987,7 +1000,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
             anchors.rightMargin: 9
-            icon: Theme.glyph(plate.tip ? plate.tip.icon : [])
+            icon: plate.tip ? plate.tip.glyph : ""
             size: 20
             fill: plate.active
             color: plate.active ? Theme.inkPrimary : Theme.dim
