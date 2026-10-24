@@ -65,17 +65,26 @@ Item {
         }
         readonly property bool focused: slideout.contentItem.Window.active
         onFocusedChanged: if (!focused && isVisible) hide()
+        // Only once the cursor has been on it: moving screens can end a stale hover
+        property bool entered: false
         onKeepOpenChanged: leave.restart()
-        onIsVisibleChanged: leave.stop()
+        onIsVisibleChanged: {
+            leave.stop()
+            entered = false
+        }
         HoverHandler {
             id: hover
             parent: slideout.contentItem
-            onHoveredChanged: leave.restart()
+            onHoveredChanged: {
+                if (hovered)
+                    slideout.entered = true
+                leave.restart()
+            }
         }
         Timer {
             id: leave
             interval: 600
-            onTriggered: if (slideout.isVisible && !hover.hovered && !slideout.keepOpen) slideout.hide()
+            onTriggered: if (slideout.isVisible && slideout.entered && !hover.hovered && !slideout.keepOpen) slideout.hide()
         }
         content: Component {
             OmniView {
