@@ -61,6 +61,9 @@ in {
       claudeCodeUsage.enable = user.claude.enable;
       quickCapture.enable = true;
 
+      # Omni Settings' QML front end as a slideout (Mod+C)
+      omniSettings.src = "${config.omni-settings.package}/share/omni-settings/plugin";
+
       # A bar widget: its IPC target only exists while it sits in a bar
       # (rightWidgets in settings.json).
       clipboardPlus.enable = true;

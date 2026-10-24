@@ -50,6 +50,8 @@ Added 2026-10-23.
 
 **Status (2026-10-24):** step 5, part 1 of 3 (the package side): `plugin/` holds the DMS plugin, `plugin.json` (id `omniSettings`, a daemon) and `OmniPanel.qml`, one `DSlideout` on the right edge moved to the focused screen on each open, with hover dismiss suspended while a field has focus or a sheet or question is open, and IPC `toggle`, `show` and `hide`. It imports the built `qml/` by its store path (`file:`, since the plugin folder is a symlink). `default.nix` writes a `qmldir` (DMS's engine finds the singletons only through one) and `Config.qml` from `qml/Config.qml.in` (backend path and editor, which DMS's process has no wrapper for). Checked offscreen: the window, and OmniView through an outside import, load with data. Next: part 2, `plugins.omniSettings` in DMS's module, Mod+C toggling the panel and Mod+Shift+C for the window (rebuild).
 
+**Status (2026-10-24):** step 5, part 2 of 3: `plugins.omniSettings.src` in DMS's module points at the package's `share/omni-settings/plugin`; Mod+C runs `dms ipc call omniSettings toggle`, and the window's focus-or-spawn moved to Mod+Shift+C. The eclipse build passes; not yet tested live. Next: part 3, the hot corner.
+
 ## What's already in the repo
 
 - `modules/home/programs/system/omni-settings/src/`: about 9,700 lines of Python (2026-10-23). About 3,700 of them are already GTK-free and stay as the backend: `helper.py`, `schema.py`, `backend.py`, `system.py`, `nixfile.py`, `nixlog.py`, `dms.py`, `closure.py`, `session.py`. The rest (`app.py`, `windowrules.py`, `runview.py`, `flatpaks.py`, `packages.py`, `overview.py` and smaller pages) mixes logic with GTK calls.

@@ -176,8 +176,11 @@
     "Mod+E" = bind "Files" {spawn = chosen.fileManager.launch;};
     "Mod+Shift+M" = bind "Spotify" {spawn = ["spotify"];};
     "Ctrl+Alt+Delete" = bind "Resources (system monitor)" {spawn = ["resources"];};
-    #--- Focuses Omni Settings, or opens it
-    "Mod+C" = bind "Omni Settings" {
+    #--- Omni Settings: the DMS panel (omni-settings/plugin/), or the window
+    "Mod+C" = bind "Omni Settings panel" {
+      spawn = ["dms" "ipc" "call" "omniSettings" "toggle"];
+    };
+    "Mod+Shift+C" = bind "Omni Settings" {
       spawn = ["nirius" "focus-or-spawn" "--app-id" "^dev\\.nixosconfig\\.Settings$" "omni-settings"];
     };
   };

@@ -17,7 +17,7 @@ Workspaces stack vertically, one row of columns each. `Mod+1` to `Mod+9` jump to
 | `Mod+A` | App launcher |
 | `Mod+Return` | Terminal |
 | `Mod+B` / `Mod+E` | Browser / files |
-| `Mod+C` | Omni Settings |
+| `Mod+C` / `Mod+Shift+C` | Omni Settings panel / window |
 | `Mod+Comma` | Shell settings |
 | `Mod+Q` | Close the window |
 | `Mod+F` / `Mod+Shift+F` | Maximize / fullscreen |
