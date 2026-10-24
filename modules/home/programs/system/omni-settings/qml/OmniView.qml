@@ -18,6 +18,8 @@ Item {
     property bool picking: false
     //--- The top tab whose page list the hover flyout shows, and the one under the cursor
     property var railTip: null  // { id, title, icon, y } of the rail icon under the cursor
+    property bool railOpen: false  // the rail hangs below the search button while hovered
+    onRailOpenChanged: if (!railOpen) railTip = null
     property bool reviewing: false
     property bool running: false
     property bool attached: false
@@ -398,6 +400,7 @@ Item {
             page = lastPage[tabId] || (first ? first.id : "")
         }
         picking = false
+        railOpen = false
         search.text = ""
         bodyFlick.contentY = 0
     }
@@ -456,7 +459,6 @@ Item {
         id: mainCol
         anchors.fill: parent
         anchors.margins: 14
-        anchors.rightMargin: rail.width + rail.anchors.rightMargin + 8
         spacing: 10
         visible: !omni.reviewing && !omni.running && omni.sheet === null
 
@@ -485,6 +487,7 @@ Item {
         Rectangle {
             id: tabsBar
             Layout.fillWidth: true
+            Layout.rightMargin: searchButton.width + 8
             implicitHeight: 40
             radius: 20
             color: Theme.card
@@ -617,7 +620,7 @@ Item {
             // A page that got shorter, or came back from a run, keeps no blank space
             onContentHeightChanged: returnToBounds()
             onVisibleChanged: if (visible) returnToBounds()
-            opacity: omni.picking ? 0.35 : 1
+            opacity: omni.picking || omni.railOpen ? 0.35 : 1
             Behavior on opacity { NumberAnimation { duration: 150 } }
 
             //--- A tap on the dimmed page closes the picker
@@ -814,7 +817,12 @@ Item {
         }
     }
 
-    //--- Search, level with the top tabs above the rail; opens the search field
+    //--- Search, level with the top tabs: a click opens the search field, hovering drops the rail
+    Timer {
+        id: railClose
+        interval: 300
+        onTriggered: if (!searchHover.hovered && !railArea.hovered) omni.railOpen = false
+    }
     Rectangle {
         id: searchButton
         visible: mainCol.visible
@@ -831,10 +839,18 @@ Item {
             size: 20
             color: omni.picking ? Theme.inkPrimary : Theme.dim
         }
-        HoverHandler { id: searchHover; cursorShape: Qt.PointingHandCursor }
+        HoverHandler {
+            id: searchHover
+            cursorShape: Qt.PointingHandCursor
+            onHoveredChanged: {
+                if (hovered && !omni.picking) omni.railOpen = true
+                else railClose.restart()
+            }
+        }
         TapHandler {
             gesturePolicy: TapHandler.ReleaseWithinBounds
             onTapped: {
+                omni.railOpen = false
                 omni.picking = !omni.picking
                 if (omni.picking)
                     search.input.forceActiveFocus()
@@ -844,15 +860,23 @@ Item {
         }
     }
 
-    //--- Page rail: the current tab's pages as icons on the window's right edge
+    //--- Page rail: the current tab's pages as icons, dropping over the page from the search button
     Rectangle {
         id: rail
-        visible: mainCol.visible
+        visible: mainCol.visible && height > 0
         anchors.right: parent.right
-        anchors.rightMargin: 8
-        y: searchButton.y + searchButton.height + 8
+        anchors.rightMargin: 14
+        y: searchButton.y + searchButton.height + 6
+        z: 1
         // As tall as its icons, up to the window's bottom margin
-        height: Math.min(railList.contentHeight + 4, omni.height - y - 14)
+        height: omni.railOpen ? Math.min(railList.contentHeight + 4, omni.height - y - 14) : 0
+        Behavior on height { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+        clip: true
+        border.color: Theme.line
+        HoverHandler {
+            id: railArea
+            onHoveredChanged: if (!hovered) railClose.restart()
+        }
         width: 44
         radius: 22
         color: Theme.card
