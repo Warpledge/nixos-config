@@ -244,6 +244,11 @@ lines, `grep -n` that file for the part you need.
   `users/_template` keys, never file text or Nix. Admin-only requests check
   wheel first. Don't loosen either.
 - Passwords reach the helper on stdin, never as an argument.
+- A QML front end in `qml/` (`omni-settings --qml`) is replacing the GTK one
+  on branch `omni-settings-qml`; its folder CLAUDE.md section and
+  `docs/todo/omni-settings-qml.md` say how. Never name a QML property `on`
+  plus a capital (it's read as a handler), and give tap handlers
+  `gesturePolicy: TapHandler.ReleaseWithinBounds`.
 
 **`modules/home/programs/media/freetube/`**
 

@@ -18,6 +18,8 @@ Added 2026-10-23.
 
 **Status (2026-10-23):** Git tested on the desktop. Flatpaks is ported: its GTK-free half moved to `src/flatpakstate.py`; api.py answers `flatpaks`, `flatpakUpdates`, `flatpakForget`, `flatseal` (through `busctl`, starting Flatseal first when needed) and `flatpakRun`, which runs one action and prints flatpak's progress on stderr for `Backend.stream`. These run in the front end's process, not the job service, as the GTK page's did. Next: Backups.
 
+**Status (2026-10-23):** Flatpaks tested: update, Flatseal and runtimes work. Open: Repair answered "omni-settings-backend gave no answer"; the user installation's half works through `api.run_streamed`, so the system half (`pkexec flatpak repair --system`) is the suspect. Since `079f063` the dialog shows the backend's last stderr lines; get those first. The warning `quickshell.desktopentry: invalid line … "\r"` during Flatpak jobs comes from a leftover `~/.local/share/applications/Reloaded-II - Granblue Fantasy Relink.desktop` (Windows line endings), not from the app. Working notes for the port are in Omni Settings' `CLAUDE.md` (QML front end section).
+
 ## What's already in the repo
 
 - `modules/home/programs/system/omni-settings/src/`: about 9,700 lines of Python (2026-10-23). About 3,700 of them are already GTK-free and stay as the backend: `helper.py`, `schema.py`, `backend.py`, `system.py`, `nixfile.py`, `nixlog.py`, `dms.py`, `closure.py`, `session.py`. The rest (`app.py`, `windowrules.py`, `runview.py`, `flatpaks.py`, `packages.py`, `overview.py` and smaller pages) mixes logic with GTK calls.
