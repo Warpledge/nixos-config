@@ -236,6 +236,9 @@ lines, `grep -n` that file for the part you need.
 - `userPackages` is a set of named lists (`{Media = ["vlc"];}`). A setting
   like that must be listed in both `GROUPED` (`src/schema.py`) and `grouped`
   (`lib/settings.nix`), or it's read as nested settings.
+- `userPackages` is only for what the user installs from Search. An app the
+  config ships gets a toggle and module under Default Packages (`add-app`),
+  never a `userPackages` entry.
 - **Security:** its root helper (`nixos/system/user/omni-settings-helper.nix`,
   `src/helper.py`) must only accept typed values for the caller's own
   `users/_template` keys, never file text or Nix. Admin-only requests check
