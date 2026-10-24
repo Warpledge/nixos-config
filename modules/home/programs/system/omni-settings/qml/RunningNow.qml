@@ -98,7 +98,7 @@ ColumnLayout {
                 }
                 Chip {
                     text: unitRow.look[0]
-                    accent: unitRow.look[1]
+                    success: unitRow.look[1]
                 }
                 IconButton {
                     icon: unitRow.restarting ? "progress_activity" : "restart_alt"

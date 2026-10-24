@@ -526,6 +526,7 @@ Item {
                             tag: modelData.page === "git" ? omni.gitTag
                                  : modelData.page === "page:Services" && omni.servicesRunning > 0
                                  ? `${omni.servicesRunning} running` : ""
+                            tagSuccess: modelData.page === "page:Services"
                             compact: true
                             onClicked: list.pick(modelData)
                         }

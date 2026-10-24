@@ -9,6 +9,7 @@ Rectangle {
     property string title
     property string subtitle
     property string tag: ""
+    property bool tagSuccess: false
     property string button: ""
     property string trailing: ""
     property bool chevron: false
@@ -61,7 +62,7 @@ Rectangle {
                     Layout.fillWidth: true
                 }
             }
-            Chip { visible: row.tag !== ""; text: row.tag; accent: true }
+            Chip { visible: row.tag !== ""; text: row.tag; accent: !row.tagSuccess; success: row.tagSuccess }
             Pill { visible: row.button !== ""; text: row.button; onClicked: row.clicked() }
             Icon { visible: row.chevron; icon: "chevron_right" }
             Icon { visible: row.trailing !== ""; icon: row.trailing; size: 18 }

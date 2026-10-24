@@ -38,6 +38,9 @@ Singleton {
     readonly property color inkError: col("on_error")
     readonly property color toast: col("inverse_surface")
     readonly property color inkToast: col("inverse_on_surface")
+    // Matugen has no success role; DMS's terminal green (dank16 color2) follows the theme
+    property string green: ""
+    readonly property color success: green || "#a6e3a1"
 
     FileView {
         path: Quickshell.env("HOME") + "/.cache/DankMaterialShell/dms-colors.json"
@@ -48,8 +51,11 @@ Singleton {
             try {
                 const d = JSON.parse(text())
                 theme.c = d.colors[d.mode] || d.colors.dark || {}
+                const g = (d.dank16 || {}).color2 || {}
+                theme.green = g[d.mode] || g.default || ""
             } catch (e) {
                 theme.c = {}
+                theme.green = ""
             }
         }
     }

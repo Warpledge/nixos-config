@@ -5,12 +5,14 @@ Rectangle {
     id: chip
     property alias text: label.text
     property bool accent: false
+    property bool success: false
     property string icon: ""
     signal tapped
     implicitWidth: row.implicitWidth + 16
     implicitHeight: 26
     radius: 13
-    color: accent ? Theme.primaryContainer : hover.hovered ? Theme.line : Theme.cardHover
+    color: success ? Qt.alpha(Theme.success, 0.18) : accent ? Theme.primaryContainer
+         : hover.hovered ? Theme.line : Theme.cardHover
     Row {
         id: row
         anchors.centerIn: parent
@@ -19,7 +21,7 @@ Rectangle {
             id: label
             anchors.verticalCenter: parent.verticalCenter
             font.pixelSize: 12
-            color: chip.accent ? Theme.inkContainer : Theme.dim
+            color: chip.success ? Theme.success : chip.accent ? Theme.inkContainer : Theme.dim
         }
         Icon {
             visible: chip.icon !== ""
