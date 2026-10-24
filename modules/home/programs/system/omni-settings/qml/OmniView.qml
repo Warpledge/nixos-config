@@ -59,6 +59,7 @@ Item {
     //--- Every DMS link the pages carry
     readonly property var links: !info ? [] : Object.values(info.pages)
         .reduce((all, pg) => pg.groups.reduce((acc, g) => acc.concat(g.links), all), [])
+        .concat(info.shellLinks.reduce((acc, c) => acc.concat(c.links), []))
 
     readonly property var settings: {
         const out = {}

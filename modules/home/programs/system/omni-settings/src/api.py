@@ -20,6 +20,7 @@ sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 import backend  # noqa: E402
 import backupstate  # noqa: E402
 import closure  # noqa: E402
+import dms  # noqa: E402
 import docstate  # noqa: E402
 import flatpakstate  # noqa: E402
 import gitstate  # noqa: E402
@@ -194,6 +195,14 @@ def setting_json(cfg, state, s, multi, modules):
     return out
 
 
+def shell_categories(shell):
+    """The Shell page's categories, each and its links in dms.LINKS order."""
+    rank = {link.tab: i for i, link in enumerate(dms.LINKS)}
+    cats = [{"title": t, "links": sorted(ls, key=lambda j: rank.get(j["tab"], len(rank)))}
+            for t, ls in shell.items()]
+    return sorted(cats, key=lambda c: rank.get(c["links"][0]["tab"], len(rank)))
+
+
 def cmd_load(cfg, _args):
     """Everything the generated pages need, from one read of the settings."""
     state = loaded(cfg)
@@ -211,17 +220,28 @@ def cmd_load(cfg, _args):
         if items:
             nav[tab].append({"id": "", "title": "", "items": items})
     pages, by_section = {}, {key: [] for key, _ in schema.SECTIONS}
+    # Under niri every DMS link moves to the Shell page, in categories (shellLinks)
+    shell_links = wm == "niri"
+    shell = {}
     for page in state.pages:
         if page.section == "userpkgs":
             continue
         pid = schema.TOP_PAGES[page.title] if page.section == "top" else f"page:{page.title}"
         groups = []
         for g in page.groups:
+            links = [{"tab": l.tab, "title": l.title, "subtitle": l.subtitle, "icon": l.icon} for l in g.links]
+            if shell_links:
+                for l, j in zip(g.links, links):
+                    shell.setdefault(l.group or l.page, []).append(j)
+                if not g.settings:
+                    continue
+                links = []
             locked = not direct and any(s.domain == "machine" for s in g.settings)
             groups.append({"title": g.title, "description": g.description, "locked": locked,
                            "settings": [setting_json(cfg, state, s, multi, modules) for s in g.settings],
-                           "links": [{"tab": l.tab, "title": l.title, "subtitle": l.subtitle,
-                                      "icon": l.icon} for l in g.links]})
+                           "links": links})
+        if not groups:
+            continue
         has_user = any(s.domain == "user" for g in page.groups for s in g.settings)
         pages[pid] = {"id": pid, "title": page.title, "description": page.description,
                       "icon": [page.icon, schema.FALLBACK_ICON], "intro": schema.PAGE_INTROS.get(page.title, ""),
@@ -264,6 +284,7 @@ def cmd_load(cfg, _args):
             "banner": banner, "userMachines": state.user_machines,
             "tabs": [{"id": t, "title": title, "icon": list(TAB_ICONS[t])} for t, title in TABS],
             "nav": nav, "pages": pages, "whatsNew": new, "quick": QUICK,
+            "shellLinks": shell_categories(shell),
             "userPackages": user_packages and setting_json(cfg, state, user_packages, multi, modules),
             "starter": packagestate.STARTER,
             "dmsSearch": [{"label": e.label, "description": e.description, "keywords": e.keywords,

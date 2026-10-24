@@ -9,7 +9,7 @@ ColumnLayout {
 
     Text {
         text: "DankMaterialShell, the bar, launcher and lock screen niri runs with. "
-              + "The pages below hold the rest of its settings."
+              + "Each tile opens its settings on that page."
         color: Theme.dim
         font.pixelSize: 15
         wrapMode: Text.Wrap
@@ -17,9 +17,14 @@ ColumnLayout {
         Layout.leftMargin: 6
         Layout.rightMargin: 6
     }
-    QuickLinks {
-        Layout.fillWidth: true
-        links: page.view.links
-        order: page.view.info.quick
+    Repeater {
+        model: page.view.info.shellLinks
+        QuickLinks {
+            required property var modelData
+            Layout.fillWidth: true
+            title: modelData.title
+            description: ""
+            links: modelData.links
+        }
     }
 }
