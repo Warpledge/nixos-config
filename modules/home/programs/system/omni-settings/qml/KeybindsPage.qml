@@ -17,6 +17,12 @@ ColumnLayout {
 
     Component.onCompleted: if (niri) load()
 
+    //--- A rebuild writes a new copy of the binds
+    Connections {
+        target: Jobs
+        function onEnded() { if (page.niri) page.load() }
+    }
+
     function load() {
         Backend.call("keybinds", {}, reply => {
             loaded = true
