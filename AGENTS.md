@@ -247,7 +247,8 @@ lines, `grep -n` that file for the part you need.
 - A QML front end in `qml/` (`omni-settings --qml`) is replacing the GTK one
   on branch `omni-settings-qml`; its folder CLAUDE.md section and
   `docs/todo/omni-settings-qml.md` say how. Never name a QML property `on`
-  plus a capital (it's read as a handler), and give tap handlers
+  plus a capital (it's read as a handler) or after an `Item` property
+  (`data`, `state`), and give tap handlers
   `gesturePolicy: TapHandler.ReleaseWithinBounds`.
 
 **`modules/home/programs/media/freetube/`**
