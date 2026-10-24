@@ -180,6 +180,8 @@
     "Mod+C" = bind "Omni Settings panel" {
       spawn = ["dms" "ipc" "call" "omniSettings" "toggle"];
     };
+    #--- Claude Code / opencode panel on the left edge (ai/ai-panel.nix)
+    "Mod+Shift+A" = lib.mkIf (user.terminals.kitty && (user.claude.enable || user.opencode.enable)) (bind "AI panel" {spawn = ["ai-panel"];});
     "Mod+Shift+C" = bind "Omni Settings" {
       spawn = [
         "nirius"

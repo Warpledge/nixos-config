@@ -124,6 +124,7 @@ user: {lib, ...}: {
     ++ lib.optionals user.lmstudio.enable [./ai/lmstudio.nix]
     ++ lib.optionals user.llamaSwap.enable [./ai/llama-swap.nix]
     ++ lib.optionals (user.claude.enable || user.opencode.enable) [./ai/mcp.nix]
+    ++ lib.optionals (user.terminals.kitty && (user.claude.enable || user.opencode.enable)) [./ai/ai-panel.nix]
     ++ lib.optionals (user.opencode.enable || (user.editors.zed && (user.llamaSwap.enable || user.claude.enable))) [./ai/agent-skills.nix]
     #--- Discord (controlled by user settings)
     ++ lib.optionals (user.discord.goofcord || user.discord.vesktop) [./discord/discord.nix]
