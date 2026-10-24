@@ -221,15 +221,26 @@ Rectangle {
         }
 
         //--- What's building and downloading right now
-        Rectangle {
+        Flickable {
             id: busy
             readonly property var items: sheet.p && !sheet.done ? sheet.p.running : []
             readonly property int building: items.filter(i => i.kind === "build").length
+            property bool expanded: false
             visible: items.length > 0
             Layout.fillWidth: true
-            implicitHeight: now.implicitHeight + 28
-            radius: 16
-            color: Theme.card
+            // Expanded, it scrolls past half the page so the log keeps its room
+            implicitHeight: expanded ? Math.min(contentHeight, Math.max(240, sheet.height * 0.5)) : contentHeight
+            contentWidth: width
+            contentHeight: now.implicitHeight + 28
+            clip: true
+            boundsBehavior: Flickable.StopAtBounds
+            Rectangle {
+                parent: busy
+                z: -1
+                anchors.fill: parent
+                radius: 16
+                color: Theme.card
+            }
             ColumnLayout {
                 id: now
                 anchors.left: parent.left
@@ -246,7 +257,7 @@ Rectangle {
                     font.weight: Font.DemiBold
                 }
                 Repeater {
-                    model: busy.items.slice(0, 5)
+                    model: busy.expanded ? busy.items : busy.items.slice(0, 5)
                     RowLayout {
                         id: item
                         required property var modelData
@@ -342,11 +353,11 @@ Rectangle {
                         }
                     }
                 }
-                Text {
+                Chip {
                     visible: busy.items.length > 5
-                    text: `and ${busy.items.length - 5} more`
-                    color: Theme.dim
-                    font.pixelSize: 13
+                    text: busy.expanded ? "Show fewer" : `Show all ${busy.items.length}`
+                    icon: busy.expanded ? "expand_less" : "expand_more"
+                    onTapped: busy.expanded = !busy.expanded
                     Layout.leftMargin: 46
                 }
             }
@@ -411,7 +422,7 @@ Rectangle {
                 }
                 ColumnLayout {
                     id: graph
-                    visible: !sheet.done && !!sheet.p && sheet.p.graph.length > 0
+                    visible: !sheet.done && !!sheet.p && !!sheet.p.graph && sheet.p.graph.length > 0
                     Layout.fillWidth: true
                     spacing: 0
                     Repeater {
