@@ -52,6 +52,8 @@ Added 2026-10-23.
 
 **Status (2026-10-24):** step 5, part 2 of 3: `plugins.omniSettings.src` in DMS's module points at the package's `share/omni-settings/plugin`; Mod+C runs `dms ipc call omniSettings toggle`, and the window's focus-or-spawn moved to Mod+Shift+C. The eclipse build passes; not yet tested live. Next: part 3, the hot corner.
 
+**Status (2026-10-24):** part 2 tested: the plugin loaded only after `dms restart` (first install); a job stays attached across hiding and `dms restart`. Fixes: DSlideout's hover dismiss never fired (it waits on DMS's bar hover state), so the panel closes itself 600 ms after the cursor leaves, unless a field has focus or a sheet or question is open, and when another window takes focus; it sits between the bars on the top and bottom edges (`ShellLayout.edge(...).occupancy`, exclusive zone -1); the daemon is a plain `Item` with `pluginId` and `pluginService`; Mod+Shift+C focuses or opens `omni-settings --qml` (`org.quickshell`, title `Omni Settings`). Compiled against DMS's own modules; eclipse builds.
+
 ## What's already in the repo
 
 - `modules/home/programs/system/omni-settings/src/`: about 9,700 lines of Python (2026-10-23). About 3,700 of them are already GTK-free and stay as the backend: `helper.py`, `schema.py`, `backend.py`, `system.py`, `nixfile.py`, `nixlog.py`, `dms.py`, `closure.py`, `session.py`. The rest (`app.py`, `windowrules.py`, `runview.py`, `flatpaks.py`, `packages.py`, `overview.py` and smaller pages) mixes logic with GTK calls.

@@ -181,7 +181,16 @@
       spawn = ["dms" "ipc" "call" "omniSettings" "toggle"];
     };
     "Mod+Shift+C" = bind "Omni Settings" {
-      spawn = ["nirius" "focus-or-spawn" "--app-id" "^dev\\.nixosconfig\\.Settings$" "omni-settings"];
+      spawn = [
+        "nirius"
+        "focus-or-spawn"
+        "--app-id"
+        "^org\\.quickshell$"
+        "--title"
+        "^Omni Settings$"
+        "omni-settings"
+        "--qml"
+      ];
     };
   };
 

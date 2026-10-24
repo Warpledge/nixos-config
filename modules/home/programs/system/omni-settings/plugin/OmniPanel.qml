@@ -2,13 +2,18 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import qs.Modules.Plugins
+import Quickshell.Wayland
+import qs.Common
 import qs.Services
 import qs.Widgets
 import "file:@qml@"
 
-PluginComponent {
+Item {
     id: root
+
+    // What PluginService hands a daemon
+    property string pluginId
+    property var pluginService
 
     function show() {
         // One slideout, moved to the focused screen, so pending changes aren't split
@@ -21,12 +26,35 @@ PluginComponent {
         id: slideout
         layerNamespace: "dms:omni-settings"
         slideEdge: "right"
-        hoverDismissEnabled: true
-        // Typing, a sheet or a question keeps it open when the cursor leaves
-        hoverDismissSuspended: {
+
+        //--- Between the bars on the top and bottom edges, auto-hiding ones included
+        readonly property real topInset: ShellLayout.edge(modelData, "top")?.occupancy ?? 0
+        readonly property real bottomInset: ShellLayout.edge(modelData, "bottom")?.occupancy ?? 0
+        WlrLayershell.exclusiveZone: -1
+        margins.top: topInset
+        margins.bottom: bottomInset
+        implicitHeight: (modelData ? modelData.height : 800) - topInset - bottomInset
+
+        //--- Closes once the cursor has been off it a moment (not while typing, or with a
+        // sheet or question open), or when another window takes focus
+        readonly property bool keepOpen: {
             const view = slideout.loadedItem
             const f = slideout.contentItem.Window.activeFocusItem
             return !!view && (view.sheet !== null || view.dialog.visible || (!!f && "cursorPosition" in f))
+        }
+        readonly property bool focused: slideout.contentItem.Window.active
+        onFocusedChanged: if (!focused && isVisible) hide()
+        onKeepOpenChanged: leave.restart()
+        onIsVisibleChanged: leave.stop()
+        HoverHandler {
+            id: hover
+            parent: slideout.contentItem
+            onHoveredChanged: leave.restart()
+        }
+        Timer {
+            id: leave
+            interval: 600
+            onTriggered: if (slideout.isVisible && !hover.hovered && !slideout.keepOpen) slideout.hide()
         }
         content: Component {
             OmniView {
