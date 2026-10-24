@@ -371,7 +371,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | | |
 | --- | --- |
 | **Editors / IDE** | [Zed][zed], [Helix][helix], [VSCodium][vscodium], [micro][micro] (quick edits) |
-| **Developer Tools** | [Go][go], Node.js, gdb, make, [lazygit][lazygit], onefetch and ilspycmd |
+| **Developer Tools** | [Rust][rustup] through rustup, [Go][go], Node.js, gdb, make, [lazygit][lazygit], onefetch and ilspycmd |
 | **Formatter** | [alejandra][alejandra] v3.0.0 |
 | **Rebuild Wrapper** | [`nixm`](./modules/home/nixm.nix) (fzf menu over [nh][nh]) |
 </details>
@@ -479,6 +479,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 [ghostty]: https://ghostty.org
 [tmux]: https://github.com/tmux/tmux
 [zed]: https://zed.dev
+[rustup]: https://www.rustup.rs/
 [go]: https://go.dev/
 [lazygit]: https://github.com/jesseduffield/lazygit
 [helix]: https://helix-editor.com

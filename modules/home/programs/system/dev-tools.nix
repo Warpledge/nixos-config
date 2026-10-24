@@ -1,7 +1,11 @@
 #=====================================================================#
 # DEVELOPER TOOLS
 #=====================================================================#
-{pkgs, ...}: {
+{
+  pkgs,
+  config,
+  ...
+}: {
   #--------------------------------------------------------------------#
   #-- Packages
   #--------------------------------------------------------------------#
@@ -13,5 +17,9 @@
     ilspycmd
     lazygit
     onefetch
+    rustup # Toolchains on first `rustup default stable`
   ];
+
+  #--- Where `cargo install` puts binaries
+  home.sessionPath = ["${config.home.homeDirectory}/.cargo/bin"];
 }

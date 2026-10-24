@@ -145,7 +145,7 @@
   #--- System Tools Selection
   system = {
     resources = false; # GNOME system and process monitor
-    devTools = false; # Go, Node.js, gdb, make, lazygit, onefetch, ILSpy
+    devTools = false; # Rust (rustup), Go, Node.js, gdb, make, lazygit, onefetch, ILSpy
   };
 
   #--- Android
