@@ -17,8 +17,6 @@ Item {
     property var lastPage: ({})
     property bool picking: false
     //--- The top tab whose page list the hover flyout shows, and the one under the cursor
-    property string flyTab: ""
-    property string hoverTab: ""
     property var railTip: null  // { id, title, icon, y } of the rail icon under the cursor
     property bool reviewing: false
     property bool running: false
@@ -400,7 +398,6 @@ Item {
             page = lastPage[tabId] || (first ? first.id : "")
         }
         picking = false
-        flyTab = ""
         search.text = ""
         bodyFlick.contentY = 0
     }
@@ -447,7 +444,6 @@ Item {
 
     Keys.onEscapePressed: {
         if (picking) picking = false
-        else if (flyTab) flyTab = ""
         else if (reviewing) reviewing = false
         else if (running) running = false
         else omni.closeRequested()
@@ -460,14 +456,24 @@ Item {
         id: mainCol
         anchors.fill: parent
         anchors.margins: 14
-        anchors.rightMargin: rail.width + 10
+        anchors.rightMargin: rail.width + rail.anchors.rightMargin + 8
         spacing: 10
         visible: !omni.reviewing && !omni.running && omni.sheet === null
 
         //--- Header
         RowLayout {
             Layout.fillWidth: true
-            Item { implicitWidth: 32 }
+            IconButton {
+                icon: "search"
+                filled: true
+                onClicked: {
+                    omni.picking = !omni.picking
+                    if (omni.picking)
+                        search.input.forceActiveFocus()
+                    else
+                        search.text = ""
+                }
+            }
             Text {
                 text: "Omni Settings"
                 color: Theme.text
@@ -526,31 +532,18 @@ Item {
                                 color: active ? Theme.inkPrimary : Theme.dim
                             }
                         }
-                        HoverHandler {
-                            id: tabHover
-                            cursorShape: Qt.PointingHandCursor
-                            onHoveredChanged: {
-                                if (hovered) {
-                                    omni.hoverTab = modelData.id
-                                    if (omni.flyTab) omni.flyTab = modelData.id
-                                    else flyOpen.restart()
-                                } else if (omni.hoverTab === modelData.id) {
-                                    omni.hoverTab = ""
-                                    flyClose.restart()
-                                }
-                            }
-                        }
+                        HoverHandler { id: tabHover; cursorShape: Qt.PointingHandCursor }
                         TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: omni.go(modelData.id) }
                     }
                 }
             }
         }
 
-        //--- Page picker: the current page, opening into the page list and search
+        //--- Search, opened from the header, pushing the dimmed page down
         Rectangle {
             Layout.fillWidth: true
-            // Opens in place, pushing the dimmed page down
-            Layout.preferredHeight: omni.picking ? Math.min(pickerCol.implicitHeight, omni.height * 0.72) : 60
+            Layout.preferredHeight: omni.picking ? Math.min(pickerCol.implicitHeight, omni.height * 0.72) : 0
+            visible: Layout.preferredHeight > 0
             radius: 16
             color: Theme.card
             clip: true
@@ -561,57 +554,10 @@ Item {
                 anchors.fill: parent
                 spacing: 0
 
-                Rectangle {
-                    Layout.fillWidth: true
-                    implicitHeight: 60
-                    radius: 16
-                    color: currentHover.hovered ? Theme.cardHover : "transparent"
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.leftMargin: 10
-                        anchors.rightMargin: 14
-                        spacing: 12
-                        Badge { icon: Theme.glyph(omni.current ? omni.current.icon : []) }
-                        ColumnLayout {
-                            spacing: 1
-                            Layout.fillWidth: true
-                            Text {
-                                text: omni.current ? omni.current.title : omni.info ? "" : omni.loadError ? "Not loaded" : "Loading…"
-                                color: Theme.text
-                                font.pixelSize: 16
-                                font.weight: Font.DemiBold
-                                Layout.fillWidth: true
-                            }
-                            Text {
-                                visible: text !== ""
-                                text: omni.current ? omni.current.subtitle || omni.current.group : ""
-                                color: Theme.dim
-                                font.pixelSize: 13
-                                elide: Text.ElideRight
-                                Layout.fillWidth: true
-                            }
-                        }
-                        Icon {
-                            icon: "expand_more"
-                            rotation: omni.picking ? 180 : 0
-                            Behavior on rotation { NumberAnimation { duration: 200 } }
-                        }
-                    }
-                    HoverHandler { id: currentHover; cursorShape: Qt.PointingHandCursor }
-                    TapHandler {
-                        gesturePolicy: TapHandler.ReleaseWithinBounds
-                        onTapped: {
-                            omni.picking = !omni.picking
-                            if (omni.picking)
-                                search.input.forceActiveFocus()
-                        }
-                    }
-                }
-
                 Field {
                     id: search
                     Layout.margins: 8
-                    Layout.bottomMargin: 4
+                    Layout.bottomMargin: search.text.trim() ? 4 : 8
                     icon: "search"
                     placeholder: "Search settings"
                     onEscaped: { text = ""; omni.picking = false; omni.forceActiveFocus() }
@@ -632,10 +578,8 @@ Item {
                     clip: true
                     spacing: 2
                     boundsBehavior: Flickable.StopAtBounds
-                    model: search.text.trim() ? omni.results
-                        : omni.navItems.filter(i => i.tab === omni.tab)
-                            .map(i => ({ kind: "page", tab: i.tab, page: i.id, title: i.title, group: i.group,
-                                         icon: i.icon, subtitle: i.subtitle || "" }))
+                    visible: count > 0
+                    model: omni.results
 
                     function pick(r) {
                         if (r.kind === "dms")
@@ -661,7 +605,7 @@ Item {
                             app: modelData.app || []
                             title: modelData.title
                             subtitle: modelData.subtitle || ""
-                            selected: modelData.kind === "page" && omni.page === modelData.page && !search.text
+                            selected: modelData.kind === "page" && omni.page === modelData.page
                             trailing: modelData.kind === "dms" ? "open_in_new" : ""
                             tag: modelData.page === "git" ? omni.gitTag
                                  : modelData.page === "page:Services" && omni.servicesRunning > 0
@@ -687,7 +631,7 @@ Item {
             // A page that got shorter, or came back from a run, keeps no blank space
             onContentHeightChanged: returnToBounds()
             onVisibleChanged: if (visible) returnToBounds()
-            opacity: omni.picking || omni.flyTab ? 0.35 : 1
+            opacity: omni.picking ? 0.35 : 1
             Behavior on opacity { NumberAnimation { duration: 150 } }
 
             //--- A tap on the dimmed page closes the picker
@@ -889,21 +833,19 @@ Item {
         id: rail
         visible: mainCol.visible
         anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        anchors.topMargin: mainCol.y + tabsBar.y
-        anchors.bottomMargin: 14
-        width: 52
+        anchors.rightMargin: 8
+        y: mainCol.y + tabsBar.y
+        // As tall as its icons, up to the window's bottom margin
+        height: Math.min(railList.contentHeight + 4, omni.height - y - 14)
+        width: 44
+        radius: 22
         color: Theme.card
-        topLeftRadius: 20
-        bottomLeftRadius: 20
-        opacity: omni.flyTab ? 0.35 : 1
 
         ListView {
             id: railList
             anchors.fill: parent
-            anchors.topMargin: 6
-            anchors.bottomMargin: 6
+            anchors.topMargin: 2
+            anchors.bottomMargin: 2
             clip: true
             boundsBehavior: Flickable.StopAtBounds
             model: omni.navItems.filter(i => i.tab === omni.tab)
@@ -930,7 +872,7 @@ Item {
                 }
                 Item {
                     width: parent.width
-                    height: 42
+                    height: 40
                     Rectangle {
                         anchors.centerIn: parent
                         width: 38
@@ -953,7 +895,7 @@ Item {
                             if (hovered)
                                 omni.railTip = { id: railItem.modelData.id, title: railItem.modelData.title,
                                                  icon: railItem.modelData.icon,
-                                                 y: parent.mapToItem(omni, 0, 0).y + 21 }
+                                                 y: parent.mapToItem(omni, 0, 0).y + 20 }
                             else if (omni.railTip && omni.railTip.id === railItem.modelData.id)
                                 omni.railTip = null
                         }
@@ -979,7 +921,7 @@ Item {
         }
         visible: rail.visible && !!tip && (open || width > 38.5)
         anchors.right: parent.right
-        anchors.rightMargin: rail.width / 2 - 19
+        anchors.rightMargin: rail.anchors.rightMargin + rail.width / 2 - 19
         y: tip ? tip.y - 19 : 0
         z: 1
         width: open ? plateText.implicitWidth + 38 + 22 : 38
@@ -1009,61 +951,6 @@ Item {
             size: 20
             fill: plate.active
             color: plate.active ? Theme.inkPrimary : Theme.dim
-        }
-    }
-
-    //--- Tab flyout: hovering a top tab lists its pages over the dimmed page
-    Timer { id: flyOpen; interval: 250; onTriggered: if (omni.hoverTab) omni.flyTab = omni.hoverTab }
-    Timer { id: flyClose; interval: 300; onTriggered: if (!omni.hoverTab && !flyHover.hovered) omni.flyTab = "" }
-    Rectangle {
-        id: flyout
-        visible: omni.flyTab !== "" && mainCol.visible
-        x: mainCol.x
-        y: mainCol.y + tabsBar.y + tabsBar.height + 6
-        z: 1
-        width: mainCol.width
-        height: Math.min(flyList.contentHeight + 16, omni.height - y - 14)
-        radius: 16
-        color: Theme.card
-        border.color: Theme.line
-        HoverHandler {
-            id: flyHover
-            onHoveredChanged: if (!hovered) flyClose.restart()
-        }
-
-        ListView {
-            id: flyList
-            anchors.fill: parent
-            anchors.margins: 8
-            clip: true
-            spacing: 2
-            boundsBehavior: Flickable.StopAtBounds
-            model: omni.navItems.filter(i => i.tab === omni.flyTab)
-
-            delegate: ColumnLayout {
-                required property var modelData
-                required property int index
-                width: flyList.width
-                spacing: 2
-                Section {
-                    readonly property var prev: index > 0 ? flyList.model[index - 1] : null
-                    visible: !!modelData.group && (!prev || prev.group !== modelData.group)
-                    text: modelData.group || ""
-                    Layout.leftMargin: 8
-                }
-                ListRow {
-                    icon: Theme.glyph(modelData.icon)
-                    title: modelData.title
-                    subtitle: modelData.subtitle || ""
-                    selected: omni.page === modelData.id
-                    tag: modelData.id === "git" ? omni.gitTag
-                         : modelData.id === "page:Services" && omni.servicesRunning > 0
-                         ? `${omni.servicesRunning} running` : ""
-                    tagSuccess: modelData.id === "page:Services"
-                    compact: true
-                    onClicked: omni.go(modelData.tab, modelData.id)
-                }
-            }
         }
     }
 
