@@ -146,18 +146,28 @@ ColumnLayout {
                      saved)
     }
 
+    property var editing: null
+    function edit(rule) {
+        editing = rule
+        view.sheet = editSheet
+    }
+    Component {
+        id: editSheet
+        RuleEditor { view: page.view; wr: page.wr; rule: page.editing; onSaved: reply => page.saved(reply) }
+    }
+
     function remove(rule) {
         Backend.call("removeWindowRule", { index: rule.index }, saved)
     }
 
-    //--- A change's reply: its toast offers Undo, which puts the file back as it was
+    //--- A change's reply: its toast offers Undo, which puts the file's text back as it was
     function saved(reply) {
         if (!reply.ok) {
             view.say(`Couldn't save the rules: ${reply.error}`)
             return
         }
         const undo = reply.data.undo
-        view.say(reply.data.text, { label: "Undo", run: () => Backend.call("undoWindowRules", undo, r => {
+        view.say(reply.data.text, { label: "Undo", run: () => Backend.call("undoWindowRules", { token: undo }, r => {
             view.say(r.ok ? r.data : `Couldn't undo: ${r.error}`)
             load()
         }) })
@@ -510,6 +520,11 @@ ColumnLayout {
                     text: row.count ? `${row.count} windows` : "all windows"
                     color: Theme.dim
                     font.pixelSize: 13
+                }
+                IconButton {
+                    visible: page.editable && row.rule.index !== null
+                    icon: "edit"
+                    onClicked: page.edit(row.rule)
                 }
                 IconButton {
                     visible: page.editable && row.rule.index !== null

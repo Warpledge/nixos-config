@@ -168,8 +168,31 @@ def add_rule(rules, match, name, prop, value):
         rules.append(rule)
     else:
         rule["name"] = name
-    rule[prop] = value
+    rule[prop] = floats(value, prop)
     return rule
+
+
+def floats(value, key=None):
+    """`value` with whole-number proportions and opacities as floats, which
+    niri-flake's options need; JSON from the QML front end loses the `.0`."""
+    if isinstance(value, dict):
+        return {k: floats(v, k) for k, v in value.items()}
+    if isinstance(value, list):
+        return [floats(v) for v in value]
+    if key in ("proportion", "opacity") and isinstance(value, int) and not isinstance(value, bool):
+        return float(value)
+    return value
+
+
+def edited(rule, original):
+    """An edited `rule` with floats fixed, in `original`'s key order (a new
+    name or note first, other new keys last), keeping `original`'s own value
+    wherever the edit left it equal."""
+    rule = floats(rule)
+    new = [k for k in rule if k not in original]
+    labels = [k for k in ("name", "note") if k in new]
+    order = labels + [k for k in original if k in rule] + [k for k in new if k not in labels]
+    return {k: original[k] if k in original and original[k] == rule[k] else rule[k] for k in order}
 
 
 #--------------------------------------------------------------------#

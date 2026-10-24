@@ -724,7 +724,9 @@ def rule_json(rule, index):
             "app": wr.plain(matches[0]["app-id"]) if one_app else "",
             "tags": [{"text": wr.tag_text(p, v), "kind": wr.tag_kind(p)} for p, v in wr.properties(rule)],
             "matches": [match_json(m) for m in matches],
-            "excludes": [match_json(m) for m in rule.get("excludes") or []]}
+            "excludes": [match_json(m) for m in rule.get("excludes") or []],
+            "raw": rule if index is not None else None,
+            "props": [{"prop": p, "value": v, "text": wr.tag_text(p, v)} for p, v in wr.properties(rule)]}
 
 
 def window_json(w):
@@ -777,10 +779,27 @@ def rules_to_change(cfg):
     return path, wr.load(path)
 
 
-def save_rules(path, before, after, text):
-    """Saves `after`; the reply carries both lists for undoWindowRules."""
+def undo_dir():
+    path = os.path.join(system.runtime_dir(), "window-rules-undo")
+    os.makedirs(path, mode=0o700, exist_ok=True)
+    return path
+
+
+def save_rules(path, after, text):
+    """Saves `after`, keeping the file's text before and after under a token
+    the reply carries for undoWindowRules (the last 20 are kept)."""
+    with open(path) as f:
+        before_text = f.read()
     wr.save(path, after)
-    return {"text": text, "undo": {"before": before, "after": after}}
+    with open(path) as f:
+        after_text = f.read()
+    token = f"{time.time_ns():x}"
+    folder = undo_dir()
+    with open(os.path.join(folder, f"{token}.json"), "w") as f:
+        json.dump({"before": before_text, "after": after_text}, f)
+    for old in sorted(os.listdir(folder))[:-20]:
+        os.remove(os.path.join(folder, old))
+    return {"text": text, "undo": token}
 
 
 def cmd_add_window_rule(cfg, args):
@@ -795,7 +814,7 @@ def cmd_add_window_rule(cfg, args):
     path, before = rules_to_change(cfg)
     rules = json.loads(json.dumps(before))
     wr.add_rule(rules, match, name, prop, value)
-    return save_rules(path, before, rules, f"{wr.property_text(prop, value)} added for {name}")
+    return save_rules(path, rules, f"{wr.property_text(prop, value)} added for {name}")
 
 
 def cmd_remove_window_rule(cfg, args):
@@ -805,15 +824,38 @@ def cmd_remove_window_rule(cfg, args):
     if not isinstance(index, int) or not 0 <= index < len(before) or "include" in before[index]:
         raise ValueError("that rule isn't in the file any more")
     rules = before[:index] + before[index + 1:]
-    return save_rules(path, before, rules, f"Removed {wr.rule_title(before[index])}")
+    return save_rules(path, rules, f"Removed {wr.rule_title(before[index])}")
+
+
+def cmd_save_window_rule(cfg, args):
+    """Replaces rule args.index with args.rule, if it is still args.original."""
+    path, before = rules_to_change(cfg)
+    index, rule = args.get("index"), args.get("rule")
+    if not isinstance(index, int) or not 0 <= index < len(before) or before[index] != args.get("original"):
+        raise ValueError("the rule changed since this page read it; open it again")
+    if not isinstance(rule, dict) or not isinstance(rule.get("matches"), list) or not wr.properties(rule):
+        raise ValueError("give the rule something to do, or remove it")
+    rule = wr.edited(rule, before[index])
+    rules = before[:index] + [rule] + before[index + 1:]
+    return save_rules(path, rules, f"Saved {wr.rule_title(rule)}")
 
 
 def cmd_undo_window_rules(cfg, args):
-    """Puts back args.before, if the file still holds args.after."""
-    path, current = rules_to_change(cfg)
-    if current != args.get("after") or not isinstance(args.get("before"), list):
-        raise ValueError("the rules changed since, so this can't be undone")
-    wr.save(path, args["before"])
+    """Puts back the file's text from before change args.token, if it still
+    holds the text that change saved."""
+    path, _ = rules_to_change(cfg)
+    token = str(args.get("token", ""))
+    saved = os.path.join(undo_dir(), f"{token}.json")
+    if not token.isalnum() or not os.path.exists(saved):
+        raise ValueError("there's nothing to undo")
+    with open(saved) as f:
+        texts = json.load(f)
+    with open(path) as f:
+        if f.read() != texts["after"]:
+            raise ValueError("the rules changed since, so this can't be undone")
+    with open(path, "w") as f:
+        f.write(texts["before"])
+    os.remove(saved)
     return "Undone"
 
 
@@ -833,7 +875,8 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "resetApp": cmd_reset_app, "doc": cmd_doc, "docLink": cmd_doc_link, "launchOptions": cmd_launch_options, "protonVersions": cmd_proton_versions,
             "windowRules": cmd_window_rules, "niriWindows": cmd_niri_windows, "pickWindow": cmd_pick_window,
             "addWindowRule": cmd_add_window_rule, "removeWindowRule": cmd_remove_window_rule,
-            "undoWindowRules": cmd_undo_window_rules}
+            "undoWindowRules": cmd_undo_window_rules,
+            "saveWindowRule": cmd_save_window_rule}
 
 
 def run(cfg, cmd, args):
