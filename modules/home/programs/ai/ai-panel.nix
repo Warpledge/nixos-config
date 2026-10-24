@@ -44,13 +44,15 @@
   #--- One tab per agent, opened in the config repo; --hold drops to a shell when the
   #--- agent exits
   xdg.configFile."kitty/ai-panel-session.conf".text = lib.concatStringsSep "\n" (
-    ["cd ${machine.flakePath}"]
-    ++ lib.optionals user.claude.enable [
+    # cd sets the folder of the tab above it only
+    lib.optionals user.claude.enable [
       "new_tab Claude Code"
+      "cd ${machine.flakePath}"
       "launch --hold claude"
     ]
     ++ lib.optionals user.opencode.enable [
       "new_tab opencode"
+      "cd ${machine.flakePath}"
       "launch --hold opencode"
     ]
   );
