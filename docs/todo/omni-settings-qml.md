@@ -8,6 +8,8 @@ Added 2026-10-23.
 
 **Status (2026-10-23):** step 2 is written: `src/jobs.py`, the `omni-settings-jobs` user service started by `%t/omni-settings/jobs.sock`, runs apply, rebuild, update, activate, collect and clean jobs with one `pkexec` per job, keeps the log and progress for clients that attach late, and exits once idle. `X-SwitchMethod = "keep-old"` stops a rebuild restarting it mid-job. Adding a person moves in with the People page. Not yet tested: a real job through pkexec from the user service (polkit has to find the graphical session). Next: step 3, notifications.
 
+**Status (2026-10-23):** steps 2 and 3 tested: a preview rebuild through the service asks with DMS's polkit dialog; attaching mid-job replays the log, a second start is refused and cancel stops the build (with a stand-in helper). A job that finishes or fails while no front end reports `shown` sends a silent notification (`suppress-sound`) through `busctl`. Next: step 4, the QML shell and shared widgets.
+
 ## What's already in the repo
 
 - `modules/home/programs/system/omni-settings/src/`: about 9,700 lines of Python (2026-10-23). About 3,700 of them are already GTK-free and stay as the backend: `helper.py`, `schema.py`, `backend.py`, `system.py`, `nixfile.py`, `nixlog.py`, `dms.py`, `closure.py`, `session.py`. The rest (`app.py`, `windowrules.py`, `runview.py`, `flatpaks.py`, `packages.py`, `overview.py` and smaller pages) mixes logic with GTK calls.

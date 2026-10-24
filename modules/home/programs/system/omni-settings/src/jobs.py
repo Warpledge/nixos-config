@@ -9,12 +9,15 @@ unlocked root session.
 Newline-delimited JSON on the socket. Requests {"id", "cmd", "args"} get
 {"id", "ok", "data" | "error"}; attached clients also get pushed events:
 {"event": "job", "job": snapshot}, {"event": "log", "lines": [[style, text]]}
-and {"event": "progress", ...} while a build runs."""
+and {"event": "progress", ...} while a build runs. A front end sends
+{"cmd": "shown", "args": {"shown": bool}} as its page goes on or off screen; a
+job that finishes or fails while none is shown sends a silent notification."""
 
 import asyncio
 import json
 import os
 import socket
+import subprocess
 import sys
 import time
 from collections import deque
@@ -286,6 +289,8 @@ class Job:
             self.undo = None
         if outcome == "failed":
             save_failed(self.title, heading, detail, "\n".join(t for _, t in self.log))
+        if outcome in ("ok", "failed"):
+            self.service.notify(f"{self.title}: {heading}", detail)
         self.service.flush()
         self.changed()
 
@@ -308,6 +313,7 @@ class Service:
     def __init__(self):
         self.cfg = backend.Config.from_env()
         self.clients = set()
+        self.shown = set()  # clients whose page is on screen
         self.job, self.count, self.starting = None, 0, False
         self.idle_since = time.monotonic()
 
@@ -323,6 +329,20 @@ class Service:
                 w.write(data)
             except (ConnectionError, RuntimeError):
                 self.clients.discard(w)
+
+    def notify(self, summary, body):
+        """A silent desktop notification, only while no front end is on screen."""
+        if self.shown:
+            return
+        try:
+            subprocess.Popen(["busctl", "--user", "call", "org.freedesktop.Notifications",
+                              "/org/freedesktop/Notifications", "org.freedesktop.Notifications",
+                              "Notify", "susssasa{sv}i", "Omni Settings", "0",
+                              os.environ.get("OMNI_SETTINGS_ICON", ""), summary, body, "0",
+                              "1", "suppress-sound", "b", "true", "-1"],
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except OSError:
+            pass
 
     def flush(self):
         """Sends log lines gathered since the last flush."""
@@ -359,7 +379,10 @@ class Service:
                 except (ValueError, AttributeError):
                     continue
                 try:
-                    data = await self.command(cmd, args)
+                    if cmd == "shown":
+                        # The front end's page went on or off screen
+                        (self.shown.add if args.get("shown") else self.shown.discard)(writer)
+                    data = True if cmd == "shown" else await self.command(cmd, args)
                     reply = {"id": rid, "ok": True, "data": data}
                 except (JobError, backend.SettingsError, system.UpdateError, OSError, ValueError) as e:
                     reply = {"id": rid, "ok": False, "error": str(e)}
@@ -374,6 +397,7 @@ class Service:
             pass
         finally:
             self.clients.discard(writer)
+            self.shown.discard(writer)
             writer.close()
 
     async def command(self, cmd, args):

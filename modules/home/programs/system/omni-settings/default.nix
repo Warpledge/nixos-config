@@ -67,6 +67,7 @@
       #--- The job service (src/jobs.py): pkexec and nix from the system, not the session
       makeWrapper ${pkgs.python3}/bin/python3 $out/bin/omni-settings-jobs \
         --add-flags $share/jobs.py \
+        --set OMNI_SETTINGS_ICON ${./icon.svg} \
         --set OMNI_SETTINGS_FLAKE ${lib.escapeShellArg machine.flakePath} \
         --set OMNI_SETTINGS_MACHINE ${lib.escapeShellArg machine.name} \
         --set OMNI_SETTINGS_USER ${lib.escapeShellArg user.name} \
