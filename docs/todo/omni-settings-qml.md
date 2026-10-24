@@ -8,7 +8,7 @@ Added 2026-10-23.
 
 - `modules/home/programs/system/omni-settings/src/`: about 9,700 lines of Python (2026-10-23). About 3,700 of them are already GTK-free and stay as the backend: `helper.py`, `schema.py`, `backend.py`, `system.py`, `nixfile.py`, `nixlog.py`, `dms.py`, `closure.py`, `session.py`. The rest (`app.py`, `windowrules.py`, `runview.py`, `flatpaks.py`, `packages.py`, `overview.py` and smaller pages) mixes logic with GTK calls.
 - DMS 2.0.0 (2026-10-20 build) has the parts a panel needs: `Widgets/DSlideout.qml` (`slideEdge`, `expandable`, `hoverDismissEnabled` with a grace delay, content built on first `show()` and kept loaded) and plugins of type `widget`/`daemon`, loaded here through `dms-plugin-registry` in `modules/wm/niri/home/dms/default.nix`.
-- The prototype read `system.info()` through a 40-line JSON script in about 50 ms and drew the Overview in Quickshell with colours from `~/.cache/DankMaterialShell/dms-colors.json`. It wasn't kept in the repo.
+- The prototype read `system.info()` through a 40-line JSON script in about 50 ms and drew the Overview in Quickshell with colours from `~/.cache/DankMaterialShell/dms-colors.json`. It's in `docs/todo/omni-settings-qml/` (`shell.qml`, `dump.py`); run it with `qs -p docs/todo/omni-settings-qml/shell.qml`.
 
 ## Layout
 
