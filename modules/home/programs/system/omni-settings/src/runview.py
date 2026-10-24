@@ -4,7 +4,6 @@ what changed between the old and new system, the services the switch touched,
 and the full log. The helper (helper.py) does the work; this only reads its
 output and can ask it to cancel the build."""
 
-import os
 import time
 
 import gi
@@ -16,43 +15,9 @@ from gi.repository import Adw, Gdk, GLib, Gtk, Pango  # noqa: E402
 import closure  # noqa: E402
 import nixlog  # noqa: E402
 import ui  # noqa: E402
+from jobs import LOG_LIMIT, STEPS, last_failed, save_failed  # noqa: E402, F401
 
-STEPS = {
-    "write": "Save and check your settings",
-    "update": "Get the newest versions",
-    "auth": "Confirm it's you",
-    "save": "Save and check your settings",
-    "build": "Build the new system",
-    "compare": "Compare with what's running",
-    "switch": "Switch to the new system",
-    "boot": "Add it to the boot menu",
-    "collect": "Delete old versions and unused files",
-    "password": "Set their password",
-}
 RUNNING_HEIGHT = 360  # px before the Working On list scrolls
-LOG_LIMIT = 6000  # lines kept in the log view
-#--- The last failed run, kept for the Overview after the window closes
-FAILED_LOG = os.path.join(GLib.get_user_state_dir(), "omni-settings", "last-failed-run.txt")
-
-
-def save_failed(title, heading, reason, log):
-    try:
-        os.makedirs(os.path.dirname(FAILED_LOG), exist_ok=True)
-        with open(FAILED_LOG, "w") as f:
-            f.write(f"{title}\n{time.time():.0f}\n{heading}\n{reason}\n\n{log}")
-    except OSError:
-        pass
-
-
-def last_failed():
-    """(title, epoch, heading, reason, log) of the last failed run, or None."""
-    try:
-        with open(FAILED_LOG, errors="replace") as f:
-            title, when, heading, rest = f.read().split("\n", 3)
-        reason, _, log = rest.partition("\n\n")
-        return title, float(when), heading, reason, log
-    except (OSError, ValueError):
-        return None
 
 
 class Step:

@@ -64,6 +64,14 @@
         --set OMNI_SETTINGS_USER ${lib.escapeShellArg user.name} \
         --set OMNI_SETTINGS_LIB ${pkgs.path}/lib \
         --prefix PATH : ${lib.makeBinPath [alejandra]}
+      #--- The job service (src/jobs.py): pkexec and nix from the system, not the session
+      makeWrapper ${pkgs.python3}/bin/python3 $out/bin/omni-settings-jobs \
+        --add-flags $share/jobs.py \
+        --set OMNI_SETTINGS_FLAKE ${lib.escapeShellArg machine.flakePath} \
+        --set OMNI_SETTINGS_MACHINE ${lib.escapeShellArg machine.name} \
+        --set OMNI_SETTINGS_USER ${lib.escapeShellArg user.name} \
+        --set OMNI_SETTINGS_LIB ${pkgs.path}/lib \
+        --prefix PATH : ${lib.makeBinPath [alejandra]}:/run/wrappers/bin:/run/current-system/sw/bin
       runHook postInstall
     '';
   };
@@ -78,6 +86,30 @@ in {
   config.omni-settings.package = omni-settings;
 
   config.home.packages = [omni-settings];
+
+  #--------------------------------------------------------------------#
+  #-- Job Service
+  #--------------------------------------------------------------------#
+
+  #--- Started on the first connection; it exits on its own once idle
+  config.systemd.user.sockets.omni-settings-jobs = {
+    Unit.Description = "Omni Settings job service socket";
+    Socket = {
+      ListenStream = "%t/omni-settings/jobs.sock";
+      SocketMode = "0600";
+      DirectoryMode = "0700";
+    };
+    Install.WantedBy = ["sockets.target"];
+  };
+
+  config.systemd.user.services.omni-settings-jobs = {
+    Unit = {
+      Description = "Omni Settings job service";
+      # A rebuild it runs mustn't restart it mid-job; the new build starts next time
+      X-SwitchMethod = "keep-old";
+    };
+    Service.ExecStart = "${omni-settings}/bin/omni-settings-jobs";
+  };
 
   #--------------------------------------------------------------------#
   #-- Desktop Entry
