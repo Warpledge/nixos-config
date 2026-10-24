@@ -188,9 +188,7 @@
         "^org\\.quickshell$"
         "--title"
         "^Omni Settings$"
-        "--" # or nirius reads --qml as its own flag
         "omni-settings"
-        "--qml"
       ];
     };
   };

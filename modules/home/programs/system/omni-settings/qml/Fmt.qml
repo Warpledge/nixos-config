@@ -1,4 +1,4 @@
-// Dates and sizes worded as the GTK app's ui.py words them
+// Dates and sizes as the pages word them
 pragma Singleton
 import QtQuick
 import Quickshell

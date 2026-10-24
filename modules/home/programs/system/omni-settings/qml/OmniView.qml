@@ -805,23 +805,17 @@ Item {
                     sourceComponent: omni.pageComponent || null
                 }
 
-                //--- Pages not ported yet
+                //--- A page id with nothing to show
                 ColumnLayout {
                     visible: !!omni.info && !omni.info.pages[omni.page] && omni.pageComponent === undefined
                     Layout.fillWidth: true
                     Layout.topMargin: 40
                     spacing: 12
                     Text {
-                        text: `${omni.current ? omni.current.title : "This page"} isn't in the QML version yet.`
+                        text: `${omni.current ? omni.current.title : "This page"} has nothing to show.`
                         color: Theme.dim
                         horizontalAlignment: Text.AlignHCenter
                         Layout.fillWidth: true
-                    }
-                    Pill {
-                        Layout.alignment: Qt.AlignHCenter
-                        quiet: true
-                        text: "Open the GTK Version"
-                        onClicked: Quickshell.execDetached(["omni-settings"])
                     }
                 }
             }
@@ -1066,7 +1060,7 @@ Item {
 
     ConfirmDialog { id: confirm; anchors.fill: parent; z: 2 }
 
-    //--- Custom pages by id; each is ported from the GTK app in turn
+    //--- Custom pages by id
     readonly property var custom: ({ overview: overviewPage, shell: shellPage, git: gitPage,
                                       flatpaks: flatpaksPage, backups: backupsPage, people: peoplePage,
                                       packages: packagesPage, userpackages: userPackagesPage,

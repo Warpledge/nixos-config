@@ -1,6 +1,6 @@
 """Where the config repo stands, read-only: branch, changed files, commits to
 push and pull, recent commits, and open pull requests from GitHub's API (signed
-in through gh when it is). Kept free of GTK for both front ends."""
+in through gh when it is)."""
 
 import calendar
 import json

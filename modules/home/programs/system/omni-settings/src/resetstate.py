@@ -1,7 +1,7 @@
 """Reset buttons on the app switches: put each setting the config declares
 back to the value it last wrote, leaving every other setting in the app's file
 as it is. Only apps whose config file stays writable are listed; the rest are
-store links a rebuild already puts back. Kept free of GTK for both front ends."""
+store links a rebuild already puts back."""
 
 import json
 import os
@@ -10,7 +10,7 @@ import subprocess
 
 HOME = os.path.expanduser("~")
 
-#--- App switches with a reset (appreset.py): user setting -> (app, its live file,
+#--- App switches with a reset (SettingRow.qml): user setting -> (app, its live file,
 #--- the config's copy, pgrep -f pattern of a running app that rewrites the file
 #--- on exit, extra warning). .db files are NeDB logs (one {"_id", "value"} per
 #--- line), the rest JSON

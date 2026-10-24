@@ -1,4 +1,4 @@
-// `omni-settings --qml`: the QML front end in its own window
+// `omni-settings`: Omni Settings in its own window
 import QtQuick
 import Quickshell
 

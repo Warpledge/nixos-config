@@ -1,7 +1,7 @@
 """Omni Settings' backend as JSON, for the QML front end. Each command loads only
 what it needs and answers once: `omni-settings-backend <cmd> ['<json args>']`
 prints {"ok": true, "data": ...} or {"ok": false, "error": ...}. Settings are
-keyed "<domain>:<dotted.path>". Kept free of GTK, which the GTK app imports too."""
+keyed "<domain>:<dotted.path>". The job service imports it too."""
 
 import dataclasses
 import difflib

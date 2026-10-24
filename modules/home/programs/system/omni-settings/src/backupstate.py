@@ -1,6 +1,5 @@
-"""The Backups page's GTK-free half: which backups apply to the user, when each
-was last made, and the `nixm` run behind its buttons. Kept free of GTK for
-both front ends."""
+"""The Backups page: which backups apply to the user, when each was last made,
+and the `nixm` run behind its buttons."""
 
 import os
 import re

@@ -1,8 +1,7 @@
 """Search's nixpkgs index, through nix-search-tv. It keeps its own index of
 search.nixos.org's unstable channel in ~/.cache/nix-search-tv, made again once
 a week, so the list can be a few days off this system's flake.lock. `print`
-lists every name and `preview` gives one package's details. Kept free of GTK
-for both front ends."""
+lists every name and `preview` gives one package's details."""
 
 import re
 import subprocess

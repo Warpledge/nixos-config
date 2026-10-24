@@ -1,4 +1,4 @@
-"""The Window Rules page's GTK-free half, for both front ends: reading and
+"""The Window Rules page: reading and
 writing modules/wm/niri/home/core/window-rules.json, the copy of what niri got
 that rules.nix writes to ~/.config/omni-settings/, and describing each rule."""
 

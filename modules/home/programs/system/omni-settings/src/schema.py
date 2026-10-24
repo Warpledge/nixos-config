@@ -55,8 +55,8 @@ SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
 #--- their groups: (title, description, [setting paths]). Pages in the apps
 #--- section keep the template's groups; "top" pages are settings a custom page
 #--- lays out (TOP_PAGES), and the "userpkgs" one the list the Packages tab's
-#--- pages edit (packages.py).
-#--- "top" pages: the custom page (its id in app.py and api.py) each one's settings show on
+#--- pages edit (UserPackagesPage.qml).
+#--- "top" pages: the custom page (its id in api.py and OmniView.qml) each one's settings show on
 TOP_PAGES = {"Flatpaks": "flatpaks", "Users": "people"}
 
 PAGES = {

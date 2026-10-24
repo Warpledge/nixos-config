@@ -1,8 +1,7 @@
-"""Running Now's GTK-free half: whether each background service the config can
-turn on is running, its last log lines, and restarting it. Only services the
-running system has are listed. A system service's restart goes through
-polkit, so DMS's password prompt asks for it. Kept free of GTK for both front
-ends."""
+"""Running Now: whether each background service the config can turn on is
+running, its last log lines, and restarting it. Only services the running
+system has are listed. A system service's restart goes through polkit, so
+DMS's password prompt asks for it."""
 
 import subprocess
 

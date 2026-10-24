@@ -1,7 +1,6 @@
 """The notes under the repo's docs/guide/ and docs/gaming/, shown as pages: one
 per guide and game note on the Docs tab. A small Markdown reader covers what the notes use:
-headings, paragraphs, lists, quotes, tables, code blocks and inline marks. Kept
-free of GTK for both front ends."""
+headings, paragraphs, lists, quotes, tables, code blocks and inline marks."""
 
 import html
 import os

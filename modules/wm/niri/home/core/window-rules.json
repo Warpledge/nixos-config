@@ -228,8 +228,8 @@
     ]
   },
   {
-    "name": "Omni Settings (QML)",
-    "note": "omni-settings --qml, a Quickshell window. About 566 px wide on the desktop.",
+    "name": "Omni Settings",
+    "note": "omni-settings, a Quickshell window. About 566 px wide on the desktop.",
     "default-column-width": {
       "proportion": 0.224
     },

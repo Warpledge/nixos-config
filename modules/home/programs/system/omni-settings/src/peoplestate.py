@@ -1,10 +1,9 @@
-"""The People page's GTK-free half: checking a login name and adding a person
+"""The Users page: checking a login name and adding a person
 the way `./setup.sh add-user` does: users/<name>/settings.nix from the
 template, their name in this machine's `users`, checked. The rebuild that
 makes the account and sets its first password follows. It never replaces a
 file or folder: a users/<name>/ that's already there is used as it is, and
-anything else in the way stops it before a file is touched. Kept free of GTK
-for both front ends."""
+anything else in the way stops it before a file is touched."""
 
 import os
 import pwd

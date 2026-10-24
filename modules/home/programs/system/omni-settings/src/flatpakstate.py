@@ -1,6 +1,5 @@
 """The Flatpak apps and runtimes installed, the apps switched off here, update
-checks, and the flatpak commands each action runs. Kept free of GTK for both
-front ends."""
+checks, and the flatpak commands each action runs."""
 
 import json
 import os

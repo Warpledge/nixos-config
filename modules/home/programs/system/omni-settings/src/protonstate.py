@@ -1,4 +1,4 @@
-"""The Docs tab's Proton pages, kept free of GTK for both front ends. Launch
+"""The Docs tab's Proton pages. Launch
 Options lists options to copy into a game's Steam launch options, or Heroic's
 and Lutris's environment and wrapper fields; Proton Versions lists the Proton
 and Wine builds each launcher has. This config's wrappers come first; the
