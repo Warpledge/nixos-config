@@ -228,6 +228,19 @@
     ]
   },
   {
+    "name": "Omni Settings (QML)",
+    "note": "omni-settings --qml, a Quickshell window. About 566 px wide on the desktop.",
+    "default-column-width": {
+      "proportion": 0.224
+    },
+    "matches": [
+      {
+        "app-id": "^org\\.quickshell$",
+        "title": "^Omni Settings$"
+      }
+    ]
+  },
+  {
     "name": "Zed",
     "note": "Mod+Z. Leaves 38.8% beside it for Omni Settings.",
     "default-column-width": {
