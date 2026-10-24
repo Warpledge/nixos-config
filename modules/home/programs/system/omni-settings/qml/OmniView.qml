@@ -490,10 +490,10 @@ Item {
         Rectangle {
             id: tabsBar
             Layout.preferredWidth: tabsRow.implicitWidth + 6
-            // An open rail stays open while the cursor is on the tabs, to scan each tab's pages
+            // Hovering the tabs drops the rail too, to scan each tab's pages
             HoverHandler {
                 id: tabsArea
-                onHoveredChanged: if (!hovered) railClose.restart()
+                onHoveredChanged: if (hovered && !omni.picking) omni.railOpen = true
             }
             implicitHeight: 44
             radius: 22
@@ -636,6 +636,15 @@ Item {
             onContentHeightChanged: returnToBounds()
             onVisibleChanged: if (visible) returnToBounds()
             opacity: omni.picking || omni.railOpen ? 0.35 : 1
+            // On the view itself, not the content, so a short page's empty space counts
+            Item {
+                parent: bodyFlick
+                anchors.fill: parent
+                HoverHandler {
+                    id: pageHover
+                    onHoveredChanged: if (hovered) railClose.restart()
+                }
+            }
             Behavior on opacity { NumberAnimation { duration: 150 } }
 
             //--- A tap on the dimmed page closes the picker
@@ -840,7 +849,9 @@ Item {
     Timer {
         id: railClose
         interval: 300
-        onTriggered: if (!pagesHover.hovered && !railArea.hovered && !tabsArea.hovered) omni.railOpen = false
+        // Only the cursor reaching the page closes the rail; leaving the window doesn't
+        onTriggered: if (pageHover.hovered && !railArea.hovered && !pagesHover.hovered && !tabsArea.hovered)
+            omni.railOpen = false
     }
     Rectangle {
         id: pagesButton
