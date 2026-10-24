@@ -461,28 +461,14 @@ Item {
         visible: !omni.reviewing && !omni.running && omni.sheet === null
 
         //--- Header
-        RowLayout {
+        Text {
+            text: "Omni Settings"
+            color: Theme.text
+            font.pixelSize: 18
+            font.weight: Font.DemiBold
+            horizontalAlignment: Text.AlignHCenter
             Layout.fillWidth: true
-            IconButton {
-                icon: "search"
-                filled: true
-                onClicked: {
-                    omni.picking = !omni.picking
-                    if (omni.picking)
-                        search.input.forceActiveFocus()
-                    else
-                        search.text = ""
-                }
-            }
-            Text {
-                text: "Omni Settings"
-                color: Theme.text
-                font.pixelSize: 18
-                font.weight: Font.DemiBold
-                horizontalAlignment: Text.AlignHCenter
-                Layout.fillWidth: true
-            }
-            IconButton { icon: "close"; filled: true; onClicked: omni.closeRequested() }
+            Layout.topMargin: 4
         }
 
         Text {
@@ -828,13 +814,43 @@ Item {
         }
     }
 
+    //--- Search, level with the top tabs above the rail; opens the search field
+    Rectangle {
+        id: searchButton
+        visible: mainCol.visible
+        anchors.right: rail.right
+        y: mainCol.y + tabsBar.y + (tabsBar.height - height) / 2
+        width: rail.width
+        height: rail.width
+        radius: width / 2
+        color: omni.picking ? Theme.primary : searchHover.hovered ? Theme.cardHover : Theme.card
+        Behavior on color { ColorAnimation { duration: 120 } }
+        Icon {
+            anchors.centerIn: parent
+            icon: "search"
+            size: 20
+            color: omni.picking ? Theme.inkPrimary : Theme.dim
+        }
+        HoverHandler { id: searchHover; cursorShape: Qt.PointingHandCursor }
+        TapHandler {
+            gesturePolicy: TapHandler.ReleaseWithinBounds
+            onTapped: {
+                omni.picking = !omni.picking
+                if (omni.picking)
+                    search.input.forceActiveFocus()
+                else
+                    search.text = ""
+            }
+        }
+    }
+
     //--- Page rail: the current tab's pages as icons on the window's right edge
     Rectangle {
         id: rail
         visible: mainCol.visible
         anchors.right: parent.right
         anchors.rightMargin: 8
-        y: mainCol.y + tabsBar.y
+        y: searchButton.y + searchButton.height + 8
         // As tall as its icons, up to the window's bottom margin
         height: Math.min(railList.contentHeight + 4, omni.height - y - 14)
         width: 44
