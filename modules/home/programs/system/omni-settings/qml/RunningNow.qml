@@ -55,9 +55,9 @@ ColumnLayout {
         property bool open: false
         property string log: ""
         property bool restarting: false
-        readonly property var look: ({ active: ["Running", true], failed: ["Failed", false],
-                                        activating: ["Starting", false], deactivating: ["Stopping", false],
-                                        reloading: ["Reloading", false] })[unit.active] || ["Stopped", false]
+        readonly property var look: ({ active: ["Running", "success"], failed: ["Failed", "error"],
+                                        activating: ["Starting", "caution"], deactivating: ["Stopping", "caution"],
+                                        reloading: ["Reloading", "caution"] })[unit.active] || ["Stopped", ""]
         readonly property bool mayRestart: unit.scope === "user" || running.view.info.admin
         Layout.fillWidth: true
         implicitHeight: unitCol.implicitHeight + 22
@@ -98,7 +98,7 @@ ColumnLayout {
                 }
                 Chip {
                     text: unitRow.look[0]
-                    success: unitRow.look[1]
+                    tone: unitRow.look[1]
                 }
                 IconButton {
                     icon: unitRow.restarting ? "progress_activity" : "restart_alt"

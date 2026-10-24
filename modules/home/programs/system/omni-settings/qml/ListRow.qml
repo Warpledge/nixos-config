@@ -10,6 +10,7 @@ Rectangle {
     property string subtitle
     property string tag: ""
     property bool tagSuccess: false
+    property string tone: ""  // tints the row and its badge: Theme.toneColor
     property string button: ""
     property string trailing: ""
     property bool chevron: false
@@ -22,7 +23,9 @@ Rectangle {
     implicitHeight: rowCol.implicitHeight + (compact ? 14 : 22)
     radius: 14
     opacity: enabled ? 1 : 0.5
-    color: selected ? Theme.selected : hover.hovered ? Theme.cardHover : compact ? "transparent" : Theme.card
+    color: selected ? Theme.selected
+         : tone ? Theme.toneFill(tone, hover.hovered ? Theme.cardHover : Theme.card)
+         : hover.hovered ? Theme.cardHover : compact ? "transparent" : Theme.card
     Behavior on color { ColorAnimation { duration: 120 } }
 
     ColumnLayout {
@@ -37,7 +40,7 @@ Rectangle {
         RowLayout {
             Layout.fillWidth: true
             spacing: 12
-            Badge { icon: row.icon; app: row.app }
+            Badge { icon: row.icon; app: row.app; tone: row.tone }
             ColumnLayout {
                 spacing: 1
                 Layout.fillWidth: true

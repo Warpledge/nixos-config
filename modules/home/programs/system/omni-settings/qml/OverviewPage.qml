@@ -327,6 +327,7 @@ ColumnLayout {
     ListRow {
         visible: !!page.ov && !!page.ov.lastFailed
         icon: "warning"
+        tone: "error"
         title: "Last Failed Run"
         subtitle: page.ov && page.ov.lastFailed
             ? `${page.ov.lastFailed.title}, ${Fmt.when(page.ov.lastFailed.when).toLowerCase()}: ${page.ov.lastFailed.heading}`
@@ -363,7 +364,7 @@ ColumnLayout {
             Layout.fillWidth: true
             implicitHeight: genRow.implicitHeight + 22
             radius: 14
-            color: Theme.card
+            color: g.running ? Theme.toneFill("success", Theme.card) : Theme.card
             RowLayout {
                 id: genRow
                 anchors.verticalCenter: parent.verticalCenter
@@ -372,7 +373,7 @@ ColumnLayout {
                 anchors.leftMargin: 10
                 anchors.rightMargin: 10
                 spacing: 10
-                Badge { icon: g.running ? "radio_button_checked" : "history" }
+                Badge { icon: g.running ? "radio_button_checked" : "history"; tone: g.running ? "success" : "" }
                 ColumnLayout {
                     spacing: 2
                     Layout.fillWidth: true
@@ -395,7 +396,7 @@ ColumnLayout {
                         visible: g.running || g.next || g.booted
                         Layout.fillWidth: true
                         spacing: 4
-                        Chip { visible: g.running; accent: true; text: "Running" }
+                        Chip { visible: g.running; tone: "success"; text: "Running" }
                         Chip { visible: g.next && !g.running; accent: true; text: "Next start" }
                         Chip { visible: g.booted && !g.running; text: "Started with" }
                     }

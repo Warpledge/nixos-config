@@ -1,6 +1,7 @@
 // A job's steps, progress and log, from the job service; it keeps running when closed
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 
 Rectangle {
     id: sheet
@@ -43,8 +44,10 @@ Rectangle {
             Layout.fillWidth: true
             implicitHeight: outcome.implicitHeight + 24
             radius: 16
-            color: sheet.job && sheet.job.outcome === "failed" ? Theme.error : Theme.primaryContainer
-            readonly property color ink: sheet.job && sheet.job.outcome === "failed" ? Theme.inkError : Theme.inkContainer
+            readonly property string tone: !sheet.job ? "" : sheet.job.outcome === "failed" ? "error"
+                                         : sheet.job.outcome === "ok" ? "success" : ""
+            color: tone ? Theme.toneFill(tone, Theme.card) : Theme.primaryContainer
+            readonly property color ink: tone ? Theme.text : Theme.inkContainer
             ColumnLayout {
                 id: outcome
                 anchors.fill: parent
@@ -92,6 +95,7 @@ Rectangle {
                             icon: sheet.stepGlyph[modelData.state] || "radio_button_unchecked"
                             fill: modelData.state === "done"
                             color: modelData.state === "failed" ? Theme.error
+                                 : modelData.state === "done" ? Theme.success
                                  : modelData.state === "waiting" || modelData.state === "skipped" ? Theme.dim
                                  : Theme.primary
                             RotationAnimation on rotation {
@@ -230,6 +234,18 @@ Rectangle {
             Layout.fillWidth: true
             spacing: 8
             Item { Layout.fillWidth: true }
+            Pill {
+                visible: sheet.done && (Jobs.log.count > 0 || sheet.job.errors.length > 0)
+                quiet: true
+                text: "Copy Log"
+                onClicked: {
+                    const lines = []
+                    for (let i = 0; i < Jobs.log.count; i++)
+                        lines.push(Jobs.log.get(i).text)
+                    Quickshell.clipboardText = (lines.length ? lines : sheet.job.errors).join("\n")
+                    sheet.view.say("Copied the log")
+                }
+            }
             Pill {
                 visible: !!sheet.job && sheet.job.cancellable
                 quiet: true

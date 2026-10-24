@@ -42,6 +42,12 @@ Singleton {
     property string green: ""
     readonly property color success: green || "#a6e3a1"
 
+    //--- Status tones for rows, badges and chips: "error", "success", "caution", or "" for none
+    function toneColor(tone) {
+        return tone === "error" ? error : tone === "success" ? success : tone === "caution" ? caution : primary
+    }
+    function toneFill(tone, base) { return Qt.tint(base, Qt.alpha(toneColor(tone), 0.2)) }
+
     FileView {
         path: Quickshell.env("HOME") + "/.cache/DankMaterialShell/dms-colors.json"
         watchChanges: true

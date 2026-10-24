@@ -12,8 +12,8 @@ ColumnLayout {
         Layout.fillWidth: true
         spacing: 6
         Chip { visible: view.diff.updated.length > 0; accent: true; text: `${view.diff.updated.length} updated` }
-        Chip { visible: view.diff.added.length > 0; text: `${view.diff.added.length} new` }
-        Chip { visible: view.diff.removed.length > 0; text: `${view.diff.removed.length} removed` }
+        Chip { visible: view.diff.added.length > 0; tone: "success"; text: `${view.diff.added.length} new` }
+        Chip { visible: view.diff.removed.length > 0; tone: "error"; text: `${view.diff.removed.length} removed` }
         Chip {
             readonly property var size: view.diff.size || []
             visible: !!size[0] && !!size[1] && size[0] !== size[1]

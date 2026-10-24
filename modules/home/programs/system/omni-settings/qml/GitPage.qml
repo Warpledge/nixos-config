@@ -67,10 +67,10 @@ ColumnLayout {
                 Flow {
                     Layout.fillWidth: true
                     spacing: 6
-                    Chip { visible: page.error !== ""; text: "Couldn't read" }
+                    Chip { visible: page.error !== ""; tone: "error"; text: "Couldn't read" }
                     Chip {
                         visible: !!page.repo && page.repo.changed.length > 0
-                        accent: true
+                        tone: "caution"
                         text: page.repo ? `${page.repo.changed.length + page.repo.moreChanged} changed` : ""
                     }
                     Chip {
@@ -79,13 +79,14 @@ ColumnLayout {
                     }
                     Chip {
                         visible: !!page.repo && page.repo.incoming.length > 0
-                        accent: true
+                        tone: "caution"
                         text: page.repo ? `${page.repo.incoming.length} to pull` : ""
                     }
                     Chip {
                         visible: !!page.repo && !page.repo.changed.length && !page.repo.outgoing.length
                                  && !page.repo.incoming.length
                         icon: "check"
+                        tone: "success"
                         text: page.repo && page.repo.upstream ? "Up to date" : "Committed"
                     }
                 }
@@ -152,7 +153,7 @@ ColumnLayout {
                     elide: Text.ElideMiddle
                     Layout.fillWidth: true
                 }
-                Chip { text: modelData.state; accent: modelData.state === "conflict" }
+                Chip { text: modelData.state; tone: modelData.state === "conflict" ? "error" : "" }
             }
         }
     }

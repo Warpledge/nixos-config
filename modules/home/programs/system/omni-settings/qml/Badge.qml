@@ -7,18 +7,19 @@ Rectangle {
     property string icon: "settings"
     property var app: []
     property bool strong: false
+    property string tone: ""
     readonly property string appPath: Theme.appIcon(app)
     implicitWidth: 38
     implicitHeight: 38
     radius: 19
-    color: appPath ? "transparent" : strong ? Theme.primary : Theme.primaryContainer
+    color: appPath ? "transparent" : tone ? Theme.toneColor(tone) : strong ? Theme.primary : Theme.primaryContainer
     Icon {
         id: glyph
         visible: !badge.appPath
         anchors.centerIn: parent
         icon: badge.icon
         size: Math.round(badge.width * 0.53)
-        color: badge.strong ? Theme.inkPrimary : Theme.inkContainer
+        color: badge.tone ? Theme.bg : badge.strong ? Theme.inkPrimary : Theme.inkContainer
         RotationAnimation on rotation {
             running: badge.icon === "progress_activity"
             from: 0; to: 360; duration: 1200; loops: Animation.Infinite

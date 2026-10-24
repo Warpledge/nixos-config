@@ -170,7 +170,8 @@ ColumnLayout {
             }
             Chip {
                 visible: text !== ""
-                accent: row.where !== "removing"
+                accent: true
+                tone: row.where === "removing" ? "caution" : ""
                 text: row.where === "adding" ? "Installs on Apply"
                     : row.where === "removing" ? "Removed on Apply"
                     : row.was !== row.cat ? "Moves here on Apply" : ""

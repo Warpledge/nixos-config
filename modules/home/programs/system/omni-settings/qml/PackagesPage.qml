@@ -190,7 +190,7 @@ ColumnLayout {
                         Layout.fillWidth: true
                     }
                 }
-                Chip { visible: !!result.info && result.info.broken; text: "Broken" }
+                Chip { visible: !!result.info && result.info.broken; tone: "error"; text: "Broken" }
                 IconButton {
                     icon: "content_copy"
                     tip: "Copy the attribute name"

@@ -689,7 +689,7 @@ Item {
                     Layout.fillWidth: true
                     implicitHeight: failed.implicitHeight + 28
                     radius: 16
-                    color: Theme.card
+                    color: Theme.toneFill("error", Theme.card)
                     ColumnLayout {
                         id: failed
                         anchors.fill: parent
@@ -703,7 +703,7 @@ Item {
                         }
                         RowLayout {
                             spacing: 14
-                            Badge { implicitWidth: 56; implicitHeight: 56; radius: 28; icon: "error" }
+                            Badge { implicitWidth: 56; implicitHeight: 56; radius: 28; icon: "error"; tone: "error" }
                             Text {
                                 text: "Couldn't read the settings"
                                 color: Theme.text
@@ -824,6 +824,8 @@ Item {
             icon: Jobs.running ? "progress_activity" : Jobs.job && Jobs.job.outcome === "failed" ? "error" : "check_circle"
             title: Jobs.job ? Jobs.job.title : ""
             subtitle: !Jobs.job ? "" : Jobs.running ? "Running" : (Jobs.job.heading || Jobs.job.done)
+            tone: !Jobs.job || Jobs.running ? "" : Jobs.job.outcome === "failed" ? "error"
+                : Jobs.job.outcome === "ok" ? "success" : ""
             chevron: true
             onClicked: omni.running = true
         }

@@ -114,7 +114,7 @@ ColumnLayout {
         Layout.fillWidth: true
         implicitHeight: outText.implicitHeight + 20
         radius: 14
-        color: Theme.card
+        color: page.last && !page.last.ok ? Theme.toneFill("error", Theme.card) : Theme.card
         TextEdit {
             id: outText
             x: 12
