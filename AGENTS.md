@@ -67,7 +67,8 @@ todo list at the start, and don't write your summary before step 3.
 
 1. `alejandra <file>` on each `.nix` file you changed.
 2. `nix flake check 2>&1 | tail -n 30` (skip for JSON, Markdown or comment-only
-   changes).
+   changes). Its `stranger` check builds a machine on template defaults, so a
+   shared module that needs `machines/` or `users/warpledge/` fails there.
 3. Load the `commit` skill and run every step, `scan.sh` included.
 4. Reply with what changed and the commit hash.
 

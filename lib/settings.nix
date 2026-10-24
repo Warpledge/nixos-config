@@ -123,7 +123,7 @@
     else if lib.all lib.isAttrs values
     then lib.zipAttrsWith (_: anyOf) values
     else null;
-in {
+in rec {
   #--- The allowed values, for tools that edit the settings files
   inherit choices userChoices listChoices;
 
@@ -133,17 +133,34 @@ in {
   #- `machine`: the machine's settings plus its folder name, with each user's
   #- final settings in machine.users. `anyUser`: each true/false user setting,
   #- true when at least one user on the machine has it on.
-  forMachine = name: let
+  forMachine = name:
+    forSettings {
+      inherit name;
+      own = import ../machines/${name}/settings.nix;
+      readUser = user: let
+        path = ../users/${user}/settings.nix;
+      in
+        if builtins.pathExists path
+        then import path
+        else null;
+    };
+
+  #--- Same, from settings given as values (`readUser` returns null for none);
+  #--- the flake's stranger check uses it
+  forSettings = {
+    name,
+    own,
+    readUser,
+  }: let
     file = "machines/${name}/settings.nix";
-    own = import ../machines/${name}/settings.nix;
     listed = own.users or {};
     names = lib.attrNames listed;
     userFile = user: "users/${user}/settings.nix";
-    missing = lib.filter (user: !builtins.pathExists ../users/${user}/settings.nix) names;
+    missing = lib.filter (user: readUser user == null) names;
 
     #--- Defaults, then the user's own file, then this machine's changes
     resolveUser = user: let
-      own = import ../users/${user}/settings.nix;
+      own = readUser user;
       merged = lib.recursiveUpdate (lib.recursiveUpdate userDefaults own) listed.${user};
     in
       merged
@@ -185,7 +202,7 @@ in {
       ++ badLists merged;
   in
     assert report file machineProblems;
-    assert lib.all (user: report (userFile user) (problems userDefaults (import ../users/${user}/settings.nix) [])) names;
+    assert lib.all (user: report (userFile user) (problems userDefaults (readUser user) [])) names;
     assert lib.all (user: report (userFile user) (badChoices userChoices machine.users.${user})) names;
     assert report file (lib.optional (!machine.users.${mainUser}.admin)
       "the main user `${mainUser}` needs admin = true (in ${userFile mainUser}), or nobody here can rebuild the system"); {

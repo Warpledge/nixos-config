@@ -40,5 +40,8 @@ esac
 if [[ $f == *.nix && $f != */modules/theme/* ]] && grep -qE '"#[0-9a-fA-F]{6}|rgba?\(' <<<"$new"; then
   msg+=("New color literal outside modules/theme/: DMS's matugen owns colours (CLAUDE.md rule 5). Use DMS's template for the app or add a matugen.templates entry, unless this is a deliberate fixed colour.")
 fi
+if [[ $f == *.nix && $f =~ /(modules|lib)/ ]] && grep -qE 'eclipse|legion|warpledge|/mnt/' <<<"$new"; then
+  msg+=("A machine, user or /mnt/ path in a shared module: anyone installing this config gets it. Move it to machines/<name>/, or gate it on a setting.")
+fi
 ((${#msg[@]})) && jq -n --arg c "$(printf '%s\n' "${msg[@]}")" '{hookSpecificOutput:{hookEventName:"PostToolUse",additionalContext:$c}}'
 exit 0

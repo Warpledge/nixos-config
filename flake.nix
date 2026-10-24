@@ -26,9 +26,47 @@
 
     #--- Every folder in machines/ is a machine, except _template
     machines = lib.filterAttrs (name: type: type == "directory" && !lib.hasPrefix "_" name) (builtins.readDir ./machines);
+
+    #--- Someone else's computer: template defaults, one admin, every toggle off.
+    #--- Must evaluate without anything from machines/ or users/warpledge/.
+    stranger = let
+      inherit
+        (settings.forSettings {
+          name = "stranger";
+          own = {
+            stateVersion = "26.05";
+            users.alice = {};
+          };
+          readUser = _: {admin = true;};
+        })
+        machine
+        anyUser
+        ;
+    in
+      nixpkgs.lib.nixosSystem {
+        modules = [
+          ./modules
+          {
+            nixpkgs.hostPlatform = "x86_64-linux";
+            fileSystems."/" = {
+              device = "/dev/disk/by-label/nixos";
+              fsType = "ext4";
+            };
+          }
+        ];
+        specialArgs = {inherit self inputs machine anyUser;};
+      };
   in {
     #--- NixOS Configurations
     nixosConfigurations = lib.mapAttrs (name: _: nixpkgs.lib.nixosSystem (mkSystem name)) machines;
+
+    #--- `nix flake check` evaluates the stranger machine (no build)
+    #--- `.nixos` exposes the system, for listing what a stranger gets installed
+    checks.x86_64-linux.stranger =
+      nixpkgs.legacyPackages.x86_64-linux.writeText "stranger-eval" (
+        builtins.unsafeDiscardStringContext stranger.config.system.build.toplevel.drvPath
+      )
+      // {nixos = stranger;};
 
     #--- Formatter (nix fmt)
     # `nix fmt .`: alejandra 3.0.0 reads stdin when given no path

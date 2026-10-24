@@ -27,7 +27,7 @@ Several folders carry their own `CLAUDE.md` (`modules/wm/`, `modules/nixos/`, `m
 ## Commands
 
 ```bash
-nix flake check         # Evaluate all outputs, no build (rule 1 says when)
+nix flake check         # Evaluate all outputs, no build (rule 1 says when); its `stranger` check is a machine on template defaults, so shared modules must work without machines/ or users/warpledge/
 nix build .#nixosConfigurations.<machine>.config.system.build.toplevel --no-link  # Full build, no activation: catches hash and patch failures that flake check (eval only) misses
 alejandra .             # Format all Nix files (v3.0.0 is the standard)
 nix fmt .               # Same formatter through the flake; a bare `nix fmt` leaves alejandra 3.0.0 waiting on stdin
