@@ -1,0 +1,8 @@
+// What the window's wrapper would set, written by default.nix for DMS's process
+pragma Singleton
+import Quickshell
+
+Singleton {
+    readonly property string backend: "@backend@"
+    readonly property var editor: (@editor@)
+}

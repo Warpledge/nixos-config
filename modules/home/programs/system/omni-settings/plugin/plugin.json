@@ -1,0 +1,11 @@
+{
+  "id": "omniSettings",
+  "name": "Omni Settings",
+  "description": "Omni Settings as a slideout panel",
+  "version": "2.0",
+  "author": "nixos-config",
+  "icon": "settings",
+  "type": "daemon",
+  "component": "./OmniPanel.qml",
+  "requires_dms": ">=2.0.0"
+}

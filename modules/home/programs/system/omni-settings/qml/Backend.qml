@@ -7,7 +7,7 @@ import Quickshell.Io
 Singleton {
     id: backend
 
-    readonly property string bin: Quickshell.env("OMNI_SETTINGS_BACKEND") || "omni-settings-backend"
+    readonly property string bin: Config.backend
 
     function call(cmd, args, done) {
         const p = runner.createObject(backend, {

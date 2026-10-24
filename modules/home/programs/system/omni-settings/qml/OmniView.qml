@@ -404,12 +404,8 @@ Item {
     }
 
     function openFile(rel) {
-        let editor = {}
-        try {
-            editor = JSON.parse(Quickshell.env("OMNI_SETTINGS_EDITOR") || "{}")
-        } catch (e) {}
         const path = rel.startsWith("/") ? rel : `${info.flake}/${rel}`
-        Quickshell.execDetached((editor.launch || ["xdg-open"]).concat([path]))
+        Quickshell.execDetached((Config.editor.launch || ["xdg-open"]).concat([path]))
     }
 
     //--- A toast; `action` ({label, run}) adds a button and keeps it up longer
