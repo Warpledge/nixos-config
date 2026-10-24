@@ -29,27 +29,6 @@ Item {
         slideout.show()
     }
 
-    //--- Hot corner: the top-right pixel of each screen, over the bar
-    Variants {
-        model: Quickshell.screens
-        PanelWindow {
-            required property var modelData
-            screen: modelData
-            anchors.top: true
-            anchors.right: true
-            implicitWidth: 1
-            implicitHeight: 1
-            color: "transparent"
-            WlrLayershell.namespace: "dms:omni-settings-corner"
-            WlrLayershell.layer: WlrLayer.Overlay
-            WlrLayershell.exclusiveZone: -1
-            WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-            HoverHandler {
-                onHoveredChanged: if (hovered) root.toggle(modelData)
-            }
-        }
-    }
-
     DSlideout {
         id: slideout
         layerNamespace: "dms:omni-settings"
