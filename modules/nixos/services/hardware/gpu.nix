@@ -26,6 +26,7 @@ in {
     #--- AMD: Mesa already carries the Vulkan and VA-API drivers
     (lib.mkIf (has "amd") {
       hardware.amdgpu.initrd.enable = true; # Early display for the boot splash
+      environment.systemPackages = [pkgs.amdgpu_top];
     })
 
     #--- Intel

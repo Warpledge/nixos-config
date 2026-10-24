@@ -32,6 +32,7 @@
   environment.systemPackages = with pkgs; [
     vulkan-tools # For vulkaninfo
     libva-utils # For vainfo
+    amdgpu_top
   ];
 
   #--- ensures that the amdgpu kernel module is loaded in stage 1

@@ -70,6 +70,7 @@
 
     systemPackages = with pkgs; [
       nvtopPackages.full # GPU monitor, AMD and NVIDIA (v3d is Raspberry Pi only)
+      amdgpu_top # 680M
 
       #--- Video Acceleration/Decoding
       libva # Video Acceleration API
