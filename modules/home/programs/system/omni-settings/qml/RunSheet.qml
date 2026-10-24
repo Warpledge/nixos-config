@@ -44,13 +44,16 @@ Rectangle {
         return pieces.map(([t, tone]) => ink(tones[tone] || Theme.dim, esc(t))).join("")
     }
 
-    //--- A log line: the build's name picked out, status glyphs in colour
+    //--- A build line's "name> text", split; other lines have no name
+    function logSplit(style, text) {
+        const m = style === "build" ? text.match(/^([^\s>]+)> ?(.*)$/) : null
+        return m ? [m[1], m[2]] : ["", text]
+    }
+
+    //--- A log line's text, status glyphs in colour; a build's name is its group header
     function logLine(style, text) {
-        if (style === "build") {
-            const m = text.match(/^([^\s>]+)> ?(.*)$/)
-            return m ? ink(Theme.primary, esc(m[1])) + ink(Theme.line, " │ ") + ink(Theme.dim, esc(m[2]))
-                     : ink(Theme.dim, esc(text))
-        }
+        if (style === "build")
+            return ink(Theme.dim, esc(logSplit(style, text)[1]))
         if (style === "graph")
             return esc(text).replace(/[✔⏵⚠]/g, g => ink(g === "✔" ? Theme.success : g === "⚠" ? Theme.error
                                                                                        : Theme.primary, g))
@@ -224,7 +227,7 @@ Rectangle {
         Flickable {
             id: busy
             readonly property var items: sheet.p && !sheet.done ? sheet.p.running : []
-            readonly property int building: items.filter(i => i.kind === "build").length
+            readonly property int building: items.filter(i => i.kind === "build" && !i.bytes).length
             property bool expanded: false
             visible: items.length > 0
             Layout.fillWidth: true
@@ -294,10 +297,13 @@ Rectangle {
                                     elide: Text.ElideMiddle
                                     Layout.fillWidth: true
                                 }
+                                //--- What it's doing: a fetchurl build counts as downloading
                                 Chip {
-                                    visible: text !== ""
                                     tappable: false
-                                    text: modelData.phase
+                                    accent: tone === ""
+                                    tone: modelData.kind === "fetch" ? "caution" : item.bytes ? "success" : ""
+                                    text: modelData.kind === "fetch" ? "Fetching" : item.bytes ? "Downloading"
+                                        : modelData.phase ? `Building · ${modelData.phase}` : "Building"
                                 }
                                 Text {
                                     text: sheet.seconds(modelData.seconds)
@@ -314,20 +320,6 @@ Rectangle {
                                 font.pixelSize: 12
                                 elide: Text.ElideRight
                                 Layout.fillWidth: true
-                            }
-                            Rectangle {
-                                visible: !!item.bytes
-                                Layout.fillWidth: true
-                                implicitHeight: 6
-                                radius: 3
-                                color: Theme.cardHover
-                                Rectangle {
-                                    height: parent.height
-                                    radius: 3
-                                    width: item.sized ? parent.width * Math.min(1, item.bytes[0] / item.bytes[1]) : 0
-                                    color: Theme.primary
-                                    Behavior on width { NumberAnimation { duration: 400 } }
-                                }
                             }
                             RowLayout {
                                 visible: !!item.bytes
@@ -348,6 +340,38 @@ Rectangle {
                                     font.pixelSize: 12
                                     font.weight: Font.DemiBold
                                     font.features: { "tnum": 1 }
+                                }
+                            }
+                            //--- Bytes when known; nix doesn't say how far a build is,
+                            //--- so a sliding bar shows it's working
+                            Rectangle {
+                                Layout.fillWidth: true
+                                implicitHeight: 6
+                                radius: 3
+                                color: Theme.cardHover
+                                clip: true
+                                Rectangle {
+                                    visible: item.sized
+                                    height: parent.height
+                                    radius: 3
+                                    width: item.sized ? parent.width * Math.min(1, item.bytes[0] / item.bytes[1]) : 0
+                                    color: Theme.primary
+                                    Behavior on width { NumberAnimation { duration: 400 } }
+                                }
+                                Rectangle {
+                                    id: slide
+                                    visible: !item.sized
+                                    height: parent.height
+                                    radius: 3
+                                    width: parent.width * 0.3
+                                    color: Qt.alpha(Theme.primary, 0.7)
+                                    NumberAnimation on x {
+                                        running: slide.visible
+                                        from: -slide.width
+                                        to: slide.parent.width
+                                        duration: 1600
+                                        loops: Animation.Infinite
+                                    }
                                 }
                             }
                         }
@@ -399,18 +423,48 @@ Rectangle {
                     onModelChanged: { follow = true; Qt.callLater(positionViewAtEnd) }
                     onCountChanged: if (follow) Qt.callLater(positionViewAtEnd)
                     onMovementEnded: follow = atYEnd
-                    delegate: Text {
+                    //--- A build's lines sit indented under its name, shown when the build changes
+                    delegate: Column {
+                        id: entry
                         required property var model
+                        required property int index
+                        readonly property string build: sheet.logSplit(model.style, model.text)[0]
+                        readonly property bool graphRow: model.style === "graph"
+                        // The last build line before this one, past start lines between them
+                        readonly property bool header: build !== "" && (() => {
+                            for (let i = index - 1; i >= Math.max(0, index - 30); i--) {
+                                const prev = Jobs.log.get(i)
+                                if (prev.style === "build")
+                                    return sheet.logSplit(prev.style, prev.text)[0] !== build
+                                if (prev.style !== "dim")
+                                    return true
+                            }
+                            return true
+                        })()
                         width: log.width
-                        text: sheet.logLine(model.style, model.text)
-                        textFormat: Text.StyledText
-                        font.family: "monospace"
-                        font.pixelSize: 12
-                        // Graph rows touch so its box lines join up
-                        lineHeight: model.style === "graph" ? 1 : 1.2
-                        wrapMode: model.style === "graph" ? Text.NoWrap : Text.WrapAtWordBoundaryOrAnywhere
-                        elide: model.style === "graph" ? Text.ElideRight : Text.ElideNone
-                        color: Theme.dim
+                        Text {
+                            visible: entry.header
+                            width: parent.width
+                            topPadding: entry.index > 0 ? 6 : 0
+                            text: entry.build
+                            color: Theme.primary
+                            font.pixelSize: 12
+                            font.weight: Font.DemiBold
+                            elide: Text.ElideMiddle
+                        }
+                        Text {
+                            width: parent.width
+                            leftPadding: entry.build !== "" ? 12 : 0
+                            text: sheet.logLine(entry.model.style, entry.model.text)
+                            textFormat: Text.StyledText
+                            font.family: entry.graphRow ? "monospace" : Qt.application.font.family
+                            font.pixelSize: 12
+                            // Graph rows touch so its box lines join up
+                            lineHeight: entry.graphRow ? 1 : 1.15
+                            wrapMode: entry.graphRow ? Text.NoWrap : Text.WrapAtWordBoundaryOrAnywhere
+                            elide: entry.graphRow ? Text.ElideRight : Text.ElideNone
+                            color: Theme.dim
+                        }
                     }
                 }
                 //--- nom's dependency graph under the log while it builds
