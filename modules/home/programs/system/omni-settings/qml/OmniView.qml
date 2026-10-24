@@ -520,7 +520,8 @@ Item {
                     Rectangle {
                         required property var modelData
                         readonly property bool active: omni.tab === modelData.id
-                        Layout.preferredWidth: tabHover.hovered ? tabLabel.x + tabLabel.implicitWidth + 14 : 38
+                        readonly property bool open: active || tabHover.hovered
+                        Layout.preferredWidth: open ? tabLabel.x + tabLabel.implicitWidth + 14 : 38
                         Layout.preferredHeight: 38
                         Behavior on Layout.preferredWidth { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
                         radius: 19
@@ -543,7 +544,7 @@ Item {
                             font.pixelSize: 15
                             font.weight: Font.Bold
                             color: active ? Theme.inkPrimary : Theme.text
-                            opacity: tabHover.hovered ? 1 : 0
+                            opacity: parent.open ? 1 : 0
                             Behavior on opacity { NumberAnimation { duration: 150 } }
                         }
                         HoverHandler { id: tabHover; cursorShape: Qt.PointingHandCursor }
