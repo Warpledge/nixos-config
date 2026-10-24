@@ -114,6 +114,12 @@ PAGES = {
     "Security": ("apps", "security-high-symbolic", "Passwords and clean-up.", None),
     "System Tools": ("apps", "utilities-system-monitor-symbolic", "Monitoring tools.", None),
     "Android": ("apps", "phone-symbolic", "Phones and tablets.", None),
+    "Local": ("apps", "folder-download-symbolic",
+              "Apps run from a prebuilt bundle you put in ~/.local/opt yourself; "
+              "this config only wraps them.",
+              [("Media", "", ["media.tonkatsuBox"]),
+               ("Audio", "", ["audio.katanaFloorboard"]),
+               ("Gaming", "", ["gaming.granblueRelinkMods"])]),
     "Fun": ("apps", "face-smile-big-symbolic", "Terminal toys.", None),
     "Dev": ("apps", "applications-engineering-symbolic", "Programming languages and developer tools.", None),
     "Gaming": ("apps", "applications-games-symbolic", "Launchers, games and gaming tools.", None),
