@@ -4,6 +4,7 @@
 {
   config,
   lib,
+  machine,
   pkgs,
   user,
   ...
@@ -29,9 +30,11 @@
     kitty_override startup_session=ai-panel-session.conf
   '';
 
-  #--- One tab per agent; --hold drops to a shell when the agent exits
+  #--- One tab per agent, opened in the config repo; --hold drops to a shell when the
+  #--- agent exits
   xdg.configFile."kitty/ai-panel-session.conf".text = lib.concatStringsSep "\n" (
-    lib.optionals user.claude.enable [
+    ["cd ${machine.flakePath}"]
+    ++ lib.optionals user.claude.enable [
       "new_tab Claude Code"
       "launch --hold claude"
     ]
