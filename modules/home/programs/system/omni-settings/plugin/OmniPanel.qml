@@ -15,6 +15,13 @@ Item {
     property string pluginId
     property var pluginService
 
+    function toggle(screen) {
+        if (slideout.isVisible)
+            slideout.hide()
+        else
+            show(screen)
+    }
+
     function show(screen) {
         // One slideout, moved to the focused screen, so pending changes aren't split
         if (!slideout.isVisible)
@@ -38,7 +45,7 @@ Item {
             WlrLayershell.exclusiveZone: -1
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
             HoverHandler {
-                onHoveredChanged: if (hovered) root.show(modelData)
+                onHoveredChanged: if (hovered) root.toggle(modelData)
             }
         }
     }
@@ -56,36 +63,6 @@ Item {
         margins.bottom: bottomInset
         implicitHeight: (modelData ? modelData.height : 800) - topInset - bottomInset
 
-        //--- Closes once the cursor has been off it a moment (not while typing, or with a
-        // sheet or question open), or when another window takes focus
-        readonly property bool keepOpen: {
-            const view = slideout.loadedItem
-            const f = slideout.contentItem.Window.activeFocusItem
-            return !!view && (view.sheet !== null || view.dialog.visible || (!!f && "cursorPosition" in f))
-        }
-        readonly property bool focused: slideout.contentItem.Window.active
-        onFocusedChanged: if (!focused && isVisible && entered) hide()
-        // Both close only once the cursor has been on it, since focus follows the mouse
-        property bool entered: false
-        onKeepOpenChanged: leave.restart()
-        onIsVisibleChanged: {
-            leave.stop()
-            entered = false
-        }
-        HoverHandler {
-            id: hover
-            parent: slideout.contentItem
-            onHoveredChanged: {
-                if (hovered)
-                    slideout.entered = true
-                leave.restart()
-            }
-        }
-        Timer {
-            id: leave
-            interval: 600
-            onTriggered: if (slideout.isVisible && slideout.entered && !hover.hovered && !slideout.keepOpen) slideout.hide()
-        }
         content: Component {
             OmniView {
                 focus: true
@@ -98,12 +75,8 @@ Item {
         target: "omniSettings"
 
         function toggle(): string {
-            if (slideout.isVisible) {
-                slideout.hide()
-                return "CLOSED"
-            }
-            root.show()
-            return "OPENED"
+            root.toggle()
+            return slideout.isVisible ? "OPENED" : "CLOSED"
         }
 
         function show(): string {
