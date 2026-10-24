@@ -879,7 +879,7 @@ Item {
     //--- Pages button, level with the top tabs: hovering drops the rail
     Timer {
         id: railClose
-        interval: 300
+        interval: 800  // time to cross the page from the top tabs to the rail
         // Only the cursor reaching the page closes the rail; leaving the window doesn't
         onTriggered: if (pageHover.hovered && !railArea.hovered && !pagesHover.hovered && !tabsArea.hovered)
             omni.railOpen = false
