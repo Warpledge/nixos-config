@@ -512,8 +512,8 @@ Item {
                             }
                             Text {
                                 text: modelData.title
-                                font.pixelSize: 12
-                                font.weight: Font.DemiBold
+                                font.pixelSize: 13
+                                font.weight: Font.Bold
                                 color: active ? Theme.inkPrimary : Theme.dim
                             }
                         }
@@ -549,7 +549,7 @@ Item {
                         anchors.leftMargin: 10
                         anchors.rightMargin: 14
                         spacing: 12
-                        Badge { icon: Theme.glyph(omni.current ? omni.current.icon : []); strong: true }
+                        Badge { icon: Theme.glyph(omni.current ? omni.current.icon : []) }
                         ColumnLayout {
                             spacing: 1
                             Layout.fillWidth: true
@@ -743,7 +743,7 @@ Item {
                     Layout.fillWidth: true
                     implicitHeight: whatsNew.implicitHeight + 24
                     radius: 16
-                    color: Theme.primaryContainer
+                    color: Theme.toneFill("", Theme.card)
                     ColumnLayout {
                         id: whatsNew
                         anchors.fill: parent
@@ -752,7 +752,7 @@ Item {
                         Text {
                             readonly property int n: omni.info ? omni.info.whatsNew.length : 0
                             text: `${n} new setting${n === 1 ? "" : "s"} your files don't list yet`
-                            color: Theme.inkContainer
+                            color: Theme.text
                             font.weight: Font.DemiBold
                         }
                         RowLayout {

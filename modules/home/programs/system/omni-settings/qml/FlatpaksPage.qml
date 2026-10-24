@@ -158,6 +158,8 @@ ColumnLayout {
         ListRow {
             icon: page.checking || page.busy === "update" ? "progress_activity" : "update"
             title: "Apps and Runtimes"
+            tone: page.busy === "update" || page.checking ? "" : page.checkError ? "error"
+                : page.found === null ? "" : page.found.length ? "caution" : "success"
             subtitle: page.busy === "update" ? (page.progress || "Updating…")
                 : page.checking ? "Asking each source for its newest versions…"
                 : page.checkError ? `Couldn't check: ${page.checkError}`

@@ -42,6 +42,6 @@ Gotchas:
 - Each `api.py` call is a new process, so state that must outlast one (the Git fetch limit) goes in a file under `$XDG_RUNTIME_DIR/omni-settings/`.
 - Don't name a property after one `Item` already has (`data`, `state`): the page fails to load.
 - A `Loader` in a layout takes `Layout.preferredHeight: item ? item.implicitHeight : 0`, or the next page it loads keeps the last one's height.
-- Matugen has no success colour: `Theme.success` is DMS's terminal green (`dank16` color2).
+- Matugen has no success or warning colour, and its `tertiary` needn't be yellow: `Theme.success` and `Theme.caution` are DMS's terminal green and yellow (`dank16` color2 and color3). Status colours go through a `tone` on `ListRow`, `Badge` and `Chip`.
 - The job service runs from the installed system, so a new or changed job kind in `jobs.py` needs a rebuild before the built package can use it.
 - Testing without a rebuild: build `.#nixosConfigurations.<machine>.config.home-manager.users.<user>.omni-settings.package` and run its `bin/omni-settings --qml`. For checks without a window, run `src/api.py` with the `OMNI_SETTINGS_*` variables from the installed wrapper, and load a throwaway `qml/zz*.qml` under `QT_QPA_PLATFORM=offscreen`, saving `grabToImage` renders; delete it afterwards.

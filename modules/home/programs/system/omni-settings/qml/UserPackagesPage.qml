@@ -171,7 +171,7 @@ ColumnLayout {
             Chip {
                 visible: text !== ""
                 accent: true
-                tone: row.where === "removing" ? "caution" : ""
+                tone: row.where === "removing" ? "caution" : row.where === "adding" ? "success" : ""
                 text: row.where === "adding" ? "Installs on Apply"
                     : row.where === "removing" ? "Removed on Apply"
                     : row.was !== row.cat ? "Moves here on Apply" : ""

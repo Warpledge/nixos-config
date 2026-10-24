@@ -12,7 +12,7 @@ Rectangle {
     implicitWidth: row.implicitWidth + 16
     implicitHeight: 26
     radius: 13
-    color: tone ? Qt.alpha(Theme.toneColor(tone), 0.2) : accent ? Theme.primaryContainer
+    color: tone ? Qt.alpha(Theme.toneColor(tone), 0.2) : accent ? Qt.alpha(Theme.primary, 0.2)
          : hover.hovered ? Theme.line : Theme.cardHover
     Row {
         id: row
@@ -22,7 +22,7 @@ Rectangle {
             id: label
             anchors.verticalCenter: parent.verticalCenter
             font.pixelSize: 12
-            color: chip.tone ? Theme.toneColor(chip.tone) : chip.accent ? Theme.inkContainer : Theme.dim
+            color: chip.tone ? Theme.toneColor(chip.tone) : chip.accent ? Theme.primary : Theme.dim
         }
         Icon {
             visible: chip.icon !== ""

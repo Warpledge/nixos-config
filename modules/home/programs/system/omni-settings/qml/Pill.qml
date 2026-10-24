@@ -17,7 +17,7 @@ Rectangle {
         id: pillText
         anchors.centerIn: parent
         font.pixelSize: 13
-        font.weight: Font.DemiBold
+        font.weight: Font.Bold
         color: pill.danger ? Theme.inkError : pill.quiet ? Theme.text : Theme.inkPrimary
     }
     HoverHandler { id: hover; cursorShape: pill.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor }

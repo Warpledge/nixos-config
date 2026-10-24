@@ -148,7 +148,12 @@ ColumnLayout {
             anchors.leftMargin: 10
             anchors.rightMargin: 12
             spacing: 10
-            Badge { icon: kindRow.working ? "progress_activity" : "save" }
+            // Green within a week of the last backup, yellow after that or before the first
+            Badge {
+                icon: kindRow.working ? "progress_activity" : "save"
+                tone: kindRow.working ? "" : kindRow.kind.last && Date.now() / 1000 - kindRow.kind.last < 7 * 86400
+                    ? "success" : "caution"
+            }
             ColumnLayout {
                 spacing: 1
                 Layout.fillWidth: true

@@ -33,14 +33,16 @@ Singleton {
     readonly property color inkContainer: col("on_primary_container")
     readonly property color selected: col("secondary_container")
     readonly property color inkSelected: col("on_secondary_container")
-    readonly property color caution: col("tertiary")
     readonly property color error: col("error")
     readonly property color inkError: col("on_error")
     readonly property color toast: col("inverse_surface")
     readonly property color inkToast: col("inverse_on_surface")
-    // Matugen has no success role; DMS's terminal green (dank16 color2) follows the theme
+    // Matugen has no success or warning role, and tertiary needn't be yellow; DMS's
+    // terminal green and yellow (dank16 color2 and color3) follow the theme
     property string green: ""
+    property string yellow: ""
     readonly property color success: green || "#a6e3a1"
+    readonly property color caution: yellow || "#f9e2af"
 
     //--- Status tones for rows, badges and chips: "error", "success", "caution", or "" for none
     function toneColor(tone) {
@@ -59,9 +61,12 @@ Singleton {
                 theme.c = d.colors[d.mode] || d.colors.dark || {}
                 const g = (d.dank16 || {}).color2 || {}
                 theme.green = g[d.mode] || g.default || ""
+                const y = (d.dank16 || {}).color3 || {}
+                theme.yellow = y[d.mode] || y.default || ""
             } catch (e) {
                 theme.c = {}
                 theme.green = ""
+                theme.yellow = ""
             }
         }
     }

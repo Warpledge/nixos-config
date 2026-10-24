@@ -143,7 +143,7 @@ ColumnLayout {
                     Layout.fillWidth: true
                 }
             }
-            Chip { visible: row.tool["default"]; text: "Steam default"; accent: true }
+            Chip { visible: row.tool["default"]; text: "Steam default"; tone: "success" }
             IconButton {
                 visible: !!row.tool.path
                 icon: "folder_open"

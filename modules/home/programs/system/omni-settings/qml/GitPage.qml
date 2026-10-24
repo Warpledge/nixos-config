@@ -127,6 +127,7 @@ ColumnLayout {
     ListRow {
         visible: !!page.repo
         icon: "sync"
+        tone: page.repo && page.repo.fetchErr ? "error" : ""
         title: "Last Fetched"
         subtitle: !page.repo ? "" : (page.repo.fetched ? Fmt.when(page.repo.fetched) : "Never")
                   + (page.repo.fetchErr ? `\nCouldn't fetch now: ${page.repo.fetchErr}` : "")
@@ -153,7 +154,12 @@ ColumnLayout {
                     elide: Text.ElideMiddle
                     Layout.fillWidth: true
                 }
-                Chip { text: modelData.state; tone: modelData.state === "conflict" ? "error" : "" }
+                Chip {
+                    text: modelData.state
+                    tone: ({ conflict: "error", deleted: "error", modified: "caution", added: "success",
+                             new: "success" })[modelData.state] || ""
+                    accent: !tone
+                }
             }
         }
     }
@@ -191,6 +197,7 @@ ColumnLayout {
     ListRow {
         visible: !!page.repo && (page.repo.prs === null || page.repo.prs.length === 0)
         icon: page.repo && page.repo.prs !== null ? "check" : "cloud_off"
+        tone: !page.repo || !page.repo.repo ? "" : page.repo.limited ? "caution" : page.repo.prErr ? "error" : "success"
         title: !page.repo ? "" : !page.repo.repo ? "The origin remote isn't on GitHub"
              : page.repo.limited ? "GitHub's limit for requests without signing in is used up"
              : page.repo.prErr ? "Couldn't reach GitHub"
