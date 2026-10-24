@@ -157,8 +157,40 @@ ColumnLayout {
     }
 
     function remove(rule) {
-        Backend.call("removeWindowRule", { index: rule.index }, saved)
+        view.ask({ heading: `Remove ${rule.title}?`,
+                   body: "It comes out of window-rules.json. A rebuild applies it.",
+                   buttons: [{ label: "Remove", value: "remove", danger: true }] },
+                 () => Backend.call("removeWindowRule", { index: rule.index }, saved))
     }
+
+    //--------------------------------------------------------------------//
+    //-- Search and order
+    //--------------------------------------------------------------------//
+    property string query: ""
+    property string order: "group"  // group, az (by name) or file (as niri reads them)
+
+    function found(r) {
+        const q = query.trim().toLowerCase()
+        if (!q)
+            return true
+        const windows = r.matches.concat(r.excludes).map(m => `${m.name} ${m.pattern}`)
+        return [r.title, r.note].concat(r.tags.map(t => t.text), windows).join("\n").toLowerCase().includes(q)
+    }
+
+    readonly property var shownGroups: {
+        if (!wr)
+            return []
+        if (order === "group")
+            return wr.groups.map(g => Object.assign({}, g, { rules: g.rules.filter(found) }))
+                .filter(g => g.rules.length)
+        const all = wr.groups.reduce((acc, g) => acc.concat(g.rules), []).filter(found)
+        all.sort(order === "az" ? (a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase())
+                                : (a, b) => a.index - b.index)
+        return all.length ? [{ title: order === "az" ? "By Name" : "In File Order",
+                               description: order === "file" ? "Top to bottom, as niri reads them." : "",
+                               icon: "view-continuous", kind: "accent", rules: all }] : []
+    }
+    readonly property var shownNix: wr ? wr.fromNix.filter(found) : []
 
     //--- A change's reply: its toast offers Undo, which puts the file's text back as it was
     function saved(reply) {
@@ -404,9 +436,39 @@ ColumnLayout {
         font.pixelSize: 13
         Layout.leftMargin: 6
     }
+    Field {
+        visible: !!page.wr
+        icon: "search"
+        placeholder: "Search rules, tags and app IDs"
+        onTextChanged: page.query = text
+        onEscaped: text = ""
+    }
+    Flow {
+        visible: !!page.wr
+        Layout.fillWidth: true
+        Layout.leftMargin: 4
+        spacing: 6
+        Repeater {
+            model: [{ id: "group", label: "Grouped" }, { id: "az", label: "A to Z" }, { id: "file", label: "File Order" }]
+            Chip {
+                required property var modelData
+                text: modelData.label
+                accent: page.order === modelData.id
+                onTapped: page.order = modelData.id
+            }
+        }
+    }
+    Text {
+        visible: !!page.wr && page.shownGroups.length === 0 && page.shownNix.length === 0
+        text: "No rules match."
+        color: Theme.dim
+        font.pixelSize: 13
+        Layout.leftMargin: 6
+        Layout.topMargin: 6
+    }
 
     Repeater {
-        model: page.wr ? page.wr.groups : []
+        model: page.shownGroups
         RuleGroup {
             required property var modelData
             title: modelData.title
@@ -417,12 +479,12 @@ ColumnLayout {
         }
     }
     RuleGroup {
-        visible: !!page.wr && page.wr.fromNix.length > 0
+        visible: page.shownNix.length > 0
         title: "Set in Nix"
         description: "Theme styling, the translucent app list and this computer's own rules. These are "
                      + "edited in the config's Nix files, not here."
         icon: "applications-system"
-        rules: page.wr ? page.wr.fromNix : []
+        rules: page.shownNix
     }
 
     component Label: Text {

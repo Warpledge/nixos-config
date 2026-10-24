@@ -60,6 +60,10 @@ Sheet {
         return e
     }
 
+    //--- Delegates get copies of the entries, so changes go through the list by position
+    function setProp(i, key, v) { props[i][key] = v }
+    function setMatch(list, i, key, v) { list[i][key] = v }
+
     function addProp(k) {
         const defaults = { on: true, choice: k.choices.length ? k.choices[0].value : true,
                            size: { proportion: 0.5 }, opacity: 0.9, workspace: "", output: "" }
@@ -152,7 +156,7 @@ Sheet {
     Section { text: "What It Does" }
     Repeater {
         model: ed.props
-        PropEditor { required property var modelData; e: modelData }
+        PropEditor { required property var modelData; required property int index; e: modelData; at: index }
     }
     Label { visible: ed.missing.length > 0; text: "Add"; Layout.topMargin: 4 }
     Flow {
@@ -172,6 +176,7 @@ Sheet {
         list: ed.matches
         onAdd: ed.matches = ed.matches.concat([ed.matchEntry({})])
         onRemove: i => ed.matches = ed.matches.filter((_, j) => j !== i)
+        onEdit: (i, key, value) => ed.setMatch(ed.matches, i, key, value)
     }
     MatchGroup {
         title: "Left Out"
@@ -179,6 +184,7 @@ Sheet {
         list: ed.excludes
         onAdd: ed.excludes = ed.excludes.concat([ed.matchEntry({})])
         onRemove: i => ed.excludes = ed.excludes.filter((_, j) => j !== i)
+        onEdit: (i, key, value) => ed.setMatch(ed.excludes, i, key, value)
     }
 
     component Label: Text {
@@ -206,10 +212,11 @@ Sheet {
     component PropEditor: Card {
         id: pe
         property var e
+        property int at
         property bool switched: e.on || false
         property int pick: e.control === "choice" ? e.choice : e.control === "size" ? e.size : 0
-        onSwitchedChanged: e.on = switched
-        onPickChanged: if (e.control === "choice") e.choice = pick; else if (e.control === "size") e.size = pick
+        onSwitchedChanged: ed.setProp(at, "on", switched)
+        onPickChanged: if (e.control === "choice") ed.setProp(at, "choice", pick); else if (e.control === "size") ed.setProp(at, "size", pick)
         RowLayout {
             Layout.fillWidth: true
             Text {
@@ -220,7 +227,7 @@ Sheet {
                 Layout.fillWidth: true
             }
             Toggle { visible: pe.e.control === "on"; checked: pe.switched; onToggled: on => pe.switched = on }
-            IconButton { icon: "delete"; onClicked: ed.props = ed.props.filter(x => x !== pe.e) }
+            IconButton { icon: "delete"; onClicked: ed.props = ed.props.filter((_, j) => j !== pe.at) }
         }
         Flow {
             visible: ["choice", "size"].includes(pe.e.control)
@@ -243,14 +250,14 @@ Sheet {
             visible: pe.e.control === "size" && pe.pick === ed.pixelsIndex
             text: pe.e.px || ""
             placeholder: "Pixels"
-            onTextChanged: pe.e.px = text
+            onTextChanged: ed.setProp(pe.at, "px", text)
         }
         Field {
             id: typedField
             visible: ["opacity", "workspace", "output"].includes(pe.e.control)
             text: pe.e.typed || ""
             placeholder: pe.e.control === "opacity" ? "0.05 to 1" : pe.e.control === "workspace" ? "Workspace name" : "Monitor name"
-            onTextChanged: pe.e.typed = text
+            onTextChanged: ed.setProp(pe.at, "typed", text)
         }
         Flow {
             readonly property var names: pe.e.control === "workspace" ? ed.wr.workspaces
@@ -286,6 +293,7 @@ Sheet {
         property var list: []
         signal add
         signal remove(int i)
+        signal edit(int i, string key, string value)
         Layout.fillWidth: true
         spacing: 6
         RowLayout {
@@ -316,11 +324,11 @@ Sheet {
                         spacing: 6
                         RowLayout {
                             Label { text: "App ID"; Layout.preferredWidth: 52 }
-                            Field { text: mc.modelData.app; onTextChanged: mc.modelData.app = text }
+                            Field { text: mc.modelData.app; onTextChanged: mg.edit(mc.index, "app", text) }
                         }
                         RowLayout {
                             Label { text: "Title"; Layout.preferredWidth: 52 }
-                            Field { text: mc.modelData.title; onTextChanged: mc.modelData.title = text }
+                            Field { text: mc.modelData.title; onTextChanged: mg.edit(mc.index, "title", text) }
                         }
                     }
                     IconButton { icon: "delete"; onClicked: mg.remove(mc.index) }
