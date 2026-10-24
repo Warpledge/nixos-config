@@ -402,6 +402,7 @@ Item {
         picking = false
         search.text = ""
         bodyFlick.contentY = 0
+        omni.forceActiveFocus()
     }
 
     function openFile(rel) {
@@ -442,6 +443,20 @@ Item {
                 out.push({ kind: "dms", tab: e.tab, title: e.label, subtitle: `DankMaterialShell · ${e.page}`,
                            icon: ["preferences-desktop-theme"] })
         return out.slice(0, 60)
+    }
+
+    //--- Typing opens search; keys only get here when no field has focus
+    Keys.onPressed: event => {
+        const t = event.text
+        if (t.length !== 1 || t <= " " || t === "\x7f" || !mainCol.visible
+                || event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier))
+            return
+        railOpen = false
+        picking = true
+        search.text = t
+        search.input.forceActiveFocus()
+        search.input.cursorPosition = t.length
+        event.accepted = true
     }
 
     Keys.onEscapePressed: {
@@ -633,7 +648,11 @@ Item {
                 parent: bodyFlick
                 anchors.fill: parent
                 enabled: omni.picking
-                onClicked: omni.picking = false
+                onClicked: {
+                    omni.picking = false
+                    search.text = ""
+                    omni.forceActiveFocus()
+                }
             }
 
             ColumnLayout {
@@ -821,7 +840,7 @@ Item {
         }
     }
 
-    //--- Pages button, level with the top tabs: hovering drops the rail, a click closes search
+    //--- Pages button, level with the top tabs: hovering drops the rail
     Timer {
         id: railClose
         interval: 300
@@ -835,30 +854,19 @@ Item {
         width: rail.width
         height: rail.width
         radius: width / 2
-        color: omni.picking ? Theme.primary : pagesHover.hovered || omni.railOpen ? Theme.cardHover : Theme.card
+        color: omni.railOpen ? Theme.cardHover : Theme.card
         Behavior on color { ColorAnimation { duration: 120 } }
         Icon {
             anchors.centerIn: parent
-            icon: omni.picking ? "close" : "menu"
+            icon: "menu"
             size: 20
-            color: omni.picking ? Theme.inkPrimary : Theme.dim
+            color: Theme.dim
         }
         HoverHandler {
             id: pagesHover
-            cursorShape: Qt.PointingHandCursor
             onHoveredChanged: {
                 if (hovered && !omni.picking) omni.railOpen = true
                 else railClose.restart()
-            }
-        }
-        TapHandler {
-            gesturePolicy: TapHandler.ReleaseWithinBounds
-            onTapped: {
-                if (omni.picking) {
-                    omni.picking = false
-                    search.text = ""
-                } else
-                    omni.railOpen = !omni.railOpen
             }
         }
     }
@@ -891,9 +899,7 @@ Item {
             anchors.bottomMargin: 2
             clip: true
             boundsBehavior: Flickable.StopAtBounds
-            // Search first, then the tab's pages
-            model: [{ id: "__search", title: "Search", glyph: "manage_search", group: "" }]
-                .concat(omni.navItems.filter(i => i.tab === omni.tab))
+            model: omni.navItems.filter(i => i.tab === omni.tab)
             onContentYChanged: omni.railTip = null
 
             delegate: Column {
@@ -902,7 +908,7 @@ Item {
                 required property int index
                 readonly property var prev: index > 0 ? railList.model[index - 1] : null
                 readonly property bool active: omni.page === modelData.id
-                readonly property string glyph: modelData.glyph || Theme.glyph(modelData.icon)
+                readonly property string glyph: Theme.glyph(modelData.icon)
                 width: railList.width
                 //--- A short line where the page list starts a new group
                 Item {
@@ -948,14 +954,7 @@ Item {
                     }
                     TapHandler {
                         gesturePolicy: TapHandler.ReleaseWithinBounds
-                        onTapped: {
-                            omni.railOpen = false
-                            if (railItem.modelData.id === "__search") {
-                                omni.picking = true
-                                search.input.forceActiveFocus()
-                            } else
-                                omni.go(omni.tab, railItem.modelData.id)
-                        }
+                        onTapped: omni.go(omni.tab, railItem.modelData.id)
                     }
                 }
             }
