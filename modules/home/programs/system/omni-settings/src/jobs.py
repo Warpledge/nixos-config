@@ -28,6 +28,7 @@ import api  # noqa: E402
 import backend  # noqa: E402
 import nixfile  # noqa: E402
 import nixlog  # noqa: E402
+import peoplestate  # noqa: E402
 import system  # noqa: E402
 
 STEPS = {
@@ -538,10 +539,36 @@ class Service:
             job = self.new_job(kind, "Removing Old Settings", ["auth"], "Old settings removed")
             await self.run(job, {"clean": True})
             return job
+        if kind == "person":
+            state = await loop.run_in_executor(None, api.loaded, cfg)
+            if api.access(cfg, state) != (True, True):
+                raise JobError("Only an admin can add people")
+            name, password = args.get("name", "").strip(), args.get("password", "")
+            if not password:
+                raise JobError("Type their first password")
+            job = self.new_job(kind, f"Adding {name}",
+                               ["write", "auth", "build", "compare", "switch", "boot", "password"],
+                               f"{name} can log in now", titles={"write": "Write their settings"})
+            job.step("write", "running")
+            try:
+                undo = await loop.run_in_executor(None, peoplestate.add, cfg, state, name,
+                                                  bool(args.get("admin")), args.get("gitName", "").strip(),
+                                                  args.get("gitEmail", "").strip())
+            except peoplestate.AddError as e:
+                job.errors.append(str(e))
+                job.step("write", "failed")
+                job.finish("failed", f"Couldn't add {name}", str(e))
+                return job
+            job.step("write", "done")
+            job.undo, job.undo_label = undo, f"Take {name} Off Again"
+            # The password goes on the helper's stdin, never in its arguments
+            await self.run(job, {"rebuild": True, "mode": "auto", "newUser": name}, password + "\n")
+            return job
         raise JobError(f"unknown job: {kind}")
 
-    async def run(self, job, request):
-        """Starts the helper for `request`; its output is read in the background."""
+    async def run(self, job, request, first_line=None):
+        """Starts the helper for `request`, writing `first_line` to its stdin;
+        its output is read in the background."""
         job.step("auth", "running")
         helper = api.helper()
         if helper is None:
@@ -556,6 +583,9 @@ class Service:
             job.append("error", str(e))
             job.finish("failed", "Couldn't start the rebuild", str(e))
             return
+        if first_line is not None:
+            job.proc.stdin.write(first_line.encode())
+            await job.proc.stdin.drain()
         asyncio.get_running_loop().create_task(self.read(job))
 
     async def read(self, job):

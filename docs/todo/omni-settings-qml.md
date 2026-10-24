@@ -22,6 +22,8 @@ Added 2026-10-23.
 
 **Status (2026-10-23):** Repair fixed: the repair finished, then `flatpakRun`'s reply crashed reading the app name with no app picked (update did the same). Backups is ported: its GTK-free half moved to `src/backupstate.py`; api.py answers `backups` and `backup`, which runs `nixm <command>` and returns what it printed for the page's Last Run. Repair, update and Backups tested on the desktop. Next: People.
 
+**Status (2026-10-23):** the rest of the Main tab is ported. People: its GTK-free half moved to `src/peoplestate.py`; api.py answers `people` and `checkPerson`, and adding someone is the job service's `person` job, which writes the files and hands the first password to the helper's stdin (the front end doesn't keep it for a re-run). Running Now and Open Right Now, the GTK extras on the generated Services and Network & Firewall pages: `src/servicestate.py`, api.py's `services`, `serviceLog`, `serviceRestart` (only units in `UNITS`) and `ports`, shown by `RunningNow.qml` and `OpenPorts.qml` from `SettingsPage.qml`; the page list shows how many services run. Checked offscreen; adding a person and a restart not yet tested. Next: the Packages tab.
+
 ## What's already in the repo
 
 - `modules/home/programs/system/omni-settings/src/`: about 9,700 lines of Python (2026-10-23). About 3,700 of them are already GTK-free and stay as the backend: `helper.py`, `schema.py`, `backend.py`, `system.py`, `nixfile.py`, `nixlog.py`, `dms.py`, `closure.py`, `session.py`. The rest (`app.py`, `windowrules.py`, `runview.py`, `flatpaks.py`, `packages.py`, `overview.py` and smaller pages) mixes logic with GTK calls.

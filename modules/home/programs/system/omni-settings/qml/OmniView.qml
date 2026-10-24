@@ -43,6 +43,14 @@ Item {
         onTriggered: Backend.call("gitSummary", {}, reply => { if (reply.ok) omni.gitCounts = reply.data })
     }
 
+    //--- Services running now, for the page list; Running Now updates it too
+    property int servicesRunning: -1
+    onInfoChanged: if (info && servicesRunning < 0)
+        Backend.call("services", {}, reply => {
+            if (reply.ok)
+                servicesRunning = reply.data.filter(u => u.active === "active").length
+        })
+
     //--- Every DMS link the pages carry
     readonly property var links: !info ? [] : Object.values(info.pages)
         .reduce((all, pg) => pg.groups.reduce((acc, g) => acc.concat(g.links), all), [])
@@ -227,7 +235,7 @@ Item {
                 say(reply.error)
                 return
             }
-            lastJob = { kind, args }
+            lastJob = kind === "person" ? null : { kind, args }  // not kept: a password
             reviewing = false
             running = true
         })
@@ -515,7 +523,9 @@ Item {
                             subtitle: modelData.subtitle || ""
                             selected: modelData.kind === "page" && omni.page === modelData.page && !search.text
                             trailing: modelData.kind === "dms" ? "open_in_new" : ""
-                            tag: modelData.page === "git" ? omni.gitTag : ""
+                            tag: modelData.page === "git" ? omni.gitTag
+                                 : modelData.page === "page:Services" && omni.servicesRunning > 0
+                                 ? `${omni.servicesRunning} running` : ""
                             compact: true
                             onClicked: list.pick(modelData)
                         }
@@ -709,7 +719,8 @@ Item {
 
     //--- Custom pages by id; each is ported from the GTK app in turn
     readonly property var custom: ({ overview: overviewPage, shell: shellPage, git: gitPage,
-                                      flatpaks: flatpaksPage, backups: backupsPage })
+                                      flatpaks: flatpaksPage, backups: backupsPage, people: peoplePage })
+    Component { id: peoplePage; PeoplePage { view: omni } }
     Component { id: backupsPage; BackupsPage { view: omni } }
     Component { id: flatpaksPage; FlatpaksPage { view: omni } }
     Component { id: overviewPage; OverviewPage { view: omni } }

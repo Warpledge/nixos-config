@@ -23,7 +23,9 @@ import closure  # noqa: E402
 import flatpakstate  # noqa: E402
 import gitstate  # noqa: E402
 import nixfile  # noqa: E402
+import peoplestate  # noqa: E402
 import schema  # noqa: E402
+import servicestate  # noqa: E402
 import system  # noqa: E402
 
 #--- The root helper every rebuild goes through (nixos/system/user/omni-settings-helper.nix)
@@ -590,6 +592,66 @@ def cmd_backup(_cfg, args):
     return {"ok": ok, "output": output}
 
 
+#--------------------------------------------------------------------#
+#-- People
+#--------------------------------------------------------------------#
+def cmd_people(cfg, _args):
+    """Who can log in here; adding someone is the job service's `person` job."""
+    state = loaded(cfg)
+    users, main = state.resolved["users"], state.resolved.get("mainUser")
+    return [{"name": name, "you": name == cfg.user, "owner": name == main and len(users) > 1,
+             "admin": bool(users[name].get("admin"))} for name in users]
+
+
+def cmd_check_person(cfg, args):
+    """Whether args.name can be added: {problem, existing}, existing when
+    users/<name>/ is already set up."""
+    problem, existing = peoplestate.check(cfg, list(loaded(cfg).resolved["users"]),
+                                          args.get("name", "").strip())
+    return {"problem": problem, "existing": existing}
+
+
+#--------------------------------------------------------------------#
+#-- Services and ports the running system has
+#--------------------------------------------------------------------#
+def cmd_services(_cfg, _args):
+    """Running Now: each service in servicestate.UNITS the running system has."""
+    found = servicestate.states()
+    return [{"name": name, "scope": scope, "unit": unit, "active": found[(scope, unit)][0],
+             "sub": found[(scope, unit)][1], "since": found[(scope, unit)][2]}
+            for name, scope, unit in servicestate.UNITS if (scope, unit) in found]
+
+
+def service_arg(args):
+    scope, unit = args.get("scope"), args.get("unit")
+    if not any(s == scope and u == unit for _, s, u in servicestate.UNITS):
+        raise ValueError(f"not a service Running Now lists: {unit}")
+    return scope, unit
+
+
+def cmd_service_log(_cfg, args):
+    try:
+        return servicestate.journal(*service_arg(args))
+    except subprocess.TimeoutExpired:
+        raise ValueError("journalctl took too long")
+
+
+def cmd_service_restart(_cfg, args):
+    try:
+        ok, why = servicestate.restart(*service_arg(args))
+    except subprocess.TimeoutExpired:
+        ok, why = False, "it took longer than 2 minutes"
+    if not ok:
+        raise ValueError(why)
+    return True
+
+
+def cmd_ports(cfg, _args):
+    """What the running firewall accepts: [{proto, port, who}]."""
+    state = loaded(cfg)
+    return [{"proto": proto, "port": port, "who": who} for proto, port, who in system.open_ports(state.resolved)]
+
+
 COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cmd_save,
             "dismiss": cmd_dismiss,
             "stale": cmd_stale, "removeStale": cmd_remove_stale,
@@ -598,7 +660,10 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "git": cmd_git, "gitSummary": cmd_git_summary,
             "flatpaks": cmd_flatpaks, "flatpakUpdates": cmd_flatpak_updates, "flatpakRun": cmd_flatpak_run,
             "flatpakForget": cmd_flatpak_forget, "flatseal": cmd_flatseal,
-            "backups": cmd_backups, "backup": cmd_backup}
+            "backups": cmd_backups, "backup": cmd_backup,
+            "people": cmd_people, "checkPerson": cmd_check_person,
+            "services": cmd_services, "serviceLog": cmd_service_log, "serviceRestart": cmd_service_restart,
+            "ports": cmd_ports}
 
 
 def run(cfg, cmd, args):

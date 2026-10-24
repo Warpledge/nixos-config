@@ -1,0 +1,156 @@
+// Running Now on the Services page: each service's state, last log lines and
+// a restart (api.py's `services`, `serviceLog` and `serviceRestart`)
+import QtQuick
+import QtQuick.Layouts
+
+ColumnLayout {
+    id: running
+    required property var view
+    property var units: null
+    property string error: ""
+    spacing: 6
+
+    function load() {
+        Backend.call("services", {}, reply => {
+            if (!reply.ok) {
+                error = reply.error
+                return
+            }
+            error = ""
+            units = reply.data
+            view.servicesRunning = units.filter(u => u.active === "active").length
+        })
+    }
+
+    Component.onCompleted: load()
+
+    RowLayout {
+        Layout.fillWidth: true
+        Section { text: "Running Now"; Layout.fillWidth: true }
+        IconButton { icon: "refresh"; tip: "Check again"; Layout.topMargin: 10; onClicked: running.load() }
+    }
+    Text {
+        text: "The services this computer runs right now. Changes above show up here after Apply."
+        color: Theme.dim
+        font.pixelSize: 12
+        wrapMode: Text.Wrap
+        Layout.fillWidth: true
+        Layout.leftMargin: 6
+    }
+    ListRow {
+        visible: running.units === null || !running.units.length
+        icon: "dns"
+        title: running.units === null && !running.error ? "Checking…" : "None of them is on"
+        subtitle: running.error
+    }
+    Repeater {
+        model: running.units || []
+        UnitRow { required property var modelData; unit: modelData }
+    }
+
+    //--- One service; tapping it shows its last log lines
+    component UnitRow: Rectangle {
+        id: unitRow
+        property var unit
+        property bool open: false
+        property string log: ""
+        property bool restarting: false
+        readonly property var look: ({ active: ["Running", true], failed: ["Failed", false],
+                                        activating: ["Starting", false], deactivating: ["Stopping", false],
+                                        reloading: ["Reloading", false] })[unit.active] || ["Stopped", false]
+        readonly property bool mayRestart: unit.scope === "user" || running.view.info.admin
+        Layout.fillWidth: true
+        implicitHeight: unitCol.implicitHeight + 22
+        radius: 14
+        color: Theme.card
+        ColumnLayout {
+            id: unitCol
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.margins: 11
+            anchors.leftMargin: 10
+            anchors.rightMargin: 12
+            spacing: 8
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 10
+                Badge { icon: "dns" }
+                ColumnLayout {
+                    spacing: 1
+                    Layout.fillWidth: true
+                    Text {
+                        text: unitRow.unit.name
+                        color: Theme.text
+                        font.pixelSize: 14
+                        font.weight: Font.DemiBold
+                        Layout.fillWidth: true
+                    }
+                    Text {
+                        text: unitRow.unit.unit + (unitRow.unit.scope === "user" ? " (yours)" : "")
+                              + (unitRow.unit.active === "active" && unitRow.unit.since
+                                 ? `\nSince ${unitRow.unit.since}` : "")
+                        color: Theme.dim
+                        font.pixelSize: 12
+                        wrapMode: Text.Wrap
+                        Layout.fillWidth: true
+                    }
+                }
+                Chip {
+                    text: unitRow.look[0]
+                    accent: unitRow.look[1]
+                }
+                IconButton {
+                    icon: unitRow.restarting ? "progress_activity" : "restart_alt"
+                    tip: unitRow.mayRestart ? "Restart it" : "Only an admin can restart it"
+                    enabled: unitRow.mayRestart && !unitRow.restarting
+                    opacity: enabled ? 1 : 0.45
+                    onClicked: {
+                        unitRow.restarting = true
+                        Backend.call("serviceRestart", { scope: unitRow.unit.scope, unit: unitRow.unit.unit },
+                                     reply => {
+                            unitRow.restarting = false
+                            running.view.say(reply.ok ? `${unitRow.unit.name} restarted`
+                                                      : `${unitRow.unit.name}: ${reply.error}`)
+                            reloadTimer.start()
+                        })
+                    }
+                }
+                Icon { icon: unitRow.open ? "expand_less" : "expand_more"; size: 18 }
+            }
+            Rectangle {
+                visible: unitRow.open
+                Layout.fillWidth: true
+                implicitHeight: logText.implicitHeight + 16
+                radius: 10
+                color: Theme.cardHover
+                TextEdit {
+                    id: logText
+                    x: 10
+                    y: 8
+                    width: parent.width - 20
+                    readOnly: true
+                    selectByMouse: true
+                    text: unitRow.log || "Loading…"
+                    color: Theme.dim
+                    selectionColor: Theme.primary
+                    font.family: "monospace"
+                    font.pixelSize: 11
+                    wrapMode: TextEdit.WrapAnywhere
+                }
+            }
+        }
+        TapHandler {
+            gesturePolicy: TapHandler.ReleaseWithinBounds
+            onTapped: {
+                unitRow.open = !unitRow.open
+                if (unitRow.open)
+                    Backend.call("serviceLog", { scope: unitRow.unit.scope, unit: unitRow.unit.unit },
+                                 reply => unitRow.log = reply.ok ? reply.data : reply.error)
+            }
+        }
+    }
+
+    // The state a moment after a restart, once systemd has caught up
+    Timer { id: reloadTimer; interval: 800; onTriggered: running.load() }
+}

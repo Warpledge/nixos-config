@@ -93,6 +93,21 @@ ColumnLayout {
                     onClicked: Quickshell.execDetached(["dms", "ipc", "call", "settings", "openWith", modelData.tab])
                 }
             }
+            Loader {
+                active: group.modelData.title === "Open Ports"
+                visible: active
+                Layout.fillWidth: true
+                Layout.preferredHeight: item ? item.implicitHeight : 0
+                sourceComponent: OpenPorts {}
+            }
         }
+    }
+
+    Loader {
+        active: page.model.title === "Services"
+        visible: active
+        Layout.fillWidth: true
+        Layout.preferredHeight: item ? item.implicitHeight : 0
+        sourceComponent: RunningNow { view: page.view }
     }
 }
