@@ -266,6 +266,7 @@ Rectangle {
                         required property var modelData
                         readonly property var bytes: modelData.bytes
                         readonly property bool sized: !!bytes && bytes[1] > 0
+                        readonly property bool downloading: modelData.kind === "download" || !!bytes
                         Layout.fillWidth: true
                         spacing: 12
                         Rectangle {
@@ -301,8 +302,8 @@ Rectangle {
                                 Chip {
                                     tappable: false
                                     accent: tone === ""
-                                    tone: modelData.kind === "fetch" ? "caution" : item.bytes ? "success" : ""
-                                    text: modelData.kind === "fetch" ? "Fetching" : item.bytes ? "Downloading"
+                                    tone: modelData.kind === "fetch" ? "caution" : item.downloading ? "success" : ""
+                                    text: modelData.kind === "fetch" ? "Fetching" : item.downloading ? "Downloading"
                                         : modelData.phase ? `Building · ${modelData.phase}` : "Building"
                                 }
                                 Text {
@@ -360,17 +361,19 @@ Rectangle {
                                 }
                                 Rectangle {
                                     id: slide
+                                    // 0 to 1 and back; x follows the track's width as it settles
+                                    property real t: 0
                                     visible: !item.sized
                                     height: parent.height
                                     radius: 3
                                     width: parent.width * 0.3
+                                    x: (parent.width - width) * t
                                     color: Qt.alpha(Theme.primary, 0.7)
-                                    NumberAnimation on x {
+                                    SequentialAnimation on t {
                                         running: slide.visible
-                                        from: -slide.width
-                                        to: slide.parent.width
-                                        duration: 1600
                                         loops: Animation.Infinite
+                                        NumberAnimation { from: 0; to: 1; duration: 1100; easing.type: Easing.InOutQuad }
+                                        NumberAnimation { from: 1; to: 0; duration: 1100; easing.type: Easing.InOutQuad }
                                     }
                                 }
                             }
