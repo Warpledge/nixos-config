@@ -3,6 +3,7 @@ what it needs and answers once: `omni-settings-backend <cmd> ['<json args>']`
 prints {"ok": true, "data": ...} or {"ok": false, "error": ...}. Settings are
 keyed "<domain>:<dotted.path>". Kept free of GTK, which the GTK app imports too."""
 
+import dataclasses
 import difflib
 import grp
 import json
@@ -10,11 +11,13 @@ import os
 import pwd
 import subprocess
 import sys
+import time
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 
 import backend  # noqa: E402
 import closure  # noqa: E402
+import flatpakstate  # noqa: E402
 import gitstate  # noqa: E402
 import nixfile  # noqa: E402
 import schema  # noqa: E402
@@ -434,12 +437,135 @@ def cmd_git_summary(cfg, _args):
         raise ValueError(str(e))
 
 
+#--------------------------------------------------------------------#
+#-- Flatpaks
+#--------------------------------------------------------------------#
+def ref_json(lst, ref):
+    return dict(dataclasses.asdict(ref), key=ref.key, bundle=lst.bundle(ref))
+
+
+def cmd_flatpaks(_cfg, _args):
+    """The apps and runtimes installed and the apps switched off here."""
+    if flatpakstate.binary() is None:
+        return {"installed": False}
+    lst = flatpakstate.listing()
+    have = {r.ref for r in lst.runtimes}
+    return {"installed": True, "flatseal": any(a.id == flatpakstate.FLATSEAL for a in lst.apps),
+            "apps": [dict(ref_json(lst, a), missing=bool(a.runtime and a.runtime not in have)) for a in lst.apps],
+            "off": [ref_json(lst, a) for a in lst.off],
+            "runtimes": [ref_json(lst, r) for r in lst.runtimes],
+            "runtimeBytes": sum(flatpakstate.size_bytes(r.size) for r in lst.runtimes)}
+
+
+def cmd_flatpak_updates(_cfg, _args):
+    """The names of the apps and runtimes with a newer version."""
+    try:
+        return flatpakstate.updates(flatpakstate.listing().installations())
+    except (RuntimeError, subprocess.TimeoutExpired) as e:
+        raise ValueError(str(e))
+
+
+def run_streamed(commands):
+    """Runs `commands` in turn, each output line to stderr for the front end's
+    progress; stops at the first that fails. Returns (ok, last lines)."""
+    tail = []
+    for command in commands:
+        proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                stdin=subprocess.DEVNULL)
+        buffer = b""
+        while chunk := proc.stdout.read1(65536):
+            *lines, buffer = (buffer + chunk).replace(b"\r", b"\n").split(b"\n")
+            for raw in lines:
+                line = flatpakstate.clean(raw.decode(errors="replace"))
+                if line:
+                    tail = (tail + [line])[-20:]
+                    print(line, file=sys.stderr, flush=True)
+        if proc.wait() != 0:
+            return False, tail
+    return True, tail
+
+
+def cmd_flatpak_run(_cfg, args):
+    """One Flatpak action, its progress on stderr: uninstall, install (an app
+    switched off here), runtime (an app's missing runtime), update, unused or
+    repair. args.key names the app as "<installation>:<id>"."""
+    lst, action = flatpakstate.listing(), args.get("action")
+    apps = {a.key: a for a in lst.apps}
+    off = {a.key: a for a in lst.off}
+    ref = apps.get(args.get("key")) or off.get(args.get("key"))
+    if action in ("uninstall", "runtime") and args.get("key") not in apps:
+        raise ValueError("that app isn't installed")
+    if action == "install" and args.get("key") not in off:
+        raise ValueError("that app isn't switched off here")
+    if action == "uninstall":
+        commands, failed = flatpakstate.uninstall(ref), f"Couldn't uninstall {ref.name}"
+    elif action == "install":
+        if lst.bundle(ref):
+            raise ValueError(f"Install {ref.name} again from the file it came from")
+        commands, failed = flatpakstate.reinstall(ref), f"Couldn't install {ref.name}"
+    elif action == "runtime":
+        remote = flatpakstate.runtime_source(lst, ref)
+        if remote is None:
+            raise ValueError(f"No source to install {ref.runtime} from")
+        commands, failed = flatpakstate.install_runtime(ref, remote), "Couldn't install the runtime"
+    elif action == "update":
+        commands, failed = flatpakstate.update_all(lst), "Couldn't update"
+    elif action == "unused":
+        commands, failed = flatpakstate.remove_unused(lst), "Couldn't remove the unused runtimes"
+    elif action == "repair":
+        commands, failed = flatpakstate.repair(lst), "Couldn't finish the repair"
+    else:
+        raise ValueError(f"unknown action: {action}")
+    ok, tail = run_streamed(commands)
+    if not ok:
+        raise ValueError(f"{failed}\n\n" + ("\n".join(tail[-6:]) or "Flatpak didn't say why."))
+    if action == "uninstall":
+        if not lst.bundle(ref):
+            flatpakstate.mark_off(ref)
+        return f"{ref.name} uninstalled"
+    if action == "install":
+        flatpakstate.forget(ref.key)
+        return f"{ref.name} installed"
+    if action == "unused":
+        # Each installation with nothing to remove says so
+        nothing = sum("Nothing unused" in line for line in tail) >= len(commands)
+        return "Nothing unused to remove" if nothing else "Unused runtimes removed"
+    return {"runtime": f"{ref.name} can start now", "update": "Flatpaks updated",
+            "repair": "Repair finished"}[action]
+
+
+def cmd_flatpak_forget(_cfg, args):
+    """Takes an app switched off here off the list."""
+    flatpakstate.forget(args.get("key", ""))
+    return True
+
+
+def cmd_flatseal(_cfg, args):
+    """Opens Flatseal, on one app's page with args.app (its `show` action takes
+    an app id); starts it first when it isn't running."""
+    call = ["busctl", "--user", "call", flatpakstate.FLATSEAL, "/com/github/tchx84/Flatseal",
+            "org.gtk.Actions", "Activate", "sava{sv}", "show", "1", "s", args.get("app", ""), "0"]
+    if args.get("app") and subprocess.run(call, capture_output=True, timeout=10).returncode == 0:
+        return True
+    subprocess.Popen(["flatpak", "run", flatpakstate.FLATSEAL], stdout=subprocess.DEVNULL,
+                     stderr=subprocess.DEVNULL, start_new_session=True)
+    if args.get("app"):
+        # Its bus name shows up once it has started
+        for _ in range(40):
+            time.sleep(0.5)
+            if subprocess.run(call, capture_output=True, timeout=10).returncode == 0:
+                break
+    return True
+
+
 COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cmd_save,
             "dismiss": cmd_dismiss,
             "stale": cmd_stale, "removeStale": cmd_remove_stale,
             "overview": cmd_overview, "freed": cmd_freed, "checkUpdates": cmd_check_updates,
             "compare": cmd_compare, "failedLog": cmd_failed_log, "forgetFailed": cmd_forget_failed,
-            "git": cmd_git, "gitSummary": cmd_git_summary}
+            "git": cmd_git, "gitSummary": cmd_git_summary,
+            "flatpaks": cmd_flatpaks, "flatpakUpdates": cmd_flatpak_updates, "flatpakRun": cmd_flatpak_run,
+            "flatpakForget": cmd_flatpak_forget, "flatseal": cmd_flatseal}
 
 
 def run(cfg, cmd, args):

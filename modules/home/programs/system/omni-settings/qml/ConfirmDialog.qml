@@ -1,6 +1,7 @@
 // A modal question over the whole view: heading, body and a row of buttons.
 // open() takes {heading, body, buttons: [{label, value, quiet, danger}]} and a
-// callback given the picked value; body can change while it's open.
+// callback given the picked value; body can change while it's open. With
+// cancel: false it has no Cancel button, for a message.
 import QtQuick
 import QtQuick.Layouts
 
@@ -9,6 +10,7 @@ Rectangle {
     property string heading
     property string body
     property var buttons: []
+    property bool cancel: true
     property var done: null
     visible: false
     color: Qt.rgba(0, 0, 0, 0.5)
@@ -17,6 +19,7 @@ Rectangle {
         heading = spec.heading
         body = spec.body || ""
         buttons = spec.buttons
+        cancel = spec.cancel !== false
         done = callback
         visible = true
         forceActiveFocus()
@@ -82,7 +85,7 @@ Rectangle {
                         onClicked: dialog.close(modelData.value)
                     }
                 }
-                Pill { quiet: true; text: "Cancel"; onClicked: dialog.close() }
+                Pill { visible: dialog.cancel; quiet: true; text: "Cancel"; onClicked: dialog.close() }
             }
         }
     }

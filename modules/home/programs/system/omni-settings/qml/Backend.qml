@@ -17,6 +17,39 @@ Singleton {
         p.running = true
     }
 
+    //--- As call(), with each line the command prints to stderr given to onLine
+    function stream(cmd, args, onLine, done) {
+        const p = streamer.createObject(backend, {
+            command: [bin, cmd, JSON.stringify(args || {})],
+            done: done || null,
+            each: onLine
+        })
+        p.running = true
+    }
+
+    Component {
+        id: streamer
+        Process {
+            id: sproc
+            property var done
+            property var each  // not onLine: QML reads on<Capital> names as handlers
+            stderr: SplitParser { onRead: line => sproc.each(line) }
+            stdout: StdioCollector {
+                onStreamFinished: {
+                    let reply
+                    try {
+                        reply = JSON.parse(text)
+                    } catch (e) {
+                        reply = { ok: false, error: "omni-settings-backend gave no answer" }
+                    }
+                    if (sproc.done)
+                        sproc.done(reply)
+                    sproc.destroy()
+                }
+            }
+        }
+    }
+
     Component {
         id: runner
         Process {

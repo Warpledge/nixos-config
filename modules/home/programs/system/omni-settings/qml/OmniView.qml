@@ -431,11 +431,12 @@ Item {
                                 color: Theme.text
                                 font.pixelSize: 15
                                 font.weight: Font.DemiBold
+                                Layout.fillWidth: true
                             }
                             Text {
                                 visible: text !== ""
-                                text: omni.info && omni.info.pages[omni.page] ? omni.info.pages[omni.page].description
-                                    : omni.current ? omni.current.subtitle || omni.current.group : ""
+                                text: (omni.info && omni.info.pages[omni.page] && omni.info.pages[omni.page].description)
+                                    || (omni.current ? omni.current.subtitle || omni.current.group : "")
                                 color: Theme.dim
                                 font.pixelSize: 12
                                 elide: Text.ElideRight
@@ -602,7 +603,7 @@ Item {
 
                 Loader {
                     Layout.fillWidth: true
-                    active: !!omni.info && !!omni.info.pages[omni.page]
+                    active: !!omni.info && !!omni.info.pages[omni.page] && omni.custom[omni.page] === undefined
                     sourceComponent: SettingsPage {
                         model: omni.info.pages[omni.page]
                         view: omni
@@ -707,7 +708,9 @@ Item {
     ConfirmDialog { id: confirm; anchors.fill: parent; z: 2 }
 
     //--- Custom pages by id; each is ported from the GTK app in turn
-    readonly property var custom: ({ overview: overviewPage, shell: shellPage, git: gitPage })
+    readonly property var custom: ({ overview: overviewPage, shell: shellPage, git: gitPage,
+                                      flatpaks: flatpaksPage })
+    Component { id: flatpaksPage; FlatpaksPage { view: omni } }
     Component { id: overviewPage; OverviewPage { view: omni } }
     Component { id: gitPage; GitPage { view: omni } }
     Component { id: shellPage; ShellPage { view: omni } }
