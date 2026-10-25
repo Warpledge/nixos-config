@@ -130,6 +130,10 @@ in {
     kdePackages.kdegraphics-thumbnailers # PDF/PS, RAW, Blender, Mobipocket previews
   ];
 
+  # KIO's password server, which asks for SMB/SFTP logins; outside Plasma
+  # the session bus can't start it, so a share needing a login just fails
+  dbus.packages = [pkgs.kdePackages.kio];
+
   #--------------------------------------------------------------------#
   #-- Application Menu
   #--------------------------------------------------------------------#
