@@ -56,4 +56,5 @@
   };
 
   lmstudio.enable = true;
+  openWebui.enable = true; # Chats with the Z13's llama-swap (home/local-ai.nix)
 }

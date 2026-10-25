@@ -12,5 +12,6 @@
     ./apps.nix
     ./binds.nix
     ./config-reminder.nix
+    ./local-ai.nix
   ];
 }
