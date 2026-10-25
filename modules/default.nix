@@ -36,14 +36,17 @@ in {
     #--- One home per user the machine lists
     users =
       lib.mapAttrs (name: user: {
-        imports = [
-          #--- Home System, handed `user` first: the routers read it in `imports`.
-          #--- Not lib.modules.importApply: its extra nesting reorders the home
-          #--- modules, which flips options that keep the last definition.
-          (import ./home user)
-          #--- Home Desktop (controlled by machine settings)
-          ./wm/${machine.windowManager}/home
-        ];
+        imports =
+          [
+            #--- Home System, handed `user` first: the routers read it in `imports`.
+            #--- Not lib.modules.importApply: its extra nesting reorders the home
+            #--- modules, which flips options that keep the last definition.
+            (import ./home user)
+            #--- Home Desktop (controlled by machine settings)
+            ./wm/${machine.windowManager}/home
+          ]
+          #--- This person's own home modules, on every machine they log in on
+          ++ lib.optional (builtins.pathExists ../users/${name}/home.nix) ../users/${name}/home.nix;
         #--- This user's settings, for every other home module (`user.media.mpv`)
         _module.args.user = user;
         home = {

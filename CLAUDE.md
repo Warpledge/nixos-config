@@ -153,7 +153,7 @@ Gotchas. Grep the option name before assuming which file owns it:
 - `lib/mutable-merge.jq` — the merge that keeps GUI changes across rebuilds, shared by `wm/dms-mutable.nix`, `editors/zed.nix` and `file-browsers/dux-files.nix`. Zed's template is `~/.config/zed/declarative-settings.json`, whose values the reset button on Omni Settings' Zed switch puts back into `settings.json`; theme and fonts are locked
 - `machines/<name>/` — `default.nix` (machine entry), `settings.nix`, `hardware/` (`gpu.nix`, `hardware-configuration.nix`), `wm/<wm>.nix` (per-WM machine overrides for every user: monitors, GPU env vars, autostart, the desktop's DMS bars)
 - `machines/_template/` and `users/_template/` — what `setup.sh` copies; their `settings.nix` files are also the full setting lists and the defaults. `machines/_template/hardware/hardware-configuration.nix` throws until it's replaced
-- `users/<name>/settings.nix` — one person's account and apps (`users/warpledge/` for the owner)
+- `users/<name>/settings.nix` — one person's account and apps (`users/warpledge/` for the owner); an optional `home.nix` beside it holds their own home-manager config
 - `machines/<name>/CLAUDE.md` and `users/<name>/CLAUDE.md` — that machine's hardware and that person's setup (see **Who and which machine**); the `onboard` skill writes them. The templates have none, so `setup.sh` copies none
 - `setup.sh` — sets up a new computer from the templates (hardware, locale, GPU, monitors, the zen kernel, users, then `nixos-rebuild boot`) or reinstalls one already in `machines/`; also `add-user`, `build` and `share` (moves the clone to `/etc/nixos-config`). It stages its files with git and asks before anything that needs sudo
 - What a machine has beyond the template (eclipse's LUKS game drives, legion's Minecraft servers) is listed in its own `CLAUDE.md`.
@@ -171,14 +171,20 @@ Gotchas. Grep the option name before assuming which file owns it:
 | WM internals | `modules/wm/{wm}/` |
 | Mullvad VPN | `modules/nixos/security/mullvad/` |
 | Per-machine WM overrides | `machines/<name>/wm/{wm}.nix` (`niri.nix`) |
-| A module only one machine or person will ever want | `machines/<name>/` (see below) |
+| A module only one machine will ever want | `machines/<name>/` (see below) |
+| A module only one person will ever want | `users/<name>/home.nix` |
 
 ### Whose change is it
 
 `modules/` is shared by everyone who installs the repo, so it only takes what others could use too. Ask when it isn't obvious which side a change falls on.
 
-- **Their hardware or their own setup only** (a device, a workaround for their monitor, a game or script nobody else has): the machine's folder. NixOS options go in `machines/<name>/default.nix` or a file beside it, and home-manager modules in `home-manager.users.<name>.imports` there, as `machines/eclipse/default.nix` imports its games. Never a hostname or username check in `modules/`.
-- **A feature anyone could turn on**: `modules/` behind a toggle that's off in the template (the `add-app` skill). For someone other than warpledge, commit it separately from their `machines/` and `users/` folders, so they can open a pull request to `Warpledge/nixos-config` with the module alone. Their own folders stay in their copy.
+- **One computer's hardware** (a device, a workaround for a monitor, a game installed on one drive): the machine's folder. NixOS options go in `machines/<name>/default.nix` or a file beside it, and home-manager modules in `home-manager.users.<name>.imports` there, as `machines/eclipse/default.nix` imports its games.
+- **One person's own setup, on every machine they use** (their scripts, an app config nobody else wants): `users/<name>/home.nix`, a home-manager module `modules/default.nix` imports for that person when the file exists. It gets the same arguments as any home module (`user`, `machine`, `pkgs`).
+- **A feature anyone could turn on**: `modules/` behind a toggle that's off in the template (the `add-app` skill), committed separately from the person's own folders.
+
+Never a hostname or username check in `modules/`; the post-edit hook flags every machine and user folder name it finds there.
+
+**Forks.** Other people run the repo from a fork of `Warpledge/nixos-config`, with their own `machines/` and `users/` folders on top. Their shared work goes back upstream as a pull request, and upstream's changes come in by merging: the `upstream` skill does both. A fork keeps warpledge's folders untouched so those merges stay clean, and pushing and opening the pull request stay with the person (rule 1).
 
 ## Workflows
 

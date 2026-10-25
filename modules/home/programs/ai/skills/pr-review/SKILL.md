@@ -41,6 +41,9 @@ The diff, not the PR description, is the source. For each PR check:
 
 - **Rule 4:** no secrets, tokens, private paths, real names or hostnames beyond
   `eclipse`/`legion`.
+- **Fork's own files:** a PR from someone's fork carries shared work only. Their
+  `machines/<name>/`, `users/<name>/` (templates aside) and `flake.lock` stay in the
+  fork, and their hostname or username must not appear in `modules/` or `lib/`.
 - **Rule 5:** no hardcoded colours, fonts or wallpaper; new colour files go through
   matugen.
 - **Rule 8:** settings beyond what the PR says it does. Personal preferences from a

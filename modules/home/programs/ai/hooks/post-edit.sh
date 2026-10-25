@@ -40,7 +40,15 @@ esac
 if [[ $f == *.nix && $f != */modules/theme/* ]] && grep -qE '"#[0-9a-fA-F]{6}|rgba?\(' <<<"$new"; then
   msg+=("New color literal outside modules/theme/: DMS's matugen owns colours (CLAUDE.md rule 5). Use DMS's template for the app or add a matugen.templates entry, unless this is a deliberate fixed colour.")
 fi
-if [[ $f == *.nix && $f =~ /(modules|lib)/ ]] && grep -qE 'eclipse|legion|warpledge|/mnt/' <<<"$new"; then
+#--- Every machine and user folder in the repo, so a fork's own names are caught too
+root=$(git -C "$(dirname "$f")" rev-parse --show-toplevel 2>/dev/null)
+names=
+for d in "$root"/machines/*/ "$root"/users/*/; do
+  d=${d%/} d=${d##*/}
+  [[ $d == _template || $d == '*' ]] || names+=${names:+|}$d
+done
+if [[ $f == *.nix && $f =~ /(modules|lib)/ ]] &&
+  { grep -qwE "${names:-eclipse|legion|warpledge}" <<<"$new" || grep -q /mnt/ <<<"$new"; }; then
   msg+=("A machine, user or /mnt/ path in a shared module: anyone installing this config gets it. Move it to machines/<name>/, or gate it on a setting.")
 fi
 ((${#msg[@]})) && jq -n --arg c "$(printf '%s\n' "${msg[@]}")" '{hookSpecificOutput:{hookEventName:"PostToolUse",additionalContext:$c}}'

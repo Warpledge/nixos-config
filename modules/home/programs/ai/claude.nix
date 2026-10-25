@@ -51,6 +51,7 @@
         pr-review = ./skills/pr-review;
         rpgm-setup = ./skills/rpgm-setup;
         todo = ./skills/todo;
+        upstream = ./skills/upstream;
         vn-setup = ./skills/vn-setup;
       };
       agents = {

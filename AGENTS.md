@@ -180,14 +180,18 @@ and the active WM's `modules/wm/<wm>/`.
 | One user's change on one machine | `users.<name>` block in `machines/<machine>/settings.nix` |
 | Monitors, bars, GPU env for one machine | `machines/<name>/wm/<wm>.nix`, never a shared module |
 | WM behaviour for everyone | `modules/wm/<wm>/home/` |
-| Something only one machine or person will want | `machines/<name>/`, never `modules/` |
+| Something only one machine will want | `machines/<name>/`, never `modules/` |
+| Something only one person will want | `users/<name>/home.nix` (a home-manager module) |
 
-- `modules/` is shared by everyone who installs the repo. Only one computer's
-  hardware or one person's setup: the machine's `default.nix` or a file beside it,
-  home-manager modules through `home-manager.users.<name>.imports` there. A feature
-  anyone could turn on: `modules/` behind a toggle off in the template, committed
-  apart from the person's own folders so it can go upstream as a pull request to
-  `Warpledge/nixos-config`. Ask when unsure.
+- `modules/` is shared by everyone who installs the repo. One computer's hardware:
+  the machine's `default.nix` or a file beside it, home-manager modules through
+  `home-manager.users.<name>.imports` there. One person's own setup on every machine:
+  `users/<name>/home.nix`, imported when it exists. A feature anyone could turn on:
+  `modules/` behind a toggle off in the template, committed apart from the person's
+  own folders. Ask when unsure.
+- **Forks**: other people run the repo from a fork of `Warpledge/nixos-config`. The
+  `upstream` skill merges upstream's changes in and prepares pull requests back. Keep
+  warpledge's folders in a fork untouched; the person pushes and opens the PR.
 
 - Modules are loaded by `lib.optionals user.<cat>.<app> [./path.nix]` in a router
   (`modules/home/programs/default.nix`; `gaming.*` in `programs/gaming/default.nix`).
@@ -329,6 +333,7 @@ steps.
 | `android-debloat-redo` | Tablet debloat after an OTA |
 | `pr-review` | Reviewing a pull request, or "the PRs" |
 | `onboard` | The machine or user has no `CLAUDE.md`, or a person updates theirs |
+| `upstream` | In a fork: sync from upstream, or send a change upstream as a PR |
 | `todo` | "Add X to the todo", or work a `docs/todo/` file tracks is done |
 | `flake-update` | Only when the user runs `/flake-update`; never on your own |
 

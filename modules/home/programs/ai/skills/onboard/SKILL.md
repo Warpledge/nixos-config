@@ -99,6 +99,6 @@ handles it. Follow **Writing Style** in the root `CLAUDE.md`.
 
 `git add` both files and commit them through the `commit` skill
 (`docs(<machine>): add the machine and user context for Claude`). Then tell the person
-that their machine-only and personal changes go in their own folders, and features
-others could use go in `modules/` as a separate commit they can send upstream (root
-`CLAUDE.md`, **Whose change is it**).
+where their changes go (root `CLAUDE.md`, **Whose change is it**): one computer's in
+`machines/<machine>/`, their own setup in `users/<user>/home.nix`, and features others
+could use in `modules/`, which the `upstream` skill turns into a pull request.
