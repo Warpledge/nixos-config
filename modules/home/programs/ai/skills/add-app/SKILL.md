@@ -38,8 +38,8 @@ catches the step that usually gets missed.
 1. **Toggle** in the matching attribute set of `users/_template/settings.nix`, with a short
    comment. The template lists every setting and is what new users start from, so the
    value is `false` unless every new user should get the app. Turn it on where the user
-   wants it: `users/warpledge/settings.nix` for every machine, or one machine's
-   `users.warpledge = {...};` block in `machines/<name>/settings.nix` (the laptop turns
+   wants it: `users/<whoami>/settings.nix` for every machine, or one machine's
+   `users.<whoami> = {...};` block in `machines/<name>/settings.nix` (the laptop turns
    apps off that way). Add it to the `apps` list in `setup.sh` too, unless it needs a
    `~/.local/opt` bundle. A system service's toggle goes in
    `machines/_template/settings.nix` (off) and on in `machines/<name>/settings.nix`.

@@ -5,11 +5,27 @@ this file too). Claude Code reads `CLAUDE.md`; this file is the condensed versio
 of it for a smaller model, kept in sync with it. Everything you need for most tasks
 is here. For the rest, `grep -n` CLAUDE.md for the section; don't read it whole.
 
-NixOS flake for two machines: **eclipse** (desktop, RX 9070 XT) and **legion**
-(laptop, hybrid AMD/NVIDIA). Nixpkgs unstable, home-manager, Niri WM, Dux Shell
-(formerly DankMaterialShell, still called DMS in the code), colours from DMS's
-matugen (default Catppuccin Mocha), fonts and cursor from Stylix. Run `hostname`
-before anything machine-specific.
+NixOS flake by warpledge for their machines **eclipse** (desktop) and **legion**
+(laptop), and for anyone else who installs it with `setup.sh`. Nixpkgs unstable,
+home-manager, Niri WM, Dux Shell (formerly DankMaterialShell, still called DMS in
+the code), colours from DMS's matugen (default Catppuccin Mocha), fonts and cursor
+from Stylix.
+
+## Whose computer
+
+Before anything touching a machine, a person or their apps:
+
+1. Run `hostname` and `whoami`. The machine is the folder whose `settings.nix` sets
+   `hostName = "<hostname>"`, else `machines/<hostname>/`; the person is
+   `users/<whoami>/`.
+2. Read `machines/<machine>/CLAUDE.md` and `users/<whoami>/CLAUDE.md`: that
+   computer's hardware and that person's setup.
+3. No machine folder: the person runs `./setup.sh`. No user folder: `./setup.sh
+   add-user`. A folder without a `CLAUDE.md`: load the `onboard` skill.
+
+Unless it's `eclipse` or `legion` as `warpledge`, use only that person's files. Never
+apply `machines/eclipse/`, `machines/legion/`, `users/warpledge/` or `docs/personal/`
+to their hardware or apps.
 
 ## Rules
 
@@ -121,8 +137,8 @@ this, in thinking and in tool calls alike:
   through branches, builds and other tools for it.
 - **Don't build when `nix flake check` answers the question.** If you must
   build, always pass `--no-link`, or a `result` link is left in the repo.
-- **`nix flake check` evaluates both eclipse and legion.** A pass means neither
-  has an evaluation error, so never build the other machine's system to look for
+- **`nix flake check` evaluates every machine in `machines/`.** A pass means none
+  has an evaluation error, so never build another machine's system to look for
   one; that compiles a whole second system.
 
 ## Context budget
@@ -164,6 +180,14 @@ and the active WM's `modules/wm/<wm>/`.
 | One user's change on one machine | `users.<name>` block in `machines/<machine>/settings.nix` |
 | Monitors, bars, GPU env for one machine | `machines/<name>/wm/<wm>.nix`, never a shared module |
 | WM behaviour for everyone | `modules/wm/<wm>/home/` |
+| Something only one machine or person will want | `machines/<name>/`, never `modules/` |
+
+- `modules/` is shared by everyone who installs the repo. Only one computer's
+  hardware or one person's setup: the machine's `default.nix` or a file beside it,
+  home-manager modules through `home-manager.users.<name>.imports` there. A feature
+  anyone could turn on: `modules/` behind a toggle off in the template, committed
+  apart from the person's own folders so it can go upstream as a pull request to
+  `Warpledge/nixos-config`. Ask when unsure.
 
 - Modules are loaded by `lib.optionals user.<cat>.<app> [./path.nix]` in a router
   (`modules/home/programs/default.nix`; `gaming.*` in `programs/gaming/default.nix`).
@@ -304,6 +328,7 @@ steps.
 | `moku-bump` | Updating or repairing Moku/Tsunagu |
 | `android-debloat-redo` | Tablet debloat after an OTA |
 | `pr-review` | Reviewing a pull request, or "the PRs" |
+| `onboard` | The machine or user has no `CLAUDE.md`, or a person updates theirs |
 | `todo` | "Add X to the todo", or work a `docs/todo/` file tracks is done |
 | `flake-update` | Only when the user runs `/flake-update`; never on your own |
 

@@ -2,7 +2,17 @@
 
 ## Project
 
-NixOS flake managing **eclipse**, the desktop (Ryzen 5800X3D + RX 9070 XT, 280Hz OLED + 144Hz) and **legion**, the laptop (Legion Slim 5, Ryzen 7735HS + hybrid AMD 680M/RTX 4070, 1600p@165Hz). Nixpkgs unstable; colours from DMS's matugen (default theme Catppuccin Mocha Mauve), fonts and cursor from Stylix. WM: Niri only; Hyprland was removed on 2026-10-21 and its config kept on the `hyprland-backup` branch.
+NixOS flake by warpledge, for their desktop **eclipse** and laptop **legion**, and for anyone else who installs it with `setup.sh` and gets their own `machines/<name>/` and `users/<name>/`. Nixpkgs unstable; colours from DMS's matugen (default theme Catppuccin Mocha Mauve), fonts and cursor from Stylix. WM: Niri only; Hyprland was removed on 2026-10-21 and its config kept on the `hyprland-backup` branch.
+
+## Who and which machine
+
+Before a task that touches a machine, a person or their apps, find out whose computer this is. It may not be warpledge's.
+
+1. Run `hostname` and `whoami`. The machine is the folder whose `settings.nix` sets `hostName = "<hostname>"` (`grep -l`), else `machines/<hostname>/`; the person is `users/<whoami>/`, listed under `users` in that machine's `settings.nix`.
+2. Read `machines/<machine>/CLAUDE.md` and `users/<whoami>/CLAUDE.md`. They hold that computer's hardware and quirks and that person's setup; Claude Code doesn't load them until a file in the folder is read.
+3. If something's missing: no machine folder means the computer wasn't set up from this repo, so the person runs `./setup.sh` (sudo, so never you); no user folder means `./setup.sh add-user`; a folder without a `CLAUDE.md` means the `onboard` skill, which detects the hardware, asks the person the rest and writes it.
+
+Unless the machine is `eclipse` or `legion` and the user `warpledge`, the person's own files are the context. Don't carry over anything from `machines/eclipse/`, `machines/legion/`, `users/warpledge/` or `docs/personal/` (warpledge's notes) to their hardware or apps, and don't fall back on it when guessing. "The user" in this file and the skills means whoever is at the keyboard.
 
 ## Critical Rules
 
@@ -143,10 +153,10 @@ Gotchas. Grep the option name before assuming which file owns it:
 - `lib/mutable-merge.jq` — the merge that keeps GUI changes across rebuilds, shared by `wm/dms-mutable.nix`, `editors/zed.nix` and `file-browsers/dux-files.nix`. Zed's template is `~/.config/zed/declarative-settings.json`, whose values the reset button on Omni Settings' Zed switch puts back into `settings.json`; theme and fonts are locked
 - `machines/<name>/` — `default.nix` (machine entry), `settings.nix`, `hardware/` (`gpu.nix`, `hardware-configuration.nix`), `wm/<wm>.nix` (per-WM machine overrides for every user: monitors, GPU env vars, autostart, the desktop's DMS bars)
 - `machines/_template/` and `users/_template/` — what `setup.sh` copies; their `settings.nix` files are also the full setting lists and the defaults. `machines/_template/hardware/hardware-configuration.nix` throws until it's replaced
-- `users/<name>/settings.nix` — one person's account and apps (`users/warpledge/` for the user)
+- `users/<name>/settings.nix` — one person's account and apps (`users/warpledge/` for the owner)
+- `machines/<name>/CLAUDE.md` and `users/<name>/CLAUDE.md` — that machine's hardware and that person's setup (see **Who and which machine**); the `onboard` skill writes them. The templates have none, so `setup.sh` copies none
 - `setup.sh` — sets up a new computer from the templates (hardware, locale, GPU, monitors, the zen kernel, users, then `nixos-rebuild boot`) or reinstalls one already in `machines/`; also `add-user`, `build` and `share` (moves the clone to `/etc/nixos-config`). It stages its files with git and asks before anything that needs sudo
-- `machines/eclipse/` also has `hardware/storage.nix`, which unlocks the LUKS game drives after boot from key files on the encrypted root (crypttab).
-- `machines/legion/` also has `hardware/swapfile.nix` and `minecraft-servers/` (GTNH + TerraFirmaGreg server definitions, plus `mcservers.nix`, an fzf picker over them). `minecraft-servers/` is a **home-manager** module injected from `machines/legion/default.nix` via `home-manager.users.${machine.mainUser}.imports`, not a NixOS module, since the servers live in the main user's `~/Documents`.
+- What a machine has beyond the template (eclipse's LUKS game drives, legion's Minecraft servers) is listed in its own `CLAUDE.md`.
 
 ### Where to place things
 
@@ -161,6 +171,14 @@ Gotchas. Grep the option name before assuming which file owns it:
 | WM internals | `modules/wm/{wm}/` |
 | Mullvad VPN | `modules/nixos/security/mullvad/` |
 | Per-machine WM overrides | `machines/<name>/wm/{wm}.nix` (`niri.nix`) |
+| A module only one machine or person will ever want | `machines/<name>/` (see below) |
+
+### Whose change is it
+
+`modules/` is shared by everyone who installs the repo, so it only takes what others could use too. Ask when it isn't obvious which side a change falls on.
+
+- **Their hardware or their own setup only** (a device, a workaround for their monitor, a game or script nobody else has): the machine's folder. NixOS options go in `machines/<name>/default.nix` or a file beside it, and home-manager modules in `home-manager.users.<name>.imports` there, as `machines/eclipse/default.nix` imports its games. Never a hostname or username check in `modules/`.
+- **A feature anyone could turn on**: `modules/` behind a toggle that's off in the template (the `add-app` skill). For someone other than warpledge, commit it separately from their `machines/` and `users/` folders, so they can open a pull request to `Warpledge/nixos-config` with the module alone. Their own folders stay in their copy.
 
 ## Workflows
 
@@ -186,10 +204,7 @@ Niri keybind syntax, DMS, XDG portals, login and the per-machine overrides are i
 
 ## Hardware
 
-**Which machine:** run `hostname` (`eclipse` for the desktop or `legion` for the laptop, which match their folders in `machines/`) before diagnosing anything machine-specific, and read that machine's `machines/<name>/` and `settings.nix`; the two differ in GPU, power management and their settings files.
-
-**Desktop:** AMD-only (RX 9070 XT direct rendering), performance governor. Suspend is disabled because the RX 9070 XT doesn't resume cleanly. LACT runs with amdgpu overdrive on (`ppfeaturemask` is the kernel default plus the overdrive bit), set in `machines/eclipse/hardware/gpu.nix`. GameMode has no `gpu` section: its `amd_performance_level = "high"` pinned the card to the 2400 MHz game clock (about 20% slower in Superposition), so don't add it back.
-**Laptop:** TLP power mgmt, hybrid GPU defaults to AMD 680M; route apps to RTX 4070 with `nvidia-offload <app>`. WM-specific GPU vars live in `machines/legion/wm/`. It doubles as the Minecraft server host, so sleep, suspend and hibernate are off, the lid and power key are ignored, and DMS auto-lock is off under niri.
+Each machine's hardware, quirks and GPU troubleshooting are in its `machines/<name>/CLAUDE.md`. Read it (**Who and which machine**) before diagnosing anything machine-specific, along with its `settings.nix`.
 
 ## Network
 
@@ -270,8 +285,6 @@ Common errors:
 - Slow / hung → check `df -h`; try `nix build --offline`
 
 **Rollback:** the user runs `nixm rollback` (rule 1), or picks a generation from the bootloader.
-
-**Laptop GPU:** `lspci | grep -i vga`, `env | grep -E 'DRI|VDPAU|LIBVA|VK'`. Configs: `machines/legion/hardware/gpu.nix` and `machines/legion/wm/niri.nix`. Verify offload with `nvidia-offload glxinfo | grep "OpenGL renderer"`.
 
 **A game crashes, freezes or won't start:** the `game-troubleshooting` skill has the logging, hang-vs-crash and native-engine steps, and indexes the per-game notes in `docs/gaming/`.
 

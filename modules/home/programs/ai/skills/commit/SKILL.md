@@ -61,7 +61,7 @@ user's). Push and history rewrites (amend, rebase, force) stay with the user.
      `revert`.
    - **scope**: the area as the repo names it: a WM (`niri`, `dms`), an app
      module (`moku`, `freetube`, `mpv`), a subsystem (`apparmor`, `mullvad`, `kernel`,
-     `theme`), `claude` for Claude Code tooling, `eclipse`/`legion` for one host, `flake`
+     `theme`), `claude` for Claude Code tooling, the machine's folder name (`eclipse`, `legion`) for one host, `flake`
      for input bumps. Omit it when a commit truly spans the whole config.
    - **body**: bullets wrapped at 72 columns, required for anything beyond a one-line
      change. Docs that belong to the change go in the same commit and need no bullet of

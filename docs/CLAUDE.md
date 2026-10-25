@@ -25,7 +25,7 @@ Window manager notes live under `docs/wm/`:
 
 - `wm/niri-xdg-portals.md` — why `xdg-desktop-portal-gnome` drops to Settings-only when `GDK_BACKEND` is set, how niri-flake hides the system portal backends, and the `busctl` health check
 
-The user's own notes, for hardware and games only they use, live under `docs/personal/`:
+warpledge's own notes, for hardware and games only they use, live under `docs/personal/`. On anyone else's machine they're reference at most, never that person's setup:
 
 - `personal/security/android-quic-vpn-leak.md` — QUIC VPN bypass (CVE, May 2026): mitigation via `adb shell device_config put tethering close_quic_connection -1`; re-apply after Android updates
 - `personal/gaming/tmodloader-debugging.md` — tModLoader paths and log locations
