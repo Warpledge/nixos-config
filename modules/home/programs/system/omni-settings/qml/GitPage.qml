@@ -12,11 +12,18 @@ ColumnLayout {
     readonly property string web: repo && repo.repo ? `https://github.com/${repo.repo}` : ""
     spacing: 6
 
-    //--- force: Refresh's shorter wait between fetches
-    function refresh(force) {
-        loading = true
-        Backend.call("git", { force }, reply => {
-            loading = false
+    //--- force: Refresh's shorter wait between fetches; cached: the last fetch's results
+    //--- without fetching, so the page shows before a fetch that's due
+    function refresh(force, cached) {
+        if (!cached)
+            loading = true
+        Backend.call("git", { force, cached: !!cached }, reply => {
+            if (!page)
+                return  // the tab was left before the reply came
+            if (!cached)
+                loading = false
+            else if (repo)
+                return
             if (!reply.ok) {
                 error = reply.error
                 return
@@ -31,7 +38,10 @@ ColumnLayout {
         })
     }
 
-    Component.onCompleted: refresh(false)
+    Component.onCompleted: {
+        refresh(false, true)
+        refresh(false)
+    }
     // The local counts every minute; gitstate decides when to fetch again
     Timer { interval: 60000; repeat: true; running: page.view.shown; onTriggered: page.refresh(false) }
 

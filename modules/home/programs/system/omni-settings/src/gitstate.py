@@ -78,18 +78,18 @@ def cache_path():
     return os.path.join(system.runtime_dir(), "git-remote.json")
 
 
-def remote(flake, repo, force=False):
+def remote(flake, repo, force=False, cached_only=False):
     """Fetches and reads the open PRs, then hands back (fetch error, PRs, PR
     error, whether GitHub's limit is used up). Within REMOTE_EVERY of the last
-    check (FORCED_EVERY for Refresh) it hands back that check's results, kept in
-    a file both front ends share, staying under GitHub's 60 requests an hour
-    without signing in."""
+    check (FORCED_EVERY for Refresh), or with cached_only, it hands back that
+    check's results, kept in a file both front ends share, staying under
+    GitHub's 60 requests an hour without signing in."""
     try:
         with open(cache_path()) as f:
             cached = json.load(f)
     except (OSError, ValueError):
         cached = {"at": 0}
-    if time.time() - cached.get("at", 0) >= (FORCED_EVERY if force else REMOTE_EVERY):
+    if not cached_only and time.time() - cached.get("at", 0) >= (FORCED_EVERY if force else REMOTE_EVERY):
         cached = {"at": time.time(), "fetchErr": None, "prs": None, "prErr": None, "limited": False}
         try:
             git(flake, "fetch", "--quiet", timeout=60)

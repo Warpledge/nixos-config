@@ -447,9 +447,10 @@ def commit_json(c):
 
 def cmd_git(cfg, args):
     """Where the config repo stands; args.force for Refresh (gitstate.remote
-    limits how often it fetches and calls GitHub)."""
+    limits how often it fetches and calls GitHub), args.cached to skip any fetch."""
     repo = gitstate.github_repo(cfg.flake)
-    fetch_err, prs, pr_err, limited = gitstate.remote(cfg.flake, repo, bool(args.get("force")))
+    fetch_err, prs, pr_err, limited = gitstate.remote(cfg.flake, repo, bool(args.get("force")),
+                                                      bool(args.get("cached")))
     try:
         status, upstream, changed, outgoing, incoming, recent, fetched = gitstate.snapshot(cfg.flake)
     except (RuntimeError, subprocess.TimeoutExpired) as e:
