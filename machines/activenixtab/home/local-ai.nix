@@ -27,19 +27,20 @@
 
   #--- Whole model on the GPU: shared memory leaves no reason to keep experts on the CPU
   models = {
-    #--- Default, for coding and chat: MoE, 10B active (~79 GB in three parts).
-    #--- 12 of its 48 layers keep a KV cache, so 256K is ~6 GB at f16
+    #--- Default, for coding and chat: MoE, 10B active (~60 GB at Q3_K_XL).
+    #--- 12 of its 48 layers keep a KV cache, so 256K is ~6 GB at f16.
+    #--- `match` takes any quant downloaded; mmproj (vision) doesn't match
     ornith-1-5-122b = {
       name = "Ornith 1.5 122B";
       dir = "unsloth/Ornith-1.5-122B-GGUF";
-      match = "*UD-Q4_K_XL*.gguf";
+      match = "Ornith-1.5-122B-*.gguf";
       context = 262144;
     };
     #--- Same family, 3B active, for quick edits (~23 GB)
     ornith-1-5-35b = {
       name = "Ornith 1.5 35B A3B";
       dir = "ornith-ai/Ornith-1.5-35B-A3B-GGUF";
-      match = "*Q4_K_M*.gguf";
+      match = "Ornith-1.5-35B-*.gguf";
       context = 131072;
     };
   };
