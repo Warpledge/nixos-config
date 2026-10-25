@@ -15,6 +15,7 @@ ColumnLayout {
     property var picked: ({})  // source name -> ticked
     property int compareNumber: 0
     readonly property bool admin: !!view.info && view.info.admin
+    readonly property int behind: view.gitCounts ? view.gitCounts.behind : 0  // as of the last fetch
     readonly property int pickedCount: updates ? updates.changes.filter(c => picked[c.name]).length : 0
     spacing: 6
 
@@ -36,6 +37,8 @@ ColumnLayout {
             // The checked versions are in flake.lock now
             if (job.kind === "update" && job.outcome === "ok" && !job.preview)
                 page.updates = null
+            if (job.kind === "pull")
+                Backend.call("gitSummary", {}, reply => { if (reply.ok) page.view.gitCounts = reply.data })
             page.load()
         }
     }
@@ -144,6 +147,23 @@ ColumnLayout {
         }, mode => view.startJob("update", some ? { mode, inputs: names } : { mode, lock: updates.lock }))
     }
 
+    function pull() {
+        if (!canStart())
+            return
+        const n = behind
+        view.ask({
+            heading: "Get the config's new commits?",
+            body: `Pulls ${n} new commit${n === 1 ? "" : "s"} into the config (git pull --rebase), `
+                  + "keeping your own commits on top, then the system rebuilds and switches. If "
+                  + "systemd, glibc, niri or xwayland-satellite change, it switches at the next restart "
+                  + "instead.\n\nPreview only builds and shows what would change, then puts the "
+                  + "config back.",
+            buttons: [{ label: "Preview", value: "build", quiet: true },
+                      { label: "At Next Restart", value: "boot", quiet: true },
+                      { label: "Pull Now", value: "auto" }]
+        }, mode => view.startJob("pull", { mode }))
+    }
+
     function rollback(g) {
         if (!canStart())
             return
@@ -222,6 +242,15 @@ ColumnLayout {
 
     //--- Updates
     Section { visible: !!page.ov; text: "Updates" }
+    ListRow {
+        visible: !!page.ov && page.behind > 0
+        icon: "download"
+        title: "Config"
+        subtitle: `${page.behind} new commit${page.behind === 1 ? "" : "s"} to pull into the config`
+        tone: "caution"
+        button: page.admin ? "Pull" : ""
+        onClicked: if (page.admin) page.pull()
+    }
     ListRow {
         visible: !!page.ov
         icon: page.checking ? "progress_activity" : "update"

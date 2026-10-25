@@ -379,7 +379,8 @@ Item {
         if (kind === "apply")
             apply("switch")
         else
-            startJob(kind, Object.assign({}, lastJob.args, { mode: kind === "update" ? "auto" : "switch" }))
+            startJob(kind, Object.assign({}, lastJob.args,
+                                        { mode: kind === "update" || kind === "pull" ? "auto" : "switch" }))
     }
 
     //--- A modal question: ask({heading, body, buttons}, done(value))

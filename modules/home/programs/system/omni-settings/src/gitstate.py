@@ -1,6 +1,6 @@
-"""Where the config repo stands, read-only: branch, changed files, commits to
-push and pull, recent commits, and open pull requests from GitHub's API (signed
-in through gh when it is)."""
+"""Where the config repo stands: branch, changed files, commits to push and
+pull, recent commits, and open pull requests from GitHub's API (signed in
+through gh when it is). The one write is `pull`, for the Overview's pull job."""
 
 import calendar
 import json
@@ -118,6 +118,82 @@ def summary(flake):
     if prs is not None:
         counts["prs"] = len(prs)
     return counts
+
+
+#--------------------------------------------------------------------#
+#-- Pull
+#--------------------------------------------------------------------#
+class PullError(Exception):
+    pass
+
+
+def changed_between(flake, path, *revs):
+    """Whether `path` differs between `revs` (the working tree when one rev)."""
+    out = subprocess.run(["git", "-C", flake, "diff", "--quiet", *revs, "--", path], env=ENV,
+                         stdin=subprocess.DEVNULL, timeout=20)
+    return out.returncode == 1
+
+
+def pull(flake):
+    """Fetches the branch's upstream and rebases the local commits onto it, as
+    `git pull --rebase` does, setting uncommitted changes aside meanwhile. A
+    flake.lock changed both here (an Update not committed) and upstream takes
+    the upstream's. Returns (old HEAD, the replaced flake.lock text or None)
+    for `unpull`."""
+    try:
+        git(flake, "fetch", "--quiet", timeout=120)
+        old = git(flake, "rev-parse", "HEAD").strip()
+        lock = None
+        if changed_between(flake, "flake.lock", "HEAD") and changed_between(flake, "flake.lock", "HEAD...@{u}"):
+            with open(os.path.join(flake, "flake.lock")) as f:
+                lock = f.read()
+            git(flake, "checkout", "HEAD", "--", "flake.lock")
+    except (RuntimeError, OSError, subprocess.TimeoutExpired) as e:
+        raise PullError(str(e))
+    out = subprocess.run(["git", "-C", flake, "rebase", "--autostash", "@{u}"], capture_output=True, text=True,
+                         env=dict(ENV, GIT_EDITOR="true"), stdin=subprocess.DEVNULL, timeout=120)
+    if out.returncode != 0:
+        conflicts = subprocess.run(["git", "-C", flake, "diff", "--name-only", "--diff-filter=U"],
+                                   capture_output=True, text=True, env=ENV, timeout=20).stdout.split()
+        subprocess.run(["git", "-C", flake, "rebase", "--abort"], capture_output=True, env=ENV, timeout=60)
+        unpull(flake, None, lock)
+        raise PullError(f"Your commits clash with the new ones in {', '.join(conflicts)}; nothing was changed."
+                        if conflicts else out.stderr.strip() or "git rebase failed")
+    return old, lock
+
+
+def unpull(flake, old, lock):
+    """Puts the branch back at `old` and flake.lock back to `lock`."""
+    if old:
+        git(flake, "reset", "--keep", old)
+    if lock is not None:
+        with open(os.path.join(flake, "flake.lock"), "w") as f:
+            f.write(lock)
+
+
+def push_backup(flake):
+    """Pushes the rebased commits to the branch's push remote, when it has one
+    apart from the upstream (branch.<name>.pushRemote or remote.pushDefault).
+    Returns a line for the log, or None when there's nowhere to push."""
+    try:
+        branch = git(flake, "branch", "--show-current").strip()
+        upstream = git(flake, "config", f"branch.{branch}.remote").strip()
+    except RuntimeError:
+        return None
+    push = ""
+    for key in (f"branch.{branch}.pushRemote", "remote.pushDefault"):
+        try:
+            push = git(flake, "config", key).strip()
+            break
+        except RuntimeError:
+            continue
+    if not push or push == upstream:
+        return None
+    try:
+        git(flake, "push", "--quiet", "--force-with-lease", push, f"HEAD:{branch}", timeout=120)
+    except (RuntimeError, subprocess.TimeoutExpired) as e:
+        return f"Couldn't push to {push}: {e}"
+    return f"Pushed your commits to {push}"
 
 
 def iso_epoch(text):
