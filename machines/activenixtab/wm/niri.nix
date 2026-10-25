@@ -27,7 +27,8 @@
 
         #--- Auto-rotation from the accelerometer (hardware.sensor.iio)
         spawn-at-startup = [
-          {command = ["${pkgs.iio-niri}/bin/iio-niri"];}
+          # iio-niri 2.x prints its help and exits without a subcommand
+          {command = ["${pkgs.iio-niri}/bin/iio-niri" "listen" "--monitor" "eDP-1"];}
         ];
       };
     })
