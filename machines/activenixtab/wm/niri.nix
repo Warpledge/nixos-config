@@ -25,6 +25,27 @@
           scale = 1.5;
         };
 
+        #--- Touchpad scroll speed matched to GTK apps
+        # Per finger movement, GTK scrolls 2.5x, Qt widgets 6x and Chromium/Electron
+        # about 10x (measured 2026-10-25). Also scales the mouse wheel in these apps.
+        window-rules = [
+          {
+            matches = [
+              {app-id = "^(vivaldi-stable|chromium(-browser)?|electron)$";}
+              {app-id = "^(vesktop|discord|codium|obsidian)$";}
+              {app-id = "^(com\\.anthropic\\.Claude|ai\\.elementlabs\\.lmstudio)$";}
+            ];
+            scroll-factor = 0.25;
+          }
+          {
+            matches = [
+              {app-id = "^org\\.kde\\.(dolphin|kate|kdenlive|partitionmanager|filelight)$";}
+              {app-id = "^(org\\.rncbc\\.qpwgraph|org\\.prismlauncher\\.PrismLauncher)$";}
+            ];
+            scroll-factor = 0.42;
+          }
+        ];
+
         #--- Auto-rotation from the accelerometer (hardware.sensor.iio)
         spawn-at-startup = [
           # iio-niri 2.x prints its help and exits without a subcommand
