@@ -45,6 +45,8 @@ STEPS = {
     "collect": "Delete old versions and unused files",
     "password": "Set their password",
 }
+#--- Jobs whose success commits and pushes the user's own folders (gitstate.back_up)
+BACKED_UP = ("apply", "rebuild", "update", "pull")
 LOG_LIMIT = 6000  # lines kept for a client attaching late
 PROGRESS_EVERY = 0.5  # seconds between progress events
 #--- Exits once no job runs and no client is attached for this long; a
@@ -297,6 +299,8 @@ class Job:
             self.undo = None
         if outcome == "ok":
             self.undo = None
+            if not self.preview and self.kind in BACKED_UP:
+                self.service.back_up(self)
         # The last graph stays at the end of the log, as nom leaves it in a terminal
         if not self.progress.evaluating:
             for row in self.progress.graph(final=True):
@@ -369,6 +373,21 @@ class Service:
                               "1", "suppress-sound", "b", "true", "-1"],
                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except OSError:
+            pass
+
+    def back_up(self, job):
+        """Commits and pushes this machine's and user's folders in the background."""
+        cfg = self.cfg
+
+        async def work():
+            note = await asyncio.get_running_loop().run_in_executor(
+                None, gitstate.back_up, cfg.flake, cfg.machine, [f"machines/{cfg.machine}", f"users/{cfg.user}"])
+            if note:
+                job.append("info", note)
+                self.flush()
+        try:
+            asyncio.get_running_loop().create_task(work())
+        except RuntimeError:
             pass
 
     def flush(self):
@@ -577,9 +596,6 @@ class Service:
                 job.restore = lambda: restore() and None
             else:
                 job.undo, job.undo_label = restore, "Undo the Pull"
-                note = await loop.run_in_executor(None, gitstate.push_backup, cfg.flake)
-                if note:
-                    job.append("info", note)
             await self.run(job, {"rebuild": True, "mode": mode})
             return job
         if kind == "activate":

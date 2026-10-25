@@ -171,29 +171,55 @@ def unpull(flake, old, lock):
             f.write(lock)
 
 
-def push_backup(flake):
-    """Pushes the rebased commits to the branch's push remote, when it has one
-    apart from the upstream (branch.<name>.pushRemote or remote.pushDefault).
-    Returns a line for the log, or None when there's nowhere to push."""
+def push_remote(flake):
+    """(branch, remote) when the branch pushes somewhere other than it pulls
+    from (branch.<name>.pushRemote or remote.pushDefault), else None."""
     try:
         branch = git(flake, "branch", "--show-current").strip()
         upstream = git(flake, "config", f"branch.{branch}.remote").strip()
     except RuntimeError:
         return None
-    push = ""
     for key in (f"branch.{branch}.pushRemote", "remote.pushDefault"):
         try:
             push = git(flake, "config", key).strip()
-            break
         except RuntimeError:
             continue
-    if not push or push == upstream:
+        return (branch, push) if push and push != upstream else None
+    return None
+
+
+def push_backup(flake):
+    """Pushes the branch to its push remote, when it has one apart from the
+    upstream. Returns a line for the log, or None when there's nowhere to push."""
+    target = push_remote(flake)
+    if target is None:
         return None
+    branch, push = target
     try:
+        # Pull rebases the local commits, so the push replaces the old ones
         git(flake, "push", "--quiet", "--force-with-lease", push, f"HEAD:{branch}", timeout=120)
     except (RuntimeError, subprocess.TimeoutExpired) as e:
-        return f"Couldn't push to {push}: {e}"
-    return f"Pushed your commits to {push}"
+        return f"Couldn't back up to {push}: {e}"
+    return f"Backed up your changes to {push}"
+
+
+def back_up(flake, machine, paths):
+    """After a successful run, on a clone with a push remote: commits what
+    changed under `paths` (this machine's and this user's folders), then
+    pushes. Returns a line for the log, or None when there's no push remote."""
+    if push_remote(flake) is None:
+        return None
+    paths = [p for p in paths if os.path.isdir(os.path.join(flake, p))]
+    try:
+        git(flake, "add", "-A", "--", *paths)
+        staged = subprocess.run(["git", "-C", flake, "diff", "--cached", "--quiet", "--", *paths], env=ENV,
+                                stdin=subprocess.DEVNULL, timeout=20)
+        if staged.returncode == 1:
+            git(flake, "commit", "--quiet", "-m", f"chore({machine}): save settings from Omni Settings",
+                "--", *paths)
+    except (RuntimeError, subprocess.TimeoutExpired) as e:
+        return f"Couldn't commit your changes: {e}"
+    return push_backup(flake)
 
 
 def iso_epoch(text):

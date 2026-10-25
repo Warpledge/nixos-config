@@ -25,4 +25,4 @@ The config is a git repository, a folder that records every change made to it. M
 - commits waiting to be pushed to GitHub, or pulled from it
 - recent commits, and open pull requests
 
-Its line in the page list says "In step" when everything is, or counts what's waiting. Changes Omni Settings makes stay uncommitted until an admin commits them, so the Git page is where to see what's been changed since.
+Its line in the page list says "In step" when everything is, or counts what's waiting. Changes Omni Settings makes stay uncommitted until an admin commits them, so the Git page is where to see what's been changed since. The exception is a copy whose branch pushes somewhere other than where it pulls from (`branch.<name>.pushRemote`, such as your own backup of someone else's repo): there, each successful Apply, Rebuild, Update or Pull commits what changed in this computer's `machines/` folder and your `users/` folder and pushes it.
