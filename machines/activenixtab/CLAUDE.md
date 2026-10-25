@@ -31,7 +31,11 @@ when Ky approves it.
 - **Touchpad:** the folio's toggle key sends F21 (`XF86TouchpadToggle`), bound in
   `home/binds.nix`; it writes `~/.config/niri/touchpad-off`, which `touch-gestures.py`
   watches. Turning the touchpad off in niri would also stop the touchscreen gestures.
-  The touchpad firmware smooths movement after about 3 s of contact; no OS fix found yet.
+  Movement feels smoothed from first contact. hid-multitouch, libinput (flat profile)
+  and niri pass the firmware's 270 Hz reports through unchanged (measured 2026-10-25),
+  so any filter is in the firmware (it feels the same on Windows). A script that
+  moved fingers ahead by their speed was snappier but lost accuracy, so it was
+  dropped; the fix being looked for is in the folio's ITE firmware.
 - **Scroll speed:** Chromium, Electron and Vivaldi scroll far faster per finger movement
   than GTK, so `wm/niri.nix` gives them `scroll-factor = 0.25`. Qt apps are left as is.
 - **Keyboard:** keyd makes a tap of Meta alone open the launcher (Meta+Space).
