@@ -25,47 +25,63 @@
     exec ${lib.getExe' pkgs.llama-cpp-vulkan "llama-server"} -m "$file" "$@"
   '';
 
+  modelsDir = "${config.home.homeDirectory}/.lmstudio/models";
+
   #--- Whole model on the GPU: shared memory leaves no reason to keep experts on the CPU
   models = {
-    #--- Default, for coding and chat: MoE, 10B active (~60 GB at Q3_K_XL).
-    #--- 12 of its 48 layers keep a KV cache, so 256K is ~6 GB at f16.
-    #--- `match` takes any quant downloaded; mmproj (vision) doesn't match
-    ornith-1-5-122b = {
-      name = "Ornith 1.5 122B";
-      dir = "unsloth/Ornith-1.5-122B-GGUF";
-      match = "Ornith-1.5-122B-*.gguf";
-      context = 262144;
+    #--- Most accurate, for chat and hard problems: MoE, 13B active (97 GiB at
+    #--- UD-IQ3_XXS). The DSpark drafter (10 GiB) nearly doubles generation but
+    #--- leaves ~1 GiB RAM free while loaded. Thinking is capped at 4096 tokens.
+    deepseek-v4-flash = {
+      name = "DeepSeek V4 Flash";
+      dir = "unsloth/DeepSeek-V4-Flash-0731-GGUF";
+      match = "DeepSeek-V4-Flash-0731-*-00001-of-*.gguf";
+      context = 65536;
+      flags = [
+        "--reasoning-budget 4096"
+        "-md '${modelsDir}/unsloth/DeepSeek-V4-Flash-0731-GGUF/dspark-DeepSeek-V4-Flash-0731-Q8_0.gguf'"
+        "--spec-type draft-dspark --spec-draft-n-max 3 -ngld 99"
+      ];
+      #--- Unsloth's sampling for V4 Flash
+      params = {
+        temperature = 1.0;
+        top_p = 1.0;
+        min_p = 0.01;
+      };
     };
-    #--- Same family, 3B active, for quick edits (~23 GB)
-    ornith-1-5-35b = {
-      name = "Ornith 1.5 35B A3B";
-      dir = "ornith-ai/Ornith-1.5-35B-A3B-GGUF";
-      match = "Ornith-1.5-35B-*.gguf";
+    #--- Fast, for opencode: MoE, 5B active (59 GiB, MXFP4 as released).
+    #--- Reads input ~3x faster than DeepSeek
+    gpt-oss-120b = {
+      name = "gpt-oss 120B";
+      dir = "ggml-org/gpt-oss-120b-GGUF";
+      match = "gpt-oss-120b-*.gguf";
       context = 131072;
+      flags = ["--reasoning-effort medium"];
+      #--- OpenAI's sampling for gpt-oss
+      params = {
+        temperature = 1.0;
+        top_p = 1.0;
+        top_k = 0;
+        min_p = 0;
+      };
     };
-  };
-  #--- Ornith's sampling for coding
-  params = {
-    temperature = 0.6;
-    top_p = 0.95;
-    top_k = 20;
-    min_p = 0;
   };
 
   settings = {
     models =
       lib.mapAttrs (id: m: {
         ttl = 600; # Unloads after 10 idle minutes
-        cmd = lib.concatStringsSep " " [
-          launch
-          "'${m.dir}'"
-          "'${m.match}'"
-          "--port \${PORT}"
-          "-c ${toString m.context}"
-          "-np 1 -fa on -ngl 99 --load-mode none -ub 2048 --no-webui"
-          "-ctk f16 -ctv f16"
-        ];
-        filters.setParamsByID.${id} = params;
+        cmd = lib.concatStringsSep " " ([
+            launch
+            "'${m.dir}'"
+            "'${m.match}'"
+            "--port \${PORT}"
+            "-c ${toString m.context}"
+            "-np 1 -fa on -ngl 99 --load-mode none -ub 2048 --no-webui"
+            "-ctk f16 -ctv f16"
+          ]
+          ++ m.flags);
+        filters.setParamsByID.${id} = m.params;
       })
       models;
     #--- One model loaded at a time
@@ -95,9 +111,9 @@ in {
   home.packages = [pkgs.opencode-desktop];
 
   programs.opencode.settings = {
-    model = "llama-swap/ornith-1-5-122b";
+    model = "llama-swap/gpt-oss-120b";
     # Titles and summaries too: another model would swap the big one out
-    small_model = "llama-swap/ornith-1-5-122b";
+    small_model = "llama-swap/gpt-oss-120b";
     provider.llama-swap = {
       npm = "@ai-sdk/openai-compatible";
       name = "llama-swap (local)";
