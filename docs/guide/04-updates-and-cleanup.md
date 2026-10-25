@@ -14,6 +14,8 @@ Some updates switch at the next restart even if you picked Update Now: a new sys
 
 Updating every week or two keeps each jump small, which makes problems easier to find.
 
+When the config's own repository has new commits (the Git page counts them as "to pull"), a **Config** row above the sources offers **Pull**. It runs `git pull --rebase`, so commits you made yourself stay on top, then rebuilds the same way Update Now does. If you'd also updated flake.lock without committing it and the new commits change it too, theirs wins. Where the branch pushes somewhere other than where it pulls from (`branch.<name>.pushRemote`), Pull pushes your commits there afterwards.
+
 ## Versions
 
 Every rebuild keeps the previous generation. The **Versions** list shows them, marked **Running**, **Next start** or **Started with**.

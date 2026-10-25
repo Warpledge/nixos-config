@@ -26,6 +26,7 @@ sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 
 import api  # noqa: E402
 import backend  # noqa: E402
+import gitstate  # noqa: E402
 import nixfile  # noqa: E402
 import nixlog  # noqa: E402
 import peoplestate  # noqa: E402
@@ -34,6 +35,7 @@ import system  # noqa: E402
 STEPS = {
     "write": "Save and check your settings",
     "update": "Get the newest versions",
+    "pull": "Get the config's new commits",
     "auth": "Confirm it's you",
     "save": "Save and check your settings",
     "build": "Build the new system",
@@ -260,10 +262,11 @@ class Job:
             self.finish("failed", self.failed_heading(), reason)
 
     def failed_heading(self):
-        for sid in ("write", "update", "save", "build", "switch", "boot"):
+        for sid in ("write", "update", "pull", "save", "build", "switch", "boot"):
             step = self.steps.get(sid)
             if step is not None and step["state"] == "failed":
                 return {"write": "These settings don't work", "update": "Couldn't update flake.lock",
+                        "pull": "Couldn't get the new commits",
                         "save": "These settings don't work", "build": "The build failed",
                         "switch": "Switching failed", "boot": "The boot menu wasn't updated"}[sid]
         return "Something went wrong"
@@ -548,6 +551,35 @@ class Service:
                 job.restore = lambda: restore() and None
             else:
                 job.undo, job.undo_label = restore, "Undo the Update"
+            await self.run(job, {"rebuild": True, "mode": mode})
+            return job
+        if kind == "pull":
+            state = await loop.run_in_executor(None, api.loaded, cfg)
+            if api.access(cfg, state) != (True, True):
+                raise JobError("Only an admin can pull the config")
+            mode = mode_arg(args, ("auto", "boot", "build"))
+            preview = mode == "build"
+            job = self.new_job(kind, "Previewing the Pull" if preview else "Pulling",
+                               ["pull", "auth"] + tail(preview), "Config pulled")
+            job.preview = preview
+            job.step("pull", "running", "Rebasing your commits onto the new ones")
+            try:
+                old, lock = await loop.run_in_executor(None, gitstate.pull, cfg.flake)
+            except gitstate.PullError as e:
+                job.errors.append(str(e))
+                job.step("pull", "failed", str(e))
+                job.finish("failed", "Couldn't get the new commits", str(e))
+                return job
+            job.step("pull", "done", "The config has the new commits"
+                     + (", with their flake.lock in place of yours" if lock is not None else ""))
+            restore = lambda: (gitstate.unpull(cfg.flake, old, lock), "The config is back how it was")[1]
+            if preview:
+                job.restore = lambda: restore() and None
+            else:
+                job.undo, job.undo_label = restore, "Undo the Pull"
+                note = await loop.run_in_executor(None, gitstate.push_backup, cfg.flake)
+                if note:
+                    job.append("info", note)
             await self.run(job, {"rebuild": True, "mode": mode})
             return job
         if kind == "activate":
