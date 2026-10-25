@@ -42,6 +42,8 @@
       runHook preInstall
       share=$out/share/omni-settings
       install -Dm644 -t $share *.py descriptions.json
+      # Python can't cache bytecode in the store, so each call would recompile
+      ${pkgs.python3}/bin/python3 -m compileall -q --invalidation-mode unchecked-hash $share
       install -Dm644 -t $share/qml ${./qml}/*.qml
       substitute ${./qml/Config.qml.in} $share/qml/Config.qml \
         --subst-var-by backend $out/bin/omni-settings-backend \
