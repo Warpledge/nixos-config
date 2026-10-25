@@ -32,10 +32,13 @@ PluginComponent {
     // A switch restarts DMS, so the run's end is judged by those times rather
     // than by a before/after look. Only the program or its first argument
     // (pkexec's, an interpreter's) counts, not a shell whose text names one.
+    // Python's is the script path past its flags: the helper runs as
+    // `python3 -I .../omni-settings-apply-1.0/.../helper.py`.
     readonly property string probe: "ps -eo user:32=,etimes=,args= | awk '"
         + "function base(p) { sub(/.*\\//, \"\", p); return p } "
         + "$1 ~ /^nixbld/ || $1 ~ /^[0-9]+$/ { b[$1] = 1; next } "
         + "{ x = base($3); y = base($4) } "
+        + "x ~ /^python/ { for (i = 4; $i ~ /^-/; i++); y = $i } "
         + "x ~ /^\\.?nh(-wrapped)?$/ && $4 == \"os\" && $5 ~ /^(switch|boot|test|build)$/ "
         + "|| (x ~ /^(pkexec|sudo|python[0-9.]*|bash|sh)$/ ? y : x) ~ /[n]ixos-rebuild|[o]mni-settings-apply/ "
         + "{ $1 = \"\"; print \"R\" $0 } "
