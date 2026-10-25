@@ -9,6 +9,8 @@ ColumnLayout {
     spacing: 6
 
     Component.onCompleted: Backend.call("ports", {}, reply => {
+        if (!ports)
+            return  // the tab was left before the reply came
         if (reply.ok)
             open = reply.data
         else

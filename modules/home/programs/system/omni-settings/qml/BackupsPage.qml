@@ -14,6 +14,8 @@ ColumnLayout {
 
     function load() {
         Backend.call("backups", {}, reply => {
+            if (!page)
+                return  // the tab was left before the reply came
             if (reply.ok) {
                 bk = reply.data
                 error = ""

@@ -20,6 +20,8 @@ ColumnLayout {
 
     function load() {
         Backend.call("flatpaks", {}, reply => {
+            if (!page)
+                return  // the tab was left before the reply came
             if (reply.ok)
                 fp = reply.data
             else

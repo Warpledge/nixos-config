@@ -12,6 +12,8 @@ ColumnLayout {
 
     function load() {
         Backend.call("services", {}, reply => {
+            if (!running)
+                return  // the tab was left before the reply came
             if (!reply.ok) {
                 error = reply.error
                 return
