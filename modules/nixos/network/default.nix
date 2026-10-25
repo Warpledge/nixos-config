@@ -28,5 +28,6 @@
       ./networkmanager.nix
     ]
     #--- Hosts blocklist (controlled by machine settings)
-    ++ lib.optionals machine.blocklist.enable [./blockers.nix];
+    ++ lib.optionals machine.blocklist.enable [./blockers.nix]
+    ++ lib.optionals machine.smb.enable [./smb.nix];
 }
