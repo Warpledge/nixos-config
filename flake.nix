@@ -103,6 +103,11 @@
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Its overlay builds mcp-nixos on its own fastmcp 4 / mcp 2 package set
+    mcp-nixos = {
+      url = "github:utensils/mcp-nixos";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     #--- Applications
     # Own nixpkgs: following ours misses cache.forall.systems
