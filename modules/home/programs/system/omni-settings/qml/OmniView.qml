@@ -134,8 +134,9 @@ Item {
 
     Component.onCompleted: {
         reload()
-        Jobs.setShown(true)
+        Jobs.setShown(shown)
     }
+    onShownChanged: Jobs.setShown(shown)
 
     Connections {
         target: Jobs
