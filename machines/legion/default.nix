@@ -105,6 +105,7 @@
     [
       ./hardware/gpu.nix
       ./hardware/hardware-configuration.nix
+      ./hardware/storage.nix
       ./hardware/swapfile.nix
 
       ../../modules

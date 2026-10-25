@@ -13,6 +13,8 @@ lid and power key are ignored, and DMS auto-lock is off under niri.
 
 - `hardware/gpu.nix` and `wm/niri.nix` — PRIME offload and the WM's GPU variables
 - `hardware/swapfile.nix`
+- `hardware/storage.nix` — the second NVMe (SK Hynix) as LUKS storage on `/mnt/storage`,
+  unlocked after boot from a key file on the encrypted root (crypttab)
 - `minecraft-servers/` — GTNH and TerraFirmaGreg server definitions, plus `mcservers.nix`,
   an fzf picker over them. It's a **home-manager** module injected from `default.nix`
   through `home-manager.users.${machine.mainUser}.imports`, not a NixOS module, since the
