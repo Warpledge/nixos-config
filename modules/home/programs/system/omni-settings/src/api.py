@@ -9,6 +9,7 @@ import grp
 import json
 import os
 import pwd
+import selectors
 import shutil
 import socket
 import subprocess
@@ -940,7 +941,71 @@ def run(cfg, cmd, args):
         return {"ok": False, "error": f"{type(e).__name__}: {e}"}
 
 
+def serve():
+    """`--serve`: Backend.qml's requests as JSON lines on stdin, {"id", "cmd", "args"},
+    each run in a forked child, so it starts as a fresh call would minus the imports;
+    the replies go to stdout as {"id", "reply"} lines, in the order they finish."""
+    sel = selectors.DefaultSelector()
+    sel.register(0, selectors.EVENT_READ)
+    pending = b""
+    children = {}  # read end -> [request id, pid, reply bytes]
+    while True:
+        for key, _ in sel.select():
+            fd = key.fd
+            if fd == 0:
+                chunk = os.read(0, 65536)
+                if not chunk:
+                    return
+                *lines, pending = (pending + chunk).split(b"\n")
+                for line in lines:
+                    if line.strip():
+                        r, pid, rid = fork_request(line)
+                        children[r] = [rid, pid, b""]
+                        sel.register(r, selectors.EVENT_READ)
+                continue
+            chunk = os.read(fd, 65536)
+            if chunk:
+                children[fd][2] += chunk
+                continue
+            rid, pid, data = children.pop(fd)
+            sel.unregister(fd)
+            os.close(fd)
+            os.waitpid(pid, 0)
+            if not data:
+                data = json.dumps({"ok": False, "error": "omni-settings-backend gave no answer"}).encode()
+            sys.stdout.buffer.write(b'{"id": %s, "reply": %s}\n' % (json.dumps(rid).encode(), data))
+            sys.stdout.buffer.flush()
+
+
+def fork_request(line):
+    """A child running one serve() request; its read end, pid and the request's id."""
+    try:
+        req = json.loads(line)
+        rid, cmd, args = req.get("id"), req.get("cmd", ""), req.get("args") or {}
+    except (ValueError, AttributeError):
+        rid, cmd, args = None, "", {}
+    r, w = os.pipe()
+    pid = os.fork()
+    if pid:
+        os.close(w)
+        return r, pid, rid
+    try:
+        os.close(r)
+        # Nothing a command runs may read the requests or write into the replies
+        null = os.open(os.devnull, os.O_RDWR)
+        os.dup2(null, 0)
+        os.dup2(null, 1)
+        data = json.dumps(run(backend.Config.from_env(), cmd, args)).encode()
+        while data:
+            data = data[os.write(w, data):]
+    finally:
+        os._exit(0)
+
+
 def main():
+    if sys.argv[1:] == ["--serve"]:
+        serve()
+        return
     if len(sys.argv) < 2:
         sys.exit(f"usage: omni-settings-backend <{'|'.join(COMMANDS)}> ['<json args>']")
     try:
