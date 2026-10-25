@@ -175,7 +175,7 @@ Rectangle {
                                  : modelData.state === "waiting" || modelData.state === "skipped" ? Theme.dim
                                  : Theme.primary
                             RotationAnimation on rotation {
-                                running: modelData.state === "running"
+                                running: modelData.state === "running" && parent.visible
                                 from: 0; to: 360; duration: 1200; loops: Animation.Infinite
                             }
                         }

@@ -20,7 +20,8 @@ Rectangle {
         size: Math.round(badge.width * 0.53)
         color: badge.tone ? Theme.bg : Theme.inkPrimary
         RotationAnimation on rotation {
-            running: badge.icon === "progress_activity"
+            // A hidden spinner still redraws the window every frame
+            running: badge.icon === "progress_activity" && glyph.visible
             from: 0; to: 360; duration: 1200; loops: Animation.Infinite
             onStopped: glyph.rotation = 0
         }
