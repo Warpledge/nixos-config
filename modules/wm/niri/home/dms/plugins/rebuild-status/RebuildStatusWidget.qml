@@ -158,17 +158,32 @@ PluginComponent {
         onTriggered: root.result = null
     }
 
-    component PillIcon: DIcon {
-        name: root.pillIcon
-        size: root.iconSize
-        color: root.pillColor
-        RotationAnimation on rotation {
-            running: root.running
-            from: 0
-            to: 360
-            duration: 1400
-            loops: Animation.Infinite
-            onStopped: parent.rotation = 0
+    // The spinner is its own icon: a stopped rotation keeps its last angle
+    component PillIcon: Item {
+        width: root.iconSize
+        height: root.iconSize
+
+        DIcon {
+            anchors.centerIn: parent
+            visible: root.running
+            name: "autorenew"
+            size: root.iconSize
+            color: root.pillColor
+            RotationAnimation on rotation {
+                running: root.running
+                from: 0
+                to: 360
+                duration: 1400
+                loops: Animation.Infinite
+            }
+        }
+
+        DIcon {
+            anchors.centerIn: parent
+            visible: !root.running
+            name: root.pillIcon
+            size: root.iconSize
+            color: root.pillColor
         }
     }
 
