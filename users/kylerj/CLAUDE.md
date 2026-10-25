@@ -23,3 +23,5 @@ Plasma, so the niri binds follow Plasma's shortcuts.
 - Per-app niri window rules go in Omni Settings' Window Rules page.
 - Theming stays the same across GTK and Qt/KDE apps (Kvantum, Papirus-Dark).
 - Ky has no other Nix machine, so a change can't be tried anywhere first.
+- No Windows, and Ky won't install it: don't suggest Windows-only fixes or tools
+  (ASUS's firmware updaters, MyASUS, Armoury Crate).
