@@ -8,10 +8,11 @@ ColumnLayout {
     required property var view
     property var doc: null
     property string error: ""
+    readonly property bool ready: !!doc && doc.key === key || error !== ""
     spacing: 10
 
-    // A link to another note keeps this page loaded, so it reads the note anew
-    readonly property string key: view.page
+    property string key: ""
+    property bool titled: true  // false leaves out the note's first heading
     onKeyChanged: load()
     Component.onCompleted: load()
     function load() {
@@ -71,7 +72,8 @@ ColumnLayout {
     }
 
     Repeater {
-        model: page.doc ? page.doc.blocks : []
+        model: !page.doc ? [] : !page.titled && page.doc.blocks.length && page.doc.blocks[0].kind === "h"
+            ? page.doc.blocks.slice(1) : page.doc.blocks
         // Only the width is set on the Loader, so the block's wrapped height isn't fed back
         Item {
             required property var modelData

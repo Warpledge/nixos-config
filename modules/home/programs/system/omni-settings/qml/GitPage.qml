@@ -7,6 +7,7 @@ ColumnLayout {
     required property var view
     property var repo: null
     property string error: ""
+    readonly property bool ready: !!repo || error !== ""
     property bool loading: false
     readonly property string web: repo && repo.repo ? `https://github.com/${repo.repo}` : ""
     spacing: 6
@@ -47,11 +48,9 @@ ColumnLayout {
             spacing: 10
             RowLayout {
                 spacing: 14
-                Badge { implicitWidth: 56; implicitHeight: 56; radius: 28; icon: "commit" }
                 ColumnLayout {
                     spacing: 2
                     Layout.fillWidth: true
-                    Text { text: "Git"; color: Theme.text; font.pixelSize: 22; font.weight: Font.Bold }
                     Text {
                         text: `Where the config repo stands: ${page.view.info.flake}`
                               + (page.repo && page.repo.repo ? `, on github.com/${page.repo.repo}` : "") + "."

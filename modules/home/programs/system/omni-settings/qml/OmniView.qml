@@ -15,7 +15,6 @@ Item {
     property var stale: null  // api.py's `stale`, when the settings files don't evaluate
     property string tab: "main"
     property string page: "overview"
-    property var lastPage: ({})
     property bool picking: false
     property bool reviewing: false
     property bool running: false
@@ -87,6 +86,10 @@ Item {
         return out
     }
     readonly property var current: navItems.find(i => i.id === page) || null
+    //--- The current tab's pages, in its scroll order. Search sits pinned above the
+    //--- Packages scroll, and All user packages shows only while there's no category
+    readonly property var tabPages: navItems.filter(i => i.tab === tab && i.id !== "packages"
+                                                    && !(i.id === "userpackages" && packageCategories.length))
     readonly property var scopes: !info ? [] : [{ id: info.machine, title: `This computer (${info.machine})` }]
         .concat(info.userMachines.filter(m => m !== info.machine).map(m => ({ id: m, title: m })))
         .concat([{ id: "", title: "All computers" }])
@@ -388,21 +391,164 @@ Item {
     //--------------------------------------------------------------------//
     //-- Navigation and Small Actions
     //--------------------------------------------------------------------//
+    //--- A tab is one scroll of its pages: go() to another tab builds its pages out
+    //--- of sight, to a page in this tab scrolls there
     function go(tabId, pageId) {
-        const lp = Object.assign({}, lastPage)
-        lp[tab] = page
-        lastPage = lp
-        tab = tabId
-        if (pageId)
-            page = pageId
-        else {
-            const first = navItems.find(i => i.tab === tabId)
-            page = lastPage[tabId] || (first ? first.id : "")
-        }
         picking = false
         search.text = ""
-        bodyFlick.contentY = 0
         omni.forceActiveFocus()
+        if (pageId === "packages") {
+            if (tabId !== tab)
+                go(tabId)
+            packageSearch.focusField()
+            return
+        }
+        if (pageId && pageId.startsWith("doc:"))
+            openNote(pageId, true)
+        if (tabId === tab) {
+            if (pageId)
+                scrollTo(pageId)
+            return
+        }
+        packageSearch.close()
+        const ts = Object.assign({}, tabState)
+        ts[tab] = { page, offset: anchorOffset }
+        tabState = ts
+        pageIn.stop()
+        scrollAnim.stop()
+        reveal = 0
+        rise = 14
+        tab = tabId
+        const kept = tabState[tabId]
+        const target = pageId || (kept ? kept.page : "")
+        page = tabPages.some(i => i.id === target) ? target : tabPages.length ? tabPages[0].id : ""
+        anchorPage = page
+        anchorOffset = !pageId && kept && kept.page === page ? kept.offset : 0
+        setY(0)
+        waiting = true
+        revealCap.restart()
+        Qt.callLater(showPage)
+        if (tabId === "packages")
+            packageSearch.focusField()
+    }
+
+    //--- The scroll: the page whose section holds the top of the view is `page`, and
+    //--- that section stays still while sections above it load or change height
+    property var tabState: ({})  // tab -> {page, offset} for coming back to it
+    property string anchorPage: "overview"
+    property real anchorOffset: 0  // contentY less the anchor section's y
+    property bool adjusting: false
+    function section(pid) {
+        for (let i = 0; i < sections.count; i++) {
+            const s = sections.itemAt(i)
+            if (s && s.pid === pid)
+                return s
+        }
+        return null
+    }
+    function maxY() { return Math.max(0, bodyFlick.contentHeight - bodyFlick.height) }
+    function setY(y) {
+        adjusting = true
+        bodyFlick.contentY = Math.max(0, Math.min(y, maxY()))
+        adjusting = false
+    }
+    function snapToAnchor() {
+        const s = section(anchorPage)
+        if (s && s.visible)
+            setY(s.y + anchorOffset)
+    }
+    function sectionMoved(s) {
+        if (s.pid === anchorPage && !bodyFlick.dragging && !bodyFlick.flicking && !scrollAnim.running)
+            snapToAnchor()
+    }
+    //--- After the user scrolls: the page now at the top, or the last one at the bottom
+    function spy() {
+        if (adjusting || scrollAnim.running)
+            return
+        const y = bodyFlick.contentY
+        let hit = null
+        for (let i = 0; i < sections.count; i++) {
+            const s = sections.itemAt(i)
+            if (s && s.visible && (s.y <= y + bodyFlick.height / 4 || !hit))
+                hit = s
+        }
+        if (!hit)
+            return
+        if (y >= maxY() - 2 && maxY() > 0)
+            for (let i = sections.count - 1; i >= 0; i--) {
+                const s = sections.itemAt(i)
+                if (s && s.visible) {
+                    hit = s
+                    break
+                }
+            }
+        page = hit.pid
+        anchorPage = hit.pid
+        anchorOffset = y - hit.y
+    }
+    function scrollTo(pid) {
+        const s = section(pid)
+        if (!s)
+            return
+        page = pid
+        anchorPage = pid
+        anchorOffset = 0
+        scrollAnim.stop()
+        scrollAnim.to = Math.max(0, Math.min(s.y, maxY()))
+        scrollAnim.start()
+    }
+    NumberAnimation {
+        id: scrollAnim
+        target: bodyFlick
+        property: "contentY"
+        duration: 380
+        easing.type: Easing.OutCubic
+        // A section above that grew meanwhile moved the target
+        onFinished: {
+            const s = omni.section(omni.anchorPage)
+            if (s)
+                omni.anchorOffset = bodyFlick.contentY - s.y
+        }
+    }
+
+    //--- Notes on the Docs tab show only their title until opened
+    property var openNotes: ({})
+    function openNote(pid, open) {
+        const n = Object.assign({}, openNotes)
+        if (open)
+            n[pid] = true
+        else
+            delete n[pid]
+        openNotes = n
+    }
+
+    //--- A new tab fades in and rises into place once its pages have their data
+    //--- (each page's `ready`)
+    property real reveal: 1
+    property real rise: 0
+    property bool waiting: false
+    function tabReady() {
+        for (let i = 0; i < sections.count; i++) {
+            const s = sections.itemAt(i)
+            if (s && !s.ready)
+                return false
+        }
+        return true
+    }
+    function showPage() {
+        if (!waiting || !tabReady() && revealCap.running)
+            return
+        waiting = false
+        revealCap.stop()
+        snapToAnchor()
+        pageIn.start()
+    }
+    // A slow backend call shows the page's own "Loading…" after this long
+    Timer { id: revealCap; interval: 700; onTriggered: omni.showPage() }
+    ParallelAnimation {
+        id: pageIn
+        NumberAnimation { target: omni; property: "reveal"; to: 1; duration: 220; easing.type: Easing.OutQuad }
+        NumberAnimation { target: omni; property: "rise"; to: 0; duration: 300; easing.type: Easing.OutCubic }
     }
 
     function openFile(rel) {
@@ -556,6 +702,8 @@ Item {
                             height: tabTip.implicitHeight + 10
                             radius: height / 2
                             color: Theme.toast
+                            border.width: 1
+                            border.color: Theme.line
                             Text {
                                 id: tabTip
                                 anchors.centerIn: parent
@@ -650,6 +798,14 @@ Item {
             }
         }
 
+        PackagesPage {
+            id: packageSearch
+            view: omni
+            visible: omni.tab === "packages"
+            z: 2  // its results hang over the page
+            Layout.fillWidth: true
+        }
+
         //--- Page body
         Flickable {
             id: bodyFlick
@@ -658,22 +814,24 @@ Item {
             contentHeight: body.implicitHeight + 16
             clip: true
             boundsBehavior: Flickable.StopAtBounds
-            interactive: !omni.picking
+            interactive: !omni.picking && !packageSearch.open
             // A page that got shorter, or came back from a run, keeps no blank space
-            onContentHeightChanged: returnToBounds()
-            onVisibleChanged: if (visible) returnToBounds()
-            opacity: omni.picking ? 0.35 : 1
+            onContentHeightChanged: omni.setY(contentY)
+            onVisibleChanged: if (visible) omni.setY(contentY)
+            onContentYChanged: omni.spy()
+            opacity: omni.picking || packageSearch.open ? 0.35 : 1
             Behavior on opacity { NumberAnimation { duration: 150 } }
 
-            //--- A tap on the dimmed page closes the picker
+            //--- A tap on the dimmed page closes the picker or the package results
             MouseArea {
                 z: 1
                 parent: bodyFlick
                 anchors.fill: parent
-                enabled: omni.picking
+                enabled: omni.picking || packageSearch.open
                 onClicked: {
                     omni.picking = false
                     search.text = ""
+                    packageSearch.close()
                     omni.forceActiveFocus()
                 }
             }
@@ -682,6 +840,8 @@ Item {
                 id: body
                 width: parent.width
                 spacing: 6
+                opacity: omni.reveal
+                transform: Translate { y: omni.rise }
 
                 //--- The settings files don't evaluate
                 Rectangle {
@@ -776,38 +936,11 @@ Item {
                     }
                 }
 
-                // Height from the page itself: one set by the layout would carry over
-                // to the next page loaded, leaving blank space above a shorter one
-                Loader {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: item ? item.implicitHeight : 0
-                    active: !!omni.info && !!omni.info.pages[omni.page] && omni.pageComponent === undefined
-                    sourceComponent: SettingsPage {
-                        model: omni.info.pages[omni.page]
-                        view: omni
-                    }
-                }
-
-                //--- Pages not made from the templates
-                Loader {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: item ? item.implicitHeight : 0
-                    active: !!omni.info && omni.pageComponent !== undefined
-                    sourceComponent: omni.pageComponent || null
-                }
-
-                //--- A page id with nothing to show
-                ColumnLayout {
-                    visible: !!omni.info && !omni.info.pages[omni.page] && omni.pageComponent === undefined
-                    Layout.fillWidth: true
-                    Layout.topMargin: 40
-                    spacing: 12
-                    Text {
-                        text: `${omni.current ? omni.current.title : "This page"} has nothing to show.`
-                        color: Theme.dim
-                        horizontalAlignment: Text.AlignHCenter
-                        Layout.fillWidth: true
-                    }
+                //--- The tab's pages, one after another
+                Repeater {
+                    id: sections
+                    model: omni.info ? omni.tabPages : []
+                    PageSection {}
                 }
             }
         }
@@ -878,7 +1011,7 @@ Item {
             anchors.margins: 4
             clip: true
             boundsBehavior: Flickable.StopAtBounds
-            model: omni.navItems.filter(i => i.tab === omni.tab)
+            model: omni.tabPages
 
             delegate: Column {
                 id: railItem
@@ -933,6 +1066,16 @@ Item {
         width: namesCol.implicitWidth + 8  // the gap to the rail counts as hovering the names
         clip: true
         HoverHandler { id: namesArea }
+        // Mutes the page behind the names so they read on any page
+        Rectangle {
+            anchors.fill: parent
+            gradient: Gradient {
+                orientation: Gradient.Horizontal
+                GradientStop { position: 0; color: "transparent" }
+                GradientStop { position: 0.35; color: Qt.alpha(Theme.bg, 0.85) }
+                GradientStop { position: 1; color: Qt.alpha(Theme.bg, 0.95) }
+            }
+        }
         // Laid out like the rail's list and scrolled with it
         Column {
             id: namesCol
@@ -961,6 +1104,8 @@ Item {
                             height: 28
                             radius: 14
                             color: nameItem.active ? Theme.primary : Theme.toast
+                            border.width: 1
+                            border.color: Theme.line
                             Text {
                                 id: nameText
                                 anchors.centerIn: parent
@@ -1017,18 +1162,121 @@ Item {
     //--- Custom pages by id
     readonly property var custom: ({ overview: overviewPage, shell: shellPage, git: gitPage,
                                       flatpaks: flatpaksPage, backups: backupsPage, people: peoplePage,
-                                      packages: packagesPage, userpackages: userPackagesPage,
+                                      userpackages: userPackagesPage,
                                       proton: protonPage, protonversions: protonVersionsPage,
                                       windowrules: windowRulesPage, keybinds: keybindsPage })
     Component { id: windowRulesPage; WindowRulesPage { view: omni } }
     Component { id: keybindsPage; KeybindsPage { view: omni } }
     Component { id: protonPage; ProtonPage { view: omni } }
-    Component { id: docPage; DocPage { view: omni } }
     Component { id: protonVersionsPage; ProtonVersionsPage { view: omni } }
-    readonly property var pageComponent: custom[page]
-        || (page.startsWith("userpackages:") ? userPackagesPage
-            : page.startsWith("doc:") ? docPage : undefined)
-    Component { id: packagesPage; PackagesPage { view: omni } }
+    //--- One page in the tab's scroll: its divider, then the page; a note is only its
+    //--- title until opened
+    component PageSection: ColumnLayout {
+        id: section
+        required property var modelData
+        required property int index
+        readonly property string pid: modelData.id
+        readonly property bool note: pid.startsWith("doc:")
+        readonly property bool userPkgs: pid.startsWith("userpackages:")
+        readonly property bool open: !note || !!omni.openNotes[pid]
+        readonly property var model: omni.info.pages[pid] || null
+        readonly property var comp: note ? notePage : userPkgs ? userPkgsPage
+            : omni.custom[pid] || (model ? settingsPage : null)
+        readonly property bool ready: !loader.item || loader.item.ready !== false
+        onReadyChanged: {
+            if (ready && loader.item && !omni.waiting)
+                arrived.restart()
+            omni.showPage()
+        }
+        onYChanged: omni.sectionMoved(section)
+        // A divider names each page, and a run of notes once
+        readonly property bool divided: !note || index === 0 || !omni.tabPages[index - 1].id.startsWith("doc:")
+        visible: !!comp
+        Layout.fillWidth: true
+        Layout.topMargin: divided && index > 0 ? 18 : 0
+        spacing: 6
+
+        //--- The page's name in a pill, lines fading out to both sides; a run of
+        //--- notes is named after its group
+        RowLayout {
+            visible: section.divided
+            Layout.fillWidth: true
+            Layout.bottomMargin: 12
+            spacing: 8
+            Rectangle {
+                Layout.fillWidth: true
+                implicitHeight: 2
+                gradient: Gradient {
+                    orientation: Gradient.Horizontal
+                    GradientStop { position: 0; color: "transparent" }
+                    GradientStop { position: 1; color: Theme.primary }
+                }
+            }
+            Rectangle { implicitWidth: 7; implicitHeight: 7; rotation: 45; color: Theme.primary }
+            Rectangle {
+                implicitWidth: dividerName.implicitWidth + 40
+                implicitHeight: 46
+                radius: 23
+                color: Theme.primaryContainer
+                border.width: 2
+                border.color: Theme.primary
+                Row {
+                    id: dividerName
+                    anchors.centerIn: parent
+                    spacing: 10
+                    Icon {
+                        anchors.verticalCenter: parent.verticalCenter
+                        icon: Theme.glyph(section.modelData.icon, "description")
+                        size: 26
+                        fill: true
+                        color: Theme.inkContainer
+                    }
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: section.note ? section.modelData.group : section.modelData.title
+                        color: Theme.inkContainer
+                        font.pixelSize: 22
+                        font.weight: Font.ExtraBold
+                    }
+                }
+            }
+            Rectangle { implicitWidth: 7; implicitHeight: 7; rotation: 45; color: Theme.primary }
+            Rectangle {
+                Layout.fillWidth: true
+                implicitHeight: 2
+                gradient: Gradient {
+                    orientation: Gradient.Horizontal
+                    GradientStop { position: 0; color: Theme.primary }
+                    GradientStop { position: 1; color: "transparent" }
+                }
+            }
+        }
+
+        ListRow {
+            visible: section.note
+            icon: Theme.glyph(section.modelData.icon, "description")
+            title: section.modelData.title
+            subtitle: section.modelData.subtitle || ""
+            trailing: section.open ? "expand_less" : "expand_more"
+            onClicked: omni.openNote(section.pid, !section.open)
+        }
+
+        // Height from the page itself, as a layout-set one would loop with wrapped text
+        Loader {
+            id: loader
+            Layout.fillWidth: true
+            Layout.preferredHeight: item ? item.implicitHeight : 0
+            active: section.open && !!section.comp
+            sourceComponent: section.comp
+            // Data that came after the tab showed eases in
+            NumberAnimation on opacity { id: arrived; running: false; from: 0.3; to: 1; duration: 260 }
+        }
+
+        Component { id: settingsPage; SettingsPage { model: section.model; view: omni } }
+        Component { id: userPkgsPage; UserPackagesPage { view: omni; category: section.pid.slice(13) } }
+        Component { id: notePage; DocPage { view: omni; key: section.pid; titled: false } }
+    }
+
     Component { id: userPackagesPage; UserPackagesPage { view: omni } }
     Component { id: peoplePage; PeoplePage { view: omni } }
     Component { id: backupsPage; BackupsPage { view: omni } }

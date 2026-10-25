@@ -9,6 +9,7 @@ ColumnLayout {
     required property var view
     property var people: null
     property string error: ""
+    readonly property bool ready: !!people || error !== ""
     property string problem: ""
     property bool existing: false  // users/<name>/ is set up already, from another computer
     property bool admin: false
@@ -78,11 +79,9 @@ ColumnLayout {
             anchors.fill: parent
             anchors.margins: 14
             spacing: 14
-            Badge { implicitWidth: 56; implicitHeight: 56; radius: 28; icon: "group" }
             ColumnLayout {
                 spacing: 2
                 Layout.fillWidth: true
-                Text { text: "Users"; color: Theme.text; font.pixelSize: 22; font.weight: Font.Bold }
                 Text {
                     text: "Who can log in to this computer. Each person picks their own apps by opening "
                           + "Omni Settings on their own account."

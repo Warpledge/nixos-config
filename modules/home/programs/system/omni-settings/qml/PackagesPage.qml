@@ -1,4 +1,5 @@
-// The Search page: nixpkgs by name through nix-search-tv (api.py's packageNames,
+// Package search, pinned above the Packages tab's scroll with its results in a
+// dropdown: nixpkgs by name through nix-search-tv (api.py's packageNames,
 // matched here as packagestate.search does), Install adding to userPackages
 import QtQuick
 import QtQuick.Layouts
@@ -10,9 +11,17 @@ ColumnLayout {
     readonly property int shown: 50  // packagestate.SHOWN
     property string query: ""
     property var found: []
+    readonly property bool open: query !== ""  // the results hang below the field, over the page
     spacing: 6
 
-    Component.onCompleted: view.loadPackageNames()
+    onVisibleChanged: if (visible) view.loadPackageNames()
+
+    function focusField() { field.input.forceActiveFocus() }
+    function close() {
+        typing.stop()
+        field.text = ""
+        search("")
+    }
 
     //--- As packagestate.search: every word, then the name, its start (or its
     //--- last part's) and anywhere
@@ -56,52 +65,75 @@ ColumnLayout {
         function onPackageNamesChanged() {
             if (field.text.trim())
                 page.search(field.text)
-            field.input.forceActiveFocus()
+            if (page.visible)
+                field.input.forceActiveFocus()
         }
     }
 
-    //--- Hero
+    //--- The field, pinned above the Packages tab's scroll
     Rectangle {
         Layout.fillWidth: true
-        implicitHeight: hero.implicitHeight + 28
+        implicitHeight: field.implicitHeight + 16
         radius: 16
         color: Theme.card
-        ColumnLayout {
-            id: hero
+        Field {
+            id: field
             anchors.fill: parent
-            anchors.margins: 14
-            spacing: 10
-            RowLayout {
-                spacing: 14
-                Badge { implicitWidth: 56; implicitHeight: 56; radius: 28; icon: "search" }
+            anchors.margins: 8
+            enabled: !!page.view.packageNames
+            icon: "search"
+            placeholder: page.view.packageNames
+                ? `Search ${page.view.packageNames.length.toLocaleString(Qt.locale("en_US"), "f", 0)} packages to install`
+                : "Search packages"
+            onTextChanged: typing.restart()
+            onAccepted: {
+                typing.stop()
+                page.search(text)
+            }
+            onEscaped: { page.close(); page.view.forceActiveFocus() }
+        }
+
+        //--- Results
+        Rectangle {
+            visible: page.open
+            anchors.top: parent.bottom
+            anchors.topMargin: 6
+            width: parent.width
+            height: Math.min(results.implicitHeight + 16, page.view.height * 0.62)
+            radius: 16
+            color: Theme.bg
+            border.width: 1
+            border.color: Theme.line
+            Flickable {
+                anchors.fill: parent
+                anchors.margins: 8
+                contentHeight: results.implicitHeight
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
                 ColumnLayout {
-                    spacing: 2
-                    Layout.fillWidth: true
-                    Text { text: "Search"; color: Theme.text; font.pixelSize: 22; font.weight: Font.Bold }
-                    Text {
-                        text: "Search nixpkgs by package name and install what you need; it's added to User "
-                              + "Packages and installed when you apply. Expand a result for its homepage, "
-                              + "licence and the program it runs."
-                        color: Theme.dim
-                        font.pixelSize: 13
-                        wrapMode: Text.Wrap
+                    id: results
+                    width: parent.width
+                    spacing: 6
+                    RowLayout {
                         Layout.fillWidth: true
+                        Section {
+                            text: page.found.length ? "Results" : `Nothing is named like “${page.query}”`
+                            Layout.fillWidth: true
+                        }
+                        Text {
+                            text: page.found.length > page.shown
+                                ? `first ${page.shown} of ${page.found.length.toLocaleString(Qt.locale("en_US"), "f", 0)}`
+                                : page.found.length ? String(page.found.length) : ""
+                            color: Theme.dim
+                            font.pixelSize: 12
+                            Layout.rightMargin: 6
+                        }
+                    }
+                    Repeater {
+                        model: page.query ? page.found.slice(0, page.shown) : []
+                        ResultRow { required property var modelData; attr: modelData }
                     }
                 }
-            }
-            Field {
-                id: field
-                enabled: !!page.view.packageNames
-                icon: "search"
-                placeholder: page.view.packageNames
-                    ? `Search ${page.view.packageNames.length.toLocaleString(Qt.locale("en_US"), "f", 0)} packages`
-                    : "Search packages"
-                onTextChanged: typing.restart()
-                onAccepted: {
-                    typing.stop()
-                    page.search(text)
-                }
-                Component.onCompleted: if (page.view.packageNames) input.forceActiveFocus()
             }
         }
     }
@@ -114,28 +146,6 @@ ColumnLayout {
         subtitle: page.view.packageError
             || "The first time, and once a week after, the list is downloaded again; that takes a minute or so."
         titleLines: 2
-    }
-
-    //--- Results
-    RowLayout {
-        visible: page.query !== ""
-        Layout.fillWidth: true
-        Section {
-            text: page.found.length ? "Results" : `Nothing is named like “${page.query}”`
-            Layout.fillWidth: true
-        }
-        Text {
-            text: page.found.length > page.shown
-                ? `first ${page.shown} of ${page.found.length.toLocaleString(Qt.locale("en_US"), "f", 0)}`
-                : page.found.length ? String(page.found.length) : ""
-            color: Theme.dim
-            font.pixelSize: 12
-            Layout.rightMargin: 6
-        }
-    }
-    Repeater {
-        model: page.query ? page.found.slice(0, page.shown) : []
-        ResultRow { required property var modelData; attr: modelData }
     }
 
     //--- One result: name, version and description, Install, copy, and its details

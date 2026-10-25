@@ -8,6 +8,7 @@ ColumnLayout {
     required property var view
     property var ov: null
     property string error: ""
+    readonly property bool ready: !!ov || error !== ""
     property bool checking: false
     property var updates: null  // checkUpdates' reply
     property string updateError: ""

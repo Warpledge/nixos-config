@@ -13,6 +13,7 @@ ColumnLayout {
     property var windows: null  // the Open Windows list, null while closed
     readonly property bool niri: !!view.info && view.info.wm === "niri"
     readonly property bool editable: !!wr && wr.editable
+    readonly property bool ready: !niri || !!wr || error !== ""
     spacing: 6
 
     Component.onCompleted: if (niri) load()
@@ -244,11 +245,9 @@ ColumnLayout {
             RowLayout {
                 spacing: 14
                 Layout.fillWidth: true
-                Badge { implicitWidth: 56; implicitHeight: 56; radius: 28; icon: "view_quilt" }
                 ColumnLayout {
                     spacing: 2
                     Layout.fillWidth: true
-                    Text { text: "Window Rules"; color: Theme.text; font.pixelSize: 22; font.weight: Font.Bold }
                     Text {
                         text: !page.niri
                             ? `These rules are niri's, and this computer runs ${page.view.info && page.view.info.wm || "another"} window manager.`

@@ -6,7 +6,7 @@ import QtQuick.Layouts
 ColumnLayout {
     id: page
     required property var view
-    readonly property string category: view.page.startsWith("userpackages:") ? view.page.slice(13) : ""
+    property string category: ""
     readonly property var now: view.userPackages(false)
     readonly property var saved: view.userPackages(true)
     //--- [{title, cat, names}]: pending removals stay listed under the category they were saved in
@@ -63,16 +63,9 @@ ColumnLayout {
             anchors.fill: parent
             anchors.margins: 14
             spacing: 14
-            Badge { implicitWidth: 56; implicitHeight: 56; radius: 28; icon: page.category ? "folder" : "package_2" }
             ColumnLayout {
                 spacing: 2
                 Layout.fillWidth: true
-                Text {
-                    text: page.category || "User Packages"
-                    color: Theme.text
-                    font.pixelSize: 22
-                    font.weight: Font.Bold
-                }
                 Text {
                     text: page.category
                         ? `User packages sorted under ${page.category}. Move one to list it under another category.`

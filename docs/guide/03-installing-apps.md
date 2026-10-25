@@ -10,7 +10,7 @@ Turn a switch on or off, then Apply. The button beside a switch opens the file t
 
 ## Search: Any Package from nixpkgs
 
-Packages → **Search** looks through nixpkgs, the main package collection (well over 100,000 packages). The list is downloaded the first time and refreshed once a week. Open a result to see its homepage, licence and what command it runs.
+The search box at the top of the Packages tab looks through nixpkgs, the main package collection (well over 100,000 packages). The list is downloaded the first time and refreshed once a week. Open a result to see its homepage, licence and what command it runs.
 
 **Install** asks for a category (Media, Tools, or one you type), then stages it like any other change. Apply to install it. These packages come as they are: no extra setup, just the program.
 

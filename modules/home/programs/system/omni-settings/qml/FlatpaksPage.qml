@@ -8,6 +8,7 @@ ColumnLayout {
     required property var view
     property var fp: null  // api.py's `flatpaks`
     property string error: ""
+    readonly property bool ready: !!fp || error !== ""
     property string busy: ""  // the running job: an app's key, "update", "unused" or "repair"
     property string progress: ""  // its latest line from flatpak
     property bool checking: false

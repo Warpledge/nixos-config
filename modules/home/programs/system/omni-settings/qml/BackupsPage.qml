@@ -7,6 +7,7 @@ ColumnLayout {
     required property var view
     property var bk: null
     property string error: ""
+    readonly property bool ready: !!bk || error !== ""
     property string busy: ""  // the nixm command running, "backup" for everything
     property var last: null  // the last run: { title, ok, output }
     spacing: 6
@@ -52,11 +53,9 @@ ColumnLayout {
             spacing: 10
             RowLayout {
                 spacing: 14
-                Badge { implicitWidth: 56; implicitHeight: 56; radius: 28; icon: "backup" }
                 ColumnLayout {
                     spacing: 2
                     Layout.fillWidth: true
-                    Text { text: "Backups"; color: Theme.text; font.pixelSize: 22; font.weight: Font.Bold }
                     Text {
                         text: "Copies of app data the config can't rebuild, in dated folders under "
                               + (page.bk ? page.bk.base.replace(/^\/home\/[^/]+/, "~") : "~/SyncBackups")

@@ -13,6 +13,7 @@ ColumnLayout {
     property bool loaded: false
     readonly property bool niri: !!view.info && view.info.wm === "niri"
     readonly property var setting: view.info ? view.info.keybinds : null
+    readonly property bool ready: !niri || loaded
     spacing: 6
 
     Component.onCompleted: if (niri) load()
@@ -210,11 +211,9 @@ ColumnLayout {
             RowLayout {
                 spacing: 14
                 Layout.fillWidth: true
-                Badge { implicitWidth: 56; implicitHeight: 56; radius: 28; icon: "keyboard" }
                 ColumnLayout {
                     spacing: 2
                     Layout.fillWidth: true
-                    Text { text: "Keybinds"; color: Theme.text; font.pixelSize: 22; font.weight: Font.Bold }
                     Text {
                         text: !page.niri
                             ? `These are niri's keybinds, and this computer runs ${page.view.info && page.view.info.wm || "another"} window manager.`

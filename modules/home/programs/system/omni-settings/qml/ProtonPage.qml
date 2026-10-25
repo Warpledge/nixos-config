@@ -8,6 +8,7 @@ ColumnLayout {
     required property var view
     property var lo: null
     property string error: ""
+    readonly property bool ready: !!lo || error !== ""
     spacing: 6
 
     Component.onCompleted: Backend.call("launchOptions", {}, reply => {
@@ -33,11 +34,9 @@ ColumnLayout {
             anchors.fill: parent
             anchors.margins: 14
             spacing: 14
-            Badge { implicitWidth: 56; implicitHeight: 56; radius: 28; icon: "sports_esports" }
             ColumnLayout {
                 spacing: 2
                 Layout.fillWidth: true
-                Text { text: "Launch Options"; color: Theme.text; font.pixelSize: 22; font.weight: Font.Bold }
                 Text {
                     text: "Launch options for Steam, Heroic and Lutris. Click one to copy it."
                     color: Theme.dim

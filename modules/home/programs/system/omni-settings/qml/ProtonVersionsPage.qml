@@ -8,6 +8,7 @@ ColumnLayout {
     required property var view
     property var pv: null
     property string error: ""
+    readonly property bool ready: !!pv || error !== ""
     spacing: 6
 
     Component.onCompleted: Backend.call("protonVersions", {}, reply => {
@@ -38,11 +39,9 @@ ColumnLayout {
             spacing: 10
             RowLayout {
                 spacing: 14
-                Badge { implicitWidth: 56; implicitHeight: 56; radius: 28; icon: "deployed_code" }
                 ColumnLayout {
                     spacing: 2
                     Layout.fillWidth: true
-                    Text { text: "Proton Versions"; color: Theme.text; font.pixelSize: 22; font.weight: Font.Bold }
                     Text {
                         text: "The Proton and Wine builds each launcher can run games with. Pick one per game "
                               + "in the launcher, or Steam's default under Settings, Compatibility."
