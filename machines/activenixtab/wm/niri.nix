@@ -29,6 +29,20 @@
         spawn-at-startup = [
           # iio-niri 2.x prints its help and exits without a subcommand
           {command = ["${pkgs.iio-niri}/bin/iio-niri" "listen" "--monitor" "eDP-1"];}
+
+          #--- Touchscreen: three-finger drag steps through windows like Mod+MMB
+          # P fires on each -T pixels moved while fingers stay down. Kept under a
+          # shell: lisgd spawned directly by niri exits at once.
+          {
+            command = [
+              "${pkgs.writeShellScript "touch-gestures" ''
+                ${pkgs.lisgd}/bin/lisgd \
+                  -d /dev/input/by-path/platform-AMDI0010:00-event -T 150 \
+                  -g '3,RL,*,*,P,niri msg action focus-column-right' \
+                  -g '3,LR,*,*,P,niri msg action focus-column-left'
+              ''}"
+            ];
+          }
         ];
       };
     })
