@@ -90,6 +90,9 @@ in {
   #--------------------------------------------------------------------#
   #-- OpenCode Provider
   #--------------------------------------------------------------------#
+  #--- opencode in a window; it reads the same settings as the terminal one
+  home.packages = [pkgs.opencode-desktop];
+
   programs.opencode.settings = {
     model = "llama-swap/ornith-1-5-122b";
     # Titles and summaries too: another model would swap the big one out
