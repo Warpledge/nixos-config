@@ -14,6 +14,7 @@
       claudeDesktop.enable = true;
       opencode.enable = true;
       userPackages = {Office = ["audacity_3"];};
+      security.keepassxc = true;
     };
   };
 
