@@ -35,7 +35,9 @@ when Ky approves it.
   and niri pass the firmware's 270 Hz reports through unchanged (measured 2026-10-25),
   so any filter is in the firmware (it feels the same on Windows). A script that
   moved fingers ahead by their speed was snappier but lost accuracy, so it was
-  dropped; the fix being looked for is in the folio's ITE firmware.
+  dropped. Its feature reports hold no filter setting, and HID mouse mode (Input
+  Mode 0) is smoothed the same, so the filter sits before both in the folio's ITE
+  firmware. Reflashing that has no recovery path without Windows.
 - **Scroll speed:** Chromium, Electron and Vivaldi scroll far faster per finger movement
   than GTK, so `wm/niri.nix` gives them `scroll-factor = 0.25`. Qt apps are left as is.
 - **Keyboard:** keyd makes a tap of Meta alone open the launcher (Meta+Space).
