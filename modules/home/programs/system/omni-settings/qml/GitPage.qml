@@ -1,4 +1,4 @@
-// The Git page: where the config repo stands, read-only (api.py's `git`)
+// The Git page: where the config repo stands (api.py's `git`), and its backup
 import QtQuick
 import QtQuick.Layouts
 
@@ -9,8 +9,23 @@ ColumnLayout {
     property string error: ""
     readonly property bool ready: !!repo || error !== ""
     property bool loading: false
+    property bool saving: false
     readonly property string web: repo && repo.repo ? `https://github.com/${repo.repo}` : ""
+    readonly property bool admin: !!view.info && view.info.admin
     spacing: 6
+
+    //--- An empty url turns backups off (api.py's `setBackup`)
+    function setBackup(url) {
+        saving = true
+        Backend.call("setBackup", { url }, reply => {
+            if (!page)
+                return
+            saving = false
+            view.say(reply.ok ? (reply.data || "Saved") : reply.error)
+            if (reply.ok)
+                refresh(true)
+        })
+    }
 
     //--- force: Refresh's shorter wait between fetches; cached: the last fetch's results
     //--- without fetching, so the page shows before a fetch that's due
@@ -144,6 +159,45 @@ ColumnLayout {
         title: "Last Fetched"
         subtitle: !page.repo ? "" : (page.repo.fetched ? Fmt.when(page.repo.fetched) : "Never")
                   + (page.repo.fetchErr ? `\nCouldn't fetch now: ${page.repo.fetchErr}` : "")
+    }
+
+    //--- Backup
+    Section { visible: !!page.repo; text: "Backup" }
+    ListRow {
+        visible: !!page.repo
+        icon: page.repo && page.repo.backup ? "cloud_done" : "cloud_off"
+        tone: page.repo && page.repo.backup ? "success" : ""
+        title: page.repo && page.repo.backup ? "Backing up to" : "Not backed up"
+        subtitle: !page.repo ? ""
+            : page.repo.backup ? `${page.repo.backup}\nEach successful rebuild commits and pushes this `
+                                 + "computer's and your own settings folders there."
+            : "Paste an empty repo you own (e.g. a private GitHub repo) to keep your own settings "
+              + "folders there. Updates still come from the repo above."
+        titleLines: 1
+        button: page.repo && page.repo.backup && page.admin && !page.saving ? "Stop" : ""
+        onClicked: if (page.admin && !page.saving && page.repo && page.repo.backup)
+            page.view.ask({ heading: "Stop backing up?",
+                            body: "Rebuilds stop committing and pushing your settings folders. What's "
+                                  + "already in the backup repo stays there.",
+                            buttons: [{ label: "Stop Backups", value: "stop", danger: true }] },
+                          () => page.setBackup(""))
+    }
+    RowLayout {
+        visible: !!page.repo && page.admin
+        Layout.fillWidth: true
+        spacing: 8
+        Field {
+            id: backupField
+            icon: "link"
+            placeholder: page.repo && page.repo.backup ? "Another repo's address"
+                                                       : "https://github.com/you/my-nixos-backup.git"
+            onAccepted: if (text.trim()) page.setBackup(text.trim())
+        }
+        Pill {
+            enabled: !page.saving && backupField.text.trim() !== ""
+            text: page.saving ? "Backing Up…" : "Back Up Here"
+            onClicked: page.setBackup(backupField.text.trim())
+        }
     }
 
     //--- Changed files
