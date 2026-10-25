@@ -72,7 +72,8 @@ Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
    Additions worth having go at the end as optional suggestions; add only what the
    user picks.
 9. **Ask before writing new docs** (a new `.md`, a new doc section, a comment over
-   two lines); the user allows or declines. Always propose docs for critical
+   two lines) with a question prompt saying what it covers and where it goes;
+   the user allows or declines. Always propose docs for critical
    infrastructure someone needs to understand to change it safely. Keeping
    existing docs accurate needs no approval.
 10. **No memory files.** If something is worth remembering, propose the line for
