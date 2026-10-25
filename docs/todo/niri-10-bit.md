@@ -14,7 +14,7 @@ Added 2026-10-16.
 
 - `modules/wm/niri/session.nix` sets `programs.niri.package` to niri-flake's `niri-unstable` build, pinned by the `niri` input's lock (niri `45739bc` on 2026-10-16), and uses it for the session package.
 - `modules/wm/niri/home/core/settings.nix` takes home-manager's niri package from `osConfig.programs.niri.package`, so both halves run the same build.
-- The `niri` input follows this flake's nixpkgs, so `niri.cachix.org` likely has no matching build and niri compiles locally.
+- The `niri` input follows this flake's nixpkgs, so a matching build depends on the input's lock; `niri-epireyn.cachix.org` (in `modules/nixos/nix/substituters.nix`) carries epireyn's `niri-unstable` builds and had the one this repo locks (2026-10-25). When it misses, niri compiles locally.
 
 ## Steps left
 
