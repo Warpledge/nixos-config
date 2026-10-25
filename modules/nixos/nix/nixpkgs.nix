@@ -25,6 +25,18 @@
       inputs.nur.overlays.default # NUR (Nix User Repository)
       inputs.claude-code.overlays.default
       inputs.affinity-nix.overlays.default # Affinity Suite (Photo, Designer, Publisher)
+      #--- fastmcp 3.4.7 imports McpError, gone in mcp 2; drop once nixpkgs fixes it
+      (_: prev: {
+        pythonPackagesExtensions =
+          prev.pythonPackagesExtensions
+          ++ [
+            (pyFinal: pyPrev:
+              # mcp_1 only exists once nixpkgs has moved mcp to 2
+                if pyPrev ? mcp_1
+                then {fastmcp-slim = pyPrev.fastmcp-slim.override {mcp = pyFinal.mcp_1;};}
+                else {})
+          ];
+      })
     ];
   };
 }
