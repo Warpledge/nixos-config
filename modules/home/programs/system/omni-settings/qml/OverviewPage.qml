@@ -472,6 +472,15 @@ ColumnLayout {
             actions: [
                 Pill {
                     quiet: true
+                    text: "Copy the Errors"
+                    visible: !!failed.run && !!failed.run.errors
+                    onClicked: {
+                        Quickshell.clipboardText = failed.run.errors
+                        page.view.say("Errors copied")
+                    }
+                },
+                Pill {
+                    quiet: true
                     text: "Copy the Log"
                     enabled: !!failed.run
                     onClicked: {

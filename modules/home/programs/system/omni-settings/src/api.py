@@ -423,15 +423,16 @@ def cmd_compare(_cfg, args):
 def cmd_failed_log(_cfg, _args):
     import jobs
     failed = jobs.last_failed()
-    return dict(zip(("title", "when", "heading", "reason", "log"), failed)) if failed else None
+    return dict(zip(("title", "when", "heading", "reason", "log", "errors"), failed)) if failed else None
 
 
 def cmd_forget_failed(_cfg, _args):
     import jobs
-    try:
-        os.remove(jobs.FAILED_LOG)
-    except FileNotFoundError:
-        pass
+    for path in (jobs.FAILED_LOG, jobs.FAILED_ERRORS):
+        try:
+            os.remove(path)
+        except FileNotFoundError:
+            pass
     return True
 
 

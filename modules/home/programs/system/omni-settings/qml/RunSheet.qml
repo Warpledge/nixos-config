@@ -528,6 +528,15 @@ Rectangle {
             spacing: 8
             Item { Layout.fillWidth: true }
             Pill {
+                visible: sheet.done && sheet.job.errors.length > 0
+                quiet: true
+                text: "Copy Errors"
+                onClicked: {
+                    Quickshell.clipboardText = sheet.job.errors.join("\n\n")
+                    sheet.view.say("Copied the errors")
+                }
+            }
+            Pill {
                 visible: sheet.done && (Jobs.log.count > 0 || sheet.job.errors.length > 0)
                 quiet: true
                 text: "Copy Log"

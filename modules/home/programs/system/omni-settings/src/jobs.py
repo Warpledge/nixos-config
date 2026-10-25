@@ -52,26 +52,35 @@ KEEP_FINISHED = 30 * 60
 
 #--- The last failed run, kept for the Overview
 FAILED_LOG = os.path.join(api.STATE_DIR, "last-failed-run.txt")
+FAILED_ERRORS = os.path.join(api.STATE_DIR, "last-failed-errors.txt")
 
 
-def save_failed(title, heading, reason, log):
+def save_failed(title, heading, reason, log, errors):
     try:
         os.makedirs(os.path.dirname(FAILED_LOG), exist_ok=True)
         with open(FAILED_LOG, "w") as f:
             f.write(f"{title}\n{time.time():.0f}\n{heading}\n{reason}\n\n{log}")
+        with open(FAILED_ERRORS, "w") as f:
+            f.write(errors)
     except OSError:
         pass
 
 
 def last_failed():
-    """(title, epoch, heading, reason, log) of the last failed run, or None."""
+    """(title, epoch, heading, reason, log, errors) of the last failed run, or None."""
     try:
         with open(FAILED_LOG, errors="replace") as f:
             title, when, heading, rest = f.read().split("\n", 3)
         reason, _, log = rest.partition("\n\n")
-        return title, float(when), heading, reason, log
+        when = float(when)
     except (OSError, ValueError):
         return None
+    try:
+        with open(FAILED_ERRORS, errors="replace") as f:
+            errors = f.read()
+    except OSError:
+        errors = ""
+    return title, when, heading, reason, log, errors
 
 
 class JobError(Exception):
@@ -290,7 +299,8 @@ class Job:
             for row in self.progress.graph(final=True):
                 self.append("graph", "".join(text for text, _ in row))
         if outcome == "failed":
-            save_failed(self.title, heading, detail, "\n".join(t for _, t in self.log))
+            save_failed(self.title, heading, detail, "\n".join(t for _, t in self.log),
+                        "\n\n".join(dict.fromkeys(self.errors)))
         if outcome in ("ok", "failed"):
             self.service.notify(f"{self.title}: {heading}", detail)
         self.service.flush()
