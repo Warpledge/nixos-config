@@ -101,6 +101,11 @@
   # Extra categories to block. Known names: fakenews, gambling, porn, social
   blocklist.extra = [];
 
+  #--- SMB Shares
+  # Lets Dolphin and Nautilus find Windows and Samba servers by name
+  # (smb://<server>); shares opened by IP address work without it
+  smb.enable = false;
+
   #--------------------------------------------------------------------#
   #-- Services
   #--------------------------------------------------------------------#

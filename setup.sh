@@ -867,6 +867,7 @@ services=(
   "Services|ssh.enable|SSH server (key login only)"
   "Services|bluetooth.enable|Bluetooth"
   "Services|printing.enable|Printing (CUPS, finds network printers)"
+  "Services|smb.enable|SMB shares: find Windows and Samba servers by name"
   "Services|blocklist.enable|Ad and tracker blocking (Steven Black hosts list)"
   "Services|capsLockRemap|Caps Lock: Escape when tapped, Ctrl when held"
   "Services|flatpak.enable|Flatpak: sandboxed apps, with Flatseal for their permissions"
