@@ -71,12 +71,13 @@
       "Bash(nh os*)",
       "Bash(sudo nh os*)",
       "Bash(*switch-to-configuration*)",
-      "Bash(home-manager switch*)",
+      "Bash(home-manager switch*)"
+    ],
+    "ask": [
       "Bash(grim*)",
       "Bash(niri msg action screenshot*)",
       "Bash(dms ipc call quickCapture screenshot*)"
-    ],
-    "ask": []
+    ]
   },
   "hooks": {
     "PreToolUse": [

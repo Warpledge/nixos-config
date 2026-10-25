@@ -5,8 +5,8 @@ description: Commit the current changes in this public NixOS repo as the user, s
 
 # Commit
 
-CLAUDE.md rule 6 governs every commit here: the repo's configured git identity (the
-user's). Push and history rewrites (amend, rebase, force) stay with the user.
+CLAUDE.md rule 6 governs every commit here: the git identity of whoever is at the
+keyboard, never another person's. Push and history rewrites (amend, rebase, force) stay with the user.
 
 ## Steps
 

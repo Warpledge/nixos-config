@@ -31,7 +31,8 @@ to their hardware or apps.
 
 Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
 
-1. **Never run `nixm rebuild`, `nixm boot` or `nixos-rebuild`.** Hand back with
+1. **Never run `nixm rebuild`, `nixm boot` or `nixos-rebuild`.** Hand back: the user
+   rebuilds from Omni Settings, or with this when they want you to see the errors:
    `! nixm rebuild 2>&1 | grep -E "error|Error|failed|Failed" || echo "✓"`.
    After any `.nix` edit, run `alejandra <file>` on that file (no hook does it for
    you; never `alejandra .`), then `nix flake check 2>&1 | tail -n 30`. A JSON,
@@ -54,17 +55,25 @@ Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
    placeholders run Zed's biome out of memory.
 6. **Commits** use Conventional Commits, `type(scope): subject` plus a bullet body;
    load the `commit` skill. Commit without asking; never push, amend or rebase.
+   Commits are authored by the person at the keyboard (their own git identity);
+   never pass `--author` or `-c user.name`.
    **Commit once, when the task is finished and checked**, not after each edit,
    and don't end a task that changed files without committing. Run every step
    of the `commit` skill, `scan.sh` included.
    A feature and every fix, tweak and doc change made for it while you're still
    working are one commit. Split only unrelated changes. Since you can't amend, an
    early commit can't be folded in later.
-7. **No screenshots** of the screen or a window unless the user said yes to that one.
+7. **Screenshots need consent.** When a capture of the screen or a window would help
+   the task, ask first and say why. A yes covers the rest of the session; never
+   capture without one or for anything else.
 8. **Set only what was asked for.** No extra options, and never restate an app's
    defaults: set only the values that differ, after checking what the default is.
+   Additions worth having go at the end as optional suggestions; add only what the
+   user picks.
 9. **Ask before writing new docs** (a new `.md`, a new doc section, a comment over
-   two lines). Keeping existing docs accurate needs no approval.
+   two lines); the user allows or declines. Always propose docs for critical
+   infrastructure someone needs to understand to change it safely. Keeping
+   existing docs accurate needs no approval.
 10. **No memory files.** If something is worth remembering, propose the line for
     CLAUDE.md or this file and let the user decide.
 11. **`rm` takes literal absolute paths**, one deletion per command, never `$VAR`.
