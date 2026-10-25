@@ -64,8 +64,9 @@ Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
    working are one commit. Split only unrelated changes. Since you can't amend, an
    early commit can't be folded in later.
 7. **Screenshots need consent.** When a capture of the screen or a window would help
-   the task, ask first and say why. A yes covers the rest of the session; never
-   capture without one or for anything else.
+   the task, ask with a question prompt that says why and that a yes lasts the
+   rest of the session. After a yes, don't ask again; never capture without one
+   or for anything else.
 8. **Set only what was asked for.** No extra options, and never restate an app's
    defaults: set only the values that differ, after checking what the default is.
    Additions worth having go at the end as optional suggestions; add only what the
