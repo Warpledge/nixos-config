@@ -134,4 +134,5 @@
 
   #--- Flatpak (the Hytale launcher), with Flatseal
   flatpak.enable = true;
+  smb.enable = false;
 }
