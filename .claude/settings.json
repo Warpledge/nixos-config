@@ -30,6 +30,7 @@
       "Read(/home/warpledge/.local/share/PrismLauncher/**)",
       "Read(/home/warpledge/Documents/Minecraft_Servers/**)",
       "Read(/home/warpledge/Downloads/**)",
+      "Read(//nix/store/**)",
       "WebSearch",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:api.github.com)",
