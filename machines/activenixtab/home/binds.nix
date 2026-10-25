@@ -26,15 +26,15 @@
     powerprofilesctl set "$next"
   '';
 
-  #--- Touchpad on / off: niri reloads touchpad-off.kdl, included last in config.kdl
-  touchpadFile = "$HOME/.config/niri/touchpad-off.kdl";
+  #--- Touchpad on / off: touch-gestures.py (wm/) holds the touchpad while the
+  # file isn't empty; niri's own switch would also stop the touchscreen gestures
+  touchpadFile = "$HOME/.config/niri/touchpad-off";
   toggleTouchpad = pkgs.writeShellScript "toggle-touchpad" ''
     if [ -s "${touchpadFile}" ]; then
       : > "${touchpadFile}"
     else
-      echo 'input { touchpad { off; }; }' > "${touchpadFile}"
+      echo off > "${touchpadFile}"
     fi
-    niri msg action load-config-file
   '';
 
   section = group: lib.mapAttrs (_: b: b // {inherit group;});
@@ -172,9 +172,4 @@ in {
       kde-mic-mute = locked "Mod+XF86AudioMute" "Mute microphone" (dms "audio micmute");
     })
   ];
-
-  #--- After dms/input.kdl, so its touchpad block can't turn the touchpad back on
-  xdg.configFile.niri-config-dms.text = lib.mkAfter ''
-    include optional=true "touchpad-off.kdl"
-  '';
 }
