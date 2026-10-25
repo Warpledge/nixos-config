@@ -257,22 +257,20 @@ Item {
         return cats.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
     }
 
-    //--- Search's index of nixpkgs names (api.py's packageNames), read once per window
-    property var packageNames: null
-    property var packageLower: []
+    //--- How many nixpkgs names Search has (api.py's packageNames), once per window;
+    //--- -1 until its index is read
+    property int packageCount: -1
     property string packageError: ""
     function loadPackageNames() {
-        if (packageNames !== null || packageError)
+        if (packageCount >= 0 || packageError)
             return
         Backend.call("packageNames", {}, reply => {
             if (!reply.ok)
                 packageError = reply.error
             else if (reply.data.missing)
                 packageError = reply.data.missing
-            else {
-                packageLower = reply.data.names.map(n => n.toLowerCase())
-                packageNames = reply.data.names
-            }
+            else
+                packageCount = reply.data.count
         })
     }
 

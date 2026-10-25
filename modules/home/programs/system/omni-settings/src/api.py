@@ -687,15 +687,26 @@ def cmd_ports(cfg, _args):
     return [{"proto": proto, "port": port, "who": who} for proto, port, who in system.open_ports(state.resolved)]
 
 
-def cmd_package_names(_cfg, _args):
-    """Every nixpkgs name Search matches on, or {missing} without nix-search-tv."""
-    if not shutil.which(packagestate.TOOL):
-        return {"missing": f"{packagestate.TOOL} isn't installed"}
+def package_names():
     try:
-        return {"names": packagestate.names()}
+        return packagestate.cached_names()
     except subprocess.CalledProcessError as e:
         detail = (e.stderr or "").strip()
         raise OSError(detail.splitlines()[-1] if detail else str(e)) from e
+
+
+def cmd_package_names(_cfg, _args):
+    """How many nixpkgs names Search matches on, or {missing} without nix-search-tv."""
+    if not shutil.which(packagestate.TOOL):
+        return {"missing": f"{packagestate.TOOL} isn't installed"}
+    return {"count": len(package_names())}
+
+
+def cmd_package_search(_cfg, args):
+    """The first SHOWN names matching args.query, best first, and how many match."""
+    query = str(args.get("query", ""))
+    hits = packagestate.search(package_names(), query)
+    return {"query": query, "total": len(hits), "names": hits[:packagestate.SHOWN]}
 
 
 def cmd_package_previews(_cfg, args):
@@ -918,7 +929,8 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "people": cmd_people, "checkPerson": cmd_check_person,
             "services": cmd_services, "serviceLog": cmd_service_log, "serviceRestart": cmd_service_restart,
             "ports": cmd_ports,
-            "packageNames": cmd_package_names, "packagePreviews": cmd_package_previews,
+            "packageNames": cmd_package_names, "packageSearch": cmd_package_search,
+            "packagePreviews": cmd_package_previews,
             "resetApp": cmd_reset_app, "doc": cmd_doc, "docLink": cmd_doc_link, "launchOptions": cmd_launch_options, "protonVersions": cmd_proton_versions,
             "windowRules": cmd_window_rules, "niriWindows": cmd_niri_windows, "pickWindow": cmd_pick_window,
             "addWindowRule": cmd_add_window_rule, "removeWindowRule": cmd_remove_window_rule,

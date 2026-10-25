@@ -1,6 +1,6 @@
 // Package search, pinned above the Packages tab's scroll with its results in a
-// dropdown: nixpkgs by name through nix-search-tv (api.py's packageNames,
-// matched here as packagestate.search does), Install adding to userPackages
+// dropdown: nixpkgs by name through nix-search-tv (api.py's packageSearch),
+// Install adding to userPackages
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
@@ -10,7 +10,9 @@ ColumnLayout {
     required property var view
     readonly property int shown: 50  // packagestate.SHOWN
     property string query: ""
-    property var found: []
+    property var found: []  // the first `shown` matches of `searched`
+    property int total: 0
+    property string searched: ""
     readonly property bool open: query !== ""  // the results hang below the field, over the page
     spacing: 6
 
@@ -23,29 +25,26 @@ ColumnLayout {
         search("")
     }
 
-    //--- As packagestate.search: every word, then the name, its start (or its
-    //--- last part's) and anywhere
+    //--- packagestate.search in the backend; a reply for an older query is dropped
     function search(text) {
-        const q = text.trim().toLowerCase()
-        const words = q.split(/\s+/).filter(w => w)
         query = text.trim()
-        if (!words.length || !view.packageNames) {
+        if (!query || view.packageCount < 0) {
             found = []
+            total = 0
+            searched = query
             return
         }
-        const hits = []
-        const lower = view.packageLower
-        for (let i = 0; i < lower.length; i++) {
-            const low = lower[i]
-            if (!words.every(w => low.includes(w)))
-                continue
-            const last = low.slice(low.lastIndexOf(".") + 1)
-            const rank = low === q ? 0 : low.startsWith(q) || last.startsWith(q) ? 1 : 2
-            hits.push([rank, low.split(".").length, low.length, view.packageNames[i]])
-        }
-        hits.sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2] || (a[3] < b[3] ? -1 : a[3] > b[3] ? 1 : 0))
-        found = hits.map(h => h[3])
-        view.describe(found.slice(0, shown))
+        const asked = query
+        Backend.call("packageSearch", { query: asked }, reply => {
+            if (!page || asked !== page.query)
+                return
+            if (!reply.ok)
+                view.say(reply.error)
+            found = reply.ok ? reply.data.names : []
+            total = reply.ok ? reply.data.total : 0
+            searched = asked
+            view.describe(found)
+        })
     }
 
     function install(attr) {
@@ -80,10 +79,10 @@ ColumnLayout {
             id: field
             anchors.fill: parent
             anchors.margins: 8
-            enabled: !!page.view.packageNames
+            enabled: page.view.packageCount >= 0
             icon: "search"
-            placeholder: page.view.packageNames
-                ? `Search ${page.view.packageNames.length.toLocaleString(Qt.locale("en_US"), "f", 0)} packages to install`
+            placeholder: page.view.packageCount >= 0
+                ? `Search ${page.view.packageCount.toLocaleString(Qt.locale("en_US"), "f", 0)} packages to install`
                 : "Search packages"
             onTextChanged: typing.restart()
             onAccepted: {
@@ -117,20 +116,21 @@ ColumnLayout {
                     RowLayout {
                         Layout.fillWidth: true
                         Section {
-                            text: page.found.length ? "Results" : `Nothing is named like “${page.query}”`
+                            text: page.found.length ? "Results" : page.searched !== page.query ? "Searching…"
+                                : `Nothing is named like “${page.query}”`
                             Layout.fillWidth: true
                         }
                         Text {
-                            text: page.found.length > page.shown
-                                ? `first ${page.shown} of ${page.found.length.toLocaleString(Qt.locale("en_US"), "f", 0)}`
-                                : page.found.length ? String(page.found.length) : ""
+                            text: page.total > page.shown
+                                ? `first ${page.shown} of ${page.total.toLocaleString(Qt.locale("en_US"), "f", 0)}`
+                                : page.total ? String(page.total) : ""
                             color: Theme.dim
                             font.pixelSize: 12
                             Layout.rightMargin: 6
                         }
                     }
                     Repeater {
-                        model: page.query ? page.found.slice(0, page.shown) : []
+                        model: page.query ? page.found : []
                         ResultRow { required property var modelData; attr: modelData }
                     }
                 }
@@ -140,7 +140,7 @@ ColumnLayout {
 
     //--- Reading the index
     ListRow {
-        visible: !page.view.packageNames
+        visible: page.view.packageCount < 0
         icon: page.view.packageError ? "error" : "progress_activity"
         title: page.view.packageError ? "Couldn't read the package list" : "Reading the package list…"
         subtitle: page.view.packageError

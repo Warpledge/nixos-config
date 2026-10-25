@@ -3,12 +3,18 @@ search.nixos.org's unstable channel in ~/.cache/nix-search-tv, made again once
 a week, so the list can be a few days off this system's flake.lock. `print`
 lists every name and `preview` gives one package's details."""
 
+import json
+import os
 import re
 import subprocess
+import time
+
+import system
 
 TOOL = "nix-search-tv"
 PREFIX = "nixpkgs/ "  # print also lists Home Manager, NixOS and NUR entries
 SHOWN = 50  # results listed at once
+NAMES_FOR = 86400  # seconds cached_names keeps a list, so a week's index refresh shows
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
 TITLE = re.compile(r"^(\S+) \(([^)]*)\)(.*)$")  # "name (version)", then "(broken)" if so
 #--- Categories Install offers before any are in use; a new name can be typed too
@@ -19,6 +25,23 @@ def names():
     """Every nixpkgs attribute name in nix-search-tv's index."""
     out = subprocess.run([TOOL, "print"], capture_output=True, text=True, timeout=600, check=True)
     return sorted(line[len(PREFIX):] for line in out.stdout.splitlines() if line.startswith(PREFIX))
+
+
+def cached_names():
+    """names(), kept in a file for NAMES_FOR, as each search is a new process."""
+    path = os.path.join(system.runtime_dir(), "package-names.json")
+    try:
+        if time.time() - os.path.getmtime(path) < NAMES_FOR:
+            with open(path) as f:
+                return json.load(f)
+    except (OSError, ValueError):
+        pass
+    found = names()
+    tmp = f"{path}.{os.getpid()}"
+    with open(tmp, "w") as f:
+        json.dump(found, f)
+    os.replace(tmp, path)
+    return found
 
 
 def preview(attr):
