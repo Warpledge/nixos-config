@@ -15,20 +15,22 @@ PluginComponent {
     // [{source, label, expects, started}], one per tool running a rebuild
     property var runs: []
     property int builders: 0
-    property string current: ""
     property string generation: ""
     property real now: Date.now()
 
-    // What the first poll of a run saw, compared when it ends
+    // {at, expects}: the oldest start seen for the run, and whether it should
+    // leave a new system
     property var start: null
     // {text, tone, icon, secs, generation} for the last run that ended
     property var result: null
 
     readonly property bool running: runs.length > 0
-    readonly property real startedAt: running ? Math.min.apply(null, runs.map(r => r.started)) : now
+    readonly property real startedAt: start ? start.at : now
 
-    // ps lines for the rebuild tools, the number of nix build users busy, and
-    // the running and boot systems. Only the program or its first argument
+    // ps lines for the rebuild tools, the number of nix build users busy, when
+    // the running and boot system links last changed, and the boot generation.
+    // A switch restarts DMS, so the run's end is judged by those times rather
+    // than by a before/after look. Only the program or its first argument
     // (pkexec's, an interpreter's) counts, not a shell whose text names one.
     readonly property string probe: "ps -eo user:32=,etimes=,args= | awk '"
         + "function base(p) { sub(/.*\\//, \"\", p); return p } "
@@ -38,8 +40,8 @@ PluginComponent {
         + "|| (x ~ /^(pkexec|sudo|python[0-9.]*|bash|sh)$/ ? y : x) ~ /[n]ixos-rebuild|[o]mni-settings-apply/ "
         + "{ $1 = \"\"; print \"R\" $0 } "
         + "END { n = 0; for (u in b) n++; print \"B \" n }'; "
-        + "printf 'C %s\\nG %s\\n' \"$(readlink -f /run/current-system)\" "
-        + "\"$(readlink /nix/var/nix/profiles/system)\""
+        + "echo T $(stat -c %Y /run/current-system /nix/var/nix/profiles/system); "
+        + "echo G $(readlink /nix/var/nix/profiles/system)"
 
     function describe(args) {
         if (args.indexOf("omni-settings-apply") >= 0) {
@@ -62,7 +64,7 @@ PluginComponent {
 
     function parse(text) {
         const found = {};
-        let busy = 0, cur = "", gen = "";
+        let busy = 0, switched = 0, linked = 0, gen = "";
         for (const line of text.split("\n")) {
             const parts = line.trim().split(/\s+/);
             if (parts[0] === "R" && parts.length > 2) {
@@ -73,28 +75,33 @@ PluginComponent {
                     found[run.source] = run;
             } else if (parts[0] === "B") {
                 busy = parseInt(parts[1]) || 0;
-            } else if (parts[0] === "C") {
-                cur = parts[1] || "";
+            } else if (parts[0] === "T") {
+                switched = (parseInt(parts[1]) || 0) * 1000;
+                linked = (parseInt(parts[2]) || 0) * 1000;
             } else if (parts[0] === "G") {
                 gen = ((parts[1] || "").match(/system-(\d+)-link/) || [])[1] || "";
             }
         }
         const list = Object.values(found);
-        if (list.length && !start)
-            start = {current: cur, generation: gen, expects: list.some(r => r.expects)};
-        if (!list.length && start)
-            finish(cur, gen);
+        if (list.length) {
+            const at = Math.min.apply(null, list.map(r => r.started));
+            const expects = list.some(r => r.expects);
+            start = start ? {at: Math.min(start.at, at), expects: start.expects || expects} : {at, expects};
+        } else if (start) {
+            finish(switched, linked, gen);
+        }
         builders = busy;
-        current = cur;
         generation = gen;
         runs = list;
     }
 
-    function finish(cur, gen) {
-        const secs = Math.round((Date.now() - startedAt) / 1000);
-        if (cur !== start.current)
+    function finish(switched, linked, gen) {
+        const secs = Math.round((Date.now() - start.at) / 1000);
+        // ps ages are whole seconds
+        const since = start.at - 2000;
+        if (switched >= since)
             result = {text: "Switched to the new system", tone: "success", icon: "check_circle", secs, generation: gen};
-        else if (gen !== start.generation)
+        else if (linked >= since)
             result = {text: "Ready on next boot", tone: "success", icon: "restart_alt", secs, generation: gen};
         else if (!start.expects)
             result = {text: "Finished", tone: "neutral", icon: "task_alt", secs, generation: gen};
