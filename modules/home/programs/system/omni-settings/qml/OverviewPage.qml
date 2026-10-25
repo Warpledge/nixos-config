@@ -39,7 +39,7 @@ ColumnLayout {
     }
 
     //--- Whether a job may start now; says why not
-    function ready() {
+    function canStart() {
         if (!view.info.canApply || !admin)
             return false
         if (view.pendingCount) {
@@ -60,7 +60,7 @@ ColumnLayout {
     }
 
     function rebuild() {
-        if (!ready())
+        if (!canStart())
             return
         view.ask({
             heading: "Rebuild now?",
@@ -73,7 +73,7 @@ ColumnLayout {
     }
 
     function collect() {
-        if (!ready())
+        if (!canStart())
             return
         const c = ov.cleanUp
         const kept = `the newest ${c.keep}` + (c.since ? ` and any made in the last ${c.since}` : "")
@@ -119,7 +119,7 @@ ColumnLayout {
     }
 
     function update() {
-        if (!ready())
+        if (!canStart())
             return
         const names = updates.changes.filter(c => picked[c.name]).map(c => c.name)
         if (!names.length) {
@@ -143,7 +143,7 @@ ColumnLayout {
     }
 
     function rollback(g) {
-        if (!ready())
+        if (!canStart())
             return
         view.ask({
             heading: `Switch to version ${g.number}?`,
