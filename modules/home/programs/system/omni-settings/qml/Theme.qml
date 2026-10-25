@@ -121,15 +121,64 @@ Singleton {
         return fallback || "settings"
     }
 
-    //--- An app icon's path for the first of `names` an icon theme or .desktop file has
+    //--- An app icon's path for the first of `names` an icon theme or .desktop file has,
+    //--- "" for none, or undefined until `lookups` gets to it: a theme lookup takes up to
+    //--- 100 ms and Qt doesn't keep it, so each runs once, a few a frame
+    property var iconPaths: ({})
+    property var iconQueue: []  // changed in place, so bindings don't wait on it
     function appIcon(names) {
-        for (const n of [].concat(names || [])) {
-            const entry = DesktopEntries.byId(String(n).replace(/\.desktop$/, ""))
+        const list = [].concat(names || [])
+        if (!list.length)
+            return ""
+        const key = list.join("\n")
+        const path = iconPaths[key]
+        if (path === undefined)
+            queueIcons([list])
+        return path
+    }
+    function queueIcons(lists) {
+        for (const l of lists) {
+            const key = [].concat(l || []).join("\n")
+            if (key && iconPaths[key] === undefined && !iconQueue.includes(key))
+                iconQueue.push(key)
+        }
+        if (iconQueue.length)
+            lookups.start()
+    }
+    function lookUp(key) {
+        for (const n of key.split("\n")) {
+            const entry = DesktopEntries.byId(n.replace(/\.desktop$/, ""))
             const path = Quickshell.iconPath(entry ? entry.icon : n, true)
             if (path)
                 return path
         }
         return ""
+    }
+    Timer {
+        id: lookups
+        interval: 16
+        repeat: true
+        onTriggered: {
+            const until = Date.now() + 6
+            while (theme.iconQueue.length && Date.now() < until) {
+                const key = theme.iconQueue.shift()
+                theme.iconPaths[key] = theme.lookUp(key)
+            }
+            theme.iconPathsChanged()
+            if (!theme.iconQueue.length)
+                stop()
+        }
+    }
+    //--- .desktop files load after start-up and change on a rebuild: look again for
+    //--- the icons not found
+    Connections {
+        target: DesktopEntries
+        function onApplicationsChanged() {
+            const missed = Object.keys(theme.iconPaths).filter(k => theme.iconPaths[k] === "")
+            for (const k of missed)
+                delete theme.iconPaths[k]
+            theme.queueIcons(missed.map(k => k.split("\n")))
+        }
     }
 
     //--- descriptions.json marks app names **like this** and cautions !!like this!!

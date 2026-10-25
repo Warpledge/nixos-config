@@ -7,14 +7,15 @@ Rectangle {
     property string icon: "settings"
     property var app: []
     property string tone: ""
-    readonly property string appPath: Theme.appIcon(app)
+    readonly property var appPath: Theme.appIcon(app)
+    readonly property bool looking: appPath === undefined  // left blank until known
     implicitWidth: 38
     implicitHeight: 38
     radius: 19
-    color: appPath ? "transparent" : tone ? Theme.toneColor(tone) : Theme.primary
+    color: appPath || looking ? "transparent" : tone ? Theme.toneColor(tone) : Theme.primary
     Icon {
         id: glyph
-        visible: !badge.appPath
+        visible: !badge.appPath && !badge.looking
         anchors.centerIn: parent
         icon: badge.icon
         size: Math.round(badge.width * 0.53)
@@ -29,6 +30,7 @@ Rectangle {
     IconImage {
         visible: !!badge.appPath
         anchors.fill: parent
-        source: badge.appPath
+        asynchronous: true
+        source: badge.appPath || ""
     }
 }

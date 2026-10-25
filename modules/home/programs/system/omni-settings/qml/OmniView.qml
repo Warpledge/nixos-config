@@ -48,11 +48,17 @@ Item {
 
     //--- Services running now, for the page list; Running Now updates it too
     property int servicesRunning: -1
-    onInfoChanged: if (info && servicesRunning < 0)
-        Backend.call("services", {}, reply => {
-            if (reply.ok)
-                servicesRunning = reply.data.filter(u => u.active === "active").length
-        })
+    onInfoChanged: {
+        if (info && servicesRunning < 0)
+            Backend.call("services", {}, reply => {
+                if (reply.ok)
+                    servicesRunning = reply.data.filter(u => u.active === "active").length
+            })
+        // Looked up in the background, so the Packages tab has its icons ready
+        if (info)
+            Theme.queueIcons(Object.values(info.pages).reduce((all, pg) => pg.groups
+                .reduce((acc, g) => acc.concat((g.settings || []).map(s => s.icon)), all), []))
+    }
 
     //--- Every DMS link the pages carry
     readonly property var links: !info ? [] : Object.values(info.pages)
