@@ -40,6 +40,27 @@ Rectangle {
 
     function speed(b) { return `${size(b)}/s` }
 
+    //--- Each progress event brings a new list; rows are updated in place by
+    //--- name, so a bar animates from where it was instead of being rebuilt
+    ListModel { id: runningRows; dynamicRoles: true }
+    function syncRows(items) {
+        for (let i = 0; i < items.length; i++) {
+            const key = items[i].kind + items[i].name
+            let j = i
+            while (j < runningRows.count && runningRows.get(j).entry.kind + runningRows.get(j).entry.name !== key)
+                j++
+            if (j === runningRows.count)
+                runningRows.insert(i, { entry: items[i] })
+            else {
+                if (j !== i)
+                    runningRows.move(j, i, 1)
+                runningRows.set(i, { entry: items[i] })
+            }
+        }
+        if (runningRows.count > items.length)
+            runningRows.remove(items.length, runningRows.count - items.length)
+    }
+
     //--- StyledText pieces; runs of spaces are kept, single ones still wrap
     function esc(t) {
         return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
@@ -239,6 +260,8 @@ Rectangle {
             readonly property var items: sheet.p && !sheet.done ? sheet.p.running : []
             readonly property int building: items.filter(i => i.kind === "build" && !i.bytes).length
             property bool expanded: false
+            readonly property var shown: expanded ? items : items.slice(0, 5)
+            onShownChanged: sheet.syncRows(shown)
             visible: items.length > 0
             Layout.fillWidth: true
             // Expanded, it scrolls past half the page so the log keeps its room
@@ -270,7 +293,7 @@ Rectangle {
                     font.weight: Font.DemiBold
                 }
                 Repeater {
-                    model: busy.expanded ? busy.items : busy.items.slice(0, 5)
+                    model: runningRows
                     RowLayout {
                         id: item
                         required property var modelData
