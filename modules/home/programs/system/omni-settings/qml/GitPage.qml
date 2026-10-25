@@ -1,4 +1,4 @@
-// The Git page: where the config repo stands (api.py's `git`), and where it backs up to
+// The Git page: where the config repo stands (api.py's `git`), and its backup
 import QtQuick
 import QtQuick.Layouts
 

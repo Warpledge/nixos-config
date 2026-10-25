@@ -195,10 +195,22 @@ def push_backup(flake):
     if target is None:
         return None
     branch, push = target
+    # Set by set_backup: what this clone last pushed ("none" for a new repo),
+    # so another computer's push is refused rather than replaced
+    try:
+        last = git(flake, "config", f"branch.{branch}.omniBackedUp").strip()
+    except RuntimeError:
+        last = ""
+    lease = f"--force-with-lease={branch}:{'' if last == 'none' else last}" if last else "--force-with-lease"
     try:
         # Pull rebases the local commits, so the push replaces the old ones
-        git(flake, "push", "--quiet", "--force-with-lease", push, f"HEAD:{branch}", timeout=120)
+        git(flake, "push", "--quiet", lease, push, f"HEAD:{branch}", timeout=120)
+        if last:
+            git(flake, "config", f"branch.{branch}.omniBackedUp", git(flake, "rev-parse", "HEAD").strip())
     except (RuntimeError, subprocess.TimeoutExpired) as e:
+        if last and ("stale info" in str(e) or "rejected" in str(e)):
+            return (f"Didn't back up to {push}: something else pushed there since this computer last "
+                    "did, and it was left alone. Give each computer its own backup repo.")
         return f"Couldn't back up to {push}: {e}"
     return f"Backed up your changes to {push}"
 
@@ -210,6 +222,8 @@ def back_up(flake, machine, paths):
     if push_remote(flake) is None:
         return None
     paths = [p for p in paths if os.path.isdir(os.path.join(flake, p))]
+    if not paths:  # with no paths, add and commit would take the whole tree
+        return "Didn't back up: this machine's and user's folders aren't there."
     try:
         git(flake, "add", "-A", "--", *paths)
         staged = subprocess.run(["git", "-C", flake, "diff", "--cached", "--quiet", "--", *paths], env=ENV,
@@ -241,11 +255,27 @@ def set_backup(flake, machine, paths, url):
         if not url:
             subprocess.run(["git", "-C", flake, "config", "--unset", f"branch.{branch}.pushRemote"],
                            env=ENV, capture_output=True, timeout=20)
+            still = push_remote(flake)
+            if still:
+                return (f"Still pushing to {still[1]}, set by remote.pushDefault; "
+                        "`git config --unset remote.pushDefault` stops that.")
             return "Backups are off."
         if not re.match(r"^(https://|ssh://|git@)\S+$", url):
             raise PullError("Paste the repo's https:// or git@ address.")
         if git(flake, "config", f"branch.{branch}.remote").strip() == "backup":
             raise PullError("This branch pulls from the remote named backup; rename that remote first.")
+        # Only an empty repo, or one holding this clone's own last backup, so
+        # nothing already there gets overwritten
+        there = git(flake, "ls-remote", url, f"refs/heads/{branch}", timeout=120).split()
+        try:
+            last = git(flake, "config", f"branch.{branch}.omniBackedUp").strip()
+        except RuntimeError:
+            last = ""
+        if there and there[0] != last:
+            raise PullError(f"That repo already has a {branch} branch, so backing up would replace it. "
+                            "Paste an empty repo.")
+        if not there:
+            git(flake, "config", f"branch.{branch}.omniBackedUp", "none")
         if "backup" in git(flake, "remote").split():
             git(flake, "remote", "set-url", "backup", url)
         else:
