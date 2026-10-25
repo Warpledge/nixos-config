@@ -111,9 +111,9 @@
   #--------------------------------------------------------------------#
   #--- Mullvad VPN (needs a Mullvad account)
   mullvad.enable = false;
-  # Apps always routed around the VPN (see nixos/security/mullvad/). Known
-  # names: steam, heroic, prismlauncher, opencode, claude, spotify, freetube,
-  # ferdium, omni-settings, protonplus, nix-daemon (rebuild downloads)
+  # Apps always routed around the VPN (see nixos/security/mullvad/); nix-daemon
+  # covers rebuild downloads. Known names: steam, heroic, prismlauncher,
+  # opencode, claude, spotify, freetube, ferdium, omni-settings, protonplus, nix-daemon
   mullvad.splitTunnel = [];
 
   #--- SSH Server
