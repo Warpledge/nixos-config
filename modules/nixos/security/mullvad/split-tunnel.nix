@@ -96,7 +96,10 @@
   #--- The system entries are the same in every user's table
   systemTargets = targetsFor machine.users.${machine.mainUser};
 
-  unknown = lib.subtractLists (lib.attrNames systemTargets) wanted;
+  #--- Not a wrapper: the daemon moves itself into the cgroup (see below)
+  daemonExcluded = lib.elem "nix-daemon" wanted;
+
+  unknown = lib.subtractLists (lib.attrNames systemTargets ++ ["nix-daemon"]) wanted;
   active = targets: lib.filter (n: targets ? ${n} && targets.${n}.enable) wanted;
 
   #--- Falls back to running unwrapped if the setuid helper is absent,
@@ -124,5 +127,15 @@ in {
 
     environment.systemPackages = wrappers systemTargets false;
     home-manager.users = lib.mapAttrs (_: user: {home.packages = wrappers (targetsFor user) true;}) machine.users;
+
+    #--- Rebuild downloads come from nix-daemon, so it joins the cgroup before
+    #--- exec and its workers inherit it; without the cgroup it stays on the VPN
+    systemd.services.nix-daemon.serviceConfig.ExecStart = lib.mkIf daemonExcluded [
+      ""
+      (pkgs.writeShellScript "nix-daemon-split-tunnel" ''
+        echo $$ 2>/dev/null >/sys/fs/cgroup/net_cls/mullvad-exclusions/cgroup.procs
+        exec ${lib.getExe' config.nix.package "nix-daemon"} --daemon
+      '')
+    ];
   };
 }

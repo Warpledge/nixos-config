@@ -102,6 +102,7 @@
     "ferdium"
     "omni-settings"
     "protonplus"
+    "nix-daemon"
   ];
 
   #--- SSH Server
