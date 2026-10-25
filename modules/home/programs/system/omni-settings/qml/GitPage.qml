@@ -33,7 +33,7 @@ ColumnLayout {
 
     Component.onCompleted: refresh(false)
     // The local counts every minute; gitstate decides when to fetch again
-    Timer { interval: 60000; repeat: true; running: true; onTriggered: page.refresh(false) }
+    Timer { interval: 60000; repeat: true; running: page.view.shown; onTriggered: page.refresh(false) }
 
     //--- Hero
     Rectangle {

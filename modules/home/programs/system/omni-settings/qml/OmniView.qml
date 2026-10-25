@@ -36,10 +36,12 @@ Item {
                        c.behind ? `${c.behind} to pull` : "", c.prs ? `${c.prs} PR${c.prs === 1 ? "" : "s"}` : ""]
         return parts.filter(p => p).join(" · ") || "In step"
     }
+    // False while DMS's panel is hidden, which keeps the view loaded
+    readonly property bool shown: !!Window.window && Window.window.visible
     Timer {
         interval: 60000
         repeat: true
-        running: !!omni.info
+        running: !!omni.info && omni.shown
         triggeredOnStart: true
         onTriggered: Backend.call("gitSummary", {}, reply => { if (reply.ok) omni.gitCounts = reply.data })
     }
