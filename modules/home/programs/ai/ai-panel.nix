@@ -21,6 +21,8 @@
   xdg.configFile."kitty/ai-panel.conf".text = ''
     edge left
     columns 120
+    # Clears DMS's top bar like Omni Settings; barThickness at innerPadding 4
+    margin_top 40
     focus_policy on-demand
     # Opaque like kitty.nix; niri's blur preset sets the translucency
     background_opacity 1.0
