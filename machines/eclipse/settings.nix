@@ -63,7 +63,7 @@
 
   #--- Kernel Selection
   # Options: "zen" | "latest" | "xanmod" | "cachyos"
-  kernel = "cachyos";
+  kernel = "zen";
 
   #--- Mouse Cursor
   # Options: "bibata" | "catppuccin"
