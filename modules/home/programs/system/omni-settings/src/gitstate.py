@@ -58,7 +58,7 @@ def snapshot(flake):
     status = system.git_status(flake)
     changed = [line for line in git(flake, "status", "--porcelain").splitlines() if line]
     upstream = git(flake, "rev-parse", "--abbrev-ref", "@{u}").strip() if status.upstream else ""
-    outgoing = commits(flake, "@{u}..HEAD") if upstream else []
+    outgoing = commits(flake, f"{system.push_ref(flake)}..HEAD") if upstream else []
     incoming = commits(flake, "HEAD..@{u}") if upstream else []
     return status, upstream, changed, outgoing, incoming, commits(flake, "-15"), last_fetch(flake)
 

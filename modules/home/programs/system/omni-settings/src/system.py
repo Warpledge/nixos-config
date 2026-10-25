@@ -191,7 +191,30 @@ def git_status(flake):
             ahead, behind = int(a), -int(b)
         elif line and not line.startswith("#"):
             changed += 1
+    push = push_ref(flake) if upstream else "@{u}"
+    if push != "@{u}":
+        count = subprocess.run(["git", "-C", flake, "rev-list", "--count", f"{push}..HEAD"],
+                               capture_output=True, text=True, timeout=20)
+        if count.returncode == 0:
+            ahead = int(count.stdout.strip())
     return GitStatus(branch, changed, ahead, behind, upstream)
+
+
+def push_ref(flake):
+    """Where pushes go: the push remote's copy of the branch when it pushes
+    somewhere other than it pulls from (branch.<name>.pushRemote or
+    remote.pushDefault, as Pull's push_backup uses) and that copy exists,
+    else "@{u}"."""
+    def config(*args):
+        out = subprocess.run(["git", "-C", flake, *args], capture_output=True, text=True, timeout=20)
+        return out.stdout.strip() if out.returncode == 0 else ""
+    branch = config("branch", "--show-current")
+    pull = config("config", f"branch.{branch}.remote")
+    push = config("config", f"branch.{branch}.pushRemote") or config("config", "remote.pushDefault")
+    ref = f"refs/remotes/{push}/{branch}"
+    if branch and push and push != pull and config("rev-parse", "--verify", "-q", ref):
+        return ref
+    return "@{u}"
 
 
 #--------------------------------------------------------------------#
