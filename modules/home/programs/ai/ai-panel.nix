@@ -1,5 +1,5 @@
 #=====================================================================#
-# AI PANEL - A LEFT-EDGE KITTY PANEL FOR CLAUDE CODE AND OPENCODE
+# TERMINAL PANEL - A LEFT-EDGE KITTY PANEL FOR CLAUDE CODE AND OPENCODE
 #=====================================================================#
 {
   config,

@@ -1,6 +1,6 @@
-# The AI Panel
+# The Terminal Panel
 
-`Mod+A` opens a terminal that slides in from the left edge of the screen. It's there for Claude Code and opencode, but it opens on a plain shell, so you start whichever you want. The shortcut only exists when kitty and at least one of Claude Code or opencode are switched on (Omni Settings' AI tab → Cloud AI).
+`Mod+A` opens a terminal that slides in from the left edge of the screen, in the config folder (`/etc/nixos-config`). It's there for Claude Code and opencode, but it opens on a plain shell, so you start whichever you want. The shortcut only exists when kitty and at least one of Claude Code or opencode are switched on (Omni Settings' AI tab → Cloud AI).
 
 ## Showing and Hiding It
 
@@ -8,12 +8,7 @@ Press `Mod+A` to show the panel and press it again to hide it. Hiding it doesn't
 
 ## Starting an Agent
 
-Type `claude` for Claude Code or `opencode` for opencode. Either works on the folder you're in, so to work on the config, go there first:
-
-```
-cd /etc/nixos-config
-claude
-```
+Type `claude` for Claude Code or `opencode` for opencode. Either works on the folder you're in, which starts as the config; `cd` somewhere else first to work on another project.
 
 Quit the agent (`/exit` in both) and you're back at the shell.
 

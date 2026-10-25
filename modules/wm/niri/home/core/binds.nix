@@ -238,9 +238,9 @@
         // lib.optionalAttrs user.gaming.lutris {
           lutris = bind "Mod+Ctrl+G" "Lutris" {spawn = ["lutris"];};
         }
-        #--- Claude Code / opencode panel on the left edge (ai/ai-panel.nix)
+        #--- Terminal panel on the left edge (ai/ai-panel.nix)
         // lib.optionalAttrs (user.terminals.kitty && (user.claude.enable || user.opencode.enable)) {
-          ai-panel = bind "Mod+A" "AI panel" {spawn = ["ai-panel"];};
+          ai-panel = bind "Mod+A" "Terminal panel" {spawn = ["ai-panel"];};
         }))
     ];
 }
