@@ -308,6 +308,12 @@ Rectangle {
                                     elide: Text.ElideMiddle
                                     Layout.fillWidth: true
                                 }
+                                Text {
+                                    text: sheet.seconds(modelData.seconds)
+                                    color: Theme.dim
+                                    font.pixelSize: 13
+                                    font.features: { "tnum": 1 }
+                                }
                                 //--- What it's doing: a fetchurl build counts as downloading
                                 Chip {
                                     tappable: false
@@ -315,12 +321,6 @@ Rectangle {
                                     tone: modelData.kind === "fetch" ? "caution" : item.downloading ? "success" : ""
                                     text: modelData.kind === "fetch" ? "Fetching" : item.downloading ? "Downloading"
                                         : modelData.phase ? `Building · ${modelData.phase}` : "Building"
-                                }
-                                Text {
-                                    text: sheet.seconds(modelData.seconds)
-                                    color: Theme.dim
-                                    font.pixelSize: 13
-                                    font.features: { "tnum": 1 }
                                 }
                             }
                             Text {

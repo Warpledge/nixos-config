@@ -300,6 +300,16 @@ class Job:
 #--------------------------------------------------------------------#
 #-- Starting Jobs
 #--------------------------------------------------------------------#
+def installed_exec_start():
+    """The ExecStart of the installed unit, which names this service's build."""
+    config = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config")
+    try:
+        with open(os.path.join(config, "systemd/user/omni-settings-jobs.service")) as f:
+            return next((line for line in f if line.startswith("ExecStart=")), None)
+    except OSError:
+        return None
+
+
 def tail(preview):
     return ["build", "compare"] if preview else ["build", "compare", "switch", "boot"]
 
@@ -318,6 +328,7 @@ class Service:
         self.shown = set()  # clients whose page is on screen
         self.job, self.count, self.starting = None, 0, False
         self.idle_since = time.monotonic()
+        self.exec_start, self.ticks = installed_exec_start(), 0
 
     #--- Clients
     def broadcast(self, msg):
@@ -363,6 +374,11 @@ class Service:
             if job is not None and job.progress_dirty and job.ended is None:
                 job.progress_dirty = False
                 self._send_all({"event": "progress", "id": job.id, "progress": job.progress_json()})
+            # A front end stays attached, so a newer build wouldn't start
+            # otherwise; with no job left to show, the socket starts it next time
+            self.ticks += 1
+            if job is None and self.ticks % 20 == 0 and installed_exec_start() != self.exec_start:
+                os._exit(0)
             if self.clients or (job is not None and job.ended is None):
                 self.idle_since = time.monotonic()
             elif time.monotonic() - self.idle_since > IDLE and (
