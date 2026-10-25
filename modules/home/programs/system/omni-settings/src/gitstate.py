@@ -222,6 +222,41 @@ def back_up(flake, machine, paths):
     return push_backup(flake)
 
 
+def backup_url(flake):
+    """The URL the branch backs up to (its separate push remote), or ""."""
+    target = push_remote(flake)
+    if target is None:
+        return ""
+    try:
+        return git(flake, "remote", "get-url", target[1]).strip()
+    except RuntimeError:
+        return ""
+
+
+def set_backup(flake, machine, paths, url):
+    """Points the branch's pushes at `url` through a `backup` remote, then backs
+    up `paths` there; an empty `url` stops the backups. Returns a line to show."""
+    try:
+        branch = git(flake, "branch", "--show-current").strip()
+        if not url:
+            subprocess.run(["git", "-C", flake, "config", "--unset", f"branch.{branch}.pushRemote"],
+                           env=ENV, capture_output=True, timeout=20)
+            return "Backups are off."
+        if not re.match(r"^(https://|ssh://|git@)\S+$", url):
+            raise PullError("Paste the repo's https:// or git@ address.")
+        if git(flake, "config", f"branch.{branch}.remote").strip() == "backup":
+            raise PullError("This branch pulls from the remote named backup; rename that remote first.")
+        if "backup" in git(flake, "remote").split():
+            git(flake, "remote", "set-url", "backup", url)
+        else:
+            git(flake, "remote", "add", "backup", url)
+        git(flake, "config", f"branch.{branch}.pushRemote", "backup")
+        git(flake, "fetch", "--quiet", "backup", timeout=120)
+    except (RuntimeError, subprocess.TimeoutExpired) as e:
+        raise PullError(str(e))
+    return back_up(flake, machine, paths)
+
+
 def iso_epoch(text):
     try:
         return calendar.timegm(time.strptime(text, "%Y-%m-%dT%H:%M:%SZ"))

@@ -466,7 +466,18 @@ def cmd_git(cfg, args):
                  "author": (p.get("user") or {}).get("login", "?"), "branch": (p.get("head") or {}).get("label", ""),
                  "updated": gitstate.iso_epoch(p.get("updated_at")), "draft": bool(p.get("draft"))}
                 for p in prs],
-            "prErr": pr_err, "limited": limited}
+            "prErr": pr_err, "limited": limited, "backup": gitstate.backup_url(cfg.flake)}
+
+
+def cmd_set_backup(cfg, args):
+    """Sets (or with an empty url, clears) the repo this clone backs up to."""
+    if access(cfg, loaded(cfg)) != (True, True):
+        raise ValueError("Only an admin can set where the config backs up to")
+    try:
+        return gitstate.set_backup(cfg.flake, cfg.machine, [f"machines/{cfg.machine}", f"users/{cfg.user}"],
+                                   (args.get("url") or "").strip())
+    except gitstate.PullError as e:
+        raise ValueError(str(e))
 
 
 def cmd_git_summary(cfg, _args):
@@ -922,7 +933,7 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "stale": cmd_stale, "removeStale": cmd_remove_stale,
             "overview": cmd_overview, "freed": cmd_freed, "checkUpdates": cmd_check_updates,
             "compare": cmd_compare, "failedLog": cmd_failed_log, "forgetFailed": cmd_forget_failed,
-            "git": cmd_git, "gitSummary": cmd_git_summary,
+            "git": cmd_git, "gitSummary": cmd_git_summary, "setBackup": cmd_set_backup,
             "flatpaks": cmd_flatpaks, "flatpakUpdates": cmd_flatpak_updates, "flatpakRun": cmd_flatpak_run,
             "flatpakForget": cmd_flatpak_forget, "flatseal": cmd_flatseal,
             "backups": cmd_backups, "backup": cmd_backup,

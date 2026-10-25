@@ -19,10 +19,10 @@ Where Syncthing is on ([`syncthing.nix`](../../modules/nixos/services/servers/sy
 
 ## Git
 
-The config is a git repository, a folder that records every change made to it. Main → **Git** shows, without changing anything:
+The config is a git repository, a folder that records every change made to it. Main → **Git** shows:
 
 - the branch, and files changed but not committed yet
 - commits waiting to be pushed to GitHub, or pulled from it
 - recent commits, and open pull requests
 
-Its line in the page list says "In step" when everything is, or counts what's waiting. Changes Omni Settings makes stay uncommitted until an admin commits them, so the Git page is where to see what's been changed since. The exception is a copy whose branch pushes somewhere other than where it pulls from (`branch.<name>.pushRemote`, such as your own backup of someone else's repo): there, each successful Apply, Rebuild, Update or Pull commits what changed in this computer's `machines/` folder and your `users/` folder and pushes it.
+Its line in the page list says "In step" when everything is, or counts what's waiting. Changes Omni Settings makes stay uncommitted until an admin commits them, so the Git page is where to see what's been changed since. The exception is a backup: paste an empty repo you own (a private GitHub repo, say) into **Backup** on the Git page and **Back Up Here** pushes your copy there. From then on each successful Apply, Rebuild, Update or Pull commits what changed in this computer's `machines/` folder and your `users/` folder and pushes it, while updates keep coming from the repo you cloned. Git has to be able to push there without asking for a password, for example after `gh auth login` and `gh auth setup-git`, or with an SSH key. Under the hood it's a `backup` remote set as the branch's `pushRemote`.
