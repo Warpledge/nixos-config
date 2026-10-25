@@ -26,8 +26,10 @@
         feedback = false;
         rocksmith = false;
         ludusavi = false;
+        tmodloader = false;
+        satisfactoryModManager = false;
       };
-      discord.arrpc.enable = false;
+      discord.arrpc.enable = true;
       lmstudio.enable = false;
       llamaSwap.enable = false;
       opencode.enable = false;
@@ -53,9 +55,19 @@
       artcraft.wordcraft = false;
       artcraft.gridcraft = false;
       artcraft.deckcraft = false;
-      discord.vesktop = false;
+      discord.vesktop = true;
       userPackages = {};
       keybinds = {};
+      androidDev.enable = false;
+      fileBrowsers.nautilus = false;
+      fileBrowsers.yazi = false;
+      discord.goofcord = false;
+      localAi.code = [];
+      localAi.chat = [];
+      localAi.edit = null;
+      openWebui.enable = false;
+      claudeDesktop.enable = false;
+      defaultApps.fileManager = "duxFiles";
     };
   };
 
@@ -106,20 +118,7 @@
   #--- Mullvad VPN
   mullvad.enable = true;
   # Apps always routed around the VPN (see nixos/security/mullvad/)
-  mullvad.splitTunnel = [
-    "steam"
-    "heroic"
-    "prismlauncher"
-    "opencode"
-    "claude"
-    "claude-desktop"
-    "lm-studio"
-    "spotify"
-    "freetube"
-    "ferdium"
-    "omni-settings"
-    "protonplus"
-  ];
+  mullvad.splitTunnel = ["steam" "heroic" "prismlauncher" "opencode" "claude" "spotify" "freetube" "ferdium" "omni-settings" "protonplus" "nix-daemon" "claude-desktop" "lm-studio"];
 
   #--- SSH Server
   # Key-only openssh + fail2ban. Add a public key to ssh.authorizedKeys in
@@ -150,4 +149,5 @@
 
   #--- Flatpak, with Flatseal
   flatpak.enable = false;
+  smb.enable = false;
 }
