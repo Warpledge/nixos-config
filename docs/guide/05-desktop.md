@@ -16,6 +16,7 @@ Workspaces stack vertically, one row of columns each. `Mod+1` to `Mod+9` jump to
 | --- | --- |
 | `Mod+Space` | App launcher |
 | `Mod+Return` / `Mod+T` | Terminal |
+| `Mod+A` | AI panel, a terminal on the left edge (see [The AI Panel](09-ai-panel.md)) |
 | `Mod+B` / `Mod+E` | Browser / files |
 | `Mod+S` | Omni Settings |
 | `Mod+Comma` | Shell settings |
