@@ -217,7 +217,7 @@
   },
   {
     "name": "Omni Settings",
-    "note": "Mod+C. Tiled; with Zed (Mod+Z) at 61.2% the two fill the screen side by side.",
+    "note": "Mod+C. Tiled.",
     "default-column-width": {
       "proportion": 0.388
     },
@@ -237,18 +237,6 @@
       {
         "app-id": "^org\\.quickshell$",
         "title": "^Omni Settings$"
-      }
-    ]
-  },
-  {
-    "name": "Zed",
-    "note": "Mod+Z. Leaves 38.8% beside it for Omni Settings.",
-    "default-column-width": {
-      "proportion": 0.612
-    },
-    "matches": [
-      {
-        "app-id": "^dev\\.zed\\.Zed$"
       }
     ]
   },
