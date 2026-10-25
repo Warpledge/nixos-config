@@ -16,7 +16,7 @@
         boorusama = false;
         tonkatsuBox = false;
       };
-      wallpaper = "engine";
+      wallpaper = "carousel";
       gaming = {
         heroic = false;
         easyrpg = false;
@@ -39,6 +39,23 @@
       browsers.ferdium = false;
       fileBrowsers.dolphin = false;
       security.keepassxc = false;
+      editors.vscodium = false;
+      artcraft.photocraft = false;
+      artcraft.lightcraft = false;
+      artcraft.vectorcraft = false;
+      artcraft.designcraft = false;
+      artcraft.figcraft = false;
+      artcraft.effectcraft = false;
+      artcraft.filmcraft = false;
+      artcraft.soundcraft = false;
+      artcraft.cadcraft = false;
+      artcraft.pdfcraft = false;
+      artcraft.wordcraft = false;
+      artcraft.gridcraft = false;
+      artcraft.deckcraft = false;
+      discord.vesktop = false;
+      userPackages = {};
+      keybinds = {};
     };
   };
 
