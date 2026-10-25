@@ -64,6 +64,16 @@ in {
       # Omni Settings' QML front end as a slideout (Mod+S)
       omniSettings.src = "${config.omni-settings.package}/share/omni-settings/plugin";
 
+      # Bar widgets: a running rebuild, and the config repo's git state read
+      # through Omni Settings' backend, which shares its GitHub limit
+      rebuildStatus.src = ./plugins/rebuild-status;
+      gitStatus.src = pkgs.runCommand "dms-git-status" {} ''
+        cp -r ${./plugins/git-status} $out
+        chmod -R u+w $out
+        substituteInPlace $out/GitStatusWidget.qml --subst-var-by backend \
+          ${config.omni-settings.package}/bin/omni-settings-backend
+      '';
+
       # A bar widget: its IPC target only exists while it sits in a bar
       # (rightWidgets in settings.json).
       clipboardPlus.enable = true;

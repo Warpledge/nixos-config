@@ -1,0 +1,12 @@
+{
+  "id": "rebuildStatus",
+  "name": "Rebuild Status",
+  "description": "Shows a running NixOS rebuild (nixm, nh, nixos-rebuild or Omni Settings) and how it ended",
+  "version": "1.0.0",
+  "author": "nixos-config",
+  "icon": "autorenew",
+  "type": "widget",
+  "capabilities": ["dankbar-widget"],
+  "component": "./RebuildStatusWidget.qml",
+  "requires_dms": ">=2.0.0"
+}

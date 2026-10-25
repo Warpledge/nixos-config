@@ -1,0 +1,12 @@
+{
+  "id": "gitStatus",
+  "name": "Config Git Status",
+  "description": "Changed files, commits to push and pull, and open pull requests for the config repo, from Omni Settings' backend",
+  "version": "1.0.0",
+  "author": "nixos-config",
+  "icon": "commit",
+  "type": "widget",
+  "capabilities": ["dankbar-widget"],
+  "component": "./GitStatusWidget.qml",
+  "requires_dms": ">=2.0.0"
+}

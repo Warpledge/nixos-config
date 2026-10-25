@@ -227,6 +227,14 @@
       "position": 0,
       "rightWidgets": [
         {
+          "id": "rebuildStatus",
+          "enabled": true
+        },
+        {
+          "id": "gitStatus",
+          "enabled": true
+        },
+        {
           "id": "quickCapture",
           "enabled": true
         },
