@@ -37,7 +37,11 @@
       dir = "unsloth/Qwen3.8-Flash-Next-GGUF";
       match = "Qwen3.8-Flash-Next-UD-Q3_K_XL-00001-of-*.gguf";
       context = 131072;
-      flags = ["--mmproj '${modelsDir}/unsloth/Qwen3.8-Flash-Next-GGUF/mmproj-F16.gguf'"];
+      # q8_0 V cache: ~17% faster prompts at 32K, perplexity within error
+      flags = [
+        "-ctv q8_0"
+        "--mmproj '${modelsDir}/unsloth/Qwen3.8-Flash-Next-GGUF/mmproj-F16.gguf'"
+      ];
       #--- Qwen's thinking-mode sampling
       params = {
         temperature = 1.0;
