@@ -28,41 +28,40 @@
   modelsDir = "${config.home.homeDirectory}/.lmstudio/models";
 
   #--- Whole model on the GPU: shared memory leaves no reason to keep experts on the CPU
+  #--- Both take images through their mmproj file (`--mmproj`)
   models = {
-    #--- Most accurate, for chat and hard problems: MoE, 13B active (97 GiB at
-    #--- UD-IQ3_XXS). The DSpark drafter (10 GiB) nearly doubles generation but
-    #--- leaves ~1 GiB RAM free while loaded. Thinking is capped at 4096 tokens.
-    deepseek-v4-flash = {
-      name = "DeepSeek V4 Flash";
-      dir = "unsloth/DeepSeek-V4-Flash-0731-GGUF";
-      match = "DeepSeek-V4-Flash-0731-*-00001-of-*.gguf";
-      context = 65536;
-      flags = [
-        "--reasoning-budget 4096"
-        "-md '${modelsDir}/unsloth/DeepSeek-V4-Flash-0731-GGUF/dspark-DeepSeek-V4-Flash-0731-Q8_0.gguf'"
-        "--spec-type draft-dspark --spec-draft-n-max 3 -ngld 99"
-      ];
-      #--- Unsloth's sampling for V4 Flash
+    #--- Main model, for opencode and hard problems: MoE, 6B active (84 GiB at
+    #--- UD-Q3_K_XL; Q4 would leave too little RAM free)
+    qwen3_8-flash-next = {
+      name = "Qwen3.8 Flash Next";
+      dir = "unsloth/Qwen3.8-Flash-Next-GGUF";
+      match = "Qwen3.8-Flash-Next-UD-Q3_K_XL-00001-of-*.gguf";
+      context = 131072;
+      flags = ["--mmproj '${modelsDir}/unsloth/Qwen3.8-Flash-Next-GGUF/mmproj-F16.gguf'"];
+      #--- Qwen's thinking-mode sampling
       params = {
         temperature = 1.0;
-        top_p = 1.0;
-        min_p = 0.01;
+        top_p = 0.95;
+        top_k = 20;
+        min_p = 0;
+        presence_penalty = 0.0;
       };
     };
-    #--- Fast, for opencode: MoE, 5B active (59 GiB, MXFP4 as released).
-    #--- Reads input ~3x faster than DeepSeek
-    gpt-oss-120b = {
-      name = "gpt-oss 120B";
-      dir = "ggml-org/gpt-oss-120b-GGUF";
-      match = "gpt-oss-120b-*.gguf";
+    #--- Light model, for quick simple tasks: MoE, 3B active (36 GiB at UD-Q8_K_XL)
+    qwen3_6-35b-a3b = {
+      name = "Qwen3.6 35B A3B";
+      dir = "unsloth/Qwen3.6-35B-A3B-GGUF";
+      match = "Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf";
       context = 131072;
-      flags = ["--reasoning-effort medium"];
-      #--- OpenAI's sampling for gpt-oss
+      flags = ["--mmproj '${modelsDir}/unsloth/Qwen3.6-35B-A3B-GGUF/mmproj-F16.gguf'"];
+      #--- Thinking off for speed, with Qwen's non-thinking sampling
       params = {
-        temperature = 1.0;
-        top_p = 1.0;
-        top_k = 0;
+        chat_template_kwargs.enable_thinking = false;
+        temperature = 0.7;
+        top_p = 0.8;
+        top_k = 20;
         min_p = 0;
+        presence_penalty = 1.5;
       };
     };
   };
@@ -111,9 +110,9 @@ in {
   home.packages = [pkgs.opencode-desktop];
 
   programs.opencode.settings = {
-    model = "llama-swap/gpt-oss-120b";
+    model = "llama-swap/qwen3_8-flash-next";
     # Titles and summaries too: another model would swap the big one out
-    small_model = "llama-swap/gpt-oss-120b";
+    small_model = "llama-swap/qwen3_8-flash-next";
     provider.llama-swap = {
       npm = "@ai-sdk/openai-compatible";
       name = "llama-swap (local)";
@@ -121,6 +120,10 @@ in {
       models =
         lib.mapAttrs (_: m: {
           inherit (m) name;
+          modalities = {
+            input = ["text" "image"];
+            output = ["text"];
+          };
           limit = {
             inherit (m) context;
             output = 32768;

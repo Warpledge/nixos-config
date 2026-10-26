@@ -53,7 +53,8 @@ when Ky approves it.
   browser (it isn't one of `lib/default-apps.nix`'s choices)
 - `home/binds.nix` — niri binds matching Ky's KDE Plasma shortcuts; repo binds on the
   same keys are switched off by id
-- `home/local-ai.nix` — llama-swap on llama.cpp (Vulkan) at `127.0.0.1:8090`, DeepSeek
-  V4 Flash and gpt-oss 120B loaded from LM Studio's folder, and opencode's provider for it
+- `home/local-ai.nix` — llama-swap on llama.cpp (Vulkan) at `127.0.0.1:8090`, Qwen3.8
+  Flash Next (main) and Qwen3.6 35B A3B (light), both with vision, loaded from LM
+  Studio's folder, and opencode's provider for it
 - `home/config-reminder.nix` — a zsh notice when the checkout is behind Warpledge's main
 - `INSTALL.md` — reinstalling from scratch (run `./setup.sh` and choose “Reinstall activenixtab”; the script will detect the existing machine folder and reapply the exact configuration)
