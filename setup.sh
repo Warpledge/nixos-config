@@ -850,6 +850,7 @@ apps=(
   "AI tools|claude.enable|Claude Code (needs an Anthropic account)"
   "AI tools|claudeDesktop.enable|Claude desktop app: chat and Claude Code"
   "AI tools|opencode.enable|opencode"
+"AI tools|opencodeDesktop.enable|OpenCode desktop app: a Claude Desktop-style GUI"
   "AI tools|lmstudio.enable|LM Studio: run language models locally"
   "AI tools|llamaSwap.enable|llama-swap: llama.cpp server for opencode"
   "AI tools|openWebui.enable|Open WebUI: chat with the local models in the browser"
