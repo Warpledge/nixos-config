@@ -47,11 +47,12 @@
         presence_penalty = 0.0;
       };
     };
-    #--- Light model, for quick simple tasks: MoE, 3B active (36 GiB at UD-Q8_K_XL)
+    #--- Light model, for quick simple tasks: MoE, 3B active (21 GiB at UD-Q4_K_XL,
+    #--- ~25% faster generation than Q8 here)
     qwen3_6-35b-a3b = {
       name = "Qwen3.6 35B A3B";
       dir = "unsloth/Qwen3.6-35B-A3B-GGUF";
-      match = "Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf";
+      match = "Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf";
       context = 131072;
       flags = ["--mmproj '${modelsDir}/unsloth/Qwen3.6-35B-A3B-GGUF/mmproj-F16.gguf'"];
       #--- Thinking off for speed, with Qwen's non-thinking sampling
