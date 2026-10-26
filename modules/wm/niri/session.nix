@@ -88,6 +88,8 @@ in {
   # and ScreenCast; variables.nix keeps the X11 fallback for everything else.
   systemd.user.services.xdg-desktop-portal-gnome = {
     overrideStrategy = "asDropin";
+    # The default PATH hides user apps, which blanks the Open With dialog
+    enableDefaultPath = false;
     serviceConfig.UnsetEnvironment = "GDK_BACKEND";
   };
 }
