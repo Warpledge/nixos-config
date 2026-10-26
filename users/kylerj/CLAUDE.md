@@ -14,6 +14,9 @@ Plasma, so the niri binds follow Plasma's shortcuts.
   after Ky approves it.
 - **The goal is a config anyone can install and keep up to date without an AI.** Prefer
   a general fix in `setup.sh`, Omni Settings or the docs over hand-configured git.
+- `home.nix` gives opencode global rules (`agents/opencode-global.md`) and adds the
+  `godot` and `tmodloader-workflow` skills (`skills/`) to opencode and Claude Code. It
+  also links the claude.ai-synced `tmodloader` skill for opencode.
 - Apps with no settings switch are in `machines/activenixtab/home/apps.nix`; the browser
   is Vivaldi, though `defaultApps.browser` says zen.
 - Only two app keys matter: Meta+T for the terminal and Ctrl+Alt+Delete for the task
