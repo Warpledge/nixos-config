@@ -26,6 +26,13 @@
     powerprofilesctl set "$next"
   '';
 
+  #--- Waits a second first: releasing the bind's keys counts as input and
+  # would wake the screens straight away
+  screenOff = pkgs.writeShellScript "screen-off" ''
+    sleep 1
+    niri msg action power-off-monitors
+  '';
+
   #--- Touchpad on / off: touch-gestures.py (wm/) holds the touchpad while the
   # file isn't empty; niri's own switch would also stop the touchscreen gestures
   touchpadFile = "$HOME/.config/niri/touchpad-off";
@@ -161,7 +168,7 @@ in {
       };
       kde-restart-shell = bind "Ctrl+Alt+BackSpace" "Restart shell" {spawn = ["dms" "restart"];};
       kde-power-profile = bind "Mod+B" "Next power profile" {spawn = ["${cyclePowerProfile}"];};
-      kde-screen-off = bind "Mod+Shift+L" "Screen off" {power-off-monitors = {};};
+      kde-screen-off = bind "Mod+Shift+L" "Screen off" {spawn = ["${screenOff}"];};
       # The folio's touchpad key sends F21 (hid-asus), XF86TouchpadToggle in xkb
       kde-touchpad =
         bind "XF86TouchpadToggle" "Touchpad on / off" {spawn = ["${toggleTouchpad}"];};
