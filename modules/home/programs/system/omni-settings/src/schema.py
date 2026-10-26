@@ -132,11 +132,13 @@ PAGES = {
     "Claude": ("cloudai", "applications-science-symbolic",
                "Anthropic's Claude, signed in with your Claude account.",
                [("", "", ["claude.enable", "claudeDesktop.enable"])]),
+    "OpenCode": ("localai", "vcs-branch-symbolic",
+               "OpenCode, the coding agent, and its desktop app, "
+               "a Claude Desktop-style GUI.",
+               [("", "", ["opencode.enable", "opencodeDesktop.enable"])]),
     "Tools": ("localai", "utilities-terminal-symbolic",
-              "The local model server, the app that downloads models, and opencode and "
-              "its desktop app, the coding agent that uses them.",
-              [("", "", ["llamaSwap.enable", "lmstudio.enable", "opencode.enable",
-                         "opencodeDesktop.enable", "openWebui.enable"])]),
+              "The local model server and the app that downloads models.",
+              [("", "", ["llamaSwap.enable", "lmstudio.enable", "openWebui.enable"])]),
     "Models": ("localai", "applications-engineering-symbolic",
                "The models llama-swap runs on this computer, one at a time.",
                [("Code", "For opencode and Zed's agent panel.", ["localAi.code"]),
