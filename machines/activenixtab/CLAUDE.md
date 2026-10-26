@@ -56,4 +56,4 @@ when Ky approves it.
 - `home/local-ai.nix` — llama-swap on llama.cpp (Vulkan) at `127.0.0.1:8090`, DeepSeek
   V4 Flash and gpt-oss 120B loaded from LM Studio's folder, and opencode's provider for it
 - `home/config-reminder.nix` — a zsh notice when the checkout is behind Warpledge's main
-- `INSTALL.md` — reinstalling from scratch
+- `INSTALL.md` — reinstalling from scratch (run `./setup.sh` and choose “Reinstall activenixtab”; the script will detect the existing machine folder and reapply the exact configuration)
