@@ -68,6 +68,13 @@ catches the step that usually gets missed.
    (`.desktop` id or icon name) when known. If the setting is a value used by another
    setting's dropdown (e.g. `fileBrowsers.duxFiles` as a choice for `defaultApps.fileManager`),
    add it to that parent's `choices` object in the same file.
+- `descriptions.json` sets the row's text and icon, **not which tab it shows on**. Tab
+  placement is in `schema.py`'s `PAGES` dict (`src/schema.py`, documented in its module
+  docstring and `modules/home/programs/system/omni-settings/CLAUDE.md`): add the new
+  setting's dotted path to the target page's list to put it on that tab. Leave it out and
+  it stays on its template section — a bool with no page naming it falls back to Default
+  Packages. So an app that belongs on a curated tab alongside its siblings (an AI app with
+  the other AI tools, for example) needs a `PAGES` entry too, not just `descriptions.json`.
 6. **README**: grep, never read it whole (`grep -n '^| \*\*' README.md`,
    `grep -n '^\[.*\]: http' README.md`), add the app to its Components row and a
    `[label]: url` link (homepage from `nix eval --raw nixpkgs#<pkg>.meta.homepage`), plus

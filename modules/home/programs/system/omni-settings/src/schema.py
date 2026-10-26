@@ -133,9 +133,10 @@ PAGES = {
                "Anthropic's Claude, signed in with your Claude account.",
                [("", "", ["claude.enable", "claudeDesktop.enable"])]),
     "Tools": ("localai", "utilities-terminal-symbolic",
-              "The local model server, the app that downloads models, and opencode, "
-              "the coding agent that uses them.",
-              [("", "", ["llamaSwap.enable", "lmstudio.enable", "opencode.enable", "openWebui.enable"])]),
+              "The local model server, the app that downloads models, and opencode and "
+              "its desktop app, the coding agent that uses them.",
+              [("", "", ["llamaSwap.enable", "lmstudio.enable", "opencode.enable",
+                         "opencodeDesktop.enable", "openWebui.enable"])]),
     "Models": ("localai", "applications-engineering-symbolic",
                "The models llama-swap runs on this computer, one at a time.",
                [("Code", "For opencode and Zed's agent panel.", ["localAi.code"]),
