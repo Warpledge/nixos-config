@@ -132,7 +132,7 @@ PAGES = {
     "Claude": ("cloudai", "applications-science-symbolic",
                "Anthropic's Claude, signed in with your Claude account.",
                [("", "", ["claude.enable", "claudeDesktop.enable"])]),
-    "OpenCode": ("localai", "vcs-branch-symbolic",
+    "OpenCode": ("cloudai", "vcs-branch-symbolic",
                "OpenCode, the coding agent, and its desktop app, "
                "a Claude Desktop-style GUI.",
                [("", "", ["opencode.enable", "opencodeDesktop.enable"])]),
