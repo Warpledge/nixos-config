@@ -59,4 +59,7 @@ when Ky approves it.
 - `home/config-reminder.nix` — a zsh notice when the checkout is behind Warpledge's main
 - `home/godot-mcp.nix` — the godot-mcp server, built from GitHub at a pinned commit and
   put on PATH; a Godot project's `opencode.json` starts it (`~/godot-mcp-demo` does)
+- `home/unreal-engine.nix` — `unreal-editor` and its desktop entry: Epic's prebuilt
+  5.8.4 editor in `~/Games/UnrealEngine/` (extracted by hand, not in git), run in
+  Steam's FHS environment plus nss/nspr
 - `INSTALL.md` — reinstalling from scratch (run `./setup.sh` and choose “Reinstall activenixtab”; the script will detect the existing machine folder and reapply the exact configuration)

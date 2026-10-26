@@ -14,5 +14,6 @@
     ./config-reminder.nix
     ./godot-mcp.nix
     ./local-ai.nix
+    ./unreal-engine.nix
   ];
 }
