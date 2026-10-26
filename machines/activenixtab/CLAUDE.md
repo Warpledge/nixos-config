@@ -57,4 +57,6 @@ when Ky approves it.
   Flash Next (main) and Qwen3.6 35B A3B (light), both with vision, loaded from LM
   Studio's folder, and opencode's provider for it
 - `home/config-reminder.nix` — a zsh notice when the checkout is behind Warpledge's main
+- `home/godot-mcp.nix` — the godot-mcp server, built from GitHub at a pinned commit and
+  put on PATH; a Godot project's `opencode.json` starts it (`~/godot-mcp-demo` does)
 - `INSTALL.md` — reinstalling from scratch (run `./setup.sh` and choose “Reinstall activenixtab”; the script will detect the existing machine folder and reapply the exact configuration)

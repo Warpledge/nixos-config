@@ -12,6 +12,7 @@
     ./apps.nix
     ./binds.nix
     ./config-reminder.nix
+    ./godot-mcp.nix
     ./local-ai.nix
   ];
 }

@@ -112,16 +112,36 @@ user's permission first.
 
 ## Godot MCP add-on
 
-`godot_mcp` (github.com/triforge0/godot-mcp) lets an agent drive the open editor: read
-the scene tree, open and save scenes, create nodes, run the project. It has two parts:
+`godot_mcp` (github.com/triforge0/godot-mcp) lets an agent drive the open editor
+through 64 tools. It has two parts:
 
-- **The plugin**, in `addons/godot_mcp/` with `plugin.cfg` directly inside it (the
-  repo keeps it at `plugin/addons/godot_mcp/`; copy that folder, not the repo).
-  Enable it in Project Settings > Plugins. It connects to `ws://127.0.0.1:6505/ws`.
-- **The server**, a Go binary, `godot-mcp start`, configured as an MCP server in the
-  AI client. It isn't packaged in this NixOS config.
+- **The plugin**, in `addons/godot_mcp/` with `plugin.cfg` directly inside it, and
+  `res://addons/godot_mcp/plugin.cfg` in `[editor_plugins]` of `project.godot`.
+  Upstream keeps it at `plugin/addons/godot_mcp/`; a checkout is in
+  `~/Projects/godot-mcp/`. It connects to the server at `ws://127.0.0.1:6505/ws` and
+  retries until it's up.
+- **The server**, `godot-mcp start`, on PATH. opencode starts it from the project's
+  `opencode.json`:
 
-If tools such as `ping` and `scene_tree` from a `godot-mcp` server are available,
-call `ping` first to confirm the editor is connected, then prefer them over editing
-`.tscn` files by hand. If they aren't, use the files and the commands above; don't try
-to install or start the server yourself.
+  ```json
+  {"mcp": {"godot": {"type": "local", "command": ["godot-mcp", "start"]}}}
+  ```
+
+When the `godot` tools are available, call `project_info` first; it fails if the
+editor isn't open with the plugin enabled, and then you should ask Ky to open the
+project in Godot. Useful tools:
+
+- Reading: `scene_current`, `node_list`, `node_children`, `node_get_property`,
+  `class_inspect` (the live ClassDB, like the doc dump), `errors_list`,
+  `console_logs`.
+- Changing: `scene_open`, `node_create`, `node_set_property`, `script_attach`,
+  `scene_save`. Prefer these to hand-editing `.tscn` files, and save the scene after.
+- Running: `runtime_run`, `runtime_status`, `runtime_stop`, then `errors_list`.
+- `screenshot_capture` of the running game is fine, like `--write-movie` frames; ask
+  before capturing the editor itself.
+- Avoid `script_execute` (arbitrary code in the editor) and the delete tools unless
+  asked. The `skill_*` tools generate generic content; write the code yourself.
+
+If the `godot` tools aren't available, use the files and the commands above. To add
+the add-on to another project, ask first, then copy the plugin folder and add the
+`opencode.json` entry.
