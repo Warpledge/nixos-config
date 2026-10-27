@@ -205,6 +205,58 @@ Rectangle {
             }
         }
 
+        //--- What came back after a switch: Dux Shell, the portals and the services
+        Rectangle {
+            visible: !!sheet.job && !!sheet.job.health
+            Layout.fillWidth: true
+            implicitHeight: health.implicitHeight + 20
+            radius: 16
+            readonly property int failed: sheet.job && sheet.job.health ? sheet.job.health.failed : 0
+            color: failed ? Theme.toneFill("error", Theme.card) : Theme.card
+            ColumnLayout {
+                id: health
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.margins: 10
+                spacing: 6
+                Text {
+                    text: !sheet.job || !sheet.job.health ? ""
+                        : !sheet.job.health.failed ? "Everything came back"
+                        : sheet.job.health.failed === 1 ? "One thing didn't come back"
+                        : `${sheet.job.health.failed} things didn't come back`
+                    color: Theme.text
+                    font.pixelSize: 16
+                    font.weight: Font.DemiBold
+                }
+                Repeater {
+                    model: sheet.job && sheet.job.health ? sheet.job.health.items : []
+                    RowLayout {
+                        required property var modelData
+                        Layout.fillWidth: true
+                        spacing: 10
+                        Icon {
+                            icon: modelData.ok ? "check_circle" : "error"
+                            color: modelData.ok ? Theme.success : Theme.error
+                            size: 18
+                        }
+                        ColumnLayout {
+                            spacing: 0
+                            Layout.fillWidth: true
+                            Text { text: modelData.title; color: Theme.text; font.pixelSize: 14 }
+                            Text {
+                                text: modelData.detail
+                                color: Theme.dim
+                                font.pixelSize: 13
+                                wrapMode: Text.Wrap
+                                Layout.fillWidth: true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         //--- Build progress
         ColumnLayout {
             visible: !!sheet.p && !sheet.done
@@ -426,14 +478,25 @@ Rectangle {
             visible: !sheet.showLog
             Layout.fillWidth: true
             Layout.fillHeight: true
-            contentHeight: diffLoader.implicitHeight
+            contentHeight: changed.implicitHeight
             clip: true
             boundsBehavior: Flickable.StopAtBounds
-            Loader {
-                id: diffLoader
+            ColumnLayout {
+                id: changed
                 width: parent.width
-                active: !!sheet.job && !!sheet.job.diff
-                sourceComponent: DiffView { diff: sheet.job.diff }
+                spacing: 12
+                Loader {
+                    active: !!sheet.job && !!sheet.job.diff
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: item ? item.implicitHeight : 0
+                    sourceComponent: DiffView { diff: sheet.job.diff }
+                }
+                Loader {
+                    active: !!sheet.job && !!sheet.job.files
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: item ? item.implicitHeight : 0
+                    sourceComponent: FilesView { files: sheet.job.files }
+                }
             }
         }
         Rectangle {

@@ -22,6 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 import backend  # noqa: E402
 import backupstate  # noqa: E402
 import bootstate  # noqa: E402
+import changelog  # noqa: E402
 import closure  # noqa: E402
 import dms  # noqa: E402
 import docstate  # noqa: E402
@@ -456,8 +457,15 @@ def cmd_check_updates(cfg, _args):
     """The newest version of each flake input, locked into a separate file the
     update job takes as args.lock; flake.lock stays as it is."""
     lock, changes = system.check_updates(cfg.flake)
-    return {"lock": lock, "changes": [{"name": c.name, "old": c.old, "new": c.new, "link": c.link}
+    return {"lock": lock, "changes": [{"name": c.name, "old": c.old, "new": c.new, "link": c.link,
+                                       "repo": c.repo, "before": c.before, "after": c.after}
                                       for c in changes]}
+
+
+def cmd_changelog(cfg, args):
+    """What one of those sources says changed between its two versions."""
+    return changelog.notes(args.get("repo", ""), args.get("before", ""), args.get("after", ""),
+                           args.get("old") or 0, args.get("new") or 0)
 
 
 def cmd_compare(_cfg, args):
@@ -979,7 +987,7 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "dismiss": cmd_dismiss,
             "stale": cmd_stale, "removeStale": cmd_remove_stale,
             "overview": cmd_overview, "freed": cmd_freed, "boot": cmd_boot,
-            "checkUpdates": cmd_check_updates,
+            "checkUpdates": cmd_check_updates, "changelog": cmd_changelog,
             "compare": cmd_compare, "failedLog": cmd_failed_log, "forgetFailed": cmd_forget_failed,
             "git": cmd_git, "gitSummary": cmd_git_summary, "setBackup": cmd_set_backup,
             "flatpaks": cmd_flatpaks, "flatpakUpdates": cmd_flatpak_updates, "flatpakRun": cmd_flatpak_run,

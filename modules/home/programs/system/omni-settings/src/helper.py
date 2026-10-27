@@ -43,6 +43,7 @@ sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 
 import backend  # noqa: E402
 import closure  # noqa: E402
+import files  # noqa: E402
 import nixfile  # noqa: E402
 import nixlog  # noqa: E402
 import schema  # noqa: E402
@@ -196,6 +197,10 @@ def compare(path, mode):
     emit(step="compare", state="start")
     diff = closure.diff(closure.CURRENT, path)
     emit(diff=diff.as_json())
+    try:
+        emit(files=files.changes(closure.CURRENT, path))
+    except (OSError, ValueError) as e:
+        out(f"Couldn't compare the generated files: {e}")
     old, new = closure.kernel(closure.BOOTED), closure.kernel(path)
     if old and new and old != new:
         emit(kernel=[old, new])

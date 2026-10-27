@@ -226,6 +226,9 @@ class InputChange:
     old: float  # lastModified
     new: float
     link: str  # a page listing the changes, when the input is on GitHub
+    repo: str = ""  # "owner/repo", for reading its release notes
+    before: str = ""  # the revision flake.lock has
+    after: str = ""  # the one it would move to
 
 
 def runtime_dir():
@@ -265,7 +268,9 @@ def check_updates(flake):
         link = ""
         if new.get("type") == "github" and old.get("rev") and new.get("rev"):
             link = f"https://github.com/{new['owner']}/{new['repo']}/compare/{old['rev']}...{new['rev']}"
-        changes.append(InputChange(name, old.get("lastModified", 0), new.get("lastModified", 0), link))
+        changes.append(InputChange(name, old.get("lastModified", 0), new.get("lastModified", 0), link,
+                                   f"{new['owner']}/{new['repo']}" if link else "",
+                                   old.get("rev", ""), new.get("rev", "")))
     return new_lock, changes
 
 
