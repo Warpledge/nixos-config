@@ -174,6 +174,8 @@ in {
       # The folio's touchpad key sends F21 (hid-asus), XF86TouchpadToggle in xkb
       kde-touchpad =
         bind "XF86TouchpadToggle" "Touchpad on / off" {spawn = ["${toggleTouchpad}"];};
+      # Clipboard history via DMS IPC
+      kde-clipboard = bind "Mod+V" "Clipboard history" {spawn = dms "clipboardPlus toggle";};
       # Volume in 1% steps, mic mute
       kde-volume-up =
         locked "Shift+XF86AudioRaiseVolume" "Volume up 1%" (dms "audio increment 1");
