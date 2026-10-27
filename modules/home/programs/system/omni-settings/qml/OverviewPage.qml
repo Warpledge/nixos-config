@@ -9,6 +9,10 @@ ColumnLayout {
     property var ov: null
     property var boot: null  // systemd-analyze's last startup, asked for apart
     property bool bootOpen: false  // whether the startup's details are shown
+    property bool versionsOpen: false  // whether the older generations are listed
+    readonly property var versions: ov ? ov.generations : []
+    readonly property var current: versions.find(g => g.running) || versions[0] || null
+    readonly property var older: versions.filter(g => !!current && g.number !== current.number)
     property string error: ""
     readonly property bool ready: !!ov || error !== ""
     property bool checking: false
@@ -384,14 +388,6 @@ ColumnLayout {
         onClicked: page.optimise()
     }
     ListRow {
-        visible: !!page.ov
-        icon: "folder_open"
-        title: "Open the Config Folder"
-        subtitle: page.view.info.flake
-        trailing: "open_in_new"
-        onClicked: Qt.openUrlExternally("file://" + page.view.info.flake)
-    }
-    ListRow {
         visible: !!page.ov && !!page.ov.lastFailed
         icon: "warning"
         tone: "error"
@@ -411,10 +407,28 @@ ColumnLayout {
         order: page.view.info.quick
     }
 
-    //--- Earlier versions
-    Section { visible: !!page.ov && page.ov.generations.length > 0; text: "Versions" }
+    //--- Earlier versions; the row keeps the running one and opens the rest
+    Section { visible: page.versions.length > 0; text: "Versions" }
+    ListRow {
+        visible: !!page.current
+        icon: page.current && page.current.running ? "radio_button_checked" : "history"
+        tone: page.current && page.current.running ? "success" : ""
+        title: page.current ? `Version ${page.current.number}` : ""
+        subtitle: !page.current ? ""
+            : [page.older.length
+                   ? `${page.older.length} earlier `
+                     + (page.older.length === 1 ? "generation" : "generations") : "",
+               Fmt.when(page.current.when),
+               page.current.version ? "NixOS " + page.current.version.split(".").slice(0, 2).join(".") : "",
+               page.current.kernel ? `Linux ${page.current.kernel}` : ""].filter(t => t).join(" · ")
+        tag: !page.current ? "" : page.current.running ? "Running"
+            : page.current.next ? "Next start" : ""
+        tagSuccess: true
+        trailing: page.older.length ? (page.versionsOpen ? "expand_less" : "expand_more") : ""
+        onClicked: if (page.older.length) page.versionsOpen = !page.versionsOpen
+    }
     Text {
-        visible: !!page.ov && page.ov.generations.length > 0
+        visible: page.versionsOpen && page.older.length > 0
         text: "Generations: each rebuild saves one, and the boot menu keeps the last ten. "
               + "Switching back leaves your settings files as they are."
         color: Theme.dim
@@ -424,7 +438,7 @@ ColumnLayout {
         Layout.leftMargin: 6
     }
     Repeater {
-        model: page.ov ? page.ov.generations : []
+        model: page.versionsOpen ? page.older : []
         Rectangle {
             required property var modelData
             readonly property var g: modelData
