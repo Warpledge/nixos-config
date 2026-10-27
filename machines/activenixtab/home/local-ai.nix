@@ -86,6 +86,9 @@
       dir = "unsloth/Qwen3.6-35B-A3B-GGUF";
       match = "Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf";
       context = 131072;
+      # opencode compacts at this less the output limit, near 48K: past that, a turn
+      # that misses the cache reprocesses everything (106K took 6 min beside 3 others)
+      session = 81920;
       slots = 4;
       flags = ["--mmproj '${modelsDir}/unsloth/Qwen3.6-35B-A3B-GGUF/mmproj-F16.gguf'"];
       #--- Coordinator: Qwen's thinking-mode coding sampling
@@ -236,28 +239,43 @@ in {
         inherit resource;
         effect = "allow";
       }) (own ++ map (p: "${nixosConfig}/${p}") own);
-    agent =
+    # v2's `agents`: with `permissions` above the file is read as v2, which drops a
+    # v1 `agent` entry's `permission`
+    agents = let
+      # Coordinators can't edit, so changes go through the subagents
+      coordinator = {
+        mode = "primary";
+        model = "llama-swap/qwen3_6-35b-a3b";
+        permissions = [
+          {
+            action = "edit";
+            resource = "*";
+            effect = "deny";
+          }
+        ];
+      };
+    in
       lib.genAttrs ["general" "explore"] (_: {
         model = "llama-swap/qwen3_6-35b-a3b-instruct";
       })
       // {
-        system = {
-          description = "Answers questions about this computer and fixes its errors";
-          mode = "primary";
-          model = "llama-swap/qwen3_6-35b-a3b";
-          # With this machine's and Ky's notes; AGENTS.md loads from the repo itself
-          prompt = lib.concatMapStringsSep "\n\n" builtins.readFile [
-            ./agents/system.md
-            ../CLAUDE.md
-            ../../../users/kylerj/CLAUDE.md
-          ];
-        };
-        gamedev = {
-          description = "Coordinates work on the Godot game Clocked Out";
-          mode = "primary";
-          model = "llama-swap/qwen3_6-35b-a3b";
-          prompt = builtins.readFile ./agents/gamedev.md;
-        };
+        system =
+          coordinator
+          // {
+            description = "Answers questions about this computer and fixes its errors";
+            # With this machine's and Ky's notes; AGENTS.md loads from the repo itself
+            system = lib.concatMapStringsSep "\n\n" builtins.readFile [
+              ./agents/system.md
+              ../CLAUDE.md
+              ../../../users/kylerj/CLAUDE.md
+            ];
+          };
+        gamedev =
+          coordinator
+          // {
+            description = "Coordinates work on the Godot game Clocked Out";
+            system = builtins.readFile ./agents/gamedev.md;
+          };
       };
     provider.llama-swap = {
       npm = "@ai-sdk/openai-compatible";
@@ -271,7 +289,7 @@ in {
             output = ["text"];
           };
           limit = {
-            inherit (m) context;
+            context = m.session or m.context;
             inherit output;
           };
         };

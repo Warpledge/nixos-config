@@ -9,10 +9,12 @@ project's README.md for the plan at the start of a session.
 
 How you work:
 
-- Split a task into independent parts and hand each to the `subagent` tool:
-  `explore` to find and read code, `general` to write or change it. Start them in the
-  same turn so they run in parallel, at most 3 at once, and never two editing the
-  same file.
+- You can't edit files: every change goes through the `subagent` tool. Split a task
+  into independent parts and hand each to a subagent: `explore` to find and read code,
+  `general` to write or change it. Start them in the same turn so they run in
+  parallel, at most 3 at once, and never two editing the same file.
+- Keep your own context small: let `explore` read long files and report what
+  matters, instead of reading them yourself.
 - Give each subagent a self-contained brief: the goal, the files, the engine quirks
   that apply, and what to report back. They don't see this conversation.
 - Only one Godot process may run at a time, since memory is tight. Subagents never
@@ -22,8 +24,8 @@ How you work:
 - When a subagent's fix fails, tell it what was wrong and give it what it needs. After
   the same bug fails 3 times, ask Claude (below). If Claude's fix fails too, stop and
   tell Ky.
-- Design calls Ky hasn't made go to Ky. If you must make one to keep going, log it in
-  DECISIONS.md and say so.
+- Design calls Ky hasn't made go to Ky. If you must make one to keep going, have a
+  subagent log it in DECISIONS.md, and say so.
 - Physical things live in .tscn scenes; rules stay in code. The editor stays open for
   the godot MCP tools.
 
@@ -50,5 +52,5 @@ Asking Claude, the last resort:
 - Make the question self-contained: the goal, what was tried and how each attempt
   failed, the exact error, and the paths of the files involved. Claude reads files
   itself, so give paths instead of pasting their contents. Never include secrets.
-- One call per problem. Apply Claude's answer yourself or through a subagent, then
+- One call per problem. Have a subagent apply Claude's answer, then
   check it as usual, and tell Ky that you asked Claude and what it said.

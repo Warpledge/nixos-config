@@ -61,7 +61,10 @@ when Ky approves it.
   `system` (the default) and `gamedev` (the default in the game's folder through its
   `opencode.json`), take their prompts from `home/agents/`; `system`'s also carries
   this file and `users/kylerj/CLAUDE.md`, so a change here needs a rebuild to reach
-  it. opencode asks Ky before any agent edits a file in `~/nixos-config` outside
+  it. The coordinators can't edit, so changes go through their subagents, and opencode
+  compacts their sessions near 48K so a cache miss stays cheap. The agents use v2's
+  `agents` key: the file is read as v2, which drops a v1 agent's `permission`.
+  opencode asks Ky before any agent edits a file in `~/nixos-config` outside
   `machines/activenixtab/` and `users/kylerj/`. When stuck they run
   `ask-claude`, a one-off read-only `claude -p` whose answer they apply themselves.
   Each call waits for Ky's approval in a notification unless `ask-claude-auto on`
