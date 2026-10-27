@@ -242,7 +242,7 @@
   },
   {
     "name": "ProtonPlus",
-        "default-column-width": {
+    "default-column-width": {
       "fixed": 1080
     },
     "default-window-height": {
@@ -257,7 +257,7 @@
   },
   {
     "name": "Flatseal",
-        "default-column-width": {
+    "default-column-width": {
       "fixed": 1080
     },
     "default-window-height": {

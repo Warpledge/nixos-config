@@ -38,6 +38,19 @@
             ];
             scroll-factor = 0.25;
           }
+          #--- Ark: open-focused so it doesn't float unexpectedly
+          {
+            matches = [{app-id = "^org\\.kde\\.ark$";}];
+            open-focused = true;
+          }
+          #--- Steam Friends List: keep tiled, not floating
+          {
+            matches = [
+              {app-id = "^steam$";}
+              {title = "^Friends List$";}
+            ];
+            open-floating = false;
+          }
         ];
 
         #--- Auto-rotation from the accelerometer (hardware.sensor.iio)
