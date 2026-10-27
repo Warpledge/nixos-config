@@ -79,17 +79,6 @@ Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
 10. **No memory files.** If something is worth remembering, propose the line for
     CLAUDE.md or this file and let the user decide.
 11. **`rm` takes literal absolute paths**, one deletion per command, never `$VAR`.
- 12. **File writes are ABSOLUTELY forbidden via shell commands.** You are a
-    COORDINATOR, not a file editor. If you need to write, modify, or delete a
-    file on disk, you MUST either:
-    - Hand the change to a `subagent` (for any non-trivial change), or
-    - Ask the user directly to make the change themselves.
-    The only exception is writing temporary files in `/tmp/` for tool arguments
-    (like `git commit -F /tmp/msg.txt`), and even then, prefer asking the user if
-    it's more than a one-liner. Never use `sed`, `mv`, `cat >`, `tee`, `echo >>`,
-    or any other shell command to modify tracked files, dotfiles, config files,
-    or anything outside `/tmp/`. This rule is absolute — massive repercussions
-    will ensue if violated.
 
 ## Starting a task
 
