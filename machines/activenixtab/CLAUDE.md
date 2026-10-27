@@ -57,7 +57,9 @@ when Ky approves it.
   35B A3B (opencode's default: 4 slots, thinking for the coordinator, its `-instruct`
   alias for subagents) and Qwen3.8 Flash Next (one slot, for hard problems), both with
   vision, loaded from LM Studio's folder, and opencode's provider for it. Models stay
-  within 96 GB so Ky's other work keeps memory
+  within 96 GB so Ky's other work keeps memory. opencode's two coordinator agents,
+  `system` (the default) and `gamedev` (the default in the game's folder through its
+  `opencode.json`), take their prompts from `home/agents/`
 - `home/config-reminder.nix` — a zsh notice when the checkout is behind Warpledge's main
 - `home/godot-mcp.nix` — the godot-mcp server, built from GitHub at a pinned commit and
   put on PATH; a Godot project's `opencode.json` starts it (`~/godot-mcp-demo` does)

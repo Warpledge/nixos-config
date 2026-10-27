@@ -138,10 +138,28 @@ in {
     model = "llama-swap/qwen3_6-35b-a3b";
     # Titles and summaries on the workers' alias, so the model stays loaded
     small_model = "llama-swap/qwen3_6-35b-a3b-instruct";
-    #--- Subagents the coordinator starts run on the workers' alias
-    agent = lib.genAttrs ["general" "explore"] (_: {
-      model = "llama-swap/qwen3_6-35b-a3b-instruct";
-    });
+    #--- Two coordinators (Tab switches): `system` for this computer, the default,
+    #--- and `gamedev` for the Godot game, which its project's opencode.json picks.
+    #--- The subagents they start run on the workers' alias
+    default_agent = "system";
+    agent =
+      lib.genAttrs ["general" "explore"] (_: {
+        model = "llama-swap/qwen3_6-35b-a3b-instruct";
+      })
+      // {
+        system = {
+          description = "Answers questions about this computer and fixes its errors";
+          mode = "primary";
+          model = "llama-swap/qwen3_6-35b-a3b";
+          prompt = builtins.readFile ./agents/system.md;
+        };
+        gamedev = {
+          description = "Coordinates work on the Godot game Clocked Out";
+          mode = "primary";
+          model = "llama-swap/qwen3_6-35b-a3b";
+          prompt = builtins.readFile ./agents/gamedev.md;
+        };
+      };
     provider.llama-swap = {
       npm = "@ai-sdk/openai-compatible";
       name = "llama-swap (local)";
