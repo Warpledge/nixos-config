@@ -10,6 +10,8 @@ ColumnLayout {
     readonly property bool ready: !!repo || error !== ""
     property bool loading: false
     property bool saving: false
+    property bool pushOpen: false
+    property bool recentOpen: false
     readonly property string web: repo && repo.repo ? `https://github.com/${repo.repo}` : ""
     readonly property bool admin: !!view.info && view.info.admin
     spacing: 6
@@ -239,18 +241,6 @@ ColumnLayout {
         Layout.leftMargin: 6
     }
 
-    //--- Commits to push and pull
-    Section { visible: !!page.repo && page.repo.outgoing.length > 0; text: "To Push" }
-    Repeater {
-        model: page.repo ? page.repo.outgoing : []
-        CommitRow { required property var modelData; commit: modelData; web: page.web }
-    }
-    Section { visible: !!page.repo && page.repo.incoming.length > 0; text: "To Pull" }
-    Repeater {
-        model: page.repo ? page.repo.incoming : []
-        CommitRow { required property var modelData; commit: modelData; web: page.web }
-    }
-
     //--- Open pull requests
     RowLayout {
         visible: !!page.repo
@@ -288,7 +278,27 @@ ColumnLayout {
         }
     }
 
-    //--- Recent commits
+    //--- Commits to push; the newest row opens the rest
+    Section { visible: !!page.repo && page.repo.outgoing.length > 0; text: "To Push" }
+    CommitRow {
+        visible: !!page.repo && page.repo.outgoing.length > 0
+        commit: page.repo && page.repo.outgoing.length ? page.repo.outgoing[0] : null
+        web: page.web
+        expandable: !!page.repo && page.repo.outgoing.length > 1
+        open: page.pushOpen
+        onToggled: page.pushOpen = !page.pushOpen
+    }
+    Repeater {
+        model: page.pushOpen && page.repo ? page.repo.outgoing.slice(1) : []
+        CommitRow { required property var modelData; commit: modelData; web: page.web }
+    }
+    Section { visible: !!page.repo && page.repo.incoming.length > 0; text: "To Pull" }
+    Repeater {
+        model: page.repo ? page.repo.incoming : []
+        CommitRow { required property var modelData; commit: modelData; web: page.web }
+    }
+
+    //--- Recent commits; the newest row opens the rest
     RowLayout {
         visible: !!page.repo
         Layout.fillWidth: true
@@ -299,19 +309,35 @@ ColumnLayout {
             onClicked: Qt.openUrlExternally(`${page.web}/commits`)
         }
     }
+    CommitRow {
+        visible: !!page.repo && page.repo.recent.length > 0
+        commit: page.repo && page.repo.recent.length ? page.repo.recent[0] : null
+        web: page.web
+        expandable: !!page.repo && page.repo.recent.length > 1
+        open: page.recentOpen
+        onToggled: page.recentOpen = !page.recentOpen
+    }
     Repeater {
-        model: page.repo ? page.repo.recent : []
+        model: page.recentOpen && page.repo ? page.repo.recent.slice(1) : []
         CommitRow { required property var modelData; commit: modelData; web: page.web }
     }
 
     component CommitRow: ListRow {
-        property var commit
-        property string web
+        property var commit: null
+        property string web: ""
+        property bool expandable: false
+        property bool open: false
+        signal toggled
         icon: "commit"
         titleLines: 2
-        title: commit.subject
-        subtitle: `${commit.short} · ${commit.author} · ${Fmt.when(commit.when)}`
-        trailing: web ? "open_in_new" : ""
-        onClicked: if (web) Qt.openUrlExternally(`${web}/commit/${commit.hash}`)
+        title: commit ? commit.subject : ""
+        subtitle: commit ? `${commit.short} · ${commit.author} · ${Fmt.when(commit.when)}` : ""
+        trailing: expandable ? (open ? "expand_less" : "expand_more") : web ? "open_in_new" : ""
+        onClicked: {
+            if (expandable)
+                toggled()
+            else if (web)
+                Qt.openUrlExternally(`${web}/commit/${commit.hash}`)
+        }
     }
 }
