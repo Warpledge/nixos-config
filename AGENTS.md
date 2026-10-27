@@ -60,6 +60,9 @@ Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
    **Commit once, when the task is finished and checked**, not after each edit,
    and don't end a task that changed files without committing. Run every step
    of the `commit` skill, `scan.sh` included.
+   Changed `machines/*/settings.nix` and `users/*/settings.nix` ride along in the
+   first commit made (or a `chore(<machine>): save settings` one alone when
+   nothing else changed); never leave them uncommitted.
    A feature and every fix, tweak and doc change made for it while you're still
    working are one commit. Split only unrelated changes. Since you can't amend, an
    early commit can't be folded in later.

@@ -21,7 +21,7 @@
       defaultApps.fileManager = "duxFiles";
       fileBrowsers.nautilus = false;
       fileBrowsers.yazi = false;
-      claudeDesktop.enable = false;
+      claudeDesktop.enable = true;
       localAi.code = ["ornith-1.5-35b-a3b"];
       artcraft.photocraft = true;
       artcraft.lightcraft = true;
