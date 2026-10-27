@@ -59,7 +59,6 @@ in {
     (lib.genAttrs [
       "system-monitor" # Ctrl+Alt+Delete
       "maximize-column" # Mod+F
-      "wallpapers" # Mod+W
       "focus-left" # Mod+Left
       "focus-right" # Mod+Right
       "focus-up" # Mod+Up
@@ -75,6 +74,9 @@ in {
       "cycle-column-width" # Mod+G
       "browser" # Mod+B
     ] (_: {enable = false;}))
+
+    #--- Mod+W is KDE's float / tile
+    {wallpapers.key = lib.mkForce "Mod+Shift+W";}
 
     #------------------------------------------------------------------#
     #-- KDE Binds
