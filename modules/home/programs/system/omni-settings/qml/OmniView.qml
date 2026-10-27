@@ -1196,6 +1196,8 @@ Item {
         required property var modelData
         required property int index
         readonly property string pid: modelData.id
+        //--- This page's own colour, cycled so two pages never look alike
+        readonly property var accent: Theme.pageAccent(index)
         readonly property bool note: pid.startsWith("doc:")
         readonly property bool userPkgs: pid.startsWith("userpackages:")
         readonly property bool open: !note || !!omni.openNotes[pid]
@@ -1229,17 +1231,17 @@ Item {
                 gradient: Gradient {
                     orientation: Gradient.Horizontal
                     GradientStop { position: 0; color: "transparent" }
-                    GradientStop { position: 1; color: Theme.primary }
+                    GradientStop { position: 1; color: section.accent }
                 }
             }
-            Rectangle { implicitWidth: 7; implicitHeight: 7; rotation: 45; color: Theme.primary }
+            Rectangle { implicitWidth: 7; implicitHeight: 7; rotation: 45; color: section.accent }
             Rectangle {
                 implicitWidth: dividerName.implicitWidth + 40
                 implicitHeight: 46
                 radius: 23
-                color: Theme.primaryContainer
+                color: Qt.tint(Theme.card, Qt.alpha(section.accent, 0.35))
                 border.width: 2
-                border.color: Theme.primary
+                border.color: section.accent
                 Row {
                     id: dividerName
                     anchors.centerIn: parent
@@ -1260,13 +1262,13 @@ Item {
                     }
                 }
             }
-            Rectangle { implicitWidth: 7; implicitHeight: 7; rotation: 45; color: Theme.primary }
+            Rectangle { implicitWidth: 7; implicitHeight: 7; rotation: 45; color: section.accent }
             Rectangle {
                 Layout.fillWidth: true
                 implicitHeight: 2
                 gradient: Gradient {
                     orientation: Gradient.Horizontal
-                    GradientStop { position: 0; color: Theme.primary }
+                    GradientStop { position: 0; color: section.accent }
                     GradientStop { position: 1; color: "transparent" }
                 }
             }
@@ -1282,14 +1284,27 @@ Item {
         }
 
         // Height from the page itself, as a layout-set one would loop with wrapped text
-        Loader {
-            id: loader
+        RowLayout {
             Layout.fillWidth: true
-            Layout.preferredHeight: item ? item.implicitHeight : 0
-            active: section.open && !!section.comp
-            sourceComponent: section.comp
-            // Data that came after the tab showed eases in
-            NumberAnimation on opacity { id: arrived; running: false; from: 0.3; to: 1; duration: 260 }
+            Layout.preferredHeight: loader.item ? loader.item.implicitHeight : 0
+            spacing: 12
+            //--- The page's colour, marking where it starts and ends
+            Rectangle {
+                visible: section.divided
+                Layout.preferredWidth: 3
+                Layout.fillHeight: true
+                radius: 1.5
+                color: Qt.alpha(section.accent, 0.7)
+            }
+            Loader {
+                id: loader
+                Layout.fillWidth: true
+                Layout.preferredHeight: item ? item.implicitHeight : 0
+                active: section.open && !!section.comp
+                sourceComponent: section.comp
+                // Data that came after the tab showed eases in
+                NumberAnimation on opacity { id: arrived; running: false; from: 0.3; to: 1; duration: 260 }
+            }
         }
 
         Component { id: settingsPage; SettingsPage { model: section.model; view: omni } }

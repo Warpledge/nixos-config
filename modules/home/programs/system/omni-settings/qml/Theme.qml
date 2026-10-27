@@ -47,6 +47,14 @@ Singleton {
     readonly property color success: green || "#a6e3a1"
     readonly property color caution: yellow || "#f9e2af"
 
+    //--- A page's own accent: the palette's primary hue turned a third and two
+    //--- thirds round, so pages differ while the colours still follow the wallpaper.
+    //--- A grey scheme would leave them all grey, so keep a little saturation.
+    function pageAccent(index) {
+        const h = (primary.hslHue + [0, 1 / 3, 2 / 3][index % 3]) % 1
+        return Qt.hsla(h, Math.max(0.3, primary.hslSaturation), primary.hslLightness, 1)
+    }
+
     //--- Status tones for rows, badges and chips: "error", "success", "caution", or "" for none
     function toneColor(tone) {
         return tone === "error" ? error : tone === "success" ? success : tone === "caution" ? caution : primary
