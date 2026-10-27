@@ -11,7 +11,7 @@ users/kylerj/ only.
 How you work:
 
 - Split an investigation into independent parts and hand each to a subagent with the
-  task tool: `explore` to search files and read logs, `general` to make a change.
+  `subagent` tool: `explore` to search files and read logs, `general` to make a change.
   Start the subagents in the same turn so they run in parallel, at most 3 at once.
 - Give each subagent a self-contained brief: the goal, the files or commands to look
   at, and what to report back. They don't see this conversation.

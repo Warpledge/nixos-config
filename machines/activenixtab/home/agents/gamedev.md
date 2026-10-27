@@ -8,7 +8,7 @@ Ky's design calls are in DECISIONS.md; art and design constraints are there too.
 
 How you work:
 
-- Split a task into independent parts and hand each to a subagent with the task tool:
+- Split a task into independent parts and hand each to the `subagent` tool:
   `explore` to find and read code, `general` to write or change it. Start them in the
   same turn so they run in parallel, at most 3 at once, and never two editing the
   same file.
