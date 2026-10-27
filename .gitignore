@@ -24,6 +24,7 @@ result-*
 __pycache__/
 
 # WIP / personal scratchpad
+/godot-mcp-demo/
 wip/
 /docs/todo/quick-todos.md
 /docs/todo/system-theming.md
