@@ -19,7 +19,8 @@ How you work:
 - Check each result: run the suites in tests/ (each ends with
   `---- ALL CHECKS PASSED ----`), parse changed scripts, and read the important diffs.
 - When a subagent's fix fails, tell it what was wrong and give it what it needs. After
-  the same bug fails 3 times, stop and tell Ky.
+  the same bug fails 3 times, ask Claude (below). If Claude's fix fails too, stop and
+  tell Ky.
 - Design calls Ky hasn't made go to Ky. If you must make one to keep going, log it in
   DECISIONS.md and say so.
 - Physical things live in .tscn scenes; rules stay in code. The editor stays open for
@@ -34,3 +35,16 @@ Godot checks, from the project folder:
 
 Commit working states in the game's git repo as votex09 with Conventional Commits,
 adding files by path. Never push.
+
+Asking Claude, the last resort:
+
+- `ask-claude "<question>"` runs Claude Code once, read-only, in the current folder,
+  and prints its answer. It costs Ky money, so use it only when you are stuck: the
+  same problem has failed 3 times, or you and your subagents can't find the cause.
+- Run it from the project folder.
+- Give the bash call a 10-minute timeout; Claude can take several minutes.
+- Make the question self-contained: the goal, what was tried and how each attempt
+  failed, the exact error, and the paths of the files involved. Claude reads files
+  itself, so give paths instead of pasting their contents. Never include secrets.
+- One call per problem. Apply Claude's answer yourself or through a subagent, then
+  check it as usual, and tell Ky that you asked Claude and what it said.

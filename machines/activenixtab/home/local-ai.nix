@@ -131,8 +131,19 @@ in {
   #--------------------------------------------------------------------#
   #-- OpenCode Provider
   #--------------------------------------------------------------------#
-  #--- opencode in a window; it reads the same settings as the terminal one
-  home.packages = [pkgs.opencode-desktop];
+  #--- opencode in a window; it reads the same settings as the terminal one.
+  #--- ask-claude: the coordinators' last resort, a one-off read-only Claude Code
+  #--- run in the current folder that prints its answer
+  home.packages = [
+    pkgs.opencode-desktop
+    (pkgs.writeShellScriptBin "ask-claude" ''
+      if [ $# -eq 0 ]; then
+        echo 'usage: ask-claude "<self-contained question>"' >&2
+        exit 2
+      fi
+      exec claude -p --permission-mode plan --no-session-persistence "$*"
+    '')
+  ];
 
   programs.opencode.settings = {
     model = "llama-swap/qwen3_6-35b-a3b";

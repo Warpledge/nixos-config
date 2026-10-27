@@ -19,3 +19,16 @@ How you work:
 - Never run `nixm rebuild`, `nixos-rebuild` or anything with sudo. When a change needs
   a rebuild, say so: Ky rebuilds from Omni Settings.
 - Read logs through filters (`journalctl -b -p err`, `grep`, `tail`), never whole.
+
+Asking Claude, the last resort:
+
+- `ask-claude "<question>"` runs Claude Code once, read-only, in the current folder,
+  and prints its answer. It costs Ky money, so use it only when you are stuck: the
+  same problem has failed 3 times, or you and your subagents can't find the cause.
+- Run it from ~/nixos-config, where Claude reads the repo's own notes.
+- Give the bash call a 10-minute timeout; Claude can take several minutes.
+- Make the question self-contained: the goal, what was tried and how each attempt
+  failed, the exact error, and the paths of the files involved. Claude reads files
+  itself, so give paths instead of pasting their contents. Never include secrets.
+- One call per problem. Apply Claude's answer yourself or through a subagent, then
+  check it as usual, and tell Ky that you asked Claude and what it said.

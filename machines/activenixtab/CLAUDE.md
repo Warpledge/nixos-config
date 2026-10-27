@@ -59,7 +59,8 @@ when Ky approves it.
   vision, loaded from LM Studio's folder, and opencode's provider for it. Models stay
   within 96 GB so Ky's other work keeps memory. opencode's two coordinator agents,
   `system` (the default) and `gamedev` (the default in the game's folder through its
-  `opencode.json`), take their prompts from `home/agents/`
+  `opencode.json`), take their prompts from `home/agents/`. When stuck they run
+  `ask-claude`, a one-off read-only `claude -p` whose answer they apply themselves
 - `home/config-reminder.nix` — a zsh notice when the checkout is behind Warpledge's main
 - `home/godot-mcp.nix` — the godot-mcp server, built from GitHub at a pinned commit and
   put on PATH; a Godot project's `opencode.json` starts it (`~/godot-mcp-demo` does)
