@@ -37,6 +37,7 @@
       dir = "unsloth/Qwen3.8-Flash-Next-GGUF";
       match = "Qwen3.8-Flash-Next-UD-Q3_K_XL-00001-of-*.gguf";
       context = 131072;
+      slots = 1; # No room for a second slot's cache under the 96 GB budget
       # q8_0 V cache: ~17% faster prompts at 32K, perplexity within error
       flags = [
         "-ctv q8_0"
@@ -50,17 +51,28 @@
         min_p = 0;
         presence_penalty = 0.0;
       };
+      fast = null;
     };
-    #--- Light model, for quick simple tasks: MoE, 3B active (21 GiB at UD-Q4_K_XL,
-    #--- ~25% faster generation than Q8 here)
+    #--- opencode's default: the coordinator session plus 3 parallel subagents, one
+    #--- slot each. MoE, 3B active (21 GiB at UD-Q4_K_XL, ~25% faster generation
+    #--- than Q8 here); 10 of 40 layers keep a cache, so 4 x 128K is ~11 GB in f16
     qwen3_6-35b-a3b = {
       name = "Qwen3.6 35B A3B";
       dir = "unsloth/Qwen3.6-35B-A3B-GGUF";
       match = "Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf";
       context = 131072;
+      slots = 4;
       flags = ["--mmproj '${modelsDir}/unsloth/Qwen3.6-35B-A3B-GGUF/mmproj-F16.gguf'"];
-      #--- Thinking off for speed, with Qwen's non-thinking sampling
+      #--- Coordinator: Qwen's thinking-mode coding sampling
       params = {
+        temperature = 0.6;
+        top_p = 0.95;
+        top_k = 20;
+        min_p = 0;
+        presence_penalty = 0.0;
+      };
+      #--- Workers (the -instruct alias): thinking off, Qwen's non-thinking sampling
+      fast = {
         chat_template_kwargs.enable_thinking = false;
         temperature = 0.7;
         top_p = 0.8;
@@ -80,12 +92,20 @@
             "'${m.dir}'"
             "'${m.match}'"
             "--port \${PORT}"
-            "-c ${toString m.context}"
-            "-np 1 -fa on -ngl 99 --load-mode none -ub 2048 --no-webui"
+            # Several slots share one cache pool of `slots` x `context`
+            (
+              if m.slots == 1
+              then "-c ${toString m.context} -np 1"
+              else "-np ${toString m.slots} -kvu --kv-unified-per-slot ${toString m.context}"
+            )
+            "-fa on -ngl 99 --load-mode none -ub 2048 --no-webui"
             "-ctk f16 -ctv f16"
           ]
           ++ m.flags);
-        filters.setParamsByID.${id} = m.params;
+        # The -instruct key also registers as an alias of the same loaded model
+        filters.setParamsByID =
+          {${id} = m.params;}
+          // lib.optionalAttrs (m.fast != null) {"${id}-instruct" = m.fast;};
       })
       models;
     #--- One model loaded at a time
@@ -115,26 +135,35 @@ in {
   home.packages = [pkgs.opencode-desktop];
 
   programs.opencode.settings = {
-    model = "llama-swap/qwen3_8-flash-next";
-    # Titles and summaries too: another model would swap the big one out
-    small_model = "llama-swap/qwen3_8-flash-next";
+    model = "llama-swap/qwen3_6-35b-a3b";
+    # Titles and summaries on the workers' alias, so the model stays loaded
+    small_model = "llama-swap/qwen3_6-35b-a3b-instruct";
+    #--- Subagents the coordinator starts run on the workers' alias
+    agent = lib.genAttrs ["general" "explore"] (_: {
+      model = "llama-swap/qwen3_6-35b-a3b-instruct";
+    });
     provider.llama-swap = {
       npm = "@ai-sdk/openai-compatible";
       name = "llama-swap (local)";
       options.baseURL = "http://127.0.0.1:${toString port}/v1";
-      models =
-        lib.mapAttrs (_: m: {
-          inherit (m) name;
+      models = lib.concatMapAttrs (id: m: let
+        model = name: output: {
+          inherit name;
           modalities = {
             input = ["text" "image"];
             output = ["text"];
           };
           limit = {
             inherit (m) context;
-            output = 32768;
+            inherit output;
           };
+        };
+      in
+        {${id} = model m.name 32768;}
+        // lib.optionalAttrs (m.fast != null) {
+          "${id}-instruct" = model "${m.name} (fast)" 8192;
         })
-        models;
+      models;
     };
   };
 }

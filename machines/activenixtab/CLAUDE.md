@@ -53,9 +53,11 @@ when Ky approves it.
   browser (it isn't one of `lib/default-apps.nix`'s choices)
 - `home/binds.nix` — niri binds matching Ky's KDE Plasma shortcuts; repo binds on the
   same keys are switched off by id
-- `home/local-ai.nix` — llama-swap on llama.cpp (Vulkan) at `127.0.0.1:8090`, Qwen3.8
-  Flash Next (main) and Qwen3.6 35B A3B (light), both with vision, loaded from LM
-  Studio's folder, and opencode's provider for it
+- `home/local-ai.nix` — llama-swap on llama.cpp (Vulkan) at `127.0.0.1:8090`, Qwen3.6
+  35B A3B (opencode's default: 4 slots, thinking for the coordinator, its `-instruct`
+  alias for subagents) and Qwen3.8 Flash Next (one slot, for hard problems), both with
+  vision, loaded from LM Studio's folder, and opencode's provider for it. Models stay
+  within 96 GB so Ky's other work keeps memory
 - `home/config-reminder.nix` — a zsh notice when the checkout is behind Warpledge's main
 - `home/godot-mcp.nix` — the godot-mcp server, built from GitHub at a pinned commit and
   put on PATH; a Godot project's `opencode.json` starts it (`~/godot-mcp-demo` does)
