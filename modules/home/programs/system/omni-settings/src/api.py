@@ -20,6 +20,7 @@ sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 
 import backend  # noqa: E402
 import backupstate  # noqa: E402
+import bootstate  # noqa: E402
 import closure  # noqa: E402
 import dms  # noqa: E402
 import docstate  # noqa: E402
@@ -403,6 +404,12 @@ def cmd_freed(_cfg, _args):
     gens = closure.generations()
     doomed = system.to_delete(gens, system.clean_policy())
     return system.freed_estimate(doomed, [g for g in gens if g not in doomed]) if doomed else 0
+
+
+def cmd_boot(_cfg, _args):
+    """The last startup's stages, its slowest units and the chain it waited on; slow,
+    so asked for apart."""
+    return bootstate.summary()
 
 
 def cmd_check_updates(cfg, _args):
@@ -931,7 +938,8 @@ def cmd_undo_window_rules(cfg, args):
 COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cmd_save,
             "dismiss": cmd_dismiss,
             "stale": cmd_stale, "removeStale": cmd_remove_stale,
-            "overview": cmd_overview, "freed": cmd_freed, "checkUpdates": cmd_check_updates,
+            "overview": cmd_overview, "freed": cmd_freed, "boot": cmd_boot,
+            "checkUpdates": cmd_check_updates,
             "compare": cmd_compare, "failedLog": cmd_failed_log, "forgetFailed": cmd_forget_failed,
             "git": cmd_git, "gitSummary": cmd_git_summary, "setBackup": cmd_set_backup,
             "flatpaks": cmd_flatpaks, "flatpakUpdates": cmd_flatpak_updates, "flatpakRun": cmd_flatpak_run,

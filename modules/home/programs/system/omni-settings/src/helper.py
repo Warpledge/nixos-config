@@ -17,6 +17,7 @@ Usage: omni-settings-apply '{"mode": "switch"|"boot", "machine": name|null,
        (stdin's first line: the first password for that newly listed person)
        omni-settings-apply '{"activate": "/nix/store/...", "mode": ...}'
        omni-settings-apply '{"collectGarbage": true}'
+       omni-settings-apply '{"optimise": true}'
        omni-settings-apply '{"clean": true}'  (drop settings the templates lost)
 
 "auto" switches now unless the new system changes a package that froze the
@@ -32,6 +33,7 @@ import os
 import pwd
 import re
 import shlex
+import shutil
 import signal
 import subprocess
 import sys
@@ -51,6 +53,8 @@ RUN_DIR = "/run/omni-settings"
 CLEAN_ARGS = shlex.split(os.environ.get("OMNI_SETTINGS_CLEAN_ARGS", "--keep-since 5d --keep 5"))
 DELETED_SYSTEM = re.compile(r"^- DEL /nix/var/nix/profiles/system-\d+-link")
 FREED = re.compile(r"(\d+) store paths deleted, ([\d.]+ \w+) freed")
+#--- "1.2 GiB freed by hard-linking 312 files", from `nix store optimise`
+OPTIMISED = re.compile(r"([\d.]+ [KMGT]?i?B) freed by hard-linking (\d+) files?")
 #--- What nh and nixos-rebuild run switch-to-configuration with, so a lost
 #--- session can't kill it halfway and two switches can't overlap
 SYSTEMD_RUN = ["systemd-run", "-E", "LOCALE_ARCHIVE", "-E", "NIXOS_INSTALL_BOOTLOADER",
@@ -268,6 +272,31 @@ def collect():
                   "freed": freed.group(2) if freed else ""})
 
 
+def store_free():
+    try:
+        return shutil.disk_usage("/nix/store").free
+    except OSError:
+        return None
+
+
+def optimise():
+    """Replaces identical files in the store with hard links, so they take the
+    space once; reports what that freed and how many files it linked."""
+    emit(step="optimise", state="start")
+    before = store_free()
+    code, lines = stream(["nix", "store", "optimise"])
+    if code != 0:
+        emit(step="optimise", state="failed")
+        raise RuntimeError("optimising the store failed")
+    emit(step="optimise", state="done")
+    summary = next((m for m in map(OPTIMISED.search, lines) if m), None)
+    freed = closure.parse_size(summary.group(1)) if summary else None
+    if freed is None:
+        after = store_free()
+        freed = after - before if before is not None and after is not None else 0
+    emit(optimised={"freed": int(freed), "files": int(summary.group(2)) if summary else None})
+
+
 #--------------------------------------------------------------------#
 #-- Requests
 #--------------------------------------------------------------------#
@@ -380,7 +409,8 @@ def main():
 
     changes, system, target, new_user, password = None, None, None, None, None
     collecting = request.get("collectGarbage") is True
-    if mode == "build" and (collecting or "activate" in request or "newUser" in request
+    optimising = request.get("optimise") is True
+    if mode == "build" and (collecting or optimising or "activate" in request or "newUser" in request
                             or request.get("clean") is True):
         refuse("bad request")
     if request.get("clean") is True:
@@ -388,6 +418,9 @@ def main():
     elif collecting:
         if not admin:
             refuse("only an admin can clean up old versions")
+    elif optimising:
+        if not admin:
+            refuse("only an admin can optimise the store")
     elif "activate" in request:
         if not admin:
             refuse("only an admin can switch to another version")
@@ -423,6 +456,15 @@ def main():
         if collecting:
             try:
                 collect()
+            except Exception as e:  # noqa: BLE001
+                emit(error=str(e))
+                emit(result="failed", restored=False)
+                sys.exit(1)
+            emit(result="ok")
+            return
+        if optimising:
+            try:
+                optimise()
             except Exception as e:  # noqa: BLE001
                 emit(error=str(e))
                 emit(result="failed", restored=False)

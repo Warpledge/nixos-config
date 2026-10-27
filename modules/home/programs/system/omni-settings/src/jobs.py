@@ -43,6 +43,7 @@ STEPS = {
     "switch": "Switch to the new system",
     "boot": "Add it to the boot menu",
     "collect": "Delete old versions and unused files",
+    "optimise": "Replace identical files with hard links",
     "password": "Set their password",
 }
 #--- Jobs whose success commits and pushes the user's own folders (gitstate.back_up)
@@ -106,6 +107,7 @@ class Job:
         self.result, self.exit_code = {}, None
         self.errors, self.notes, self.diff, self.units = [], [], None, None
         self.restart, self.cleaned, self.deleted = False, None, 0
+        self.optimised = None
         self.undo = self.undo_label = self.restore = None
         self.log = deque(maxlen=LOG_LIMIT)
         self.progress = nixlog.Progress()
@@ -215,6 +217,14 @@ class Job:
                       f"{versions} old system version{'s' if versions != 1 else ''} deleted",
                       "The boot menu now lists only the versions that are left.")
             self.append("info", f"Deleted {self.deleted:,} store paths.")
+        if "optimised" in e:
+            self.optimised = e["optimised"]
+            freed, files = self.optimised.get("freed"), self.optimised.get("files")
+            self.note("drive-harddisk-symbolic", f"Freed {nixlog.size(freed)}" if freed else "Nothing to free",
+                      f"{files:,} identical files replaced with hard links" if files
+                      else "No identical files were left to link")
+            if files:
+                self.append("info", f"Hard-linked {files:,} files.")
         if "error" in e:
             self.errors.append(e["error"])
             self.append("error", e["error"])
@@ -235,6 +245,11 @@ class Job:
             freed = self.cleaned.get("freed")
             self.finish("ok", "Cleaned up", f"Freed {freed} of disk space." if freed
                         else "Nothing was old enough or unused, so no space was freed.")
+        elif self.optimised is not None and result == "ok":
+            freed = self.optimised.get("freed")
+            self.finish("ok", "Store optimized", f"Freed {nixlog.size(freed)} by hard-linking "
+                        "identical files." if freed else "The store had no identical files left to "
+                        "link, so no space was freed.")
         elif result == "ok" and self.mode == "saved":
             self.finish("ok", "Saved", self.result.get("detail", "Your changes were saved."))
         elif result == "ok" and self.mode == "built":
@@ -609,6 +624,10 @@ class Service:
             job = self.new_job(kind, "Cleaning Up", ["auth", "collect", "boot"], "Cleaned up",
                                titles={"boot": "Update the boot menu"})
             await self.run(job, {"collectGarbage": True})
+            return job
+        if kind == "optimise":
+            job = self.new_job(kind, "Optimizing the Nix Store", ["auth", "optimise"], "Store optimized")
+            await self.run(job, {"optimise": True})
             return job
         if kind == "clean":
             job = self.new_job(kind, "Removing Old Settings", ["auth"], "Old settings removed")

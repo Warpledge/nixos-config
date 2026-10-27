@@ -7,6 +7,7 @@ ColumnLayout {
     id: page
     required property var view
     property var ov: null
+    property var boot: null  // systemd-analyze's last startup, asked for apart
     property string error: ""
     readonly property bool ready: !!ov || error !== ""
     property bool checking: false
@@ -30,7 +31,18 @@ ColumnLayout {
         })
     }
 
-    Component.onCompleted: load()
+    Component.onCompleted: {
+        load()
+        loadBoot()
+    }
+
+    //--- The startup chart takes a call of its own, so the rest shows meanwhile
+    function loadBoot() {
+        Backend.call("boot", {}, reply => {
+            if (page && reply.ok)
+                page.boot = reply.data
+        })
+    }
     Connections {
         target: Jobs
         function onEnded(job) {
@@ -103,6 +115,18 @@ ColumnLayout {
                         ? `\n\nThe old system generations alone free about ${Fmt.size(reply.data)}, `
                           + "more with other unused store paths." : "")
             })
+    }
+
+    function optimise() {
+        if (!canStart())
+            return
+        view.ask({
+            heading: "Optimize the Nix store?",
+            body: "Replaces identical files in the store with hard links, so each copy takes space "
+                  + "once. Nothing is deleted and every app keeps working. It can take a few "
+                  + "minutes; the space it freed is shown when it finishes.",
+            buttons: [{ label: "Optimize", value: "optimise" }]
+        }, () => view.startJob("optimise", {}))
     }
 
     function check() {
@@ -351,6 +375,15 @@ ColumnLayout {
     }
     ListRow {
         visible: !!page.ov
+        enabled: page.admin
+        icon: "compress"
+        title: "Optimize the Nix Store"
+        subtitle: "Hard-links identical files, freeing space without deleting anything"
+        chevron: true
+        onClicked: page.optimise()
+    }
+    ListRow {
+        visible: !!page.ov
         icon: "folder_open"
         title: "Open the Config Folder"
         subtitle: page.view.info.flake
@@ -367,6 +400,144 @@ ColumnLayout {
             : ""
         chevron: true
         onClicked: page.view.sheet = failedSheet
+    }
+
+    //--- How the last startup went, from systemd-analyze
+    Section { visible: !!page.boot && page.boot.stages.total > 0; text: "Last Startup" }
+    Rectangle {
+        visible: !!page.boot && page.boot.stages.total > 0
+        Layout.fillWidth: true
+        implicitHeight: bootColumn.implicitHeight + 28
+        radius: 16
+        color: Theme.card
+        ColumnLayout {
+            id: bootColumn
+            anchors.fill: parent
+            anchors.margins: 14
+            spacing: 10
+            Text {
+                text: page.boot ? Fmt.duration(page.boot.stages.total) : ""
+                color: Theme.text
+                font.pixelSize: 24
+                font.weight: Font.Bold
+            }
+            Text {
+                Layout.fillWidth: true
+                text: page.boot && page.boot.graphical
+                    ? `From power on to ${page.boot.graphical.target}, which came up at `
+                      + Fmt.duration(page.boot.graphical.seconds) + "."
+                    : "From power on to the desktop."
+                color: Theme.dim
+                font.pixelSize: 13
+                wrapMode: Text.Wrap
+            }
+            Flow {
+                Layout.fillWidth: true
+                spacing: 6
+                Repeater {
+                    model: ["firmware", "loader", "kernel", "initrd", "userspace"]
+                    delegate: Chip {
+                        required property string modelData
+                        visible: !!page.boot && !!page.boot.stages[modelData]
+                        tappable: false
+                        text: page.boot ? `${modelData} ${Fmt.duration(page.boot.stages[modelData])}` : ""
+                    }
+                }
+            }
+            Text {
+                Layout.fillWidth: true
+                Layout.topMargin: 2
+                text: "The slowest units to start:"
+                color: Theme.dim
+                font.pixelSize: 13
+            }
+            Repeater {
+                model: page.boot ? page.boot.blame.units : []
+                delegate: ColumnLayout {
+                    id: blameRow
+                    required property var modelData
+                    readonly property var units: page.boot.blame.units
+                    readonly property real share: units.length
+                        ? modelData.seconds / Math.max(units[0].seconds, 0.001) : 0
+                    Layout.fillWidth: true
+                    spacing: 4
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 10
+                        Text {
+                            Layout.fillWidth: true
+                            text: blameRow.modelData.unit
+                            color: Theme.text
+                            font.pixelSize: 13
+                            elide: Text.ElideRight
+                        }
+                        Text {
+                            text: Fmt.duration(blameRow.modelData.seconds)
+                            color: Theme.dim
+                            font.pixelSize: 13
+                        }
+                    }
+                    Rectangle {
+                        Layout.fillWidth: true
+                        implicitHeight: 6
+                        radius: 3
+                        color: Theme.line
+                        Rectangle {
+                            width: parent.width * blameRow.share
+                            height: parent.height
+                            radius: 3
+                            color: Theme.primary
+                        }
+                    }
+                }
+            }
+            Text {
+                visible: !!page.boot && page.boot.blame.devices !== null
+                Layout.fillWidth: true
+                text: page.boot && page.boot.blame.devices !== null
+                    ? `Device units took up to ${Fmt.duration(page.boot.blame.devices)}; one wait `
+                      + "shows up under many device names." : ""
+                color: Theme.dim
+                font.pixelSize: 13
+                wrapMode: Text.Wrap
+            }
+            Text {
+                visible: page.boot && page.boot.chain.length > 0
+                Layout.fillWidth: true
+                Layout.topMargin: 2
+                text: "The chain the desktop waited on, each indent waiting for the one above:"
+                color: Theme.dim
+                font.pixelSize: 13
+                wrapMode: Text.Wrap
+            }
+            Repeater {
+                model: page.boot ? page.boot.chain : []
+                delegate: RowLayout {
+                    required property var modelData
+                    Layout.fillWidth: true
+                    Layout.leftMargin: Math.min(modelData.depth, 4) * 14
+                    spacing: 10
+                    Text {
+                        Layout.fillWidth: true
+                        text: modelData.unit
+                        color: Theme.text
+                        font.pixelSize: 13
+                        elide: Text.ElideRight
+                    }
+                    Text {
+                        visible: modelData.took !== null
+                        text: modelData.took !== null ? `+${Fmt.duration(modelData.took)}` : ""
+                        color: Theme.dim
+                        font.pixelSize: 13
+                    }
+                    Text {
+                        text: `@${Fmt.duration(modelData.at)}`
+                        color: Theme.dim
+                        font.pixelSize: 13
+                    }
+                }
+            }
+        }
     }
 
     //--- Shell settings; under niri they're on the Niri tab's Shell page
