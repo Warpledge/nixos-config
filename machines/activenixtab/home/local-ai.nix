@@ -27,6 +27,9 @@
 
   modelsDir = "${config.home.homeDirectory}/.lmstudio/models";
 
+  #--- While this file exists, ask-claude runs without asking Ky first
+  autoFlag = "${config.xdg.stateHome}/ask-claude/auto";
+
   #--- Whole model on the GPU: shared memory leaves no reason to keep experts on the CPU
   #--- Both take images through their mmproj file (`--mmproj`)
   models = {
@@ -133,7 +136,8 @@ in {
   #--------------------------------------------------------------------#
   #--- opencode in a window; it reads the same settings as the terminal one.
   #--- ask-claude: the coordinators' last resort, a one-off read-only Claude Code
-  #--- run in the current folder that prints its answer
+  #--- run in the current folder that prints its answer. Each call waits for Ky's
+  #--- answer in a notification unless ask-claude-auto has switched that off
   home.packages = [
     pkgs.opencode-desktop
     (pkgs.writeShellScriptBin "ask-claude" ''
@@ -141,7 +145,43 @@ in {
         echo 'usage: ask-claude "<self-contained question>"' >&2
         exit 2
       fi
+      flag=${autoFlag}
+      if [ ! -e "$flag" ]; then
+        # The notification takes markup, so the question's own <, > and & are escaped
+        q="$*"
+        body=$(printf '%s\n\n%s' "$PWD" "''${q:0:400}" | sed 's/&/\&amp;/g;s/</\&lt;/g;s/>/\&gt;/g')
+        choice=$(${lib.getExe pkgs.libnotify} -u critical -a "ask-claude" \
+          -A allow="Allow once" -A auto="Allow until turned off" -A deny="Deny" \
+          "A coordinator wants to ask Claude" "$body")
+        case $choice in
+          allow) ;;
+          auto) mkdir -p "$(dirname "$flag")" && touch "$flag" ;;
+          *)
+            echo "Ky declined this Claude call. Don't ask Claude again for this problem;" >&2
+            echo "tell Ky where you are stuck instead." >&2
+            exit 1
+            ;;
+        esac
+      fi
       exec claude -p --permission-mode plan --no-session-persistence "$*"
+    '')
+    #--- `ask-claude-auto on|off`, or no argument to show the state
+    (pkgs.writeShellScriptBin "ask-claude-auto" ''
+      flag=${autoFlag}
+      case $1 in
+        on) mkdir -p "$(dirname "$flag")" && touch "$flag" ;;
+        off) rm -f "$flag" ;;
+        "") ;;
+        *)
+          echo "usage: ask-claude-auto [on|off]" >&2
+          exit 2
+          ;;
+      esac
+      if [ -e "$flag" ]; then
+        echo "on: ask-claude runs without asking"
+      else
+        echo "off: each ask-claude call asks Ky first"
+      fi
     '')
   ];
 
@@ -153,6 +193,14 @@ in {
     #--- and `gamedev` for the Godot game, which its project's opencode.json picks.
     #--- The subagents they start run on the workers' alias
     default_agent = "system";
+    # Only Ky switches the ask-claude approval off
+    permissions = [
+      {
+        action = "shell";
+        resource = "ask-claude-auto*";
+        effect = "deny";
+      }
+    ];
     agent =
       lib.genAttrs ["general" "explore"] (_: {
         model = "llama-swap/qwen3_6-35b-a3b-instruct";

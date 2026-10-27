@@ -60,7 +60,10 @@ when Ky approves it.
   within 96 GB so Ky's other work keeps memory. opencode's two coordinator agents,
   `system` (the default) and `gamedev` (the default in the game's folder through its
   `opencode.json`), take their prompts from `home/agents/`. When stuck they run
-  `ask-claude`, a one-off read-only `claude -p` whose answer they apply themselves
+  `ask-claude`, a one-off read-only `claude -p` whose answer they apply themselves.
+  Each call waits for Ky's approval in a notification unless `ask-claude-auto on`
+  (or the notification's "Allow until turned off") has switched that off; opencode
+  denies the agents `ask-claude-auto`
 - `home/config-reminder.nix` — a zsh notice when the checkout is behind Warpledge's main
 - `home/godot-mcp.nix` — the godot-mcp server, built from GitHub at a pinned commit and
   put on PATH; a Godot project's `opencode.json` starts it (`~/godot-mcp-demo` does)

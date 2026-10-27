@@ -26,7 +26,10 @@ Asking Claude, the last resort:
   and prints its answer. It costs Ky money, so use it only when you are stuck: the
   same problem has failed 3 times, or you and your subagents can't find the cause.
 - Run it from ~/nixos-config, where Claude reads the repo's own notes.
-- Give the bash call a 10-minute timeout; Claude can take several minutes.
+- Each call first waits for Ky to allow it in a notification, unless Ky has switched
+  that off. If Ky declines, don't ask Claude again for that problem; tell Ky where
+  you're stuck. Never run `ask-claude-auto`: only Ky changes that setting.
+- Give the bash call a 30-minute timeout, for Ky's answer and Claude's.
 - Make the question self-contained: the goal, what was tried and how each attempt
   failed, the exact error, and the paths of the files involved. Claude reads files
   itself, so give paths instead of pasting their contents. Never include secrets.
