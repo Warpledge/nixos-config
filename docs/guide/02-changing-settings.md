@@ -52,11 +52,14 @@ When the config gains a setting your file doesn't have yet, a **What's New** pag
 ## The Settings Pages
 
 - **System**: the computer's name, desktop and kernel
+- **Boot**: how long the boot menu waits, which version it starts and how many it keeps
 - **Language & Input**: time zone, language and keyboard layout
 - **Devices**: Bluetooth, printing and the mouse pointer
 - **Network & Firewall**: what other devices can reach here, what this computer blocks, and the SSH keys that may log in as you
 - **Services**: background services, and under **Running Now** each one's state, last log lines and a restart button
 - **Default Apps**: which app opens links, text files, terminal programs and folders. Change these here: picking a default in the shell's settings doesn't survive a rebuild. The choices are listed in [`lib/default-apps.nix`](../../lib/default-apps.nix).
+- **Startup**: variables every program you start sees, and programs started with the desktop
+- **File Types**: which app opens one file type, in front of the Default Apps choices
 
 Monitors, sound, Wi-Fi, keyboard shortcuts, the bar, wallpaper and lock screen are the shell's own settings. Their pages (on the Niri tab) open the matching tab of the shell's settings window, and those changes save straight away with no rebuild.
 

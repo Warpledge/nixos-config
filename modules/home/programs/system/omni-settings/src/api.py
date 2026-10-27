@@ -10,6 +10,7 @@ import json
 import os
 import pwd
 import selectors
+import shlex
 import shutil
 import socket
 import subprocess
@@ -27,6 +28,7 @@ import docstate  # noqa: E402
 import flatpakstate  # noqa: E402
 import gitstate  # noqa: E402
 import keybindstate  # noqa: E402
+import mimeapps  # noqa: E402
 import nixfile  # noqa: E402
 import packagestate  # noqa: E402
 import peoplestate  # noqa: E402
@@ -74,6 +76,8 @@ NAV_SUBTITLES = {"overview": "Updates, rebuild, versions", "git": "Changes, comm
                  "people": "Who can log in", "packages": "Find packages in nixpkgs",
                  "shell": "DankMaterialShell's settings", "windowrules": "Rules for each app's windows",
                  "keybinds": "Change, add and turn off shortcuts",
+                 "startup": "Variables every program sees, and autostart",
+                 "filetypes": "Which app opens one file type",
                  "userpackages": "Packages you added from Search",
                  "proton": "Launch options to copy", "protonversions": "Proton builds installed"}
 
@@ -122,6 +126,9 @@ def shown(setting, value):
     if setting.kind == "keybinds":
         return f"{len(value)} keybind{'' if len(value) == 1 else 's'} changed" if value else "Not set"
     if isinstance(value, dict):
+        if not all(isinstance(v, list) for v in value.values()):
+            n = len(value)
+            return f"{n} entr{'y' if n == 1 else 'ies'}" if n else "Not set"
         n = sum(len(v) for v in value.values())
         return f"{n} in {len(value)} categor{'y' if len(value) == 1 else 'ies'}" if n else "Not set"
     if value is None or value == "" or value == []:
@@ -232,7 +239,7 @@ def cmd_load(cfg, _args):
     shell_links = wm == "niri"
     shell = {}
     for page in state.pages:
-        if page.section in ("userpkgs", "keybinds"):
+        if page.section in ("userpkgs", "keybinds", "startup", "filetypes"):
             continue
         pid = schema.TOP_PAGES[page.title] if page.section == "top" else f"page:{page.title}"
         groups = []
@@ -257,6 +264,18 @@ def cmd_load(cfg, _args):
         if page.section != "top":
             by_section.get(page.section, by_section["apps"]).append(
                 {"id": pid, "title": page.title, "icon": [page.icon, schema.FALLBACK_ICON]})
+    startup = [s for p in state.pages for g in p.groups for s in g.settings
+               if (s.domain, s.path) in (("user", ("env",)), ("user", ("autostart",)))]
+    mime_types = next((s for p in state.pages for g in p.groups for s in g.settings
+                       if (s.domain, s.path) == ("user", ("mimeTypes",))), None)
+    if startup:
+        by_section["personal"].append({"id": "startup", "title": "Startup",
+                                       "icon": ["system-run-symbolic"],
+                                       "subtitle": NAV_SUBTITLES["startup"]})
+    if mime_types:
+        by_section["personal"].append({"id": "filetypes", "title": "File Types",
+                                       "icon": ["text-x-generic-symbolic"],
+                                       "subtitle": NAV_SUBTITLES["filetypes"]})
     for key, title in schema.SECTIONS:
         if by_section[key]:
             nav[section_tab.get(key, "main")].append({"id": key, "title": title, "items": by_section[key]})
@@ -297,6 +316,11 @@ def cmd_load(cfg, _args):
             "shellLinks": shell_categories(shell),
             "userPackages": user_packages and setting_json(cfg, state, user_packages, multi, modules),
             "keybinds": keybinds and setting_json(cfg, state, keybinds, multi, modules),
+            "env": next((setting_json(cfg, state, s, multi, modules) for s in startup
+                         if s.path == ("env",)), None),
+            "autostart": next((setting_json(cfg, state, s, multi, modules) for s in startup
+                               if s.path == ("autostart",)), None),
+            "mimeTypes": mime_types and setting_json(cfg, state, mime_types, multi, modules),
             "starter": packagestate.STARTER,
             "dmsSearch": [{"label": e.label, "description": e.description, "keywords": e.keywords,
                            "tab": e.link.tab, "page": e.link.page} for e in state.dms_entries]}
@@ -307,6 +331,22 @@ def cmd_list(_cfg, args):
     if args.get("name") not in set(schema.DATA_CHOICES.values()):
         raise ValueError("unknown list")
     return [{"value": v, "label": label} for v, label in backend.data_list(args["name"])]
+
+
+def cmd_mime_apps(_cfg, _args):
+    """The apps installed here, for the File Types page."""
+    return mimeapps.apps()
+
+
+def cmd_split_command(_cfg, args):
+    """An autostart command line as niri's argv list, quoted words kept whole."""
+    text = str(args.get("text") or "").strip()
+    if not text:
+        raise ValueError("type a command")
+    try:
+        return shlex.split(text)
+    except ValueError as e:
+        raise ValueError(f"Can't read that command: {e}") from None
 
 
 def cmd_review(cfg, args):
@@ -955,7 +995,8 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "addWindowRule": cmd_add_window_rule, "removeWindowRule": cmd_remove_window_rule,
             "undoWindowRules": cmd_undo_window_rules,
             "saveWindowRule": cmd_save_window_rule,
-            "keybinds": cmd_keybinds, "launchCommand": cmd_launch_command}
+            "keybinds": cmd_keybinds, "launchCommand": cmd_launch_command,
+            "mimeApps": cmd_mime_apps, "splitCommand": cmd_split_command}
 
 
 def run(cfg, cmd, args):

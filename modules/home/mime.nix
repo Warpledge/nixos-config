@@ -150,13 +150,15 @@ with lib; let
         mimeMap
       )
     );
+  #--- Types picked on Omni Settings' File Types page win over these
+  resolved = associations // mapAttrs (_: app: [app]) user.mimeTypes;
 in {
   xdg = {
     configFile."mimeapps.list".force = true;
     mimeApps = {
       enable = true;
-      associations.added = associations;
-      defaultApplications = associations;
+      associations.added = resolved;
+      defaultApplications = resolved;
     };
     userDirs = {
       enable = true;

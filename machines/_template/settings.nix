@@ -64,6 +64,18 @@
   gpu.integratedBusId = ""; # Hybrid laptops only: the AMD or Intel chip
 
   #--------------------------------------------------------------------#
+  #-- Boot
+  #--------------------------------------------------------------------#
+  #--- Boot Menu
+  # Seconds the menu waits, the generation it starts if you don't choose
+  # (0 is the newest) and how many generations it keeps
+  boot.menu = {
+    timeout = 5;
+    default = 0;
+    entries = 10;
+  };
+
+  #--------------------------------------------------------------------#
   #-- Language & Keyboard
   #--------------------------------------------------------------------#
   #--- setup.sh copies these from the choices made in the NixOS installer

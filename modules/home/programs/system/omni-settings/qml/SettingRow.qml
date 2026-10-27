@@ -148,6 +148,7 @@ Rectangle {
             Layout.leftMargin: 50
             Layout.bottomMargin: 4
             sourceComponent: row.s.kind === "text" ? textEditor
+                           : row.s.kind === "number" ? numberEditor
                            : row.s.kind === "list" ? listEditor : choiceEditor
         }
     }
@@ -226,6 +227,29 @@ Rectangle {
                 }
             }
             Pill { text: "Set"; onClicked: textField.set() }
+        }
+    }
+
+    //--- number: whole numbers, e.g. the boot menu's timeout in seconds
+    Component {
+        id: numberEditor
+        RowLayout {
+            spacing: 8
+            Field {
+                id: numberField
+                text: row.value ?? ""
+                placeholder: "A whole number"
+                onAccepted: set()
+                function set() {
+                    const t = text.trim()
+                    if (!/^-?[0-9]+$/.test(t)) {
+                        row.view.say("A whole number, like 5")
+                        return
+                    }
+                    row.view.change(row.s, parseInt(t))
+                }
+            }
+            Pill { text: "Set"; onClicked: numberField.set() }
         }
     }
 

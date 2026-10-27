@@ -76,6 +76,12 @@ Item {
             out[info.userPackages.key] = info.userPackages
         if (info && info.keybinds)
             out[info.keybinds.key] = info.keybinds
+        if (info && info.env)
+            out[info.env.key] = info.env
+        if (info && info.autostart)
+            out[info.autostart.key] = info.autostart
+        if (info && info.mimeTypes)
+            out[info.mimeTypes.key] = info.mimeTypes
         return out
     }
     readonly property var navItems: {
@@ -296,7 +302,10 @@ Item {
         if (s.kind === "bool")
             return v ? "On" : "Off"
         if (v !== null && typeof v === "object" && !Array.isArray(v)) {
-            const n = Object.values(v).reduce((a, x) => a + x.length, 0)
+            const values = Object.values(v)
+            if (!values.every(x => Array.isArray(x)))
+                return values.length ? `${values.length} entr${values.length === 1 ? "y" : "ies"}` : "Not set"
+            const n = values.reduce((a, x) => a + x.length, 0)
             const c = Object.keys(v).length
             return n ? `${n} in ${c} categor${c === 1 ? "y" : "ies"}` : "Not set"
         }
@@ -1172,9 +1181,12 @@ Item {
                                       flatpaks: flatpaksPage, backups: backupsPage, people: peoplePage,
                                       userpackages: userPackagesPage,
                                       proton: protonPage, protonversions: protonVersionsPage,
-                                      windowrules: windowRulesPage, keybinds: keybindsPage })
+                                      windowrules: windowRulesPage, keybinds: keybindsPage,
+                                      startup: startupPage, filetypes: fileTypesPage })
     Component { id: windowRulesPage; WindowRulesPage { view: omni } }
     Component { id: keybindsPage; KeybindsPage { view: omni } }
+    Component { id: startupPage; StartupPage { view: omni } }
+    Component { id: fileTypesPage; FileTypesPage { view: omni } }
     Component { id: protonPage; ProtonPage { view: omni } }
     Component { id: protonVersionsPage; ProtonVersionsPage { view: omni } }
     //--- One page in the tab's scroll: its divider, then the page; a note is only its

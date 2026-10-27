@@ -351,6 +351,22 @@ def same_kind(template, value):
 #--- The fields a keybind change may set, as lib/settings.nix's keybindFields
 KEYBIND_FIELDS = {"key": str, "title": str, "enable": bool, "spawn": list, "action": str, "argument": str}
 
+#--- The key shapes of the settings holding named text (schema.py's TEXT_SETS)
+TEXT_SHAPES = {("env",): r"[A-Za-z_][A-Za-z0-9_]*",
+               ("mimeTypes",): r"[A-Za-z0-9.+-]+/[A-Za-z0-9.+-]+"}
+
+
+def text_set_ok(path, value):
+    """Whether value is a set of text, keyed by a variable name or MIME type."""
+    if not isinstance(value, dict):
+        return False
+    for key, item in value.items():
+        if not isinstance(key, str) or not isinstance(item, str):
+            return False
+        if not re.fullmatch(TEXT_SHAPES[path], key):
+            return False
+    return True
+
 
 def keybinds_ok(value):
     """Whether `value` is a set of keybind changes by id: a config bind's key, title
@@ -383,12 +399,19 @@ def user_changes(cfg, raw):
             refuse("bad request")
         path, value = item
         found, default = backend.lookup(template, path)
+        key = tuple(path)
         if not found or path[0] in schema.HIDDEN or (isinstance(default, dict)
-                                                     and tuple(path) not in schema.GROUPED):
+                                                     and key not in schema.GROUPED):
             refuse(f"`{'.'.join(path)}` can't be changed here")
-        if not (keybinds_ok(value) if tuple(path) == schema.KEYBINDS else same_kind(default, value)):
+        if key in schema.TEXT_SETS:
+            ok = text_set_ok(key, value)
+        elif key == schema.KEYBINDS:
+            ok = keybinds_ok(value)
+        else:
+            ok = same_kind(default, value)
+        if not ok:
             refuse(f"`{'.'.join(path)}` got the wrong kind of value")
-        changes[("user", tuple(path))] = value
+        changes[("user", key)] = value
     return changes
 
 

@@ -23,7 +23,7 @@ Every rebuild keeps the previous generation. The **Versions** list shows them, m
 - The compare button shows what's different from the running version.
 - **Switch** goes back to that version (admins only). It changes the running system, not your settings files, so your next Apply builds from the files again.
 
-The boot menu keeps the last ten ([`bootloader.nix`](../../modules/nixos/system/bootloader.nix)). If a version won't start, restart and pick an older one there.
+The boot menu keeps the last ten by default, set on Omni Settings' **Boot** page ([`bootloader.nix`](../../modules/nixos/system/bootloader.nix)). If a version won't start, restart and pick an older one there.
 
 ## Clean-Up
 

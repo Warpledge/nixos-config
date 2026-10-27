@@ -12,10 +12,12 @@ import nixfile
 
 #--- Never shown: account plumbing, hardware, and values set once at install
 HIDDEN = {"users", "mainUser", "stateVersion", "flakePath", "gpu", "admin"}
-#--- Settings read and written whole: sets of named lists, and the keybind
-#--- changes by id (lib/settings.nix checks both)
+#--- Settings read and written whole: sets of named lists or text, and the
+#--- keybind changes by id (lib/settings.nix checks both)
 KEYBINDS = ("keybinds",)
-GROUPED = {("userPackages",), KEYBINDS}
+#--- The ones holding text rather than lists, e.g. env = {EDITOR = "zeditor";}
+TEXT_SETS = {("env",), ("mimeTypes",)}
+GROUPED = {("userPackages",), ("autostart",), *TEXT_SETS, KEYBINDS}
 
 #--- Template sections whose `#---` headers each get their own page
 SPLIT_SECTIONS = {"Apps"}
@@ -69,6 +71,9 @@ PAGES = {
     "System": ("computer", "computer-symbolic",
                "The name, desktop and kernel this computer runs, the same for everyone on it.",
                [("", "", ["hostName", "windowManager", "kernel"])]),
+    "Boot": ("computer", "system-reboot-symbolic",
+             "The boot menu: how long it waits, which version it starts and how many it keeps.",
+             [("Boot Menu", "", ["boot.menu.timeout", "boot.menu.default", "boot.menu.entries"])]),
     "Language & Input": ("computer", "preferences-desktop-locale-symbolic",
                          "Time zone, language and keyboard layout.",
                          [("Region", "", ["timeZone", "locale"]),
@@ -106,6 +111,12 @@ PAGES = {
                      "Which app opens links, text files, terminal programs and folders.",
                      [("", "", ["defaultApps.browser", "defaultApps.textEditor",
                                 "defaultApps.terminal", "defaultApps.fileManager"])]),
+    "Startup": ("startup", "system-run-symbolic",
+                "Variables every program sees, and programs started with the desktop.",
+                [("", "", ["env", "autostart"])]),
+    "File Types": ("filetypes", "text-x-generic-symbolic",
+                   "Which app opens one file type, in front of Default Apps.",
+                   [("", "", ["mimeTypes"])]),
     "Browsers": ("apps", "web-browser-symbolic", "Browsers to install. The one that opens links "
                  "is picked under Default Apps.", None),
     "Terminals": ("apps", "utilities-terminal-symbolic", "Terminal emulators to install.", None),
@@ -180,7 +191,7 @@ SETUP_ENTRY = re.compile(r'^\s*"([^"|]+)\|([^"|]+)\|([^"]+)"\s*$', re.M)
 class Setting:
     domain: str  # "machine" or "user"
     path: tuple
-    kind: str  # bool, choice, text, pick (from a data list), list
+    kind: str  # bool, choice, number, text, pick (from a data list), list
     title: str
     subtitle: str = ""
     nullable: bool = False
@@ -366,6 +377,8 @@ def make_setting(domain, path, b, values, choices, labels, doc, lead, header_tit
         s.kind, s.choices = "choice", choices[dotted]
     elif isinstance(value, bool):
         s.kind = "bool"
+    elif isinstance(value, int):
+        s.kind = "number"
     elif path == KEYBINDS:
         s.kind = "keybinds"
     elif path in GROUPED:

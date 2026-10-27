@@ -231,6 +231,26 @@
     vn = false;
   };
 
+  #--------------------------------------------------------------------#
+  #-- Startup
+  #--------------------------------------------------------------------#
+  #--- Environment Variables
+  # Variables every program you start sees, e.g. {EDITOR = "zeditor";}
+  env = {};
+
+  #--- Autostart
+  # Programs started with the desktop, as command lists, e.g.
+  # {syncthing = ["syncthing" "--no-browser"];}
+  autostart = {};
+
+  #--------------------------------------------------------------------#
+  #-- File Types
+  #--------------------------------------------------------------------#
+  #--- File Type Overrides
+  # Which app opens one file type, in front of defaultApps, e.g.
+  # {"application/x-cbz" = "moku.desktop";}
+  mimeTypes = {};
+
   #--- User Packages
   # nixpkgs packages added from Omni Settings' Packages tab, installed as they
   # come with no settings of their own, sorted into categories you name,
