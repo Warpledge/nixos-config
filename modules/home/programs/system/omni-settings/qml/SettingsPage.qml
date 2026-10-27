@@ -110,12 +110,4 @@ ColumnLayout {
         Layout.preferredHeight: item ? item.implicitHeight : 0
         sourceComponent: RunningNow { view: page.view }
     }
-
-    Loader {
-        active: page.model.title === "Boot"
-        visible: active
-        Layout.fillWidth: true
-        Layout.preferredHeight: item ? item.implicitHeight : 0
-        sourceComponent: BootGenerations { view: page.view }
-    }
 }

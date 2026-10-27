@@ -52,7 +52,7 @@ When the config gains a setting your file doesn't have yet, a **What's New** pag
 ## The Settings Pages
 
 - **System**: the computer's name, desktop and kernel
-- **Boot**: how long the boot menu waits, which version it starts and how many it keeps
+- **Boot**: how long the boot menu waits and how many generations it keeps
 - **Language & Input**: time zone, language and keyboard layout
 - **Devices**: Bluetooth, printing and the mouse pointer
 - **Network & Firewall**: what other devices can reach here, what this computer blocks, and the SSH keys that may log in as you

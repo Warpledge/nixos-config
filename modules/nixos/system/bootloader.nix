@@ -3,14 +3,11 @@
 #=====================================================================#
 {
   config,
-  lib,
   pkgs,
   machine,
   ...
 }: let
-  #--- The generation the boot menu starts (0 is the newest), and the ESP the
-  #--- installer writes its files and EFI variables to
-  startOn = machine.boot.menu.default;
+  #--- The ESP the installer writes its files and EFI variables to
   esp = config.boot.loader.efi.efiSysMountPoint;
 in {
   #--------------------------------------------------------------------#
@@ -49,29 +46,12 @@ in {
         configurationLimit = machine.boot.menu.entries; # Generations the menu lists
         consoleMode = "max"; # Use full console resolution
         # An entry picked in the menu itself lives in an EFI variable that
-        # outranks loader.conf, and the installer starts the newest generation:
-        # clear both, then name the chosen one in loader.conf (entries are
-        # named nixos-<content hash>.conf, so find it by its version line)
-        extraInstallCommands =
-          ''
-            ${config.systemd.package}/bin/bootctl --esp-path=${esp} set-default ""
-            ${config.systemd.package}/bin/bootctl --esp-path=${esp} set-timeout ""
-          ''
-          + lib.optionalString (startOn > 0) ''
-            entry=$(
-              for f in ${esp}/loader/entries/*.conf; do
-                if ${pkgs.gnugrep}/bin/grep -qs "^version Generation ${toString startOn} " "$f" \
-                  && ! ${pkgs.gnugrep}/bin/grep -qs "^title .*(" "$f"; then
-                  echo "$f"
-                  break
-                fi
-              done
-            )
-            if [ -n "$entry" ]; then
-              ${pkgs.gnused}/bin/sed -i -E "s|^default .*|default $(${pkgs.coreutils}/bin/basename "$entry")|" \
-                ${esp}/loader/loader.conf
-            fi
-          '';
+        # outranks loader.conf, and so does a timeout set there: clear both, so
+        # the menu starts the newest generation and keeps the timeout above
+        extraInstallCommands = ''
+          ${config.systemd.package}/bin/bootctl --esp-path=${esp} set-default ""
+          ${config.systemd.package}/bin/bootctl --esp-path=${esp} set-timeout ""
+        '';
       };
       efi.canTouchEfiVariables = true;
     };
