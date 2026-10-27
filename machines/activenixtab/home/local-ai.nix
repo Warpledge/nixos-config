@@ -30,6 +30,28 @@
   #--- While this file exists, ask-claude runs without asking Ky first
   autoFlag = "${config.xdg.stateHome}/ask-claude/auto";
 
+  #--- ~/nixos-config's top level, and Ky's own folders inside it
+  nixosConfig = "${config.home.homeDirectory}/nixos-config";
+  # Listed by name: `*` also matches `/`, so "*.md" would catch other projects' files
+  shared = [
+    "AGENTS.md"
+    "CLAUDE.md"
+    "README.md"
+    "LICENSE"
+    "flake.nix"
+    "flake.lock"
+    "setup.sh"
+    "pyrightconfig.json"
+    ".gitignore"
+    ".claude/*"
+    "docs/*"
+    "lib/*"
+    "machines/*"
+    "modules/*"
+    "users/*"
+  ];
+  own = ["machines/activenixtab/*" "users/kylerj/*"];
+
   #--- Whole model on the GPU: shared memory leaves no reason to keep experts on the CPU
   #--- Both take images through their mmproj file (`--mmproj`)
   models = {
@@ -193,14 +215,27 @@ in {
     #--- and `gamedev` for the Godot game, which its project's opencode.json picks.
     #--- The subagents they start run on the workers' alias
     default_agent = "system";
-    # Only Ky switches the ask-claude approval off
-    permissions = [
-      {
-        action = "shell";
-        resource = "ask-claude-auto*";
-        effect = "deny";
-      }
-    ];
+    # Only Ky switches the ask-claude approval off. Edits to Warpledge's shared
+    # files ask Ky first: paths are relative inside ~/nixos-config, absolute from
+    # another project. The last matching rule wins
+    permissions =
+      [
+        {
+          action = "shell";
+          resource = "ask-claude-auto*";
+          effect = "deny";
+        }
+      ]
+      ++ map (resource: {
+        action = "edit";
+        inherit resource;
+        effect = "ask";
+      }) (shared ++ map (p: "${nixosConfig}/${p}") shared)
+      ++ map (resource: {
+        action = "edit";
+        inherit resource;
+        effect = "allow";
+      }) (own ++ map (p: "${nixosConfig}/${p}") own);
     agent =
       lib.genAttrs ["general" "explore"] (_: {
         model = "llama-swap/qwen3_6-35b-a3b-instruct";
@@ -210,7 +245,12 @@ in {
           description = "Answers questions about this computer and fixes its errors";
           mode = "primary";
           model = "llama-swap/qwen3_6-35b-a3b";
-          prompt = builtins.readFile ./agents/system.md;
+          # With this machine's and Ky's notes; AGENTS.md loads from the repo itself
+          prompt = lib.concatMapStringsSep "\n\n" builtins.readFile [
+            ./agents/system.md
+            ../CLAUDE.md
+            ../../../users/kylerj/CLAUDE.md
+          ];
         };
         gamedev = {
           description = "Coordinates work on the Godot game Clocked Out";

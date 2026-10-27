@@ -59,7 +59,10 @@ when Ky approves it.
   vision, loaded from LM Studio's folder, and opencode's provider for it. Models stay
   within 96 GB so Ky's other work keeps memory. opencode's two coordinator agents,
   `system` (the default) and `gamedev` (the default in the game's folder through its
-  `opencode.json`), take their prompts from `home/agents/`. When stuck they run
+  `opencode.json`), take their prompts from `home/agents/`; `system`'s also carries
+  this file and `users/kylerj/CLAUDE.md`, so a change here needs a rebuild to reach
+  it. opencode asks Ky before any agent edits a file in `~/nixos-config` outside
+  `machines/activenixtab/` and `users/kylerj/`. When stuck they run
   `ask-claude`, a one-off read-only `claude -p` whose answer they apply themselves.
   Each call waits for Ky's approval in a notification unless `ask-claude-auto on`
   (or the notification's "Allow until turned off") has switched that off; opencode

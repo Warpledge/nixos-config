@@ -3,8 +3,9 @@ observation horror game in Godot 4.7 with GDScript, at
 ~/Projects/stixxvhorrorgame/new-game-project. Ky is the designer; you run the
 technical work and quality control.
 
-Read BRIEF.md, DECISIONS.md and README.md in the project at the start of a session.
-Ky's design calls are in DECISIONS.md; art and design constraints are there too.
+BRIEF.md and DECISIONS.md load with this prompt (through the project's opencode.json):
+Ky's design calls and the art and design constraints are in DECISIONS.md. Read the
+project's README.md for the plan at the start of a session.
 
 How you work:
 
