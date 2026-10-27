@@ -8,6 +8,7 @@ ColumnLayout {
     required property var view
     property var ov: null
     property var boot: null  // systemd-analyze's last startup, asked for apart
+    property bool bootOpen: false  // whether the startup's details are shown
     property string error: ""
     readonly property bool ready: !!ov || error !== ""
     property bool checking: false
@@ -402,10 +403,107 @@ ColumnLayout {
         onClicked: page.view.sheet = failedSheet
     }
 
-    //--- How the last startup went, from systemd-analyze
-    Section { visible: !!page.boot && page.boot.stages.total > 0; text: "Last Startup" }
-    Rectangle {
+    //--- Shell settings; under niri they're on the Niri tab's Shell page
+    QuickLinks {
+        visible: !!page.ov && page.view.info.wm !== "niri" && shown.length > 0
+        Layout.fillWidth: true
+        links: page.view.links
+        order: page.view.info.quick
+    }
+
+    //--- Earlier versions
+    Section { visible: !!page.ov && page.ov.generations.length > 0; text: "Versions" }
+    Text {
+        visible: !!page.ov && page.ov.generations.length > 0
+        text: "Generations: each rebuild saves one, and the boot menu keeps the last ten. "
+              + "Switching back leaves your settings files as they are."
+        color: Theme.dim
+        font.pixelSize: 13
+        wrapMode: Text.Wrap
+        Layout.fillWidth: true
+        Layout.leftMargin: 6
+    }
+    Repeater {
+        model: page.ov ? page.ov.generations : []
+        Rectangle {
+            required property var modelData
+            readonly property var g: modelData
+            Layout.fillWidth: true
+            implicitHeight: genRow.implicitHeight + 22
+            radius: 14
+            color: g.running ? Theme.toneFill("success", Theme.card) : Theme.card
+            RowLayout {
+                id: genRow
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
+                spacing: 10
+                Badge { icon: g.running ? "radio_button_checked" : "history"; tone: g.running ? "success" : "" }
+                ColumnLayout {
+                    spacing: 2
+                    Layout.fillWidth: true
+                    Text {
+                        text: `Version ${g.number}`
+                        color: Theme.text
+                        font.pixelSize: 16
+                        font.weight: Font.DemiBold
+                    }
+                    Text {
+                        text: [Fmt.when(g.when),
+                               g.version ? "NixOS " + g.version.split(".").slice(0, 2).join(".") : "",
+                               g.kernel ? `Linux ${g.kernel}` : ""].filter(t => t).join(" · ")
+                        color: Theme.dim
+                        font.pixelSize: 13
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                    }
+                    Flow {
+                        visible: g.running || g.next || g.booted
+                        Layout.fillWidth: true
+                        spacing: 4
+                        Chip { tappable: false; visible: g.running; tone: "success"; text: "Running" }
+                        Chip { tappable: false; visible: g.next && !g.running; accent: true; text: "Next start" }
+                        Chip { tappable: false; visible: g.booted && !g.running; text: "Started with" }
+                    }
+                }
+                IconButton {
+                    visible: !g.running
+                    icon: "difference"
+                    onClicked: {
+                        page.compareNumber = g.number
+                        page.view.sheet = compareSheet
+                    }
+                }
+                Pill {
+                    visible: !g.running
+                    enabled: page.admin
+                    quiet: true
+                    text: "Switch"
+                    onClicked: page.rollback(g)
+                }
+            }
+        }
+    }
+
+    //--- How the last startup went, from systemd-analyze; the row keeps it to
+    //--- the total until the details are wanted
+    Section { visible: !!page.boot && page.boot.stages.total > 0; text: "Startup" }
+    ListRow {
         visible: !!page.boot && page.boot.stages.total > 0
+        icon: "timer"
+        title: "Last Startup"
+        subtitle: !page.boot ? ""
+            : page.boot.graphical
+                ? `${Fmt.duration(page.boot.stages.total)} from power on to `
+                  + page.boot.graphical.target
+                : `${Fmt.duration(page.boot.stages.total)} from power on`
+        trailing: page.bootOpen ? "expand_less" : "expand_more"
+        onClicked: page.bootOpen = !page.bootOpen
+    }
+    Rectangle {
+        visible: page.bootOpen && !!page.boot && page.boot.stages.total > 0
         Layout.fillWidth: true
         implicitHeight: bootColumn.implicitHeight + 28
         radius: 16
@@ -416,17 +514,12 @@ ColumnLayout {
             anchors.margins: 14
             spacing: 10
             Text {
-                text: page.boot ? Fmt.duration(page.boot.stages.total) : ""
-                color: Theme.text
-                font.pixelSize: 24
-                font.weight: Font.Bold
-            }
-            Text {
                 Layout.fillWidth: true
-                text: page.boot && page.boot.graphical
-                    ? `From power on to ${page.boot.graphical.target}, which came up at `
-                      + Fmt.duration(page.boot.graphical.seconds) + "."
-                    : "From power on to the desktop."
+                text: !page.boot ? ""
+                    : page.boot.graphical
+                        ? `The desktop was up ${Fmt.duration(page.boot.graphical.seconds)} into `
+                          + "userspace."
+                        : "From power on to the desktop."
                 color: Theme.dim
                 font.pixelSize: 13
                 wrapMode: Text.Wrap
@@ -535,90 +628,6 @@ ColumnLayout {
                         color: Theme.dim
                         font.pixelSize: 13
                     }
-                }
-            }
-        }
-    }
-
-    //--- Shell settings; under niri they're on the Niri tab's Shell page
-    QuickLinks {
-        visible: !!page.ov && page.view.info.wm !== "niri" && shown.length > 0
-        Layout.fillWidth: true
-        links: page.view.links
-        order: page.view.info.quick
-    }
-
-    //--- Earlier versions
-    Section { visible: !!page.ov && page.ov.generations.length > 0; text: "Versions" }
-    Text {
-        visible: !!page.ov && page.ov.generations.length > 0
-        text: "Generations: each rebuild saves one, and the boot menu keeps the last ten. "
-              + "Switching back leaves your settings files as they are."
-        color: Theme.dim
-        font.pixelSize: 13
-        wrapMode: Text.Wrap
-        Layout.fillWidth: true
-        Layout.leftMargin: 6
-    }
-    Repeater {
-        model: page.ov ? page.ov.generations : []
-        Rectangle {
-            required property var modelData
-            readonly property var g: modelData
-            Layout.fillWidth: true
-            implicitHeight: genRow.implicitHeight + 22
-            radius: 14
-            color: g.running ? Theme.toneFill("success", Theme.card) : Theme.card
-            RowLayout {
-                id: genRow
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
-                spacing: 10
-                Badge { icon: g.running ? "radio_button_checked" : "history"; tone: g.running ? "success" : "" }
-                ColumnLayout {
-                    spacing: 2
-                    Layout.fillWidth: true
-                    Text {
-                        text: `Version ${g.number}`
-                        color: Theme.text
-                        font.pixelSize: 16
-                        font.weight: Font.DemiBold
-                    }
-                    Text {
-                        text: [Fmt.when(g.when),
-                               g.version ? "NixOS " + g.version.split(".").slice(0, 2).join(".") : "",
-                               g.kernel ? `Linux ${g.kernel}` : ""].filter(t => t).join(" · ")
-                        color: Theme.dim
-                        font.pixelSize: 13
-                        elide: Text.ElideRight
-                        Layout.fillWidth: true
-                    }
-                    Flow {
-                        visible: g.running || g.next || g.booted
-                        Layout.fillWidth: true
-                        spacing: 4
-                        Chip { tappable: false; visible: g.running; tone: "success"; text: "Running" }
-                        Chip { tappable: false; visible: g.next && !g.running; accent: true; text: "Next start" }
-                        Chip { tappable: false; visible: g.booted && !g.running; text: "Started with" }
-                    }
-                }
-                IconButton {
-                    visible: !g.running
-                    icon: "difference"
-                    onClicked: {
-                        page.compareNumber = g.number
-                        page.view.sheet = compareSheet
-                    }
-                }
-                Pill {
-                    visible: !g.running
-                    enabled: page.admin
-                    quiet: true
-                    text: "Switch"
-                    onClicked: page.rollback(g)
                 }
             }
         }

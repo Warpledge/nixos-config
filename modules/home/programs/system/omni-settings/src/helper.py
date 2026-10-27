@@ -279,17 +279,52 @@ def store_free():
         return None
 
 
+def store_paths():
+    """How many paths the store lists, for the progress bar; 0 when it can't say."""
+    try:
+        res = subprocess.run(["nix", "path-info", "--all"], capture_output=True, text=True,
+                             env=env())
+    except OSError:
+        return 0
+    return res.stdout.count("\n") if res.returncode == 0 else 0
+
+
 def optimise():
     """Replaces identical files in the store with hard links, so they take the
-    space once; reports what that freed and how many files it linked."""
+    space once; reports what that freed and how many files it linked. Nix prints
+    a line per path, which is counted for the progress and kept out of the log."""
     emit(step="optimise", state="start")
     before = store_free()
-    code, lines = stream(["nix", "store", "optimise"])
+    total = store_paths()
+    emit(optimise={"done": 0, "total": total})
+    proc = subprocess.Popen(["nix", "store", "optimise", "-v"], stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT, env=env(), start_new_session=True,
+                            text=True, errors="replace", bufsize=1)
+    CANCEL.run(proc)
+    done, summary = 0, None
+    for line in proc.stdout:
+        line = line.rstrip("\n")
+        if line.startswith("optimising path"):
+            done += 1
+            if done % 500 == 0:
+                emit(optimise={"done": done, "total": total})
+            if done % 5000 == 0:
+                out(f"Checked {done:,} store paths")
+            continue
+        m = OPTIMISED.search(line)
+        if m:
+            summary = m
+        elif line.strip():
+            out(line)
+    code = proc.wait()
+    CANCEL.done()
+    if CANCEL.requested:
+        raise Cancelled()
     if code != 0:
         emit(step="optimise", state="failed")
         raise RuntimeError("optimising the store failed")
     emit(step="optimise", state="done")
-    summary = next((m for m in map(OPTIMISED.search, lines) if m), None)
+    emit(optimise={"done": done, "total": total})
     freed = closure.parse_size(summary.group(1)) if summary else None
     if freed is None:
         after = store_free()
@@ -465,6 +500,9 @@ def main():
         if optimising:
             try:
                 optimise()
+            except Cancelled:
+                emit(result="cancelled")
+                sys.exit(3)
             except Exception as e:  # noqa: BLE001
                 emit(error=str(e))
                 emit(result="failed", restored=False)

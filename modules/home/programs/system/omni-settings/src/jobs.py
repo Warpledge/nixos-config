@@ -108,6 +108,7 @@ class Job:
         self.errors, self.notes, self.diff, self.units = [], [], None, None
         self.restart, self.cleaned, self.deleted = False, None, 0
         self.optimised = None
+        self.optimise_progress = None  # {"done", "total"} while `nix store optimise` runs
         self.undo = self.undo_label = self.restore = None
         self.log = deque(maxlen=LOG_LIMIT)
         self.progress = nixlog.Progress()
@@ -122,7 +123,8 @@ class Job:
                 "heading": self.heading, "detail": self.detail, "mode": self.mode,
                 "preview": self.preview, "errors": list(dict.fromkeys(self.errors)),
                 "notes": self.notes, "diff": self.diff, "units": self.units, "restart": self.restart,
-                "cancellable": self.proc is not None and self.current == "build" and self.ended is None,
+                "cancellable": self.proc is not None and self.current in ("build", "optimise")
+                               and self.ended is None,
                 "undo": self.undo_label if self.undo is not None and self.outcome in ("failed",) else None}
 
     def progress_json(self):
@@ -132,6 +134,7 @@ class Job:
                 "bytes": [p.downloaded(), p.download_total()],
                 "builds": [p.builds[0], max(p.builds[1], p.will_build), p.builds[2]],
                 "fraction": p.fraction(), "running": p.running(), "deleted": self.deleted,
+                "optimise": self.optimise_progress,
                 "graph": [] if p.evaluating else p.graph()}
 
     def changed(self):
@@ -217,6 +220,9 @@ class Job:
                       f"{versions} old system version{'s' if versions != 1 else ''} deleted",
                       "The boot menu now lists only the versions that are left.")
             self.append("info", f"Deleted {self.deleted:,} store paths.")
+        if "optimise" in e:
+            self.optimise_progress = e["optimise"]
+            self.progress_dirty = True
         if "optimised" in e:
             self.optimised = e["optimised"]
             freed, files = self.optimised.get("freed"), self.optimised.get("files")
@@ -265,8 +271,11 @@ class Job:
                 detail += " Restart to use the new kernel."
             self.finish("ok", heading, detail)
         elif result == "cancelled":
-            self.finish("cancelled", "Stopped", "The build was stopped and nothing was switched."
-                        + (" Your settings were put back." if self.result.get("restored") else ""))
+            detail = ("The optimisation was stopped; the files it already linked stay linked."
+                      if self.kind == "optimise"
+                      else "The build was stopped and nothing was switched."
+                           + (" Your settings were put back." if self.result.get("restored") else ""))
+            self.finish("cancelled", "Stopped", detail)
         elif result is None and code in (126, 127):
             self.finish("auth", "Nothing was changed",
                         "The password prompt was closed, or the password wasn't accepted.")

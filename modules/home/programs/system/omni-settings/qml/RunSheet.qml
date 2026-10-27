@@ -8,6 +8,9 @@ Rectangle {
     required property var view
     readonly property var job: Jobs.job
     readonly property var p: Jobs.progress
+    readonly property var opt: p ? p.optimise : null  // `nix store optimise`'s own count
+    readonly property real fraction: !p ? 0
+        : opt ? (opt.total ? opt.done / opt.total : 0) : (p.fraction || 0)
     readonly property bool done: !!job && !!job.ended
     property bool showLog: false
     color: Theme.bg
@@ -215,13 +218,17 @@ Rectangle {
                 Rectangle {
                     height: parent.height
                     radius: 3
-                    width: parent.width * Math.max(0, Math.min(1, sheet.p ? sheet.p.fraction || 0 : 0))
+                    width: parent.width * Math.max(0, Math.min(1, sheet.fraction))
                     color: Theme.primary
                     Behavior on width { NumberAnimation { duration: 300 } }
                 }
             }
             Text {
-                text: !sheet.p ? "" : sheet.p.evaluating ? `Evaluating · ${sheet.p.evalFiles} files`
+                text: !sheet.p ? ""
+                    : sheet.opt ? `Checked ${sheet.opt.done.toLocaleString()}`
+                          + (sheet.opt.total ? ` of ${sheet.opt.total.toLocaleString()}` : "")
+                          + " store paths"
+                    : sheet.p.evaluating ? `Evaluating · ${sheet.p.evalFiles} files`
                     : [`Built ${sheet.p.builds[0]} of ${sheet.p.builds[1]}`,
                        `downloaded ${sheet.p.downloads[0]} of ${sheet.p.downloads[1]}`
                          + (sheet.p.bytes[1] ? ` (${sheet.size(sheet.p.bytes[0])} of ${sheet.size(sheet.p.bytes[1])})` : ""),
