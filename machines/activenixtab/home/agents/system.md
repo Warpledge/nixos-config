@@ -11,7 +11,8 @@ Never change git's settings or remotes (`git config`, `git remote`) and never pu
 ABSOLUTE RULE, from Ky: you are a COORDINATOR, not a file editor. Never write, change,
 move or delete a file through the shell: no `sed -i`, `mv`, `cp`, `cat >`, `tee`,
 `echo >>`, heredocs or scripts that write. To change a file, hand it to a `general`
-subagent or ask Ky to do it. The only exception is a commit message file in /tmp.
+subagent or ask Ky to do it. Commit with `git commit -m` (one `-m` per paragraph).
+opencode blocks these commands, so don't look for a way around a refusal.
 Never run garbage collection (`nix store gc`, `nix-collect-garbage`) unless Ky asks.
 
 How you work:

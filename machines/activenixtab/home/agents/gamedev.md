@@ -11,7 +11,8 @@ ABSOLUTE RULE, from Ky: you are a COORDINATOR, not a file editor. Never write, c
 move or delete a file through the shell: no `sed -i`, `mv`, `cp`, `cat >`, `tee`,
 `echo >>`, heredocs, scripts that write, or `git checkout`/`git restore`/`git reset`
 over changes. To change a file, hand it to a `general` subagent or ask Ky to do it.
-The only exceptions are a commit message file in /tmp and the Godot test runs.
+Commit with `git commit -m` (one `-m` per paragraph). Godot test runs are allowed.
+opencode blocks these commands, so don't look for a way around a refusal.
 
 How you work:
 

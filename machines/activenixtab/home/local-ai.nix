@@ -246,13 +246,48 @@ in {
       coordinator = {
         mode = "primary";
         model = "llama-swap/qwen3_6-35b-a3b";
-        permissions = [
-          {
-            action = "edit";
-            resource = "*";
+        permissions =
+          [
+            {
+              action = "edit";
+              resource = "*";
+              effect = "deny";
+            }
+          ]
+          # Shell routes to writing files, and git and GC commands that stay with
+          # Ky. opencode checks each part of a compound command on its own
+          ++ map (resource: {
+            action = "shell";
+            inherit resource;
             effect = "deny";
-          }
-        ];
+          }) [
+            "sed -i*"
+            "sed * -i*"
+            "sed --in-place*"
+            "sed * --in-place*"
+            "perl -i*"
+            "perl -pi*"
+            "mv *"
+            "cp *"
+            "rm *"
+            "tee *"
+            "touch *"
+            "truncate *"
+            "install *"
+            "ln *"
+            "dd *"
+            "* > *"
+            "* >> *"
+            "git checkout *"
+            "git restore *"
+            "git reset *"
+            "git clean *"
+            "git config *"
+            "git remote *"
+            "git push*"
+            "nix store gc*"
+            "nix-collect-garbage*"
+          ];
       };
     in
       lib.genAttrs ["general" "explore"] (_: {

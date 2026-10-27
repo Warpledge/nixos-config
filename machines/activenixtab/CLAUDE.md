@@ -61,7 +61,9 @@ when Ky approves it.
   `system` (the default) and `gamedev` (the default in the game's folder through its
   `opencode.json`), take their prompts from `home/agents/`; `system`'s also carries
   this file and `users/kylerj/CLAUDE.md`, so a change here needs a rebuild to reach
-  it. The coordinators can't edit, so changes go through their subagents, and opencode
+  it. The coordinators can't edit, and opencode denies them shell commands that write
+  files (`sed -i`, `mv`, `cp`, `rm`, redirects…), `git config`/`remote`/`push`/
+  `checkout`/`reset` and garbage collection, so changes go through their subagents; opencode
   compacts their sessions near 48K so a cache miss stays cheap. The agents use v2's
   `agents` key: the file is read as v2, which drops a v1 agent's `permission`.
   opencode asks Ky before any agent edits a file in `~/nixos-config` outside
