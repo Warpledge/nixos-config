@@ -156,6 +156,12 @@ ColumnLayout {
     }
     ListRow {
         visible: !!page.repo
+        icon: "history"
+        title: "Commits"
+        subtitle: page.repo && page.repo.total ? `${page.repo.total} in total` : ""
+    }
+    ListRow {
+        visible: !!page.repo
         icon: "sync"
         tone: page.repo && page.repo.fetchErr ? "error" : ""
         title: "Last Fetched"
@@ -279,7 +285,10 @@ ColumnLayout {
     }
 
     //--- Commits to push; the newest row opens the rest
-    Section { visible: !!page.repo && page.repo.outgoing.length > 0; text: "To Push" }
+    Section {
+        visible: !!page.repo && page.repo.outgoing.length > 0
+        text: page.repo ? `To Push (${page.repo.outgoing.length})` : "To Push"
+    }
     CommitRow {
         visible: !!page.repo && page.repo.outgoing.length > 0
         commit: page.repo && page.repo.outgoing.length ? page.repo.outgoing[0] : null

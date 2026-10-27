@@ -507,13 +507,14 @@ def cmd_git(cfg, args):
     fetch_err, prs, pr_err, limited = gitstate.remote(cfg.flake, repo, bool(args.get("force")),
                                                       bool(args.get("cached")))
     try:
-        status, upstream, changed, outgoing, incoming, recent, fetched = gitstate.snapshot(cfg.flake)
+        status, upstream, changed, outgoing, incoming, recent, fetched, total = gitstate.snapshot(cfg.flake)
     except (RuntimeError, subprocess.TimeoutExpired) as e:
         raise ValueError(f"Couldn't read the repo: {e}")
     files = [{"path": line[3:], "state": gitstate.STATES.get(line[:2].strip()[:1], line[:2].strip())}
              for line in changed[:gitstate.MAX_FILES]]
     return {"repo": repo, "branch": status.branch, "upstream": upstream, "fetched": fetched,
             "fetchErr": fetch_err, "changed": files, "moreChanged": max(0, len(changed) - gitstate.MAX_FILES),
+            "total": total,
             "outgoing": [commit_json(c) for c in outgoing], "incoming": [commit_json(c) for c in incoming],
             "recent": [commit_json(c) for c in recent],
             "prs": None if prs is None else [

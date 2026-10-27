@@ -1,6 +1,7 @@
 """Where the config repo stands: branch, changed files, commits to push and
-pull, recent commits, and open pull requests from GitHub's API (signed in
-through gh when it is). The one write is `pull`, for the Overview's pull job."""
+pull, recent commits, the commit count, and open pull requests from GitHub's
+API (signed in through gh when it is). The one write is `pull`, for the
+Overview's pull job."""
 
 import calendar
 import json
@@ -47,6 +48,11 @@ def commits(flake, *rev):
     return [line.split("\x1f") for line in git(flake, "log", LOG, *rev).splitlines() if line]
 
 
+def commit_count(flake):
+    """How many commits HEAD has, for the Git page's count."""
+    return int(git(flake, "rev-list", "--count", "HEAD").strip() or 0)
+
+
 def last_fetch(flake):
     try:
         return os.path.getmtime(os.path.join(flake, git(flake, "rev-parse", "--git-path", "FETCH_HEAD").strip()))
@@ -60,7 +66,8 @@ def snapshot(flake):
     upstream = git(flake, "rev-parse", "--abbrev-ref", "@{u}").strip() if status.upstream else ""
     outgoing = commits(flake, f"{system.push_ref(flake)}..HEAD") if upstream else []
     incoming = commits(flake, "HEAD..@{u}") if upstream else []
-    return status, upstream, changed, outgoing, incoming, commits(flake, "-15"), last_fetch(flake)
+    return (status, upstream, changed, outgoing, incoming, commits(flake, "-15"), last_fetch(flake),
+            commit_count(flake))
 
 
 def github(path, timeout=15):

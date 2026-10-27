@@ -39,6 +39,9 @@
       discord.vesktop = true;
       discord.goofcord = false;
       userPackages = {};
+      env = {};
+      autostart = {};
+      mimeTypes = {};
     };
   };
 
@@ -135,4 +138,6 @@
   #--- Flatpak (the Hytale launcher), with Flatseal
   flatpak.enable = true;
   smb.enable = false;
+  boot.menu.timeout = 5;
+  boot.menu.entries = 10;
 }
