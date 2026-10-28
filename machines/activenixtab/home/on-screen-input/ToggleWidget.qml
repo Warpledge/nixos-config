@@ -13,7 +13,7 @@ PluginComponent {
     pillClickAction: () => Quickshell.execDetached(["@command@"])
 
     horizontalBarPill: Component {
-        DankIcon {
+        DIcon {
             name: "@icon@"
             size: root.iconSize
             color: Theme.surfaceText
@@ -21,7 +21,7 @@ PluginComponent {
     }
 
     verticalBarPill: Component {
-        DankIcon {
+        DIcon {
             name: "@icon@"
             size: root.iconSize
             color: Theme.surfaceText
