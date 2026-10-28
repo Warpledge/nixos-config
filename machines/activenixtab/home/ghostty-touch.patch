@@ -1,0 +1,96 @@
+--- a/src/apprt/gtk/class/surface.zig
++++ b/src/apprt/gtk/class/surface.zig
+@@ -640,6 +640,9 @@
+         /// True when we have a precision scroll in progress
+         precision_scroll: bool = false,
+ 
++        /// The touch drag's offset at its last scroll
++        touch_scroll_y: f64 = 0,
++
+         /// True when the child has exited.
+         child_exited: bool = false,
+ 
+@@ -1785,6 +1788,13 @@
+         // Read GTK primary paste setting
+         priv.gtk_enable_primary_paste = gsettings.get(.@"gtk-enable-primary-paste") orelse true;
+ 
++        // A one-finger touch drag scrolls
++        const touch_drag = gtk.GestureDrag.new();
++        touch_drag.as(gtk.GestureSingle).setTouchOnly(1);
++        _ = gtk.GestureDrag.signals.drag_begin.connect(touch_drag, *Self, gdTouchBegin, self, .{});
++        _ = gtk.GestureDrag.signals.drag_update.connect(touch_drag, *Self, gdTouchUpdate, self, .{});
++        self.as(gtk.Widget).addController(touch_drag.as(gtk.EventController));
++
+         // Set up to handle items being dropped on our surface. Files can be dropped
+         // from Nautilus and strings can be dropped from many programs. The order
+         // of these types matter.
+@@ -2781,6 +2791,10 @@
+             _ = gl_area_widget.grabFocus();
+         }
+ 
++        // A touch clicks on release (gcMouseUp); if the finger moves, GTK
++        // cancels this gesture and the touch drag scrolls instead.
++        if (event.getEventType() == .touch_begin) return;
++
+         // Report the event
+         const button = translateMouseButton(gesture.as(gtk.GestureSingle).getCurrentButton());
+ 
+@@ -2835,8 +2849,8 @@
+     fn gcMouseUp(
+         gesture: *gtk.GestureClick,
+         _: c_int,
+-        _: f64,
+-        _: f64,
++        x: f64,
++        y: f64,
+         self: *Self,
+     ) callconv(.c) void {
+         const event = gesture.as(gtk.EventController).getCurrentEvent() orelse return;
+@@ -2844,6 +2858,23 @@
+         const priv = self.private();
+         const surface = priv.core_surface orelse return;
+         const gtk_mods = event.getModifierState();
++
++        // A tap: touch never moves the cursor, so move it to the finger and
++        // click there
++        if (event.getEventType() == .touch_end) {
++            const scaled = self.scaledCoordinates(x, y);
++            priv.cursor_pos = .{ .x = @floatCast(scaled.x), .y = @floatCast(scaled.y) };
++            const mods = gtk_key.translateMods(gtk_mods);
++            surface.cursorPosCallback(priv.cursor_pos, mods) catch |err| {
++                log.warn("error in cursor pos callback err={}", .{err});
++            };
++            inline for (.{ .press, .release }) |action| {
++                _ = surface.mouseButtonCallback(action, .left, mods) catch |err| {
++                    log.warn("error in key callback err={}", .{err});
++                };
++            }
++            return;
++        }
+         const button = translateMouseButton(gesture.as(gtk.GestureSingle).getCurrentButton());
+ 
+         if (button == .left and priv.suppress_left_mouse_release) {
+@@ -2965,6 +2996,23 @@
+         self.private().precision_scroll = false;
+     }
+ 
++    fn gdTouchBegin(_: *gtk.GestureDrag, _: f64, _: f64, self: *Self) callconv(.c) void {
++        self.private().touch_scroll_y = 0;
++    }
++
++    fn gdTouchUpdate(_: *gtk.GestureDrag, _: f64, offset_y: f64, self: *Self) callconv(.c) void {
++        const priv = self.private();
++        const surface = priv.core_surface orelse return;
++        const dy = offset_y - priv.touch_scroll_y;
++        priv.touch_scroll_y = offset_y;
++
++        // Pixels, so the text follows the finger
++        const scaled = self.scaledCoordinates(0, dy);
++        surface.scrollCallback(0, scaled.y, .{ .precision = true }) catch |err| {
++            log.warn("error in scroll callback err={}", .{err});
++        };
++    }
++
+     fn ecMouseScrollVertical(
+         _: *gtk.EventControllerScroll,
+         x: f64,

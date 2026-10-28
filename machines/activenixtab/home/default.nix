@@ -12,6 +12,7 @@
     ./apps.nix
     ./binds.nix
     ./config-reminder.nix
+    ./ghostty.nix
     ./godot-mcp.nix
     ./local-ai.nix
     ./unreal-engine.nix

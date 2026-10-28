@@ -79,6 +79,9 @@ when Ky approves it.
   (or the notification's "Allow until turned off") has switched that off; opencode
   denies the agents `ask-claude-auto`
 - `home/config-reminder.nix` — a zsh notice when the checkout is behind Warpledge's main
+- `home/ghostty.nix` — Ghostty with `ghostty-touch.patch` (a tap clicks at the finger,
+  a one-finger drag scrolls), built from source since the patched package isn't
+  cached, and the DMS colour theme the shared module doesn't load yet
 - `home/godot-mcp.nix` — the godot-mcp server, built from GitHub at a pinned commit and
   put on PATH; a Godot project's `opencode.json` starts it (`~/godot-mcp-demo` does)
 - `home/unreal-engine.nix` — `unreal-editor` and its desktop entry: Epic's prebuilt
