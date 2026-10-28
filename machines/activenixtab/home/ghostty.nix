@@ -11,5 +11,7 @@
 
     #--- DMS's matugen writes this theme; the shared module doesn't load it yet
     settings.theme = "dankcolors";
+
+    settings.custom-shader = "${./ghostty-cursor.glsl}";
   };
 }
