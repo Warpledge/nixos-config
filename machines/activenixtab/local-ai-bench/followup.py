@@ -32,7 +32,10 @@ def run_tool(name, args):
         # Only read-only commands run for real; anything else is refused like opencode would
         if WRITE_RE.search(c) or "sudo" in c or first not in READ_ONLY:
             return "denied: not allowed for the coordinator"
-        p = subprocess.run(["bash", "-c", c], cwd=REPO, capture_output=True, text=True, timeout=30)
+        try:
+            p = subprocess.run(["bash", "-c", c], cwd=REPO, capture_output=True, text=True, timeout=30)
+        except subprocess.TimeoutExpired:
+            return "timed out after 30 s"
         return ((p.stdout + p.stderr) or "(no output)")[:12000]
     if name == "subagent":
         return "Done. The worker made the change and checked it."

@@ -59,8 +59,10 @@ when Ky approves it.
   `-instruct` alias for subagents) and Qwen3.8 Flash Next (one slot), both with
   vision, loaded from LM Studio's folder, and opencode's provider for it. Models stay
   within 80 GB so Ky's other work keeps memory. Every model tested or tuned here
-  gets an entry in `local-ai-models.md` (settings, memory, speed, test results),
-  measured with the scripts in `local-ai-bench/`. opencode's two coordinator agents,
+  gets an entry in `local-ai-models.md`, measured with the scripts in
+  `local-ai-bench/`: the at-a-glance table and a plain-language section first (what
+  to pick it for, how long Ky waits, RAM left, what to watch out for), then its
+  settings to copy and the raw numbers. Show results to Ky the same way. opencode's two coordinator agents,
   `system` (the default) and `gamedev` (the default in the game's folder through its
   `opencode.json`), take their prompts from `home/agents/`; `system`'s also carries
   this file and `users/kylerj/CLAUDE.md`, so a change here needs a rebuild to reach

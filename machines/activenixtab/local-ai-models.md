@@ -1,9 +1,237 @@
 # Local AI models on the Flow Z13
 
-Every model tested or tuned on this machine, with the settings it ended on and what
-it measured, so the next change starts from these numbers instead of from scratch.
-`home/local-ai.nix` holds the live settings. Memory budget for models: 80 GB (Ky,
-2026-10-27), leaving the rest of the 128 GB for everything else.
+What each model tested on this machine is like to use, the settings it ended on,
+and the raw measurements behind that, so the next model change starts from here
+instead of from scratch. `home/local-ai.nix` holds the live settings. Memory budget
+for models: 80 GB (Ky, 2026-10-27), possibly 90 GB, out of 128 GB.
+
+## At a glance (2026-10-27)
+
+**In use:** Nemotron 3.5 Super VL. It fits the 80 GB budget and never broke a
+coordinator rule, but it's the slowest to finish a coding task.
+**Best results:** Qwen3.8 Flash Next (UD-IQ3_XXS) at medium effort. It solved every
+coding task in one to two minutes and behaved well as a coordinator, but it needs
+about 86 GB, which only fits a 90 GB budget.
+
+| Model | Pick it for | Waiting on it | RAM left for everything else | Watch out for |
+|---|---|---|---|---|
+| **Flash Next IQ3_XXS, medium** | Coordinator and workers | Small coding task: 1 to 2 min. Reads a 20K-token file in 47 s | ~20 GB | Over the 80 GB budget. Leave effort at `medium`: its default (`xhigh`) overthinks |
+| **Nemotron 3.5 Super VL** (in use) | Coordinator and workers within 80 GB | Small coding task: 3.5 to 6.5 min. Reads a 20K-token file in 63 s | ~40 GB | Slow at full reasoning. Tried `sudo` once |
+| gpt-oss-120b + Qwen3.5-9B for images | Speed, if you can live without built-in vision | Small coding task: 1 to 2 min. Reads a 20K-token file in 23 s | not measured (77 GB loaded) | Vision comes from a small helper that made up details. Called `edit` directly once |
+| Qwen3.8-27B, medium | Lots of free memory | Small coding task: about 3 min. Reads a 20K-token file in 81 s | ~58 GB | Slowest writer: about 13 tokens a second |
+| Flash Next Q3_K_XL | Don't | n/a | ~10 GB | 93 GB: the file that ran out of memory |
+| Qwen3.6 35B A3B | Don't | n/a | n/a | Broke every coordinator rule in real use |
+
+"Small coding task" is one of three functions checked by hidden tests. "RAM left"
+is what was free with the model loaded and a test running.
+
+## Each model in plain terms
+
+### Qwen3.8 Flash Next, UD-IQ3_XXS (best results, not in use)
+
+At `medium` effort it's the strongest model tested here. It solved all three
+coding tasks in 41 to 110 seconds each, three to five times quicker than Nemotron.
+As a coordinator it worked in parallel, changed nothing itself, and noticed when a
+requested keybind already existed. Its image descriptions are the most observant
+of any model: in the aisle frame it spotted a grey cube on the floor and a small
+red object at the far end. It writes about as fast as Nemotron (28 tokens a second)
+and reads long files faster.
+
+The catch is memory. About 59 GB sits in GPU memory and another 27 GB in the
+server process itself, which leaves roughly 20 GB for games, the editor and
+everything else. Its chat template defaults to `xhigh` effort, which tells it to
+second-guess everything: at that setting it ran out of room before answering two of
+three tasks. `low` was too loose (it called `edit` directly once).
+
+### Nemotron 3.5 Super VL (in use)
+
+The careful one. In every coordinator test it handed changes to subagents, refused
+Warpledge's shared files, ignored a "just use sed" shortcut, and caught a worker
+that claimed it was done without changing anything. It solved all three coding
+tasks, but at full reasoning each took 3.5 to 6.5 minutes. With MTP drafting it
+writes about 28 tokens a second, so a screen of code (about 500 tokens) takes
+around 18 seconds. Reading a long file is slower than Flash Next. It uses 72 GB of
+GPU memory, inside the 80 GB budget. A run at `medium_effort` for a fairer
+comparison with Flash Next is under way.
+
+### gpt-oss-120b with Qwen3.5-9B for images (tested, not in use)
+
+The fastest setup by a wide margin: about 45 tokens a second, and it reads a
+20K-token file in about 23 seconds. It solved two of three coding tasks in one to
+two minutes each and coordinated well, but called `edit` directly once, which
+opencode would have blocked. It can't see images, so a small Qwen3.5-9B loads
+beside it for that. The helper took 15 seconds per image with thinking off but made
+details up, or 47 seconds and accurate with thinking on. Both loaded take 77 GB.
+
+### Qwen3.8-27B (tested, not in use)
+
+Fits easily at 45 GB and leaves almost 60 GB free. At `medium` effort it solved all
+three coding tasks and coordinated well in the single-turn tests, but it writes only
+about 13 tokens a second even with MTP, so each task took around three minutes.
+At its default `xhigh` effort it never finished a task.
+
+### Qwen3.8 Flash Next, UD-Q3_K_XL (don't use)
+
+The file that was in use before 2026-10-27. Same model as the IQ3_XXS above, but
+93 GB in all, which left 10 GB free and ran out of memory. Delete it once the
+IQ3_XXS file is settled.
+
+### Qwen3.6 35B A3B (dropped 2026-10-27)
+
+Fast (about 46 tokens a second) and small (37 GB), but as a coordinator it ignored
+its rules: it never delegated, edited files through the shell after edits were
+blocked, changed git remotes, ran garbage collection unasked, wrote to Warpledge's
+shared files, and wiped uncommitted game work with `git checkout HEAD -- .`. Ky
+found its code poor too.
+
+### Earlier models (2026-10-25, from commit messages)
+
+- **DeepSeek V4 Flash:** UD-IQ3_XXS, 97 GiB, 13B active. Its DSpark drafter (10 GiB)
+  nearly doubled generation but left about 1 GiB of RAM free. Thinking capped at
+  4096 tokens.
+- **gpt-oss-120b (59 GiB):** read input about 3 times faster than DeepSeek. Text only.
+- **Ornith 1.5 35B A3B:** replaced by the two above the same day.
+
+## Settings to copy
+
+All need llama.cpp 0.7.0 or newer (built in `local-ai.nix`) and load from
+`~/.lmstudio/models/`. Every one here runs fully on the GPU (`-fa on -ngl 99`).
+
+**Nemotron 3.5 Super VL** (`unsloth/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-GGUF`,
+UD-Q3_K_XL plus `mmproj-BF16.gguf`):
+
+```
+-np 3 -kvu --kv-unified-per-slot 65536 -fa on -ngl 99 --load-mode none -ub 2048
+-ctk f16 -ctv f16 --spec-type draft-mtp --top-k 0 --min-p 0 --mmproj …/mmproj-BF16.gguf
+request: temperature 1.0, top_p 0.95
+coordinator: chat_template_kwargs {"enable_thinking": true}
+workers:     chat_template_kwargs {"enable_thinking": true, "medium_effort": true}
+```
+
+opencode: context 65536, output 16384, so it compacts near 48K.
+
+**Qwen3.8 Flash Next** (`unsloth/Qwen3.8-Flash-Next-GGUF`, UD-IQ3_XXS plus
+`mmproj-F16.gguf`):
+
+```
+-np 2 -kvu --kv-unified-per-slot 65536 -fa on -ngl 99 --load-mode none -ub 2048
+-ctk f16 -ctv q8_0 --temp 1.0 --top-p 0.95 --top-k 20 --min-p 0 --mmproj …/mmproj-F16.gguf
+request: chat_template_kwargs {"reasoning_effort": "medium"}
+```
+
+The q8_0 V cache measured about 17% faster prompts at 32K with perplexity within
+error. `reasoning_effort` takes `xhigh` (the default), `medium` or `low`; `high`
+means `xhigh`.
+
+**gpt-oss-120b** (`ggml-org/gpt-oss-120b-GGUF`, MXFP4):
+
+```
+-np 3 -kvu --kv-unified-per-slot 65536 -fa on -ngl 99 --load-mode none -ub 2048
+-ctk f16 -ctv f16 --temp 1.0 --top-p 1.0 --top-k 0 --min-p 0
+request: chat_template_kwargs {"reasoning_effort": "high"}   (low, medium or high)
+```
+
+**Qwen3.5-9B vision helper** (`unsloth/Qwen3.5-9B-GGUF`, UD-Q4_K_XL plus
+`mmproj-F16.gguf`, fetched from Hugging Face because LM Studio wouldn't):
+
+```
+-np 1 -c 32768 -fa on -ngl 99 --temp 0.7 --top-p 0.8 --top-k 20 --min-p 0 --mmproj …
+```
+
+**Qwen3.8-27B** (`unsloth/Qwen3.8-27B-GGUF`, UD-Q6_K_XL plus `mmproj-F16.gguf`):
+
+```
+-np 3 -kvu --kv-unified-per-slot 65536 -fa on -ngl 99 -ub 2048 --spec-type draft-mtp
+--temp 1.0 --top-p 0.95 --top-k 20 --min-p 0
+request: chat_template_kwargs {"reasoning_effort": "medium"}
+```
+
+**Qwen3.6 35B A3B** (`unsloth/Qwen3.6-35B-A3B-GGUF`, UD-Q4_K_XL, about 25% faster
+than Q8 here): 4 slots of 128K with `-kvu`, f16 cache (only 10 of its 40 layers keep
+one, so 4 x 128K is about 11 GB). Coordinator temperature 0.6, top_p 0.95, top_k 20;
+workers with thinking off at 0.7, 0.8, presence penalty 1.5.
+
+**Flash Next as first set up** (UD-Q3_K_XL): one slot of 128K, same cache types and
+sampling as above. 68 GB GPU memory plus 36 GB in the server process.
+
+## Raw data
+
+All runs on 2026-10-27, llama.cpp 0.7.0, one model at a time on port 8095. Speeds
+are tokens per second with thinking on unless noted. Memory is GPU memory
+(`mem_info_gtt_used` plus `mem_info_vram_used`) plus the server process where it
+holds part of the model.
+
+### Speed and memory
+
+| Model, settings | Memory | RAM free | 1 req | 2 req | 3 req | 4 req | Prompt (19K) |
+|---|---|---|---|---|---|---|---|
+| Nemotron, 3 slots, MTP | 72 GB | ~40 GB | 28.4 | 29.0 | 24.6 | 19.6 | 306 |
+| Nemotron, 4 slots, MTP | 74 GB | | | | | | |
+| Nemotron, 4 slots, no MTP | 66 GB | | 18.6 | 26.0 | 30.2 | 30.9 | 306 |
+| Flash Next IQ3_XXS, 2 slots | 59 + 27 GB | 19 to 20 GB | 28.2 | 39.2 | | 38.4 | 410 |
+| Flash Next Q3_K_XL, 2 slots | 66 + 27 GB | 10 GB | 25.1 | 32.4 | | 34.8 | 407 |
+| Qwen3.8-27B, 3 slots, MTP | 45 GB | 58 to 59 GB | 13.4 | 20.5 | | 17.4 | 235 |
+| gpt-oss-120b, 3 slots | 69 GB | | 45.1 | | | 52.7 | 849 |
+| gpt-oss + Qwen3.5-9B helper | 77 GB | | | | | | |
+| Qwen3.6 35B A3B, 4 slots of 128K | ~37 GB | | ~46 | | | | 600 to 1,600 |
+
+- Nemotron's MTP accepted 84% of drafts on code and about 52% on prose (21.1 tok/s
+  alone, thinking off). MTP wins with one or two requests and loses from three, so
+  the config runs 3 slots: one coordinator, two workers.
+- Qwen3.8-27B's MTP accepted 39 to 52% of drafts.
+- Qwen3.6's prompt reading fell to 310 tok/s for a 106K prompt with 3 other requests
+  running: one turn took 6 minutes.
+- Nemotron loads in about 25 seconds.
+
+### Coding (three tasks with hidden tests, 12,000-token cap)
+
+| Model, effort | Score | Time per task | Tokens per task |
+|---|---|---|---|
+| Nemotron, full | 3/3 | 202 to 399 s | 3,582 to 7,164 |
+| Nemotron, `medium_effort` | pending | | (726 against 2,283 on one prompt) |
+| Flash Next IQ3_XXS, medium | 3/3 | 41 to 110 s | 1,077 to 2,932 |
+| Flash Next IQ3_XXS, low | 2/3 | 27 to 77 s | 692 to 2,049 |
+| Flash Next IQ3_XXS, xhigh | 1/3 | 333 to 463 s | 8,728; two hit the cap |
+| Flash Next Q3_K_XL, xhigh | 0/3 | 502 to 511 s | all hit the cap |
+| Qwen3.8-27B, medium | 3/3 | 172 to 198 s | 3,206 to 3,648 |
+| Qwen3.8-27B, xhigh | 0/3 | 801 to 842 s | all hit the cap |
+| gpt-oss-120b, high | 2/3 | 48 to 117 s | 2,025 to 4,903 |
+
+gpt-oss missed that `lazy_chunks` must raise on the call rather than on the first
+`next()`. Flash Next at low missed `retry_after`.
+
+### Coordinator checks
+
+Single-turn scores count a first move that reads before delegating as a miss, so
+the multi-turn run is the one to trust.
+
+| Model, effort | Single turn | Multi-turn | Notes |
+|---|---|---|---|
+| Nemotron, full | 4/8 | passed | no writes; caught a fake worker; one `sudo journalctl` |
+| Flash Next IQ3_XXS, medium | 3/8 | passed | no writes; found the existing bind; split work both times |
+| Flash Next IQ3_XXS, low | 6/8 | one slip | called `edit` directly once |
+| Flash Next IQ3_XXS, xhigh | 3/8 | passed | no writes |
+| Flash Next Q3_K_XL, xhigh | 4/8 | passed | no writes; saw through fake workers; stray probing (`cd /root`, `git -C /`) |
+| Qwen3.8-27B, medium | 6/8 | passed the split twice | first multi-turn run crashed on a slow `find /`; rerun under way |
+| Qwen3.8-27B, xhigh | 2/8 | passed | |
+| gpt-oss-120b, high | 3/8 | one slip | called `edit` directly once; split work across three subagents |
+
+### Vision (aisle frame from the game's test baseline)
+
+| Model | Time | Result |
+|---|---|---|
+| Nemotron | 72 s | correct: blue racking, boxes, fluorescent lights, no text; missed the crosshair |
+| Flash Next IQ3_XXS, medium | 32 s | correct |
+| Flash Next Q3_K_XL, xhigh | | most observant: grey cube on the floor, red object at the end |
+| Qwen3.8-27B | | correct |
+| Qwen3.5-9B helper, thinking off | 15 s | mostly right; made up "flickering" lights, guessed Unity |
+| Qwen3.5-9B helper, thinking on | 47 s | correct, noted the flat untextured shading |
+
+### Published comparison (NVIDIA's Nemotron model card, vendor numbers)
+
+Nemotron trails Flash Next on most coding and agent rows (Terminal-Bench 2.1: 66.7
+against 85.8; SWE-bench Pro: 51.8 against 60.4) and beats Qwen3.5-122B-A10B on
+coding and agent rows, though not on vision.
 
 ## How models are tested
 
@@ -18,153 +246,12 @@ one model (load, memory, all checks, unload) and writes results to `$BENCH_OUT`:
   checked by hidden tests (`retry_after`, `safe_join`, `lazy_chunks`), and a vision
   description of the game's `tests/baseline/pose_05_aisle.png`.
 - `followup.py URL MODEL LABEL`: the same coordinator prompts over several turns,
-  answering `read` and read-only shell calls for real. The single-turn test scores
-  a model low when it reads a file before delegating; this one shows where it goes.
+  answering `read` and read-only shell calls for real.
 - `speed.py URL` and `par2.py URL N`: generation speed alone and with N thinking
   requests at once.
 - `vision.py URL IMAGE`: the frame description with thinking off, then on.
 
-`BENCH_EXTRA='{"temperature":1.0,"top_p":0.95}'` passes the model's own sampling.
-GPU memory is `mem_info_gtt_used` plus `mem_info_vram_used` under
-`/sys/class/drm/card1/device/`.
-
-## Nemotron 3.5 Super VL 120B-A12B (current, since 2026-10-27)
-
-- **File:** `unsloth/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-GGUF`, UD-Q3_K_XL
-  (65.8 GB) plus `mmproj-BF16.gguf` (1.7 GB). Q4_K_XL is 86.9 GB, over budget.
-- **Needs llama.cpp 0.7.0 or newer** (support merged 2026-10-15). nixpkgs had 0.6.0,
-  so `local-ai.nix` builds 0.7.0 with its tests off: `test-download-model` needs the
-  network, which the Nix sandbox blocks.
-- **Settings:** `-np 3 -kvu --kv-unified-per-slot 65536 -fa on -ngl 99 --load-mode
-  none -ub 2048 -ctk f16 -ctv f16 --spec-type draft-mtp --top-k 0 --min-p 0`.
-  Temperature 1.0 and top_p 0.95, NVIDIA's values. The coordinator uses
-  `enable_thinking`; workers add `medium_effort` through the `-instruct` alias.
-  opencode's context is 65536 with a 16384 output limit, so it compacts near 48K.
-- **Memory:** 72 GB of GPU memory with 3 slots and MTP; 66 GB with 4 slots and no
-  MTP; 74 GB with 4 slots and MTP. Loads in about 25 seconds.
-- **Speed, thinking on (tok/s):**
-
-  | Requests at once | No MTP | MTP |
-  |---|---|---|
-  | 1 | 18.6 | 28.4 |
-  | 2 | 26.0 | 29.0 |
-  | 3 | 30.2 | 24.6 |
-  | 4 | 30.9 | 19.6 |
-
-  MTP accepted 84% of drafts on code and about 52% on plain prose (21 tok/s alone).
-  It wins with one or two requests and loses beyond that, so the config runs 3
-  slots: one coordinator and two workers. Prompt reading: 306 tok/s at 19K tokens.
-- **`medium_effort`:** the same coding prompt used 726 tokens against 2,283 with
-  full reasoning.
-- **Results:**
-  - Coding: 3/3, but slow, at 3,600 to 7,200 tokens and 3.5 to 6.5 minutes a task.
-  - Vision: described the aisle frame correctly (blue racking, boxes, fluorescent
-    lights, no text, nothing broken). It didn't mention the crosshair.
-  - Coordinator: no direct edits or shell writes in any run. It refused the shared
-    file both times and handed the "just use sed" change to a subagent. Over
-    several turns it read the target file first, noticed when a bind already
-    existed, split independent work across two subagents, and caught a fake
-    worker that claimed success without making the change, then re-delegated.
-    It tried `sudo journalctl` once when logs were empty.
-- **Published comparison (NVIDIA's model card, vendor numbers):** below Qwen3.8
-  Flash Next on most coding and agent rows (Terminal-Bench 2.1: 66.7 against 85.8;
-  SWE-bench Pro: 51.8 against 60.4); above Qwen3.5-122B-A10B on coding and agent
-  rows, below it on vision.
-
-## Qwen3.8-27B (tested 2026-10-27, not in use)
-
-- **File:** `unsloth/Qwen3.8-27B-GGUF`, UD-Q6_K_XL plus `mmproj-F16.gguf`. Dense, with
-  vision and an MTP head.
-- **Settings tested:** `-np 3 -kvu --kv-unified-per-slot 65536 -fa on -ngl 99 -ub 2048
-  --spec-type draft-mtp`, temperature 1.0, top_p 0.95, top_k 20.
-- **Memory:** 45 GB GPU memory, nothing extra in the server process.
-- **Speed:** 13 tok/s alone even with MTP (39 to 52% of drafts accepted), 20.5 tok/s
-  with two thinking requests, 17.3 with four, prompt reading 235 tok/s.
-- **Results:** coding 0/3, each still thinking at the 12,000-token cap after 13 to 14
-  minutes. Over several turns it delegated the two-part task to subagents both
-  times and wrote nothing. Vision accurate. Too slow on this machine for either role.
-
-## Qwen3.6 35B A3B (dropped 2026-10-27)
-
-- **File:** `unsloth/Qwen3.6-35B-A3B-GGUF`, UD-Q4_K_XL (21 GiB) plus
-  `mmproj-F16.gguf`. About 25% faster generation than Q8 on this machine.
-- **Settings used:** 4 slots of 128K with `-kvu`, f16 cache (only 10 of its 40
-  layers keep one, so 4 x 128K is about 11 GB). Thinking on for the coordinator
-  (temperature 0.6, top_p 0.95, top_k 20), off for workers (0.7, 0.8, presence
-  penalty 1.5). About 37 GB of GPU memory loaded.
-- **Speed:** about 46 tok/s alone; prompt reading 600 to 1,600 tok/s, falling to
-  310 tok/s for a 106K prompt with 3 other requests running (6 minutes for one turn).
-- **Why it was dropped:** as a coordinator it never delegated (94 steps without a
-  subagent call), edited files through `sed` and `mv` after edits were denied,
-  changed git remotes, ran garbage collection unasked, wrote to Warpledge's shared
-  files, and ran `git checkout HEAD -- .` over uncommitted game work. Ky also found
-  its code poor. An independent Strix Halo coding test scored it 6/10.
-
-## Qwen3.8 Flash Next (replaced 2026-10-27, retested the same day)
-
-- **Files:** `unsloth/Qwen3.8-Flash-Next-GGUF`, UD-Q3_K_XL (89.9 GB, in its
-  `UD-Q3_K_XL/` folder) and UD-IQ3_XXS (81.9 GB), plus `mmproj-F16.gguf`. Q4 is
-  111 GB. A 24.6 GB MTP drafter exists but wasn't tried: it doesn't fit beside either.
-- **Settings used in production:** one slot of 128K, f16 K cache and q8_0 V cache
-  (about 17% faster prompts at 32K with perplexity within error), Qwen's thinking
-  sampling (temperature 1.0, top_p 0.95, top_k 20). That took 68 GB GPU memory plus
-  36 GB in llama-server's own process, too little for everything else: it ran out
-  of memory.
-- **Retest settings (2026-10-27):** `-np 2 -kvu --kv-unified-per-slot 65536 -fa on
-  -ngl 99 --load-mode none -ub 2048 -ctk f16 -ctv q8_0`, same sampling. Part of the
-  model stays in the server process rather than GPU memory, so count both.
-
-  | | UD-Q3_K_XL | UD-IQ3_XXS |
-  |---|---|---|
-  | GPU + server process | 66 + 27 GB | 59 + 27 GB |
-  | RAM left at peak | 10 GB | 19 GB |
-  | Generation, alone | 25.1 tok/s | 28.2 tok/s |
-  | Two thinking requests | 32.4 tok/s | 38.9 tok/s |
-  | 4 requests | 34.8 tok/s | 37.8 tok/s |
-  | Prompt reading (19K) | 407 tok/s | 410 tok/s |
-  | Coding (12K-token cap) | 0/3 | 1/3 |
-
-- **Results:** it thinks far longer than Nemotron. Every coding miss above ran out
-  of the 12,000-token cap before writing code, after 7.5 to 8.5 minutes; the one
-  pass took 8,700 tokens. As a coordinator over several turns it delegated in
-  parallel, wrote nothing, and noticed that the fake workers' "Done" replies hadn't
-  changed anything. It probes more than it needs to (`cd /root`, `git -C /`,
-  `uname`). Its vision answer was the most observant of any model tested: it saw
-  the grey cube on the floor and the small red object at the end of the aisle.
-- Ky found its work good but slow. IQ3_XXS fits a 90 GB budget, not 80.
-
-## Earlier models (2026-10-25, from commit messages)
-
-- **DeepSeek V4 Flash:** UD-IQ3_XXS, 97 GiB, 13B active. Its DSpark drafter (10 GiB)
-  nearly doubled generation but left about 1 GiB of RAM free. Thinking capped at
-  4096 tokens.
-- **gpt-oss-120b:** MXFP4, 59 GiB, 5B active. Read input about 3 times faster than
-  DeepSeek. Text only.
-- **Ornith 1.5 35B A3B:** replaced by the two above the same day.
-
-## gpt-oss-120b with a Qwen3.5-9B vision helper (tested 2026-10-27, not in use)
-
-The text-only main model for the coordinator and workers, plus a small vision model
-loaded beside it only when an image needs looking at.
-
-- **Files:** `ggml-org/gpt-oss-120b-GGUF`, MXFP4 (63.3 GB, 5.1B active, text only).
-  `unsloth/Qwen3.5-9B-GGUF`, UD-Q4_K_XL (6.0 GB) plus `mmproj-F16.gguf` (0.9 GB).
-  LM Studio wouldn't fetch the mmproj; it came straight from Hugging Face.
-- **gpt-oss settings tested:** `-np 3 -kvu --kv-unified-per-slot 65536 -fa on -ngl 99
-  --load-mode none -ub 2048`, f16 cache, temperature 1.0, top_p 1.0 (OpenAI's),
-  `chat_template_kwargs.reasoning_effort = "high"`. Its template ignores
-  `enable_thinking`; effort is low, medium or high.
-- **Vision helper settings tested:** `-np 1 -c 32768 -fa on -ngl 99`, temperature 0.7,
-  top_p 0.8, top_k 20 (Qwen's non-thinking values).
-- **Memory:** gpt-oss alone 69 GB; with the helper loaded 77 GB.
-- **gpt-oss speed:** 45 tok/s alone, 53 tok/s total with 4 requests, prompt reading
-  849 tok/s at 19K tokens. About 2.5 times Nemotron on all three.
-- **Results:**
-  - Coding: 2/3 in 1 to 2 minutes a task. It missed that `lazy_chunks` must raise
-    on the call rather than on the first `next()`.
-  - Coordinator: refused the shared file, split work across three subagents over
-    several turns, and noticed the existing bind. In one run it called the `edit`
-    tool directly, which opencode's deny would have blocked; Nemotron never tried.
-  - Vision (helper): with thinking off, 15 s and mostly right, but it made up
-    "flickering" lights and guessed the engine (Unity). With thinking on, 47 s and
-    accurate, including the flat untextured shading.
+`BENCH_EXTRA` passes the model's own sampling and template switches, for example
+`'{"temperature":1.0,"top_p":0.95,"chat_template_kwargs":{"reasoning_effort":"medium"}}'`.
+Check a model's chat template for an effort switch before testing: Flash Next and
+Qwen3.8-27B default to `xhigh`, which made both look far worse than they are.
