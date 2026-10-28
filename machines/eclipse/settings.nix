@@ -56,7 +56,7 @@
       media.ytDlp = false;
       media.aniCli = false;
       security.keepassxc = false;
-      opencodeDesktop.enable = false;
+      opencodeDesktop.enable = true;
     };
   };
 
