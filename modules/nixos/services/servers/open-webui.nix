@@ -60,11 +60,11 @@
 
   #--- Points FRONTEND_BUILD_DIR at the themed copy from postFixup, in place of
   #--- upstream's makeWrapperArgs
-  #--- mcp 2.x (nixpkgs) removed the `streamablehttp_client` adapter Open WebUI
-  #--- imports, so it crashes on startup. Targets the pinned v0.12.3 source;
-  #--- drop it when the package is bumped past the mcp 2.x break.
   openWebuiPatched = pkgs.open-webui.overridePythonAttrs (old: {
-    patches = [ ./open-webui-mcp2.patch ];
+    #--- mcp 2.x (nixpkgs) removed the `streamablehttp_client` adapter Open WebUI
+    #--- imports, so it crashes on startup. Targets the pinned v0.12.3 source;
+    #--- drop it when the package is bumped past the mcp 2.x break.
+    patches = (old.patches or []) ++ [./open-webui-mcp2.patch];
     makeWrapperArgs = [];
     postFixup = ''
       wrapProgram $out/bin/open-webui --set FRONTEND_BUILD_DIR ${themedFrontend}
