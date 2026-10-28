@@ -57,6 +57,7 @@
       media.aniCli = false;
       security.keepassxc = false;
       opencodeDesktop.enable = true;
+      openWebui.enable = false;
     };
   };
 
