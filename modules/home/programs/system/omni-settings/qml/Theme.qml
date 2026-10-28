@@ -47,12 +47,47 @@ Singleton {
     readonly property color success: green || "#a6e3a1"
     readonly property color caution: yellow || "#f9e2af"
 
-    //--- A page's own accent: the palette's primary hue turned a third and two
-    //--- thirds round, so pages differ while the colours still follow the wallpaper.
-    //--- A grey scheme would leave them all grey, so keep a little saturation.
-    function pageAccent(index) {
-        const h = (primary.hslHue + [0, 1 / 3, 2 / 3][index % 3]) % 1
+    //--- Page accents: primary's hue turned in 30° steps, leaving out any within 45°
+    //--- of a status colour so a page never reads as a state; ordered so the hues
+    //--- next to each other in the list sit far apart on the wheel
+    readonly property var accentHues: {
+        const base = Math.max(0, primary.hslHue)  // -1 for a grey primary
+        const status = [success, caution, error].map(c => c.hslHue).filter(h => h >= 0)
+        const near = (a, b) => Math.min(Math.abs(a - b), 1 - Math.abs(a - b)) < 0.125
+        const hues = []
+        for (let k = 0; k < 12; k++) {
+            const h = (base + k / 12) % 1
+            if (k === 0 || !status.some(s => near(h, s)))
+                hues.push(h)
+        }
+        const half = Math.ceil(hues.length / 2), out = []
+        for (let i = 0; i < half; i++) {
+            out.push(hues[i])
+            if (i + half < hues.length)
+                out.push(hues[i + half])
+        }
+        return out
+    }
+    //--- A grey scheme would leave them all grey, so keep a little saturation
+    function pageAccent(n) {
+        const h = accentHues[n % accentHues.length]
         return Qt.hsla(h, Math.max(0.3, primary.hslSaturation), primary.hslLightness, 1)
+    }
+    //--- A page's place in accentHues from its id, so it keeps its colour as pages
+    //--- around it come and go
+    function accentIndex(id) {
+        let h = 0
+        for (let i = 0; i < id.length; i++)
+            h = (h * 31 + id.charCodeAt(i)) | 0
+        return Math.abs(h) % accentHues.length
+    }
+    //--- The accent of the page `item` sits in (the nearest `pageAccent` above it),
+    //--- or primary outside one, as in sheets and dialogs
+    function accentOf(item) {
+        for (let p = item; p; p = p.parent)
+            if (p.pageAccent !== undefined)
+                return p.pageAccent
+        return primary
     }
 
     //--- Status tones for rows, badges and chips: "error", "success", "caution", or "" for none

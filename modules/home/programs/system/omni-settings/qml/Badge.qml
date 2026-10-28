@@ -12,7 +12,7 @@ Rectangle {
     implicitWidth: 38
     implicitHeight: 38
     radius: 19
-    color: appPath || looking ? "transparent" : tone ? Theme.toneColor(tone) : Theme.primary
+    color: appPath || looking ? "transparent" : tone ? Theme.toneColor(tone) : Theme.accentOf(badge)
     Icon {
         id: glyph
         visible: !badge.appPath && !badge.looking

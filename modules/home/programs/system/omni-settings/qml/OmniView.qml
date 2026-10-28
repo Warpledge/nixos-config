@@ -10,6 +10,7 @@ Item {
     signal closeRequested
 
     property int edge: 14  // gap between the view and the window's edges
+    property int gutter: 8  // the part of `edge` left of the pages that holds their band
     property var info: null
     property string loadError: ""
     property var stale: null  // api.py's `stale`, when the settings files don't evaluate
@@ -106,6 +107,21 @@ Item {
     //--- Packages scroll, and All user packages shows only while there's no category
     readonly property var tabPages: navItems.filter(i => i.tab === tab && i.id !== "packages"
                                                     && !(i.id === "userpackages" && packageCategories.length))
+    //--- Each page's colour by id; a page that would match the one above takes the
+    //--- next, and a run of notes shares the first one's
+    readonly property var pageAccents: {
+        const out = {}
+        let prev = -1
+        tabPages.forEach((p, i) => {
+            const runOn = p.id.startsWith("doc:") && i > 0 && tabPages[i - 1].id.startsWith("doc:")
+            let n = runOn ? prev : Theme.accentIndex(p.id)
+            if (!runOn && n === prev)
+                n = (n + 1) % Theme.accentHues.length
+            out[p.id] = Theme.pageAccent(n)
+            prev = n
+        })
+        return out
+    }
     readonly property var scopes: !info ? [] : [{ id: info.machine, title: `This computer (${info.machine})` }]
         .concat(info.userMachines.filter(m => m !== info.machine).map(m => ({ id: m, title: m })))
         .concat([{ id: "", title: "All computers" }])
@@ -830,6 +846,7 @@ Item {
             id: bodyFlick
             Layout.fillWidth: true
             Layout.fillHeight: true
+            Layout.leftMargin: -omni.gutter
             contentHeight: body.implicitHeight + 16
             clip: true
             boundsBehavior: Flickable.StopAtBounds
@@ -857,7 +874,8 @@ Item {
 
             ColumnLayout {
                 id: body
-                width: parent.width
+                x: omni.gutter
+                width: parent.width - omni.gutter
                 spacing: 6
                 opacity: omni.reveal
                 transform: Translate { y: omni.rise }
@@ -1038,6 +1056,7 @@ Item {
                 required property int index
                 readonly property var prev: index > 0 ? railList.model[index - 1] : null
                 readonly property bool active: omni.page === modelData.id
+                readonly property color accent: omni.pageAccents[modelData.id] || Theme.primary
                 width: railList.width
                 //--- A line where the page list starts a new group
                 Item {
@@ -1055,14 +1074,14 @@ Item {
                     width: parent.width
                     height: 40
                     radius: 20
-                    color: railItem.active ? Theme.primary : railHover.hovered ? Theme.hover : "transparent"
+                    color: railItem.active ? railItem.accent : railHover.hovered ? Theme.hover : "transparent"
                     Behavior on color { ColorAnimation { duration: 120 } }
                     Icon {
                         anchors.centerIn: parent
                         icon: Theme.glyph(railItem.modelData.icon)
                         size: 20
                         fill: railItem.active
-                        color: railItem.active ? Theme.inkPrimary : railHover.hovered ? Theme.inkSelected : Theme.dim
+                        color: railItem.active ? Theme.inkPrimary : railItem.accent
                     }
                     HoverHandler { id: railHover; cursorShape: Qt.PointingHandCursor }
                     TapHandler {
@@ -1198,8 +1217,8 @@ Item {
         required property var modelData
         required property int index
         readonly property string pid: modelData.id
-        //--- This page's own colour, cycled so two pages never look alike
-        readonly property var accent: Theme.pageAccent(index)
+        //--- This page's own colour, which its headings and badges read (Theme.accentOf)
+        readonly property color pageAccent: omni.pageAccents[pid] || Theme.primary
         readonly property bool note: pid.startsWith("doc:")
         readonly property bool userPkgs: pid.startsWith("userpackages:")
         readonly property bool open: !note || !!omni.openNotes[pid]
@@ -1233,17 +1252,17 @@ Item {
                 gradient: Gradient {
                     orientation: Gradient.Horizontal
                     GradientStop { position: 0; color: "transparent" }
-                    GradientStop { position: 1; color: section.accent }
+                    GradientStop { position: 1; color: section.pageAccent }
                 }
             }
-            Rectangle { implicitWidth: 7; implicitHeight: 7; rotation: 45; color: section.accent }
+            Rectangle { implicitWidth: 7; implicitHeight: 7; rotation: 45; color: section.pageAccent }
             Rectangle {
                 implicitWidth: dividerName.implicitWidth + 40
                 implicitHeight: 46
                 radius: 23
-                color: Qt.tint(Theme.card, Qt.alpha(section.accent, 0.35))
+                color: Qt.tint(Theme.card, Qt.alpha(section.pageAccent, 0.35))
                 border.width: 2
-                border.color: section.accent
+                border.color: section.pageAccent
                 Row {
                     id: dividerName
                     anchors.centerIn: parent
@@ -1264,13 +1283,13 @@ Item {
                     }
                 }
             }
-            Rectangle { implicitWidth: 7; implicitHeight: 7; rotation: 45; color: section.accent }
+            Rectangle { implicitWidth: 7; implicitHeight: 7; rotation: 45; color: section.pageAccent }
             Rectangle {
                 Layout.fillWidth: true
                 implicitHeight: 2
                 gradient: Gradient {
                     orientation: Gradient.Horizontal
-                    GradientStop { position: 0; color: section.accent }
+                    GradientStop { position: 0; color: section.pageAccent }
                     GradientStop { position: 1; color: "transparent" }
                 }
             }
@@ -1286,22 +1305,29 @@ Item {
         }
 
         // Height from the page itself, as a layout-set one would loop with wrapped text
-        RowLayout {
+        Item {
             Layout.fillWidth: true
             Layout.preferredHeight: loader.item ? loader.item.implicitHeight : 0
-            spacing: 12
-            //--- The page's colour, marking where it starts and ends
+            //--- A faint wash of the page's colour, edged by its band in the gutter
             Rectangle {
-                visible: section.divided
-                Layout.preferredWidth: 3
-                Layout.fillHeight: true
+                visible: section.divided && !!loader.item
+                x: -omni.gutter
+                width: parent.width + omni.gutter
+                height: parent.height
+                radius: 14
+                color: Qt.alpha(section.pageAccent, 0.05)
+            }
+            Rectangle {
+                visible: section.divided && !!loader.item
+                x: -omni.gutter + 2
+                width: 3
+                height: parent.height
                 radius: 1.5
-                color: Qt.alpha(section.accent, 0.7)
+                color: Qt.alpha(section.pageAccent, 0.7)
             }
             Loader {
                 id: loader
-                Layout.fillWidth: true
-                Layout.preferredHeight: item ? item.implicitHeight : 0
+                width: parent.width
                 active: section.open && !!section.comp
                 sourceComponent: section.comp
                 // Data that came after the tab showed eases in
