@@ -8,7 +8,9 @@ it measured, so the next change starts from these numbers instead of from scratc
 ## How models are tested
 
 The scripts in `local-ai-bench/` run against a llama-server started by hand on a
-spare port (8095), with llama-swap's model unloaded so the two don't share memory:
+spare port (8095), with llama-swap's model unloaded so the two don't share memory.
+`run.sh LABEL SERVER MODEL "FLAGS" 'BENCH_EXTRA' [IMAGE]` does the whole round for
+one model (load, memory, all checks, unload) and writes results to `$BENCH_OUT`:
 
 - `bench.py URL MODEL LABEL [IMAGE]`: generation and prompt speed, 4 requests at
   once, a coordinator tool-discipline test (delegate an edit, split two tasks,
@@ -69,6 +71,19 @@ GPU memory is `mem_info_gtt_used` plus `mem_info_vram_used` under
   SWE-bench Pro: 51.8 against 60.4); above Qwen3.5-122B-A10B on coding and agent
   rows, below it on vision.
 
+## Qwen3.8-27B (tested 2026-10-27, not in use)
+
+- **File:** `unsloth/Qwen3.8-27B-GGUF`, UD-Q6_K_XL plus `mmproj-F16.gguf`. Dense, with
+  vision and an MTP head.
+- **Settings tested:** `-np 3 -kvu --kv-unified-per-slot 65536 -fa on -ngl 99 -ub 2048
+  --spec-type draft-mtp`, temperature 1.0, top_p 0.95, top_k 20.
+- **Memory:** 45 GB GPU memory, nothing extra in the server process.
+- **Speed:** 13 tok/s alone even with MTP (39 to 52% of drafts accepted), 20.5 tok/s
+  with two thinking requests, 17.3 with four, prompt reading 235 tok/s.
+- **Results:** coding 0/3, each still thinking at the 12,000-token cap after 13 to 14
+  minutes. Over several turns it delegated the two-part task to subagents both
+  times and wrote nothing. Vision accurate. Too slow on this machine for either role.
+
 ## Qwen3.6 35B A3B (dropped 2026-10-27)
 
 - **File:** `unsloth/Qwen3.6-35B-A3B-GGUF`, UD-Q4_K_XL (21 GiB) plus
@@ -85,16 +100,38 @@ GPU memory is `mem_info_gtt_used` plus `mem_info_vram_used` under
   files, and ran `git checkout HEAD -- .` over uncommitted game work. Ky also found
   its code poor. An independent Strix Halo coding test scored it 6/10.
 
-## Qwen3.8 Flash Next (replaced 2026-10-27, files still on disk)
+## Qwen3.8 Flash Next (replaced 2026-10-27, retested the same day)
 
-- **File:** `unsloth/Qwen3.8-Flash-Next-GGUF`, UD-Q3_K_XL (84 GiB) plus
-  `mmproj-F16.gguf`. Q4 is 111 GB.
-- **Settings:** one slot of 128K, f16 K cache and q8_0 V cache (about 17% faster
-  prompts at 32K with perplexity within error), Qwen's thinking sampling
-  (temperature 1.0, top_p 0.95, top_k 20).
-- **Memory:** 68 GB GPU memory plus 36 GB in llama-server's own process with one
-  128K slot. That left too little for everything else, and it ran out of memory.
-- Good results by Ky's account, but slow. No speed numbers were recorded.
+- **Files:** `unsloth/Qwen3.8-Flash-Next-GGUF`, UD-Q3_K_XL (89.9 GB, in its
+  `UD-Q3_K_XL/` folder) and UD-IQ3_XXS (81.9 GB), plus `mmproj-F16.gguf`. Q4 is
+  111 GB. A 24.6 GB MTP drafter exists but wasn't tried: it doesn't fit beside either.
+- **Settings used in production:** one slot of 128K, f16 K cache and q8_0 V cache
+  (about 17% faster prompts at 32K with perplexity within error), Qwen's thinking
+  sampling (temperature 1.0, top_p 0.95, top_k 20). That took 68 GB GPU memory plus
+  36 GB in llama-server's own process, too little for everything else: it ran out
+  of memory.
+- **Retest settings (2026-10-27):** `-np 2 -kvu --kv-unified-per-slot 65536 -fa on
+  -ngl 99 --load-mode none -ub 2048 -ctk f16 -ctv q8_0`, same sampling. Part of the
+  model stays in the server process rather than GPU memory, so count both.
+
+  | | UD-Q3_K_XL | UD-IQ3_XXS |
+  |---|---|---|
+  | GPU + server process | 66 + 27 GB | 59 + 27 GB |
+  | RAM left at peak | 10 GB | 19 GB |
+  | Generation, alone | 25.1 tok/s | 28.2 tok/s |
+  | Two thinking requests | 32.4 tok/s | 38.9 tok/s |
+  | 4 requests | 34.8 tok/s | 37.8 tok/s |
+  | Prompt reading (19K) | 407 tok/s | 410 tok/s |
+  | Coding (12K-token cap) | 0/3 | 1/3 |
+
+- **Results:** it thinks far longer than Nemotron. Every coding miss above ran out
+  of the 12,000-token cap before writing code, after 7.5 to 8.5 minutes; the one
+  pass took 8,700 tokens. As a coordinator over several turns it delegated in
+  parallel, wrote nothing, and noticed that the fake workers' "Done" replies hadn't
+  changed anything. It probes more than it needs to (`cd /root`, `git -C /`,
+  `uname`). Its vision answer was the most observant of any model tested: it saw
+  the grey cube on the floor and the small red object at the end of the aisle.
+- Ky found its work good but slow. IQ3_XXS fits a 90 GB budget, not 80.
 
 ## Earlier models (2026-10-25, from commit messages)
 

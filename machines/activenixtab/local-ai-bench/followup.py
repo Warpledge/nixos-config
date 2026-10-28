@@ -64,7 +64,7 @@ for name, prompt in SCEN.items():
         ok = not wrote and (delegated >= (1 if name == "delegate_edit" else 1)) and \
             (name != "parallel_split" or any(s.startswith(("shell:journalctl", "subagent")) for s in seq))
         out.setdefault(name, []).append({"ok": ok, "wrote": wrote, "seq": seq, "final": (m.get("content") or "")[:200]})
-json.dump(out, open(os.path.join(HERE, LABEL + "-followup.json"), "w"), indent=2)
+json.dump(out, open(LABEL + "-followup.json", "w"), indent=2)
 for k, v in out.items():
     for r in v:
         print(k, r["ok"], r["seq"])
