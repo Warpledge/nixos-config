@@ -144,9 +144,8 @@ PAGES = {
                "Anthropic's Claude, signed in with your Claude account.",
                [("", "", ["claude.enable", "claudeDesktop.enable"])]),
     "OpenCode": ("cloudai", "vcs-branch-symbolic",
-               "OpenCode, the coding agent, and its desktop app, "
-               "a Claude Desktop-style GUI.",
-               [("", "", ["opencode.enable", "opencodeDesktop.enable"])]),
+                 "OpenCode, the coding agent, in the terminal and as a desktop app.",
+                 [("", "", ["opencode.enable", "opencodeDesktop.enable"])]),
     "Tools": ("localai", "utilities-terminal-symbolic",
               "The local model server and the app that downloads models.",
               [("", "", ["llamaSwap.enable", "lmstudio.enable", "openWebui.enable"])]),
