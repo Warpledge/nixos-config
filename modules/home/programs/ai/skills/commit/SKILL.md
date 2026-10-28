@@ -21,9 +21,9 @@ keyboard, never another person's. Push and history rewrites (amend, rebase, forc
      alone even if found while doing something else. Changes that cancel out within the
      session (a toggle switched on, then off) aren't committed at all.
    - **Settings ride along**: stage every changed `machines/*/settings.nix` and
-     `users/*/settings.nix` with the first commit of the run, whatever it is about; when
-     only they changed, commit them alone as `chore(<machine>): save settings from Omni
-     Settings`.
+     `users/*/settings.nix` with the commit being made, whatever it is about, and leave
+     them out of its message; when only they changed, commit them alone as
+     `chore(<machine>): save settings from Omni Settings`.
    - A file mixing topics (`claude.nix`, `settings.nix`, CLAUDE.md) gets split by hunk;
      `git add -p` is interactive and unavailable, so:
      ```bash
