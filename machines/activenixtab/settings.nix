@@ -18,6 +18,11 @@
       wallpaper = "engine";
       terminals.ghostty = true;
       defaultApps.terminal = "ghostty";
+      opencodeDesktop.enable = false;
+      env = {};
+      autostart = {};
+      mimeTypes = {};
+      windowRules = {};
     };
   };
 
@@ -64,4 +69,6 @@
 
   #--- Flatpak, with Flatseal (RetroDECK)
   flatpak.enable = true;
+  boot.menu.timeout = 5;
+  boot.menu.entries = 10;
 }
