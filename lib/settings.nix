@@ -36,6 +36,11 @@
     "localAi.chat" = lib.attrNames (import ./local-models.nix).chat;
   };
   portLists = ["firewall.openTCPPorts" "firewall.openUDPPorts"];
+  #--- Whole-number machine settings and the range each takes
+  numberRanges = {
+    "boot.menu.timeout" = [0 60];
+    "boot.menu.entries" = [1 50];
+  };
   #--- Sets of named lists of text, e.g. userPackages = {Media = ["vlc"];};
   #--- a machine's users.<name> block replaces the user's whole set
   grouped = ["userPackages" "autostart"];
@@ -174,7 +179,15 @@
       wrong = lib.filter (v: !(lib.isInt v && v >= 1 && v <= 65535)) (listAt path set);
     in
       lib.optional (wrong != []) "`${path}` has ${builtins.toJSON wrong}; use port numbers from 1 to 65535")
-    portLists;
+    portLists
+    ++ lib.concatLists (lib.mapAttrsToList (path: range: let
+      value = lib.attrByPath (lib.splitString "." path) null set;
+      low = builtins.elemAt range 0;
+      high = builtins.elemAt range 1;
+    in
+      lib.optional (lib.isInt value && (value < low || value > high))
+      "`${path}` is ${toString value}; use a number from ${toString low} to ${toString high}")
+    numberRanges);
 
   #--- Stops evaluation with every problem found in `file`
   report = file: lines:

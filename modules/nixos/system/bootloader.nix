@@ -47,10 +47,11 @@ in {
         consoleMode = "max"; # Use full console resolution
         # An entry picked in the menu itself lives in an EFI variable that
         # outranks loader.conf, and so does a timeout set there: clear both, so
-        # the menu starts the newest generation and keeps the timeout above
+        # the menu starts the newest generation and keeps the timeout above.
+        # Allowed to fail where the EFI variables can't be written
         extraInstallCommands = ''
-          ${config.systemd.package}/bin/bootctl --esp-path=${esp} set-default ""
-          ${config.systemd.package}/bin/bootctl --esp-path=${esp} set-timeout ""
+          ${config.systemd.package}/bin/bootctl --esp-path=${esp} set-default "" || true
+          ${config.systemd.package}/bin/bootctl --esp-path=${esp} set-timeout "" || true
         '';
       };
       efi.canTouchEfiVariables = true;

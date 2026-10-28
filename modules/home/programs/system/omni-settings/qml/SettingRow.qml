@@ -242,8 +242,8 @@ Rectangle {
                 onAccepted: set()
                 function set() {
                     const t = text.trim()
-                    if (!/^-?[0-9]+$/.test(t)) {
-                        row.view.say("A whole number, like 5")
+                    if (!/^[0-9]+$/.test(t)) {
+                        row.view.say("A whole number of 0 or more, like 5")
                         return
                     }
                     row.view.change(row.s, parseInt(t))
