@@ -82,6 +82,12 @@ when Ky approves it.
 - `home/ghostty.nix` — Ghostty with `ghostty-touch.patch` (a tap clicks at the finger,
   a one-finger drag scrolls), built from source since the patched package isn't
   cached, and the DMS colour theme the shared module doesn't load yet
+- `home/on-screen-input/` — for use without the folio: wvkbd (a user service started
+  hidden, coloured by a matugen template, shown and hidden with `osk-toggle`) and an
+  on-screen touchpad panel (`touchpad.py`, `touchpad-toggle`) that feeds a virtual
+  touchpad, so libinput's tap, scroll and drag apply. Each has a DMS bar plugin
+  (`oskToggle`, `touchpadToggle`) added from DMS's bar settings; a one-finger swipe up
+  from the bottom edge also runs `osk-toggle` (`wm/touch-gestures.py`)
 - `home/godot-mcp.nix` — the godot-mcp server, built from GitHub at a pinned commit and
   put on PATH; a Godot project's `opencode.json` starts it (`~/godot-mcp-demo` does)
 - `home/unreal-engine.nix` — `unreal-editor` and its desktop entry: Epic's prebuilt

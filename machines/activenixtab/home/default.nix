@@ -15,6 +15,7 @@
     ./ghostty.nix
     ./godot-mcp.nix
     ./local-ai.nix
+    ./on-screen-input
     ./unreal-engine.nix
   ];
 }

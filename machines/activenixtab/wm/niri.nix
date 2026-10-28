@@ -64,7 +64,8 @@
             command = [
               "${pkgs.writeShellScript "touch-gestures" ''
                 ${pkgs.python3.withPackages (p: [p.evdev])}/bin/python3 \
-                  ${./touch-gestures.py} /dev/input/by-path/platform-AMDI0010:00-event
+                  ${./touch-gestures.py} /dev/input/by-path/platform-AMDI0010:00-event \
+                  osk-toggle
               ''}"
             ];
           }

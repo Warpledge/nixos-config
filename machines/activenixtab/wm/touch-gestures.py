@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # Three-finger drags on the touchscreen become touchpad swipes, so niri scrolls
 # columns and workspaces under the fingers. Fewer fingers pass through untouched.
-# It also holds the touchpad while ~/.config/niri/touchpad-off isn't empty.
-# Usage: touch-gestures <touchscreen event device>
+# It also holds the touchpad while ~/.config/niri/touchpad-off isn't empty, and
+# runs the optional command on a one-finger swipe up from the bottom edge.
+# Usage: touch-gestures <touchscreen event device> [command...]
 import json
 import os
 import select
@@ -18,6 +19,12 @@ from evdev import ecodes as e
 HOLD = 0.09
 # Movement (device units) that commits a held-back touch to the app under it
 MOVE = 40
+# Edge swipe, as fractions of the screen: where it starts and how far it rises.
+# A touch on the edge is held back up to EDGE_HOLD seconds to see if it rises.
+EDGE = 0.03
+EDGE_RISE = 0.05
+EDGE_HOLD = 0.4
+edge_command = sys.argv[2:]
 
 src = evdev.InputDevice(sys.argv[1])
 caps = src.capabilities(absinfo=True)
@@ -95,6 +102,8 @@ held = []  # frames held back in "hold"
 hold_start = 0.0
 start = {}  # slot -> position when the touch landed
 g = {}  # gesture state
+edge = False  # the held touch landed on the bottom edge
+edge_t = "Normal"  # the screen's transform when it did
 
 
 def forward(frame, slot):
@@ -171,6 +180,26 @@ def begin_gesture():
     pad_frame()
 
 
+def on_screen(pos, t):
+    # Panel position to where it is on the turned screen, 0-1 on each axis
+    nx, ny = pos[0] / xmax, pos[1] / ymax
+    return {
+        "_90": (1 - ny, nx),
+        "_180": (1 - nx, 1 - ny),
+        "_270": (ny, 1 - nx),
+    }.get(t, (nx, ny))
+
+
+def rise():
+    # (up, sideways) since the touch landed, for the one finger down
+    s = next(iter(slots))
+    if s not in start:
+        return 0.0, 0.0
+    x0, y0 = on_screen(start[s], edge_t)
+    x1, y1 = on_screen(slots[s], edge_t)
+    return y0 - y1, abs(x1 - x0)
+
+
 def moved():
     return any(
         abs(slots[s][0] - start[s][0]) + abs(slots[s][1] - start[s][1]) > MOVE
@@ -219,7 +248,8 @@ try:
         touchpad_switch()
         timeout = 0.5
         if mode == "hold":
-            timeout = max(0.0, hold_start + HOLD - time.monotonic())
+            wait = EDGE_HOLD if edge else HOLD
+            timeout = max(0.0, hold_start + wait - time.monotonic())
         r, _, _ = select.select([src.fd], [], [], timeout)
         if not r and mode != "hold":
             continue
@@ -258,15 +288,25 @@ try:
             if mode == "idle":
                 if slots:
                     mode, hold_start, held = "hold", time.monotonic(), []
+                    edge = False
+                    if edge_command and len(slots) == 1:
+                        edge_t = transform()
+                        pos = next(iter(slots.values()))
+                        edge = on_screen(pos, edge_t)[1] > 1 - EDGE
                 else:
                     forward(done, fslot)
                     continue
             if mode == "hold":
                 held.append((done, fslot))
+                up, side = rise() if edge and len(slots) == 1 else (0.0, 0.0)
                 if len(slots) >= 3:
                     held = []
                     begin_gesture()
-                elif not slots or moved():
+                elif up >= EDGE_RISE:
+                    held = []
+                    subprocess.Popen(edge_command)
+                    mode = "drain"
+                elif not slots or (moved() and not (edge and up > side)):
                     flush()
                     mode = "pass" if slots else "idle"
             elif mode == "pass":
