@@ -12,6 +12,22 @@
 }: let
   port = 8090; # Open WebUI's address for llama-swap
 
+  #--- 0.7.0 adds Nemotron 3.5 Super VL; nixpkgs is on 0.6.0, whose one patch
+  #--- 0.7.0 already has. Drop this once nixpkgs reaches 0.7.0
+  llamaCpp = pkgs.llama-cpp-vulkan.overrideAttrs {
+    version = "0.7.0";
+    src = pkgs.fetchFromGitHub {
+      owner = "ggml-org";
+      repo = "llama.cpp";
+      tag = "v0.7.0";
+      hash = "sha256-pEDYgI3AMTU+cekvRX7NNt5wddznydQSNuerswvEpsA=";
+    };
+    patches = [];
+    # 0.7.0's test-download-model fetches from Hugging Face, which the sandbox blocks
+    doCheck = false;
+    npmDepsHash = "sha256-hqYzdp1FwPhYkBP278fQXgY9NCKB6Q3P6Gko7BfP0m0=";
+  };
+
   #--- Finds a download in its LM Studio folder, whatever the file's exact name;
   #--- the first part of a split file sorts first
   launch = pkgs.writeShellScript "llama-model" ''
@@ -22,7 +38,7 @@
       echo "No $match in $dir: download it in LM Studio" >&2
       exit 1
     fi
-    exec ${lib.getExe' pkgs.llama-cpp-vulkan "llama-server"} -m "$file" "$@"
+    exec ${lib.getExe' llamaCpp "llama-server"} -m "$file" "$@"
   '';
 
   modelsDir = "${config.home.homeDirectory}/.lmstudio/models";
@@ -54,6 +70,7 @@
 
   #--- Whole model on the GPU: shared memory leaves no reason to keep experts on the CPU
   #--- Both take images through their mmproj file (`--mmproj`)
+  main = "nemotron-3_5-super-vl"; # opencode's coordinators and workers
   models = {
     #--- Main model, for opencode and hard problems: MoE, 6B active (84 GiB at
     #--- UD-Q3_K_XL; Q4 would leave too little RAM free)
@@ -78,35 +95,37 @@
       };
       fast = null;
     };
-    #--- opencode's default: the coordinator session plus 3 parallel subagents, one
-    #--- slot each. MoE, 3B active (21 GiB at UD-Q4_K_XL, ~25% faster generation
-    #--- than Q8 here); 10 of 40 layers keep a cache, so 4 x 128K is ~11 GB in f16
-    qwen3_6-35b-a3b = {
-      name = "Qwen3.6 35B A3B";
-      dir = "unsloth/Qwen3.6-35B-A3B-GGUF";
-      match = "Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf";
-      context = 131072;
-      # opencode compacts at this less the output limit, near 48K: past that, a turn
-      # that misses the cache reprocesses everything (106K took 6 min beside 3 others)
-      session = 81920;
-      slots = 4;
-      flags = ["--mmproj '${modelsDir}/unsloth/Qwen3.6-35B-A3B-GGUF/mmproj-F16.gguf'"];
-      #--- Coordinator: Qwen's thinking-mode coding sampling
+    #--- opencode's default: the coordinator plus 2 parallel subagents, one slot each.
+    #--- MoE with Mamba layers, 12B active; ~72 GB loaded. Tuning and test results
+    #--- are in ../local-ai-models.md
+    nemotron-3_5-super-vl = {
+      name = "Nemotron 3.5 Super VL";
+      dir = "unsloth/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-GGUF";
+      match = "NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-UD-Q3_K_XL-00001-of-*.gguf";
+      context = 65536;
+      # opencode compacts at this less `output`, near 48K
+      output = 16384;
+      slots = 3;
+      # MTP drafting: 28 tok/s alone and 29 with two requests, against 19 and 26 without
+      flags = [
+        "--spec-type draft-mtp"
+        "--top-k 0 --min-p 0"
+        "--mmproj '${modelsDir}/unsloth/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-GGUF/mmproj-BF16.gguf'"
+      ];
+      #--- Coordinator: full reasoning, NVIDIA's sampling
       params = {
-        temperature = 0.6;
+        temperature = 1.0;
         top_p = 0.95;
-        top_k = 20;
-        min_p = 0;
-        presence_penalty = 0.0;
+        chat_template_kwargs.enable_thinking = true;
       };
-      #--- Workers (the -instruct alias): thinking off, Qwen's non-thinking sampling
+      #--- Workers (the -instruct alias): medium effort, ~3x fewer thinking tokens
       fast = {
-        chat_template_kwargs.enable_thinking = false;
-        temperature = 0.7;
-        top_p = 0.8;
-        top_k = 20;
-        min_p = 0;
-        presence_penalty = 1.5;
+        temperature = 1.0;
+        top_p = 0.95;
+        chat_template_kwargs = {
+          enable_thinking = true;
+          medium_effort = true;
+        };
       };
     };
   };
@@ -211,9 +230,9 @@ in {
   ];
 
   programs.opencode.settings = {
-    model = "llama-swap/qwen3_6-35b-a3b";
+    model = "llama-swap/${main}";
     # Titles and summaries on the workers' alias, so the model stays loaded
-    small_model = "llama-swap/qwen3_6-35b-a3b-instruct";
+    small_model = "llama-swap/${main}-instruct";
     #--- Two coordinators (Tab switches): `system` for this computer, the default,
     #--- and `gamedev` for the Godot game, which its project's opencode.json picks.
     #--- The subagents they start run on the workers' alias
@@ -245,7 +264,7 @@ in {
       # Coordinators can't edit, so changes go through the subagents
       coordinator = {
         mode = "primary";
-        model = "llama-swap/qwen3_6-35b-a3b";
+        model = "llama-swap/${main}";
         permissions =
           [
             {
@@ -291,7 +310,7 @@ in {
       };
     in
       lib.genAttrs ["general" "explore"] (_: {
-        model = "llama-swap/qwen3_6-35b-a3b-instruct";
+        model = "llama-swap/${main}-instruct";
       })
       // {
         system =
@@ -329,9 +348,9 @@ in {
           };
         };
       in
-        {${id} = model m.name 32768;}
+        {${id} = model m.name (m.output or 32768);}
         // lib.optionalAttrs (m.fast != null) {
-          "${id}-instruct" = model "${m.name} (fast)" 8192;
+          "${id}-instruct" = model "${m.name} (fast)" (m.output or 8192);
         })
       models;
     };

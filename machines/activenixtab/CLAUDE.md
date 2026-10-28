@@ -53,11 +53,14 @@ when Ky approves it.
   browser (it isn't one of `lib/default-apps.nix`'s choices)
 - `home/binds.nix` — niri binds matching Ky's KDE Plasma shortcuts; repo binds on the
   same keys are switched off by id
-- `home/local-ai.nix` — llama-swap on llama.cpp (Vulkan) at `127.0.0.1:8090`, Qwen3.6
-  35B A3B (opencode's default: 4 slots, thinking for the coordinator, its `-instruct`
-  alias for subagents) and Qwen3.8 Flash Next (one slot, for hard problems), both with
+- `home/local-ai.nix` — llama-swap on llama.cpp 0.7.0 (Vulkan, built here until
+  nixpkgs has it) at `127.0.0.1:8090`, Nemotron 3.5 Super VL (opencode's default: 3
+  slots with MTP drafting, full reasoning for the coordinator, `medium_effort` on its
+  `-instruct` alias for subagents) and Qwen3.8 Flash Next (one slot), both with
   vision, loaded from LM Studio's folder, and opencode's provider for it. Models stay
-  within 96 GB so Ky's other work keeps memory. opencode's two coordinator agents,
+  within 80 GB so Ky's other work keeps memory. Every model tested or tuned here
+  gets an entry in `local-ai-models.md` (settings, memory, speed, test results),
+  measured with the scripts in `local-ai-bench/`. opencode's two coordinator agents,
   `system` (the default) and `gamedev` (the default in the game's folder through its
   `opencode.json`), take their prompts from `home/agents/`; `system`'s also carries
   this file and `users/kylerj/CLAUDE.md`, so a change here needs a rebuild to reach
