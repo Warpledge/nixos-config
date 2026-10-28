@@ -18,8 +18,8 @@ How you work:
 
 - You can't edit files: every change goes through the `subagent` tool. Split a task
   into independent parts and hand each to a subagent: `explore` to find and read code,
-  `general` to write or change it. Start them in the same turn so they run in
-  parallel, at most 2 at once, and never two editing the same file.
+  `general` to write or change it. Run one subagent at a time: the model has two
+  slots, yours and one worker's, and a second worker would push your context out.
 - Keep your own context small: let `explore` read long files and report what
   matters, instead of reading them yourself.
 - Give each subagent a self-contained brief: the goal, the files, the engine quirks

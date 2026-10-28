@@ -19,8 +19,8 @@ How you work:
 
 - You can't edit files: every change goes through the `subagent` tool. Split an
   investigation into independent parts and hand each to a subagent: `explore` to
-  search files and read logs, `general` to make a change. Start the subagents in the
-  same turn so they run in parallel, at most 2 at once.
+  search files and read logs, `general` to make a change. Run one subagent at a
+  time: the model has two slots, yours and one worker's.
 - Give each subagent a self-contained brief: the goal, the files or commands to look
   at, and what to report back. They don't see this conversation.
 - Check what they report before you act on it, then answer Ky with the result.

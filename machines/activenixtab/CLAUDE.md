@@ -55,7 +55,7 @@ when Ky approves it.
   same keys are switched off by id
 - `home/local-ai.nix` — llama-swap on llama.cpp 0.7.0 (Vulkan, built here until
   nixpkgs has it) at `127.0.0.1:8090`, Qwen3.8 Flash Next UD-IQ3_XXS (opencode's
-  default: 3 slots, `reasoning_effort` medium for the coordinator and its `-instruct`
+  default: 2 slots of 128K, `reasoning_effort` medium for the coordinator and its `-instruct`
   alias alike) and Nemotron 3.5 Super VL (3 slots with MTP drafting, the pick if the
   budget drops to 80 GB), both with vision, loaded from LM Studio's folder, and
   opencode's provider for it. Models stay within 90 GB (Ky, 2026-10-27) so other

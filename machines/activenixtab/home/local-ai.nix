@@ -72,9 +72,9 @@
   #--- Both take images through their mmproj file (`--mmproj`)
   main = "qwen3_8-flash-next"; # opencode's coordinators and workers
   models = {
-    #--- opencode's default: the coordinator plus 2 subagents, one slot each. MoE, 6B
-    #--- active; UD-IQ3_XXS takes 59 GB GPU memory plus 27 GB in the server process
-    #--- with 2 slots, inside the 90 GB budget. Results: ../local-ai-models.md
+    #--- opencode's default: the coordinator plus 1 subagent, one slot each. MoE, 6B
+    #--- active; UD-IQ3_XXS takes ~47 KB per token of cache: 2 x 128K is ~91 GB with
+    #--- the 26 GB in the server process (3 x 128K: 97). See ../local-ai-models.md
     qwen3_8-flash-next = {
       name = "Qwen3.8 Flash Next";
       dir = "unsloth/Qwen3.8-Flash-Next-GGUF";
@@ -83,7 +83,7 @@
       context = 131072;
       # opencode compacts at this less `output`, near 112K
       output = 16384;
-      slots = 3;
+      slots = 2;
       # q8_0 V cache: ~17% faster prompts at 32K, perplexity within error
       flags = [
         "-ctv q8_0"
