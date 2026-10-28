@@ -17,6 +17,7 @@
       security.keepassxc = true;
       wallpaper = "engine";
       terminals.ghostty = true;
+      defaultApps.terminal = "ghostty";
     };
   };
 
