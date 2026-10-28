@@ -39,7 +39,18 @@ and reads long files faster.
 
 The catch is memory. About 59 GB sits in GPU memory and another 27 GB in the
 server process itself, which leaves roughly 20 GB for games, the editor and
-everything else. Its chat template defaults to `xhigh` effort, which tells it to
+everything else. Each token of context costs about 47 KB, so slots add up fast:
+three 128K slots came to about 97 GB.
+
+**In real use (night run, 2026-10-27 to 28, 2 then 3 slots of 64K):** it followed
+every rule as a coordinator. It delegated 13 tasks, never edited anything itself,
+ran each Godot check alone, and stayed out of `~/nixos-config`. But it got little
+done. At 64K the workers compacted every 10 to 15 minutes on the game's
+6,000-line scene file, lost their place, and re-read the same files. One went two
+hours without an edit until Claude stopped it. One `explore` worker also ran Godot
+and `pkill godot` against the rules. The run now uses 2 slots of 128K instead.
+opencode can also send its own `reasoning_effort`, which beats the template
+setting in llama.cpp, so the config sets it at the top level of each request too. Its chat template defaults to `xhigh` effort, which tells it to
 second-guess everything: at that setting it ran out of room before answering two of
 three tasks. `low` was too loose (it called `edit` directly once).
 
@@ -114,10 +125,13 @@ opencode: context 65536, output 16384, so it compacts near 48K.
 `mmproj-F16.gguf`):
 
 ```
--np 2 -kvu --kv-unified-per-slot 65536 -fa on -ngl 99 --load-mode none -ub 2048
+-np 2 -kvu --kv-unified-per-slot 131072 -fa on -ngl 99 --load-mode none -ub 2048
 -ctk f16 -ctv q8_0 --temp 1.0 --top-p 0.95 --top-k 20 --min-p 0 --mmproj …/mmproj-F16.gguf
-request: chat_template_kwargs {"reasoning_effort": "medium"}
+request: reasoning_effort "medium" and chat_template_kwargs {"reasoning_effort": "medium"}
 ```
+
+A request that asked for `low` and one that asked for `xhigh` both thought about
+the same amount (1,720 and 1,886 tokens) once llama-swap set the top-level field.
 
 The q8_0 V cache measured about 17% faster prompts at 32K with perplexity within
 error. `reasoning_effort` takes `xhigh` (the default), `medium` or `low`; `high`
@@ -168,7 +182,8 @@ holds part of the model.
 | Nemotron, 3 slots, MTP | 72 GB | ~40 GB | 28.4 | 29.0 | 24.6 | 19.6 | 306 |
 | Nemotron, 4 slots, MTP | 74 GB | | | | | | |
 | Nemotron, 4 slots, no MTP | 66 GB | | 18.6 | 26.0 | 30.2 | 30.9 | 306 |
-| Flash Next IQ3_XXS, 2 slots | 59 + 27 GB | 19 to 20 GB | 28.2 | 39.2 | | 38.4 | 410 |
+| Flash Next IQ3_XXS, 2 slots of 64K | 59 + 27 GB | 19 to 20 GB | 28.2 | 39.2 | | 38.4 | 410 |
+| Flash Next IQ3_XXS, 3 slots of 128K | 71 + 26 GB | 14 GB | | | | | |
 | Flash Next Q3_K_XL, 2 slots | 66 + 27 GB | 10 GB | 25.1 | 32.4 | | 34.8 | 407 |
 | Qwen3.8-27B, 3 slots, MTP | 45 GB | 58 to 59 GB | 13.4 | 20.5 | | 17.4 | 235 |
 | gpt-oss-120b, 3 slots | 69 GB | | 45.1 | | | 52.7 | 849 |
