@@ -20,6 +20,7 @@ spare port (8095), with llama-swap's model unloaded so the two don't share memor
   a model low when it reads a file before delegating; this one shows where it goes.
 - `speed.py URL` and `par2.py URL N`: generation speed alone and with N thinking
   requests at once.
+- `vision.py URL IMAGE`: the frame description with thinking off, then on.
 
 `BENCH_EXTRA='{"temperature":1.0,"top_p":0.95}'` passes the model's own sampling.
 GPU memory is `mem_info_gtt_used` plus `mem_info_vram_used` under
@@ -104,10 +105,29 @@ GPU memory is `mem_info_gtt_used` plus `mem_info_vram_used` under
   DeepSeek. Text only.
 - **Ornith 1.5 35B A3B:** replaced by the two above the same day.
 
-## Still to try
+## gpt-oss-120b with a Qwen3.5-9B vision helper (tested 2026-10-27, not in use)
 
-- **gpt-oss-120b plus a vision helper loaded on demand:** gpt-oss (63.3 GB, text
-  only) for the coordinator and workers, with Qwen3.5-9B (5.6 GB plus a 0.9 GB vision
-  file) behind a `vision` subagent that llama-swap loads when an image needs
-  looking at. Estimated peak about 78 GB. gpt-oss led an independent Strix Halo
-  coding test (9/10, about 50 tok/s).
+The text-only main model for the coordinator and workers, plus a small vision model
+loaded beside it only when an image needs looking at.
+
+- **Files:** `ggml-org/gpt-oss-120b-GGUF`, MXFP4 (63.3 GB, 5.1B active, text only).
+  `unsloth/Qwen3.5-9B-GGUF`, UD-Q4_K_XL (6.0 GB) plus `mmproj-F16.gguf` (0.9 GB).
+  LM Studio wouldn't fetch the mmproj; it came straight from Hugging Face.
+- **gpt-oss settings tested:** `-np 3 -kvu --kv-unified-per-slot 65536 -fa on -ngl 99
+  --load-mode none -ub 2048`, f16 cache, temperature 1.0, top_p 1.0 (OpenAI's),
+  `chat_template_kwargs.reasoning_effort = "high"`. Its template ignores
+  `enable_thinking`; effort is low, medium or high.
+- **Vision helper settings tested:** `-np 1 -c 32768 -fa on -ngl 99`, temperature 0.7,
+  top_p 0.8, top_k 20 (Qwen's non-thinking values).
+- **Memory:** gpt-oss alone 69 GB; with the helper loaded 77 GB.
+- **gpt-oss speed:** 45 tok/s alone, 53 tok/s total with 4 requests, prompt reading
+  849 tok/s at 19K tokens. About 2.5 times Nemotron on all three.
+- **Results:**
+  - Coding: 2/3 in 1 to 2 minutes a task. It missed that `lazy_chunks` must raise
+    on the call rather than on the first `next()`.
+  - Coordinator: refused the shared file, split work across three subagents over
+    several turns, and noticed the existing bind. In one run it called the `edit`
+    tool directly, which opencode's deny would have blocked; Nemotron never tried.
+  - Vision (helper): with thinking off, 15 s and mostly right, but it made up
+    "flickering" lights and guessed the engine (Unity). With thinking on, 47 s and
+    accurate, including the flat untextured shading.
