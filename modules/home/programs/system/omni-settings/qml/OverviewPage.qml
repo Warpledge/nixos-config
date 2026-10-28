@@ -176,8 +176,9 @@ ColumnLayout {
         const n = behind
         view.ask({
             heading: "Get the config's new commits?",
-            body: `Pulls ${n} new commit${n === 1 ? "" : "s"} into the config (git pull --rebase), `
-                  + "keeping your own commits on top, then the system rebuilds and switches. If "
+            body: `Pulls ${n} new commit${n === 1 ? "" : "s"} into the config (git pull --rebase, `
+                  + "or a merge once you've merged upstream yourself), keeping your own commits, "
+                  + "then the system rebuilds and switches. If "
                   + "systemd, glibc, niri or xwayland-satellite change, it switches at the next restart "
                   + "instead.\n\nPreview only builds and shows what would change, then puts the "
                   + "config back.",

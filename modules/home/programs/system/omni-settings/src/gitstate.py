@@ -148,10 +148,11 @@ def changed_between(flake, path, *revs):
 
 def pull(flake):
     """Fetches the branch's upstream and rebases the local commits onto it, as
-    `git pull --rebase` does, setting uncommitted changes aside meanwhile. A
-    flake.lock changed both here (an Update not committed) and upstream takes
-    the upstream's. Returns (old HEAD, the replaced flake.lock text or None)
-    for `unpull`."""
+    `git pull --rebase` does, or merges it when a local commit is a merge (a
+    fork that merges upstream, whose resolved conflicts a rebase would replay),
+    setting uncommitted changes aside meanwhile. A flake.lock changed both here
+    (an Update not committed) and upstream takes the upstream's. Returns (old
+    HEAD, the replaced flake.lock text or None) for `unpull`."""
     try:
         git(flake, "fetch", "--quiet", timeout=120)
         old = git(flake, "rev-parse", "HEAD").strip()
@@ -160,17 +161,19 @@ def pull(flake):
             with open(os.path.join(flake, "flake.lock")) as f:
                 lock = f.read()
             git(flake, "checkout", "HEAD", "--", "flake.lock")
+        mode = "merge" if git(flake, "rev-list", "--merges", "@{u}..HEAD").strip() else "rebase"
     except (RuntimeError, OSError, subprocess.TimeoutExpired) as e:
         raise PullError(str(e))
-    out = subprocess.run(["git", "-C", flake, "rebase", "--autostash", "@{u}"], capture_output=True, text=True,
+    args = ["merge", "--autostash", "--no-edit", "@{u}"] if mode == "merge" else ["rebase", "--autostash", "@{u}"]
+    out = subprocess.run(["git", "-C", flake, *args], capture_output=True, text=True,
                          env=dict(ENV, GIT_EDITOR="true"), stdin=subprocess.DEVNULL, timeout=120)
     if out.returncode != 0:
         conflicts = subprocess.run(["git", "-C", flake, "diff", "--name-only", "--diff-filter=U"],
                                    capture_output=True, text=True, env=ENV, timeout=20).stdout.split()
-        subprocess.run(["git", "-C", flake, "rebase", "--abort"], capture_output=True, env=ENV, timeout=60)
+        subprocess.run(["git", "-C", flake, mode, "--abort"], capture_output=True, env=ENV, timeout=60)
         unpull(flake, None, lock)
         raise PullError(f"Your commits clash with the new ones in {', '.join(conflicts)}; nothing was changed."
-                        if conflicts else out.stderr.strip() or "git rebase failed")
+                        if conflicts else out.stderr.strip() or f"git {mode} failed")
     return old, lock
 
 
@@ -215,7 +218,7 @@ def push_backup(flake):
         last = ""
     lease = f"--force-with-lease={branch}:{'' if last == 'none' else last}" if last else "--force-with-lease"
     try:
-        # Pull rebases the local commits, so the push replaces the old ones
+        # Pull can rebase the local commits, so the push replaces the old ones
         git(flake, "push", "--quiet", lease, push, f"HEAD:{branch}", timeout=120)
         if last:
             git(flake, "config", f"branch.{branch}.omniBackedUp", git(flake, "rev-parse", "HEAD").strip())
