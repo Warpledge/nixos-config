@@ -9,6 +9,7 @@ import os
 import re
 
 CURRENT = "/run/current-system"
+STORE = "/nix/store/"
 HOME_UNIT = re.compile(r"^home-manager-(.+)\.service$")
 GENERATION = re.compile(r"/nix/store/[a-z0-9]+-home-manager-generation")
 #--- The files read for a text diff, and how much of every diff is kept
@@ -21,8 +22,17 @@ TOTAL_LINES = 2000
 NOISE = {"profiles", "terminfo", "zoneinfo", "kbd"}
 
 
+def in_store(path):
+    """Whether `path` resolves inside the store. The helper runs this as root, so
+    a link out of the store (an /etc entry naming /run, an out-of-store
+    home-manager link) is compared by its target and never read."""
+    return os.path.realpath(path).startswith(STORE)
+
+
 def digest(path):
     """A hash of the file's contents, so two store paths holding the same text match."""
+    if not in_store(path):
+        return "outside:" + os.path.realpath(path)
     h = hashlib.sha256()
     try:
         with open(path, "rb") as f:
@@ -45,7 +55,7 @@ def tree(root):
             dirs[:] = []
             continue
         seen.add(real)
-        dirs[:] = [d for d in dirs if d not in NOISE]
+        dirs[:] = [d for d in dirs if d not in NOISE and in_store(os.path.join(base, d))]
         for name in names:
             path = os.path.join(base, name)
             found[os.path.relpath(path, root)] = path
@@ -56,7 +66,7 @@ def text_diff(before, after, budget):
     """A short unified diff of two files' text; [] for binaries, big files and
     files the two systems name differently."""
     lines = []
-    if budget <= 0:
+    if budget <= 0 or not (in_store(before) and in_store(after)):
         return lines
     try:
         if max(os.path.getsize(before), os.path.getsize(after)) > TEXT_LIMIT:
