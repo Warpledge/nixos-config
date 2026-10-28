@@ -104,6 +104,22 @@ in {
     Install.WantedBy = ["graphical-session.target"];
   };
 
+  #--- Raises the keyboard and touchpad over DMS's launcher and polkit dialog
+  systemd.user.services.osk-raise = {
+    Unit = {
+      Description = "Keep the on-screen keyboard and touchpad on top";
+      PartOf = ["graphical-session.target"];
+      After = ["graphical-session.target"];
+    };
+    Service = {
+      ExecStart = "${pkgs.python3}/bin/python3 -I ${./raise-watch.py}";
+      Environment = "PATH=${lib.makeBinPath [config.programs.niri.package pkgs.procps]}";
+      Restart = "always";
+      RestartSec = 2;
+    };
+    Install.WantedBy = ["graphical-session.target"];
+  };
+
   #--- Colours: wvkbd only reads them at start, so a theme change restarts it
   matugen.templates.wvkbd = {
     input = ./wvkbd-colors.sh;

@@ -87,7 +87,10 @@ when Ky approves it.
   on-screen touchpad panel (`touchpad.py`, `touchpad-toggle`) that feeds a virtual
   touchpad, so libinput's tap, scroll and drag apply. Each has a DMS bar plugin
   (`oskToggle`, `touchpadToggle`) added from DMS's bar settings; a one-finger swipe up
-  from the bottom edge also runs `osk-toggle` (`wm/touch-gestures.py`)
+  from the bottom edge also runs `osk-toggle` (`wm/touch-gestures.py`). wvkbd is
+  patched to type through uinput (so niri's binds see its keys) and to leave the pad's
+  width free; `raise-watch.py` (`osk-raise.service`) re-creates both surfaces when
+  another overlay opens, since niri stacks the newest layer surface on top
 - `home/godot-mcp.nix` — the godot-mcp server, built from GitHub at a pinned commit and
   put on PATH; a Godot project's `opencode.json` starts it (`~/godot-mcp-demo` does)
 - `home/unreal-engine.nix` — `unreal-editor` and its desktop entry: Epic's prebuilt

@@ -3,6 +3,7 @@ touches drive a virtual touchpad, so libinput gives it the folio's behaviour
 (tap, two-finger tap and scroll, tap-and-drag)."""
 
 import os
+import signal
 
 import gi
 
@@ -11,7 +12,7 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Gtk4LayerShell", "1.0")
 from evdev import AbsInfo, UInput
 from evdev import ecodes as e
-from gi.repository import Gdk, Gio, Gtk
+from gi.repository import Gdk, Gio, GLib, GLibUnix, Gtk
 from gi.repository import Gtk4LayerShell as Layer
 
 STYLE = os.path.expanduser("~/.config/on-screen-touchpad/style.css")
@@ -163,6 +164,15 @@ def activate(app):
     monitor = Gio.File.new_for_path(STYLE).monitor_file(Gio.FileMonitorFlags.NONE)
     monitor.connect("changed", load_theme)
     win.monitor = monitor  # keeps it alive
+
+    # SIGUSR1 (from raise-watch.py) remaps the window: a new layer surface,
+    # stacked above overlays opened since
+    def restack():
+        win.set_visible(False)
+        win.set_visible(True)
+        return GLib.SOURCE_CONTINUE
+
+    GLibUnix.signal_add(GLib.PRIORITY_DEFAULT, signal.SIGUSR1, restack)
     win.present()
 
 
