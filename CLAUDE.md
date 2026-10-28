@@ -14,6 +14,10 @@ Before a task that touches a machine, a person or their apps, find out whose com
 
 Unless the machine is `eclipse` or `legion` and the user `warpledge`, the person's own files are the context. Don't carry over anything from `machines/eclipse/`, `machines/legion/`, `users/warpledge/` or `docs/personal/` (warpledge's notes) to their hardware or apps, and don't fall back on it when guessing. "The user" in this file and the skills means whoever is at the keyboard.
 
+## Applied Learning
+
+When something fails repeatedly, when the user has to re-explain, or when a workaround is found for a platform/tool limitation, add a one-line bullet here. Keep each bullet under 15 words. No explanations. Only add things that will save time in future sessions.
+
 ## Critical Rules
 
 1. **Never run `nixm rebuild` or `nixos-rebuild`.** Stop and ask instead. When handing back a rebuild, say they can run it from Omni Settings, or with `!` when they want you to see the errors, in the token-light form: `! nixm rebuild 2>&1 | grep -E "error|Error|failed|Failed" || echo "✓"` (same for `nixm boot`). The edit hook formats each `.nix` file with `alejandra`. Run `nix flake check`, and a machine build even more rarely, only when you can't tell whether a change breaks evaluation or the build: a new module or import, a renamed or unfamiliar option, an input or package change, Nix you aren't sure of. A value changed in an option that already works, or a JSON, Markdown or comment edit, needs neither. Commit without asking (see rule 6); pushing and history rewrites stay with the user.
@@ -27,6 +31,7 @@ Unless the machine is `eclipse` or `legion` and the user `warpledge`, the person
 9. **Ask before writing new docs or long comments.** A new `.md` file, a new section or note in an existing one, or a new comment longer than a line or two needs the user's yes first; propose it with a questionnaire (AskUserQuestion) saying what it covers and where it goes, and let them allow or decline. Always propose docs for critical infrastructure, anything someone needs to understand to change that part of the repo safely, rather than leaving it undocumented. Keeping existing docs accurate needs no approval: CLAUDE.md, AGENTS.md, README rows and links, and the rows and entries a workflow below or a skill keeps current. Neither does a one-line comment where the code would otherwise be unclear.
 10. **Ask before saving a memory, and offer where it goes.** Local memory (`~/.claude/projects/.../memory/`) is for private, personal or security-sensitive notes: real names behind stand-ins, personal data, playthrough notes. Anything that would help the config and is safe to publish belongs in the repo (CLAUDE.md, a skill, `docs/`), so it travels with the flake. Propose the note and let the user pick the location before writing it.
 11. **`rm` takes literal paths.** Write the absolute path, never `$VAR` (`rm /run/user/1000/a`, not `rm $XDG_RUNTIME_DIR/a`), and run each deletion as its own command, never chained onto a read-only check or hidden in a script.
+12. **Do not make any changes until you have 95% confidence in what you need to build.** Ask me follow-up questions until you reach that confidence.
 
 `AGENTS.md` at the repo root is for the local AI only (opencode and Zed's agent on llama-swap's models): a standalone, condensed version of this file with the same rule numbers, plus guidance for a smaller model (verifying options in upstream source, breaking retry loops, context budget). Keep it in sync: when a rule, path, workflow or gotcha changes here or in a folder's `CLAUDE.md` (condensed under its **Folder rules**), update `AGENTS.md` in the same commit, and never let the two contradict.
 

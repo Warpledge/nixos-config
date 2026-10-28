@@ -27,6 +27,10 @@ Unless it's `eclipse` or `legion` as `warpledge`, use only that person's files. 
 apply `machines/eclipse/`, `machines/legion/`, `users/warpledge/` or `docs/personal/`
 to their hardware or apps.
 
+## Applied Learning
+
+When something fails repeatedly, when the user has to re-explain, or when a workaround is found for a platform/tool limitation, add a one-line bullet here. Keep each bullet under 15 words. No explanations. Only add things that will save time in future sessions.
+
 ## Rules
 
 Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
@@ -82,6 +86,7 @@ Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
 10. **No memory files.** If something is worth remembering, propose the line for
     CLAUDE.md or this file and let the user decide.
 11. **`rm` takes literal absolute paths**, one deletion per command, never `$VAR`.
+12. **Do not make any changes until you have 95% confidence in what you need to build.** Ask me follow-up questions until you reach that confidence.
 
 ## Starting a task
 
