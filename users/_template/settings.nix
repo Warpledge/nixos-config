@@ -263,4 +263,10 @@
   # Your own binds have ids starting custom-, a key, a title, and spawn (a
   # command as a list) or a niri action with an optional argument.
   keybinds = {};
+
+  #--- Window Rules
+  # Changes to the config's niri window rules, made on Omni Settings' Window
+  # Rules page, by rule id: {minecraft-fullscreen = {enable = false;};}, or a
+  # whole rule in its place. Your own rules have ids starting custom-.
+  windowRules = {};
 }

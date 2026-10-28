@@ -250,6 +250,8 @@ lines, `grep -n` that file for the part you need.
 - Binds go in `niri.keybinds.<id>` (`key`, `title`, `action`, `group`), not
   `programs.niri.settings.binds`; `core/keybinds.nix` converts them, applies
   each user's `keybinds` setting, and fails the build on two binds sharing a key.
+- Shared window rules are in `core/window-rules.json`, each with an `id`; each
+  user's `windowRules` setting turns one off, replaces it or adds `custom-` ones.
 - **Niri spawns with arguments are lists** (`spawn = ["dms" "ipc" "call" ...]`);
   a spaced string fails the build.
 - DMS `settings.json` in `<wm>/home/dms/` is shared by every machine and written
@@ -290,6 +292,13 @@ window, over a Python backend)
   (`lib/settings.nix`), or it's read as nested settings. `keybinds` (the
   Keybinds page's changes by bind id) is in `GROUPED` too, with its own checks:
   `keybindProblems` in `lib/settings.nix` and `keybinds_ok` in `src/helper.py`.
+  So is `windowRules` (the Window Rules page's changes by rule id, applied over
+  `wm/niri/home/core/window-rules.json` by `window-rules.nix`), checked by
+  `windowRuleProblems` and `window_rules_ok`.
+- **The app never writes `modules/`** or the `_template` files: every setting
+  goes in a machine's or user's `settings.nix` (`backend.save` refuses other
+  paths). Shared data a page changes stays read-only in `modules/`, with the
+  changes taken as a user setting, as `keybinds` and `windowRules` do.
 - `userPackages` is only for what the user installs from Search. An app the
   config ships gets a toggle and module under Default Packages (`add-app`),
   never a `userPackages` entry.

@@ -1,6 +1,7 @@
-// Edits one rule from window-rules.json: its name and note, the windows it
-// matches or leaves out, and what it does. Properties the page has no control
-// for are kept as they are, or removed. Saved through api.py's saveWindowRule.
+// Edits one window rule: its name and note, the windows it matches or leaves
+// out, and what it does. Properties the page has no control for are kept as
+// they are, or removed. api.py's saveWindowRule returns the windowRules setting
+// with the edit, which the page stages as a pending change.
 import QtQuick
 import QtQuick.Layouts
 
@@ -9,6 +10,7 @@ Sheet {
     required property var view
     required property var wr  // the page's windowRules reply: kinds, sizes, places
     required property var rule  // one rule from it, with `raw`
+    required property var now  // the windowRules setting with pending changes
     signal saved(var reply)
     title: `Edit ${rule.title}`
     onBack: view.sheet = null
@@ -134,10 +136,10 @@ Sheet {
             out[e.prop] = v
         }
         if (!props.length) {
-            view.say("Give the rule something to do, or remove it")
+            view.say("Give the rule something to do, or turn it off")
             return
         }
-        Backend.call("saveWindowRule", { index: ed.rule.index, original: ed.rule.raw, rule: out }, reply => {
+        Backend.call("saveWindowRule", { now: ed.now, id: ed.rule.id, original: ed.rule.raw, rule: out }, reply => {
             const v = ed.view
             ed.saved(reply)  // before closing, which destroys this sheet
             if (reply.ok)
@@ -282,7 +284,7 @@ Sheet {
         }
         Text {
             visible: pe.e.control === ""
-            text: `${pe.e.text}. Kept as it is; set in the file.`
+            text: `${pe.e.text}. Kept as it is; this page can't change it.`
             color: Theme.dim
             font.pixelSize: 13
             wrapMode: Text.Wrap

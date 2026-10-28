@@ -390,6 +390,28 @@ def keybinds_ok(value):
     return True
 
 
+def window_rules_ok(value):
+    """Whether `value` is a set of window rule changes by id, as lib/settings.nix's
+    windowRuleProblems: {"enable": false} or a whole rule, custom- ones with matches."""
+    if not isinstance(value, dict):
+        return False
+    for rule_id, r in value.items():
+        if not (isinstance(rule_id, str) and re.fullmatch(r"[A-Za-z0-9_-]+", rule_id) and isinstance(r, dict)):
+            return False
+        if rule_id.startswith("custom-") and "matches" not in r:
+            return False
+        for k, v in r.items():
+            if not (isinstance(k, str) and re.fullmatch(r"[a-z][a-z0-9-]*", k)):
+                return False
+            if k in ("matches", "excludes") and not (isinstance(v, list) and all(isinstance(m, dict) for m in v)):
+                return False
+            if k == "enable" and not isinstance(v, bool):
+                return False
+            if k in ("name", "note", "category") and not isinstance(v, str):
+                return False
+    return True
+
+
 def user_changes(cfg, raw):
     """The request's changes, refused unless each is a user template key with
     the template's kind of value."""
@@ -412,6 +434,8 @@ def user_changes(cfg, raw):
             ok = text_set_ok(key, value)
         elif key == schema.KEYBINDS:
             ok = keybinds_ok(value)
+        elif key == schema.WINDOW_RULES:
+            ok = window_rules_ok(value)
         else:
             ok = same_kind(default, value)
         if not ok:

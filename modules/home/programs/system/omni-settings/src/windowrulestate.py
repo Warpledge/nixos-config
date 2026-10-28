@@ -1,13 +1,15 @@
-"""The Window Rules page: reading and
-writing modules/wm/niri/home/core/window-rules.json, the copy of what niri got
+"""The Window Rules page: the shared rules in
+modules/wm/niri/home/core/window-rules.json (read only) with the user's
+windowRules setting applied as window-rules.nix does, the copy of what niri got
 that rules.nix writes to ~/.config/omni-settings/, and describing each rule."""
 
 import configparser
 import json
 import os
+import re
 import subprocess
 
-RULES_FILE = os.path.join("modules", "wm", "niri", "home", "core", "window-rules.json")
+SHARED_FILE = os.path.join("modules", "wm", "niri", "home", "core", "window-rules.json")
 APPLIED_FILE = os.path.join(os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config"),
                             "omni-settings", "niri-window-rules.json")
 
@@ -57,8 +59,10 @@ GROUPS = [("Floating", "Windows that open above the tiled ones.", "focus-windows
           ("Other", "", "applications-system-symbolic", "neutral")]
 GROUP = {g[0]: g for g in GROUPS}
 
-NOT_PROPERTIES = ("name", "note", "category", "matches", "excludes")
+NOT_PROPERTIES = ("id", "enable", "name", "note", "category", "matches", "excludes")
 LABELS = ("name", "note", "category")  # the page's own fields, which rules.nix strips
+#--- What rules.nix strips: the labels, a rule's id and the setting's on/off
+STRIPPED = ("id", "enable", *LABELS)
 
 
 #--------------------------------------------------------------------#
@@ -81,7 +85,7 @@ def clean(value):
 
 def bare(rule):
     """A rule as rules.nix hands it to niri: without the page's labels."""
-    return clean({k: v for k, v in rule.items() if k not in LABELS})
+    return clean(floats({k: v for k, v in rule.items() if k not in STRIPPED}))
 
 
 def load(path):
@@ -94,21 +98,55 @@ def load(path):
 
 
 def load_applied():
-    """(every rule niri got, the window-rules.json that build used); the second
-    is None from a build before rules.nix wrote it."""
+    """(every rule niri got, the shared and user rules that build made, the
+    windowRules changes it applied); the last two are None from a build older
+    than the windowRules setting."""
     try:
         with open(APPLIED_FILE) as f:
             data = json.load(f)
     except (OSError, ValueError):
-        return [], None
-    if isinstance(data, list):
-        return data, None
-    return data.get("all") or [], data.get("file")
+        return [], None, None
+    if not isinstance(data, dict):
+        return [], None, None
+    return data.get("all") or [], data.get("rules"), data.get("overrides")
 
 
-def save(path, rules):
-    with open(path, "w") as f:
-        f.write(json.dumps(rules, indent=2) + "\n")
+def changes_of(value):
+    """The windowRules setting as a dict, whatever the page sent."""
+    return value if isinstance(value, dict) else {}
+
+
+def effective(shared, changes):
+    """The rules window-rules.nix builds from the shared file and `changes`, in
+    niri's order, as (id, rule, off, custom); off rules are kept for the page."""
+    out = []
+    for r in shared:
+        if "include" in r or not isinstance(r.get("id"), str):
+            continue
+        change = changes.get(r["id"]) or {}
+        rule = dict(change, id=r["id"]) if "matches" in change else r
+        out.append((r["id"], rule, change.get("enable", True) is False, False))
+    for rule_id in sorted(k for k in changes if k.startswith("custom-")):
+        r = changes[rule_id]
+        if isinstance(r, dict):
+            out.append((rule_id, dict(r, id=rule_id), r.get("enable", True) is False, True))
+    return out
+
+
+def new_id(name, taken):
+    base = "custom-" + (re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "rule")
+    rule_id, n = base, 2
+    while rule_id in taken:
+        rule_id, n = f"{base}-{n}", n + 1
+    return rule_id
+
+
+def own_copy(rule, change):
+    """`rule` as the setting stores it: without its id, keeping the change's on/off."""
+    out = {k: v for k, v in rule.items() if k not in ("id", "enable")}
+    if (change or {}).get("enable") is False:
+        out["enable"] = False
+    return out
 
 
 def regex(text):
@@ -142,38 +180,60 @@ def places():
     return workspaces, outputs
 
 
-def listing(path):
-    """(the file's rules, the rules Nix sets itself, whether the last build has
-    rules other than the file's). What niri got, less the file's rules, is what
-    Nix sets; {"include": ...} entries are left to rules.nix."""
-    rules = load(path)
-    applied, applied_file = load_applied()
-    current = [bare(r) for r in rules if "include" not in r]
-    built = current if applied_file is None else [bare(r) for r in applied_file if "include" not in r]
+def listing(path, changes, saved):
+    """(the rules as (id, rule, off, custom), the rules Nix sets itself, whether
+    the saved changes aren't built yet). What niri got, less the shared and
+    user rules that build made, is what Nix sets."""
+    shared = load(path)
+    rules = effective(shared, changes)
+    applied, applied_rules, applied_changes = load_applied()
+    if applied_rules is None:  # an older build: its rules were the file's alone
+        applied_rules = [r for r in shared if "include" not in r]
     from_nix = [clean(r) for r in applied]
-    waiting = applied_file is not None and built != current
-    for r in built:
-        if r in from_nix:
-            from_nix.remove(r)
-        elif applied_file is None:
-            waiting = True
+    for r in applied_rules:
+        b = bare(r)
+        if b in from_nix:
+            from_nix.remove(b)
+    waiting = (applied_changes or {}) != saved
     return rules, from_nix, waiting
 
 
-def add_rule(rules, match, name, prop, value, category=""):
-    """Sets `prop` for `match` in `rules`: one rule per window, so a second
-    property for it joins the first. A blank category leaves the rule's own."""
-    rule = next((r for r in rules if r.get("matches") == [match] and not r.get("excludes")), None)
-    if rule is None:
+def add_rule(path, changes, match, name, prop, value, category=""):
+    """`changes` with `prop` set for `match`: one rule per window, so a second
+    property for it joins the first (a shared one is copied in under its id).
+    A blank category leaves the rule's own. Returns (changes, the rule)."""
+    changes = json.loads(json.dumps(changes))
+    rules = effective(load(path), changes)
+    found = next(((i, r) for i, r, off, _ in rules
+                  if not off and r.get("matches") == [match] and not r.get("excludes")), None)
+    if found is None:
+        rule_id = new_id(name, {i for i, _, _, _ in rules} | set(changes))
         rule = {"name": name, "matches": [match]}
-        rules.append(rule)
     else:
+        rule_id, rule = found[0], own_copy(found[1], changes.get(found[0]))
         rule["name"] = name
     if category:
         rule["category"] = category
         rule.update({k: rule.pop(k) for k in list(rule) if k not in ("name", "note", "category")})
     rule[prop] = floats(value, prop)
-    return rule
+    changes[rule_id] = rule
+    return changes, rule
+
+
+def save_rule(path, changes, rule_id, original, rule):
+    """`changes` with rule `rule_id` replaced by the edited `rule`, if it is
+    still `original`; a shared rule edited back to the file's drops its change."""
+    changes = json.loads(json.dumps(changes))
+    current = next((r for i, r, _, _ in effective(load(path), changes) if i == rule_id), None)
+    if current is None or own_copy(current, None) != own_copy(original, None):
+        raise ValueError("the rule changed since this page read it; open it again")
+    new = own_copy(edited(rule, own_copy(current, None)), changes.get(rule_id))
+    default = next((r for r in load(path) if r.get("id") == rule_id), None)
+    if default is not None and new == own_copy(default, None):
+        changes.pop(rule_id, None)
+    else:
+        changes[rule_id] = new
+    return changes, new
 
 
 def floats(value, key=None):

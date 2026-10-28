@@ -79,6 +79,28 @@
         ++ lib.optional (b ? argument && !(b ? action))
         "${at} has an argument but no action")
       value);
+  #--- Changes to niri window rules by id (wm/niri/home/core/window-rules.nix):
+  #--- {enable = false;} or a whole rule; replaced whole by a users.<name> block
+  windowRuleProblems = value: let
+    matchList = v: lib.isList v && lib.all lib.isAttrs v;
+  in
+    if !(lib.isAttrs value && lib.all lib.isAttrs (lib.attrValues value))
+    then ["`windowRules` should be a set of sets, e.g. {minecraft-fullscreen = {enable = false;};}"]
+    else
+      lib.concatLists (lib.mapAttrsToList (id: r: let
+        at = "`windowRules.${id}`";
+      in
+        lib.optional (lib.hasPrefix "custom-" id && !(r ? matches))
+        "${at} needs matches, a list of windows like [{app-id = \"^mpv$\";}]"
+        ++ lib.optional (r ? matches && !(matchList r.matches))
+        "${at}.matches should be a list of sets"
+        ++ lib.optional (r ? excludes && !(matchList r.excludes))
+        "${at}.excludes should be a list of sets"
+        ++ lib.optional (r ? enable && !(lib.isBool r.enable))
+        "${at}.enable should be true or false"
+        ++ map (k: "${at}.${k} should be text in quotes")
+        (lib.filter (k: r ? ${k} && !(lib.isString r.${k})) ["name" "note" "category"]))
+      value);
   userChoices =
     {
       wallpaper = ["carousel" "engine"];
@@ -140,6 +162,8 @@
       then []
       else if at == ["keybinds"]
       then keybindProblems value
+      else if at == ["windowRules"]
+      then windowRuleProblems value
       else if lib.elem dotted textSets
       then textSetProblems dotted value
       else if lib.elem dotted grouped
@@ -241,7 +265,7 @@ in rec {
       merged = lib.recursiveUpdate (lib.recursiveUpdate userDefaults own) listed.${user};
     in
       merged
-      // lib.genAttrs (grouped ++ textSets ++ ["keybinds"]) (key: listed.${user}.${key} or own.${key} or userDefaults.${key})
+      // lib.genAttrs (grouped ++ textSets ++ ["keybinds" "windowRules"]) (key: listed.${user}.${key} or own.${key} or userDefaults.${key})
       // {name = user;};
 
     merged = lib.recursiveUpdate machineDefaults (removeAttrs own ["users"]);

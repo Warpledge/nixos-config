@@ -15,9 +15,11 @@ HIDDEN = {"users", "mainUser", "stateVersion", "flakePath", "gpu", "admin"}
 #--- Settings read and written whole: sets of named lists or text, and the
 #--- keybind changes by id (lib/settings.nix checks both)
 KEYBINDS = ("keybinds",)
+#--- Window rule changes by id, checked the same way
+WINDOW_RULES = ("windowRules",)
 #--- The ones holding text rather than lists, e.g. env = {EDITOR = "zeditor";}
 TEXT_SETS = {("env",), ("mimeTypes",)}
-GROUPED = {("userPackages",), ("autostart",), *TEXT_SETS, KEYBINDS}
+GROUPED = {("userPackages",), ("autostart",), *TEXT_SETS, KEYBINDS, WINDOW_RULES}
 
 #--- Template sections whose `#---` headers each get their own page
 SPLIT_SECTIONS = {"Apps"}
@@ -58,7 +60,8 @@ SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
 #--- their groups: (title, description, [setting paths]). Pages in the apps
 #--- section keep the template's groups; "top" pages are settings a custom page
 #--- lays out (TOP_PAGES), the "userpkgs" one the list the Packages tab's
-#--- pages edit (UserPackagesPage.qml), and "keybinds" the Keybinds page's set.
+#--- pages edit (UserPackagesPage.qml), "keybinds" the Keybinds page's set and
+#--- "windowrules" the Window Rules page's.
 #--- "top" pages: the custom page (its id in api.py and OmniView.qml) each one's settings show on
 TOP_PAGES = {"Flatpaks": "flatpaks", "Users": "people"}
 
@@ -68,6 +71,7 @@ PAGES = {
               [("Commit As", "Your name and email on git commits you make.", ["git.name", "git.email"])]),
     "User Packages": ("userpkgs", "package-x-generic-symbolic", "", [("", "", ["userPackages"])]),
     "Keybinds": ("keybinds", "input-keyboard-symbolic", "", [("", "", ["keybinds"])]),
+    "Window Rules": ("windowrules", "focus-windows-symbolic", "", [("", "", ["windowRules"])]),
     "System": ("computer", "computer-symbolic",
                "The name, desktop and kernel this computer runs, the same for everyone on it.",
                [("", "", ["hostName", "windowManager", "kernel"])]),
@@ -380,6 +384,8 @@ def make_setting(domain, path, b, values, choices, labels, doc, lead, header_tit
         s.kind = "number"
     elif path == KEYBINDS:
         s.kind = "keybinds"
+    elif path == WINDOW_RULES:
+        s.kind = "windowrules"
     elif path in GROUPED:
         s.kind = "groups"
     elif isinstance(value, list):

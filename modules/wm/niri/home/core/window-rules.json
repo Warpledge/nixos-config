@@ -1,5 +1,6 @@
 [
   {
+    "id": "private-apps",
     "name": "Private Apps",
     "note": "Blacked out in screenshots and screen recordings. Includes the Bitwarden popup in Zen, and Suwayomi and Syncthing as Helium app windows.",
     "block-out-from": "screen-capture",
@@ -59,12 +60,14 @@
     "include": "translucent"
   },
   {
+    "id": "never-open-maximized",
     "name": "Never Open Maximized",
     "note": "Applies to every window.",
     "matches": [],
     "open-maximized": false
   },
   {
+    "id": "minecraft-fullscreen",
     "name": "Minecraft Fullscreen",
     "matches": [
       {
@@ -74,6 +77,7 @@
     "open-fullscreen": true
   },
   {
+    "id": "variable-refresh-rate-for-games",
     "name": "Variable Refresh Rate for Games",
     "note": "Monitors use on-demand VRR. Proton games show as <game>.exe on native Wayland and steam_app_<id> on X11.",
     "matches": [
@@ -93,6 +97,7 @@
     "variable-refresh-rate": true
   },
   {
+    "id": "full-width-browsers",
     "name": "Full-Width Browsers",
     "default-column-width": {
       "proportion": 1.0
@@ -110,6 +115,7 @@
     ]
   },
   {
+    "id": "freetube-opens-in-the-background",
     "name": "FreeTube Opens in the Background",
     "note": "Keeps youtube-dispatch link handoffs in the background, since each one opens a new window. Outranks the activation token.",
     "matches": [
@@ -120,6 +126,7 @@
     "open-focused": false
   },
   {
+    "id": "protonup-qt",
     "name": "ProtonUp-Qt",
     "note": "Wine and Proton installer.",
     "default-column-width": {
@@ -142,6 +149,7 @@
     "open-focused": true
   },
   {
+    "id": "steam-secondary-windows",
     "name": "Steam Secondary Windows",
     "note": "Friends List, Settings and game properties. The main library window stays tiled; with no position set, niri centers them.",
     "excludes": [
@@ -157,6 +165,7 @@
     "open-floating": true
   },
   {
+    "id": "guitar-pro-8-fretboard",
     "name": "Guitar Pro 8 Fretboard",
     "default-column-width": {
       "fixed": 1687
@@ -172,6 +181,7 @@
     "open-floating": true
   },
   {
+    "id": "bitwarden-popout-in-zen",
     "name": "Bitwarden Popout in Zen",
     "note": "PIN unlock. Outranks the full-width rule for Zen.",
     "default-column-width": {
@@ -189,6 +199,7 @@
     "open-floating": true
   },
   {
+    "id": "tone3000",
     "name": "TONE3000",
     "note": "JUCE standalone with a fixed-size UI that letterboxes when tiled. No size set, so it keeps its own.",
     "matches": [
@@ -200,6 +211,7 @@
     "open-focused": true
   },
   {
+    "id": "resources",
     "name": "Resources",
     "note": "Task manager (Ctrl+Alt+Delete). Its maximize request is refused in raw KDL in rules.nix.",
     "default-column-width": {
@@ -216,6 +228,7 @@
     "open-floating": true
   },
   {
+    "id": "omni-settings",
     "name": "Omni Settings",
     "note": "Mod+C. Tiled.",
     "default-column-width": {
@@ -228,6 +241,7 @@
     ]
   },
   {
+    "id": "omni-settings-2",
     "name": "Omni Settings",
     "note": "omni-settings, a Quickshell window. About 566 px wide on the desktop.",
     "default-column-width": {
@@ -241,8 +255,9 @@
     ]
   },
   {
+    "id": "protonplus",
     "name": "ProtonPlus",
-        "default-column-width": {
+    "default-column-width": {
       "fixed": 1080
     },
     "default-window-height": {
@@ -256,8 +271,9 @@
     "open-floating": true
   },
   {
+    "id": "flatseal",
     "name": "Flatseal",
-        "default-column-width": {
+    "default-column-width": {
       "fixed": 1080
     },
     "default-window-height": {
@@ -271,6 +287,7 @@
     "open-floating": true
   },
   {
+    "id": "calculator",
     "name": "Calculator",
     "matches": [
       {
@@ -280,6 +297,7 @@
     "open-floating": true
   },
   {
+    "id": "wine-installers-and-dialogs",
     "name": "Wine Installers and Dialogs",
     "matches": [
       {
@@ -302,6 +320,7 @@
     "open-focused": true
   },
   {
+    "id": "wine-webview2",
     "name": "Wine WebView2",
     "note": "Embedded login panels, like Morimens'. Clipping to geometry with no border background breaks their rendering.",
     "clip-to-geometry": false,
@@ -313,6 +332,7 @@
     ]
   },
   {
+    "id": "audio-and-media-tools",
     "name": "Audio and Media Tools",
     "matches": [
       {
@@ -334,6 +354,7 @@
     "open-floating": true
   },
   {
+    "id": "system-dialogs-and-utilities",
     "name": "System Dialogs and Utilities",
     "matches": [
       {
@@ -376,6 +397,7 @@
     "open-floating": true
   },
   {
+    "id": "file-operation-dialogs",
     "name": "File Operation Dialogs",
     "matches": [
       {
@@ -408,6 +430,7 @@
     "open-floating": true
   },
   {
+    "id": "alerts-and-confirmations",
     "name": "Alerts and Confirmations",
     "matches": [
       {
@@ -432,6 +455,7 @@
     "include": "styling"
   },
   {
+    "id": "firefox-picture-in-picture",
     "name": "Firefox Picture-in-Picture",
     "default-column-width": {
       "fixed": 480
@@ -453,6 +477,7 @@
     "open-floating": true
   },
   {
+    "id": "zen-picture-in-picture",
     "name": "Zen Picture-in-Picture",
     "default-column-width": {
       "fixed": 480
@@ -474,6 +499,7 @@
     "open-floating": true
   },
   {
+    "id": "picture-in-picture",
     "name": "Picture-in-Picture",
     "default-floating-position": {
       "relative-to": "bottom-right",
@@ -488,6 +514,7 @@
     "open-floating": true
   },
   {
+    "id": "discord-popout",
     "name": "Discord Popout",
     "default-floating-position": {
       "relative-to": "bottom-right",
@@ -502,6 +529,7 @@
     "open-floating": true
   },
   {
+    "id": "steam-resize-fill",
     "name": "Steam Resize Fill",
     "note": "XWayland has no synchronized resize, so resizing shows frame area Steam hasn't painted yet; a solid border fills it. Must stay after the theme's styling rules.",
     "draw-border-with-background": true,
@@ -512,6 +540,7 @@
     ]
   },
   {
+    "id": "protonplus-2",
     "name": "ProtonPlus",
     "matches": [
       {

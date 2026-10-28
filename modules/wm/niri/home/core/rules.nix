@@ -4,6 +4,7 @@
 {
   config,
   lib,
+  user,
   ...
 }: let
   #--- Rules that need Nix (the translucent app list), spliced in
@@ -45,15 +46,31 @@
     ];
   };
 
-  #--- Every other rule lives in window-rules.json, which Omni Settings' Window
-  #--- Rules page edits; its name, note and category fields are labels for that page
+  #--- Every other rule is window-rules.json's, with the user's windowRules
+  #--- changes; id, name, note and category are labels for Omni Settings
+  labelled = import ./window-rules.nix {inherit lib user;};
+  labels = ["id" "name" "note" "category" "enable"];
+
+  # niri-flake wants floats; a whole number typed in the settings is an int
+  floats = v:
+    if lib.isAttrs v
+    then
+      lib.mapAttrs (k: x:
+        if lib.elem k ["proportion" "opacity"] && lib.isInt x
+        then x * 1.0
+        else floats x)
+      v
+    else if lib.isList v
+    then map floats v
+    else v;
+
   windowRules =
     lib.concatMap
     (r:
       if r ? include
       then included.${r.include}
-      else [(removeAttrs r ["name" "note" "category"])])
-    (lib.importJSON ./window-rules.json);
+      else [(floats (removeAttrs r labels))])
+    labelled;
 in {
   programs.niri.settings = {
     window-rules = windowRules;
@@ -81,10 +98,11 @@ in {
   };
 
   #--- For Omni Settings' Window Rules page: every rule niri gets (machine ones
-  #--- too) and the window-rules.json this build used
+  #--- too), the shared and user rules as built, and the changes applied
   xdg.configFile."omni-settings/niri-window-rules.json".text = builtins.toJSON {
     all = config.programs.niri.settings.window-rules;
-    file = lib.importJSON ./window-rules.json;
+    rules = map floats (lib.filter (r: !(r ? include)) labelled);
+    overrides = user.windowRules;
   };
 
   #--------------------------------------------------------------------#

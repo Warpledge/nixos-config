@@ -76,6 +76,8 @@ Item {
             out[info.userPackages.key] = info.userPackages
         if (info && info.keybinds)
             out[info.keybinds.key] = info.keybinds
+        if (info && info.windowRules)
+            out[info.windowRules.key] = info.windowRules
         if (info && info.env)
             out[info.env.key] = info.env
         if (info && info.autostart)
