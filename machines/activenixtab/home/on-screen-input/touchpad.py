@@ -2,6 +2,8 @@
 touches drive a virtual touchpad, so libinput gives it the folio's behaviour
 (tap, two-finger tap and scroll, tap-and-drag)."""
 
+import os
+
 import gi
 
 gi.require_version("Gdk", "4.0")
@@ -12,12 +14,12 @@ from evdev import ecodes as e
 from gi.repository import Gdk, Gtk
 from gi.repository import Gtk4LayerShell as Layer
 
-WIDTH, HEIGHT = 480, 300  # logical px
+WIDTH, HEIGHT = map(int, os.environ.get("TOUCHPAD_SIZE", "480x300").split("x"))
 SCALE = 10  # device units per logical px
-# Units per mm, for libinput's speed: a logical px here is ~0.175 mm on the
-# Z13's panel (2560 px at scale 1.5 over ~300 mm), so the pad moves the
+# Units per mm, for libinput's speed: a logical px here is ~0.156 mm on the
+# Z13's panel (2560 px at scale 4/3 over ~300 mm), so the pad moves the
 # pointer like a real one of its size
-RES = round(SCALE / 0.175)
+RES = round(SCALE / 0.156)
 SLOTS = 5
 
 pad = UInput(
@@ -82,7 +84,11 @@ def send(slot, x, y, down):
     pad.syn()
 
 
-def on_event(_controller, event):
+def on_event(controller, _event):
+    # PyGObject hands the signal's GdkEvent over as None; the controller has it
+    event = controller.get_current_event()
+    if event is None:
+        return False
     kind = event.get_event_type()
     if kind not in (
         Gdk.EventType.TOUCH_BEGIN,
@@ -115,9 +121,10 @@ def activate(app):
     Layer.set_layer(win, Layer.Layer.OVERLAY)
     # Never takes keyboard focus, so typing still goes to the focused window
     Layer.set_keyboard_mode(win, Layer.KeyboardMode.NONE)
+    # In the space wvkbd leaves at its right, not above its exclusive zone
     for edge in (Layer.Edge.BOTTOM, Layer.Edge.RIGHT):
         Layer.set_anchor(win, edge, True)
-        Layer.set_margin(win, edge, 16)
+    Layer.set_exclusive_zone(win, -1)
     win.set_default_size(WIDTH, HEIGHT)
 
     area = Gtk.Box()

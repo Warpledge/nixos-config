@@ -12,17 +12,28 @@
 }: let
   colors = "${config.xdg.configHome}/wvkbd/colors.sh";
 
+  #--- The touchpad sits right of the keyboard, at its height (logical px)
+  padWidth = 480;
+  height = 300;
+
+  #--- The desktop layout (F keys, number row, Tab, Ctrl…), plus a right margin
+  wvkbd = pkgs.wvkbd.overrideAttrs (old: {
+    makeFlags = (old.makeFlags or []) ++ ["LAYOUT=deskintl"];
+    patches = (old.patches or []) ++ [./wvkbd-margin.patch];
+  });
+
   keyboard = pkgs.writeShellScript "wvkbd-start" ''
     WVKBD_COLORS=""
     [ -r "${colors}" ] && . "${colors}"
+    export WVKBD_MARGIN_RIGHT=${toString padWidth}
     # shellcheck disable=SC2086 # one flag per word
-    exec ${pkgs.wvkbd}/bin/wvkbd-mobintl --hidden \
+    exec ${wvkbd}/bin/wvkbd-deskintl --hidden -H ${toString height} -L ${toString height} \
       --fn "${config.stylix.fonts.sansSerif.name} ${toString config.stylix.fonts.sizes.popups}" \
       $WVKBD_COLORS
   '';
 
   osk-toggle = pkgs.writeShellScriptBin "osk-toggle" ''
-    pkill --signal RTMIN -x wvkbd-mobintl
+    pkill --signal RTMIN -x wvkbd-deskintl
   '';
 
   touchpad = pkgs.stdenv.mkDerivation {
@@ -39,7 +50,8 @@
     '';
     # gtk4-layer-shell has to load before libwayland
     preFixup = ''
-      gappsWrapperArgs+=(--set LD_PRELOAD ${pkgs.gtk4-layer-shell}/lib/libgtk4-layer-shell.so)
+      gappsWrapperArgs+=(--set LD_PRELOAD ${pkgs.gtk4-layer-shell}/lib/libgtk4-layer-shell.so
+        --set TOUCHPAD_SIZE ${toString padWidth}x${toString height})
     '';
     postFixup = ''
       wrapGApp $out/bin/on-screen-touchpad
