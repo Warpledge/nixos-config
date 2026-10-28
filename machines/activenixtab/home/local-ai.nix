@@ -79,8 +79,9 @@
       name = "Qwen3.8 Flash Next";
       dir = "unsloth/Qwen3.8-Flash-Next-GGUF";
       match = "Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-*.gguf";
-      context = 65536;
-      # opencode compacts at this less `output`, near 48K
+      # 64K made workers compact every 10-15 minutes on this repo's big scene files
+      context = 131072;
+      # opencode compacts at this less `output`, near 112K
       output = 16384;
       slots = 3;
       # q8_0 V cache: ~17% faster prompts at 32K, perplexity within error
@@ -89,13 +90,16 @@
         "--mmproj '${modelsDir}/unsloth/Qwen3.8-Flash-Next-GGUF/mmproj-F16.gguf'"
       ];
       #--- Coordinator: Qwen's thinking sampling at medium effort. The template's
-      #--- default, xhigh, overthinks: it ran out of a 12K budget on small tasks
+      #--- default, xhigh, overthinks: it ran out of a 12K budget on small tasks.
+      #--- A request's own reasoning_effort beats chat_template_kwargs in llama.cpp,
+      #--- so both are set here, which replaces whatever opencode sends
       params = {
         temperature = 1.0;
         top_p = 0.95;
         top_k = 20;
         min_p = 0;
         presence_penalty = 0.0;
+        reasoning_effort = "medium";
         chat_template_kwargs.reasoning_effort = "medium";
       };
       #--- Workers (the -instruct alias): the same; at low effort it edited directly
@@ -105,6 +109,7 @@
         top_k = 20;
         min_p = 0;
         presence_penalty = 0.0;
+        reasoning_effort = "medium";
         chat_template_kwargs.reasoning_effort = "medium";
       };
     };
