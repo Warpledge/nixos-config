@@ -1,5 +1,6 @@
-// Window Rules (Niri tab): the rules in window-rules.json by group, a form that
-// adds one for a picked window, and the rules Nix sets (api.py's windowRules)
+// Window Rules (Niri tab): the config's shared rules with the user's changes
+// (their windowRules setting, a pending change like any other) by group, a form
+// that adds one for a picked window, and the rules Nix sets (api.py's windowRules)
 import QtQuick
 import QtQuick.Layouts
 
@@ -12,14 +13,38 @@ ColumnLayout {
     property bool picking: false
     property var windows: null  // the Open Windows list, null while closed
     readonly property bool niri: !!view.info && view.info.wm === "niri"
-    readonly property bool editable: !!wr && wr.editable
+    readonly property var setting: view.info ? view.info.windowRules : null
+    readonly property bool editable: !!wr && !!setting
     readonly property bool ready: !niri || !!wr || error !== ""
     spacing: 6
 
     Component.onCompleted: if (niri) load()
+    onNowChanged: if (niri) load()
+
+    //--- A rebuild writes a new copy of what niri got
+    Connections {
+        target: Jobs
+        function onEnded() { if (page.niri) page.load() }
+    }
+
+    //--- The windowRules setting with pending changes ({id: change}), or as saved
+    function changes(saved) {
+        const v = !setting ? null : saved ? view.scopedValue(setting) : view.valueOf(setting)
+        return v && typeof v === "object" && !Array.isArray(v) ? v : {}
+    }
+    readonly property var now: changes(false)
+
+    function setChange(id, change) {
+        const out = Object.assign({}, now)
+        if (change && Object.keys(change).length)
+            out[id] = change
+        else
+            delete out[id]
+        view.change(setting, out)
+    }
 
     function load() {
-        Backend.call("windowRules", {}, reply => {
+        Backend.call("windowRules", { now, saved: changes(true) }, reply => {
             if (reply.ok) {
                 wr = reply.data
                 error = ""
@@ -143,9 +168,9 @@ ColumnLayout {
         const v = value()
         if (v === undefined)
             return
-        Backend.call("addWindowRule", { appId: app, title, name: nameField.text, prop: kind.prop, value: v,
+        Backend.call("addWindowRule", { now, appId: app, title, name: nameField.text, prop: kind.prop, value: v,
                                          category: categoryField.text },
-                     saved)
+                     staged)
     }
 
     property var editing: null
@@ -155,14 +180,27 @@ ColumnLayout {
     }
     Component {
         id: editSheet
-        RuleEditor { view: page.view; wr: page.wr; rule: page.editing; onSaved: reply => page.saved(reply) }
+        RuleEditor { view: page.view; wr: page.wr; rule: page.editing; now: page.now; onSaved: reply => page.staged(reply) }
     }
 
-    function remove(rule) {
-        view.ask({ heading: `Remove ${rule.title}?`,
-                   body: "It comes out of window-rules.json. A rebuild applies it.",
-                   buttons: [{ label: "Remove", value: "remove", danger: true }] },
-                 () => Backend.call("removeWindowRule", { index: rule.index }, saved))
+    //--- Off: a shared rule keeps its change with enable = false; on drops that
+    function toggle(rule, on) {
+        const o = Object.assign({}, rule.change || {})
+        if (on)
+            delete o.enable
+        else
+            o.enable = false
+        setChange(rule.id, o)
+    }
+
+    //--- Back to the config's rule, or your own rule removed
+    function reset(rule) {
+        if (rule.custom)
+            view.ask({ heading: `Remove ${rule.title}?`, body: "Your rule comes out on Apply.",
+                       buttons: [{ label: "Remove", value: "remove", danger: true }] },
+                     () => setChange(rule.id, null))
+        else
+            setChange(rule.id, null)
     }
 
     //--------------------------------------------------------------------//
@@ -199,30 +237,26 @@ ColumnLayout {
         all.sort(order === "az" ? (a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase())
                                 : (a, b) => a.index - b.index)
         return all.length ? [{ title: order === "az" ? "By Name" : "In File Order",
-                               description: order === "file" ? "Top to bottom, as niri reads them." : "",
+                               description: order === "file" ? "Top to bottom, as niri reads them; your own rules come last." : "",
                                icon: "view-continuous", kind: "accent", rules: all }] : []
     }
     readonly property var shownNix: wr ? wr.fromNix.filter(found) : []
 
-    //--- A change's reply: its toast offers Undo, which puts the file's text back as it was
-    function saved(reply) {
+    //--- A change's reply: the new windowRules setting, staged until Apply
+    function staged(reply) {
         if (!reply.ok) {
-            view.say(`Couldn't save the rules: ${reply.error}`)
+            view.say(`Couldn't change the rules: ${reply.error}`)
             return
         }
-        const undo = reply.data.undo
-        view.say(reply.data.text, { label: "Undo", run: () => Backend.call("undoWindowRules", { token: undo }, r => {
-            view.say(r.ok ? r.data : `Couldn't undo: ${r.error}`)
-            load()
-        }) })
-        load()
+        view.change(setting, reply.data.value)
+        view.say(`${reply.data.text}; it waits for Apply`)
     }
 
     function rebuild() {
         view.ask({
             heading: "Rebuild now?",
             body: "Rebuilds from your settings files as they are (nixos-rebuild switch), which gives niri "
-                  + "the rules changed here.",
+                  + "the window rules saved here.",
             buttons: [{ label: "Preview", value: "build", quiet: true },
                       { label: "At Next Restart", value: "boot", quiet: true },
                       { label: "Rebuild Now", value: "switch" }]
@@ -251,10 +285,9 @@ ColumnLayout {
                     Text {
                         text: !page.niri
                             ? `These rules are niri's, and this computer runs ${page.view.info && page.view.info.wm || "another"} window manager.`
-                            : !page.wr || page.editable
-                            ? "Pick a window, choose what niri should do with it, and the rule joins the list "
-                              + "below. A rebuild applies it."
-                            : "Only an admin who can edit the config's files can add window rules."
+                            : "Pick a window and choose what niri should do with it, or change or turn off "
+                              + "the config's rules. Changes are yours alone and wait for Apply, like any "
+                              + "other setting."
                         color: Theme.dim
                         font.pixelSize: 13
                         wrapMode: Text.Wrap
@@ -420,7 +453,7 @@ ColumnLayout {
         icon: "sync"
         tone: "caution"
         title: "Not Applied Yet"
-        subtitle: "Rebuild to give niri the rules changed here."
+        subtitle: "Saved window rule changes reach niri with the next rebuild."
         button: page.view.info && page.view.info.canApply && page.view.info.admin ? "Rebuild" : ""
         onClicked: if (button) page.rebuild()
     }
@@ -551,6 +584,7 @@ ColumnLayout {
         implicitHeight: ruleCol.implicitHeight + 22
         radius: 14
         color: hover.hovered ? Theme.hover : Theme.card
+        opacity: rule.off ? 0.6 : 1
         HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
         TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: row.open = !row.open }
         ColumnLayout {
@@ -589,6 +623,14 @@ ColumnLayout {
                                 accent: modelData.kind === "accent"
                             }
                         }
+                        Chip { tappable: false; visible: row.rule.custom; text: "Yours" }
+                        Chip {
+                            tappable: false
+                            visible: row.rule.changed && !row.rule.custom
+                            text: "Changed"
+                            tone: "caution"
+                        }
+                        Chip { tappable: false; visible: row.rule.pending; text: "Not saved"; tone: "caution" }
                     }
                 }
                 Text {
@@ -598,14 +640,19 @@ ColumnLayout {
                     font.pixelSize: 13
                 }
                 IconButton {
-                    visible: page.editable && row.rule.index !== null
+                    visible: page.editable && row.rule.id !== null
                     icon: "edit"
                     onClicked: page.edit(row.rule)
                 }
                 IconButton {
-                    visible: page.editable && row.rule.index !== null
-                    icon: "delete"
-                    onClicked: page.remove(row.rule)
+                    visible: page.editable && row.rule.changed
+                    icon: row.rule.custom ? "delete" : "undo"
+                    onClicked: page.reset(row.rule)
+                }
+                Toggle {
+                    visible: page.editable && row.rule.id !== null
+                    checked: !row.rule.off
+                    onToggled: on => page.toggle(row.rule, on)
                 }
                 Icon { icon: row.open ? "expand_less" : "expand_more"; size: 18 }
             }

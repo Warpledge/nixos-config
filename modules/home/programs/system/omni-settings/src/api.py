@@ -10,6 +10,7 @@ import json
 import os
 import pwd
 import selectors
+import shlex
 import shutil
 import socket
 import subprocess
@@ -20,12 +21,15 @@ sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 
 import backend  # noqa: E402
 import backupstate  # noqa: E402
+import bootstate  # noqa: E402
+import changelog  # noqa: E402
 import closure  # noqa: E402
 import dms  # noqa: E402
 import docstate  # noqa: E402
 import flatpakstate  # noqa: E402
 import gitstate  # noqa: E402
 import keybindstate  # noqa: E402
+import mimeapps  # noqa: E402
 import nixfile  # noqa: E402
 import packagestate  # noqa: E402
 import peoplestate  # noqa: E402
@@ -73,6 +77,8 @@ NAV_SUBTITLES = {"overview": "Updates, rebuild, versions", "git": "Changes, comm
                  "people": "Who can log in", "packages": "Find packages in nixpkgs",
                  "shell": "DankMaterialShell's settings", "windowrules": "Rules for each app's windows",
                  "keybinds": "Change, add and turn off shortcuts",
+                 "startup": "Variables every program sees, and autostart",
+                 "filetypes": "Which app opens one file type",
                  "userpackages": "Packages you added from Search",
                  "proton": "Launch options to copy", "protonversions": "Proton builds installed"}
 
@@ -86,6 +92,7 @@ SECTION_TAB = {"cloudai": "ai", "localai": "ai", "apps": "packages"}
 
 USER_PACKAGES = ("user", ("userPackages",))
 KEYBINDS = ("user", schema.KEYBINDS)
+WINDOW_RULES = ("user", schema.WINDOW_RULES)
 
 STATE_DIR = os.path.join(os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state"),
                          "omni-settings")
@@ -120,7 +127,12 @@ def shown(setting, value):
         return "On" if value else "Off"
     if setting.kind == "keybinds":
         return f"{len(value)} keybind{'' if len(value) == 1 else 's'} changed" if value else "Not set"
+    if setting.kind == "windowrules":
+        return f"{len(value)} window rule{'' if len(value) == 1 else 's'} changed" if value else "Not set"
     if isinstance(value, dict):
+        if not all(isinstance(v, list) for v in value.values()):
+            n = len(value)
+            return f"{n} entr{'y' if n == 1 else 'ies'}" if n else "Not set"
         n = sum(len(v) for v in value.values())
         return f"{n} in {len(value)} categor{'y' if len(value) == 1 else 'ies'}" if n else "Not set"
     if value is None or value == "" or value == []:
@@ -231,7 +243,7 @@ def cmd_load(cfg, _args):
     shell_links = wm == "niri"
     shell = {}
     for page in state.pages:
-        if page.section in ("userpkgs", "keybinds"):
+        if page.section in ("userpkgs", "keybinds", "windowrules", "startup", "filetypes"):
             continue
         pid = schema.TOP_PAGES[page.title] if page.section == "top" else f"page:{page.title}"
         groups = []
@@ -256,6 +268,18 @@ def cmd_load(cfg, _args):
         if page.section != "top":
             by_section.get(page.section, by_section["apps"]).append(
                 {"id": pid, "title": page.title, "icon": [page.icon, schema.FALLBACK_ICON]})
+    startup = [s for p in state.pages for g in p.groups for s in g.settings
+               if (s.domain, s.path) in (("user", ("env",)), ("user", ("autostart",)))]
+    mime_types = next((s for p in state.pages for g in p.groups for s in g.settings
+                       if (s.domain, s.path) == ("user", ("mimeTypes",))), None)
+    if startup:
+        by_section["personal"].append({"id": "startup", "title": "Startup",
+                                       "icon": ["system-run-symbolic"],
+                                       "subtitle": NAV_SUBTITLES["startup"]})
+    if mime_types:
+        by_section["personal"].append({"id": "filetypes", "title": "File Types",
+                                       "icon": ["text-x-generic-symbolic"],
+                                       "subtitle": NAV_SUBTITLES["filetypes"]})
     for key, title in schema.SECTIONS:
         if by_section[key]:
             nav[section_tab.get(key, "main")].append({"id": key, "title": title, "items": by_section[key]})
@@ -268,6 +292,8 @@ def cmd_load(cfg, _args):
                                            "icon": ["package-x-generic-symbolic"], "custom": True}]})
     keybinds = next((s for p in state.pages for g in p.groups for s in g.settings
                      if (s.domain, s.path) == KEYBINDS), None)
+    window_rules = next((s for p in state.pages for g in p.groups for s in g.settings
+                         if (s.domain, s.path) == WINDOW_RULES), None)
     guides = [{"id": d.key, "title": d.title, "icon": ["help-browser-symbolic"], "custom": True}
               for d in docstate.guide_docs(cfg.flake)]
     if guides:
@@ -296,6 +322,12 @@ def cmd_load(cfg, _args):
             "shellLinks": shell_categories(shell),
             "userPackages": user_packages and setting_json(cfg, state, user_packages, multi, modules),
             "keybinds": keybinds and setting_json(cfg, state, keybinds, multi, modules),
+            "windowRules": window_rules and setting_json(cfg, state, window_rules, multi, modules),
+            "env": next((setting_json(cfg, state, s, multi, modules) for s in startup
+                         if s.path == ("env",)), None),
+            "autostart": next((setting_json(cfg, state, s, multi, modules) for s in startup
+                               if s.path == ("autostart",)), None),
+            "mimeTypes": mime_types and setting_json(cfg, state, mime_types, multi, modules),
             "starter": packagestate.STARTER,
             "dmsSearch": [{"label": e.label, "description": e.description, "keywords": e.keywords,
                            "tab": e.link.tab, "page": e.link.page} for e in state.dms_entries]}
@@ -306,6 +338,22 @@ def cmd_list(_cfg, args):
     if args.get("name") not in set(schema.DATA_CHOICES.values()):
         raise ValueError("unknown list")
     return [{"value": v, "label": label} for v, label in backend.data_list(args["name"])]
+
+
+def cmd_mime_apps(_cfg, _args):
+    """The apps installed here, for the File Types page."""
+    return mimeapps.apps()
+
+
+def cmd_split_command(_cfg, args):
+    """An autostart command line as niri's argv list, quoted words kept whole."""
+    text = str(args.get("text") or "").strip()
+    if not text:
+        raise ValueError("type a command")
+    try:
+        return shlex.split(text)
+    except ValueError as e:
+        raise ValueError(f"Can't read that command: {e}") from None
 
 
 def cmd_review(cfg, args):
@@ -405,12 +453,25 @@ def cmd_freed(_cfg, _args):
     return system.freed_estimate(doomed, [g for g in gens if g not in doomed]) if doomed else 0
 
 
+def cmd_boot(_cfg, _args):
+    """The last startup's stages, its slowest units and the chain it waited on; slow,
+    so asked for apart."""
+    return bootstate.summary()
+
+
 def cmd_check_updates(cfg, _args):
     """The newest version of each flake input, locked into a separate file the
     update job takes as args.lock; flake.lock stays as it is."""
     lock, changes = system.check_updates(cfg.flake)
-    return {"lock": lock, "changes": [{"name": c.name, "old": c.old, "new": c.new, "link": c.link}
+    return {"lock": lock, "changes": [{"name": c.name, "old": c.old, "new": c.new, "link": c.link,
+                                       "repo": c.repo, "before": c.before, "after": c.after}
                                       for c in changes]}
+
+
+def cmd_changelog(cfg, args):
+    """What one of those sources says changed between its two versions."""
+    return changelog.notes(args.get("repo", ""), args.get("before", ""), args.get("after", ""),
+                           args.get("old") or 0, args.get("new") or 0)
 
 
 def cmd_compare(_cfg, args):
@@ -452,13 +513,14 @@ def cmd_git(cfg, args):
     fetch_err, prs, pr_err, limited = gitstate.remote(cfg.flake, repo, bool(args.get("force")),
                                                       bool(args.get("cached")))
     try:
-        status, upstream, changed, outgoing, incoming, recent, fetched = gitstate.snapshot(cfg.flake)
+        status, upstream, changed, outgoing, incoming, recent, fetched, total = gitstate.snapshot(cfg.flake)
     except (RuntimeError, subprocess.TimeoutExpired) as e:
         raise ValueError(f"Couldn't read the repo: {e}")
     files = [{"path": line[3:], "state": gitstate.STATES.get(line[:2].strip()[:1], line[:2].strip())}
              for line in changed[:gitstate.MAX_FILES]]
     return {"repo": repo, "branch": status.branch, "upstream": upstream, "fetched": fetched,
             "fetchErr": fetch_err, "changed": files, "moreChanged": max(0, len(changed) - gitstate.MAX_FILES),
+            "total": total,
             "outgoing": [commit_json(c) for c in outgoing], "incoming": [commit_json(c) for c in incoming],
             "recent": [commit_json(c) for c in recent],
             "prs": None if prs is None else [
@@ -759,12 +821,7 @@ def cmd_proton_versions(_cfg, _args):
 #-- Window Rules (niri)
 #--------------------------------------------------------------------#
 def rules_path(cfg):
-    return os.path.join(cfg.flake, wr.RULES_FILE)
-
-
-def rules_editable(cfg):
-    path = rules_path(cfg)
-    return in_wheel() and backend.writable(cfg) and os.access(path, os.W_OK)
+    return os.path.join(cfg.flake, wr.SHARED_FILE)
 
 
 def match_json(match):
@@ -772,10 +829,16 @@ def match_json(match):
             "app": wr.plain(match.get("app-id", ""))}
 
 
-def rule_json(rule, index):
+def rule_json(rule, index, rule_id=None, off=False, custom=False, now=None, saved=None):
+    """One rule for the page; `rule_id` is None for the rules Nix sets, and
+    `now`/`saved` are the windowRules setting with and without pending changes."""
     matches = rule.get("matches") or []
     one_app = len(matches) == 1 and "app-id" in matches[0]
-    return {"index": index, "title": wr.rule_title(rule), "note": rule.get("note", ""),
+    now, saved = now or {}, saved or {}
+    return {"index": index, "id": rule_id, "off": off, "custom": custom,
+            "change": now.get(rule_id), "changed": rule_id in now,
+            "pending": now.get(rule_id) != saved.get(rule_id),
+            "title": wr.rule_title(rule), "note": rule.get("note", ""),
             "category": rule.get("category", ""),
             "app": wr.plain(matches[0]["app-id"]) if one_app else "",
             "tags": [{"text": wr.tag_text(p, v), "kind": wr.tag_kind(p)} for p, v in wr.properties(rule)],
@@ -791,17 +854,18 @@ def window_json(w):
             "size": (w.get("layout") or {}).get("window_size") or []}
 
 
-def cmd_window_rules(cfg, _args):
-    """The rules in window-rules.json by group, the ones Nix sets, and the form's choices."""
-    rules, from_nix, waiting = wr.listing(rules_path(cfg))
+def cmd_window_rules(cfg, args):
+    """The shared rules with the windowRules setting (args.now, with pending
+    changes; args.saved, without) by group, the ones Nix sets, and the form's choices."""
+    now, saved = wr.changes_of(args.get("now")), wr.changes_of(args.get("saved"))
+    rules, from_nix, waiting = wr.listing(rules_path(cfg), now, saved)
     grouped = {g[0]: [] for g in wr.GROUPS}
-    for i, r in enumerate(rules):
-        if "include" not in r:
-            grouped[wr.group_of(r)].append(rule_json(r, i))
+    for i, (rule_id, r, off, custom) in enumerate(rules):
+        grouped[wr.group_of(r)].append(rule_json(r, i, rule_id, off, custom, now, saved))
     workspaces, outputs = wr.places()
-    categories = sorted({r["category"] for r in rules if isinstance(r.get("category"), str) and r["category"]},
-                        key=str.lower)
-    return {"editable": rules_editable(cfg), "waiting": waiting, "categories": categories,
+    categories = sorted({r["category"] for _, r, _, _ in rules
+                         if isinstance(r.get("category"), str) and r["category"]}, key=str.lower)
+    return {"editable": True, "waiting": waiting, "categories": categories,
             "groups": [{"title": t, "description": d, "icon": icon, "kind": k, "rules": grouped[t]}
                        for t, d, icon, k in wr.GROUPS if grouped[t]],
             "fromNix": [rule_json(r, None) for r in from_nix],
@@ -840,39 +904,9 @@ def cmd_launch_command(_cfg, args):
     return keybindstate.launch_command(str(args.get("appId") or ""))
 
 
-def rules_to_change(cfg):
-    """(the path, its rules) for a change, which only admins who can edit the files make."""
-    if not rules_editable(cfg):
-        raise PermissionError("only an admin who can edit the config's files changes window rules")
-    path = rules_path(cfg)
-    return path, wr.load(path)
-
-
-def undo_dir():
-    path = os.path.join(system.runtime_dir(), "window-rules-undo")
-    os.makedirs(path, mode=0o700, exist_ok=True)
-    return path
-
-
-def save_rules(path, after, text):
-    """Saves `after`, keeping the file's text before and after under a token
-    the reply carries for undoWindowRules (the last 20 are kept)."""
-    with open(path) as f:
-        before_text = f.read()
-    wr.save(path, after)
-    with open(path) as f:
-        after_text = f.read()
-    token = f"{time.time_ns():x}"
-    folder = undo_dir()
-    with open(os.path.join(folder, f"{token}.json"), "w") as f:
-        json.dump({"before": before_text, "after": after_text}, f)
-    for old in sorted(os.listdir(folder))[:-20]:
-        os.remove(os.path.join(folder, old))
-    return {"text": text, "undo": token}
-
-
 def cmd_add_window_rule(cfg, args):
-    """Sets args.prop to args.value for the window args.appId and args.title match."""
+    """The windowRules setting args.now with args.prop set to args.value for the
+    window args.appId and args.title match; the page stages it as a pending change."""
     prop, value = args.get("prop"), args.get("value")
     if prop not in wr.KIND or value is None or value == "":
         raise ValueError("pick what the rule does")
@@ -880,58 +914,28 @@ def cmd_add_window_rule(cfg, args):
     if not match:
         raise ValueError("pick a window, or type an app ID or title")
     name = (args.get("name") or "").strip() or match.get("app-id") or match["title"]
-    path, before = rules_to_change(cfg)
-    rules = json.loads(json.dumps(before))
-    wr.add_rule(rules, match, name, prop, value, (args.get("category") or "").strip()[:40])
-    return save_rules(path, rules, f"{wr.property_text(prop, value)} added for {name}")
-
-
-def cmd_remove_window_rule(cfg, args):
-    """Takes rule args.index out of window-rules.json."""
-    path, before = rules_to_change(cfg)
-    index = args.get("index")
-    if not isinstance(index, int) or not 0 <= index < len(before) or "include" in before[index]:
-        raise ValueError("that rule isn't in the file any more")
-    rules = before[:index] + before[index + 1:]
-    return save_rules(path, rules, f"Removed {wr.rule_title(before[index])}")
+    changes, _ = wr.add_rule(rules_path(cfg), wr.changes_of(args.get("now")), match, name, prop, value,
+                             (args.get("category") or "").strip()[:40])
+    return {"value": changes, "text": f"{wr.property_text(prop, value)} added for {name}"}
 
 
 def cmd_save_window_rule(cfg, args):
-    """Replaces rule args.index with args.rule, if it is still args.original."""
-    path, before = rules_to_change(cfg)
-    index, rule = args.get("index"), args.get("rule")
-    if not isinstance(index, int) or not 0 <= index < len(before) or before[index] != args.get("original"):
-        raise ValueError("the rule changed since this page read it; open it again")
+    """The windowRules setting args.now with rule args.id replaced by args.rule,
+    if it is still args.original."""
+    rule = args.get("rule")
     if not isinstance(rule, dict) or not isinstance(rule.get("matches"), list) or not wr.properties(rule):
-        raise ValueError("give the rule something to do, or remove it")
-    rule = wr.edited(rule, before[index])
-    rules = before[:index] + [rule] + before[index + 1:]
-    return save_rules(path, rules, f"Saved {wr.rule_title(rule)}")
-
-
-def cmd_undo_window_rules(cfg, args):
-    """Puts back the file's text from before change args.token, if it still
-    holds the text that change saved."""
-    path, _ = rules_to_change(cfg)
-    token = str(args.get("token", ""))
-    saved = os.path.join(undo_dir(), f"{token}.json")
-    if not token.isalnum() or not os.path.exists(saved):
-        raise ValueError("there's nothing to undo")
-    with open(saved) as f:
-        texts = json.load(f)
-    with open(path) as f:
-        if f.read() != texts["after"]:
-            raise ValueError("the rules changed since, so this can't be undone")
-    with open(path, "w") as f:
-        f.write(texts["before"])
-    os.remove(saved)
-    return "Undone"
+        raise ValueError("give the rule something to do, or turn it off")
+    original = args.get("original") if isinstance(args.get("original"), dict) else {}
+    changes, new = wr.save_rule(rules_path(cfg), wr.changes_of(args.get("now")), str(args.get("id") or ""),
+                                original, rule)
+    return {"value": changes, "text": f"Changed {wr.rule_title(new)}"}
 
 
 COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cmd_save,
             "dismiss": cmd_dismiss,
             "stale": cmd_stale, "removeStale": cmd_remove_stale,
-            "overview": cmd_overview, "freed": cmd_freed, "checkUpdates": cmd_check_updates,
+            "overview": cmd_overview, "freed": cmd_freed, "boot": cmd_boot,
+            "checkUpdates": cmd_check_updates, "changelog": cmd_changelog,
             "compare": cmd_compare, "failedLog": cmd_failed_log, "forgetFailed": cmd_forget_failed,
             "git": cmd_git, "gitSummary": cmd_git_summary, "setBackup": cmd_set_backup,
             "flatpaks": cmd_flatpaks, "flatpakUpdates": cmd_flatpak_updates, "flatpakRun": cmd_flatpak_run,
@@ -944,10 +948,9 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "packagePreviews": cmd_package_previews,
             "resetApp": cmd_reset_app, "doc": cmd_doc, "docLink": cmd_doc_link, "launchOptions": cmd_launch_options, "protonVersions": cmd_proton_versions,
             "windowRules": cmd_window_rules, "niriWindows": cmd_niri_windows, "pickWindow": cmd_pick_window,
-            "addWindowRule": cmd_add_window_rule, "removeWindowRule": cmd_remove_window_rule,
-            "undoWindowRules": cmd_undo_window_rules,
-            "saveWindowRule": cmd_save_window_rule,
-            "keybinds": cmd_keybinds, "launchCommand": cmd_launch_command}
+            "addWindowRule": cmd_add_window_rule, "saveWindowRule": cmd_save_window_rule,
+            "keybinds": cmd_keybinds, "launchCommand": cmd_launch_command,
+            "mimeApps": cmd_mime_apps, "splitCommand": cmd_split_command}
 
 
 def run(cfg, cmd, args):

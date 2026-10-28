@@ -7,12 +7,21 @@ ColumnLayout {
     id: page
     required property var view
     property var ov: null
+    property var boot: null  // systemd-analyze's last startup, asked for apart
+    property bool bootOpen: false  // whether the startup's details are shown
+    property bool versionsOpen: false  // whether the older generations are listed
+    readonly property var versions: ov ? ov.generations : []
+    readonly property var current: versions.find(g => g.running) || versions[0] || null
+    readonly property var older: versions.filter(g => !!current && g.number !== current.number)
     property string error: ""
     readonly property bool ready: !!ov || error !== ""
     property bool checking: false
     property var updates: null  // checkUpdates' reply
     property string updateError: ""
     property var picked: ({})  // source name -> ticked
+    property var notesSource: null  // the source whose release notes are open
+    property var notes: null  // changelog's reply
+    property string notesError: ""
     property int compareNumber: 0
     readonly property bool admin: !!view.info && view.info.admin
     readonly property int behind: view.gitCounts ? view.gitCounts.behind : 0  // as of the last fetch
@@ -30,7 +39,18 @@ ColumnLayout {
         })
     }
 
-    Component.onCompleted: load()
+    Component.onCompleted: {
+        load()
+        loadBoot()
+    }
+
+    //--- The startup chart takes a call of its own, so the rest shows meanwhile
+    function loadBoot() {
+        Backend.call("boot", {}, reply => {
+            if (page && reply.ok)
+                page.boot = reply.data
+        })
+    }
     Connections {
         target: Jobs
         function onEnded(job) {
@@ -105,6 +125,18 @@ ColumnLayout {
             })
     }
 
+    function optimise() {
+        if (!canStart())
+            return
+        view.ask({
+            heading: "Optimize the Nix store?",
+            body: "Replaces identical files in the store with hard links, so each copy takes space "
+                  + "once. Nothing is deleted and every app keeps working. It can take a few "
+                  + "minutes; the space it freed is shown when it finishes.",
+            buttons: [{ label: "Optimize", value: "optimise" }]
+        }, () => view.startJob("optimise", {}))
+    }
+
     function check() {
         checking = true
         updates = null
@@ -120,6 +152,23 @@ ColumnLayout {
             for (const c of updates.changes)
                 p[c.name] = true
             picked = p
+        })
+    }
+
+    //--- One source's release notes, read from GitHub when the row asks for them
+    function showNotes(src) {
+        notesSource = src
+        notes = null
+        notesError = ""
+        view.sheet = notesSheet
+        Backend.call("changelog", { repo: src.repo, before: src.before, after: src.after,
+                                    old: src.old, new: src.new }, reply => {
+            if (!page)
+                return
+            if (reply.ok)
+                page.notes = reply.data
+            else
+                page.notesError = reply.error
         })
     }
 
@@ -301,6 +350,11 @@ ColumnLayout {
                     }
                 }
                 IconButton {
+                    visible: modelData.repo !== ""
+                    icon: "notes"
+                    onClicked: page.showNotes(modelData)
+                }
+                IconButton {
                     visible: modelData.link !== ""
                     icon: "open_in_new"
                     onClicked: Qt.openUrlExternally(modelData.link)
@@ -351,11 +405,12 @@ ColumnLayout {
     }
     ListRow {
         visible: !!page.ov
-        icon: "folder_open"
-        title: "Open the Config Folder"
-        subtitle: page.view.info.flake
-        trailing: "open_in_new"
-        onClicked: Qt.openUrlExternally("file://" + page.view.info.flake)
+        enabled: page.admin
+        icon: "compress"
+        title: "Optimize the Nix Store"
+        subtitle: "Hard-links identical files, freeing space without deleting anything"
+        chevron: true
+        onClicked: page.optimise()
     }
     ListRow {
         visible: !!page.ov && !!page.ov.lastFailed
@@ -377,10 +432,28 @@ ColumnLayout {
         order: page.view.info.quick
     }
 
-    //--- Earlier versions
-    Section { visible: !!page.ov && page.ov.generations.length > 0; text: "Versions" }
+    //--- Earlier versions; the row keeps the running one and opens the rest
+    Section { visible: page.versions.length > 0; text: "Versions" }
+    ListRow {
+        visible: !!page.current
+        icon: page.current && page.current.running ? "radio_button_checked" : "history"
+        tone: page.current && page.current.running ? "success" : ""
+        title: page.current ? `Version ${page.current.number}` : ""
+        subtitle: !page.current ? ""
+            : [page.older.length
+                   ? `${page.older.length} earlier `
+                     + (page.older.length === 1 ? "generation" : "generations") : "",
+               Fmt.when(page.current.when),
+               page.current.version ? "NixOS " + page.current.version.split(".").slice(0, 2).join(".") : "",
+               page.current.kernel ? `Linux ${page.current.kernel}` : ""].filter(t => t).join(" · ")
+        tag: !page.current ? "" : page.current.running ? "Running"
+            : page.current.next ? "Next start" : ""
+        tagSuccess: true
+        trailing: page.older.length ? (page.versionsOpen ? "expand_less" : "expand_more") : ""
+        onClicked: if (page.older.length) page.versionsOpen = !page.versionsOpen
+    }
     Text {
-        visible: !!page.ov && page.ov.generations.length > 0
+        visible: page.versionsOpen && page.older.length > 0
         text: "Generations: each rebuild saves one, and the boot menu keeps the last ten. "
               + "Switching back leaves your settings files as they are."
         color: Theme.dim
@@ -390,7 +463,7 @@ ColumnLayout {
         Layout.leftMargin: 6
     }
     Repeater {
-        model: page.ov ? page.ov.generations : []
+        model: page.versionsOpen ? page.older : []
         Rectangle {
             required property var modelData
             readonly property var g: modelData
@@ -453,6 +526,152 @@ ColumnLayout {
         }
     }
 
+    //--- How the last startup went, from systemd-analyze; the row keeps it to
+    //--- the total until the details are wanted
+    Section { visible: !!page.boot && page.boot.stages.total > 0; text: "Startup" }
+    ListRow {
+        visible: !!page.boot && page.boot.stages.total > 0
+        icon: "timer"
+        title: "Last Startup"
+        subtitle: !page.boot ? ""
+            : page.boot.graphical
+                ? `${Fmt.duration(page.boot.stages.total)} from power on to `
+                  + page.boot.graphical.target
+                : `${Fmt.duration(page.boot.stages.total)} from power on`
+        trailing: page.bootOpen ? "expand_less" : "expand_more"
+        onClicked: page.bootOpen = !page.bootOpen
+    }
+    Rectangle {
+        visible: page.bootOpen && !!page.boot && page.boot.stages.total > 0
+        Layout.fillWidth: true
+        implicitHeight: bootColumn.implicitHeight + 28
+        radius: 16
+        color: Theme.card
+        ColumnLayout {
+            id: bootColumn
+            anchors.fill: parent
+            anchors.margins: 14
+            spacing: 10
+            Text {
+                Layout.fillWidth: true
+                text: !page.boot ? ""
+                    : page.boot.graphical
+                        ? `The desktop was up ${Fmt.duration(page.boot.graphical.seconds)} into `
+                          + "userspace."
+                        : "From power on to the desktop."
+                color: Theme.dim
+                font.pixelSize: 13
+                wrapMode: Text.Wrap
+            }
+            Flow {
+                Layout.fillWidth: true
+                spacing: 6
+                Repeater {
+                    model: ["firmware", "loader", "kernel", "initrd", "userspace"]
+                    delegate: Chip {
+                        required property string modelData
+                        visible: !!page.boot && !!page.boot.stages[modelData]
+                        tappable: false
+                        text: page.boot ? `${modelData} ${Fmt.duration(page.boot.stages[modelData])}` : ""
+                    }
+                }
+            }
+            Text {
+                Layout.fillWidth: true
+                Layout.topMargin: 2
+                text: "The slowest units to start:"
+                color: Theme.dim
+                font.pixelSize: 13
+            }
+            Repeater {
+                model: page.boot ? page.boot.blame.units : []
+                delegate: ColumnLayout {
+                    id: blameRow
+                    required property var modelData
+                    readonly property var units: page.boot.blame.units
+                    readonly property real share: units.length
+                        ? modelData.seconds / Math.max(units[0].seconds, 0.001) : 0
+                    Layout.fillWidth: true
+                    spacing: 4
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 10
+                        Text {
+                            Layout.fillWidth: true
+                            text: blameRow.modelData.unit
+                            color: Theme.text
+                            font.pixelSize: 13
+                            elide: Text.ElideRight
+                        }
+                        Text {
+                            text: Fmt.duration(blameRow.modelData.seconds)
+                            color: Theme.dim
+                            font.pixelSize: 13
+                        }
+                    }
+                    Rectangle {
+                        Layout.fillWidth: true
+                        implicitHeight: 6
+                        radius: 3
+                        color: Theme.line
+                        Rectangle {
+                            width: parent.width * blameRow.share
+                            height: parent.height
+                            radius: 3
+                            color: Theme.primary
+                        }
+                    }
+                }
+            }
+            Text {
+                visible: !!page.boot && page.boot.blame.devices !== null
+                Layout.fillWidth: true
+                text: page.boot && page.boot.blame.devices !== null
+                    ? `Device units took up to ${Fmt.duration(page.boot.blame.devices)}; one wait `
+                      + "shows up under many device names." : ""
+                color: Theme.dim
+                font.pixelSize: 13
+                wrapMode: Text.Wrap
+            }
+            Text {
+                visible: page.boot && page.boot.chain.length > 0
+                Layout.fillWidth: true
+                Layout.topMargin: 2
+                text: "The chain the desktop waited on, each indent waiting for the one above:"
+                color: Theme.dim
+                font.pixelSize: 13
+                wrapMode: Text.Wrap
+            }
+            Repeater {
+                model: page.boot ? page.boot.chain : []
+                delegate: RowLayout {
+                    required property var modelData
+                    Layout.fillWidth: true
+                    Layout.leftMargin: Math.min(modelData.depth, 4) * 14
+                    spacing: 10
+                    Text {
+                        Layout.fillWidth: true
+                        text: modelData.unit
+                        color: Theme.text
+                        font.pixelSize: 13
+                        elide: Text.ElideRight
+                    }
+                    Text {
+                        visible: modelData.took !== null
+                        text: modelData.took !== null ? `+${Fmt.duration(modelData.took)}` : ""
+                        color: Theme.dim
+                        font.pixelSize: 13
+                    }
+                    Text {
+                        text: `@${Fmt.duration(modelData.at)}`
+                        color: Theme.dim
+                        font.pixelSize: 13
+                    }
+                }
+            }
+        }
+    }
+
     //--------------------------------------------------------------------//
     //-- Sheets
     //--------------------------------------------------------------------//
@@ -488,6 +707,172 @@ ColumnLayout {
                 active: !!cmp.diff
                 Layout.fillWidth: true
                 sourceComponent: DiffView { diff: cmp.diff }
+            }
+        }
+    }
+
+    Component {
+        id: notesSheet
+        Sheet {
+            id: rel
+            property int open: -1  // the release whose notes are shown
+            readonly property var data: page.notes
+            title: page.notesSource ? `${page.notesSource.name} notes` : "Release notes"
+            onBack: page.view.sheet = null
+            actions: [
+                Pill {
+                    quiet: true
+                    visible: !!page.notesSource && !!page.notesSource.link
+                    text: "All the Changes"
+                    onClicked: Qt.openUrlExternally(page.notesSource.link)
+                }
+            ]
+            Text {
+                Layout.fillWidth: true
+                Layout.margins: 6
+                text: !page.notesSource ? ""
+                    : `What ${page.notesSource.name} says changed between `
+                      + `${Fmt.day(page.notesSource.old)} and ${Fmt.day(page.notesSource.new)}.`
+                color: Theme.dim
+                font.pixelSize: 15
+                wrapMode: Text.Wrap
+            }
+            Text {
+                visible: !rel.data && !page.notesError
+                Layout.fillWidth: true
+                Layout.margins: 6
+                text: "Reading GitHub…"
+                color: Theme.dim
+            }
+            Text {
+                visible: page.notesError !== ""
+                Layout.fillWidth: true
+                Layout.margins: 6
+                text: page.notesError
+                color: Theme.error
+                wrapMode: Text.Wrap
+            }
+            Text {
+                visible: !!rel.data && !rel.data.releases.length && !rel.data.commits
+                Layout.fillWidth: true
+                Layout.margins: 6
+                text: "Nothing was published between these two versions."
+                color: Theme.dim
+                wrapMode: Text.Wrap
+            }
+            Section {
+                visible: !!rel.data && rel.data.releases.length > 0
+                text: rel.data && rel.data.releases.length === 1 ? "Release"
+                    : `${rel.data ? rel.data.releases.length : 0} releases`
+            }
+            Repeater {
+                model: rel.data && rel.data.releases ? rel.data.releases : []
+                Rectangle {
+                    id: release
+                    required property var modelData
+                    required property int index
+                    Layout.fillWidth: true
+                    implicitHeight: releaseCol.implicitHeight + 20
+                    radius: 14
+                    color: Theme.card
+                    ColumnLayout {
+                        id: releaseCol
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.margins: 10
+                        anchors.leftMargin: 14
+                        spacing: 4
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 1
+                                Text {
+                                    text: release.modelData.tag
+                                    color: Theme.text
+                                    font.pixelSize: 16
+                                    font.weight: Font.DemiBold
+                                }
+                                Text {
+                                    text: [release.modelData.name !== release.modelData.tag
+                                           ? release.modelData.name : "",
+                                           Fmt.day(release.modelData.when)].filter(t => t).join(" · ")
+                                    color: Theme.dim
+                                    font.pixelSize: 13
+                                    elide: Text.ElideRight
+                                    Layout.fillWidth: true
+                                }
+                            }
+                            IconButton {
+                                visible: release.modelData.url !== ""
+                                icon: "open_in_new"
+                                onClicked: Qt.openUrlExternally(release.modelData.url)
+                            }
+                            Icon {
+                                icon: "expand_more"
+                                rotation: rel.open === release.index ? 180 : 0
+                            }
+                        }
+                        Text {
+                            visible: rel.open === release.index
+                            Layout.fillWidth: true
+                            text: release.modelData.body || "The release has no notes."
+                            color: Theme.dim
+                            font.pixelSize: 13
+                            wrapMode: Text.Wrap
+                        }
+                    }
+                    HoverHandler { cursorShape: Qt.PointingHandCursor }
+                    TapHandler {
+                        gesturePolicy: TapHandler.ReleaseWithinBounds
+                        onTapped: rel.open = rel.open === release.index ? -1 : release.index
+                    }
+                }
+            }
+            Section {
+                visible: !!rel.data && !!rel.data.commits
+                text: rel.data && rel.data.commits
+                    ? `${rel.data.commits.total} commit${rel.data.commits.total === 1 ? "" : "s"}`
+                    : ""
+            }
+            Repeater {
+                model: rel.data && rel.data.commits ? rel.data.commits.items : []
+                Rectangle {
+                    required property var modelData
+                    Layout.fillWidth: true
+                    implicitHeight: commit.implicitHeight + 18
+                    radius: 14
+                    color: Theme.card
+                    RowLayout {
+                        id: commit
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.margins: 10
+                        anchors.leftMargin: 14
+                        spacing: 10
+                        Text {
+                            text: modelData.sha
+                            color: Theme.primary
+                            font.family: "monospace"
+                            font.pixelSize: 13
+                        }
+                        Text {
+                            text: modelData.subject
+                            color: Theme.text
+                            font.pixelSize: 13
+                            elide: Text.ElideRight
+                            Layout.fillWidth: true
+                        }
+                        IconButton {
+                            visible: modelData.url !== ""
+                            icon: "open_in_new"
+                            onClicked: Qt.openUrlExternally(modelData.url)
+                        }
+                    }
+                }
             }
         }
     }

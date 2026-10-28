@@ -17,6 +17,7 @@ Usage: omni-settings-apply '{"mode": "switch"|"boot", "machine": name|null,
        (stdin's first line: the first password for that newly listed person)
        omni-settings-apply '{"activate": "/nix/store/...", "mode": ...}'
        omni-settings-apply '{"collectGarbage": true}'
+       omni-settings-apply '{"optimise": true}'
        omni-settings-apply '{"clean": true}'  (drop settings the templates lost)
 
 "auto" switches now unless the new system changes a package that froze the
@@ -32,6 +33,7 @@ import os
 import pwd
 import re
 import shlex
+import shutil
 import signal
 import subprocess
 import sys
@@ -41,6 +43,7 @@ sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 
 import backend  # noqa: E402
 import closure  # noqa: E402
+import files  # noqa: E402
 import nixfile  # noqa: E402
 import nixlog  # noqa: E402
 import schema  # noqa: E402
@@ -51,6 +54,8 @@ RUN_DIR = "/run/omni-settings"
 CLEAN_ARGS = shlex.split(os.environ.get("OMNI_SETTINGS_CLEAN_ARGS", "--keep-since 5d --keep 5"))
 DELETED_SYSTEM = re.compile(r"^- DEL /nix/var/nix/profiles/system-\d+-link")
 FREED = re.compile(r"(\d+) store paths deleted, ([\d.]+ \w+) freed")
+#--- "1.2 GiB freed by hard-linking 312 files", from `nix store optimise`
+OPTIMISED = re.compile(r"([\d.]+ [KMGT]?i?B) freed by hard-linking (\d+) files?")
 #--- What nh and nixos-rebuild run switch-to-configuration with, so a lost
 #--- session can't kill it halfway and two switches can't overlap
 SYSTEMD_RUN = ["systemd-run", "-E", "LOCALE_ARCHIVE", "-E", "NIXOS_INSTALL_BOOTLOADER",
@@ -192,6 +197,10 @@ def compare(path, mode):
     emit(step="compare", state="start")
     diff = closure.diff(closure.CURRENT, path)
     emit(diff=diff.as_json())
+    try:
+        emit(files=files.changes(closure.CURRENT, path))
+    except (OSError, ValueError) as e:
+        out(f"Couldn't compare the generated files: {e}")
     old, new = closure.kernel(closure.BOOTED), closure.kernel(path)
     if old and new and old != new:
         emit(kernel=[old, new])
@@ -268,6 +277,66 @@ def collect():
                   "freed": freed.group(2) if freed else ""})
 
 
+def store_free():
+    try:
+        return shutil.disk_usage("/nix/store").free
+    except OSError:
+        return None
+
+
+def store_paths():
+    """How many paths the store lists, for the progress bar; 0 when it can't say."""
+    try:
+        res = subprocess.run(["nix", "path-info", "--all"], capture_output=True, text=True,
+                             env=env())
+    except OSError:
+        return 0
+    return res.stdout.count("\n") if res.returncode == 0 else 0
+
+
+def optimise():
+    """Replaces identical files in the store with hard links, so they take the
+    space once; reports what that freed and how many files it linked. Nix prints
+    a line per path, which is counted for the progress and kept out of the log."""
+    emit(step="optimise", state="start")
+    before = store_free()
+    total = store_paths()
+    emit(optimise={"done": 0, "total": total})
+    proc = subprocess.Popen(["nix", "store", "optimise", "-v"], stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT, env=env(), start_new_session=True,
+                            text=True, errors="replace", bufsize=1)
+    CANCEL.run(proc)
+    done, summary = 0, None
+    for line in proc.stdout:
+        line = line.rstrip("\n")
+        if line.startswith("optimising path"):
+            done += 1
+            if done % 500 == 0:
+                emit(optimise={"done": done, "total": total})
+            if done % 5000 == 0:
+                out(f"Checked {done:,} store paths")
+            continue
+        m = OPTIMISED.search(line)
+        if m:
+            summary = m
+        elif line.strip():
+            out(line)
+    code = proc.wait()
+    CANCEL.done()
+    if CANCEL.requested:
+        raise Cancelled()
+    if code != 0:
+        emit(step="optimise", state="failed")
+        raise RuntimeError("optimising the store failed")
+    emit(step="optimise", state="done")
+    emit(optimise={"done": done, "total": total})
+    freed = closure.parse_size(summary.group(1)) if summary else None
+    if freed is None:
+        after = store_free()
+        freed = after - before if before is not None and after is not None else 0
+    emit(optimised={"freed": int(freed), "files": int(summary.group(2)) if summary else None})
+
+
 #--------------------------------------------------------------------#
 #-- Requests
 #--------------------------------------------------------------------#
@@ -287,6 +356,22 @@ def same_kind(template, value):
 #--- The fields a keybind change may set, as lib/settings.nix's keybindFields
 KEYBIND_FIELDS = {"key": str, "title": str, "enable": bool, "spawn": list, "action": str, "argument": str}
 
+#--- The key shapes of the settings holding named text (schema.py's TEXT_SETS)
+TEXT_SHAPES = {("env",): r"[A-Za-z_][A-Za-z0-9_]*",
+               ("mimeTypes",): r"[A-Za-z0-9.+-]+/[A-Za-z0-9.+-]+"}
+
+
+def text_set_ok(path, value):
+    """Whether value is a set of text, keyed by a variable name or MIME type."""
+    if not isinstance(value, dict):
+        return False
+    for key, item in value.items():
+        if not isinstance(key, str) or not isinstance(item, str):
+            return False
+        if not re.fullmatch(TEXT_SHAPES[path], key):
+            return False
+    return True
+
 
 def keybinds_ok(value):
     """Whether `value` is a set of keybind changes by id: a config bind's key, title
@@ -305,6 +390,28 @@ def keybinds_ok(value):
     return True
 
 
+def window_rules_ok(value):
+    """Whether `value` is a set of window rule changes by id, as lib/settings.nix's
+    windowRuleProblems: {"enable": false} or a whole rule, custom- ones with matches."""
+    if not isinstance(value, dict):
+        return False
+    for rule_id, r in value.items():
+        if not (isinstance(rule_id, str) and re.fullmatch(r"[A-Za-z0-9_-]+", rule_id) and isinstance(r, dict)):
+            return False
+        if rule_id.startswith("custom-") and "matches" not in r:
+            return False
+        for k, v in r.items():
+            if not (isinstance(k, str) and re.fullmatch(r"[a-z][a-z0-9-]*", k)):
+                return False
+            if k in ("matches", "excludes") and not (isinstance(v, list) and all(isinstance(m, dict) for m in v)):
+                return False
+            if k == "enable" and not isinstance(v, bool):
+                return False
+            if k in ("name", "note", "category") and not isinstance(v, str):
+                return False
+    return True
+
+
 def user_changes(cfg, raw):
     """The request's changes, refused unless each is a user template key with
     the template's kind of value."""
@@ -319,12 +426,21 @@ def user_changes(cfg, raw):
             refuse("bad request")
         path, value = item
         found, default = backend.lookup(template, path)
+        key = tuple(path)
         if not found or path[0] in schema.HIDDEN or (isinstance(default, dict)
-                                                     and tuple(path) not in schema.GROUPED):
+                                                     and key not in schema.GROUPED):
             refuse(f"`{'.'.join(path)}` can't be changed here")
-        if not (keybinds_ok(value) if tuple(path) == schema.KEYBINDS else same_kind(default, value)):
+        if key in schema.TEXT_SETS:
+            ok = text_set_ok(key, value)
+        elif key == schema.KEYBINDS:
+            ok = keybinds_ok(value)
+        elif key == schema.WINDOW_RULES:
+            ok = window_rules_ok(value)
+        else:
+            ok = same_kind(default, value)
+        if not ok:
             refuse(f"`{'.'.join(path)}` got the wrong kind of value")
-        changes[("user", tuple(path))] = value
+        changes[("user", key)] = value
     return changes
 
 
@@ -380,7 +496,8 @@ def main():
 
     changes, system, target, new_user, password = None, None, None, None, None
     collecting = request.get("collectGarbage") is True
-    if mode == "build" and (collecting or "activate" in request or "newUser" in request
+    optimising = request.get("optimise") is True
+    if mode == "build" and (collecting or optimising or "activate" in request or "newUser" in request
                             or request.get("clean") is True):
         refuse("bad request")
     if request.get("clean") is True:
@@ -388,6 +505,9 @@ def main():
     elif collecting:
         if not admin:
             refuse("only an admin can clean up old versions")
+    elif optimising:
+        if not admin:
+            refuse("only an admin can optimise the store")
     elif "activate" in request:
         if not admin:
             refuse("only an admin can switch to another version")
@@ -423,6 +543,18 @@ def main():
         if collecting:
             try:
                 collect()
+            except Exception as e:  # noqa: BLE001
+                emit(error=str(e))
+                emit(result="failed", restored=False)
+                sys.exit(1)
+            emit(result="ok")
+            return
+        if optimising:
+            try:
+                optimise()
+            except Cancelled:
+                emit(result="cancelled")
+                sys.exit(3)
             except Exception as e:  # noqa: BLE001
                 emit(error=str(e))
                 emit(result="failed", restored=False)

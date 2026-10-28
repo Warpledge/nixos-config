@@ -8,6 +8,7 @@
   config,
   lib,
   pkgs,
+  user,
   ...
 }: let
   presetFile = "${config.xdg.configHome}/niri/dms/blur-preset.kdl";
@@ -19,7 +20,7 @@
     lib.filter (m: lib.all (k: k == "app-id" || k == "title") (lib.attrNames m))
     (import ./translucent-apps.nix
       ++ lib.concatMap (r: r.matches or [])
-      (lib.filter (r: (r.opacity or 1) < 1) (lib.importJSON ./window-rules.json)));
+      (lib.filter (r: (r.opacity or 1) < 1) (import ./window-rules.nix {inherit lib user;})));
   matchTest = m:
     "{ "
     + lib.concatStringsSep " && " (lib.mapAttrsToList (k: v: let

@@ -6,7 +6,10 @@
   pkgs,
   machine,
   ...
-}: {
+}: let
+  #--- The ESP the installer writes its files and EFI variables to
+  esp = config.boot.loader.efi.efiSysMountPoint;
+in {
   #--------------------------------------------------------------------#
   #-- Kernel Selection (controlled by kernel in machine settings)
   #--------------------------------------------------------------------#
@@ -37,10 +40,19 @@
       "udev.log_priority=3" # Reduce udev boot logging
     ];
     loader = {
+      timeout = machine.boot.menu.timeout;
       systemd-boot = {
         enable = true;
-        configurationLimit = 10; # Keep last 10 entries
+        configurationLimit = machine.boot.menu.entries; # Generations the menu lists
         consoleMode = "max"; # Use full console resolution
+        # An entry picked in the menu itself lives in an EFI variable that
+        # outranks loader.conf, and so does a timeout set there: clear both, so
+        # the menu starts the newest generation and keeps the timeout above.
+        # Allowed to fail where the EFI variables can't be written
+        extraInstallCommands = ''
+          ${config.systemd.package}/bin/bootctl --esp-path=${esp} set-default "" || true
+          ${config.systemd.package}/bin/bootctl --esp-path=${esp} set-timeout "" || true
+        '';
       };
       efi.canTouchEfiVariables = true;
     };

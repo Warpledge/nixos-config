@@ -172,6 +172,7 @@
   claude = {enable = true;};
   claudeDesktop = {enable = true;};
   opencode = {enable = true;};
+  opencodeDesktop = {enable = true;};
   lmstudio = {enable = true;};
   llamaSwap = {enable = true;};
   openWebui = {enable = true;};

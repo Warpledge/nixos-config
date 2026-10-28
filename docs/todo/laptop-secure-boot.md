@@ -27,7 +27,7 @@ The laptop goes first because the desktop has other EFI loaders in its boot orde
 6. **Enroll the keys.** `sudo sbctl enroll-keys --microsoft`. Keep `--microsoft`: some option ROMs are signed with Microsoft's keys, and a GPU whose option ROM fails the check can come up with no picture before the OS loads. Then check that `/sys/firmware/efi/efivars/dbx-*` isn't empty.
 7. **Turn Secure Boot on and reboot.** `bootctl status` should report `Secure Boot: enabled (user)`.
 8. **Set a firmware supervisor password**, or anyone can switch Secure Boot back off.
-9. **Bind LUKS to the TPM** (decided 2026-10-16). The laptop hosts the Minecraft servers, and with TPM unlock a reboot brings them back without anyone typing the LUKS passphrase (a power cut too, if the firmware is set to power on when AC returns). Lanzaboote's `measuredBoot` and `measuredBoot.autoCryptenroll` do this through systemd-pcrlock; with measured boot on, `configurationLimit` must be 4 or less, so the laptop overrides the 10 from `bootloader.nix`. Keep the passphrase slot as the fallback.
+9. **Bind LUKS to the TPM** (decided 2026-10-16). The laptop hosts the Minecraft servers, and with TPM unlock a reboot brings them back without anyone typing the LUKS passphrase (a power cut too, if the firmware is set to power on when AC returns). Lanzaboote's `measuredBoot` and `measuredBoot.autoCryptenroll` do this through systemd-pcrlock; with measured boot on, `configurationLimit` must be 4 or less, so the laptop overrides the template's 10 (`boot.menu.entries`). Keep the passphrase slot as the fallback.
 10. **Desktop, later.** Only after the laptop has run this for a while, and once the desktop's other loaders are signed or gone.
 
 ## Useful info

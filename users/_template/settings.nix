@@ -211,6 +211,7 @@
   claude.enable = false; # Claude Code (needs an Anthropic account)
   claudeDesktop.enable = false; # Claude desktop app: chat and Claude Code
   opencode.enable = false;
+  opencodeDesktop.enable = false; # OpenCode's desktop app: a Claude Desktop-style GUI
   lmstudio.enable = false; # Runs language models locally
   llamaSwap.enable = false; # llama.cpp server on the GPU, opencode's default model
   openWebui.enable = false; # Chat with llama-swap's models in the browser
@@ -230,6 +231,26 @@
     vn = false;
   };
 
+  #--------------------------------------------------------------------#
+  #-- Startup
+  #--------------------------------------------------------------------#
+  #--- Environment Variables
+  # Variables every program you start sees, e.g. {EDITOR = "zeditor";}
+  env = {};
+
+  #--- Autostart
+  # Programs started with the desktop, as command lists, e.g.
+  # {syncthing = ["syncthing" "--no-browser"];}
+  autostart = {};
+
+  #--------------------------------------------------------------------#
+  #-- File Types
+  #--------------------------------------------------------------------#
+  #--- File Type Overrides
+  # Which app opens one file type, in front of defaultApps, e.g.
+  # {"application/x-cbz" = "moku.desktop";}
+  mimeTypes = {};
+
   #--- User Packages
   # nixpkgs packages added from Omni Settings' Packages tab, installed as they
   # come with no settings of their own, sorted into categories you name,
@@ -242,4 +263,10 @@
   # Your own binds have ids starting custom-, a key, a title, and spawn (a
   # command as a list) or a niri action with an optional argument.
   keybinds = {};
+
+  #--- Window Rules
+  # Changes to the config's niri window rules, made on Omni Settings' Window
+  # Rules page, by rule id: {minecraft-fullscreen = {enable = false;};}, or a
+  # whole rule in its place. Your own rules have ids starting custom-.
+  windowRules = {};
 }

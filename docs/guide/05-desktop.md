@@ -51,4 +51,4 @@ Pick a wallpaper with `Mod+W` and a colour theme in the shell settings (`Mod+Com
 
 ## Window Rules
 
-Niri → **Window Rules** decides how particular apps open: floating, on a given workspace or monitor, a set size, and so on. **Pick a Window** fills in a rule from a window you click. Admins can add, edit and remove rules; they apply after a rebuild. The rules are kept in [`window-rules.json`](../../modules/wm/niri/home/core/window-rules.json), and this computer's monitor layout in [`niri.nix`](../../machines/{machine}/wm/niri.nix).
+Niri → **Window Rules** decides how particular apps open: floating, on a given workspace or monitor, a set size, and so on. **Pick a Window** fills in a rule from a window you click. You can add your own rules and change or switch off the config's; your changes are yours alone, saved in your `windowRules` setting, and apply with the rest of your settings. The config's rules are kept in [`window-rules.json`](../../modules/wm/niri/home/core/window-rules.json), which the app doesn't change, and this computer's monitor layout in [`niri.nix`](../../machines/{machine}/wm/niri.nix).

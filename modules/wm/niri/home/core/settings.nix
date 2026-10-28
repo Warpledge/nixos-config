@@ -38,8 +38,11 @@
       };
 
       #--- Startup Applications
-      # Japanese input method daemon (controlled by user settings)
-      spawn-at-startup = lib.optional user.japanese.ime {command = ["fcitx5" "-d" "-r"];};
+      # The Japanese input method daemon (a user setting), then the user's
+      # autostart entries from Omni Settings' Startup page
+      spawn-at-startup =
+        lib.optional user.japanese.ime {command = ["fcitx5" "-d" "-r"];}
+        ++ lib.mapAttrsToList (_: command: {inherit command;}) user.autostart;
 
       #--- Input Configuration
       # Pointer speed and acceleration, scrolling, tapping, disable-while-typing,

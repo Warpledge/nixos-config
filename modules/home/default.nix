@@ -17,6 +17,7 @@ user: {lib, ...}: {
   imports = [
     #--- Other
     (import ./programs user)
+    ./env.nix
     ./mime.nix
     ./nixm.nix
     ./services.nix

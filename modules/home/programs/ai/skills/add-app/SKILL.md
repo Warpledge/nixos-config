@@ -68,6 +68,10 @@ catches the step that usually gets missed.
    (`.desktop` id or icon name) when known. If the setting is a value used by another
    setting's dropdown (e.g. `fileBrowsers.duxFiles` as a choice for `defaultApps.fileManager`),
    add it to that parent's `choices` object in the same file.
+   `descriptions.json` doesn't decide which page the row is on: `PAGES` in `src/schema.py`
+   does. An app that belongs beside its siblings on a curated page (an AI app on the AI
+   tab) needs its dotted path in that page's list; without one it stays on its template
+   section, under Default Packages.
 6. **README**: grep, never read it whole (`grep -n '^| \*\*' README.md`,
    `grep -n '^\[.*\]: http' README.md`), add the app to its Components row and a
    `[label]: url` link (homepage from `nix eval --raw nixpkgs#<pkg>.meta.homepage`), plus

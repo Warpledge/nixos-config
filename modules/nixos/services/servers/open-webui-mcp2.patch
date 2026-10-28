@@ -1,0 +1,33 @@
+--- a/backend/open_webui/utils/mcp/client.py	2026-10-27 19:51:45.544182688 -0500
++++ b/backend/open_webui/utils/mcp/client.py	2026-10-27 19:51:45.545898027 -0500
+@@ -12,7 +12,7 @@
+ from jsonschema import Draft202012Validator, FormatChecker
+ from mcp import ClientSession
+ from mcp.client.auth import OAuthClientProvider, TokenStorage
+-from mcp.client.streamable_http import streamablehttp_client
++from mcp.client.streamable_http import streamable_http_client
+ from mcp.shared.auth import OAuthClientInformationFull, OAuthClientMetadata, OAuthToken
+ from mcp.types import ElicitRequestFormParams, ElicitResult
+ from referencing import Registry
+@@ -129,13 +129,15 @@
+     async def connect(self, url: str, headers: Optional[dict] = None, auth: Optional[httpx.Auth] = None):
+         async with AsyncExitStack() as exit_stack:
+             try:
+-                self._streams_context = streamablehttp_client(
++                # mcp 2.x dropped the `streamablehttp_client` adapter (which took
++                # headers/auth/httpx_client_factory); build the httpx client the
++                # factory wants and pass it as `http_client`, closing on disconnect.
++                factory = create_httpx_client if AIOHTTP_CLIENT_SESSION_TOOL_SERVER_SSL else create_insecure_httpx_client
++                self._http_client = factory(headers=headers, auth=auth)
++                await exit_stack.enter_async_context(self._http_client)
++                self._streams_context = streamable_http_client(
+                     url,
+-                    headers=headers,
+-                    auth=auth,
+-                    httpx_client_factory=create_httpx_client
+-                    if AIOHTTP_CLIENT_SESSION_TOOL_SERVER_SSL
+-                    else create_insecure_httpx_client,
++                    http_client=self._http_client,
+                 )
+ 
+                 transport = await exit_stack.enter_async_context(self._streams_context)

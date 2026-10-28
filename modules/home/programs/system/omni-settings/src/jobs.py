@@ -27,6 +27,7 @@ sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 import api  # noqa: E402
 import backend  # noqa: E402
 import gitstate  # noqa: E402
+import health  # noqa: E402
 import nixfile  # noqa: E402
 import nixlog  # noqa: E402
 import peoplestate  # noqa: E402
@@ -42,7 +43,9 @@ STEPS = {
     "compare": "Compare with what's running",
     "switch": "Switch to the new system",
     "boot": "Add it to the boot menu",
+    "check": "See what came back",
     "collect": "Delete old versions and unused files",
+    "optimise": "Replace identical files with hard links",
     "password": "Set their password",
 }
 #--- Jobs whose success commits and pushes the user's own folders (gitstate.back_up)
@@ -53,6 +56,7 @@ PROGRESS_EVERY = 0.5  # seconds between progress events
 #--- finished job nobody dismissed keeps it up to KEEP_FINISHED
 IDLE = 60
 KEEP_FINISHED = 30 * 60
+SETTLE = 3  # seconds a check waits for the units a switch restarted
 
 #--- The last failed run, kept for the Overview
 FAILED_LOG = os.path.join(api.STATE_DIR, "last-failed-run.txt")
@@ -105,7 +109,11 @@ class Job:
         self.mode, self.preview = "", False
         self.result, self.exit_code = {}, None
         self.errors, self.notes, self.diff, self.units = [], [], None, None
+        self.files, self.health, self.before = None, None, None
+        self.switched = False
         self.restart, self.cleaned, self.deleted = False, None, 0
+        self.optimised = None
+        self.optimise_progress = None  # {"done", "total"} while `nix store optimise` runs
         self.undo = self.undo_label = self.restore = None
         self.log = deque(maxlen=LOG_LIMIT)
         self.progress = nixlog.Progress()
@@ -119,8 +127,10 @@ class Job:
                 "started": self.started, "ended": self.ended, "outcome": self.outcome,
                 "heading": self.heading, "detail": self.detail, "mode": self.mode,
                 "preview": self.preview, "errors": list(dict.fromkeys(self.errors)),
-                "notes": self.notes, "diff": self.diff, "units": self.units, "restart": self.restart,
-                "cancellable": self.proc is not None and self.current == "build" and self.ended is None,
+                "notes": self.notes, "diff": self.diff, "files": self.files, "health": self.health,
+                "units": self.units, "restart": self.restart,
+                "cancellable": self.proc is not None and self.current in ("build", "optimise")
+                               and self.ended is None,
                 "undo": self.undo_label if self.undo is not None and self.outcome in ("failed",) else None}
 
     def progress_json(self):
@@ -130,6 +140,7 @@ class Job:
                 "bytes": [p.downloaded(), p.download_total()],
                 "builds": [p.builds[0], max(p.builds[1], p.will_build), p.builds[2]],
                 "fraction": p.fraction(), "running": p.running(), "deleted": self.deleted,
+                "optimise": self.optimise_progress,
                 "graph": [] if p.evaluating else p.graph()}
 
     def changed(self):
@@ -186,9 +197,13 @@ class Job:
                 self.steps["auth"]["state"] = "done"
             if sid == "switch" and state in ("done", "failed"):
                 self.units = nixlog.unit_changes(self.switch_lines)
+            if sid == "switch" and state == "done":
+                self.switched = True
             self.step(sid, state)
         if "diff" in e:
             self.diff = e["diff"]
+        if "files" in e:
+            self.files = e["files"]
         if "kernel" in e:
             old, new = e["kernel"]
             self.note("system-reboot-symbolic", f"New kernel: Linux {old} → {new}",
@@ -215,6 +230,17 @@ class Job:
                       f"{versions} old system version{'s' if versions != 1 else ''} deleted",
                       "The boot menu now lists only the versions that are left.")
             self.append("info", f"Deleted {self.deleted:,} store paths.")
+        if "optimise" in e:
+            self.optimise_progress = e["optimise"]
+            self.progress_dirty = True
+        if "optimised" in e:
+            self.optimised = e["optimised"]
+            freed, files = self.optimised.get("freed"), self.optimised.get("files")
+            self.note("drive-harddisk-symbolic", f"Freed {nixlog.size(freed)}" if freed else "Nothing to free",
+                      f"{files:,} identical files replaced with hard links" if files
+                      else "No identical files were left to link")
+            if files:
+                self.append("info", f"Hard-linked {files:,} files.")
         if "error" in e:
             self.errors.append(e["error"])
             self.append("error", e["error"])
@@ -227,14 +253,21 @@ class Job:
         self.changed()
 
     #--- Ending
-    def exited(self, code):
+    async def exited(self, code):
         if self.exit_code is not None:
             code = self.exit_code
         result = self.result.get("result")
+        if self.switched and result == "ok":
+            await self.came_back()
         if self.cleaned is not None and result == "ok":
             freed = self.cleaned.get("freed")
             self.finish("ok", "Cleaned up", f"Freed {freed} of disk space." if freed
                         else "Nothing was old enough or unused, so no space was freed.")
+        elif self.optimised is not None and result == "ok":
+            freed = self.optimised.get("freed")
+            self.finish("ok", "Store optimized", f"Freed {nixlog.size(freed)} by hard-linking "
+                        "identical files." if freed else "The store had no identical files left to "
+                        "link, so no space was freed.")
         elif result == "ok" and self.mode == "saved":
             self.finish("ok", "Saved", self.result.get("detail", "Your changes were saved."))
         elif result == "ok" and self.mode == "built":
@@ -248,10 +281,16 @@ class Job:
                       else "Your system is running the new settings.")
             if self.restart and not boot:
                 detail += " Restart to use the new kernel."
+            if self.health and self.health.get("failed"):
+                detail += (f" {self.health['failed']} of the {self.health['checked']} checks "
+                           "found something missing; see below.")
             self.finish("ok", heading, detail)
         elif result == "cancelled":
-            self.finish("cancelled", "Stopped", "The build was stopped and nothing was switched."
-                        + (" Your settings were put back." if self.result.get("restored") else ""))
+            detail = ("The optimisation was stopped; the files it already linked stay linked."
+                      if self.kind == "optimise"
+                      else "The build was stopped and nothing was switched."
+                           + (" Your settings were put back." if self.result.get("restored") else ""))
+            self.finish("cancelled", "Stopped", detail)
         elif result is None and code in (126, 127):
             self.finish("auth", "Nothing was changed",
                         "The password prompt was closed, or the password wasn't accepted.")
@@ -262,6 +301,22 @@ class Job:
             elif self.undo is not None:
                 reason += "\n\nYour changes are still in the files, but the system wasn't rebuilt with them."
             self.finish("failed", self.failed_heading(), reason)
+
+    async def came_back(self):
+        """Checks what the switch restarted: Dux Shell, the desktop portals and the
+        services the Services page lists."""
+        self.step("check", "running")
+        await asyncio.sleep(SETTLE)  # units a switch restarts come back a moment later
+        loop = asyncio.get_running_loop()
+        try:
+            self.health = await loop.run_in_executor(None, health.report,
+                                                     self.before or health.snapshot())
+        except (OSError, ValueError) as e:
+            self.health = {"items": [{"title": "The check", "ok": False, "detail": str(e)}],
+                           "failed": 1, "checked": 0, "running": 0}
+        failed = self.health.get("failed") or 0
+        self.step("check", "done", "Everything came back" if not failed
+                  else f"{failed} didn't come back")
 
     def failed_heading(self):
         for sid in ("write", "update", "pull", "save", "build", "switch", "boot"):
@@ -328,7 +383,8 @@ def installed_exec_start():
 
 
 def tail(preview):
-    return ["build", "compare"] if preview else ["build", "compare", "switch", "boot"]
+    """The steps after the build; a run that switches then checks what came back."""
+    return ["build", "compare"] if preview else ["build", "compare", "switch", "boot", "check"]
 
 
 def mode_arg(args, allowed=("switch", "boot", "build")):
@@ -601,14 +657,18 @@ class Service:
         if kind == "activate":
             mode = mode_arg(args, ("auto", "boot"))
             number = args.get("number", "")
-            job = self.new_job(kind, f"Switching to Version {number}", ["auth", "compare", "switch", "boot"],
-                               f"Switched to version {number}")
+            job = self.new_job(kind, f"Switching to Version {number}",
+                               ["auth", "compare", "switch", "boot", "check"], f"Switched to version {number}")
             await self.run(job, {"activate": args.get("generation"), "mode": mode})
             return job
         if kind == "collect":
             job = self.new_job(kind, "Cleaning Up", ["auth", "collect", "boot"], "Cleaned up",
                                titles={"boot": "Update the boot menu"})
             await self.run(job, {"collectGarbage": True})
+            return job
+        if kind == "optimise":
+            job = self.new_job(kind, "Optimizing the Nix Store", ["auth", "optimise"], "Store optimized")
+            await self.run(job, {"optimise": True})
             return job
         if kind == "clean":
             job = self.new_job(kind, "Removing Old Settings", ["auth"], "Old settings removed")
@@ -622,7 +682,7 @@ class Service:
             if not password:
                 raise JobError("Type their first password")
             job = self.new_job(kind, f"Adding {name}",
-                               ["write", "auth", "build", "compare", "switch", "boot", "password"],
+                               ["write", "auth", "build", "compare", "switch", "boot", "check", "password"],
                                f"{name} can log in now", titles={"write": "Write their settings"})
             job.step("write", "running")
             try:
@@ -644,6 +704,8 @@ class Service:
     async def run(self, job, request, first_line=None):
         """Starts the helper for `request`, writing `first_line` to its stdin;
         its output is read in the background."""
+        if "check" in job.steps and job.before is None:
+            job.before = await asyncio.get_running_loop().run_in_executor(None, health.snapshot)
         job.step("auth", "running")
         helper = api.helper()
         if helper is None:
@@ -679,7 +741,7 @@ class Service:
         code = await proc.wait()
         if proc.stdin is not None:
             proc.stdin.close()
-        job.exited(code)
+        await job.exited(code)
 
 
 #--------------------------------------------------------------------#

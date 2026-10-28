@@ -383,7 +383,19 @@ def render(cfg, changes, machine, everywhere=()):
     return {f: (old[f], text[f]) for f in text if text[f] != old[f]}
 
 
+def settings_file(path):
+    """Whether `path` is a machine's or user's settings.nix, the only repo
+    files the app edits; modules/ and the templates are never written."""
+    real = os.path.realpath(path)
+    folder = os.path.dirname(real)
+    return (os.path.basename(real) == "settings.nix"
+            and os.path.basename(os.path.dirname(folder)) in ("machines", "users")
+            and os.path.basename(folder) != "_template")
+
+
 def save(path, text):
+    if not settings_file(path):
+        raise PermissionError(f"Omni Settings only writes machines/ and users/ settings files, not {path}")
     # Rewrites in place, keeping the file's mode, owner and ACL
     with open(path, "r+") as f:
         f.seek(0)

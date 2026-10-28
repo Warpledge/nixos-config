@@ -27,6 +27,10 @@ Unless it's `eclipse` or `legion` as `warpledge`, use only that person's files. 
 apply `machines/eclipse/`, `machines/legion/`, `users/warpledge/` or `docs/personal/`
 to their hardware or apps.
 
+## Applied Learning
+
+When something fails repeatedly, when the user has to re-explain, or when a workaround is found for a platform/tool limitation, add a one-line bullet here. Keep each bullet under 15 words. No explanations. Only add things that will save time in future sessions.
+
 ## Rules
 
 Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
@@ -60,6 +64,10 @@ Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
    **Commit once, when the task is finished and checked**, not after each edit,
    and don't end a task that changed files without committing. Run every step
    of the `commit` skill, `scan.sh` included.
+   Changed `machines/*/settings.nix` and `users/*/settings.nix` ride along in the
+   commit being made, unmentioned in its message (or a `chore(<machine>): save
+   settings from Omni Settings` one alone when nothing else changed); never leave
+   them uncommitted.
    A feature and every fix, tweak and doc change made for it while you're still
    working are one commit. Split only unrelated changes. Since you can't amend, an
    early commit can't be folded in later.
@@ -79,6 +87,7 @@ Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
 10. **No memory files.** If something is worth remembering, propose the line for
     CLAUDE.md or this file and let the user decide.
 11. **`rm` takes literal absolute paths**, one deletion per command, never `$VAR`.
+12. **Do not make any changes until you have 95% confidence in what you need to build.** Ask me follow-up questions until you reach that confidence.
 
 ## Starting a task
 
@@ -241,6 +250,8 @@ lines, `grep -n` that file for the part you need.
 - Binds go in `niri.keybinds.<id>` (`key`, `title`, `action`, `group`), not
   `programs.niri.settings.binds`; `core/keybinds.nix` converts them, applies
   each user's `keybinds` setting, and fails the build on two binds sharing a key.
+- Shared window rules are in `core/window-rules.json`, each with an `id`; each
+  user's `windowRules` setting turns one off, replaces it or adds `custom-` ones.
 - **Niri spawns with arguments are lists** (`spawn = ["dms" "ipc" "call" ...]`);
   a spaced string fails the build.
 - DMS `settings.json` in `<wm>/home/dms/` is shared by every machine and written
@@ -281,6 +292,13 @@ window, over a Python backend)
   (`lib/settings.nix`), or it's read as nested settings. `keybinds` (the
   Keybinds page's changes by bind id) is in `GROUPED` too, with its own checks:
   `keybindProblems` in `lib/settings.nix` and `keybinds_ok` in `src/helper.py`.
+  So is `windowRules` (the Window Rules page's changes by rule id, applied over
+  `wm/niri/home/core/window-rules.json` by `window-rules.nix`), checked by
+  `windowRuleProblems` and `window_rules_ok`.
+- **The app never writes `modules/`** or the `_template` files: every setting
+  goes in a machine's or user's `settings.nix` (`backend.save` refuses other
+  paths). Shared data a page changes stays read-only in `modules/`, with the
+  changes taken as a user setting, as `keybinds` and `windowRules` do.
 - `userPackages` is only for what the user installs from Search. An app the
   config ships gets a toggle and module under Default Packages (`add-app`),
   never a `userPackages` entry.

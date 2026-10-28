@@ -36,9 +36,16 @@
     "localAi.chat" = lib.attrNames (import ./local-models.nix).chat;
   };
   portLists = ["firewall.openTCPPorts" "firewall.openUDPPorts"];
+  #--- Whole-number machine settings and the range each takes
+  numberRanges = {
+    "boot.menu.timeout" = [0 60];
+    "boot.menu.entries" = [1 50];
+  };
   #--- Sets of named lists of text, e.g. userPackages = {Media = ["vlc"];};
   #--- a machine's users.<name> block replaces the user's whole set
-  grouped = ["userPackages"];
+  grouped = ["userPackages" "autostart"];
+  #--- Sets of named text, e.g. env = {EDITOR = "zeditor";}; replaced the same way
+  textSets = ["env" "mimeTypes"];
   #--- Changes to niri keybinds by id (wm/niri/home/core/keybinds.nix), also
   #--- replaced whole by a machine's users.<name> block
   keybindFields = {
@@ -72,6 +79,28 @@
         ++ lib.optional (b ? argument && !(b ? action))
         "${at} has an argument but no action")
       value);
+  #--- Changes to niri window rules by id (wm/niri/home/core/window-rules.nix):
+  #--- {enable = false;} or a whole rule; replaced whole by a users.<name> block
+  windowRuleProblems = value: let
+    matchList = v: lib.isList v && lib.all lib.isAttrs v;
+  in
+    if !(lib.isAttrs value && lib.all lib.isAttrs (lib.attrValues value))
+    then ["`windowRules` should be a set of sets, e.g. {minecraft-fullscreen = {enable = false;};}"]
+    else
+      lib.concatLists (lib.mapAttrsToList (id: r: let
+        at = "`windowRules.${id}`";
+      in
+        lib.optional (lib.hasPrefix "custom-" id && !(r ? matches))
+        "${at} needs matches, a list of windows like [{app-id = \"^mpv$\";}]"
+        ++ lib.optional (r ? matches && !(matchList r.matches))
+        "${at}.matches should be a list of sets"
+        ++ lib.optional (r ? excludes && !(matchList r.excludes))
+        "${at}.excludes should be a list of sets"
+        ++ lib.optional (r ? enable && !(lib.isBool r.enable))
+        "${at}.enable should be true or false"
+        ++ map (k: "${at}.${k} should be text in quotes")
+        (lib.filter (k: r ? ${k} && !(lib.isString r.${k})) ["name" "note" "category"]))
+      value);
   userChoices =
     {
       wallpaper = ["carousel" "engine"];
@@ -96,11 +125,36 @@
     then "a whole number"
     else "a set in { }";
 
+  #--- One line per entry of a textSets setting that isn't a name and text
+  textSetProblems = name: value:
+    if !(lib.isAttrs value)
+    then ["`${name}` should be a set of text, e.g. {EDITOR = \"zeditor\";}"]
+    else
+      lib.concatLists (lib.mapAttrsToList (key: item: let
+        at = "`${name}.${key}`";
+        shape =
+          builtins.match (
+            if name == "env"
+            then "[A-Za-z_][A-Za-z0-9_]*"
+            else "[A-Za-z0-9.+-]+/[A-Za-z0-9.+-]+"
+          )
+          key;
+      in
+        lib.optional (shape == null)
+        (
+          if name == "env"
+          then "${at} isn't a variable name (letters, digits and _ only)"
+          else "${at} isn't a MIME type, e.g. application/x-cbz"
+        )
+        ++ lib.optional (!(lib.isString item)) "${at} should be text in quotes")
+      value);
+
   #--- One line for each setting in `set` that `defaults` lacks or types differently
   problems = defaults: set: path:
     lib.concatLists (lib.mapAttrsToList (key: value: let
       at = path ++ [key];
       name = "`${lib.concatStringsSep "." at}`";
+      dotted = lib.concatStringsSep "." at;
     in
       if !(defaults ? ${key})
       then ["${name} is not a setting (check the spelling against the _template file)"]
@@ -108,7 +162,11 @@
       then []
       else if at == ["keybinds"]
       then keybindProblems value
-      else if lib.elem (lib.concatStringsSep "." at) grouped
+      else if at == ["windowRules"]
+      then windowRuleProblems value
+      else if lib.elem dotted textSets
+      then textSetProblems dotted value
+      else if lib.elem dotted grouped
       then
         lib.optional (!(lib.isAttrs value && lib.all (l: lib.isList l && lib.all lib.isString l) (lib.attrValues value)))
         "${name} should be a set of lists of names in quotes, e.g. {Media = [\"vlc\"];}"
@@ -145,7 +203,15 @@
       wrong = lib.filter (v: !(lib.isInt v && v >= 1 && v <= 65535)) (listAt path set);
     in
       lib.optional (wrong != []) "`${path}` has ${builtins.toJSON wrong}; use port numbers from 1 to 65535")
-    portLists;
+    portLists
+    ++ lib.concatLists (lib.mapAttrsToList (path: range: let
+      value = lib.attrByPath (lib.splitString "." path) null set;
+      low = builtins.elemAt range 0;
+      high = builtins.elemAt range 1;
+    in
+      lib.optional (lib.isInt value && (value < low || value > high))
+      "`${path}` is ${toString value}; use a number from ${toString low} to ${toString high}")
+    numberRanges);
 
   #--- Stops evaluation with every problem found in `file`
   report = file: lines:
@@ -199,7 +265,7 @@ in rec {
       merged = lib.recursiveUpdate (lib.recursiveUpdate userDefaults own) listed.${user};
     in
       merged
-      // lib.genAttrs (grouped ++ ["keybinds"]) (key: listed.${user}.${key} or own.${key} or userDefaults.${key})
+      // lib.genAttrs (grouped ++ textSets ++ ["keybinds" "windowRules"]) (key: listed.${user}.${key} or own.${key} or userDefaults.${key})
       // {name = user;};
 
     merged = lib.recursiveUpdate machineDefaults (removeAttrs own ["users"]);

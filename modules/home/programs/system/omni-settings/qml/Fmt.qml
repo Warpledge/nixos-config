@@ -62,4 +62,16 @@ Singleton {
         }
         return `${sign}${v.toFixed(i ? 1 : 0)} ${units[i]}`
     }
+
+    //--- "739 ms", "4.12 s" or "1 min 12 s", for a boot time
+    function duration(seconds) {
+        if (seconds === null || seconds === undefined)
+            return ""
+        if (seconds < 1)
+            return `${Math.round(seconds * 1000)} ms`
+        if (seconds < 60)
+            return `${seconds.toFixed(seconds < 10 ? 2 : 1)} s`
+        const minutes = Math.floor(seconds / 60)
+        return `${minutes} min ${Math.round(seconds - minutes * 60)} s`
+    }
 }
