@@ -11,8 +11,10 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Gtk4LayerShell", "1.0")
 from evdev import AbsInfo, UInput
 from evdev import ecodes as e
-from gi.repository import Gdk, Gtk
+from gi.repository import Gdk, Gio, Gtk
 from gi.repository import Gtk4LayerShell as Layer
+
+STYLE = os.path.expanduser("~/.config/on-screen-touchpad/style.css")
 
 WIDTH, HEIGHT = map(int, os.environ.get("TOUCHPAD_SIZE", "480x300").split("x"))
 SCALE = 10  # device units per logical px
@@ -135,15 +137,32 @@ def activate(app):
     area.add_controller(legacy)
     win.set_child(area)
 
-    css = Gtk.CssProvider()
-    css.load_from_string(
-        ".touchpad { background: alpha(@window_fg_color, 0.12);"
-        " border: 1px solid alpha(@window_fg_color, 0.3); border-radius: 16px; }"
-        " window { background: transparent; }"
+    display = Gdk.Display.get_default()
+    base = Gtk.CssProvider()
+    # Until matugen has written STYLE, the GTK theme's own colours
+    base.load_from_string(
+        "window { background: transparent; }"
+        " .touchpad { background: alpha(@window_bg_color, 0.92);"
+        " border: 2px solid alpha(@window_fg_color, 0.5); border-radius: 16px; }"
     )
     Gtk.StyleContext.add_provider_for_display(
-        Gdk.Display.get_default(), css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        display, base, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
     )
+
+    # The pad's colours, rendered by DMS's matugen; reloaded on a theme change
+    theme = Gtk.CssProvider()
+    Gtk.StyleContext.add_provider_for_display(
+        display, theme, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+    )
+
+    def load_theme(*_):
+        if os.path.exists(STYLE):
+            theme.load_from_path(STYLE)
+
+    load_theme()
+    monitor = Gio.File.new_for_path(STYLE).monitor_file(Gio.FileMonitorFlags.NONE)
+    monitor.connect("changed", load_theme)
+    win.monitor = monitor  # keeps it alive
     win.present()
 
 

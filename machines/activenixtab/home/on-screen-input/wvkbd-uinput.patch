@@ -1,0 +1,96 @@
+--- a/keyboard.c
++++ b/keyboard.c
+@@ -20,6 +20,84 @@
+ #endif
+ #include KEYMAP
+ 
++/* With WVKBD_UINPUT set, keys go out through a kernel uinput keyboard rather
++ * than the virtual-keyboard protocol, so the compositor's shortcuts see them.
++ * Modifier state then comes from the modifier key presses alone. */
++#include <fcntl.h>
++#include <linux/uinput.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/ioctl.h>
++#include <unistd.h>
++
++static int uinput_fd = -2;
++
++static int
++uinput_open(void)
++{
++    if (uinput_fd != -2)
++        return uinput_fd;
++    uinput_fd = -1;
++    if (!getenv("WVKBD_UINPUT"))
++        return -1;
++    int fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
++    if (fd < 0) {
++        perror("wvkbd: /dev/uinput");
++        return -1;
++    }
++    ioctl(fd, UI_SET_EVBIT, EV_KEY);
++    for (int code = 1; code < 256; code++)
++        ioctl(fd, UI_SET_KEYBIT, code);
++    struct uinput_setup setup;
++    memset(&setup, 0, sizeof(setup));
++    setup.id.bustype = BUS_VIRTUAL;
++    strcpy(setup.name, "On-screen keyboard");
++    if (ioctl(fd, UI_DEV_SETUP, &setup) < 0 || ioctl(fd, UI_DEV_CREATE) < 0) {
++        perror("wvkbd: uinput setup");
++        close(fd);
++        return -1;
++    }
++    uinput_fd = fd;
++    return fd;
++}
++
++static void
++uinput_emit(int fd, uint16_t type, uint16_t code, int32_t value)
++{
++    struct input_event ev;
++    memset(&ev, 0, sizeof(ev));
++    ev.type = type;
++    ev.code = code;
++    ev.value = value;
++    if (write(fd, &ev, sizeof(ev)) < 0)
++        perror("wvkbd: uinput write");
++}
++
++static void
++vk_key(struct zwp_virtual_keyboard_v1 *vkbd, uint32_t time, uint32_t key,
++       uint32_t state)
++{
++    int fd = uinput_open();
++    if (fd < 0) {
++        zwp_virtual_keyboard_v1_key(vkbd, time, key, state);
++        return;
++    }
++    uinput_emit(fd, EV_KEY, key, state == WL_KEYBOARD_KEY_STATE_PRESSED);
++    uinput_emit(fd, EV_SYN, SYN_REPORT, 0);
++}
++
++static void
++vk_modifiers(struct zwp_virtual_keyboard_v1 *vkbd, uint32_t depressed,
++             uint32_t latched, uint32_t locked, uint32_t group)
++{
++    if (uinput_open() < 0)
++        zwp_virtual_keyboard_v1_modifiers(vkbd, depressed, latched, locked,
++                                          group);
++}
++
++#define zwp_virtual_keyboard_v1_key vk_key
++#define zwp_virtual_keyboard_v1_modifiers vk_modifiers
++
+ void
+ kbd_switch_layout(struct kbd *kb, struct layout *l, size_t layer_index)
+ {
+@@ -163,6 +241,8 @@
+          char *landscape_layer_names_list)
+ {
+     int i;
++    /* Create the uinput keyboard now, so its first key isn't lost */
++    uinput_open();
+ 
+     fprintf(stderr, "Initializing keyboard\n");
+ 

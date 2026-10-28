@@ -19,13 +19,15 @@
   #--- The desktop layout (F keys, number row, Tab, Ctrl…), plus a right margin
   wvkbd = pkgs.wvkbd.overrideAttrs (old: {
     makeFlags = (old.makeFlags or []) ++ ["LAYOUT=deskintl"];
-    patches = (old.patches or []) ++ [./wvkbd-margin.patch];
+    patches = (old.patches or []) ++ [./wvkbd-margin.patch ./wvkbd-uinput.patch];
   });
 
   keyboard = pkgs.writeShellScript "wvkbd-start" ''
     WVKBD_COLORS=""
     [ -r "${colors}" ] && . "${colors}"
     export WVKBD_MARGIN_RIGHT=${toString padWidth}
+    # Type through uinput, so niri's binds, keyd and polkit prompts see the keys
+    export WVKBD_UINPUT=1
     # shellcheck disable=SC2086 # one flag per word
     exec ${wvkbd}/bin/wvkbd-deskintl --hidden -H ${toString height} -L ${toString height} \
       --fn "${config.stylix.fonts.sansSerif.name} ${toString config.stylix.fonts.sizes.popups}" \
@@ -107,6 +109,12 @@ in {
     input = ./wvkbd-colors.sh;
     output = colors;
     postHook = "systemctl --user restart wvkbd.service";
+  };
+
+  #--- The touchpad panel watches this file itself
+  matugen.templates.on-screen-touchpad = {
+    input = ./touchpad.css.matugen;
+    output = "${config.xdg.configHome}/on-screen-touchpad/style.css";
   };
 
   #--------------------------------------------------------------------#

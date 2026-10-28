@@ -1,0 +1,5 @@
+.touchpad {
+  background: alpha({{colors.surface_container_high.default.hex}}, 0.92);
+  border: 2px solid {{colors.outline.default.hex}};
+  border-radius: 16px;
+}
