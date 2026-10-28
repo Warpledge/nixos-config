@@ -227,7 +227,7 @@ index d40b004..82b761e 100644
 +		uint32_t tempX = frameInfo->layers.get( 0 ).integerWidth();
 +		uint32_t tempY = frameInfo->layers.get( 0 ).integerHeight();
 +
-+		update_tmp_images(tempX, tempY);
++		update_tmp_images(tempX, tempY, tmp_image_format(frameInfo->layers.get( 0 ).colorspace));
 +
 +		const int pixelsPerGroup = 8;
 +

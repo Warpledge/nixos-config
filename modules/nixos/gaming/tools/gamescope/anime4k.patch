@@ -48,22 +48,25 @@ index d53c2c4..601278e 100644
              bNeedsFullComposite |= pFrameInfo->blurLayer0;
              bNeedsFullComposite |= bNeedsCompositeFromFilter;
              bNeedsFullComposite |= g_bColorSliderInUse;
-@@ -2999,6 +3000,15 @@ namespace gamescope
-                     return;
-                 }
- 
-+                case KEY_H:
-+                {
-+                    if ( !bPressed )
-+                    {
-+                        CycleArtUpscaleFilter();
-+                    }
-+                    return;
-+                }
+@@ -2990,6 +2991,7 @@ namespace gamescope
+             case KEY_B:
+             case KEY_U:
+             case KEY_Y:
++            case KEY_H:
+             case KEY_I:
+             case KEY_O:
+             case KEY_S:
+@@ -3053,6 +3055,10 @@ namespace gamescope
+                     GamescopeUpscaleFilter::LINEAR : GamescopeUpscaleFilter::NIS;
+                 break;
+
++            case KEY_H:
++                CycleArtUpscaleFilter();
++                break;
 +
-                 case KEY_I:
-                 {
-                     if ( !bPressed )
+             case KEY_I:
+                 g_upscaleFilterSharpness = std::min( 20, g_upscaleFilterSharpness + 1 );
+                 break;
 diff --git a/src/commit.cpp b/src/commit.cpp
 index c9d0001..a516a5c 100644
 --- a/src/commit.cpp
@@ -350,7 +353,7 @@ index 54e4efc..fbced0f 100644
 +		uint32_t tempX = frameInfo->layers.get( 0 ).integerWidth();
 +		uint32_t tempY = frameInfo->layers.get( 0 ).integerHeight();
 +
-+		update_tmp_images(tempX, tempY);
++		update_tmp_images(tempX, tempY, tmp_image_format(frameInfo->layers.get( 0 ).colorspace));
 +		update_anime4k_images(inputX, inputY);
 +
 +		const int pixelsPerGroup = 8;
