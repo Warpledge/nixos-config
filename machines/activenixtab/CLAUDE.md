@@ -54,11 +54,12 @@ when Ky approves it.
 - `home/binds.nix` — niri binds matching Ky's KDE Plasma shortcuts; repo binds on the
   same keys are switched off by id
 - `home/local-ai.nix` — llama-swap on llama.cpp 0.7.0 (Vulkan, built here until
-  nixpkgs has it) at `127.0.0.1:8090`, Nemotron 3.5 Super VL (opencode's default: 3
-  slots with MTP drafting, full reasoning for the coordinator, `medium_effort` on its
-  `-instruct` alias for subagents) and Qwen3.8 Flash Next (one slot), both with
-  vision, loaded from LM Studio's folder, and opencode's provider for it. Models stay
-  within 80 GB so Ky's other work keeps memory. Every model tested or tuned here
+  nixpkgs has it) at `127.0.0.1:8090`, Qwen3.8 Flash Next UD-IQ3_XXS (opencode's
+  default: 3 slots, `reasoning_effort` medium for the coordinator and its `-instruct`
+  alias alike) and Nemotron 3.5 Super VL (3 slots with MTP drafting, the pick if the
+  budget drops to 80 GB), both with vision, loaded from LM Studio's folder, and
+  opencode's provider for it. Models stay within 90 GB (Ky, 2026-10-27) so other
+  work keeps memory; a Godot test needs 5 GB free to start. Every model tested or tuned here
   gets an entry in `local-ai-models.md`, measured with the scripts in
   `local-ai-bench/`: the at-a-glance table and a plain-language section first (what
   to pick it for, how long Ky waits, RAM left, what to watch out for), then its

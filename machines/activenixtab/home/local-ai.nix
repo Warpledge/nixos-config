@@ -70,32 +70,45 @@
 
   #--- Whole model on the GPU: shared memory leaves no reason to keep experts on the CPU
   #--- Both take images through their mmproj file (`--mmproj`)
-  main = "nemotron-3_5-super-vl"; # opencode's coordinators and workers
+  main = "qwen3_8-flash-next"; # opencode's coordinators and workers
   models = {
-    #--- Main model, for opencode and hard problems: MoE, 6B active (84 GiB at
-    #--- UD-Q3_K_XL; Q4 would leave too little RAM free)
+    #--- opencode's default: the coordinator plus 2 subagents, one slot each. MoE, 6B
+    #--- active; UD-IQ3_XXS takes 59 GB GPU memory plus 27 GB in the server process
+    #--- with 2 slots, inside the 90 GB budget. Results: ../local-ai-models.md
     qwen3_8-flash-next = {
       name = "Qwen3.8 Flash Next";
       dir = "unsloth/Qwen3.8-Flash-Next-GGUF";
-      match = "Qwen3.8-Flash-Next-UD-Q3_K_XL-00001-of-*.gguf";
-      context = 131072;
-      slots = 1; # No room for a second slot's cache under the 96 GB budget
+      match = "Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-*.gguf";
+      context = 65536;
+      # opencode compacts at this less `output`, near 48K
+      output = 16384;
+      slots = 3;
       # q8_0 V cache: ~17% faster prompts at 32K, perplexity within error
       flags = [
         "-ctv q8_0"
         "--mmproj '${modelsDir}/unsloth/Qwen3.8-Flash-Next-GGUF/mmproj-F16.gguf'"
       ];
-      #--- Qwen's thinking-mode sampling
+      #--- Coordinator: Qwen's thinking sampling at medium effort. The template's
+      #--- default, xhigh, overthinks: it ran out of a 12K budget on small tasks
       params = {
         temperature = 1.0;
         top_p = 0.95;
         top_k = 20;
         min_p = 0;
         presence_penalty = 0.0;
+        chat_template_kwargs.reasoning_effort = "medium";
       };
-      fast = null;
+      #--- Workers (the -instruct alias): the same; at low effort it edited directly
+      fast = {
+        temperature = 1.0;
+        top_p = 0.95;
+        top_k = 20;
+        min_p = 0;
+        presence_penalty = 0.0;
+        chat_template_kwargs.reasoning_effort = "medium";
+      };
     };
-    #--- opencode's default: the coordinator plus 2 parallel subagents, one slot each.
+    #--- Fits 80 GB: the coordinator plus 2 parallel subagents, one slot each.
     #--- MoE with Mamba layers, 12B active; ~72 GB loaded. Tuning and test results
     #--- are in ../local-ai-models.md
     nemotron-3_5-super-vl = {
