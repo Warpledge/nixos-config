@@ -39,7 +39,7 @@ o = chat([{"role": "user", "content": "Write about 300 words on how warehouses a
 t = o.get("timings", {})
 results["decode_tps"] = round(t.get("predicted_per_second", 0), 1)
 
-readme = open("/home/kylerj/Projects/stixxvhorrorgame/new-game-project/README.md").read()
+readme = open("/home/kylerj/Projects/stixxvhorrorgame/README.md").read()
 long_prompt = (readme + "\n\n") * 2
 o = chat([{"role": "user", "content": long_prompt + "\nIn one sentence, what is this game?"}],
          max_tokens=80, think=False)
