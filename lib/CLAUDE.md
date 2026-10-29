@@ -22,4 +22,4 @@ Module arguments:
 
 ## Other files
 
-- `mutable-merge.jq` — the merge that keeps GUI changes across rebuilds, shared by `wm/dms-mutable.nix`, `editors/zed.nix`, `file-browsers/dux-files.nix` and `ai/claude.nix`. Zed's template is `~/.config/zed/declarative-settings.json`, whose values the reset button on Omni Settings' Zed switch puts back into `settings.json`; theme and fonts are locked.
+- `mutable-merge.jq` — the merge that keeps GUI changes across rebuilds, shared by `wm/dms-mutable.nix`, `editors/zed.nix`, `file-browsers/dux-files.nix`, `ai/claude.nix` and `ai/claude-desktop.nix`. Zed's template is `~/.config/zed/declarative-settings.json`, whose values the reset button on Omni Settings' Zed switch puts back into `settings.json`; theme and fonts are locked.

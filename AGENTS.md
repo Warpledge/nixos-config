@@ -364,6 +364,8 @@ window, over a Python backend; full notes split across its `CLAUDE.md`,
   page (`schema.py`) and a `descriptions.json` title.
 - `~/.claude/settings.json` stays writable: `claude.nix` merges its settings in
   with `lib/mutable-merge.jq`, never through `programs.claude-code.settings`.
+  `claude-desktop.nix` merges the local MCP servers into Claude Desktop's
+  `claude_desktop_config.json` the same way.
 - In opencode the GitHub MCP is off (its tool list fills too much context); Zed's
   agent still has it. Without it, for upstream releases, issues and files use `gh`
   read-only: `gh release list -R

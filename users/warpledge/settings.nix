@@ -203,11 +203,15 @@
       docs = true;
       importMemory = true;
       mcpBuilder = true;
+      googleWorkspace = false;
     };
     model = "opus";
     effort = "medium";
     outputStyle = "Concise";
     builtins.agentsMdFiles = "claude-md";
+    connectors.googleDrive = false;
+    connectors.googleCalendar = false;
+    connectors.gmail = false;
   };
   claudeDesktop = {enable = true;};
   opencode = {enable = true;};

@@ -59,11 +59,7 @@
       opencodeDesktop.enable = true;
       openWebui.enable = false;
       claude.plugins.claudeSecurity = false;
-      claude.connectors.gmail = true;
-      claude.connectors.googleCalendar = true;
-      claude.connectors.googleDrive = true;
       claude.accountSkills.docx = true;
-      claude.accountSkills.googleWorkspace = true;
       claude.accountSkills.morning = true;
       claude.accountSkills.pdf = true;
       claude.accountSkills.pptx = true;
