@@ -179,15 +179,16 @@
       numbers)))
 
       #--- Move Window to Workspace (Number Keys)
+      # focus = false keeps the view on the current workspace
       (section "Workspaces" (lib.listToAttrs (map (n: let
         name = toString n;
       in
         lib.nameValuePair "to-workspace-${name}" (
           if n == 1
-          then bind "Mod+Shift+1" "Send window to workspace 1-9" {move-column-to-workspace = 1;}
+          then bind "Mod+Shift+1" "Send window to workspace 1-9" {move-column-to-workspace = [{focus = false;} 1];}
           else
             hidden "Mod+Shift+${name}" "Send window to workspace ${name}" {
-              move-column-to-workspace = n;
+              move-column-to-workspace = [{focus = false;} n];
             }
         ))
       numbers)))

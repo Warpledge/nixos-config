@@ -65,7 +65,9 @@ ColumnLayout {
         if (action.spawn !== undefined)
             return Array.isArray(action.spawn) ? joinCommand(action.spawn) : String(action.spawn)
         const name = Object.keys(action)[0] || ""
-        const arg = action[name]
+        let arg = action[name]
+        if (Array.isArray(arg)) // [{props}, arg], as in move-column-to-workspace focus=false
+            arg = arg.filter(a => a === null || typeof a !== "object").join(" ") || null
         return arg === null || typeof arg === "object" ? name : `${name} ${arg}`
     }
 

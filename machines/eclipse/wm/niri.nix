@@ -83,7 +83,7 @@ in {
         in {
           # Forcing the action alone keeps the key and title from binds.nix
           "workspace-${name}".action = lib.mkForce {focus-workspace = name;};
-          "to-workspace-${name}".action = lib.mkForce {move-column-to-workspace = name;};
+          "to-workspace-${name}".action = lib.mkForce {move-column-to-workspace = [{focus = false;} name];};
         })
         numbers);
 
