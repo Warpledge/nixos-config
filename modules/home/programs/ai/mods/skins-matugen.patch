@@ -1,3 +1,16 @@
+diff --git a/hooks/command.ts b/hooks/command.ts
+index 1273ec9..b9bc25d 100644
+--- a/hooks/command.ts
++++ b/hooks/command.ts
+@@ -96,7 +96,7 @@ export function parsePrefs(raw: unknown, names: readonly string[]): Prefs {
+     skin:
+       typeof skin === 'string' && (skin === 'off' || names.includes(skin))
+         ? skin
+-        : DEFAULT_PREFS.skin,
++        : names.includes('matugen') ? 'matugen' : DEFAULT_PREFS.skin,
+     icons: saved.icons === 'ascii' ? 'ascii' : 'unicode',
+     prompt: saved.prompt === 'right' || saved.prompt === 'plain' ? saved.prompt : 'left',
+     words: saved.words === 'claude' ? 'claude' : 'skin',
 diff --git a/hooks/register.tsx b/hooks/register.tsx
 index 42c3609..117203c 100644
 --- a/hooks/register.tsx
