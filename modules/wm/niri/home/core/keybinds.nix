@@ -40,14 +40,12 @@
   #--- A winsKey bind turns off the other config binds on its key, except ones
   #--- whose key or on/off the user's keybinds setting chose
   wonKeys = map (b: lib.toLower b.key) (lib.filter (b: b.winsKey && b.enable) (lib.attrValues changed));
-  won = lib.mapAttrs (id: b:
-    if
-      !b.winsKey
-      && lib.elem (lib.toLower b.key) wonKeys
-      && !(user.keybinds ? ${id}.key || user.keybinds ? ${id}.enable)
-    then b // {enable = false;}
-    else b)
+  lost = lib.filterAttrs (id: b:
+    !b.winsKey
+    && lib.elem (lib.toLower b.key) wonKeys
+    && !(user.keybinds ? ${id}.key || user.keybinds ? ${id}.enable))
   changed;
+  won = changed // lib.mapAttrs (_: b: b // {enable = false;}) lost;
   custom = lib.mapAttrs (id: o: {
     inherit id;
     inherit (o) key title;
@@ -131,7 +129,11 @@ in {
       binds = lib.mapAttrsToList (id: b:
         b
         // {
-          default = {inherit (defaults.${id} or b) key title enable;};
+          # A bind that lost its key to a winsKey one is off by default here
+          default = {
+            inherit (defaults.${id} or b) key title;
+            enable = (defaults.${id} or b).enable && !(lost ? ${id});
+          };
           custom = custom ? ${id};
         })
       final;
