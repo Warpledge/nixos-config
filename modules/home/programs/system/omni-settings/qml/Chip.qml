@@ -41,5 +41,6 @@ Rectangle {
         }
     }
     HoverHandler { id: hover; cursorShape: chip.tappable ? Qt.PointingHandCursor : Qt.ArrowCursor }
-    TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: chip.tapped() }
+    // A label leaves the tap to what's under it
+    TapHandler { enabled: chip.tappable; gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: chip.tapped() }
 }
