@@ -139,8 +139,8 @@
   --cds-bg-user-message: color-mix(in oklab, {{colors.primary.default.hex}} 15%, transparent) !important;
 }
 
-/* Sidebar and main pane; a nested element sets these itself, hence *. The pane
-   uses background, as the terminals do */
+/* Sidebar, main pane and the transcript's box behind the chat bar; nested elements
+   set these themselves, hence *. The pane uses background, as the terminals do */
 * {
 <* if {{ is_dark_mode }} *>
   --df-web-sidebar-bg: {{colors.surface_container_lowest.default.hex}} !important;
@@ -149,6 +149,7 @@
   --df-web-sidebar-bg: {{colors.surface_container.default.hex}} !important;
   --df-sidebar-bg: {{colors.surface_container.default.hex}} !important;
 <* endif *>
+  --epitaxy-transcript-surface: {{colors.background.default.hex}} !important;
   --df-bg-page-hsl: {{colors.background.default.hex | to_color | format: "hue"}} {{colors.background.default.hex | to_color | format: "saturation"}}% {{colors.background.default.hex | to_color | format: "lightness"}}% !important;
 }
 
