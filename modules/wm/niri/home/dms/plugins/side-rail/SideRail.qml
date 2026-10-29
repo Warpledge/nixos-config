@@ -385,7 +385,8 @@ Item {
             return;
         const w = NiriService.windows.find(w => w.is_focused);
         const ws = w ? NiriService.workspaces[w.workspace_id] : null;
-        const a = ws && isStash(ws) ? config.apps.find(a => a.appId === w.app_id) : null;
+        // Only once niri shows the stash: an app the rail just stashed stays focused
+        const a = ws && isStash(ws) && ws.is_active ? config.apps.find(a => a.appId === w.app_id) : null;
         if (!a)
             return;
         const onOutput = NiriService.allWorkspaces.filter(o => o.output === ws.output && !isStash(o));
