@@ -2,8 +2,9 @@
 # DANKMATERIALSHELL THEME
 #=====================================================================#
 # The DMS registry's Catppuccin Mocha Mauve theme with Crust (11111b) for
-# Base, the default DMS seeds. DMS's matugen colours each app from the theme
-# picked in its settings, so this file is the starting preset, not a lock.
+# Base (Latte in light mode), the default DMS seeds. DMS's matugen colours each
+# app from the theme picked in its settings, so this file is the starting preset,
+# not a lock.
 {
   lib,
   machine,
@@ -36,6 +37,27 @@
           error = "#f38ba8"; # Red
           warning = "#fab387"; # Peach
           info = "#89b4fa"; # Blue
+        };
+        # The registry's Latte Mauve, for DMS's light mode
+        light = {
+          primary = "#8839ef"; # Mauve
+          primaryText = "#eff1f5";
+          primaryContainer = "#eadcff";
+          secondary = "#7287fd"; # Lavender
+          surfaceTint = "#eadcff";
+          surface = "#e6e9ef"; # Mantle
+          surfaceText = "#4c4f69";
+          surfaceVariant = "#eff1f5";
+          surfaceVariantText = "#6c6f85";
+          background = "#eff1f5"; # Base
+          backgroundText = "#4c4f69";
+          outline = "#9ca0b0"; # Overlay 0
+          surfaceContainer = "#e6e9ef";
+          surfaceContainerHigh = "#ccd0da"; # Surface 0
+          surfaceContainerHighest = "#bcc0cc"; # Surface 1
+          error = "#d20f39"; # Red
+          warning = "#fe640b"; # Peach
+          info = "#1e66f5"; # Blue
         };
       };
     })
