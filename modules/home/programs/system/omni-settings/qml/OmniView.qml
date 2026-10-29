@@ -1314,7 +1314,7 @@ Item {
         Item {
             Layout.fillWidth: true
             Layout.preferredHeight: loader.item ? loader.item.implicitHeight : 0
-            //--- A faint wash of the page's colour, edged by its band in the gutter
+            //--- A faint wash of the page's colour, reaching into the gutter
             Rectangle {
                 visible: section.divided && !!loader.item
                 x: -omni.gutter
@@ -1322,14 +1322,6 @@ Item {
                 height: parent.height
                 radius: 14
                 color: Qt.alpha(section.pageAccent, 0.05)
-            }
-            Rectangle {
-                visible: section.divided && !!loader.item
-                x: -omni.gutter + 2
-                width: 3
-                height: parent.height
-                radius: 1.5
-                color: Qt.alpha(section.pageAccent, 0.7)
             }
             Loader {
                 id: loader
