@@ -213,7 +213,10 @@
     connectors.googleCalendar = false;
     connectors.gmail = false;
   };
-  claudeDesktop = {enable = true;};
+  claudeDesktop = {
+    enable = true;
+    matugen = true;
+  };
   opencode = {enable = true;};
   opencodeDesktop = {enable = true;};
   lmstudio = {enable = true;};

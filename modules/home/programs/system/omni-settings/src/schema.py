@@ -138,7 +138,7 @@ PAGES = {
     "Discord": ("apps", "user-available-symbolic", "Discord and showing what you play.", None),
     "Claude": ("cloudai", "applications-science-symbolic",
                "Anthropic's Claude, signed in with your Claude account.",
-               [("", "", ["claude.enable", "claudeDesktop.enable"]),
+               [("", "", ["claude.enable", "claudeDesktop.enable", "claudeDesktop.matugen"]),
                 ("Claude Code", "Changes made in Claude Code stay until set here.",
                  ["claude.model", "claude.effort", "claude.outputStyle", "claude.builtins.agentsMd",
                   "claude.builtins.agentsMdFiles"]),

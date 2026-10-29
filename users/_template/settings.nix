@@ -223,6 +223,7 @@
   claude.builtins.agentsMd = true; # Built-in plugin that reads AGENTS.md files
   claude.builtins.agentsMdFiles = "claude-md-or-agents-md"; # Files it loads
   claudeDesktop.enable = false; # Claude desktop app: chat and Claude Code
+  claudeDesktop.matugen = false; # Claude desktop app in your wallpaper's colours
   opencode.enable = false;
   opencodeDesktop.enable = false; # OpenCode's desktop app: a Claude Desktop-style GUI
   lmstudio.enable = false; # Runs language models locally

@@ -857,6 +857,7 @@ apps=(
   "AI tools|claude.statusLine|Status line under Claude Code's prompt: context used"
   "AI tools|claude.builtins.youShouldKnow|Claude Code's built-in plugin: you should know"
   "AI tools|claudeDesktop.enable|Claude desktop app: chat and Claude Code"
+  "AI tools|claudeDesktop.matugen|Claude desktop app in your wallpaper's colours"
   "AI tools|opencode.enable|opencode"
   "AI tools|opencodeDesktop.enable|OpenCode desktop app: a window for opencode"
   "AI tools|lmstudio.enable|LM Studio: run language models locally"
