@@ -71,7 +71,6 @@ ColumnLayout {
                  () => Quickshell.execDetached(["systemctl", "reboot"]))
     }
 
-
     function collect() {
         if (!canStart())
             return
