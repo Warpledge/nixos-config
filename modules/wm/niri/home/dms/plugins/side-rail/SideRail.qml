@@ -107,9 +107,11 @@ Item {
         markHidden(id, false);
         if (!w)
             return;
-        if (id === activeId && shown) {
+        // The rail stays as it is with nothing docked; Mod+A won't restart this one
+        if (id === activeId) {
+            activeId = "";
             pendingId = "";
-            shown = false;
+            saveState("lastId", "");
         }
         if (a.command[0] !== "helium") {
             const all = Object.assign({}, closing);
@@ -252,8 +254,12 @@ Item {
             hide();
             return;
         }
-        const last = activeId || state("lastId", "");
-        open(app(last) ? last : (config.apps[0]?.id ?? ""));
+        const last = activeId || state("lastId", null);
+        // "" after the docked app was unloaded: the rail alone
+        if (last === "")
+            shown = true;
+        else
+            open(app(last) ? last : (config.apps[0]?.id ?? ""));
     }
 
     function railScreen() {

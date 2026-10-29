@@ -10,7 +10,7 @@ A hidden app closes on its own after 30 minutes, so it stops using memory, and o
 
 Right-click an icon to choose for that app:
 
-- **Unload now** closes it straight away.
+- **Unload now** closes it straight away. The rail stays open, and `Mod+A` brings back the rail alone until you pick an app.
 - **Keep running** stops it from closing on its own.
 - **Unload after 5, 15 or 30 min** sets how long it can sit hidden.
 
