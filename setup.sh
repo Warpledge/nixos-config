@@ -848,6 +848,7 @@ apps=(
   "Gaming|gaming.retroshelf|RetroShelf: tidy an ES-DE / RetroDECK library"
   "Gaming|discord.arrpc.enable|Show the game you're playing in Discord"
   "AI tools|claude.enable|Claude Code (needs an Anthropic account)"
+  "AI tools|claude.mods.band|Band above Claude Code's prompt: context, cache, usage left"
   "AI tools|claudeDesktop.enable|Claude desktop app: chat and Claude Code"
   "AI tools|opencode.enable|opencode"
   "AI tools|opencodeDesktop.enable|OpenCode desktop app: a window for opencode"

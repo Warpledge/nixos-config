@@ -28,13 +28,16 @@
           rev = "d4226d062928f8d9505dbdeadd10217d23361052";
           hash = "sha256-gdxtwbZnIxc0l1379a9suBLvdUnWoptOsddJySFfxV0=";
         };
-      in {
-        claude-md-management = "${official}/plugins/claude-md-management";
-        skill-creator = "${official}/plugins/skill-creator";
-        claude-code-setup = "${official}/plugins/claude-code-setup";
-        # Off: lists 9 agents every session and a scan costs heavy usage
-        # claude-security = "${official}/plugins/claude-security";
-      };
+      in
+        {
+          claude-md-management = "${official}/plugins/claude-md-management";
+          skill-creator = "${official}/plugins/skill-creator";
+          claude-code-setup = "${official}/plugins/claude-code-setup";
+          # Off: lists 9 agents every session and a scan costs heavy usage
+          # claude-security = "${official}/plugins/claude-security";
+        }
+        #--- Repo mods (hooks modules), each behind claude.mods.<name>
+        // lib.optionalAttrs user.claude.mods.band {band = ./mods/band;};
 
       #--- Repo-local skills and subagents (synced to every host through this module)
       skills = {

@@ -209,6 +209,7 @@
 
   #--- AI Tools
   claude.enable = false; # Claude Code (needs an Anthropic account)
+  claude.mods.band = false; # Band above Claude Code's prompt: context, cache, usage left
   claudeDesktop.enable = false; # Claude desktop app: chat and Claude Code
   opencode.enable = false;
   opencodeDesktop.enable = false; # OpenCode's desktop app: a Claude Desktop-style GUI

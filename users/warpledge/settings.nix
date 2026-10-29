@@ -169,7 +169,10 @@
   discord.arrpc.enable = true;
 
   #--- AI Tools
-  claude = {enable = true;};
+  claude = {
+    enable = true;
+    mods.band = true;
+  };
   claudeDesktop = {enable = true;};
   opencode = {enable = true;};
   opencodeDesktop = {enable = true;};
