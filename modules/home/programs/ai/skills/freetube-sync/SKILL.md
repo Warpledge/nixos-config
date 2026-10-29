@@ -1,7 +1,13 @@
 ---
 name: freetube-sync
 description: Fold channels blocked or unblocked in the FreeTube app back into this repo's declarative blocklist (blocked-channels.nix), and keep that list valid. Use when the user says they blocked more channels, asks to sync or update FreeTube, mentions the FreeTube blocklist or hidden channels, or before editing blocked-channels.nix by hand.
+context: fork
+agent: general-purpose
+model: haiku
 ---
+
+In Claude Code this runs as a forked subagent that can't ask the user anything: where a
+step says to ask, stop and return the question instead.
 
 # FreeTube sync
 

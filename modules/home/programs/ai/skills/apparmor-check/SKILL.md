@@ -1,7 +1,13 @@
 ---
 name: apparmor-check
 description: Compile-test this repo's AppArmor profiles before handing back. Use after adding or editing anything under modules/nixos/security/apparmor/ (a profile, an abstraction, a toggle gate), when moving a profile from complain to enforce, or when the user asks whether the AppArmor profiles are valid. nix flake check does not parse profiles; this does.
+context: fork
+agent: general-purpose
+model: haiku
 ---
+
+In Claude Code this runs as a forked subagent without the conversation: report what you
+find and fix nothing unless a step below says to.
 
 # AppArmor check
 

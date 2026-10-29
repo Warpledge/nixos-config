@@ -1,7 +1,18 @@
 ---
 name: commit
-description: Commit the current changes in this public NixOS repo as the user, split into logical commits, after a secret and content scan. Use it for every commit, including ones made without the user asking.
+description: Commit the current changes in this public NixOS repo as the user, split into logical commits, after a secret and content scan. Use it for every commit, including ones made without the user asking. It runs in a forked subagent that can't see the chat, so pass what changed and why (and any grouping the user approved) as the argument.
+argument-hint: what changed and why, plus any approved grouping
+context: fork
+agent: general-purpose
+model: sonnet
 ---
+
+In Claude Code this runs as a forked subagent without the conversation. The caller's note
+on what changed and why: $ARGUMENTS
+
+Forked, you can't ask the user anything: where a step below says to ask, commit nothing
+for that group and return the question for the caller to put to the user. Run inline (an
+agent that loads skills without forking), use the conversation and ask as usual.
 
 # Commit
 
@@ -31,8 +42,8 @@ keyboard, never another person's. Push and history rewrites (amend, rebase, forc
      bash <skill-dir>/scripts/hunks.sh stage <file> 1,3    # stage just those
      ```
      Two topics inside one hunk can't be split; put that hunk with the larger topic.
-   - Propose the grouping to the user (one line per planned commit) before committing
-     when there are more than three or four.
+   - With more than four groups and no approved grouping in the caller's note, commit
+     nothing and return the plan (one line per planned commit) for the user to confirm.
 3. For each group, `git add <paths>` by path, never `git add -A` or `.` (or stage hunks), then **check** (only when the
    note at the end calls for it) **and scan**:
    ```bash
