@@ -28,6 +28,8 @@ Item {
     property string pendingId: ""
     // Workspace hidden apps wait on, kept so stashing doesn't spread them out
     property int stashWs: -1
+    // The monitor the rail was opened on; it moves only when a rail key is pressed on another
+    property string railOutput: ""
 
     function app(id) {
         return config.apps.find(a => a.id === id) ?? null;
@@ -70,13 +72,18 @@ Item {
         return NiriService.workspaces[NiriService.focusedWorkspaceId] ?? null;
     }
 
-    //--- The last workspace of the focused output, as nirius's scratchpad uses
+    //--- The workspace showing on the rail's monitor
+    function railWs() {
+        return NiriService.allWorkspaces.find(ws => ws.output === railOutput && ws.is_active) ?? null;
+    }
+
+    //--- The last workspace of the rail's monitor, as nirius's scratchpad uses. Kept on the
+    //--- same monitor, since niri moves the cursor when focus follows a window across
     function stashTarget() {
-        const focused = focusedWs();
         const known = NiriService.workspaces[stashWs];
-        if (known && !known.is_active && (!focused || known.id !== focused.id))
+        if (known && !known.is_active && known.output === railOutput)
             return stashWs;
-        const onOutput = NiriService.allWorkspaces.filter(ws => ws.output === focused?.output && !ws.is_active);
+        const onOutput = NiriService.allWorkspaces.filter(ws => ws.output === railOutput && !ws.is_active);
         if (onOutput.length === 0)
             return -1;
         stashWs = onOutput.reduce((a, b) => (b.idx > a.idx ? b : a)).id;
@@ -102,26 +109,55 @@ Item {
         saveState("widths", widths);
     }
 
-    //--- Docks a window beside the rail on the focused workspace, at the app's width
+    //--- Docks a window beside the rail on its monitor's workspace, at the app's width.
+    //--- Moved without focus, then focused, so niri leaves the cursor where it is
     function place(a, w) {
-        const ws = focusedWs();
+        const ws = railWs();
         const screen = railScreen();
         if (ws && w.workspace_id !== ws.id)
-            act({MoveWindowToWorkspace: {window_id: w.id, reference: {Id: ws.id}, focus: true}});
+            act({MoveWindowToWorkspace: {window_id: w.id, reference: {Id: ws.id}, focus: false}});
         if (!w.is_floating)
             act({MoveWindowToFloating: {id: w.id}});
         const width = widthOf(a);
         if (Math.round(w.layout?.window_size?.[0] ?? 0) !== width)
             act({SetWindowWidth: {id: w.id, change: {SetFixed: width}}});
-        if (screen) {
-            const top = ShellLayout.edge(screen, "top")?.occupancy ?? 0;
-            const bottom = ShellLayout.edge(screen, "bottom")?.occupancy ?? 0;
-            const height = Math.round(screen.height - top - bottom - geo.gap * 2);
-            if (Math.round(w.layout?.window_size?.[1] ?? 0) !== height)
-                act({SetWindowHeight: {id: w.id, change: {SetFixed: height}}});
-        }
-        act({MoveFloatingWindow: {id: w.id, x: {SetFixed: geo.rail + geo.gap}, y: {SetFixed: geo.gap}}});
+        const top = inset(screen, "top");
+        const height = Math.round((screen?.height ?? 0) - top - inset(screen, "bottom") - geo.gap * 2);
+        if (screen && Math.round(w.layout?.window_size?.[1] ?? 0) !== height)
+            act({SetWindowHeight: {id: w.id, change: {SetFixed: height}}});
+        // niri places floating windows inside the space bars reserve; an auto-hiding
+        // bar reserves none, so the rest of its height is added here
+        const y = top - ShellLayout.dockAdjacentThickness(screen, "top") + geo.gap;
+        act({MoveFloatingWindow: {id: w.id, x: {SetFixed: geo.rail + geo.gap}, y: {SetFixed: Math.max(geo.gap, y)}}});
         act({FocusWindow: {id: w.id}});
+    }
+
+    //--- How far DMS's bars reach in from one edge, auto-hiding ones included
+    function inset(screen, side) {
+        return screen ? ShellLayout.edge(screen, side)?.occupancy ?? 0 : 0;
+    }
+
+    //--- A rail key pressed on a monitor without the rail: true when it moves the rail
+    //--- there, taking the shown app along
+    function claimFocusedOutput() {
+        const output = focusedWs()?.output ?? "";
+        if (shown && output === railOutput)
+            return false;
+        const moving = shown && activeId !== "";
+        if (moving)
+            stash(activeId);
+        railOutput = output;
+        stashWs = -1;
+        return moving;
+    }
+
+    //--- An app's own key: shows the rail on it, or hides the rail when it's the one shown
+    function toggleApp(id) {
+        const moved = claimFocusedOutput();
+        if (shown && !moved && activeId === id)
+            hide();
+        else
+            open(id);
     }
 
     function open(id) {
@@ -151,17 +187,17 @@ Item {
     }
 
     function toggle() {
-        if (shown) {
+        const moved = claimFocusedOutput();
+        if (shown && !moved) {
             hide();
             return;
         }
-        const last = state("lastId", "");
+        const last = activeId || state("lastId", "");
         open(app(last) ? last : (config.apps[0]?.id ?? ""));
     }
 
     function railScreen() {
-        const output = focusedWs()?.output;
-        return Quickshell.screens.find(s => s.name === output) ?? Quickshell.screens[0] ?? null;
+        return Quickshell.screens.find(s => s.name === railOutput) ?? Quickshell.screens[0] ?? null;
     }
 
     //--- A launched app's window: dock it once it opens
@@ -201,12 +237,15 @@ Item {
             }
         }
 
-        //--- The docked app follows a workspace switch
-        function onFocusedWorkspaceIdChanged() {
+        //--- The docked app follows a workspace switch on the rail's monitor only
+        function onWorkspacesChanged() {
             const w = root.windowOf(root.app(root.activeId));
-            const ws = root.focusedWs();
-            if (w && ws && w.workspace_id !== ws.id && ws.id !== root.stashWs)
-                root.act({MoveWindowToWorkspace: {window_id: w.id, reference: {Id: ws.id}, focus: true}});
+            const ws = root.railWs();
+            if (!w || !ws || w.workspace_id === ws.id || ws.id === root.stashWs)
+                return;
+            root.act({MoveWindowToWorkspace: {window_id: w.id, reference: {Id: ws.id}, focus: false}});
+            if (NiriService.focusedWorkspaceId == ws.id)
+                root.act({FocusWindow: {id: w.id}});
         }
     }
 
@@ -220,24 +259,26 @@ Item {
             WlrLayershell.namespace: "dms:side-rail"
             WlrLayershell.layer: WlrLayer.Top
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-            exclusiveZone: 0
+            // Placed by hand below the bar, which may auto-hide and reserve nothing
+            exclusionMode: ExclusionMode.Ignore
             anchors {
                 left: true
                 top: true
-                bottom: true
             }
-            implicitWidth: root.geo.rail
+            margins.top: root.inset(screen, "top") + root.geo.gap
+            margins.left: root.geo.gap / 2
+            // Only as tall as its icons
+            implicitWidth: root.geo.rail - root.geo.gap / 2
+            implicitHeight: icons.implicitHeight + Theme.spacingS * 2
             color: "transparent"
 
             Rectangle {
                 anchors.fill: parent
-                anchors.topMargin: root.geo.gap
-                anchors.bottomMargin: root.geo.gap
-                anchors.leftMargin: root.geo.gap / 2
                 radius: Theme.cornerRadius
                 color: Theme.withAlpha(Theme.surfaceContainer, Theme.popupTransparency)
 
                 Column {
+                    id: icons
                     anchors.top: parent.top
                     anchors.topMargin: Theme.spacingS
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -345,6 +386,13 @@ Item {
                 return "NO APP " + id;
             root.open(id);
             return "OPENED";
+        }
+
+        function toggleApp(id: string): string {
+            if (!root.app(id))
+                return "NO APP " + id;
+            root.toggleApp(id);
+            return root.shown ? "OPENED" : "CLOSED";
         }
 
         function hide(): string {

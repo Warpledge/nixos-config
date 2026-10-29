@@ -16,7 +16,7 @@
     chosen = (import ../../../../../lib/default-apps.nix {inherit lib;}).forUser user;
     railApps = (import ../dms/plugins/side-rail/apps.nix {inherit lib user machine;}).apps;
     inRail = id: lib.any (a: a.id == id) railApps;
-    railShow = id: ["dms" "ipc" "call" "sideRail" "show" id];
+    railToggle = id: ["dms" "ipc" "call" "sideRail" "toggleApp" id];
     # Each bind in a section gets its group, the heading Omni Settings shows
     section = group: lib.mapAttrs (_: b: b // {inherit group;});
     # The title is what the Mod+/ cheatsheet (DMS) shows for the bind
@@ -242,13 +242,13 @@
         // lib.optionalAttrs user.gaming.lutris {
           lutris = bind "Mod+Ctrl+G" "Lutris" {spawn = ["lutris"];};
         }
-        #--- Claude / OpenCode Desktop open in the side rail when it has them,
-        #--- else focus an open window instead of starting another
+        #--- Claude / OpenCode Desktop show or hide the side rail on them when it has
+        #--- them, else focus an open window instead of starting another
         // lib.optionalAttrs user.claudeDesktop.enable {
           claude-desktop = bind "Mod+C" "Claude Desktop" {
             spawn =
               if inRail "claude-desktop"
-              then railShow "claude-desktop"
+              then railToggle "claude-desktop"
               else ["nirius" "focus-or-spawn" "--app-id" "^com\\.anthropic\\.Claude$" "claude-desktop"];
           };
         }
@@ -256,7 +256,7 @@
           opencode-desktop = bind "Mod+X" "OpenCode Desktop" {
             spawn =
               if inRail "opencode-desktop"
-              then railShow "opencode-desktop"
+              then railToggle "opencode-desktop"
               else ["nirius" "focus-or-spawn" "--app-id" "^ai\\.opencode\\.desktop$" "opencode-desktop"];
           };
         }

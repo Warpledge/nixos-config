@@ -4,7 +4,9 @@
 
 Click an icon to swap the app beside the rail. Click the one already showing to hide the rail. An app starts the first time you pick it, and a dot next to an icon means that app is running but not showing. If you switch workspace while the rail is open, the app comes with you.
 
-`Mod+C` and `Mod+X` open Claude Desktop and OpenCode Desktop on the rail.
+`Mod+C` and `Mod+X` show or hide the rail on Claude Desktop and OpenCode Desktop, the way `Mod+A` does.
+
+The rail stays on the monitor you opened it on. Press `Mod+A` (or `Mod+C`, `Mod+X`) on another monitor to bring it and its app over.
 
 ## What's on it
 
