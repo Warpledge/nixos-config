@@ -46,6 +46,8 @@ ColumnLayout {
     readonly property var saved: overrides(true)
     readonly property bool waiting: !!built && !view.same(saved, built.changes || {})
     readonly property int defaultWidth: built ? built.geometry.width : 0
+    // 30 until a rebuild writes the geometry that has it
+    readonly property int defaultUnload: built && built.geometry.unloadAfter ? built.geometry.unloadAfter : 30
 
     function setOverride(id, change) {
         const out = Object.assign({}, now)
@@ -65,6 +67,8 @@ ColumnLayout {
             return { id: a.id, name: a.name, icon: a.icon, custom: false,
                      web: a.command[0] === "helium", what: a.command.join(" "),
                      enable: c.enable !== false, width: c.width || a.width, defaultOrder: i,
+                     keepRunning: c.keepRunning !== undefined ? c.keepRunning : !!a.keepRunning,
+                     unloadAfter: c.unloadAfter || a.unloadAfter || defaultUnload,
                      order: c.order !== undefined ? c.order : i, changed: a.id in now,
                      savedChange: a.id in saved, raw: c }
         })
@@ -73,6 +77,7 @@ ColumnLayout {
             return { id, name: c.name || id, icon: c.icon || "apps", custom: true, web: !!c.url,
                      what: c.url || (c.command || []).join(" "),
                      enable: c.enable !== false, width: c.width || defaultWidth, defaultOrder: 1000,
+                     keepRunning: !!c.keepRunning, unloadAfter: c.unloadAfter || defaultUnload,
                      order: c.order !== undefined ? c.order : 1000, changed: true,
                      savedChange: id in saved, raw: c }
         })
@@ -257,6 +262,7 @@ ColumnLayout {
                     spacing: 4
                     Chip { tappable: false; text: `${r.row.width}px`; accent: true }
                     Chip { tappable: false; text: r.row.web ? "Web page" : "App" }
+                    Chip { tappable: false; text: r.row.keepRunning ? "Keeps running" : `Unloads after ${r.row.unloadAfter} min` }
                     Chip {
                         tappable: false
                         visible: r.row.changed && !r.row.custom

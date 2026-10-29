@@ -17,10 +17,13 @@ Sheet {
 
     property bool web: true
     property bool picking: false
+    property bool keep: false
 
     Component.onCompleted: {
         nameField.text = app.name || ""
         widthField.text = app.raw && app.raw.width ? String(app.raw.width) : ""
+        keep = app.raw && app.raw.keepRunning !== undefined ? app.raw.keepRunning : fallbackKeep
+        minutesField.text = app.raw && app.raw.unloadAfter ? String(app.raw.unloadAfter) : ""
         if (app.custom) {
             const o = app.raw
             web = !!o.url
@@ -40,6 +43,11 @@ Sheet {
         }
         return rail.defaultWidth
     }
+
+    //--- Unloading as apps.nix sets it before the user's change
+    readonly property var sharedApp: !custom && rail.built ? rail.built.shared.find(s => s.id === app.id) || null : null
+    readonly property bool fallbackKeep: !!(sharedApp && sharedApp.keepRunning)
+    readonly property int fallbackMinutes: sharedApp && sharedApp.unloadAfter ? sharedApp.unloadAfter : rail.defaultUnload
 
     property var windows: null  // the open windows, while listed
     property string ownIcon: ""  // the picked app's icon from its .desktop file
@@ -158,12 +166,26 @@ Sheet {
             view.say("The width is a number of pixels, like 900")
             return
         }
+        const typedMinutes = minutesField.text.trim()
+        const minutes = typedMinutes === "" ? 0 : Number(typedMinutes)
+        if (typedMinutes !== "" && !(Number.isInteger(minutes) && minutes > 0)) {
+            view.say("The time is a whole number of minutes, like 15")
+            return
+        }
         const kept = Object.assign({}, app.raw || {})
         if (!custom) {
             if (width && width !== fallbackWidth)
                 kept.width = width
             else
                 delete kept.width
+            if (keep !== fallbackKeep)
+                kept.keepRunning = keep
+            else
+                delete kept.keepRunning
+            if (minutes && minutes !== fallbackMinutes)
+                kept.unloadAfter = minutes
+            else
+                delete kept.unloadAfter
             rail.setOverride(app.id, kept)
             view.sheet = null
             return
@@ -194,6 +216,10 @@ Sheet {
             o.icon = iconField.text.trim()
         if (width)
             o.width = width
+        if (keep)
+            o.keepRunning = true
+        if (minutes && minutes !== fallbackMinutes)
+            o.unloadAfter = minutes
         if (kept.enable === false)
             o.enable = false
         if (kept.order !== undefined)
@@ -324,6 +350,36 @@ Sheet {
         Text {
             text: "Where Reset to Default on the rail goes back to. Dragging with Mod and the right mouse "
                   + "button changes it until then."
+            color: Theme.dim
+            font.pixelSize: 13
+            wrapMode: Text.Wrap
+            Layout.fillWidth: true
+        }
+    }
+
+    Card {
+        Label { text: "Unloading" }
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 10
+            ColumnLayout {
+                spacing: 1
+                Layout.fillWidth: true
+                Text { text: "Keep Running"; color: Theme.text; font.pixelSize: 15 }
+                Text {
+                    text: ed.keep ? "Stays open while the rail hides it"
+                                  : "Closes after sitting hidden, and reopens when picked"
+                    color: Theme.dim
+                    font.pixelSize: 13
+                    elide: Text.ElideRight
+                    Layout.fillWidth: true
+                }
+            }
+            Toggle { checked: ed.keep; onToggled: on => ed.keep = on }
+        }
+        Field { id: minutesField; visible: !ed.keep; placeholder: `${ed.fallbackMinutes} minutes hidden unless set` }
+        Text {
+            text: "The rail's right-click menu changes both until Reset to Default."
             color: Theme.dim
             font.pixelSize: 13
             wrapMode: Text.Wrap

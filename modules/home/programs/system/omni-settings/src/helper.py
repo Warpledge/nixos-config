@@ -407,27 +407,29 @@ def window_rules_ok(value):
     return True
 
 
-SIDE_RAIL_FIELDS = {"enable": bool, "order": int, "width": int, "name": str, "icon": str,
-                    "appId": str, "url": str, "command": list}
+SIDE_RAIL_FIELDS = {"enable": bool, "order": int, "width": int, "keepRunning": bool,
+                    "unloadAfter": int, "name": str, "icon": str, "appId": str, "url": str,
+                    "command": list}
+SIDE_RAIL_SHARED = ("enable", "order", "width", "keepRunning", "unloadAfter")
 
 
 def side_rail_ok(value):
     """Whether `value` is a set of side rail changes by id, as lib/settings.nix's
-    sideRailProblems: a shared app's enable, order or width, or a custom- app."""
+    sideRailProblems: a shared app's SIDE_RAIL_SHARED fields, or a custom- app."""
     if not isinstance(value, dict):
         return False
     for app_id, e in value.items():
         if not (isinstance(app_id, str) and re.fullmatch(r"[A-Za-z0-9_-]+", app_id) and isinstance(e, dict)):
             return False
         custom = app_id.startswith("custom-")
-        allowed = SIDE_RAIL_FIELDS if custom else ("enable", "order", "width")
+        allowed = SIDE_RAIL_FIELDS if custom else SIDE_RAIL_SHARED
         for k, v in e.items():
             kind = SIDE_RAIL_FIELDS.get(k)
             if k not in allowed or not isinstance(v, kind) or (kind is int and isinstance(v, bool)):
                 return False
             if k == "command" and not (v and all(isinstance(w, str) for w in v)):
                 return False
-            if k == "width" and v <= 0:
+            if k in ("width", "unloadAfter") and v <= 0:
                 return False
         if custom and ("name" not in e or ("url" in e) == ("command" in e)
                        or ("command" in e and "appId" not in e)):
