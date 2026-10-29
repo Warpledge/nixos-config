@@ -105,6 +105,7 @@
       claude.agentModels.proseReviewer = null;
       claude.agentModels.publicRepoAuditor = null;
       windowRules = {};
+      sideRail = {};
     };
   };
 
