@@ -173,6 +173,29 @@
     enable = true;
     mods.band = true;
     builtins.youShouldKnow = true;
+    builtins.agentsMd = true;
+    plugins = {
+      claudeMdManagement = true;
+      skillCreator = true;
+      claudeCodeSetup = true;
+    };
+    mcp = {
+      nixos = true;
+      context7 = true;
+      github = true;
+      deepwiki = true;
+      grep = true;
+    };
+    connectors.claudeDocs = true;
+    accountSkills = {
+      builtInBrowser = true;
+      chromeBrowser = true;
+      computerUse = true;
+      deepResearch = true;
+      docs = true;
+      importMemory = true;
+      mcpBuilder = true;
+    };
   };
   claudeDesktop = {enable = true;};
   opencode = {enable = true;};

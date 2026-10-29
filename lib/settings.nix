@@ -109,7 +109,22 @@
     // lib.mapAttrs' (kind: candidates: lib.nameValuePair "defaultApps.${kind}" (map (c: c.name) candidates))
     (import ./default-apps.nix {inherit lib;}).apps
     #--- localAi.edit: none, or a model lib/local-models.nix lists
-    // {"localAi.edit" = [null] ++ lib.attrNames (import ./local-models.nix).edit;};
+    // {"localAi.edit" = [null] ++ lib.attrNames (import ./local-models.nix).edit;}
+    #--- Claude Code; null leaves the setting to Claude Code
+    // {
+      "claude.model" = [null "opus" "sonnet" "haiku" "fable"];
+      "claude.effort" = [null "low" "medium" "high" "xhigh" "max"];
+      "claude.outputStyle" = [null "default" "Explanatory" "Learning" "Concise"];
+      "claude.builtins.agentsMdFiles" = ["claude-md" "claude-md-or-agents-md" "claude-md-and-agents-md"];
+    }
+    #--- claude.skills, .agents and their models: each name the template lists
+    // claudeChoices "skills" ["on" "name-only" "user-invocable-only" "off"]
+    // claudeChoices "agents" ["on" "off"]
+    // claudeChoices "skillModels" claudeModels
+    // claudeChoices "agentModels" claudeModels;
+  claudeModels = [null "inherit" "haiku" "sonnet" "opus" "fable"];
+  claudeChoices = kind: values:
+    lib.mapAttrs' (name: _: lib.nameValuePair "claude.${kind}.${name}" values) userDefaults.claude.${kind};
 
   #--------------------------------------------------------------------#
   #-- Checks

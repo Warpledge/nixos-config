@@ -351,6 +351,11 @@ window, over a Python backend; full notes split across its `CLAUDE.md`,
   secret goes in it. Its Bash allow rules stay read-only.
 - MCP API keys are read at launch from `~/.nixos-config-mcp/`, never written into
   the repo or the store.
+- A new skill or subagent also needs its `claude.skills`/`claude.agents` and model
+  lines in `users/_template/settings.nix`, a row on Omni Settings' Claude Skills
+  page (`schema.py`) and a `descriptions.json` title.
+- `~/.claude/settings.json` stays writable: `claude.nix` merges its settings in
+  with `lib/mutable-merge.jq`, never through `programs.claude-code.settings`.
 - In opencode the GitHub MCP is off (its tool list fills too much context); Zed's
   agent still has it. Without it, for upstream releases, issues and files use `gh`
   read-only: `gh release list -R
