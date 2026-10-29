@@ -338,6 +338,10 @@ window, over a Python backend; full notes split across its `CLAUDE.md`,
   backend read; a `Repeater` delegate's `modelData` is a copy, so edit the
   source list by index. What a dropdown opens goes in a `Reveal`
   (`Reveal.qml`), and Loaders inside it gate on its `shown`.
+- Keep the interface clean: a row is its name plus a 2-5 word `summary`, the
+  rest in its `text`. Notes and cautions are `Hint` indicators with a tooltip,
+  never coloured text; every icon button has a `tip`; a switch with no `text`
+  has no dropdown; group and page blurbs stay one short line.
 
 **`modules/home/programs/media/freetube/`**
 

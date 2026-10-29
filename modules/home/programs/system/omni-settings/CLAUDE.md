@@ -12,6 +12,10 @@ Tabs across the top (`TABS`, `TAB_ICONS` and `TOP` in `src/api.py`, sent by `loa
 
 What each custom page does (notes, Git, Backups, Search and User Packages, Startup and File Types, Boot, Users, Running Now, reset buttons, Proton, Window Rules, Keybinds, Flatpaks, What's New) and how jobs reach the root helper are in `src/CLAUDE.md`; grep it for the page you need.
 
+## Keep the interface clean
+
+Each row is its name plus one short line (`summary`, about 2 to 5 words, never wrapping); the rest goes in its `text`, shown when the row opens. Cautions and notes (`note`, "Set for this computer only", "Only an admin can change these") are `Hint` indicators beside the name that explain themselves at the cursor, never coloured text in the row. A value shows as the pill on the right, every icon button has a `tip`, and a switch with no `text` has no dropdown. Group and page blurbs stay one short line; longer guidance belongs in `PAGE_INTROS` or a guide.
+
 For anyone else the machine settings are locked (per group, so a moved user setting stays editable) and the helper does the writing: it takes the caller from `PKEXEC_UID`, accepts only `users/_template` keys outside `HIDDEN` with the template's kind of value, writes that user's file (or their `users.<name>` block in the file of a machine that lists them), runs the check, builds and switches (or only saves, when the block is another machine's), and puts the file back if any step fails. That rebuild builds the whole working tree, so an admin's saved but unapplied edits go live with it.
 
 ## Testing
