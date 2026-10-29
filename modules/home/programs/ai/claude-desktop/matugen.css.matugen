@@ -139,7 +139,8 @@
   --cds-bg-user-message: color-mix(in oklab, {{colors.primary.default.hex}} 15%, transparent) !important;
 }
 
-/* Sidebar and page behind the frame; a nested element sets these itself, hence * */
+/* Sidebar and main pane; a nested element sets these itself, hence *. The pane
+   uses background, as the terminals do */
 * {
 <* if {{ is_dark_mode }} *>
   --df-web-sidebar-bg: {{colors.surface_container_lowest.default.hex}} !important;
@@ -148,7 +149,7 @@
   --df-web-sidebar-bg: {{colors.surface_container.default.hex}} !important;
   --df-sidebar-bg: {{colors.surface_container.default.hex}} !important;
 <* endif *>
-  --df-bg-page-hsl: {{colors.surface.default.hex | to_color | format: "hue"}} {{colors.surface.default.hex | to_color | format: "saturation"}}% {{colors.surface.default.hex | to_color | format: "lightness"}}% !important;
+  --df-bg-page-hsl: {{colors.background.default.hex | to_color | format: "hue"}} {{colors.background.default.hex | to_color | format: "saturation"}}% {{colors.background.default.hex | to_color | format: "lightness"}}% !important;
 }
 
 /* The app's raw gray scale and frame depths: its own lightness steps, in the
