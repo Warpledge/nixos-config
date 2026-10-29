@@ -1,8 +1,8 @@
 #=====================================================================#
 # KYLERJ'S NIRI KEYBINDS (KDE PLASMA LAYOUT)
 #=====================================================================#
-#- kylerj's KDE Plasma shortcuts, translated to niri. A repo bind on one of
-#- these keys is switched off by id; the repo's other binds stay.
+#- kylerj's KDE Plasma shortcuts, translated to niri. Each wins its key
+#- (winsKey), so a repo bind on it is switched off; the repo's other binds stay.
 {
   lib,
   pkgs,
@@ -46,7 +46,10 @@
 
   section = group: lib.mapAttrs (_: b: b // {inherit group;});
   # The title is what the Mod+/ cheatsheet (DMS) shows for the bind
-  bind = key: title: action: {inherit key title action;};
+  bind = key: title: action: {
+    inherit key title action;
+    winsKey = true;
+  };
   hidden = key: title: action: bind key title action // {hidden = true;};
   # Volume keys still work on the lock screen
   locked = key: title: cmd: hidden key title {spawn = cmd;} // {allowWhenLocked = true;};
@@ -56,25 +59,6 @@ in {
   #--------------------------------------------------------------------#
   #--- Mod+T (terminal-t) and Mod+Space (launcher) already match KDE
   niri.keybinds = lib.mkMerge [
-    (lib.genAttrs [
-      "system-monitor" # Ctrl+Alt+Delete
-      "maximize-column" # Mod+F
-      "focus-left" # Mod+Left
-      "focus-right" # Mod+Right
-      "focus-up" # Mod+Up
-      "focus-down" # Mod+Down
-      "move-left" # Mod+Shift+Left
-      "move-right" # Mod+Shift+Right
-      "focus-monitor-left" # Mod+Alt+Left
-      "focus-monitor-right" # Mod+Alt+Right
-      "shrink-width" # Mod+Ctrl+Left
-      "grow-width" # Mod+Ctrl+Right
-      "shrink-height" # Mod+Ctrl+Up
-      "grow-height" # Mod+Ctrl+Down
-      "cycle-column-width" # Mod+G
-      "browser" # Mod+B
-    ] (_: {enable = false;}))
-
     #--- Mod+W is KDE's float / tile
     {wallpapers.key = lib.mkForce "Mod+Shift+W";}
 

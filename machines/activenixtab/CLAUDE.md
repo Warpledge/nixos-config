@@ -51,8 +51,8 @@ when Ky approves it.
 - `wm/niri.nix` — the monitor, scroll factors, auto-rotation and touchscreen gestures
 - `home/apps.nix` — apps with no switch in the user template, and Vivaldi as default
   browser (it isn't one of `lib/default-apps.nix`'s choices)
-- `home/binds.nix` — niri binds matching Ky's KDE Plasma shortcuts; repo binds on the
-  same keys are switched off by id
+- `home/binds.nix` — niri binds matching Ky's KDE Plasma shortcuts; each wins its key
+  (`winsKey`), so a repo bind on the same key, even one added later, is switched off
 - `home/local-ai.nix` — llama-swap on llama.cpp 0.7.0 (Vulkan, built here until
   nixpkgs has it) at `127.0.0.1:8090`, Qwen3.8 Flash Next UD-IQ3_XXS (opencode's
   default: 2 slots of 128K, `reasoning_effort` medium for the coordinator and its `-instruct`
