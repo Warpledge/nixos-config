@@ -1,0 +1,5 @@
+{
+  "commit": [
+    {"name": "xsystem4", "repo": "nunuhara/xsystem4", "file": "machines/eclipse/games/xsystem4/default.nix"}
+  ]
+}
