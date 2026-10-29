@@ -452,75 +452,80 @@ ColumnLayout {
         trailing: page.older.length ? (page.versionsOpen ? "expand_less" : "expand_more") : ""
         onClicked: if (page.older.length) page.versionsOpen = !page.versionsOpen
     }
-    Text {
-        visible: page.versionsOpen && page.older.length > 0
-        text: "Generations: each rebuild saves one, and the boot menu keeps the last ten. "
-              + "Switching back leaves your settings files as they are."
-        color: Theme.dim
-        font.pixelSize: 13
-        wrapMode: Text.Wrap
-        Layout.fillWidth: true
-        Layout.leftMargin: 6
-    }
-    Repeater {
-        model: page.versionsOpen ? page.older : []
-        Rectangle {
-            required property var modelData
-            readonly property var g: modelData
+    Reveal {
+        id: olderList
+        open: page.versionsOpen && page.older.length > 0
+        gap: page.spacing
+        spacing: page.spacing
+        Text {
+            text: "Generations: each rebuild saves one, and the boot menu keeps the last ten. "
+                  + "Switching back leaves your settings files as they are."
+            color: Theme.dim
+            font.pixelSize: 13
+            wrapMode: Text.Wrap
             Layout.fillWidth: true
-            implicitHeight: genRow.implicitHeight + 22
-            radius: 14
-            color: g.running ? Theme.toneFill("success", Theme.card) : Theme.card
-            RowLayout {
-                id: genRow
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
-                spacing: 10
-                Badge { icon: g.running ? "radio_button_checked" : "history"; tone: g.running ? "success" : "" }
-                ColumnLayout {
-                    spacing: 2
-                    Layout.fillWidth: true
-                    Text {
-                        text: `Version ${g.number}`
-                        color: Theme.text
-                        font.pixelSize: 16
-                        font.weight: Font.DemiBold
-                    }
-                    Text {
-                        text: [Fmt.when(g.when),
-                               g.version ? "NixOS " + g.version.split(".").slice(0, 2).join(".") : "",
-                               g.kernel ? `Linux ${g.kernel}` : ""].filter(t => t).join(" · ")
-                        color: Theme.dim
-                        font.pixelSize: 13
-                        elide: Text.ElideRight
+            Layout.leftMargin: 6
+        }
+        Repeater {
+            model: olderList.shown ? page.older : []
+            Rectangle {
+                required property var modelData
+                readonly property var g: modelData
+                Layout.fillWidth: true
+                implicitHeight: genRow.implicitHeight + 22
+                radius: 14
+                color: g.running ? Theme.toneFill("success", Theme.card) : Theme.card
+                RowLayout {
+                    id: genRow
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                    spacing: 10
+                    Badge { icon: g.running ? "radio_button_checked" : "history"; tone: g.running ? "success" : "" }
+                    ColumnLayout {
+                        spacing: 2
                         Layout.fillWidth: true
+                        Text {
+                            text: `Version ${g.number}`
+                            color: Theme.text
+                            font.pixelSize: 16
+                            font.weight: Font.DemiBold
+                        }
+                        Text {
+                            text: [Fmt.when(g.when),
+                                   g.version ? "NixOS " + g.version.split(".").slice(0, 2).join(".") : "",
+                                   g.kernel ? `Linux ${g.kernel}` : ""].filter(t => t).join(" · ")
+                            color: Theme.dim
+                            font.pixelSize: 13
+                            elide: Text.ElideRight
+                            Layout.fillWidth: true
+                        }
+                        Flow {
+                            visible: g.running || g.next || g.booted
+                            Layout.fillWidth: true
+                            spacing: 4
+                            Chip { tappable: false; visible: g.running; tone: "success"; text: "Running" }
+                            Chip { tappable: false; visible: g.next && !g.running; accent: true; text: "Next start" }
+                            Chip { tappable: false; visible: g.booted && !g.running; text: "Started with" }
+                        }
                     }
-                    Flow {
-                        visible: g.running || g.next || g.booted
-                        Layout.fillWidth: true
-                        spacing: 4
-                        Chip { tappable: false; visible: g.running; tone: "success"; text: "Running" }
-                        Chip { tappable: false; visible: g.next && !g.running; accent: true; text: "Next start" }
-                        Chip { tappable: false; visible: g.booted && !g.running; text: "Started with" }
+                    IconButton {
+                        visible: !g.running
+                        icon: "difference"
+                        onClicked: {
+                            page.compareNumber = g.number
+                            page.view.sheet = compareSheet
+                        }
                     }
-                }
-                IconButton {
-                    visible: !g.running
-                    icon: "difference"
-                    onClicked: {
-                        page.compareNumber = g.number
-                        page.view.sheet = compareSheet
+                    Pill {
+                        visible: !g.running
+                        enabled: page.admin
+                        quiet: true
+                        text: "Switch"
+                        onClicked: page.rollback(g)
                     }
-                }
-                Pill {
-                    visible: !g.running
-                    enabled: page.admin
-                    quiet: true
-                    text: "Switch"
-                    onClicked: page.rollback(g)
                 }
             }
         }
@@ -541,131 +546,136 @@ ColumnLayout {
         trailing: page.bootOpen ? "expand_less" : "expand_more"
         onClicked: page.bootOpen = !page.bootOpen
     }
-    Rectangle {
-        visible: page.bootOpen && !!page.boot && page.boot.stages.total > 0
-        Layout.fillWidth: true
-        implicitHeight: bootColumn.implicitHeight + 28
-        radius: 16
-        color: Theme.card
-        ColumnLayout {
-            id: bootColumn
-            anchors.fill: parent
-            anchors.margins: 14
-            spacing: 10
-            Text {
-                Layout.fillWidth: true
-                text: !page.boot ? ""
-                    : page.boot.graphical
-                        ? `The desktop was up ${Fmt.duration(page.boot.graphical.seconds)} into `
-                          + "userspace."
-                        : "From power on to the desktop."
-                color: Theme.dim
-                font.pixelSize: 13
-                wrapMode: Text.Wrap
-            }
-            Flow {
-                Layout.fillWidth: true
-                spacing: 6
-                Repeater {
-                    model: ["firmware", "loader", "kernel", "initrd", "userspace"]
-                    delegate: Chip {
-                        required property string modelData
-                        visible: !!page.boot && !!page.boot.stages[modelData]
-                        tappable: false
-                        text: page.boot ? `${modelData} ${Fmt.duration(page.boot.stages[modelData])}` : ""
+    Reveal {
+        open: page.bootOpen && !!page.boot && page.boot.stages.total > 0
+        gap: page.spacing
+        Rectangle {
+            Layout.fillWidth: true
+            implicitHeight: bootColumn.implicitHeight + 28
+            radius: 16
+            color: Theme.card
+            ColumnLayout {
+                id: bootColumn
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.margins: 14
+                spacing: 10
+                Text {
+                    Layout.fillWidth: true
+                    text: !page.boot ? ""
+                        : page.boot.graphical
+                            ? `The desktop was up ${Fmt.duration(page.boot.graphical.seconds)} into `
+                              + "userspace."
+                            : "From power on to the desktop."
+                    color: Theme.dim
+                    font.pixelSize: 13
+                    wrapMode: Text.Wrap
+                }
+                Flow {
+                    Layout.fillWidth: true
+                    spacing: 6
+                    Repeater {
+                        model: ["firmware", "loader", "kernel", "initrd", "userspace"]
+                        delegate: Chip {
+                            required property string modelData
+                            visible: !!page.boot && !!page.boot.stages[modelData]
+                            tappable: false
+                            text: page.boot ? `${modelData} ${Fmt.duration(page.boot.stages[modelData])}` : ""
+                        }
                     }
                 }
-            }
-            Text {
-                Layout.fillWidth: true
-                Layout.topMargin: 2
-                text: "The slowest units to start:"
-                color: Theme.dim
-                font.pixelSize: 13
-            }
-            Repeater {
-                model: page.boot ? page.boot.blame.units : []
-                delegate: ColumnLayout {
-                    id: blameRow
-                    required property var modelData
-                    readonly property var units: page.boot.blame.units
-                    readonly property real share: units.length
-                        ? modelData.seconds / Math.max(units[0].seconds, 0.001) : 0
+                Text {
                     Layout.fillWidth: true
-                    spacing: 4
-                    RowLayout {
+                    Layout.topMargin: 2
+                    text: "The slowest units to start:"
+                    color: Theme.dim
+                    font.pixelSize: 13
+                }
+                Repeater {
+                    model: page.boot ? page.boot.blame.units : []
+                    delegate: ColumnLayout {
+                        id: blameRow
+                        required property var modelData
+                        readonly property var units: page.boot.blame.units
+                        readonly property real share: units.length
+                            ? modelData.seconds / Math.max(units[0].seconds, 0.001) : 0
                         Layout.fillWidth: true
+                        spacing: 4
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
+                            Text {
+                                Layout.fillWidth: true
+                                text: blameRow.modelData.unit
+                                color: Theme.text
+                                font.pixelSize: 13
+                                elide: Text.ElideRight
+                            }
+                            Text {
+                                text: Fmt.duration(blameRow.modelData.seconds)
+                                color: Theme.dim
+                                font.pixelSize: 13
+                            }
+                        }
+                        Rectangle {
+                            Layout.fillWidth: true
+                            implicitHeight: 6
+                            radius: 3
+                            color: Theme.line
+                            Rectangle {
+                                width: parent.width * blameRow.share
+                                height: parent.height
+                                radius: 3
+                                color: Theme.primary
+                            }
+                        }
+                    }
+                }
+                Text {
+                    visible: !!page.boot && page.boot.blame.devices !== null
+                    Layout.fillWidth: true
+                    text: page.boot && page.boot.blame.devices !== null
+                        ? `Device units took up to ${Fmt.duration(page.boot.blame.devices)}; one wait `
+                          + "shows up under many device names." : ""
+                    color: Theme.dim
+                    font.pixelSize: 13
+                    wrapMode: Text.Wrap
+                }
+                Text {
+                    visible: page.boot && page.boot.chain.length > 0
+                    Layout.fillWidth: true
+                    Layout.topMargin: 2
+                    text: "The chain the desktop waited on, each indent waiting for the one above:"
+                    color: Theme.dim
+                    font.pixelSize: 13
+                    wrapMode: Text.Wrap
+                }
+                Repeater {
+                    model: page.boot ? page.boot.chain : []
+                    delegate: RowLayout {
+                        required property var modelData
+                        Layout.fillWidth: true
+                        Layout.leftMargin: Math.min(modelData.depth, 4) * 14
                         spacing: 10
                         Text {
                             Layout.fillWidth: true
-                            text: blameRow.modelData.unit
+                            text: modelData.unit
                             color: Theme.text
                             font.pixelSize: 13
                             elide: Text.ElideRight
                         }
                         Text {
-                            text: Fmt.duration(blameRow.modelData.seconds)
+                            visible: modelData.took !== null
+                            text: modelData.took !== null ? `+${Fmt.duration(modelData.took)}` : ""
                             color: Theme.dim
                             font.pixelSize: 13
                         }
-                    }
-                    Rectangle {
-                        Layout.fillWidth: true
-                        implicitHeight: 6
-                        radius: 3
-                        color: Theme.line
-                        Rectangle {
-                            width: parent.width * blameRow.share
-                            height: parent.height
-                            radius: 3
-                            color: Theme.primary
+                        Text {
+                            text: `@${Fmt.duration(modelData.at)}`
+                            color: Theme.dim
+                            font.pixelSize: 13
                         }
-                    }
-                }
-            }
-            Text {
-                visible: !!page.boot && page.boot.blame.devices !== null
-                Layout.fillWidth: true
-                text: page.boot && page.boot.blame.devices !== null
-                    ? `Device units took up to ${Fmt.duration(page.boot.blame.devices)}; one wait `
-                      + "shows up under many device names." : ""
-                color: Theme.dim
-                font.pixelSize: 13
-                wrapMode: Text.Wrap
-            }
-            Text {
-                visible: page.boot && page.boot.chain.length > 0
-                Layout.fillWidth: true
-                Layout.topMargin: 2
-                text: "The chain the desktop waited on, each indent waiting for the one above:"
-                color: Theme.dim
-                font.pixelSize: 13
-                wrapMode: Text.Wrap
-            }
-            Repeater {
-                model: page.boot ? page.boot.chain : []
-                delegate: RowLayout {
-                    required property var modelData
-                    Layout.fillWidth: true
-                    Layout.leftMargin: Math.min(modelData.depth, 4) * 14
-                    spacing: 10
-                    Text {
-                        Layout.fillWidth: true
-                        text: modelData.unit
-                        color: Theme.text
-                        font.pixelSize: 13
-                        elide: Text.ElideRight
-                    }
-                    Text {
-                        visible: modelData.took !== null
-                        text: modelData.took !== null ? `+${Fmt.duration(modelData.took)}` : ""
-                        color: Theme.dim
-                        font.pixelSize: 13
-                    }
-                    Text {
-                        text: `@${Fmt.duration(modelData.at)}`
-                        color: Theme.dim
-                        font.pixelSize: 13
                     }
                 }
             }
@@ -813,15 +823,19 @@ ColumnLayout {
                             Icon {
                                 icon: "expand_more"
                                 rotation: rel.open === release.index ? 180 : 0
+                                Behavior on rotation { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
                             }
                         }
-                        Text {
-                            visible: rel.open === release.index
-                            Layout.fillWidth: true
-                            text: release.modelData.body || "The release has no notes."
-                            color: Theme.dim
-                            font.pixelSize: 13
-                            wrapMode: Text.Wrap
+                        Reveal {
+                            open: rel.open === release.index
+                            gap: releaseCol.spacing
+                            Text {
+                                Layout.fillWidth: true
+                                text: release.modelData.body || "The release has no notes."
+                                color: Theme.dim
+                                font.pixelSize: 13
+                                wrapMode: Text.Wrap
+                            }
                         }
                     }
                     HoverHandler { cursorShape: Qt.PointingHandCursor }

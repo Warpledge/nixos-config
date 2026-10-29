@@ -1310,10 +1310,21 @@ Item {
             onClicked: omni.openNote(section.pid, !section.open)
         }
 
-        // Height from the page itself, as a layout-set one would loop with wrapped text
+        // Height from the page itself, as a layout-set one would loop with wrapped text;
+        // a note slides open and shut (Reveal.qml does the same for smaller content)
         Item {
+            id: body
+            property bool armed: false
+            Connections { target: section; function onOpenChanged() { body.armed = section.note } }
             Layout.fillWidth: true
-            Layout.preferredHeight: loader.item ? loader.item.implicitHeight : 0
+            Layout.preferredHeight: loader.item && section.open ? loader.item.implicitHeight : 0
+            clip: section.note
+            opacity: section.open ? 1 : 0
+            Behavior on Layout.preferredHeight {
+                enabled: body.armed
+                NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
+            }
+            Behavior on opacity { enabled: body.armed; NumberAnimation { duration: 220; easing.type: Easing.OutQuad } }
             //--- A faint wash of the page's colour, reaching into the gutter
             Rectangle {
                 visible: section.divided && !!loader.item
@@ -1326,7 +1337,7 @@ Item {
             Loader {
                 id: loader
                 width: parent.width
-                active: section.open && !!section.comp
+                active: (section.open || body.height > 0) && !!section.comp
                 sourceComponent: section.comp
                 // Data that came after the tab showed eases in
                 NumberAnimation on opacity { id: arrived; running: false; from: 0.3; to: 1; duration: 260 }

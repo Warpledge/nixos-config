@@ -68,63 +68,78 @@ ColumnLayout {
                         font.weight: Font.DemiBold
                         Layout.fillWidth: true
                     }
-                    Icon { icon: "expand_more"; rotation: group.open ? 180 : 0 }
+                    Icon {
+                        icon: "expand_more"
+                        rotation: group.open ? 180 : 0
+                        Behavior on rotation { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
+                    }
                     TapHandler {
                         gesturePolicy: TapHandler.ReleaseWithinBounds
                         onTapped: group.open = !group.open
                     }
                 }
-                Repeater {
-                    model: group.open ? group.items : []
-                    ColumnLayout {
-                        id: file
-                        required property var modelData
-                        property bool open: false
-                        Layout.fillWidth: true
-                        spacing: 4
-                        RowLayout {
+                Reveal {
+                    id: groupBody
+                    open: group.open
+                    gap: groupCol.spacing
+                    spacing: groupCol.spacing
+                    Repeater {
+                        model: groupBody.shown ? group.items : []
+                        ColumnLayout {
+                            id: file
+                            required property var modelData
+                            property bool open: false
                             Layout.fillWidth: true
-                            spacing: 8
-                            Icon {
-                                icon: file.modelData.status === "added" ? "add_circle"
-                                    : file.modelData.status === "removed" ? "remove_circle" : "edit"
-                                size: 16
-                                color: file.modelData.status === "added" ? Theme.success
-                                    : file.modelData.status === "removed" ? Theme.error : Theme.primary
-                            }
-                            Text {
-                                text: file.modelData.path
-                                color: Theme.text
-                                font.pixelSize: 13
-                                elide: Text.ElideMiddle
+                            spacing: 4
+                            RowLayout {
                                 Layout.fillWidth: true
+                                spacing: 8
+                                Icon {
+                                    icon: file.modelData.status === "added" ? "add_circle"
+                                        : file.modelData.status === "removed" ? "remove_circle" : "edit"
+                                    size: 16
+                                    color: file.modelData.status === "added" ? Theme.success
+                                        : file.modelData.status === "removed" ? Theme.error : Theme.primary
+                                }
+                                Text {
+                                    text: file.modelData.path
+                                    color: Theme.text
+                                    font.pixelSize: 13
+                                    elide: Text.ElideMiddle
+                                    Layout.fillWidth: true
+                                }
+                                Text {
+                                    visible: file.modelData.diff.length > 0 && !file.open
+                                    text: `${file.modelData.diff.length} diff lines`
+                                    color: Theme.dim
+                                    font.pixelSize: 12
+                                }
+                                Icon {
+                                    visible: file.modelData.diff.length > 0
+                                    icon: "expand_more"
+                                    size: 16
+                                    rotation: file.open ? 180 : 0
+                                    Behavior on rotation { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
+                                }
                             }
-                            Text {
-                                visible: file.modelData.diff.length > 0 && !file.open
-                                text: `${file.modelData.diff.length} diff lines`
-                                color: Theme.dim
-                                font.pixelSize: 12
+                            Reveal {
+                                open: file.open
+                                gap: file.spacing
+                                Text {
+                                    Layout.fillWidth: true
+                                    Layout.leftMargin: 24
+                                    text: view.ink(file.modelData.diff)
+                                    textFormat: Text.StyledText
+                                    font.family: "monospace"
+                                    font.pixelSize: 12
+                                    wrapMode: Text.WrapAnywhere
+                                }
                             }
-                            Icon {
-                                visible: file.modelData.diff.length > 0
-                                icon: file.open ? "expand_less" : "expand_more"
-                                size: 16
+                            TapHandler {
+                                gesturePolicy: TapHandler.ReleaseWithinBounds
+                                enabled: file.modelData.diff.length > 0
+                                onTapped: file.open = !file.open
                             }
-                        }
-                        Text {
-                            visible: file.open
-                            Layout.fillWidth: true
-                            Layout.leftMargin: 24
-                            text: view.ink(file.modelData.diff)
-                            textFormat: Text.StyledText
-                            font.family: "monospace"
-                            font.pixelSize: 12
-                            wrapMode: Text.WrapAnywhere
-                        }
-                        TapHandler {
-                            gesturePolicy: TapHandler.ReleaseWithinBounds
-                            enabled: file.modelData.diff.length > 0
-                            onTapped: file.open = !file.open
                         }
                     }
                 }

@@ -215,7 +215,12 @@ ColumnLayout {
                     enabled: text === "Install"
                     onClicked: page.install(result.attr)
                 }
-                Icon { icon: result.open ? "expand_less" : "expand_more"; size: 20 }
+                Icon {
+                    icon: "expand_more"
+                    size: 20
+                    rotation: result.open ? 180 : 0
+                    Behavior on rotation { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
+                }
             }
 
             Text {
@@ -227,11 +232,10 @@ ColumnLayout {
             }
 
             //--- Details
-            ColumnLayout {
-                visible: result.open && !!result.info
-                Layout.fillWidth: true
+            Reveal {
+                open: result.open && !!result.info
+                gap: resultCol.spacing
                 Layout.leftMargin: 50
-                spacing: 6
                 Repeater {
                     model: result.info ? result.info.homepage : []
                     Detail {

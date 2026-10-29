@@ -149,10 +149,10 @@ PAGES = {
                [("", "", ["claude.enable", "claudeDesktop.enable"]),
                 ("Claude Code", "Changes made inside Claude Code stay until you change the same "
                  "setting here; the reset button on Claude Code puts all of these back.",
-                 ["claude.model", "claude.effort", "claude.outputStyle", "claude.mods.ribbon",
-                  "claude.statusLine",
-                  "claude.builtins.youShouldKnow", "claude.builtins.agentsMd",
-                  "claude.builtins.agentsMdFiles"])]),
+                 ["claude.model", "claude.effort", "claude.outputStyle", "claude.builtins.agentsMd",
+                  "claude.builtins.agentsMdFiles"]),
+                ("Mods", "", ["claude.mods.ribbon", "claude.statusLine",
+                              "claude.builtins.youShouldKnow"])]),
     "Claude Tools": ("cloudai", "application-x-addon-symbolic",
                      "Plugins, MCP servers and claude.ai connectors Claude Code loads.",
                      [("Plugins", "", [f"claude.plugins.{n}" for n in (
@@ -190,10 +190,13 @@ PAGES = {
                  "stays free.", ["localAi.edit"])]),
 }
 
-#--- (page, group) shown closed until its heading is clicked
-COLLAPSED = {("Claude Tools", "Plugins"), ("Claude Tools", "claude.ai Connectors"),
-             ("Claude Skills", "Repo Skills"), ("Claude Skills", "Subagents"),
-             ("Claude Skills", "Account Skills")}
+#--- (page, group) shown closed until its heading is clicked, and its heading's icon
+COLLAPSED = {("Claude", "Mods"): "brush",
+             ("Claude Tools", "Plugins"): "extension", ("Claude Tools", "MCP Servers"): "hub",
+             ("Claude Tools", "claude.ai Connectors"): "cable",
+             ("Claude Skills", "Repo Skills"): "construction",
+             ("Claude Skills", "Subagents"): "smart_toy",
+             ("Claude Skills", "Account Skills"): "cloud"}
 
 #--- Settings shown inside another's row, by path prefix: claude.skills.commit's row
 #--- also edits claude.skillModels.commit (pair_up)

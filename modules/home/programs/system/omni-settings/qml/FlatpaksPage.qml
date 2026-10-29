@@ -243,30 +243,40 @@ ColumnLayout {
                             Layout.fillWidth: true
                         }
                     }
-                    Icon { icon: "expand_more"; rotation: page.runtimesOpen ? 180 : 0 }
+                    Icon {
+                        icon: "expand_more"
+                        rotation: page.runtimesOpen ? 180 : 0
+                        Behavior on rotation { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
+                    }
                     TapHandler {
                         gesturePolicy: TapHandler.ReleaseWithinBounds
                         onTapped: page.runtimesOpen = !page.runtimesOpen
                     }
                 }
-                Repeater {
-                    model: page.runtimesOpen && page.fp && page.fp.installed ? page.fp.runtimes : []
-                    ColumnLayout {
-                        required property var modelData
-                        Layout.fillWidth: true
-                        Layout.leftMargin: 50
-                        spacing: 0
-                        Text {
-                            text: modelData.id
-                            color: Theme.text
-                            font.pixelSize: 15
-                            elide: Text.ElideRight
+                Reveal {
+                    id: runtimes
+                    open: page.runtimesOpen
+                    gap: rtCol.spacing
+                    spacing: rtCol.spacing
+                    Repeater {
+                        model: runtimes.shown && page.fp && page.fp.installed ? page.fp.runtimes : []
+                        ColumnLayout {
+                            required property var modelData
                             Layout.fillWidth: true
-                        }
-                        Text {
-                            text: [modelData.branch, page.where(modelData), modelData.size].filter(t => t).join(" · ")
-                            color: Theme.dim
-                            font.pixelSize: 13
+                            Layout.leftMargin: 50
+                            spacing: 0
+                            Text {
+                                text: modelData.id
+                                color: Theme.text
+                                font.pixelSize: 15
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                            }
+                            Text {
+                                text: [modelData.branch, page.where(modelData), modelData.size].filter(t => t).join(" · ")
+                                color: Theme.dim
+                                font.pixelSize: 13
+                            }
                         }
                     }
                 }

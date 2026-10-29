@@ -119,27 +119,35 @@ ColumnLayout {
                         })
                     }
                 }
-                Icon { icon: unitRow.open ? "expand_less" : "expand_more"; size: 18 }
+                Icon {
+                    icon: "expand_more"
+                    size: 18
+                    rotation: unitRow.open ? 180 : 0
+                    Behavior on rotation { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
+                }
             }
-            Rectangle {
-                visible: unitRow.open
-                Layout.fillWidth: true
-                implicitHeight: logText.implicitHeight + 16
-                radius: 10
-                color: Theme.cardHover
-                TextEdit {
-                    id: logText
-                    x: 10
-                    y: 8
-                    width: parent.width - 20
-                    readOnly: true
-                    selectByMouse: true
-                    text: unitRow.log || "Loading…"
-                    color: Theme.dim
-                    selectionColor: Theme.primary
-                    font.family: "monospace"
-                    font.pixelSize: 12
-                    wrapMode: TextEdit.WrapAnywhere
+            Reveal {
+                open: unitRow.open
+                gap: unitCol.spacing
+                Rectangle {
+                    Layout.fillWidth: true
+                    implicitHeight: logText.implicitHeight + 16
+                    radius: 10
+                    color: Theme.cardHover
+                    TextEdit {
+                        id: logText
+                        x: 10
+                        y: 8
+                        width: parent.width - 20
+                        readOnly: true
+                        selectByMouse: true
+                        text: unitRow.log || "Loading…"
+                        color: Theme.dim
+                        selectionColor: Theme.primary
+                        font.family: "monospace"
+                        font.pixelSize: 12
+                        wrapMode: TextEdit.WrapAnywhere
+                    }
                 }
             }
         }

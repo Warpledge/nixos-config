@@ -131,50 +131,56 @@ Rectangle {
         }
 
         //--- Opened
-        Text {
-            visible: row.open && row.s.description !== ""
-            text: Theme.rich(row.s.description)
-            textFormat: Text.StyledText
-            color: Theme.dim
-            font.pixelSize: 15
-            wrapMode: Text.Wrap
-            lineHeight: 1.15
-            Layout.fillWidth: true
-            Layout.leftMargin: 50
-        }
-        Text {
-            visible: row.open && row.s.kind !== "bool"
-            text: `Default: ${row.s.defaultShown}`
-            color: Theme.dim
-            font.pixelSize: 13
-            Layout.leftMargin: 50
-        }
-        Loader {
-            active: row.open && !row.locked && row.s.kind !== "bool"
-            visible: active
-            Layout.fillWidth: true
-            Layout.leftMargin: 50
-            Layout.bottomMargin: 4
-            sourceComponent: row.s.kind === "text" ? textEditor
-                           : row.s.kind === "number" ? numberEditor
-                           : row.s.kind === "list" ? listEditor : choiceEditor
-        }
-        //--- The paired setting's choices (schema.py's PAIRS), under its own title
-        Text {
-            visible: row.open && !!row.s.pair
-            text: row.s.pair ? `${row.s.pair.title} · Default: ${row.s.pair.defaultShown}` : ""
-            color: Theme.dim
-            font.pixelSize: 13
-            Layout.leftMargin: 50
-        }
-        Loader {
-            active: row.open && !row.locked && !!row.s.pair
-            visible: active
-            Layout.fillWidth: true
-            Layout.leftMargin: 50
-            Layout.bottomMargin: 4
-            sourceComponent: choiceEditor
-            onLoaded: item.subject = row.s.pair
+        Reveal {
+            id: opened
+            open: row.open && (row.s.description !== "" || row.s.kind !== "bool" || !!row.s.pair)
+            gap: col.spacing
+            spacing: col.spacing
+            Text {
+                visible: row.s.description !== ""
+                text: Theme.rich(row.s.description)
+                textFormat: Text.StyledText
+                color: Theme.dim
+                font.pixelSize: 15
+                wrapMode: Text.Wrap
+                lineHeight: 1.15
+                Layout.fillWidth: true
+                Layout.leftMargin: 50
+            }
+            Text {
+                visible: row.s.kind !== "bool"
+                text: `Default: ${row.s.defaultShown}`
+                color: Theme.dim
+                font.pixelSize: 13
+                Layout.leftMargin: 50
+            }
+            Loader {
+                active: opened.shown && !row.locked && row.s.kind !== "bool"
+                visible: active
+                Layout.fillWidth: true
+                Layout.leftMargin: 50
+                Layout.bottomMargin: 4
+                sourceComponent: row.s.kind === "text" ? textEditor
+                               : row.s.kind === "number" ? numberEditor
+                               : row.s.kind === "list" ? listEditor : choiceEditor
+            }
+            //--- The paired setting's choices (schema.py's PAIRS), under its own title
+            Text {
+                visible: !!row.s.pair
+                text: row.s.pair ? `${row.s.pair.title} · Default: ${row.s.pair.defaultShown}` : ""
+                color: Theme.dim
+                font.pixelSize: 13
+                Layout.leftMargin: 50
+            }
+            Loader {
+                active: opened.shown && !row.locked && !!row.s.pair
+                visible: active
+                Layout.fillWidth: true
+                Layout.leftMargin: 50
+                Layout.bottomMargin: 4
+                sourceComponent: choiceEditor
+                onLoaded: item.subject = row.s.pair
+            }
         }
     }
 

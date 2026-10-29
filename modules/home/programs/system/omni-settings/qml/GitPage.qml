@@ -297,9 +297,15 @@ ColumnLayout {
         open: page.pushOpen
         onToggled: page.pushOpen = !page.pushOpen
     }
-    Repeater {
-        model: page.pushOpen && page.repo ? page.repo.outgoing.slice(1) : []
-        CommitRow { required property var modelData; commit: modelData; web: page.web }
+    Reveal {
+        id: pushRest
+        open: page.pushOpen
+        gap: page.spacing
+        spacing: page.spacing
+        Repeater {
+            model: pushRest.shown && page.repo ? page.repo.outgoing.slice(1) : []
+            CommitRow { required property var modelData; commit: modelData; web: page.web }
+        }
     }
     Section { visible: !!page.repo && page.repo.incoming.length > 0; text: "To Pull" }
     Repeater {
@@ -326,9 +332,15 @@ ColumnLayout {
         open: page.recentOpen
         onToggled: page.recentOpen = !page.recentOpen
     }
-    Repeater {
-        model: page.recentOpen && page.repo ? page.repo.recent.slice(1) : []
-        CommitRow { required property var modelData; commit: modelData; web: page.web }
+    Reveal {
+        id: recentRest
+        open: page.recentOpen
+        gap: page.spacing
+        spacing: page.spacing
+        Repeater {
+            model: recentRest.shown && page.repo ? page.repo.recent.slice(1) : []
+            CommitRow { required property var modelData; commit: modelData; web: page.web }
+        }
     }
 
     component CommitRow: ListRow {

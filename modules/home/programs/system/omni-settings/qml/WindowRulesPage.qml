@@ -654,53 +654,64 @@ ColumnLayout {
                     checked: !row.rule.off
                     onToggled: on => page.toggle(row.rule, on)
                 }
-                Icon { icon: row.open ? "expand_less" : "expand_more"; size: 18 }
+                Icon {
+                    icon: "expand_more"
+                    size: 18
+                    rotation: row.open ? 180 : 0
+                    Behavior on rotation { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
+                }
             }
-            Text {
-                visible: row.open && row.rule.note !== ""
-                text: row.rule.note
-                color: Theme.dim
-                font.pixelSize: 13
-                wrapMode: Text.Wrap
-                Layout.fillWidth: true
-                Layout.leftMargin: 50
-            }
-            Repeater {
-                model: row.open ? row.rule.matches.map(m => Object.assign({ out: false }, m))
-                                  .concat(row.rule.excludes.map(m => Object.assign({ out: true }, m))) : []
-                RowLayout {
-                    required property var modelData
+            Reveal {
+                id: matches
+                open: row.open && (row.rule.note !== "" || row.rule.matches.length + row.rule.excludes.length > 0)
+                gap: ruleCol.spacing
+                spacing: ruleCol.spacing
+                Text {
+                    visible: row.rule.note !== ""
+                    text: row.rule.note
+                    color: Theme.dim
+                    font.pixelSize: 13
+                    wrapMode: Text.Wrap
                     Layout.fillWidth: true
                     Layout.leftMargin: 50
-                    spacing: 10
-                    Badge {
-                        implicitWidth: 24
-                        implicitHeight: 24
-                        radius: 12
-                        icon: "view_quilt"
-                        app: modelData.app ? [modelData.app, modelData.app.toLowerCase()] : []
-                    }
-                    ColumnLayout {
-                        spacing: 0
+                }
+                Repeater {
+                    model: matches.shown ? row.rule.matches.map(m => Object.assign({ out: false }, m))
+                                           .concat(row.rule.excludes.map(m => Object.assign({ out: true }, m))) : []
+                    RowLayout {
+                        required property var modelData
                         Layout.fillWidth: true
-                        Text {
-                            text: modelData.name
-                            color: Theme.text
-                            font.pixelSize: 15
-                            elide: Text.ElideRight
-                            Layout.fillWidth: true
+                        Layout.leftMargin: 50
+                        spacing: 10
+                        Badge {
+                            implicitWidth: 24
+                            implicitHeight: 24
+                            radius: 12
+                            icon: "view_quilt"
+                            app: modelData.app ? [modelData.app, modelData.app.toLowerCase()] : []
                         }
-                        Text {
-                            visible: page.showIds
-                            text: modelData.pattern
-                            color: Theme.dim
-                            font.family: "monospace"
-                            font.pixelSize: 13
-                            wrapMode: Text.WrapAnywhere
+                        ColumnLayout {
+                            spacing: 0
                             Layout.fillWidth: true
+                            Text {
+                                text: modelData.name
+                                color: Theme.text
+                                font.pixelSize: 15
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                            }
+                            Text {
+                                visible: page.showIds
+                                text: modelData.pattern
+                                color: Theme.dim
+                                font.family: "monospace"
+                                font.pixelSize: 13
+                                wrapMode: Text.WrapAnywhere
+                                Layout.fillWidth: true
+                            }
                         }
+                        Chip { tappable: false; visible: modelData.out; text: "Left out"; tone: "caution" }
                     }
-                    Chip { tappable: false; visible: modelData.out; text: "Left out"; tone: "caution" }
                 }
             }
         }
