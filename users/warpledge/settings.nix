@@ -172,6 +172,13 @@
   claude = {
     enable = true;
     mods.ribbon = true;
+    mods.skins = true;
+    mods.fileTree = true;
+    mods.savvyProgress = true;
+    mods.blastRadius = true;
+    mods.replayTheater = true;
+    mods.chatInventory = true;
+    mods.screenShare = true;
     statusLine = true;
     builtins.youShouldKnow = true;
     builtins.agentsMd = false;
