@@ -71,7 +71,6 @@ ColumnLayout {
                  () => Quickshell.execDetached(["systemctl", "reboot"]))
     }
 
-    function rebuild() { view.rebuild() }
 
     function collect() {
         if (!canStart())
@@ -314,15 +313,6 @@ ColumnLayout {
 
     //--- Maintenance
     Section { visible: !!page.ov; text: "Maintenance" }
-    ListRow {
-        visible: !!page.ov
-        enabled: page.admin
-        icon: "refresh"
-        title: "Rebuild Now"
-        subtitle: "nixos-rebuild switch on your settings files as they are"
-        chevron: true
-        onClicked: page.rebuild()
-    }
     ListRow {
         visible: !!page.ov
         enabled: page.admin

@@ -1432,12 +1432,11 @@ Item {
                             Layout.fillWidth: true
                         }
                         // A generated page's blurb, or a custom page's line from the rail
-                        Text {
+                        Elided {
                             visible: text !== ""
                             text: section.modelData.subtitle || (section.model ? section.model.description : "")
                             color: Theme.dim
                             font.pixelSize: 13
-                            elide: Text.ElideRight
                             Layout.fillWidth: true
                         }
                     }

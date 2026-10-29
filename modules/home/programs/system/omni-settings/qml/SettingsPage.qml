@@ -75,13 +75,13 @@ ColumnLayout {
                 }
                 Item { Layout.fillWidth: true }
             }
-            Text {
+            Elided {
                 visible: !group.collapsed && text !== ""
                 text: Theme.rich(group.modelData.description)
+                full: Theme.plain(group.modelData.description)
                 textFormat: Text.StyledText
                 color: Theme.dim
                 font.pixelSize: 13
-                elide: Text.ElideRight
                 Layout.fillWidth: true
                 Layout.leftMargin: 6
             }
@@ -160,13 +160,13 @@ ColumnLayout {
                                 }
                                 Item { Layout.fillWidth: true }
                             }
-                            Text {
+                            Elided {
                                 visible: text !== ""
                                 text: Theme.rich(group.modelData.description)
+                                full: Theme.plain(group.modelData.description)
                                 textFormat: Text.StyledText
                                 color: Theme.dim
                                 font.pixelSize: 13
-                                elide: Text.ElideRight
                                 Layout.fillWidth: true
                             }
                         }

@@ -73,7 +73,7 @@ DOCS_GAMING = [("proton", "Launch Options", ("input-gaming-symbolic",)),
                 ("system-software-install-symbolic", "input-gaming-symbolic"))]
 
 #--- The line under each page in the page list that has no description of its own
-NAV_SUBTITLES = {"overview": "Updates, rebuild, versions", "git": "Changes, commits, pull requests",
+NAV_SUBTITLES = {"overview": "Updates, clean-up, versions", "git": "Changes, commits, pull requests",
                  "flatpaks": "Apps, updates, repair", "backups": "Back up app data",
                  "people": "Who can log in", "packages": "Find packages in nixpkgs",
                  "shell": "DankMaterialShell's settings", "windowrules": "Rules for each app's windows",

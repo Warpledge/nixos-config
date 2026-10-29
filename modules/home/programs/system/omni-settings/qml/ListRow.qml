@@ -61,12 +61,11 @@ Rectangle {
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }
-                Text {
+                Elided {
                     visible: text !== ""
                     text: row.subtitle
                     color: Theme.dim
                     font.pixelSize: 13
-                    elide: Text.ElideRight
                     Layout.fillWidth: true
                 }
             }

@@ -131,7 +131,8 @@ ColumnLayout {
                     width: userRow.implicitWidth + 24
                     height: 34
                     radius: 17
-                    color: Qt.alpha(Theme.primary, 0.14)
+                    color: Qt.alpha(Theme.primary, userHover.hovered ? 0.26 : 0.14)
+                    Behavior on color { ColorAnimation { duration: 120 } }
                     border.width: 1
                     border.color: Qt.alpha(Theme.primary, 0.3)
                     Row {
@@ -153,6 +154,8 @@ ColumnLayout {
                             color: Theme.primary
                         }
                     }
+                    HoverHandler { id: userHover; cursorShape: Qt.PointingHandCursor }
+                    TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: header.view.go("main", "people") }
                 }
             }
 
