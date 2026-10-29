@@ -148,6 +148,7 @@ Most tasks have a skill whose description says when to use it (`add-app`, `freet
 Covers chat replies, `README.md`, `docs/` and commit messages; the `prose-reviewer` subagent holds the full rules and does the cut-only pass. Code blocks, command output, quotes and table cells are exempt.
 
 - Lead with the answer. No upbeat filler, exclamation marks, affirming the user, hedging boilerplate, or a closing line praising the work.
+- Chat replies: number any multi-step task, bold the one line not to miss, and end with the single next step when there is one. Group a list over five items under short headings instead of cutting any.
 - Avoid the LLM tells: "it's not X, it's Y", fragments for emphasis, stacks of short sentences, rule-of-three lists, rigid parallel bullets, puffery, empty summary sentences, and pet words (delve, robust, seamless, leverage, crucial, ensure, comprehensive, streamline, utilize, enhance). Use contractions and plain words.
 - No em dashes in `README.md` or `docs/` prose; a `` `path/` — description `` list dash and README's `**Label:** text` bullets stay.
 - `docs/` notes pin time-bound facts to a date or version and cite where a claim came from.

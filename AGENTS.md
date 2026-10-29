@@ -436,6 +436,9 @@ Every module opens with a banner; copy it byte for byte from a neighbour:
 For replies, `README.md`, `docs/` and commit messages.
 
 - Lead with the answer. No praise, no exclamation marks, no restating the request.
+- Chat replies: number multi-step tasks, bold the one line not to miss, end
+  with the single next step. Group lists over five items under headings; cut
+  nothing.
 - Full sentences of varied length. Not "it's not X, it's Y"; no lists padded to
   three; don't rate what you describe.
 - Avoid: delve, robust, seamless, leverage, crucial, ensure, comprehensive,
