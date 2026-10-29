@@ -230,7 +230,7 @@
   {
     "id": "omni-settings",
     "name": "Omni Settings",
-    "note": "Mod+C. Tiled.",
+    "note": "Mod+S. Tiled.",
     "default-column-width": {
       "proportion": 0.388
     },
