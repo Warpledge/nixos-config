@@ -10,7 +10,7 @@ On this setup you don't have to edit those files yourself. Omni Settings (`Mod+S
 | --- | --- |
 | Config | The folder [`/etc/nixos-config`](../../), which describes this computer and every other one it runs on |
 | Rebuild | Building a new system from the config and switching to it. Every change goes through one |
-| Generation (version) | One finished rebuild. The Overview lists them as Version 1, 2, 3… |
+| Generation (version) | One finished rebuild. The Maintenance page lists them as Version 1, 2, 3… |
 | Switch | Moving the running system to a new generation without restarting |
 | At next restart | Building now, but starting the new generation only when you restart (`nixos-rebuild boot`) |
 | Flake input (source) | Something the config is built from, like nixpkgs, the big collection of packages. Updating means moving these to newer versions |

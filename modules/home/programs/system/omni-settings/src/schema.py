@@ -42,12 +42,6 @@ PAGE_TITLES = {
 }
 MOVES = {  # setting -> (page, group on that page)
     ("japanese", "vn"): ("Gaming", "Japanese Visual Novels"),
-    #--- Each ArtCraft app with others of its kind; a new one stays on the ArtCraft page
-    **{("artcraft", app): ("Graphics", "ArtCraft") for app in
-       ("photocraft", "lightcraft", "vectorcraft", "designcraft", "figcraft", "effectcraft", "cadcraft")},
-    ("artcraft", "filmcraft"): ("Media", "ArtCraft"),
-    ("artcraft", "soundcraft"): ("Audio", "ArtCraft"),
-    **{("artcraft", app): ("Office", "ArtCraft") for app in ("pdfcraft", "wordcraft", "gridcraft", "deckcraft")},
 }
 
 #--- Sidebar sections, top to bottom; under niri, Desktop is on the Niri tab, and
@@ -73,10 +67,10 @@ PAGES = {
     "Keybinds": ("keybinds", "input-keyboard-symbolic", "", [("", "", ["keybinds"])]),
     "Window Rules": ("windowrules", "focus-windows-symbolic", "", [("", "", ["windowRules"])]),
     "System": ("computer", "computer-symbolic",
-               "The name, desktop and kernel this computer runs, the same for everyone on it.",
+               "This computer's name, desktop and kernel.",
                [("", "", ["hostName", "windowManager", "kernel"])]),
     "Boot": ("computer", "system-reboot-symbolic",
-             "The boot menu: how long it waits and how many generations it keeps.",
+             "How long the boot menu waits and what it keeps.",
              [("Boot Menu", "", ["boot.menu.timeout", "boot.menu.entries"])]),
     "Language & Input": ("computer", "preferences-desktop-locale-symbolic",
                          "Time zone, language and keyboard layout.",
@@ -88,15 +82,15 @@ PAGES = {
                 [("", "", ["bluetooth.enable", "printing.enable"]),
                  ("Mouse Pointer", "", ["cursor", "cursorSize"])]),
     "Network & Firewall": ("computer", "network-workgroup-symbolic",
-                           "What other devices may reach on this computer, and what it blocks.",
-                           [("Open Ports", "Other devices can connect to this computer on these.",
+                           "What other devices may reach, and what's blocked.",
+                           [("Open Ports", "Other devices can connect on these.",
                              ["firewall.openTCPPorts", "firewall.openUDPPorts"]),
                             ("Ad & Tracker Blocking", "",
                              ["blocklist.enable", "blocklist.extra"]),
-                            ("Remote Login", "Keys that may log in as you while SSH is on (Services).",
+                            ("Remote Login", "Keys that may log in as you over SSH.",
                              ["ssh.authorizedKeys"])]),
     "Services": ("computer", "network-server-symbolic",
-                 "Background services for everyone on this computer.",
+                 "Background services for everyone here.",
                  [("VPN & Remote Access", "", ["mullvad.enable", "mullvad.splitTunnel", "ssh.enable"]),
                   ("Sharing & Streaming", "", ["syncthing.enable", "sunshine.enable", "suwayomi.enable"]),
                   ("Containers & Scanning", "", ["docker.enable", "clamav.enable"])]),
@@ -106,23 +100,22 @@ PAGES = {
     "Displays": ("desktop", "video-display-symbolic",
                  "Monitors, night light and what each screen shows.", []),
     "Input & Connections": ("desktop", "input-keyboard-symbolic",
-                            "The shell's keyboard, mouse, sound, printer and network settings.", []),
+                            "Keyboard, mouse, sound, printers and network.", []),
     "Desktop Shell": ("desktop", "view-app-grid-symbolic",
-                      "The bar, dock, launcher, notifications and widgets.", []),
+                      "Bar, dock, launcher, notifications and widgets.", []),
     "Power & Lock": ("desktop", "system-lock-screen-symbolic",
                      "Idle timers, the lock screen and the power menu.", []),
     "Default Apps": ("personal", "emblem-default-symbolic",
-                     "Which app opens links, text files, terminal programs and folders.",
+                     "Apps for links, text, the terminal and folders.",
                      [("", "", ["defaultApps.browser", "defaultApps.textEditor",
                                 "defaultApps.terminal", "defaultApps.fileManager"])]),
     "Startup": ("startup", "system-run-symbolic",
-                "Variables every program sees, and programs started with the desktop.",
+                "Variables every program sees, and autostart.",
                 [("", "", ["env", "autostart"])]),
     "File Types": ("filetypes", "text-x-generic-symbolic",
-                   "Which app opens one file type, in front of Default Apps.",
+                   "Which app opens one file type.",
                    [("", "", ["mimeTypes"])]),
-    "Browsers": ("apps", "web-browser-symbolic", "Browsers to install. The one that opens links "
-                 "is picked under Default Apps.", None),
+    "Browsers": ("apps", "web-browser-symbolic", "Pick the default under Default Apps.", None),
     "Terminals": ("apps", "utilities-terminal-symbolic", "Terminal emulators to install.", None),
     "Editors": ("apps", "accessories-text-editor-symbolic", "Text and code editors to install.", None),
     "File Browsers": ("apps", "folder-symbolic", "File managers to install.", None),
@@ -135,8 +128,7 @@ PAGES = {
     "System Tools": ("apps", "utilities-system-monitor-symbolic", "Monitoring tools.", None),
     "Android": ("apps", "phone-symbolic", "Phones and tablets.", None),
     "Local": ("apps", "folder-download-symbolic",
-              "Apps run from a prebuilt bundle you put in ~/.local/opt yourself; "
-              "this config only wraps them.",
+              "Prebuilt bundles you put in ~/.local/opt.",
               [("Media", "", ["media.tonkatsuBox"]),
                ("Audio", "", ["audio.katanaFloorboard"]),
                ("Gaming", "", ["gaming.granblueRelinkMods"])]),
@@ -146,7 +138,36 @@ PAGES = {
     "Discord": ("apps", "user-available-symbolic", "Discord and showing what you play.", None),
     "Claude": ("cloudai", "applications-science-symbolic",
                "Anthropic's Claude, signed in with your Claude account.",
-               [("", "", ["claude.enable", "claudeDesktop.enable"])]),
+               [("", "", ["claude.enable", "claudeDesktop.enable", "claudeDesktop.matugen"]),
+                ("Claude Code", "Changes made in Claude Code stay until set here.",
+                 ["claude.model", "claude.effort", "claude.outputStyle", "claude.builtins.agentsMd",
+                  "claude.builtins.agentsMdFiles"]),
+                ("Mods", "", ["claude.mods.ribbon", "claude.mods.skins",
+                              "claude.mods.fileTree", "claude.mods.savvyProgress",
+                              "claude.mods.blastRadius", "claude.mods.replayTheater",
+                              "claude.mods.chatInventory", "claude.mods.screenShare",
+                              "claude.statusLine", "claude.builtins.youShouldKnow"])]),
+    "Claude Tools": ("cloudai", "application-x-addon-symbolic",
+                     "Plugins, MCP servers and claude.ai connectors Claude Code loads.",
+                     [("Plugins", "", [f"claude.plugins.{n}" for n in (
+                         "claudeMdManagement", "skillCreator", "claudeCodeSetup", "claudeSecurity")]),
+                      ("MCP Servers", "Shared with OpenCode.", [f"claude.mcp.{n}" for n in (
+                          "nixos", "context7", "github", "deepwiki", "grep")]),
+                      ("claude.ai Connectors", "One turned off is blocked by name.", [f"claude.connectors.{n}" for n in (
+                           "gmail", "googleCalendar", "googleDrive", "claudeDocs")])]),
+    "Claude Skills": ("cloudai", "view-list-symbolic",
+                      "What Claude sees of each skill and subagent, and the model it runs on.",
+                      [("Repo Skills", "", [f"claude.skills.{n}" for n in (
+                          "addApp", "androidDebloatRedo", "apparmorCheck", "commit", "disablePackage",
+                          "flakeUpdate", "freetubeSync", "gameTroubleshooting", "handoff", "mokuBump",
+                          "onboard", "prReview", "rpgmSetup", "todo", "upstream", "vnSetup")]),
+                       ("Subagents", "", [f"claude.agents.{n}" for n in (
+                           "buildTriager", "docsDriftAuditor", "proseReviewer", "publicRepoAuditor")]),
+                       ("Account Skills", "Synced from your claude.ai account.",
+                        [f"claude.accountSkills.{n}" for n in (
+                            "builtInBrowser", "chromeBrowser", "computerUse", "deepResearch", "docs",
+                            "docx", "googleWorkspace", "importMemory", "mcpBuilder", "morning", "pdf",
+                            "pptx", "xlsx")])]),
     "OpenCode": ("cloudai", "vcs-branch-symbolic",
                  "OpenCode, the coding agent, in the terminal and as a desktop app.",
                  [("", "", ["opencode.enable", "opencodeDesktop.enable"])]),
@@ -156,11 +177,22 @@ PAGES = {
     "Models": ("localai", "applications-engineering-symbolic",
                "The models llama-swap runs on this computer, one at a time.",
                [("Code", "For opencode and Zed's agent panel.", ["localAi.code"]),
-                ("Chat", "For conversation in Open WebUI or llama-swap's Playground, which also "
-                 "list the coding models.", ["localAi.chat"]),
-                ("Inline Suggestions", "Zed's suggestions as you type, run on the CPU so the GPU "
-                 "stays free.", ["localAi.edit"])]),
+                ("Chat", "For Open WebUI and llama-swap's Playground.", ["localAi.chat"]),
+                ("Inline Suggestions", "Zed's suggestions as you type, on the CPU.", ["localAi.edit"])]),
 }
+
+#--- (page, group) shown closed until its heading is clicked, and its heading's icon
+COLLAPSED = {("Claude", "Mods"): "brush",
+             ("Claude Tools", "Plugins"): "extension", ("Claude Tools", "MCP Servers"): "hub",
+             ("Claude Tools", "claude.ai Connectors"): "cable",
+             ("Claude Skills", "Repo Skills"): "construction",
+             ("Claude Skills", "Subagents"): "smart_toy",
+             ("Claude Skills", "Account Skills"): "cloud"}
+
+#--- Settings shown inside another's row, by path prefix: claude.skills.commit's row
+#--- also edits claude.skillModels.commit (pair_up)
+PAIRS = {("claude", "skills"): ("claude", "skillModels"),
+         ("claude", "agents"): ("claude", "agentModels")}
 
 #--- List and none-or-one settings shown as one switch per model, straight in their group
 SWITCH_LISTS = {"localAi.code", "localAi.chat", "localAi.edit"}
@@ -208,6 +240,7 @@ class Setting:
     icon: list = field(default_factory=list)  # icon names or .desktop ids to try
     labels: dict = field(default_factory=dict)  # choice value -> label
     default: object = None  # the template's value
+    pair: object = None  # a second Setting edited in this one's row (PAIRS)
 
 
 @dataclass
@@ -494,3 +527,27 @@ def arrange(pages, links=()):
                                       curated.index(p.title) if p.section != "apps" and p.title in curated
                                       else len(curated),
                                       p.title.casefold()))
+
+
+def flat(pages):
+    """Every setting on `pages`, paired ones included."""
+    for p in pages:
+        for g in p.groups:
+            for s in g.settings:
+                yield s
+                if s.pair:
+                    yield s.pair
+
+
+def pair_up(pages):
+    """Moves each PAIRS partner into its main setting's `pair`, off the page it was on."""
+    pool = {s.path: (s, g) for p in pages for g in p.groups for s in g.settings}
+    for path, (s, _) in list(pool.items()):
+        partner = PAIRS.get(path[:2])
+        if partner and len(path) == 3 and partner + path[2:] in pool:
+            other, group = pool[partner + path[2:]]
+            s.pair = other
+            group.settings.remove(other)
+    for page in pages:
+        page.groups = [g for g in page.groups if g.settings or g.links]
+    return [p for p in pages if p.groups]

@@ -1,0 +1,247 @@
+/* Claude Desktop in matugen's colours: overrides the app's own colour variables.
+   matugen-theme.js loads the rendered file and reloads it on each theme change. */
+
+/* Chat: HSL triples, lightest to darkest from bg-000 in both of the app's modes */
+:root, .darkTheme, :root[data-theme][data-mode] {
+<* if {{ is_dark_mode }} *>
+  --bg-000: {{colors.surface_container_high.default.hex | to_color | format: "hue"}} {{colors.surface_container_high.default.hex | to_color | format: "saturation"}}% {{colors.surface_container_high.default.hex | to_color | format: "lightness"}}% !important;
+  --bg-100: {{colors.surface_container.default.hex | to_color | format: "hue"}} {{colors.surface_container.default.hex | to_color | format: "saturation"}}% {{colors.surface_container.default.hex | to_color | format: "lightness"}}% !important;
+  --bg-200: {{colors.surface_container_low.default.hex | to_color | format: "hue"}} {{colors.surface_container_low.default.hex | to_color | format: "saturation"}}% {{colors.surface_container_low.default.hex | to_color | format: "lightness"}}% !important;
+  --bg-300: {{colors.surface.default.hex | to_color | format: "hue"}} {{colors.surface.default.hex | to_color | format: "saturation"}}% {{colors.surface.default.hex | to_color | format: "lightness"}}% !important;
+  --bg-400: {{colors.surface_container_lowest.default.hex | to_color | format: "hue"}} {{colors.surface_container_lowest.default.hex | to_color | format: "saturation"}}% {{colors.surface_container_lowest.default.hex | to_color | format: "lightness"}}% !important;
+  --bg-500: {{colors.surface_container_lowest.default.hex | to_color | format: "hue"}} {{colors.surface_container_lowest.default.hex | to_color | format: "saturation"}}% {{colors.surface_container_lowest.default.hex | to_color | format: "lightness"}}% !important;
+<* else *>
+  --bg-000: {{colors.surface_container_lowest.default.hex | to_color | format: "hue"}} {{colors.surface_container_lowest.default.hex | to_color | format: "saturation"}}% {{colors.surface_container_lowest.default.hex | to_color | format: "lightness"}}% !important;
+  --bg-100: {{colors.surface_container_low.default.hex | to_color | format: "hue"}} {{colors.surface_container_low.default.hex | to_color | format: "saturation"}}% {{colors.surface_container_low.default.hex | to_color | format: "lightness"}}% !important;
+  --bg-200: {{colors.surface_container.default.hex | to_color | format: "hue"}} {{colors.surface_container.default.hex | to_color | format: "saturation"}}% {{colors.surface_container.default.hex | to_color | format: "lightness"}}% !important;
+  --bg-300: {{colors.surface_container_high.default.hex | to_color | format: "hue"}} {{colors.surface_container_high.default.hex | to_color | format: "saturation"}}% {{colors.surface_container_high.default.hex | to_color | format: "lightness"}}% !important;
+  --bg-400: {{colors.surface_container_highest.default.hex | to_color | format: "hue"}} {{colors.surface_container_highest.default.hex | to_color | format: "saturation"}}% {{colors.surface_container_highest.default.hex | to_color | format: "lightness"}}% !important;
+  --bg-500: {{colors.surface_container_highest.default.hex | to_color | format: "hue"}} {{colors.surface_container_highest.default.hex | to_color | format: "saturation"}}% {{colors.surface_container_highest.default.hex | to_color | format: "lightness"}}% !important;
+<* endif *>
+  --text-000: {{colors.on_surface.default.hex | to_color | format: "hue"}} {{colors.on_surface.default.hex | to_color | format: "saturation"}}% {{colors.on_surface.default.hex | to_color | format: "lightness"}}% !important;
+  --text-100: {{colors.on_surface.default.hex | to_color | format: "hue"}} {{colors.on_surface.default.hex | to_color | format: "saturation"}}% {{colors.on_surface.default.hex | to_color | format: "lightness"}}% !important;
+  --text-200: {{colors.on_surface_variant.default.hex | to_color | format: "hue"}} {{colors.on_surface_variant.default.hex | to_color | format: "saturation"}}% {{colors.on_surface_variant.default.hex | to_color | format: "lightness"}}% !important;
+  --text-300: {{colors.on_surface_variant.default.hex | to_color | format: "hue"}} {{colors.on_surface_variant.default.hex | to_color | format: "saturation"}}% {{colors.on_surface_variant.default.hex | to_color | format: "lightness"}}% !important;
+  --text-400: {{colors.outline.default.hex | to_color | format: "hue"}} {{colors.outline.default.hex | to_color | format: "saturation"}}% {{colors.outline.default.hex | to_color | format: "lightness"}}% !important;
+  --text-500: {{colors.outline.default.hex | to_color | format: "hue"}} {{colors.outline.default.hex | to_color | format: "saturation"}}% {{colors.outline.default.hex | to_color | format: "lightness"}}% !important;
+  --border-100: {{colors.on_surface_variant.default.hex | to_color | format: "hue"}} {{colors.on_surface_variant.default.hex | to_color | format: "saturation"}}% {{colors.on_surface_variant.default.hex | to_color | format: "lightness"}}% !important;
+  --border-200: {{colors.on_surface_variant.default.hex | to_color | format: "hue"}} {{colors.on_surface_variant.default.hex | to_color | format: "saturation"}}% {{colors.on_surface_variant.default.hex | to_color | format: "lightness"}}% !important;
+  --border-300: {{colors.on_surface_variant.default.hex | to_color | format: "hue"}} {{colors.on_surface_variant.default.hex | to_color | format: "saturation"}}% {{colors.on_surface_variant.default.hex | to_color | format: "lightness"}}% !important;
+  --border-400: {{colors.on_surface_variant.default.hex | to_color | format: "hue"}} {{colors.on_surface_variant.default.hex | to_color | format: "saturation"}}% {{colors.on_surface_variant.default.hex | to_color | format: "lightness"}}% !important;
+  --accent-brand: {{colors.primary.default.hex | to_color | format: "hue"}} {{colors.primary.default.hex | to_color | format: "saturation"}}% {{colors.primary.default.hex | to_color | format: "lightness"}}% !important;
+  --brand-000: {{colors.primary.default.hex | to_color | format: "hue"}} {{colors.primary.default.hex | to_color | format: "saturation"}}% {{colors.primary.default.hex | to_color | format: "lightness"}}% !important;
+  --brand-100: {{colors.primary.default.hex | to_color | format: "hue"}} {{colors.primary.default.hex | to_color | format: "saturation"}}% {{colors.primary.default.hex | to_color | format: "lightness"}}% !important;
+  --brand-200: {{colors.primary.default.hex | to_color | format: "hue"}} {{colors.primary.default.hex | to_color | format: "saturation"}}% {{colors.primary.default.hex | to_color | format: "lightness"}}% !important;
+  --accent-000: {{colors.primary.default.hex | to_color | format: "hue"}} {{colors.primary.default.hex | to_color | format: "saturation"}}% {{colors.primary.default.hex | to_color | format: "lightness"}}% !important;
+  --accent-100: {{colors.primary.default.hex | to_color | format: "hue"}} {{colors.primary.default.hex | to_color | format: "saturation"}}% {{colors.primary.default.hex | to_color | format: "lightness"}}% !important;
+  --accent-200: {{colors.primary.default.hex | to_color | format: "hue"}} {{colors.primary.default.hex | to_color | format: "saturation"}}% {{colors.primary.default.hex | to_color | format: "lightness"}}% !important;
+  --accent-900: {{colors.primary_container.default.hex | to_color | format: "hue"}} {{colors.primary_container.default.hex | to_color | format: "saturation"}}% {{colors.primary_container.default.hex | to_color | format: "lightness"}}% !important;
+  --accent-pro-000: {{colors.tertiary.default.hex | to_color | format: "hue"}} {{colors.tertiary.default.hex | to_color | format: "saturation"}}% {{colors.tertiary.default.hex | to_color | format: "lightness"}}% !important;
+  --accent-pro-100: {{colors.tertiary.default.hex | to_color | format: "hue"}} {{colors.tertiary.default.hex | to_color | format: "saturation"}}% {{colors.tertiary.default.hex | to_color | format: "lightness"}}% !important;
+  --accent-pro-200: {{colors.tertiary.default.hex | to_color | format: "hue"}} {{colors.tertiary.default.hex | to_color | format: "saturation"}}% {{colors.tertiary.default.hex | to_color | format: "lightness"}}% !important;
+  --accent-pro-900: {{colors.tertiary_container.default.hex | to_color | format: "hue"}} {{colors.tertiary_container.default.hex | to_color | format: "saturation"}}% {{colors.tertiary_container.default.hex | to_color | format: "lightness"}}% !important;
+  --oncolor-100: {{colors.on_primary.default.hex | to_color | format: "hue"}} {{colors.on_primary.default.hex | to_color | format: "saturation"}}% {{colors.on_primary.default.hex | to_color | format: "lightness"}}% !important;
+  --oncolor-200: {{colors.on_primary.default.hex | to_color | format: "hue"}} {{colors.on_primary.default.hex | to_color | format: "saturation"}}% {{colors.on_primary.default.hex | to_color | format: "lightness"}}% !important;
+  --oncolor-300: {{colors.on_primary.default.hex | to_color | format: "hue"}} {{colors.on_primary.default.hex | to_color | format: "saturation"}}% {{colors.on_primary.default.hex | to_color | format: "lightness"}}% !important;
+  --danger-000: {{colors.error.default.hex | to_color | format: "hue"}} {{colors.error.default.hex | to_color | format: "saturation"}}% {{colors.error.default.hex | to_color | format: "lightness"}}% !important;
+  --danger-100: {{colors.error.default.hex | to_color | format: "hue"}} {{colors.error.default.hex | to_color | format: "saturation"}}% {{colors.error.default.hex | to_color | format: "lightness"}}% !important;
+  --danger-200: {{colors.error.default.hex | to_color | format: "hue"}} {{colors.error.default.hex | to_color | format: "saturation"}}% {{colors.error.default.hex | to_color | format: "lightness"}}% !important;
+  --danger-900: {{colors.error_container.default.hex | to_color | format: "hue"}} {{colors.error_container.default.hex | to_color | format: "saturation"}}% {{colors.error_container.default.hex | to_color | format: "lightness"}}% !important;
+  --success-000: {{dank16.color2.default.hex | to_color | format: "hue"}} {{dank16.color2.default.hex | to_color | format: "saturation"}}% {{dank16.color2.default.hex | to_color | format: "lightness"}}% !important;
+  --success-100: {{dank16.color2.default.hex | to_color | format: "hue"}} {{dank16.color2.default.hex | to_color | format: "saturation"}}% {{dank16.color2.default.hex | to_color | format: "lightness"}}% !important;
+  --success-200: {{dank16.color2.default.hex | to_color | format: "hue"}} {{dank16.color2.default.hex | to_color | format: "saturation"}}% {{dank16.color2.default.hex | to_color | format: "lightness"}}% !important;
+  --warning-000: {{dank16.color3.default.hex | to_color | format: "hue"}} {{dank16.color3.default.hex | to_color | format: "saturation"}}% {{dank16.color3.default.hex | to_color | format: "lightness"}}% !important;
+  --warning-100: {{dank16.color3.default.hex | to_color | format: "hue"}} {{dank16.color3.default.hex | to_color | format: "saturation"}}% {{dank16.color3.default.hex | to_color | format: "lightness"}}% !important;
+  --warning-200: {{dank16.color3.default.hex | to_color | format: "hue"}} {{dank16.color3.default.hex | to_color | format: "saturation"}}% {{dank16.color3.default.hex | to_color | format: "lightness"}}% !important;
+}
+
+/* Code tab: the neutral ramp runs from the page colour (0) to the text colour (900) */
+/* [class*="cds-"]: some component roots redefine these after .cds-root */
+.cds-root, [class*="cds-"] {
+<* if {{ is_dark_mode }} *>
+  --cds-surface-0: {{colors.surface.default.hex}} !important;
+  --cds-surface-1: {{colors.surface_container_low.default.hex}} !important;
+  --cds-surface-2: {{colors.surface_container.default.hex}} !important;
+  --cds-surface-3: {{colors.surface_container_high.default.hex}} !important;
+<* else *>
+  --cds-surface-0: {{colors.surface_container_low.default.hex}} !important;
+  --cds-surface-1: {{colors.surface.default.hex}} !important;
+  --cds-surface-2: {{colors.surface_container_lowest.default.hex}} !important;
+  --cds-surface-3: {{colors.surface_container_lowest.default.hex}} !important;
+<* endif *>
+  --m-bg: {{colors.surface_container_lowest.default.hex}};
+  --m-fg: {{colors.on_surface.default.hex}};
+  --cds-neutral-0: var(--m-bg) !important;
+  --cds-neutral-10: color-mix(in oklab, var(--m-fg) 1.11%, var(--m-bg)) !important;
+  --cds-neutral-20: color-mix(in oklab, var(--m-fg) 2.22%, var(--m-bg)) !important;
+  --cds-neutral-30: color-mix(in oklab, var(--m-fg) 3.33%, var(--m-bg)) !important;
+  --cds-neutral-40: color-mix(in oklab, var(--m-fg) 4.44%, var(--m-bg)) !important;
+  --cds-neutral-50: color-mix(in oklab, var(--m-fg) 5.56%, var(--m-bg)) !important;
+  --cds-neutral-60: color-mix(in oklab, var(--m-fg) 6.67%, var(--m-bg)) !important;
+  --cds-neutral-70: color-mix(in oklab, var(--m-fg) 7.78%, var(--m-bg)) !important;
+  --cds-neutral-80: color-mix(in oklab, var(--m-fg) 8.89%, var(--m-bg)) !important;
+  --cds-neutral-90: color-mix(in oklab, var(--m-fg) 10%, var(--m-bg)) !important;
+  --cds-neutral-100: color-mix(in oklab, var(--m-fg) 11.11%, var(--m-bg)) !important;
+  --cds-neutral-150: color-mix(in oklab, var(--m-fg) 16.67%, var(--m-bg)) !important;
+  --cds-neutral-200: color-mix(in oklab, var(--m-fg) 22.22%, var(--m-bg)) !important;
+  --cds-neutral-250: color-mix(in oklab, var(--m-fg) 27.78%, var(--m-bg)) !important;
+  --cds-neutral-300: color-mix(in oklab, var(--m-fg) 33.33%, var(--m-bg)) !important;
+  --cds-neutral-350: color-mix(in oklab, var(--m-fg) 38.89%, var(--m-bg)) !important;
+  --cds-neutral-400: color-mix(in oklab, var(--m-fg) 44.44%, var(--m-bg)) !important;
+  --cds-neutral-450: color-mix(in oklab, var(--m-fg) 50%, var(--m-bg)) !important;
+  --cds-neutral-500: color-mix(in oklab, var(--m-fg) 55.56%, var(--m-bg)) !important;
+  --cds-neutral-550: color-mix(in oklab, var(--m-fg) 61.11%, var(--m-bg)) !important;
+  --cds-neutral-600: color-mix(in oklab, var(--m-fg) 66.67%, var(--m-bg)) !important;
+  --cds-neutral-650: color-mix(in oklab, var(--m-fg) 72.22%, var(--m-bg)) !important;
+  --cds-neutral-700: color-mix(in oklab, var(--m-fg) 77.78%, var(--m-bg)) !important;
+  --cds-neutral-750: color-mix(in oklab, var(--m-fg) 83.33%, var(--m-bg)) !important;
+  --cds-neutral-800: color-mix(in oklab, var(--m-fg) 88.89%, var(--m-bg)) !important;
+  --cds-neutral-810: color-mix(in oklab, var(--m-fg) 90%, var(--m-bg)) !important;
+  --cds-neutral-820: color-mix(in oklab, var(--m-fg) 91.11%, var(--m-bg)) !important;
+  --cds-neutral-830: color-mix(in oklab, var(--m-fg) 92.22%, var(--m-bg)) !important;
+  --cds-neutral-840: color-mix(in oklab, var(--m-fg) 93.33%, var(--m-bg)) !important;
+  --cds-neutral-850: color-mix(in oklab, var(--m-fg) 94.44%, var(--m-bg)) !important;
+  --cds-neutral-860: color-mix(in oklab, var(--m-fg) 95.56%, var(--m-bg)) !important;
+  --cds-neutral-870: color-mix(in oklab, var(--m-fg) 96.67%, var(--m-bg)) !important;
+  --cds-neutral-880: color-mix(in oklab, var(--m-fg) 97.78%, var(--m-bg)) !important;
+  --cds-neutral-890: color-mix(in oklab, var(--m-fg) 98.89%, var(--m-bg)) !important;
+  --cds-neutral-900: var(--m-fg) !important;
+  --cds-page-bg: {{colors.surface.default.hex}} !important;
+  --cds-text-primary: {{colors.on_surface.default.hex}} !important;
+  --cds-text-secondary: {{colors.on_surface_variant.default.hex}} !important;
+  --cds-text-muted: {{colors.outline.default.hex}} !important;
+  --cds-text-accent: {{colors.primary.default.hex}} !important;
+  --cds-bg-accent: {{colors.primary_container.default.hex}} !important;
+  --cds-border-accent: {{colors.primary.default.hex}} !important;
+  --cds-role-accent-fill: {{colors.primary.default.hex}} !important;
+  --cds-role-accent-fill-hover: color-mix(in oklab, {{colors.primary.default.hex}} 85%, var(--m-fg)) !important;
+  --cds-role-accent-on: {{colors.on_primary.default.hex}} !important;
+  --cds-clay: {{colors.primary.default.hex}} !important;
+  --cds-clay-emphasized: {{colors.primary.default.hex}} !important;
+  --cds-on-brand: {{colors.on_primary.default.hex}} !important;
+  --cds-radio-group-card-selected: {{colors.primary_container.default.hex}} !important;
+  --cds-text-danger: {{colors.error.default.hex}} !important;
+  --cds-bg-danger: {{colors.error_container.default.hex}} !important;
+  --cds-border-danger: {{colors.error.default.hex}} !important;
+  --cds-role-danger-fill: {{colors.error.default.hex}} !important;
+  --cds-role-danger-on: {{colors.on_error.default.hex}} !important;
+  --cds-text-success: {{dank16.color2.default.hex}} !important;
+  --cds-bg-success: color-mix(in oklab, {{dank16.color2.default.hex}} 20%, var(--m-bg)) !important;
+  --cds-border-success: {{dank16.color2.default.hex}} !important;
+  --cds-role-success-fill: {{dank16.color2.default.hex}} !important;
+  --cds-text-warning: {{dank16.color3.default.hex}} !important;
+  --cds-bg-warning: color-mix(in oklab, {{dank16.color3.default.hex}} 20%, var(--m-bg)) !important;
+  --cds-border-warning: {{dank16.color3.default.hex}} !important;
+}
+
+/* Your message's bubble, which the app sets per element from its own accent picker */
+.cds-root [class*="--cds-bg-user-message"] {
+  --cds-bg-user-message: color-mix(in oklab, {{colors.primary.default.hex}} 15%, transparent) !important;
+}
+
+/* Sidebar, main pane and the transcript's box behind the chat bar; nested elements
+   set these themselves, hence *. The pane uses background, as the terminals do */
+* {
+<* if {{ is_dark_mode }} *>
+  --df-web-sidebar-bg: {{colors.surface_container_lowest.default.hex}} !important;
+  --df-sidebar-bg: {{colors.surface_container_lowest.default.hex}} !important;
+<* else *>
+  --df-web-sidebar-bg: {{colors.surface_container.default.hex}} !important;
+  --df-sidebar-bg: {{colors.surface_container.default.hex}} !important;
+<* endif *>
+  --epitaxy-transcript-surface: {{colors.background.default.hex}} !important;
+  --df-bg-page-hsl: {{colors.background.default.hex | to_color | format: "hue"}} {{colors.background.default.hex | to_color | format: "saturation"}}% {{colors.background.default.hex | to_color | format: "lightness"}}% !important;
+}
+
+/* The app's raw gray scale and frame depths: its own lightness steps, in the
+   theme's hue */
+:root {
+  --cds-gray-0: {{colors.surface_variant.default.hex | to_color | set_lightness: 100.0 | format: "hex"}} !important;
+  --cds-hsl-gray-0: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 100.0% !important;
+  --cds-gray-10: {{colors.surface_variant.default.hex | to_color | set_lightness: 98.6 | format: "hex"}} !important;
+  --cds-hsl-gray-10: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 98.6% !important;
+  --cds-gray-20: {{colors.surface_variant.default.hex | to_color | set_lightness: 97.3 | format: "hex"}} !important;
+  --cds-hsl-gray-20: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 97.3% !important;
+  --cds-gray-30: {{colors.surface_variant.default.hex | to_color | set_lightness: 96.1 | format: "hex"}} !important;
+  --cds-hsl-gray-30: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 96.1% !important;
+  --cds-gray-40: {{colors.surface_variant.default.hex | to_color | set_lightness: 94.7 | format: "hex"}} !important;
+  --cds-hsl-gray-40: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 94.7% !important;
+  --cds-gray-50: {{colors.surface_variant.default.hex | to_color | set_lightness: 93.3 | format: "hex"}} !important;
+  --cds-hsl-gray-50: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 93.3% !important;
+  --cds-gray-60: {{colors.surface_variant.default.hex | to_color | set_lightness: 92.0 | format: "hex"}} !important;
+  --cds-hsl-gray-60: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 92.0% !important;
+  --cds-gray-70: {{colors.surface_variant.default.hex | to_color | set_lightness: 90.6 | format: "hex"}} !important;
+  --cds-hsl-gray-70: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 90.6% !important;
+  --cds-gray-80: {{colors.surface_variant.default.hex | to_color | set_lightness: 89.4 | format: "hex"}} !important;
+  --cds-hsl-gray-80: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 89.4% !important;
+  --cds-gray-90: {{colors.surface_variant.default.hex | to_color | set_lightness: 88.0 | format: "hex"}} !important;
+  --cds-hsl-gray-90: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 88.0% !important;
+  --cds-gray-100: {{colors.surface_variant.default.hex | to_color | set_lightness: 86.7 | format: "hex"}} !important;
+  --cds-hsl-gray-100: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 86.7% !important;
+  --cds-gray-150: {{colors.surface_variant.default.hex | to_color | set_lightness: 80.2 | format: "hex"}} !important;
+  --cds-hsl-gray-150: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 80.2% !important;
+  --cds-gray-200: {{colors.surface_variant.default.hex | to_color | set_lightness: 74.1 | format: "hex"}} !important;
+  --cds-hsl-gray-200: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 74.1% !important;
+  --cds-gray-250: {{colors.surface_variant.default.hex | to_color | set_lightness: 68.2 | format: "hex"}} !important;
+  --cds-hsl-gray-250: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 68.2% !important;
+  --cds-gray-300: {{colors.surface_variant.default.hex | to_color | set_lightness: 62.5 | format: "hex"}} !important;
+  --cds-hsl-gray-300: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 62.5% !important;
+  --cds-gray-350: {{colors.surface_variant.default.hex | to_color | set_lightness: 57.3 | format: "hex"}} !important;
+  --cds-hsl-gray-350: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 57.3% !important;
+  --cds-gray-400: {{colors.surface_variant.default.hex | to_color | set_lightness: 52.2 | format: "hex"}} !important;
+  --cds-hsl-gray-400: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 52.2% !important;
+  --cds-gray-450: {{colors.surface_variant.default.hex | to_color | set_lightness: 46.9 | format: "hex"}} !important;
+  --cds-hsl-gray-450: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 46.9% !important;
+  --cds-gray-500: {{colors.surface_variant.default.hex | to_color | set_lightness: 41.6 | format: "hex"}} !important;
+  --cds-hsl-gray-500: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 41.6% !important;
+  --cds-gray-550: {{colors.surface_variant.default.hex | to_color | set_lightness: 36.3 | format: "hex"}} !important;
+  --cds-hsl-gray-550: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 36.3% !important;
+  --cds-gray-600: {{colors.surface_variant.default.hex | to_color | set_lightness: 31.4 | format: "hex"}} !important;
+  --cds-hsl-gray-600: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 31.4% !important;
+  --cds-gray-650: {{colors.surface_variant.default.hex | to_color | set_lightness: 26.5 | format: "hex"}} !important;
+  --cds-hsl-gray-650: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 26.5% !important;
+  --cds-gray-700: {{colors.surface_variant.default.hex | to_color | set_lightness: 21.4 | format: "hex"}} !important;
+  --cds-hsl-gray-700: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 21.4% !important;
+  --cds-gray-750: {{colors.surface_variant.default.hex | to_color | set_lightness: 16.9 | format: "hex"}} !important;
+  --cds-hsl-gray-750: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 16.9% !important;
+  --cds-gray-800: {{colors.surface_variant.default.hex | to_color | set_lightness: 12.4 | format: "hex"}} !important;
+  --cds-hsl-gray-800: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 12.4% !important;
+  --cds-gray-810: {{colors.surface_variant.default.hex | to_color | set_lightness: 11.6 | format: "hex"}} !important;
+  --cds-hsl-gray-810: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 11.6% !important;
+  --cds-gray-820: {{colors.surface_variant.default.hex | to_color | set_lightness: 10.8 | format: "hex"}} !important;
+  --cds-hsl-gray-820: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 10.8% !important;
+  --cds-gray-830: {{colors.surface_variant.default.hex | to_color | set_lightness: 10.0 | format: "hex"}} !important;
+  --cds-hsl-gray-830: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 10.0% !important;
+  --cds-gray-840: {{colors.surface_variant.default.hex | to_color | set_lightness: 9.2 | format: "hex"}} !important;
+  --cds-hsl-gray-840: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 9.2% !important;
+  --cds-gray-850: {{colors.surface_variant.default.hex | to_color | set_lightness: 8.2 | format: "hex"}} !important;
+  --cds-hsl-gray-850: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 8.2% !important;
+  --cds-gray-860: {{colors.surface_variant.default.hex | to_color | set_lightness: 7.5 | format: "hex"}} !important;
+  --cds-hsl-gray-860: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 7.5% !important;
+  --cds-gray-870: {{colors.surface_variant.default.hex | to_color | set_lightness: 6.7 | format: "hex"}} !important;
+  --cds-hsl-gray-870: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 6.7% !important;
+  --cds-gray-880: {{colors.surface_variant.default.hex | to_color | set_lightness: 5.9 | format: "hex"}} !important;
+  --cds-hsl-gray-880: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 5.9% !important;
+  --cds-gray-890: {{colors.surface_variant.default.hex | to_color | set_lightness: 5.1 | format: "hex"}} !important;
+  --cds-hsl-gray-890: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 5.1% !important;
+  --cds-gray-900: {{colors.surface_variant.default.hex | to_color | set_lightness: 4.3 | format: "hex"}} !important;
+  --cds-hsl-gray-900: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 4.3% !important;
+}
+.dframe-root {
+  --df-z0: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 100% !important;
+  --df-z1: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 96.1% !important;
+  --df-z2: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 92.2% !important;
+  --df-z3: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 87.8% !important;
+  --df-z4: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 83.9% !important;
+  --df-z5: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 60% !important;
+  --df-z6: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 45.1% !important;
+}
+[data-mode=dark] .dframe-root {
+  --df-z0: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 3.9% !important;
+  --df-z1: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 10.2% !important;
+  --df-z2: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 14.9% !important;
+  --df-z3: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 20% !important;
+  --df-z4: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 23.9% !important;
+  --df-z5: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 32.2% !important;
+  --df-z6: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 65.1% !important;
+}

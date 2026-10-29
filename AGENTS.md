@@ -87,7 +87,7 @@ Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
 10. **No memory files.** If something is worth remembering, propose the line for
     CLAUDE.md or this file and let the user decide.
 11. **`rm` takes literal absolute paths**, one deletion per command, never `$VAR`.
-12. **Do not make any changes until you have 95% confidence in what you need to build.** Ask me follow-up questions until you reach that confidence.
+12. **Do not make any changes until you have 95% confidence in what you need to build.** Ask me follow-up questions until you reach that confidence. For work across several files or modules, write out the plan and get it approved before editing.
 
 ## Starting a task
 
@@ -279,9 +279,33 @@ lines, `grep -n` that file for the part you need.
   to a binary Nix builds also run (unzip, tar). Run `apparmor-check` after.
 - `services/ssh.nix` owns sshd and fail2ban; key-only auth, and an assertion
   fails the build if no user lists a key.
+- A NixOS module that configures every user's home writes
+  `home-manager.users = lib.mapAttrs (_: _: {...}) machine.users;`, never
+  `home-manager.sharedModules` (it reorders list options).
+- A new unconditional overlay goes in `nix/nixpkgs.nix`. `allowBroken` is on, so
+  only a build shows a broken package.
+
+**`modules/home/`**
+
+- Home routers take `user` as a plain first argument
+  (`user: {lib, ...}: {...}`, imported with `(import ./gaming user)`). Don't
+  switch them to `lib.modules.importApply`: it reorders the home modules.
+- Keep the `clearStaleBackups` activation hook in `default.nix`; on a "file
+  exists" error, find the real conflicting file.
+- `claudeDesktop.matugen` patches `app.asar` to load `matugen-theme.js` after the
+  `"use strict";` in `index.pre.js`; the template overrides only the app's colour
+  variables (`--bg-*`, `--text-*`, `--cds-*`). Details: `programs/ai/CLAUDE.md`.
+
+**`lib/`**
+
+- `settings.nix` fills every setting missing from a settings file with the
+  template's value (true/false turned off) and stops eval on a bad one.
+- Default apps are chosen in `default-apps.nix` (`mimeapps.list` is forced),
+  local models in `local-models.nix`.
 
 **`modules/home/programs/system/omni-settings/`** (a QML app, DMS panel and
-window, over a Python backend)
+window, over a Python backend; full notes split across its `CLAUDE.md`,
+`qml/CLAUDE.md` and `src/CLAUDE.md`)
 
 - It builds its pages from the `_template/settings.nix` layout (`#--` sections,
   `#---` headers, trailing comments), so keep that layout when adding a setting.
@@ -315,7 +339,15 @@ window, over a Python backend)
   `gesturePolicy: TapHandler.ReleaseWithinBounds`. JSON sent back from QML
   loses `.0` and can have its keys sorted, so write files from data the
   backend read; a `Repeater` delegate's `modelData` is a copy, so edit the
-  source list by index.
+  source list by index. What a dropdown opens goes in a `Reveal`
+  (`Reveal.qml`), and Loaders inside it gate on its `shown`.
+- Keep the interface clean: rows, cards, headings and page headers show the
+  name only. What it is shows on hovering the name (`TitleTip.qml`; a
+  setting's `text`, under ~200 characters); cautions behind a yellow triangle
+  `Hint`. Live alerts stay
+  as yellow text (`alert`), status values show large (`value`), and names keep
+  full width. Switches have no dropdown; no dropdown holds text alone. Every
+  icon button has a `tip`.
 
 **`modules/home/programs/media/freetube/`**
 
@@ -330,6 +362,11 @@ window, over a Python backend)
   secret goes in it. Its Bash allow rules stay read-only.
 - MCP API keys are read at launch from `~/.nixos-config-mcp/`, never written into
   the repo or the store.
+- A new skill or subagent also needs its `claude.skills`/`claude.agents` and model
+  lines in `users/_template/settings.nix`, a row on Omni Settings' Claude Skills
+  page (`schema.py`) and a `descriptions.json` title.
+- `~/.claude/settings.json` stays writable: `claude.nix` merges its settings in
+  with `lib/mutable-merge.jq`, never through `programs.claude-code.settings`.
 - In opencode the GitHub MCP is off (its tool list fills too much context); Zed's
   agent still has it. Without it, for upstream releases, issues and files use `gh`
   read-only: `gh release list -R
@@ -364,6 +401,7 @@ steps.
 | `onboard` | The machine or user has no `CLAUDE.md`, or a person updates theirs |
 | `upstream` | In a fork: sync from upstream, or send a change upstream as a PR |
 | `todo` | "Add X to the todo", or work a `docs/todo/` file tracks is done |
+| `handoff` | Wrapping up for a fresh session, or "continue" with a note in `.claude/handoffs/` |
 | `flake-update` | Only when the user runs `/flake-update`; never on your own |
 
 - `<skill-dir>` is `modules/home/programs/ai/skills/<name>`.
@@ -401,6 +439,9 @@ Every module opens with a banner; copy it byte for byte from a neighbour:
 For replies, `README.md`, `docs/` and commit messages.
 
 - Lead with the answer. No praise, no exclamation marks, no restating the request.
+- Chat replies: number multi-step tasks, bold the one line not to miss, end
+  with the single next step. Group lists over five items under headings; cut
+  nothing.
 - Full sentences of varied length. Not "it's not X, it's Y"; no lists padded to
   three; don't rate what you describe.
 - Avoid: delve, robust, seamless, leverage, crucial, ensure, comprehensive,

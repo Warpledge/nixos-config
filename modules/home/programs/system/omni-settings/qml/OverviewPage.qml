@@ -1,4 +1,4 @@
-// The Overview: what this computer runs, updates, maintenance and earlier versions
+// The Maintenance page (id "overview"): updates, freeing space and earlier versions
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
@@ -63,38 +63,12 @@ ColumnLayout {
         }
     }
 
-    //--- Whether a job may start now; says why not
-    function canStart() {
-        if (!view.info.canApply || !admin)
-            return false
-        if (view.pendingCount) {
-            view.say("Apply or discard your changes first")
-            return false
-        }
-        if (Jobs.running) {
-            view.say("Another job is running; wait for it to finish")
-            return false
-        }
-        return true
-    }
+    function canStart() { return view.canStart() }
 
     function restart() {
         view.ask({ heading: "Restart now?", body: "Save your work in other apps first.",
                    buttons: [{ label: "Restart", value: "restart" }] },
                  () => Quickshell.execDetached(["systemctl", "reboot"]))
-    }
-
-    function rebuild() {
-        if (!canStart())
-            return
-        view.ask({
-            heading: "Rebuild now?",
-            body: "Rebuilds from your settings files as they are (nixos-rebuild switch). At Next "
-                  + "Restart uses nixos-rebuild boot; Preview only builds and shows what would change.",
-            buttons: [{ label: "Preview", value: "build", quiet: true },
-                      { label: "At Next Restart", value: "boot", quiet: true },
-                      { label: "Rebuild Now", value: "switch" }]
-        }, mode => view.startJob("rebuild", { mode }))
     }
 
     function collect() {
@@ -235,59 +209,26 @@ ColumnLayout {
         Layout.margins: 6
     }
 
-    //--- Hero
-    Rectangle {
-        visible: !!page.ov
-        Layout.fillWidth: true
-        implicitHeight: hero.implicitHeight + 28
-        radius: 16
-        color: Theme.card
-        RowLayout {
-            id: hero
-            anchors.fill: parent
-            anchors.margins: 14
-            spacing: 14
-            Badge {
-                implicitWidth: 64
-                implicitHeight: 64
-                radius: 32
-                icon: "ac_unit"
-                app: ["distributor-logo-nixos", "nix-snowflake"]
-            }
-            ColumnLayout {
-                spacing: 4
-                Layout.fillWidth: true
-                Text {
-                    text: page.ov ? page.ov.hostname : ""
-                    color: Theme.text
-                    font.pixelSize: 24
-                    font.weight: Font.Bold
-                }
-                Text { text: page.ov ? page.ov.pretty : ""; color: Theme.dim }
-                Flow {
-                    Layout.fillWidth: true
-                    spacing: 6
-                    Chip { tappable: false; text: page.view.info.wm; accent: true }
-                    Chip { tappable: false; text: page.ov ? `Linux ${page.ov.kernel}` : "" }
-                    Chip {
-                        tappable: false
-                        visible: !!page.ov && page.ov.generation > 0
-                        text: page.ov ? `Version ${page.ov.generation}` : ""
-                    }
-                }
-            }
-        }
-    }
-
     //--- Waiting for a restart
     ListRow {
         visible: !!page.ov && (page.ov.pending > 0 || page.ov.newKernel !== "")
         icon: "restart_alt"
         title: page.ov && page.ov.pending ? "Restart to finish" : "Restart to use the new kernel"
-        subtitle: !page.ov ? "" : page.ov.pending ? `Version ${page.ov.pending} starts the next time you restart.`
-                                                  : `Linux ${page.ov.newKernel} is installed.`
+        alert: !page.ov ? "" : page.ov.pending ? `Version ${page.ov.pending} starts the next time you restart.`
+                                               : `Linux ${page.ov.newKernel} is installed.`
         button: "Restart"
         onClicked: page.restart()
+    }
+    ListRow {
+        visible: !!page.ov && !!page.ov.lastFailed
+        icon: "warning"
+        tone: "error"
+        title: "Last Failed Run"
+        alert: page.ov && page.ov.lastFailed
+            ? `${page.ov.lastFailed.title}, ${Fmt.when(page.ov.lastFailed.when).toLowerCase()}: ${page.ov.lastFailed.heading}`
+            : ""
+        chevron: true
+        onClicked: page.view.sheet = failedSheet
     }
 
     //--- Updates
@@ -296,7 +237,7 @@ ColumnLayout {
         visible: !!page.ov && page.behind > 0
         icon: "download"
         title: "Config"
-        subtitle: `${page.behind} new commit${page.behind === 1 ? "" : "s"} to pull into the config`
+        alert: `${page.behind} new commit${page.behind === 1 ? "" : "s"} to pull into the config`
         tone: "caution"
         button: page.admin ? "Pull" : ""
         onClicked: if (page.admin) page.pull()
@@ -305,22 +246,17 @@ ColumnLayout {
         visible: !!page.ov
         icon: page.checking ? "progress_activity" : "update"
         title: "Sources"
-        subtitle: !page.ov ? ""
-            : page.checking ? "Looking up the newest version of each source; this takes about half a minute."
-            : page.updateError ? `Couldn't check: ${page.updateError}`
-            : !page.updates ? `Flake inputs, locked ${Fmt.day(page.ov.updated)} (${Fmt.ago(page.ov.updated)})`
-            : !page.updates.changes.length ? `Up to date. Sources from ${Fmt.day(page.ov.updated)}.`
-            : `${page.updates.changes.length} of this config's sources have newer versions, up to `
-              + Fmt.day(Math.max(...page.updates.changes.map(c => c.new))) + "."
+        info: page.ov ? "The flake inputs this config is built from, such as nixpkgs. Locked "
+                        + `${Fmt.day(page.ov.updated)} (${Fmt.ago(page.ov.updated)}).` : ""
+        caution: page.admin ? "" : "Only an admin can update this computer"
+        value: !page.ov ? ""
+            : page.checking ? "Checking…"
+            : !page.updates ? Fmt.day(page.ov.updated)
+            : !page.updates.changes.length ? "Up to date"
+            : `${page.updates.changes.length} newer`
+        alert: page.updateError ? `Couldn't check: ${page.updateError}` : ""
         button: page.checking || !page.admin ? "" : page.updates ? "Check Again" : "Check"
         onClicked: if (!page.checking && page.admin) page.check()
-    }
-    Text {
-        visible: !!page.ov && !page.admin
-        text: "Only an admin can update this computer."
-        color: Theme.dim
-        font.pixelSize: 13
-        Layout.leftMargin: 6
     }
     Repeater {
         model: page.updates ? page.updates.changes : []
@@ -381,25 +317,16 @@ ColumnLayout {
         onClicked: page.update()
     }
 
-    //--- Maintenance
-    Section { visible: !!page.ov; text: "Maintenance" }
-    ListRow {
-        visible: !!page.ov
-        enabled: page.admin
-        icon: "refresh"
-        title: "Rebuild Now"
-        subtitle: "nixos-rebuild switch on your settings files as they are"
-        chevron: true
-        onClicked: page.rebuild()
-    }
+    //--- Free Up Space
+    Section { visible: !!page.ov; text: "Free Up Space" }
     ListRow {
         visible: !!page.ov
         enabled: page.admin
         icon: "delete_sweep"
         title: "Clean Up Old Versions"
-        subtitle: page.ov && page.ov.diskFree
-            ? `Garbage collection · ${Fmt.size(page.ov.diskFree)} free of ${Fmt.size(page.ov.diskTotal)}`
-            : "Garbage collection"
+        info: "Garbage collection: deletes old system versions and the packages only they use"
+              + (page.ov && page.ov.diskTotal ? `. ${Fmt.size(page.ov.diskTotal)} disk.` : ".")
+        value: page.ov && page.ov.diskFree ? `${Fmt.size(page.ov.diskFree)} free` : ""
         chevron: true
         bar: page.ov && page.ov.diskTotal ? 1 - page.ov.diskFree / page.ov.diskTotal : -1
         onClicked: page.collect()
@@ -409,20 +336,9 @@ ColumnLayout {
         enabled: page.admin
         icon: "compress"
         title: "Optimize the Nix Store"
-        subtitle: "Hard-links identical files, freeing space without deleting anything"
+        info: "Frees space by hard-linking identical files in the Nix store. Deletes nothing."
         chevron: true
         onClicked: page.optimise()
-    }
-    ListRow {
-        visible: !!page.ov && !!page.ov.lastFailed
-        icon: "warning"
-        tone: "error"
-        title: "Last Failed Run"
-        subtitle: page.ov && page.ov.lastFailed
-            ? `${page.ov.lastFailed.title}, ${Fmt.when(page.ov.lastFailed.when).toLowerCase()}: ${page.ov.lastFailed.heading}`
-            : ""
-        chevron: true
-        onClicked: page.view.sheet = failedSheet
     }
 
     //--- Shell settings; under niri they're on the Niri tab's Shell page
@@ -440,88 +356,90 @@ ColumnLayout {
         icon: page.current && page.current.running ? "radio_button_checked" : "history"
         tone: page.current && page.current.running ? "success" : ""
         title: page.current ? `Version ${page.current.number}` : ""
-        subtitle: !page.current ? ""
-            : [page.older.length
-                   ? `${page.older.length} earlier `
-                     + (page.older.length === 1 ? "generation" : "generations") : "",
-               Fmt.when(page.current.when),
-               page.current.version ? "NixOS " + page.current.version.split(".").slice(0, 2).join(".") : "",
-               page.current.kernel ? `Linux ${page.current.kernel}` : ""].filter(t => t).join(" · ")
+        info: !page.current ? ""
+            : "Generations: each rebuild saves one, and the boot menu keeps the last ten. "
+              + "Switching back leaves your settings files as they are."
+              + [page.older.length
+                     ? `${page.older.length} earlier `
+                       + (page.older.length === 1 ? "generation" : "generations") : "",
+                 // The header shows the running one's
+                 page.current.version && !page.current.running
+                     ? "NixOS " + page.current.version.split(".").slice(0, 2).join(".") : "",
+                 page.current.kernel && !page.current.running ? `Linux ${page.current.kernel}` : ""]
+                .filter(t => t).map(t => `\n${t}`).join("")
+        value: page.current ? Fmt.when(page.current.when) : ""
         tag: !page.current ? "" : page.current.running ? "Running"
             : page.current.next ? "Next start" : ""
         tagSuccess: true
-        trailing: page.older.length ? (page.versionsOpen ? "expand_less" : "expand_more") : ""
+        expandable: page.older.length > 0
+        expanded: page.versionsOpen
         onClicked: if (page.older.length) page.versionsOpen = !page.versionsOpen
     }
-    Text {
-        visible: page.versionsOpen && page.older.length > 0
-        text: "Generations: each rebuild saves one, and the boot menu keeps the last ten. "
-              + "Switching back leaves your settings files as they are."
-        color: Theme.dim
-        font.pixelSize: 13
-        wrapMode: Text.Wrap
-        Layout.fillWidth: true
-        Layout.leftMargin: 6
-    }
-    Repeater {
-        model: page.versionsOpen ? page.older : []
-        Rectangle {
-            required property var modelData
-            readonly property var g: modelData
-            Layout.fillWidth: true
-            implicitHeight: genRow.implicitHeight + 22
-            radius: 14
-            color: g.running ? Theme.toneFill("success", Theme.card) : Theme.card
-            RowLayout {
-                id: genRow
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
-                spacing: 10
-                Badge { icon: g.running ? "radio_button_checked" : "history"; tone: g.running ? "success" : "" }
-                ColumnLayout {
-                    spacing: 2
-                    Layout.fillWidth: true
-                    Text {
-                        text: `Version ${g.number}`
-                        color: Theme.text
-                        font.pixelSize: 16
-                        font.weight: Font.DemiBold
-                    }
-                    Text {
-                        text: [Fmt.when(g.when),
-                               g.version ? "NixOS " + g.version.split(".").slice(0, 2).join(".") : "",
-                               g.kernel ? `Linux ${g.kernel}` : ""].filter(t => t).join(" · ")
-                        color: Theme.dim
-                        font.pixelSize: 13
-                        elide: Text.ElideRight
+    Reveal {
+        id: olderList
+        open: page.versionsOpen && page.older.length > 0
+        gap: page.spacing
+        spacing: page.spacing
+        Repeater {
+            model: olderList.shown ? page.older : []
+            Rectangle {
+                required property var modelData
+                readonly property var g: modelData
+                Layout.fillWidth: true
+                implicitHeight: genRow.implicitHeight + 22
+                radius: 14
+                color: g.running ? Theme.toneFill("success", Theme.card) : Theme.card
+                RowLayout {
+                    id: genRow
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                    spacing: 10
+                    Badge { icon: g.running ? "radio_button_checked" : "history"; tone: g.running ? "success" : "" }
+                    ColumnLayout {
+                        spacing: 2
                         Layout.fillWidth: true
+                        Text {
+                            text: `Version ${g.number}`
+                            color: Theme.text
+                            font.pixelSize: 16
+                            font.weight: Font.DemiBold
+                        }
+                        Text {
+                            text: [Fmt.when(g.when),
+                                   g.version ? "NixOS " + g.version.split(".").slice(0, 2).join(".") : "",
+                                   g.kernel ? `Linux ${g.kernel}` : ""].filter(t => t).join(" · ")
+                            color: Theme.dim
+                            font.pixelSize: 13
+                            elide: Text.ElideRight
+                            Layout.fillWidth: true
+                        }
+                        Flow {
+                            visible: g.running || g.next || g.booted
+                            Layout.fillWidth: true
+                            spacing: 4
+                            Chip { tappable: false; visible: g.running; tone: "success"; text: "Running" }
+                            Chip { tappable: false; visible: g.next && !g.running; accent: true; text: "Next start" }
+                            Chip { tappable: false; visible: g.booted && !g.running; text: "Started with" }
+                        }
                     }
-                    Flow {
-                        visible: g.running || g.next || g.booted
-                        Layout.fillWidth: true
-                        spacing: 4
-                        Chip { tappable: false; visible: g.running; tone: "success"; text: "Running" }
-                        Chip { tappable: false; visible: g.next && !g.running; accent: true; text: "Next start" }
-                        Chip { tappable: false; visible: g.booted && !g.running; text: "Started with" }
+                    IconButton {
+                        visible: !g.running
+                        icon: "difference"
+                        onClicked: {
+                            page.compareNumber = g.number
+                            page.view.sheet = compareSheet
+                        }
                     }
-                }
-                IconButton {
-                    visible: !g.running
-                    icon: "difference"
-                    onClicked: {
-                        page.compareNumber = g.number
-                        page.view.sheet = compareSheet
+                    Pill {
+                        visible: !g.running
+                        enabled: page.admin
+                        quiet: true
+                        text: "Switch"
+                        onClicked: page.rollback(g)
                     }
-                }
-                Pill {
-                    visible: !g.running
-                    enabled: page.admin
-                    quiet: true
-                    text: "Switch"
-                    onClicked: page.rollback(g)
                 }
             }
         }
@@ -534,139 +452,144 @@ ColumnLayout {
         visible: !!page.boot && page.boot.stages.total > 0
         icon: "timer"
         title: "Last Startup"
-        subtitle: !page.boot ? ""
-            : page.boot.graphical
-                ? `${Fmt.duration(page.boot.stages.total)} from power on to `
-                  + page.boot.graphical.target
-                : `${Fmt.duration(page.boot.stages.total)} from power on`
-        trailing: page.bootOpen ? "expand_less" : "expand_more"
+        info: !page.boot ? ""
+            : page.boot.graphical ? `From power on to ${page.boot.graphical.target}`
+            : "From power on"
+        value: page.boot ? Fmt.duration(page.boot.stages.total) : ""
+        expandable: true
+        expanded: page.bootOpen
         onClicked: page.bootOpen = !page.bootOpen
     }
-    Rectangle {
-        visible: page.bootOpen && !!page.boot && page.boot.stages.total > 0
-        Layout.fillWidth: true
-        implicitHeight: bootColumn.implicitHeight + 28
-        radius: 16
-        color: Theme.card
-        ColumnLayout {
-            id: bootColumn
-            anchors.fill: parent
-            anchors.margins: 14
-            spacing: 10
-            Text {
-                Layout.fillWidth: true
-                text: !page.boot ? ""
-                    : page.boot.graphical
-                        ? `The desktop was up ${Fmt.duration(page.boot.graphical.seconds)} into `
-                          + "userspace."
-                        : "From power on to the desktop."
-                color: Theme.dim
-                font.pixelSize: 13
-                wrapMode: Text.Wrap
-            }
-            Flow {
-                Layout.fillWidth: true
-                spacing: 6
-                Repeater {
-                    model: ["firmware", "loader", "kernel", "initrd", "userspace"]
-                    delegate: Chip {
-                        required property string modelData
-                        visible: !!page.boot && !!page.boot.stages[modelData]
-                        tappable: false
-                        text: page.boot ? `${modelData} ${Fmt.duration(page.boot.stages[modelData])}` : ""
+    Reveal {
+        open: page.bootOpen && !!page.boot && page.boot.stages.total > 0
+        gap: page.spacing
+        Rectangle {
+            Layout.fillWidth: true
+            implicitHeight: bootColumn.implicitHeight + 28
+            radius: 16
+            color: Theme.card
+            ColumnLayout {
+                id: bootColumn
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.margins: 14
+                spacing: 10
+                Text {
+                    Layout.fillWidth: true
+                    text: !page.boot ? ""
+                        : page.boot.graphical
+                            ? `The desktop was up ${Fmt.duration(page.boot.graphical.seconds)} into `
+                              + "userspace."
+                            : "From power on to the desktop."
+                    color: Theme.dim
+                    font.pixelSize: 13
+                    wrapMode: Text.Wrap
+                }
+                Flow {
+                    Layout.fillWidth: true
+                    spacing: 6
+                    Repeater {
+                        model: ["firmware", "loader", "kernel", "initrd", "userspace"]
+                        delegate: Chip {
+                            required property string modelData
+                            visible: !!page.boot && !!page.boot.stages[modelData]
+                            tappable: false
+                            text: page.boot ? `${modelData} ${Fmt.duration(page.boot.stages[modelData])}` : ""
+                        }
                     }
                 }
-            }
-            Text {
-                Layout.fillWidth: true
-                Layout.topMargin: 2
-                text: "The slowest units to start:"
-                color: Theme.dim
-                font.pixelSize: 13
-            }
-            Repeater {
-                model: page.boot ? page.boot.blame.units : []
-                delegate: ColumnLayout {
-                    id: blameRow
-                    required property var modelData
-                    readonly property var units: page.boot.blame.units
-                    readonly property real share: units.length
-                        ? modelData.seconds / Math.max(units[0].seconds, 0.001) : 0
+                Text {
                     Layout.fillWidth: true
-                    spacing: 4
-                    RowLayout {
+                    Layout.topMargin: 2
+                    text: "The slowest units to start:"
+                    color: Theme.dim
+                    font.pixelSize: 13
+                }
+                Repeater {
+                    model: page.boot ? page.boot.blame.units : []
+                    delegate: ColumnLayout {
+                        id: blameRow
+                        required property var modelData
+                        readonly property var units: page.boot.blame.units
+                        readonly property real share: units.length
+                            ? modelData.seconds / Math.max(units[0].seconds, 0.001) : 0
                         Layout.fillWidth: true
+                        spacing: 4
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
+                            Text {
+                                Layout.fillWidth: true
+                                text: blameRow.modelData.unit
+                                color: Theme.text
+                                font.pixelSize: 13
+                                elide: Text.ElideRight
+                            }
+                            Text {
+                                text: Fmt.duration(blameRow.modelData.seconds)
+                                color: Theme.dim
+                                font.pixelSize: 13
+                            }
+                        }
+                        Rectangle {
+                            Layout.fillWidth: true
+                            implicitHeight: 6
+                            radius: 3
+                            color: Theme.line
+                            Rectangle {
+                                width: parent.width * blameRow.share
+                                height: parent.height
+                                radius: 3
+                                color: Theme.primary
+                            }
+                        }
+                    }
+                }
+                Text {
+                    visible: !!page.boot && page.boot.blame.devices !== null
+                    Layout.fillWidth: true
+                    text: page.boot && page.boot.blame.devices !== null
+                        ? `Device units took up to ${Fmt.duration(page.boot.blame.devices)}; one wait `
+                          + "shows up under many device names." : ""
+                    color: Theme.dim
+                    font.pixelSize: 13
+                    wrapMode: Text.Wrap
+                }
+                Text {
+                    visible: page.boot && page.boot.chain.length > 0
+                    Layout.fillWidth: true
+                    Layout.topMargin: 2
+                    text: "The chain the desktop waited on, each indent waiting for the one above:"
+                    color: Theme.dim
+                    font.pixelSize: 13
+                    wrapMode: Text.Wrap
+                }
+                Repeater {
+                    model: page.boot ? page.boot.chain : []
+                    delegate: RowLayout {
+                        required property var modelData
+                        Layout.fillWidth: true
+                        Layout.leftMargin: Math.min(modelData.depth, 4) * 14
                         spacing: 10
                         Text {
                             Layout.fillWidth: true
-                            text: blameRow.modelData.unit
+                            text: modelData.unit
                             color: Theme.text
                             font.pixelSize: 13
                             elide: Text.ElideRight
                         }
                         Text {
-                            text: Fmt.duration(blameRow.modelData.seconds)
+                            visible: modelData.took !== null
+                            text: modelData.took !== null ? `+${Fmt.duration(modelData.took)}` : ""
                             color: Theme.dim
                             font.pixelSize: 13
                         }
-                    }
-                    Rectangle {
-                        Layout.fillWidth: true
-                        implicitHeight: 6
-                        radius: 3
-                        color: Theme.line
-                        Rectangle {
-                            width: parent.width * blameRow.share
-                            height: parent.height
-                            radius: 3
-                            color: Theme.primary
+                        Text {
+                            text: `@${Fmt.duration(modelData.at)}`
+                            color: Theme.dim
+                            font.pixelSize: 13
                         }
-                    }
-                }
-            }
-            Text {
-                visible: !!page.boot && page.boot.blame.devices !== null
-                Layout.fillWidth: true
-                text: page.boot && page.boot.blame.devices !== null
-                    ? `Device units took up to ${Fmt.duration(page.boot.blame.devices)}; one wait `
-                      + "shows up under many device names." : ""
-                color: Theme.dim
-                font.pixelSize: 13
-                wrapMode: Text.Wrap
-            }
-            Text {
-                visible: page.boot && page.boot.chain.length > 0
-                Layout.fillWidth: true
-                Layout.topMargin: 2
-                text: "The chain the desktop waited on, each indent waiting for the one above:"
-                color: Theme.dim
-                font.pixelSize: 13
-                wrapMode: Text.Wrap
-            }
-            Repeater {
-                model: page.boot ? page.boot.chain : []
-                delegate: RowLayout {
-                    required property var modelData
-                    Layout.fillWidth: true
-                    Layout.leftMargin: Math.min(modelData.depth, 4) * 14
-                    spacing: 10
-                    Text {
-                        Layout.fillWidth: true
-                        text: modelData.unit
-                        color: Theme.text
-                        font.pixelSize: 13
-                        elide: Text.ElideRight
-                    }
-                    Text {
-                        visible: modelData.took !== null
-                        text: modelData.took !== null ? `+${Fmt.duration(modelData.took)}` : ""
-                        color: Theme.dim
-                        font.pixelSize: 13
-                    }
-                    Text {
-                        text: `@${Fmt.duration(modelData.at)}`
-                        color: Theme.dim
-                        font.pixelSize: 13
                     }
                 }
             }
@@ -811,18 +734,20 @@ ColumnLayout {
                                 icon: "open_in_new"
                                 onClicked: Qt.openUrlExternally(release.modelData.url)
                             }
-                            Icon {
-                                icon: "expand_more"
-                                rotation: rel.open === release.index ? 180 : 0
+                            Chevron {
+                                open: rel.open === release.index
                             }
                         }
-                        Text {
-                            visible: rel.open === release.index
-                            Layout.fillWidth: true
-                            text: release.modelData.body || "The release has no notes."
-                            color: Theme.dim
-                            font.pixelSize: 13
-                            wrapMode: Text.Wrap
+                        Reveal {
+                            open: rel.open === release.index
+                            gap: releaseCol.spacing
+                            Text {
+                                Layout.fillWidth: true
+                                text: release.modelData.body || "The release has no notes."
+                                color: Theme.dim
+                                font.pixelSize: 13
+                                wrapMode: Text.Wrap
+                            }
                         }
                     }
                     HoverHandler { cursorShape: Qt.PointingHandCursor }

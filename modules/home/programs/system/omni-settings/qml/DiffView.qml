@@ -26,7 +26,7 @@ ColumnLayout {
         visible: view.none
         icon: "check"
         title: "No package versions changed"
-        subtitle: "Only settings and generated files did" + (view.diff.files ? ` (${view.diff.files} settings files)` : "")
+        info: "Only settings and generated files did" + (view.diff.files ? ` (${view.diff.files} settings files)` : "")
     }
 
     Repeater {
@@ -72,25 +72,33 @@ ColumnLayout {
                             Layout.fillWidth: true
                         }
                     }
-                    Icon { icon: "expand_more"; rotation: group.open ? 180 : 0 }
+                    Chevron {
+                        open: group.open
+                    }
                     TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: group.open = !group.open }
                 }
-                Repeater {
-                    model: group.open ? group.modelData.items.slice(0, 300) : []
-                    RowLayout {
-                        required property var modelData
-                        Layout.fillWidth: true
-                        Text {
-                            text: modelData[0]
-                            color: Theme.text
-                            font.pixelSize: 13
-                            elide: Text.ElideRight
+                Reveal {
+                    id: groupBody
+                    open: group.open
+                    gap: groupCol.spacing
+                    spacing: groupCol.spacing
+                    Repeater {
+                        model: groupBody.shown ? group.modelData.items.slice(0, 300) : []
+                        RowLayout {
+                            required property var modelData
                             Layout.fillWidth: true
-                        }
-                        Text {
-                            text: modelData[1]
-                            color: Theme.dim
-                            font.pixelSize: 13
+                            Text {
+                                text: modelData[0]
+                                color: Theme.text
+                                font.pixelSize: 13
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                            }
+                            Text {
+                                text: modelData[1]
+                                color: Theme.dim
+                                font.pixelSize: 13
+                            }
                         }
                     }
                 }

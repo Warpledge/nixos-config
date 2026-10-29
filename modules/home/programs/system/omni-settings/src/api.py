@@ -8,6 +8,7 @@ import difflib
 import grp
 import json
 import os
+import platform
 import pwd
 import selectors
 import shlex
@@ -53,7 +54,7 @@ TAB_ICONS = {"main": ("go-home-symbolic", "user-home-symbolic"),
 
 #--- Each tab's pages above its sections: key, title and icons to try.
 #--- Shell shows only under niri, which also moves the Desktop section to Niri.
-TOP = {"main": [("overview", "Overview", ("computer-symbolic",)),
+TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
                 ("git", "Git", ("vcs-branch-symbolic", "branch-symbolic", "folder-remote-symbolic")),
                 ("flatpaks", "Flatpaks", ("flatpak-symbolic", "system-software-install-symbolic")),
                 ("backups", "Backups", ("drive-harddisk-symbolic", "document-save-symbolic")),
@@ -72,15 +73,28 @@ DOCS_GAMING = [("proton", "Launch Options", ("input-gaming-symbolic",)),
                 ("system-software-install-symbolic", "input-gaming-symbolic"))]
 
 #--- The line under each page in the page list that has no description of its own
-NAV_SUBTITLES = {"overview": "Updates, rebuild, versions", "git": "Changes, commits, pull requests",
-                 "flatpaks": "Apps, updates, repair", "backups": "Back up app data",
-                 "people": "Who can log in", "packages": "Find packages in nixpkgs",
-                 "shell": "DankMaterialShell's settings", "windowrules": "Rules for each app's windows",
-                 "keybinds": "Change, add and turn off shortcuts",
+NAV_SUBTITLES = {"overview": "Updates, freeing space, versions", "git": "Changes, commits, pull requests",
+                 "flatpaks": "Apps nixpkgs doesn't have: update them, clean up, and switch each one "
+                             "on or off",
+                 "backups": "Back up app data",
+                 "people": "Who can log in to this computer. Each person picks their own apps by "
+                           "opening Omni Settings on their own account.", "packages": "Find packages in nixpkgs",
+                 "shell": "DankMaterialShell, the bar, launcher and lock screen niri runs with. "
+                          "Each tile opens its settings on that page.",
+                 "windowrules": "Pick a window and choose what niri should do with it, or change or "
+                                "turn off the config's rules. Changes are yours alone and wait for "
+                                "Apply, like any other setting.",
+                 "keybinds": "Change a key, turn a keybind off, or add your own. Changes are yours "
+                             "alone and wait for Apply, like any other setting.",
                  "startup": "Variables every program sees, and autostart",
                  "filetypes": "Which app opens one file type",
-                 "userpackages": "Packages you added from Search",
-                 "proton": "Launch options to copy", "protonversions": "Proton builds installed"}
+                 "userpackages": "Packages you added from Search, installed as they come with no "
+                                 "settings of their own. Apps with settings made for them are under "
+                                 "Default Packages.",
+                 "proton": "Launch options for Steam, Heroic and Lutris. Click one to copy it.",
+                 "protonversions": "The Proton and Wine builds each launcher can run games with. Pick "
+                                   "one per game in the launcher, or Steam's default under Settings, "
+                                   "Compatibility."}
 
 #--- DMS tabs shown as buttons on the Overview (Shell page under niri), in this order
 QUICK = ["display_config", "keybinds", "mouse_touchpad", "theme", "wallpaper", "dankbar_settings",
@@ -98,6 +112,10 @@ STATE_DIR = os.path.join(os.environ.get("XDG_STATE_HOME") or os.path.expanduser(
                          "omni-settings")
 #--- What's New items the user dismissed, as "domain:dotted.path"
 DISMISSED = os.path.join(STATE_DIR, "whats-new-dismissed.json")
+#--- Which pages and cards are open, kept across launches
+UI_STATE = os.path.join(STATE_DIR, "ui.json")
+#--- The Apps section's pages, merged into one page of cards
+APPS_PAGE = "page:Default Packages"
 
 
 #--------------------------------------------------------------------#
@@ -122,6 +140,15 @@ def read_dismissed():
         return set()
 
 
+def read_ui():
+    try:
+        with open(UI_STATE) as f:
+            data = json.load(f)
+        return data if isinstance(data, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
 def shown(setting, value):
     if setting.kind == "bool":
         return "On" if value else "Off"
@@ -135,6 +162,8 @@ def shown(setting, value):
             return f"{n} entr{'y' if n == 1 else 'ies'}" if n else "Not set"
         n = sum(len(v) for v in value.values())
         return f"{n} in {len(value)} categor{'y' if len(value) == 1 else 'ies'}" if n else "Not set"
+    if value is None and setting.kind == "choice" and "None" in setting.labels:
+        return setting.labels["None"]
     if value is None or value == "" or value == []:
         return "Not set"
     if isinstance(value, list):
@@ -211,6 +240,8 @@ def setting_json(cfg, state, s, multi, modules):
         out["resettable"] = {"app": reset[0], "file": os.path.basename(reset[1]), "extra": reset[4]}
     if s.path in modules:
         out["module"] = os.path.relpath(modules[s.path], cfg.flake)
+    if s.pair:
+        out["pair"] = setting_json(cfg, state, s.pair, multi, modules)
     return out
 
 
@@ -220,6 +251,16 @@ def shell_categories(shell):
     cats = [{"title": t, "links": sorted(ls, key=lambda j: rank.get(j["tab"], len(rank)))}
             for t, ls in shell.items()]
     return sorted(cats, key=lambda c: rank.get(c["links"][0]["tab"], len(rank)))
+
+
+def app_card(page, pid, groups):
+    """One Apps page as a card on the Default Packages page; its template groups
+    become headings inside it (each setting's `sub`) when they all have a name."""
+    named = len(groups) > 1 and all(g["title"] for g in groups)
+    settings = [dict(s, sub=g["title"] if named else "") for g in groups for s in g["settings"]]
+    return {"title": page.title, "description": page.description, "collapsed": True,
+            "locked": any(g["locked"] for g in groups), "icon": [page.icon, schema.FALLBACK_ICON],
+            "card": pid, "settings": settings, "links": [l for g in groups for l in g["links"]]}
 
 
 def cmd_load(cfg, _args):
@@ -239,6 +280,7 @@ def cmd_load(cfg, _args):
         if items:
             nav[tab].append({"id": "", "title": "", "items": items})
     pages, by_section = {}, {key: [] for key, _ in schema.SECTIONS}
+    apps_groups = []
     # Under niri every DMS link moves to the Shell page, in categories (shellLinks)
     shell_links = wm == "niri"
     shell = {}
@@ -257,9 +299,14 @@ def cmd_load(cfg, _args):
                 links = []
             locked = not direct and any(s.domain == "machine" for s in g.settings)
             groups.append({"title": g.title, "description": g.description, "locked": locked,
+                           "collapsed": (page.title, g.title) in schema.COLLAPSED,
+                           "icon": schema.COLLAPSED.get((page.title, g.title), ""),
                            "settings": [setting_json(cfg, state, s, multi, modules) for s in g.settings],
                            "links": links})
         if not groups:
+            continue
+        if page.section == "apps" or page.section not in by_section and page.section != "top":
+            apps_groups.append(app_card(page, pid, groups))
             continue
         has_user = any(s.domain == "user" for g in page.groups for s in g.settings)
         pages[pid] = {"id": pid, "title": page.title, "description": page.description,
@@ -268,6 +315,12 @@ def cmd_load(cfg, _args):
         if page.section != "top":
             by_section.get(page.section, by_section["apps"]).append(
                 {"id": pid, "title": page.title, "icon": [page.icon, schema.FALLBACK_ICON]})
+    if apps_groups:
+        pages[APPS_PAGE] = {"id": APPS_PAGE, "title": "Default Packages", "description": "",
+                            "icon": ["package-x-generic-symbolic"], "intro": "",
+                            "changeFor": multi, "groups": apps_groups}
+        by_section["apps"].append({"id": APPS_PAGE, "title": "Default Packages",
+                                   "icon": ["package-x-generic-symbolic"]})
     startup = [s for p in state.pages for g in p.groups for s in g.settings
                if (s.domain, s.path) in (("user", ("env",)), ("user", ("autostart",)))]
     mime_types = next((s for p in state.pages for g in p.groups for s in g.settings
@@ -308,7 +361,7 @@ def cmd_load(cfg, _args):
     dismissed = read_dismissed()
     new = [{"key": new_id(d, p), "value": v} for d, p, v in state.new
            if (d == "user" or direct) and new_id(d, p) not in dismissed
-           and any(s.domain == d and s.path == p for pg in state.pages for g in pg.groups for s in g.settings)]
+           and any(s.domain == d and s.path == p for s in schema.flat(state.pages))]
     banner = ""
     if not helper():
         banner = "The Omni Settings helper isn't installed, so changes can't be applied"
@@ -318,7 +371,7 @@ def cmd_load(cfg, _args):
             "admin": admin, "direct": direct, "canApply": bool(helper()) and (direct or not admin),
             "banner": banner, "userMachines": state.user_machines,
             "tabs": [{"id": t, "title": title, "icon": list(TAB_ICONS[t])} for t, title in TABS],
-            "nav": nav, "pages": pages, "whatsNew": new, "quick": QUICK,
+            "nav": nav, "pages": pages, "whatsNew": new, "ui": read_ui(), "quick": QUICK,
             "shellLinks": shell_categories(shell),
             "userPackages": user_packages and setting_json(cfg, state, user_packages, multi, modules),
             "keybinds": keybinds and setting_json(cfg, state, keybinds, multi, modules),
@@ -360,7 +413,7 @@ def cmd_review(cfg, args):
     """Each change as before -> after, and the lines it changes in each file.
     args: changes, machine (the Change For pick; null for all computers)."""
     state = loaded(cfg)
-    settings = {(s.domain, s.path): s for p in state.pages for g in p.groups for s in g.settings}
+    settings = {(s.domain, s.path): s for s in schema.flat(state.pages)}
     changes, machine = changes_arg(args), args.get("machine", cfg.machine)
     lines = []
     for key, value in changes.items():
@@ -401,6 +454,15 @@ def cmd_dismiss(_cfg, args):
     with open(DISMISSED, "w") as f:
         json.dump(sorted(keys), f)
     return sorted(keys)
+
+
+def cmd_saveUi(_cfg, args):
+    """Keeps the open pages and open cards (args.openPages, args.open)."""
+    data = {k: sorted(set(args.get(k) or [])) for k in ("openPages", "open")}
+    os.makedirs(STATE_DIR, exist_ok=True)
+    with open(UI_STATE, "w") as f:
+        json.dump(data, f)
+    return data
 
 
 def cmd_stale(cfg, _args):
@@ -451,6 +513,30 @@ def cmd_freed(_cfg, _args):
     gens = closure.generations()
     doomed = system.to_delete(gens, system.clean_policy())
     return system.freed_estimate(doomed, [g for g in gens if g not in doomed]) if doomed else 0
+
+
+def cmd_status(_cfg, _args):
+    """What the header shows: this computer, its NixOS release, kernel and running version."""
+    running = os.path.realpath(closure.CURRENT)
+    generation = next((g.number for g in closure.generations() if g.path == running), 0)
+    return {"hostname": socket.gethostname(), "release": system.os_release().split(" (")[0],
+            "kernel": platform.release(), "generation": generation}
+
+
+def cmd_usage(_cfg, _args):
+    """CPU time counters (the header works out the load between two calls), memory and
+    the root disk, in bytes."""
+    with open("/proc/stat") as f:
+        ticks = [int(n) for n in f.readline().split()[1:9]]
+    mem = {}
+    with open("/proc/meminfo") as f:
+        for line in f:
+            key, value = line.split(":", 1)
+            mem[key] = int(value.split()[0]) * 1024
+    disk = shutil.disk_usage("/")
+    return {"cpuTotal": sum(ticks), "cpuIdle": ticks[3] + ticks[4],
+            "memTotal": mem["MemTotal"], "memUsed": mem["MemTotal"] - mem["MemAvailable"],
+            "diskTotal": disk.total, "diskUsed": disk.used}
 
 
 def cmd_boot(_cfg, _args):
@@ -932,9 +1018,10 @@ def cmd_save_window_rule(cfg, args):
 
 
 COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cmd_save,
-            "dismiss": cmd_dismiss,
+            "dismiss": cmd_dismiss, "saveUi": cmd_saveUi,
             "stale": cmd_stale, "removeStale": cmd_remove_stale,
             "overview": cmd_overview, "freed": cmd_freed, "boot": cmd_boot,
+            "status": cmd_status, "usage": cmd_usage,
             "checkUpdates": cmd_check_updates, "changelog": cmd_changelog,
             "compare": cmd_compare, "failedLog": cmd_failed_log, "forgetFailed": cmd_forget_failed,
             "git": cmd_git, "gitSummary": cmd_git_summary, "setBackup": cmd_set_backup,

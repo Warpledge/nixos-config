@@ -2,7 +2,7 @@
 name: docs-drift-auditor
 description: Read-only check that CLAUDE.md, AGENTS.md and README.md in this NixOS repo still match the tree - named paths, machine and user settings and the documented per-machine overrides, registered skills, agents and MCP servers, README Components rows and link references, and AGENTS.md against CLAUDE.md's Critical Rules. Use after a change that adds, moves or removes a module, toggle, skill, agent or MCP server, before committing doc edits, and when the user asks whether the docs are up to date.
 tools: Read, Grep, Glob, Bash
-model: opus
+model: sonnet
 effort: medium
 omitClaudeMd: true
 ---

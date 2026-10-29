@@ -11,6 +11,7 @@ Item {
 
     property int edge: 14  // gap between the view and the window's edges
     property int gutter: 8  // the part of `edge` left of the pages that holds their band
+    property int frameInset: 6  // the page body inside its frame; clears the frame's corners
     property var info: null
     property string loadError: ""
     property var stale: null  // api.py's `stale`, when the settings files don't evaluate
@@ -71,8 +72,11 @@ Item {
         if (info)
             for (const pg of Object.values(info.pages))
                 for (const g of pg.groups)
-                    for (const s of g.settings)
+                    for (const s of g.settings) {
                         out[s.key] = s
+                        if (s.pair)
+                            out[s.pair.key] = s.pair
+                    }
         if (info && info.userPackages)
             out[info.userPackages.key] = info.userPackages
         if (info && info.keybinds)
@@ -99,7 +103,8 @@ Item {
         if (at > 0)
             out.splice(at, 0, ...packageCategories.map(c => ({ tab: "packages", group: "User Packages",
                 id: `userpackages:${c}`, title: c, icon: ["folder"], custom: true,
-                subtitle: `${userPackages(false)[c] ? userPackages(false)[c].length : 0} installed` })))
+                subtitle: `${userPackages(false)[c] ? userPackages(false)[c].length : 0} installed. `
+                          + "Move one to list it under another category." })))
         return out
     }
     readonly property var current: navItems.find(i => i.id === page) || null
@@ -141,8 +146,13 @@ Item {
             stale = null
             const first = !info
             info = reply.data
-            if (first)
+            if (first) {
                 scope = info.machine
+                const ui = info.ui || {}
+                const set = keys => (keys || []).reduce((o, k) => (o[k] = true, o), {})
+                openPages = set(ui.openPages)
+                openCards = set(ui.open)
+            }
             // Keep changes that still differ from what the files now hold
             const kept = {}
             for (const [k, v] of Object.entries(pending))
@@ -327,6 +337,9 @@ Item {
             const c = Object.keys(v).length
             return n ? `${n} in ${c} categor${c === 1 ? "y" : "ies"}` : "Not set"
         }
+        const nullChoice = v === null && s.kind === "choice" && s.choices.find(c => c.value === null)
+        if (nullChoice && nullChoice.label !== "None")
+            return nullChoice.label
         if (v === null || v === undefined || v === "" || (Array.isArray(v) && !v.length))
             return "Not set"
         if (Array.isArray(v))
@@ -410,6 +423,34 @@ Item {
                                         { mode: kind === "update" || kind === "pull" ? "auto" : "switch" }))
     }
 
+    //--- Whether a job may start now; says why not
+    function canStart() {
+        if (!info || !info.canApply || !info.admin)
+            return false
+        if (pendingCount) {
+            say("Apply or discard your changes first")
+            return false
+        }
+        if (Jobs.running) {
+            say("Another job is running; wait for it to finish")
+            return false
+        }
+        return true
+    }
+
+    function rebuild() {
+        if (!canStart())
+            return
+        ask({
+            heading: "Rebuild now?",
+            body: "Rebuilds from your settings files as they are (nixos-rebuild switch). At Next "
+                  + "Restart uses nixos-rebuild boot; Preview only builds and shows what would change.",
+            buttons: [{ label: "Preview", value: "build", quiet: true },
+                      { label: "At Next Restart", value: "boot", quiet: true },
+                      { label: "Rebuild Now", value: "switch" }]
+        }, mode => startJob("rebuild", { mode }))
+    }
+
     //--- A modal question: ask({heading, body, buttons}, done(value))
     function ask(spec, done) { dialog.open(spec, done) }
     readonly property alias dialog: confirm
@@ -440,6 +481,8 @@ Item {
         }
         if (pageId && pageId.startsWith("doc:"))
             openNote(pageId, true)
+        else if (pageId && !openPages[pageId])
+            setPageOpen(pageId, true)
         if (tabId === tab) {
             if (pageId)
                 scrollTo(pageId)
@@ -518,8 +561,22 @@ Item {
                 }
             }
         page = hit.pid
-        anchorPage = hit.pid
-        anchorOffset = y - hit.y
+        anchorTop()
+    }
+    //--- The section under the view's top edge stays put, so a dropdown opened
+    //--- anywhere in view pushes what's below it down instead of what's above up
+    function anchorTop() {
+        const y = bodyFlick.contentY
+        let top = null
+        for (let i = 0; i < sections.count; i++) {
+            const s = sections.itemAt(i)
+            if (s && s.visible && (s.y <= y || !top))
+                top = s
+        }
+        if (!top)
+            return
+        anchorPage = top.pid
+        anchorOffset = y - top.y
     }
     function scrollTo(pid) {
         const s = section(pid)
@@ -539,11 +596,32 @@ Item {
         duration: 380
         easing.type: Easing.OutCubic
         // A section above that grew meanwhile moved the target
-        onFinished: {
-            const s = omni.section(omni.anchorPage)
-            if (s)
-                omni.anchorOffset = bodyFlick.contentY - s.y
-        }
+        onFinished: omni.anchorTop()
+    }
+
+    //--- Open pages and open group cards, kept in api.py's UI_STATE; both start shut
+    property var openPages: ({})
+    property var openCards: ({})
+    function setCardOpen(key, open) {
+        const c = Object.assign({}, openCards)
+        if (open)
+            c[key] = true
+        else
+            delete c[key]
+        openCards = c
+        saveUi()
+    }
+    function setPageOpen(pid, open) {
+        const c = Object.assign({}, openPages)
+        if (open)
+            c[pid] = true
+        else
+            delete c[pid]
+        openPages = c
+        saveUi()
+    }
+    function saveUi() {
+        Backend.call("saveUi", { openPages: Object.keys(openPages), open: Object.keys(openCards) }, () => {})
     }
 
     //--- Notes on the Docs tab show only their title until opened
@@ -617,7 +695,9 @@ Item {
                 for (const s of g.settings)
                     if (s.title.toLowerCase().includes(q) || s.subtitle.toLowerCase().includes(q))
                         out.push({ kind: "page", tab: item.tab, page: pid, title: s.title,
-                                   subtitle: `${pg.title} · ${s.subtitle}`, icon: s.icon, app: s.icon })
+                                   subtitle: `${g.collapsed ? g.title : pg.title} · ${s.subtitle}`,
+                                   icon: s.icon, app: s.icon,
+                                   card: g.collapsed ? (g.card || `${pid}|${g.title}`) : "" })
         }
         for (const e of info.dmsSearch)
             if (e.label.toLowerCase().includes(q) || e.keywords.includes(q))
@@ -649,10 +729,40 @@ Item {
     //--------------------------------------------------------------------//
     //-- Layout
     //--------------------------------------------------------------------//
+    //--- The border the page scrolls under, drawn round the body Flickable
+    Rectangle {
+        id: bodyFrame
+        visible: mainCol.visible && bodyFlick.visible
+        x: mainCol.x + bodyFlick.x - omni.frameInset
+        y: mainCol.y + bodyFlick.y - omni.frameInset
+        width: bodyFlick.width + 2 * omni.frameInset
+        height: bodyFlick.height + 2 * omni.frameInset
+        radius: 20
+        color: "transparent"
+        border.width: 1
+        border.color: Qt.alpha(Theme.primary, 0.22)
+    }
+
+    //--- Across the whole width, over the rail too
+    StatusHeader {
+        id: statusHeader
+        view: omni
+        visible: mainCol.visible || runSheet.visible
+        barOnly: runSheet.visible
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.margins: omni.edge
+    }
+
     ColumnLayout {
         id: mainCol
-        anchors.fill: parent
+        anchors.top: statusHeader.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
         anchors.margins: omni.edge
+        anchors.topMargin: 10
         anchors.rightMargin: omni.edge + rail.width + 10
         spacing: 10
         visible: !omni.reviewing && !omni.running && omni.sheet === null
@@ -796,10 +906,16 @@ Item {
                     model: omni.results
 
                     function pick(r) {
-                        if (r.kind === "dms")
+                        if (r.kind === "dms") {
                             Quickshell.execDetached(["dms", "ipc", "call", "settings", "openWith", r.tab])
-                        else
+                        } else {
+                            // A setting in a card or a collapsed page shows open
+                            if (!omni.openPages[r.page])
+                                omni.setPageOpen(r.page, true)
+                            if (r.card && !omni.openCards[r.card])
+                                omni.setCardOpen(r.card, true)
                             omni.go(r.tab, r.page)
+                        }
                         omni.forceActiveFocus()
                     }
 
@@ -841,12 +957,15 @@ Item {
             Layout.fillWidth: true
         }
 
-        //--- Page body
+        //--- Page body, inset in its frame (bodyFrame)
         Flickable {
             id: bodyFlick
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.leftMargin: -omni.gutter
+            Layout.leftMargin: -omni.gutter + omni.frameInset
+            Layout.rightMargin: omni.frameInset
+            Layout.topMargin: omni.frameInset
+            Layout.bottomMargin: omni.frameInset
             contentHeight: body.implicitHeight + 16
             clip: true
             boundsBehavior: Flickable.StopAtBounds
@@ -1034,7 +1153,7 @@ Item {
         anchors.top: parent.top
         anchors.right: parent.right
         anchors.margins: omni.edge
-        anchors.topMargin: omni.edge + 44  // starts an icon below the top tabs
+        anchors.topMargin: mainCol.y + tabsBar.y + tabsBar.height  // level with the tabs' foot
         // As tall as its icons, up to the window's bottom margin
         height: Math.min(railList.contentHeight + 8, parent.height - anchors.topMargin - omni.edge)
         width: 48
@@ -1173,8 +1292,13 @@ Item {
     }
 
     RunSheet {
-        anchors.fill: parent
+        id: runSheet
+        anchors.top: statusHeader.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
         anchors.margins: omni.edge
+        anchors.topMargin: 10
         visible: omni.running && !!Jobs.job
         view: omni
     }
@@ -1210,8 +1334,8 @@ Item {
     Component { id: fileTypesPage; FileTypesPage { view: omni } }
     Component { id: protonPage; ProtonPage { view: omni } }
     Component { id: protonVersionsPage; ProtonVersionsPage { view: omni } }
-    //--- One page in the tab's scroll: its divider, then the page; a note is only its
-    //--- title until opened
+    //--- One page in the tab's scroll: its section's divider when it starts one, then
+    //--- the page in a card whose header collapses it; a note starts collapsed
     component PageSection: ColumnLayout {
         id: section
         required property var modelData
@@ -1221,7 +1345,7 @@ Item {
         readonly property color pageAccent: omni.pageAccents[pid] || Theme.primary
         readonly property bool note: pid.startsWith("doc:")
         readonly property bool userPkgs: pid.startsWith("userpackages:")
-        readonly property bool open: !note || !!omni.openNotes[pid]
+        readonly property bool open: note ? !!omni.openNotes[pid] : !!omni.openPages[pid]
         readonly property var model: omni.info.pages[pid] || null
         readonly property var comp: note ? notePage : userPkgs ? userPkgsPage
             : omni.custom[pid] || (model ? settingsPage : null)
@@ -1232,19 +1356,31 @@ Item {
             omni.showPage()
         }
         onYChanged: omni.sectionMoved(section)
-        // A divider names each page, and a run of notes once
-        readonly property bool divided: !note || index === 0 || !omni.tabPages[index - 1].id.startsWith("doc:")
+        function toggle() {
+            if (note)
+                omni.openNote(pid, !open)
+            else
+                omni.setPageOpen(pid, !open)
+        }
+        // The rail's group this page starts; the untitled first group takes the tab's name
+        readonly property var prev: index > 0 ? omni.tabPages[index - 1] : null
+        readonly property var next: index + 1 < omni.tabPages.length ? omni.tabPages[index + 1] : null
+        readonly property bool divided: !prev || prev.group !== modelData.group
+        readonly property string sectionTitle: modelData.group
+            || (omni.info.tabs.find(t => t.id === omni.tab) || { title: "" }).title
+        // A section holding one page of its own name shows only the divider
+        readonly property bool headed: !(divided && modelData.title === modelData.group
+                                         && (!next || next.group !== modelData.group))
         visible: !!comp
         Layout.fillWidth: true
-        Layout.topMargin: divided && index > 0 ? 18 : 0
+        Layout.topMargin: index === 0 ? 0 : divided ? 22 : 4
         spacing: 6
 
-        //--- The page's name in a pill, lines fading out to both sides; a run of
-        //--- notes is named after its group
+        //--- The section's name in a pill, lines fading out to both sides
         RowLayout {
-            visible: section.divided
+            visible: section.divided && section.sectionTitle !== ""
             Layout.fillWidth: true
-            Layout.bottomMargin: 12
+            Layout.bottomMargin: 8
             spacing: 8
             Rectangle {
                 Layout.fillWidth: true
@@ -1263,24 +1399,13 @@ Item {
                 color: Qt.tint(Theme.card, Qt.alpha(section.pageAccent, 0.35))
                 border.width: 2
                 border.color: section.pageAccent
-                Row {
+                Text {
                     id: dividerName
                     anchors.centerIn: parent
-                    spacing: 10
-                    Icon {
-                        anchors.verticalCenter: parent.verticalCenter
-                        icon: Theme.glyph(section.modelData.icon, "description")
-                        size: 26
-                        fill: true
-                        color: Theme.inkContainer
-                    }
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: section.note ? section.modelData.group : section.modelData.title
-                        color: Theme.inkContainer
-                        font.pixelSize: 22
-                        font.weight: Font.ExtraBold
-                    }
+                    text: section.sectionTitle
+                    color: Theme.inkContainer
+                    font.pixelSize: 22
+                    font.weight: Font.ExtraBold
                 }
             }
             Rectangle { implicitWidth: 7; implicitHeight: 7; rotation: 45; color: section.pageAccent }
@@ -1295,43 +1420,110 @@ Item {
             }
         }
 
-        ListRow {
-            visible: section.note
-            icon: Theme.glyph(section.modelData.icon, "description")
-            title: section.modelData.title
-            subtitle: section.modelData.subtitle || ""
-            trailing: section.open ? "expand_less" : "expand_more"
-            onClicked: omni.openNote(section.pid, !section.open)
-        }
-
-        // Height from the page itself, as a layout-set one would loop with wrapped text
-        Item {
+        //--- The page's card, reaching into the gutter
+        Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: loader.item ? loader.item.implicitHeight : 0
-            //--- A faint wash of the page's colour, edged by its band in the gutter
-            Rectangle {
-                visible: section.divided && !!loader.item
-                x: -omni.gutter
-                width: parent.width + omni.gutter
-                height: parent.height
-                radius: 14
-                color: Qt.alpha(section.pageAccent, 0.05)
-            }
-            Rectangle {
-                visible: section.divided && !!loader.item
-                x: -omni.gutter + 2
-                width: 3
-                height: parent.height
-                radius: 1.5
-                color: Qt.alpha(section.pageAccent, 0.7)
-            }
-            Loader {
-                id: loader
-                width: parent.width
-                active: section.open && !!section.comp
-                sourceComponent: section.comp
-                // Data that came after the tab showed eases in
-                NumberAnimation on opacity { id: arrived; running: false; from: 0.3; to: 1; duration: 260 }
+            Layout.leftMargin: -omni.gutter
+            implicitHeight: frameCol.implicitHeight
+            radius: 20
+            color: Qt.alpha(section.pageAccent, section.headed && headHover.hovered && !section.open ? 0.1 : 0.05)
+            border.width: section.headed ? 1 : 0
+            border.color: Qt.alpha(section.pageAccent, section.open ? 0.22 : 0.15)
+            Behavior on color { ColorAnimation { duration: 150 } }
+
+            ColumnLayout {
+                id: frameCol
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
+                spacing: 0
+
+                //--- Header: icon, name, a short line and the chevron; tapping it collapses
+                RowLayout {
+                    visible: section.headed
+                    Layout.fillWidth: true
+                    Layout.margins: 12
+                    spacing: 12
+                    Rectangle {
+                        implicitWidth: 36
+                        implicitHeight: 36
+                        radius: 18
+                        color: section.pageAccent
+                        Icon {
+                            anchors.centerIn: parent
+                            icon: Theme.glyph(section.modelData.icon, "description")
+                            size: 20
+                            fill: true
+                            color: Theme.inkPrimary
+                        }
+                    }
+                    RowLayout {
+                        spacing: 8
+                        Layout.fillWidth: true
+                        Text {
+                            id: pageTitle
+                            text: section.modelData.title
+                            color: Theme.text
+                            font.pixelSize: 20
+                            font.weight: Font.Bold
+                            elide: Text.ElideRight
+                            Layout.maximumWidth: Math.ceil(pageTitleWidth.advanceWidth) + 1
+                            Layout.fillWidth: true
+                            TextMetrics { id: pageTitleWidth; font: pageTitle.font; text: pageTitle.text }
+                            // A generated page's blurb, or a custom page's line from the rail
+                            TitleTip {
+                                tip: section.modelData.subtitle || (section.model ? section.model.description : "")
+                            }
+                        }
+                        Item { Layout.fillWidth: true }
+                    }
+                    // Words, not a Chevron, so it reads apart from the dropdowns inside
+                    Chip {
+                        tappable: false  // the whole header takes the tap
+                        text: section.open ? "Hide" : "Show"
+                        accent: headHover.hovered
+                    }
+                    HoverHandler { id: headHover; cursorShape: Qt.PointingHandCursor }
+                    TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: section.toggle() }
+                }
+                Rectangle {
+                    visible: section.headed && body.height > 0
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 14
+                    Layout.rightMargin: 14
+                    implicitHeight: 1
+                    opacity: body.opacity
+                    color: Qt.alpha(section.pageAccent, 0.25)
+                }
+
+                // Height from the page itself, as a layout-set one would loop with wrapped
+                // text; it slides open and shut (Reveal.qml does the same for smaller content)
+                Item {
+                    id: body
+                    property bool armed: false
+                    Connections { target: section; function onOpenChanged() { body.armed = true } }
+                    Layout.fillWidth: true
+                    Layout.leftMargin: omni.gutter
+                    Layout.rightMargin: omni.gutter
+                    Layout.topMargin: section.headed && section.open ? 8 : 0
+                    Layout.bottomMargin: section.open ? 10 : 0
+                    Layout.preferredHeight: loader.item && section.open ? loader.item.implicitHeight : 0
+                    clip: true
+                    opacity: section.open ? 1 : 0
+                    Behavior on Layout.preferredHeight {
+                        enabled: body.armed
+                        NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
+                    }
+                    Behavior on opacity { enabled: body.armed; NumberAnimation { duration: 220; easing.type: Easing.OutQuad } }
+                    Loader {
+                        id: loader
+                        width: parent.width
+                        active: (section.open || body.height > 0) && !!section.comp
+                        sourceComponent: section.comp
+                        // Data that came after the tab showed eases in
+                        NumberAnimation on opacity { id: arrived; running: false; from: 0.3; to: 1; duration: 260 }
+                    }
+                }
             }
         }
 
@@ -1392,5 +1584,35 @@ Item {
         }
         // The toast stays while the cursor is on it
         HoverHandler { onHoveredChanged: hovered ? toastTimer.stop() : toastTimer.restart() }
+    }
+
+    //--- The tooltip a button or indicator asked for (Tip.qml), beside the cursor and
+    //--- kept inside the view
+    Rectangle {
+        id: tipBox
+        readonly property point at: omni.mapFromItem(null, Tip.at.x, Tip.at.y)
+        z: 10
+        visible: opacity > 0
+        opacity: Tip.shown ? 1 : 0
+        Behavior on opacity { NumberAnimation { duration: 120 } }
+        width: Math.min(tipText.implicitWidth, 340) + 22
+        height: tipText.implicitHeight + 14
+        x: Math.max(4, Math.min(at.x + 14, omni.width - width - 4))
+        y: at.y + 22 + height > omni.height - 4 ? at.y - height - 8 : at.y + 22
+        radius: 10
+        color: Theme.toast
+        border.width: 1
+        border.color: Qt.alpha(Theme.primary, 0.35)
+        Text {
+            id: tipText
+            anchors.centerIn: parent
+            width: Math.min(implicitWidth, 340)
+            text: Tip.text
+            textFormat: Tip.rich ? Text.StyledText : Text.PlainText
+            color: Theme.inkToast
+            font.pixelSize: 14
+            lineHeight: 1.1
+            wrapMode: Text.Wrap
+        }
     }
 }

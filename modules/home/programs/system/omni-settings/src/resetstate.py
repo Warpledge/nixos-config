@@ -15,6 +15,8 @@ HOME = os.path.expanduser("~")
 #--- on exit, extra warning). .db files are NeDB logs (one {"_id", "value"} per
 #--- line), the rest JSON
 APPS = {
+    ("claude", "enable"): ("Claude Code", ".claude/settings.json",
+                           ".claude/declarative-settings.json", None, ""),
     ("editors", "zed"): ("Zed", ".config/zed/settings.json",
                          ".config/zed/declarative-settings.json", None, ""),
     ("fileBrowsers", "duxFiles"): ("Dux Files", ".config/dfiles/ui-settings.json",

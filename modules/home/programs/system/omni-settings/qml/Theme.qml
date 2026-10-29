@@ -96,6 +96,11 @@ Singleton {
     }
     function toneFill(tone, base) { return Qt.tint(base, Qt.alpha(toneColor(tone), 0.2)) }
 
+    //--- Rows: a wash of the page's accent and an accent border, the same as the
+    //--- collapsed group cards (SettingsPage.qml)
+    function rowFill(accent, lit) { return Qt.alpha(accent, lit ? 0.13 : 0.07) }
+    function rowBorder(accent, open) { return Qt.alpha(accent, open ? 0.35 : 0.2) }
+
     FileView {
         path: Quickshell.env("HOME") + "/.cache/DankMaterialShell/dms-colors.json"
         watchChanges: true
@@ -126,7 +131,8 @@ Singleton {
         "applications-science": "science", "applications-system": "settings",
         "audio-speakers": "speaker", "audio-volume-high": "volume_up",
         "audio-x-generic": "music_note", "avatar-default": "person", "bluetooth": "devices",
-        "computer": "computer", "dialog-information": "info", "drive-harddisk": "backup",
+        "computer": "computer", "dialog-information": "info", "draw-brush": "brush",
+        "drive-harddisk": "backup",
         "edit-paste": "content_paste", "emblem-default": "check_circle",
         "face-smile-big": "mood", "flatpak": "widgets", "focus-windows": "select_window",
         "folder": "folder", "folder-download": "download", "go-home": "home", "help-browser": "lightbulb",
@@ -147,7 +153,7 @@ Singleton {
         "system-shutdown": "power_settings_new", "system-software-install": "install_desktop",
         "system-users": "group", "text-x-generic": "description", "user-available": "chat",
         "utilities-system-monitor": "monitoring", "utilities-terminal": "terminal",
-        "vcs-branch": "commit", "video-display": "desktop_windows",
+        "vcs-branch": "commit", "view-list": "checklist","video-display": "desktop_windows",
         "view-app-grid": "apps", "view-continuous": "view_agenda",
         "view-dual": "splitscreen_left", "view-fullscreen": "fullscreen",
         "view-grid": "view_quilt", "view-more-horizontal": "more_horiz",
@@ -232,4 +238,6 @@ Singleton {
                   .replace(/!!(.+?)!!/g, `<b><font color="${caution}">$1</font></b>`)
                   .replace(/\n/g, "<br>")
     }
+    //--- The same text without its marks, for a tooltip
+    function plain(text) { return String(text || "").replace(/\*\*|!!/g, "") }
 }

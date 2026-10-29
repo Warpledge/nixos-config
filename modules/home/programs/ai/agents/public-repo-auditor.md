@@ -2,7 +2,7 @@
 name: public-repo-auditor
 description: Read-only reviewer that checks a diff in this public NixOS repo for anything that must not be published. Use only when the user asks for an audit or whether something is safe to push; commits don't run it on their own.
 tools: Read, Grep, Glob, Bash
-model: opus
+model: sonnet
 effort: medium
 omitClaudeMd: true
 ---

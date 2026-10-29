@@ -5,6 +5,7 @@
   config,
   lib,
   pkgs,
+  user,
   ...
 }: let
   #--- One file per server; opencode.nix reads the context7 key from here too
@@ -15,7 +16,8 @@ in {
   #--------------------------------------------------------------------#
   programs.mcp = {
     enable = true;
-    servers = {
+    #--- Each behind claude.mcp.<name>; opencode.nix's own copies follow the same toggles
+    servers = lib.filterAttrs (name: _: user.claude.mcp.${name}) {
       nixos.command = lib.getExe pkgs.mcp-nixos;
 
       #--- Key is read from this file at launch, so it never enters the store or the repo

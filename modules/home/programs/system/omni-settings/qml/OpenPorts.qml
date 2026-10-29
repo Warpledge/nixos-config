@@ -17,20 +17,16 @@ ColumnLayout {
             error = reply.error
     })
 
-    Section { text: "Open Right Now" }
-    Text {
-        text: "What the running system accepts from other devices. Changes above show up here after Apply."
-        color: Theme.dim
-        font.pixelSize: 13
-        wrapMode: Text.Wrap
-        Layout.fillWidth: true
-        Layout.leftMargin: 6
+    Section {
+        text: "Open Right Now"
+        info: "What the running system accepts from other devices. Changes above show up here after Apply."
     }
     ListRow {
         visible: ports.error !== "" || (!!ports.open && !ports.open.length)
         icon: "lan"
         title: ports.error !== "" ? "Couldn't read the firewall" : "No ports are open"
-        subtitle: ports.error || "Other devices can't start connections to this computer."
+        alert: ports.error
+        info: ports.error ? "" : "Other devices can't start connections to this computer."
     }
     Rectangle {
         visible: !!ports.open && ports.open.length > 0

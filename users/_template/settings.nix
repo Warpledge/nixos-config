@@ -209,7 +209,21 @@
 
   #--- AI Tools
   claude.enable = false; # Claude Code (needs an Anthropic account)
+  claude.mods.ribbon = false; # Band above Claude Code's prompt: usage left, prompt cache
+  claude.mods.skins = false; # Skins: cards, tool rows and a wallpaper-coloured skin
+  claude.mods.fileTree = false; # File tree sidebar (needs /tui fullscreen in a terminal)
+  claude.mods.savvyProgress = false; # Progress bar and a live panel of subagents
+  claude.mods.blastRadius = false; # Shows what a risky rm or git command would change
+  claude.mods.replayTheater = false; # /replay steps through the last turn's edits
+  # Need BenAI's mods unzipped into ~/.local/opt/claude-mods
+  claude.mods.chatInventory = false; # Pane listing the chat's to-dos, files and tools
+  claude.mods.screenShare = false; # /screen-share hides names and emails while recording
+  claude.statusLine = false; # Status line under Claude Code's prompt: context used
+  claude.builtins.youShouldKnow = false; # Built-in "you should know" plugin
+  claude.builtins.agentsMd = true; # Built-in plugin that reads AGENTS.md files
+  claude.builtins.agentsMdFiles = "claude-md-or-agents-md"; # Files it loads
   claudeDesktop.enable = false; # Claude desktop app: chat and Claude Code
+  claudeDesktop.matugen = false; # Claude desktop app in your wallpaper's colours
   opencode.enable = false;
   opencodeDesktop.enable = false; # OpenCode's desktop app: a Claude Desktop-style GUI
   lmstudio.enable = false; # Runs language models locally
@@ -222,6 +236,87 @@
     edit = null; # Zed's inline suggestions
     chat = []; # Chat models
   };
+
+  #--- Claude Code Settings
+  # Written into ~/.claude/settings.json; changes made inside Claude Code stay
+  # until a rebuild changes the same setting here. null leaves it to Claude Code.
+  claude.model = null;
+  claude.effort = null;
+  claude.outputStyle = null;
+  #--- Claude Code Plugins
+  claude.plugins.claudeMdManagement = true;
+  claude.plugins.skillCreator = true;
+  claude.plugins.claudeCodeSetup = true;
+  claude.plugins.claudeSecurity = false; # Lists 9 agents every session; scans cost a lot
+  #--- MCP Servers (Claude Code and OpenCode)
+  claude.mcp.nixos = true;
+  claude.mcp.context7 = true;
+  claude.mcp.github = true;
+  claude.mcp.deepwiki = true;
+  claude.mcp.grep = true;
+  #--- claude.ai Connectors
+  claude.connectors.gmail = true;
+  claude.connectors.googleCalendar = true;
+  claude.connectors.googleDrive = true;
+  claude.connectors.claudeDocs = true;
+  #--- Account Skills
+  # Skills synced from your claude.ai account
+  claude.accountSkills.builtInBrowser = true;
+  claude.accountSkills.chromeBrowser = true;
+  claude.accountSkills.computerUse = true;
+  claude.accountSkills.deepResearch = true;
+  claude.accountSkills.docs = true;
+  claude.accountSkills.docx = true;
+  claude.accountSkills.googleWorkspace = true;
+  claude.accountSkills.importMemory = true;
+  claude.accountSkills.mcpBuilder = true;
+  claude.accountSkills.morning = true;
+  claude.accountSkills.pdf = true;
+  claude.accountSkills.pptx = true;
+  claude.accountSkills.xlsx = true;
+  #--- Repo Skills
+  # on, name-only, user-invocable-only or off; a model of null keeps the skill's own
+  claude.skills.addApp = "on";
+  claude.skills.androidDebloatRedo = "on";
+  claude.skills.apparmorCheck = "on";
+  claude.skills.commit = "on";
+  claude.skills.disablePackage = "on";
+  claude.skills.flakeUpdate = "on";
+  claude.skills.freetubeSync = "on";
+  claude.skills.gameTroubleshooting = "on";
+  claude.skills.handoff = "on";
+  claude.skills.mokuBump = "on";
+  claude.skills.onboard = "on";
+  claude.skills.prReview = "on";
+  claude.skills.rpgmSetup = "on";
+  claude.skills.todo = "on";
+  claude.skills.upstream = "on";
+  claude.skills.vnSetup = "on";
+  claude.skillModels.addApp = null;
+  claude.skillModels.androidDebloatRedo = null;
+  claude.skillModels.apparmorCheck = null;
+  claude.skillModels.commit = null;
+  claude.skillModels.disablePackage = null;
+  claude.skillModels.flakeUpdate = null;
+  claude.skillModels.freetubeSync = null;
+  claude.skillModels.gameTroubleshooting = null;
+  claude.skillModels.handoff = null;
+  claude.skillModels.mokuBump = null;
+  claude.skillModels.onboard = null;
+  claude.skillModels.prReview = null;
+  claude.skillModels.rpgmSetup = null;
+  claude.skillModels.todo = null;
+  claude.skillModels.upstream = null;
+  claude.skillModels.vnSetup = null;
+  #--- Subagents
+  claude.agents.buildTriager = "on";
+  claude.agents.docsDriftAuditor = "on";
+  claude.agents.proseReviewer = "on";
+  claude.agents.publicRepoAuditor = "on";
+  claude.agentModels.buildTriager = null;
+  claude.agentModels.docsDriftAuditor = null;
+  claude.agentModels.proseReviewer = null;
+  claude.agentModels.publicRepoAuditor = null;
 
   #--- Japanese Language & Game Support
   # ime: fcitx5 + Mozc input method for typing hiragana/katakana/kanji

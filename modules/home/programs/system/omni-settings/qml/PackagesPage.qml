@@ -143,8 +143,8 @@ ColumnLayout {
         visible: page.view.packageCount < 0
         icon: page.view.packageError ? "error" : "progress_activity"
         title: page.view.packageError ? "Couldn't read the package list" : "Reading the package list…"
-        subtitle: page.view.packageError
-            || "The first time, and once a week after, the list is downloaded again; that takes a minute or so."
+        alert: page.view.packageError
+        info: "The first time, and once a week after, the list is downloaded again; that takes a minute or so."
         titleLines: 2
     }
 
@@ -215,7 +215,9 @@ ColumnLayout {
                     enabled: text === "Install"
                     onClicked: page.install(result.attr)
                 }
-                Icon { icon: result.open ? "expand_less" : "expand_more"; size: 20 }
+                Chevron {
+                    open: result.open
+                }
             }
 
             Text {
@@ -227,11 +229,10 @@ ColumnLayout {
             }
 
             //--- Details
-            ColumnLayout {
-                visible: result.open && !!result.info
-                Layout.fillWidth: true
+            Reveal {
+                open: result.open && !!result.info
+                gap: resultCol.spacing
                 Layout.leftMargin: 50
-                spacing: 6
                 Repeater {
                     model: result.info ? result.info.homepage : []
                     Detail {

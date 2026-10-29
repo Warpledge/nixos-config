@@ -52,40 +52,11 @@ ColumnLayout {
         view.setUserPackages(g)
     }
 
-    //--- Hero
-    Rectangle {
-        Layout.fillWidth: true
-        implicitHeight: hero.implicitHeight + 28
-        radius: 16
-        color: Theme.card
-        RowLayout {
-            id: hero
-            anchors.fill: parent
-            anchors.margins: 14
-            spacing: 14
-            ColumnLayout {
-                spacing: 2
-                Layout.fillWidth: true
-                Text {
-                    text: page.category
-                        ? `User packages sorted under ${page.category}. Move one to list it under another category.`
-                        : "Packages you added from Search, installed as they come with no settings of their own, "
-                          + "sorted into categories you pick. Apps with settings made for them are under Default "
-                          + "Packages."
-                    color: Theme.dim
-                    font.pixelSize: 13
-                    wrapMode: Text.Wrap
-                    Layout.fillWidth: true
-                }
-            }
-        }
-    }
-
     Text {
         visible: page.groups.length > 0
         text: `Saved for ${page.view.scopeTitle()}.`
         color: Theme.dim
-        font.pixelSize: 13
+        font.pixelSize: 14
         Layout.leftMargin: 6
     }
 
@@ -95,7 +66,7 @@ ColumnLayout {
         visible: !page.groups.length
         icon: "package_2"
         title: "No user packages yet"
-        subtitle: "Find one on the Search page and press Install."
+        info: "Find one on the Search page and press Install."
         chevron: true
         onClicked: page.view.go("packages", "packages")
     }

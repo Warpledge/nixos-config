@@ -169,8 +169,54 @@
   discord.arrpc.enable = true;
 
   #--- AI Tools
-  claude = {enable = true;};
-  claudeDesktop = {enable = true;};
+  claude = {
+    enable = true;
+    mods.ribbon = true;
+    mods.skins = true;
+    mods.fileTree = true;
+    mods.savvyProgress = true;
+    mods.blastRadius = true;
+    mods.replayTheater = true;
+    mods.chatInventory = true;
+    mods.screenShare = true;
+    statusLine = true;
+    builtins.youShouldKnow = true;
+    builtins.agentsMd = false;
+    plugins = {
+      claudeMdManagement = true;
+      skillCreator = true;
+      claudeCodeSetup = false;
+    };
+    mcp = {
+      nixos = true;
+      context7 = true;
+      github = true;
+      deepwiki = true;
+      grep = true;
+    };
+    connectors.claudeDocs = true;
+    accountSkills = {
+      builtInBrowser = true;
+      chromeBrowser = true;
+      computerUse = true;
+      deepResearch = true;
+      docs = true;
+      importMemory = true;
+      mcpBuilder = true;
+      googleWorkspace = false;
+    };
+    model = "opus";
+    effort = "medium";
+    outputStyle = "Concise";
+    builtins.agentsMdFiles = "claude-md";
+    connectors.googleDrive = false;
+    connectors.googleCalendar = false;
+    connectors.gmail = false;
+  };
+  claudeDesktop = {
+    enable = true;
+    matugen = true;
+  };
   opencode = {enable = true;};
   opencodeDesktop = {enable = true;};
   lmstudio = {enable = true;};

@@ -58,18 +58,18 @@
         command = [(lib.getExe pkgs.context7-mcp)];
         # Same file as tokenDir in mcp.nix
         environment.CONTEXT7_API_KEY = "{file:${config.home.homeDirectory}/.nixos-config-mcp/context7}";
-        enabled = true;
+        enabled = user.claude.mcp.context7;
       };
 
       settings.mcp.deepwiki = {
         type = "remote";
         url = "https://mcp.deepwiki.com/mcp";
-        enabled = true;
+        enabled = user.claude.mcp.deepwiki;
       };
       settings.mcp.grep = {
         type = "remote";
         url = "https://mcp.grep.app";
-        enabled = true;
+        enabled = user.claude.mcp.grep;
       };
       #--- Off: opencode loads every tool schema up front and GitHub's are the bulk;
       #--- the local models use `gh` instead

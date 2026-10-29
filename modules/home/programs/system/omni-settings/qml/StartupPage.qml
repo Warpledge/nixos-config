@@ -72,43 +72,24 @@ ColumnLayout {
         })
     }
 
-    //--- Hero
-    Rectangle {
-        Layout.fillWidth: true
-        implicitHeight: hero.implicitHeight + 28
-        radius: 16
-        color: Theme.card
-        ColumnLayout {
-            id: hero
-            anchors.fill: parent
-            anchors.margins: 14
-            Text {
-                text: "Variables every program you start sees, and programs started with your desktop "
-                      + "session. Both apply on the next rebuild; autostart programs run the next time "
-                      + "you log in. Changing one the desktop already sets (PATH, QT_QPA_PLATFORM) can "
-                      + "stop apps from starting."
-                color: Theme.dim
-                font.pixelSize: 13
-                wrapMode: Text.Wrap
-                Layout.fillWidth: true
-            }
-        }
-    }
-
     Text {
         text: `Saved for ${page.view.scopeTitle()}.`
         color: Theme.dim
-        font.pixelSize: 13
+        font.pixelSize: 14
         Layout.leftMargin: 6
     }
 
     //--- Environment variables
-    Section { text: "Environment Variables" }
+    Section {
+        text: "Environment Variables"
+        info: "Variables every program you start sees, from the next rebuild. !!Changing one the "
+              + "desktop already sets (PATH, QT_QPA_PLATFORM) can stop apps from starting.!!"
+    }
     ListRow {
         visible: Object.keys(page.env).length === 0
         icon: "terminal"
         title: "No variables of your own"
-        subtitle: "Apps fall back to the session's variables until you add one here."
+        info: "Apps fall back to the session's variables until you add one here."
     }
     Repeater {
         model: Object.keys(page.env).sort((a, b) => a.localeCompare(b))
@@ -155,12 +136,15 @@ ColumnLayout {
     }
 
     //--- Autostart
-    Section { text: "Autostart" }
+    Section {
+        text: "Autostart"
+        info: "Programs started with your desktop session, from the next login after a rebuild."
+    }
     ListRow {
         visible: Object.keys(page.autostart).length === 0
         icon: "rocket_launch"
         title: "No programs of your own"
-        subtitle: "Programs listed here start with your desktop session."
+        info: "Programs listed here start with your desktop session."
     }
     Repeater {
         model: Object.keys(page.autostart).sort((a, b) => a.localeCompare(b))
