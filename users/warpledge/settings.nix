@@ -172,6 +172,7 @@
   claude = {
     enable = true;
     mods.band = true;
+    builtins.youShouldKnow = true;
   };
   claudeDesktop = {enable = true;};
   opencode = {enable = true;};

@@ -97,10 +97,24 @@
     home.sessionVariables.CLAUDE_CODE_SEND_FEEDBACK = "0";
 
     #--------------------------------------------------------------------#
-    #-- Mods
+    #-- Mods and Built-in Plugins
     #--------------------------------------------------------------------#
     #--- Repo mods, each behind claude.mods.<name>. Linked whole, not through
     #--- programs.claude-code.plugins: its per-file links fail the hooks path check
     home.file.".claude/skills/band" = lib.mkIf user.claude.mods.band {source = ./mods/band;};
+
+    #--- Built-in plugins, each behind claude.builtins.<name>; sets only its
+    #--- enabledPlugins key, the rest of settings.json stays writable
+    home.activation.claudeBuiltinPlugins = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      if [[ ! -v DRY_RUN ]]; then
+        settings="$HOME/.claude/settings.json"
+        [ -s "$settings" ] || { install -d "$HOME/.claude"; echo '{}' > "$settings"; }
+        tmp=$(mktemp)
+        ${lib.getExe pkgs.jq} \
+          --argjson ysk ${lib.boolToString user.claude.builtins.youShouldKnow} \
+          '.enabledPlugins["cc-plugin-you-should-know@builtin"] = $ysk' \
+          "$settings" > "$tmp" && mv "$tmp" "$settings"
+      fi
+    '';
   };
 }
