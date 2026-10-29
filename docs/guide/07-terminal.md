@@ -13,6 +13,7 @@ Everything in Omni Settings can also be done from a terminal (`Mod+Return`). You
 | `nixm upgrade` | Update every source and rebuild |
 | `nixm flake-update` | Update the sources without rebuilding |
 | `nixm dryrun` | Build without switching, to see if it works |
+| `nixm check-updates` | List newer upstream versions of pinned apps, and disabled packages that build again |
 | `nixm rollback` | Pick an older generation and switch to it |
 | `nixm gc` | Clean up, keeping the last five generations |
 | `nixm backup` | Back up FreeTube and Zen |

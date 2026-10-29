@@ -249,6 +249,7 @@
         "nixm upgrade|''${C_NIX}󰦗''${R} Upgrade System"
         "nixm flake-update|''${C_NIX}󰏢''${R} Flake Update"
         "nixm dryrun|''${C_NIX}󰚀''${R} Dry-run Rebuild"
+        "nixm check-updates|''${C_NIX}󰚰''${R} Check Upstream Updates"
         "nixm lint|''${C_NIX}󰉨''${R} Lint Config"
         "nixm optimize|''${C_NIX}󰚀''${R} Store Optimize"
         "nixm gc|''${C_WRN}󰭜''${R} Collect Garbage"
@@ -395,6 +396,19 @@
         dryrun)
           echo "Running dry-run rebuild (no changes will be made)..."
           nh os switch --dry "$FLAKE_PATH#nixosConfigurations.$MACHINE"
+          ;;
+        #--- Omni Settings' Updates page check (src/updatestate.py), as a table
+        check-updates)
+          echo "Checking upstream versions..."
+          ${config.omni-settings.package}/bin/omni-settings-backend upstream '{"force":true}' |
+            ${pkgs.jq}/bin/jq -r 'if .ok then .data.rows | group_by(.kind)[]
+              | "\n\(.[0].kind | ascii_upcase)", (.[]
+                | "  \(if .status == "update" then "*" else " " end) \(.name): "
+                  + (if .kind == "disabled" then .note
+                     elif .status == "update" then "\(.current) -> \(.latest)  \(.link)"
+                     elif .status == "ok" then "up to date"
+                     else .note end))
+              else "error: \(.error)" end'
           ;;
         gc)
           nh clean all --keep 5
@@ -708,6 +722,7 @@
           echo "  upgrade           - Rebuild and upgrade system"
           echo "  flake-update      - Update flake inputs"
           echo "  dryrun            - Dry-run rebuild"
+          echo "  check-updates     - New upstream versions of pinned apps"
           echo "  gc                - Garbage collection"
           echo "  optimize          - Optimize Nix store"
           echo "  rollback          - Rollback to previous generation"

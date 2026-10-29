@@ -39,6 +39,7 @@ import protonstate  # noqa: E402
 import schema  # noqa: E402
 import servicestate  # noqa: E402
 import system  # noqa: E402
+import updatestate  # noqa: E402
 import windowrulestate as wr  # noqa: E402
 
 #--- The root helper every rebuild goes through (nixos/system/user/omni-settings-helper.nix)
@@ -58,6 +59,7 @@ TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
                 ("git", "Git", ("vcs-branch-symbolic", "branch-symbolic", "folder-remote-symbolic")),
                 ("flatpaks", "Flatpaks", ("flatpak-symbolic", "system-software-install-symbolic")),
                 ("backups", "Backups", ("drive-harddisk-symbolic", "document-save-symbolic")),
+                ("updates", "Updates", ("software-update-available-symbolic", "view-refresh-symbolic")),
                 ("people", "Users", ("system-users-symbolic", "avatar-default-symbolic"))],
        "packages": [("packages", "Search", ("system-search-symbolic", "edit-find-symbolic"))],
        "niri": [("shell", "Shell", ("view-app-grid-symbolic",)),
@@ -77,6 +79,8 @@ NAV_SUBTITLES = {"overview": "Updates, freeing space, versions", "git": "Changes
                  "flatpaks": "Apps nixpkgs doesn't have: update them, clean up, and switch each one "
                              "on or off",
                  "backups": "Back up app data",
+                 "updates": "New upstream versions of hand-pinned apps, and disabled packages that "
+                            "build again",
                  "people": "Who can log in to this computer. Each person picks their own apps by "
                            "opening Omni Settings on their own account.", "packages": "Find packages in nixpkgs",
                  "shell": "DankMaterialShell, the bar, launcher and lock screen niri runs with. "
@@ -759,6 +763,14 @@ def cmd_flatseal(_cfg, args):
 
 
 #--------------------------------------------------------------------#
+#-- Upstream updates
+#--------------------------------------------------------------------#
+def cmd_upstream(cfg, args):
+    """What upstream released past the hand-pinned versions; cached: the last check only."""
+    return updatestate.run(cfg, force=bool(args.get("force")), cached_only=bool(args.get("cached")))
+
+
+#--------------------------------------------------------------------#
 #-- Backups
 #--------------------------------------------------------------------#
 def cmd_backups(cfg, _args):
@@ -1027,7 +1039,7 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "git": cmd_git, "gitSummary": cmd_git_summary, "setBackup": cmd_set_backup,
             "flatpaks": cmd_flatpaks, "flatpakUpdates": cmd_flatpak_updates, "flatpakRun": cmd_flatpak_run,
             "flatpakForget": cmd_flatpak_forget, "flatseal": cmd_flatseal,
-            "backups": cmd_backups, "backup": cmd_backup,
+            "backups": cmd_backups, "backup": cmd_backup, "upstream": cmd_upstream,
             "people": cmd_people, "checkPerson": cmd_check_person,
             "services": cmd_services, "serviceLog": cmd_service_log, "serviceRestart": cmd_service_restart,
             "ports": cmd_ports,
