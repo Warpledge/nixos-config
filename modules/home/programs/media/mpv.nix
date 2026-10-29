@@ -12,7 +12,7 @@
   in ''no-osd change-list glsl-shaders set "${lib.concatStringsSep ":" files}"; show-text "Anime4K: ${label}"'';
   #--- ArtCNN C4F32, an anime-trained luma doubler; not in nixpkgs
   artcnn = pkgs.fetchurl {
-    url = "https://raw.githubusercontent.com/Artoriuz/ArtCNN/a1b6ace035df4a9e9a113713dd7ee4eb92dd67ea/GLSL/ArtCNN_C4F32.glsl";
+    url = "https://raw.githubusercontent.com/Artoriuz/ArtCNN/0837e5326e710f49e2ab0a8d995da0708047442e/GLSL/ArtCNN_C4F32.glsl";
     hash = "sha256-93O85s9f5+Xl1Zmmle3UDfXNeiDD0IxNFk0HWR1b6tM=";
   };
 in {
