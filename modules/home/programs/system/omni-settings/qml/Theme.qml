@@ -17,7 +17,7 @@ Singleton {
         primary: "#cba6f7", on_primary: "#1e1e2e", primary_container: "#4f3d6b",
         on_primary_container: "#ead7ff", secondary_container: "#45475a",
         on_secondary_container: "#cdd6f4", tertiary: "#f9e2af", error: "#f38ba8",
-        on_error: "#1e1e2e", inverse_surface: "#cdd6f4", inverse_on_surface: "#1e1e2e"
+        on_error: "#1e1e2e"
     })
     function col(name) { return c[name] || fallback[name] }
 
@@ -38,8 +38,10 @@ Singleton {
     readonly property color inkSelected: text
     readonly property color error: col("error")
     readonly property color inkError: col("on_error")
-    readonly property color toast: col("inverse_surface")
-    readonly property color inkToast: col("inverse_on_surface")
+    // Not inverse_surface: matugen makes it light in dark mode, and a tip's yellow
+    // caution and primary app names vanish on it
+    readonly property color toast: col("surface_container_highest")
+    readonly property color inkToast: col("on_surface")
     // Matugen has no success or warning role, and tertiary needn't be yellow; DMS's
     // terminal green and yellow (dank16 color2 and color3) follow the theme
     property string green: ""
