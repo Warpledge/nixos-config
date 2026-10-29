@@ -1,5 +1,5 @@
 #=====================================================================#
-# MCP SERVERS - SHARED BY CLAUDE CODE, OPENCODE AND CLAUDE DESKTOP
+# MCP SERVERS - SHARED BY CLAUDE CODE AND OPENCODE
 #=====================================================================#
 {
   config,
