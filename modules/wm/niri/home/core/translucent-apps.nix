@@ -22,7 +22,11 @@
   {app-id = "Zotero";}
   {app-id = "io.github.alainm23.planify";}
   {app-id = "org.quickshell";}
-  {app-id = "^com\\.anthropic\\.Claude$";}
+  # Floating = Quick Entry, which would otherwise show the wallpaper through its card
+  {
+    app-id = "^com\\.anthropic\\.Claude$";
+    is-floating = false;
+  }
   {app-id = "^ai\\.opencode\\.desktop$";}
   # DMS's own windows: Settings, System Monitor, Notepad, Keybinds and the rest
   {app-id = "^dev\\.duxlabs\\.shell$";}
