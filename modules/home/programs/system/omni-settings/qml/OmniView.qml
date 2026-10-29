@@ -1400,10 +1400,11 @@ Item {
                             Layout.fillWidth: true
                         }
                     }
-                    Chevron {
-                        size: 30
-                        open: section.open
-                        lit: headHover.hovered
+                    // Words, not a Chevron, so it reads apart from the dropdowns inside
+                    Chip {
+                        tappable: false  // the whole header takes the tap
+                        text: section.open ? "Hide" : "Show"
+                        accent: headHover.hovered
                     }
                     HoverHandler { id: headHover; cursorShape: Qt.PointingHandCursor }
                     TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: section.toggle() }

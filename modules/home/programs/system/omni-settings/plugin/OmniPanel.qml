@@ -33,8 +33,8 @@ Item {
         id: slideout
         layerNamespace: "dms:omni-settings"
         slideEdge: "right"
-        // DSlideout's 480, plus the page rail and its gap, less the margins dropped below
-        slideoutWidth: 490
+        // The window's default width (shell.qml), so pages lay out the same in both
+        slideoutWidth: 618
         // Drops DSlideout's own content margin; OmniView's edge is the only gap
         Component.onCompleted: {
             container.anchors.topMargin = 0
