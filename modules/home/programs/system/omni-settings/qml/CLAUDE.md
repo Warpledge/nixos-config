@@ -11,6 +11,7 @@ Page-by-page behaviour and the backend modules behind each page are in `src/CLAU
 ## Gotchas
 
 - QML reads a property named `on` plus a capital (`onPrimary`, `onLine`) as a signal handler, so it comes out undefined: the colours are `Theme.ink*`, `Backend.stream`'s callback is `each`.
+- Whatever a dropdown opens goes in a `Reveal` (`Reveal.qml`) with `gap` set to the parent layout's spacing, so it slides instead of popping in; Loaders and Repeaters inside gate on its `shown`, not the open flag, so they stay until it has closed.
 - Tap handlers take `gesturePolicy: TapHandler.ReleaseWithinBounds`; with the default, a click that closes a dialog also reaches the row under it.
 - Inside an inline component, `view: view` binds the property to itself, which is why `OmniView`'s id is `omni`. Its JS has no `Array.flatMap`.
 - JSON sent back from QML loses `.0` on whole numbers and can come back with its keys sorted, so files are written from data the backend read itself (`windowrulestate.edited`, the window rules undo). A `Repeater` delegate's `modelData` is a copy: edits go through the source list by index (`RuleEditor.qml`).

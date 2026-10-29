@@ -336,7 +336,8 @@ window, over a Python backend; full notes split across its `CLAUDE.md`,
   `gesturePolicy: TapHandler.ReleaseWithinBounds`. JSON sent back from QML
   loses `.0` and can have its keys sorted, so write files from data the
   backend read; a `Repeater` delegate's `modelData` is a copy, so edit the
-  source list by index.
+  source list by index. What a dropdown opens goes in a `Reveal`
+  (`Reveal.qml`), and Loaders inside it gate on its `shown`.
 
 **`modules/home/programs/media/freetube/`**
 
