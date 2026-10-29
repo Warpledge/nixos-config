@@ -453,6 +453,9 @@
     "open-floating": true
   },
   {
+    "include": "sideRail"
+  },
+  {
     "include": "styling"
   },
   {

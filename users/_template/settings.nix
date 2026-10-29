@@ -364,4 +364,11 @@
   # Rules page, by rule id: {minecraft-fullscreen = {enable = false;};}, or a
   # whole rule in its place. Your own rules have ids starting custom-.
   windowRules = {};
+
+  #--- Side Rail
+  # Changes to the Mod+A side rail's apps, made on Omni Settings' Side Rail
+  # page, by id: {brave-ai = {enable = false;}; terminal = {width = 900;};}.
+  # Your own apps have ids starting custom-, a name, an optional icon, and a
+  # url (opened as a Helium app window) or a command (a list) and its appId.
+  sideRail = {};
 }

@@ -5,8 +5,11 @@
   config,
   lib,
   user,
+  machine,
   ...
 }: let
+  sideRail = import ../dms/plugins/side-rail/apps.nix {inherit lib user machine;};
+
   #--- Rules that need Nix (the translucent app list), spliced in
   #--- where window-rules.json has {"include": "<name>"}
   included = {
@@ -51,6 +54,21 @@
       }
       # The cast-target rule's colours: dms/colors.kdl (theme/matugen/niri-colors.kdl)
     ];
+
+    #--- The Mod+A rail's apps open docked beside it (dms/plugins/side-rail);
+    #--- SideRail.qml then sets the height and any width saved for the app
+    sideRail =
+      map (a: {
+        matches = [{app-id = "^${lib.escapeRegex a.appId}$";}];
+        open-floating = true;
+        default-column-width.fixed = a.width;
+        default-floating-position = {
+          x = sideRail.geometry.rail + sideRail.geometry.gap;
+          y = sideRail.geometry.gap;
+          relative-to = "top-left";
+        };
+      })
+      sideRail.apps;
   };
 
   #--- Every other rule is window-rules.json's, with the user's windowRules

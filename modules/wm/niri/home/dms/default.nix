@@ -4,8 +4,10 @@
   inputs,
   lib,
   user,
+  machine,
   ...
 }: let
+  sideRail = import ./plugins/side-rail/apps.nix {inherit lib user machine;};
   # The theme path in the mirrored file names one home folder; point it at this user's.
   # The cursor size follows Stylix (cursorSize in the machine's settings.nix).
   mirrored = lib.importJSON ./settings.json;
@@ -73,6 +75,17 @@ in {
         substituteInPlace $out/GitStatusWidget.qml --subst-var-by backend \
           ${config.omni-settings.package}/bin/omni-settings-backend
       '';
+
+      # The Mod+A rail of docked apps, with its app list baked in
+      sideRail = {
+        enable = sideRail.apps != [];
+        src = pkgs.runCommand "dms-side-rail" {} ''
+          mkdir $out
+          cp ${./plugins/side-rail/plugin.json} $out/plugin.json
+          substitute ${./plugins/side-rail/SideRail.qml} $out/SideRail.qml \
+            --subst-var-by config ${lib.escapeShellArg (builtins.toJSON sideRail)}
+        '';
+      };
 
       # A bar widget: its IPC target only exists while it sits in a bar
       # (rightWidgets in settings.json).
