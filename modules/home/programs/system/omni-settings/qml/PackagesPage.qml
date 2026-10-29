@@ -215,11 +215,8 @@ ColumnLayout {
                     enabled: text === "Install"
                     onClicked: page.install(result.attr)
                 }
-                Icon {
-                    icon: "expand_more"
-                    size: 20
-                    rotation: result.open ? 180 : 0
-                    Behavior on rotation { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
+                Chevron {
+                    open: result.open
                 }
             }
 

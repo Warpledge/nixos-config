@@ -119,11 +119,8 @@ ColumnLayout {
                         })
                     }
                 }
-                Icon {
-                    icon: "expand_more"
-                    size: 18
-                    rotation: unitRow.open ? 180 : 0
-                    Behavior on rotation { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
+                Chevron {
+                    open: unitRow.open
                 }
             }
             Reveal {

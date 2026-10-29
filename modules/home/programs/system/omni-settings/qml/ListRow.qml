@@ -14,6 +14,8 @@ Rectangle {
     property string button: ""
     property string trailing: ""
     property bool chevron: false
+    property bool expandable: false  // a dropdown: a turning Chevron, open while `expanded`
+    property bool expanded: false
     property bool selected: false
     property bool compact: false
     property int titleLines: 1
@@ -21,11 +23,16 @@ Rectangle {
     signal clicked
     Layout.fillWidth: true
     implicitHeight: rowCol.implicitHeight + (compact ? 14 : 22)
-    radius: 14
+    readonly property color accent: Theme.accentOf(row)
+    readonly property bool plainCard: !selected && !tone && !compact
+    radius: compact ? 14 : 16
     opacity: enabled ? 1 : 0.5
     color: selected ? Theme.selected
          : tone ? Theme.toneFill(tone, hover.hovered ? Theme.hover : Theme.card)
-         : hover.hovered ? Theme.hover : compact ? "transparent" : Theme.card
+         : compact ? (hover.hovered ? Theme.hover : "transparent")
+         : Theme.rowFill(accent, hover.hovered && !expanded)
+    border.width: plainCard ? 1 : 0
+    border.color: Theme.rowBorder(accent, expanded)
     Behavior on color { ColorAnimation { duration: 120 } }
 
     ColumnLayout {
@@ -68,6 +75,7 @@ Rectangle {
             Chip { tappable: false; visible: row.tag !== ""; text: row.tag; accent: !row.tagSuccess; success: row.tagSuccess }
             Pill { visible: row.button !== ""; text: row.button; onClicked: row.clicked() }
             Icon { visible: row.chevron; icon: "chevron_right" }
+            Chevron { visible: row.expandable; open: row.expanded; lit: hover.hovered }
             Icon { visible: row.trailing !== ""; icon: row.trailing; size: 18 }
         }
 

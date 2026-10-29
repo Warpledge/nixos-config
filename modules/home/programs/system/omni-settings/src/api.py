@@ -98,6 +98,10 @@ STATE_DIR = os.path.join(os.environ.get("XDG_STATE_HOME") or os.path.expanduser(
                          "omni-settings")
 #--- What's New items the user dismissed, as "domain:dotted.path"
 DISMISSED = os.path.join(STATE_DIR, "whats-new-dismissed.json")
+#--- Which pages are collapsed and which cards are open, kept across launches
+UI_STATE = os.path.join(STATE_DIR, "ui.json")
+#--- The Apps section's pages, merged into one page of cards
+APPS_PAGE = "page:Default Packages"
 
 
 #--------------------------------------------------------------------#
@@ -120,6 +124,15 @@ def read_dismissed():
             return set(json.load(f))
     except (OSError, ValueError):
         return set()
+
+
+def read_ui():
+    try:
+        with open(UI_STATE) as f:
+            data = json.load(f)
+        return data if isinstance(data, dict) else {}
+    except (OSError, ValueError):
+        return {}
 
 
 def shown(setting, value):
@@ -226,6 +239,16 @@ def shell_categories(shell):
     return sorted(cats, key=lambda c: rank.get(c["links"][0]["tab"], len(rank)))
 
 
+def app_card(page, pid, groups):
+    """One Apps page as a card on the Default Packages page; its template groups
+    become headings inside it (each setting's `sub`) when they all have a name."""
+    named = len(groups) > 1 and all(g["title"] for g in groups)
+    settings = [dict(s, sub=g["title"] if named else "") for g in groups for s in g["settings"]]
+    return {"title": page.title, "description": page.description, "collapsed": True,
+            "locked": any(g["locked"] for g in groups), "icon": [page.icon, schema.FALLBACK_ICON],
+            "card": pid, "settings": settings, "links": [l for g in groups for l in g["links"]]}
+
+
 def cmd_load(cfg, _args):
     """Everything the generated pages need, from one read of the settings."""
     state = loaded(cfg)
@@ -243,6 +266,7 @@ def cmd_load(cfg, _args):
         if items:
             nav[tab].append({"id": "", "title": "", "items": items})
     pages, by_section = {}, {key: [] for key, _ in schema.SECTIONS}
+    apps_groups = []
     # Under niri every DMS link moves to the Shell page, in categories (shellLinks)
     shell_links = wm == "niri"
     shell = {}
@@ -267,6 +291,9 @@ def cmd_load(cfg, _args):
                            "links": links})
         if not groups:
             continue
+        if page.section == "apps" or page.section not in by_section and page.section != "top":
+            apps_groups.append(app_card(page, pid, groups))
+            continue
         has_user = any(s.domain == "user" for g in page.groups for s in g.settings)
         pages[pid] = {"id": pid, "title": page.title, "description": page.description,
                       "icon": [page.icon, schema.FALLBACK_ICON], "intro": schema.PAGE_INTROS.get(page.title, ""),
@@ -274,6 +301,12 @@ def cmd_load(cfg, _args):
         if page.section != "top":
             by_section.get(page.section, by_section["apps"]).append(
                 {"id": pid, "title": page.title, "icon": [page.icon, schema.FALLBACK_ICON]})
+    if apps_groups:
+        pages[APPS_PAGE] = {"id": APPS_PAGE, "title": "Default Packages", "description": "",
+                            "icon": ["package-x-generic-symbolic"], "intro": "",
+                            "changeFor": multi, "groups": apps_groups}
+        by_section["apps"].append({"id": APPS_PAGE, "title": "Default Packages",
+                                   "icon": ["package-x-generic-symbolic"]})
     startup = [s for p in state.pages for g in p.groups for s in g.settings
                if (s.domain, s.path) in (("user", ("env",)), ("user", ("autostart",)))]
     mime_types = next((s for p in state.pages for g in p.groups for s in g.settings
@@ -324,7 +357,7 @@ def cmd_load(cfg, _args):
             "admin": admin, "direct": direct, "canApply": bool(helper()) and (direct or not admin),
             "banner": banner, "userMachines": state.user_machines,
             "tabs": [{"id": t, "title": title, "icon": list(TAB_ICONS[t])} for t, title in TABS],
-            "nav": nav, "pages": pages, "whatsNew": new, "quick": QUICK,
+            "nav": nav, "pages": pages, "whatsNew": new, "ui": read_ui(), "quick": QUICK,
             "shellLinks": shell_categories(shell),
             "userPackages": user_packages and setting_json(cfg, state, user_packages, multi, modules),
             "keybinds": keybinds and setting_json(cfg, state, keybinds, multi, modules),
@@ -407,6 +440,15 @@ def cmd_dismiss(_cfg, args):
     with open(DISMISSED, "w") as f:
         json.dump(sorted(keys), f)
     return sorted(keys)
+
+
+def cmd_saveUi(_cfg, args):
+    """Keeps the collapsed pages and open cards (args.collapsed, args.open)."""
+    data = {k: sorted(set(args.get(k) or [])) for k in ("collapsed", "open")}
+    os.makedirs(STATE_DIR, exist_ok=True)
+    with open(UI_STATE, "w") as f:
+        json.dump(data, f)
+    return data
 
 
 def cmd_stale(cfg, _args):
@@ -938,7 +980,7 @@ def cmd_save_window_rule(cfg, args):
 
 
 COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cmd_save,
-            "dismiss": cmd_dismiss,
+            "dismiss": cmd_dismiss, "saveUi": cmd_saveUi,
             "stale": cmd_stale, "removeStale": cmd_remove_stale,
             "overview": cmd_overview, "freed": cmd_freed, "boot": cmd_boot,
             "checkUpdates": cmd_check_updates, "changelog": cmd_changelog,

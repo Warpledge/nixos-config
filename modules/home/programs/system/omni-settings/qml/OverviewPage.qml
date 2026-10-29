@@ -449,7 +449,8 @@ ColumnLayout {
         tag: !page.current ? "" : page.current.running ? "Running"
             : page.current.next ? "Next start" : ""
         tagSuccess: true
-        trailing: page.older.length ? (page.versionsOpen ? "expand_less" : "expand_more") : ""
+        expandable: page.older.length > 0
+        expanded: page.versionsOpen
         onClicked: if (page.older.length) page.versionsOpen = !page.versionsOpen
     }
     Reveal {
@@ -543,7 +544,8 @@ ColumnLayout {
                 ? `${Fmt.duration(page.boot.stages.total)} from power on to `
                   + page.boot.graphical.target
                 : `${Fmt.duration(page.boot.stages.total)} from power on`
-        trailing: page.bootOpen ? "expand_less" : "expand_more"
+        expandable: true
+        expanded: page.bootOpen
         onClicked: page.bootOpen = !page.bootOpen
     }
     Reveal {
@@ -820,10 +822,8 @@ ColumnLayout {
                                 icon: "open_in_new"
                                 onClicked: Qt.openUrlExternally(release.modelData.url)
                             }
-                            Icon {
-                                icon: "expand_more"
-                                rotation: rel.open === release.index ? 180 : 0
-                                Behavior on rotation { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
+                            Chevron {
+                                open: rel.open === release.index
                             }
                         }
                         Reveal {

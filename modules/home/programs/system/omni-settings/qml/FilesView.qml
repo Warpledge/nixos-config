@@ -68,10 +68,8 @@ ColumnLayout {
                         font.weight: Font.DemiBold
                         Layout.fillWidth: true
                     }
-                    Icon {
-                        icon: "expand_more"
-                        rotation: group.open ? 180 : 0
-                        Behavior on rotation { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
+                    Chevron {
+                        open: group.open
                     }
                     TapHandler {
                         gesturePolicy: TapHandler.ReleaseWithinBounds
@@ -114,12 +112,10 @@ ColumnLayout {
                                     color: Theme.dim
                                     font.pixelSize: 12
                                 }
-                                Icon {
+                                Chevron {
                                     visible: file.modelData.diff.length > 0
-                                    icon: "expand_more"
-                                    size: 16
-                                    rotation: file.open ? 180 : 0
-                                    Behavior on rotation { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
+                                    size: 22
+                                    open: file.open
                                 }
                             }
                             Reveal {

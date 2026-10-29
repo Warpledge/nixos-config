@@ -96,6 +96,11 @@ Singleton {
     }
     function toneFill(tone, base) { return Qt.tint(base, Qt.alpha(toneColor(tone), 0.2)) }
 
+    //--- Rows: the card colour with a breath of the page's accent and a hairline,
+    //--- quieter than the group cards they sit in (SettingsPage.qml)
+    function rowFill(accent, lit) { return Qt.tint(card, Qt.alpha(accent, lit ? 0.14 : 0.05)) }
+    function rowBorder(accent, open) { return Qt.alpha(accent, open ? 0.32 : 0.12) }
+
     FileView {
         path: Quickshell.env("HOME") + "/.cache/DankMaterialShell/dms-colors.json"
         watchChanges: true
@@ -126,7 +131,8 @@ Singleton {
         "applications-science": "science", "applications-system": "settings",
         "audio-speakers": "speaker", "audio-volume-high": "volume_up",
         "audio-x-generic": "music_note", "avatar-default": "person", "bluetooth": "devices",
-        "computer": "computer", "dialog-information": "info", "drive-harddisk": "backup",
+        "computer": "computer", "dialog-information": "info", "draw-brush": "brush",
+        "drive-harddisk": "backup",
         "edit-paste": "content_paste", "emblem-default": "check_circle",
         "face-smile-big": "mood", "flatpak": "widgets", "focus-windows": "select_window",
         "folder": "folder", "folder-download": "download", "go-home": "home", "help-browser": "lightbulb",
@@ -232,4 +238,6 @@ Singleton {
                   .replace(/!!(.+?)!!/g, `<b><font color="${caution}">$1</font></b>`)
                   .replace(/\n/g, "<br>")
     }
+    //--- The same text without its marks, for a tooltip
+    function plain(text) { return String(text || "").replace(/\*\*|!!/g, "") }
 }

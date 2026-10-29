@@ -144,8 +144,13 @@ Item {
             stale = null
             const first = !info
             info = reply.data
-            if (first)
+            if (first) {
                 scope = info.machine
+                const ui = info.ui || {}
+                const set = keys => (keys || []).reduce((o, k) => (o[k] = true, o), {})
+                collapsedPages = set(ui.collapsed)
+                openCards = set(ui.open)
+            }
             // Keep changes that still differ from what the files now hold
             const kept = {}
             for (const [k, v] of Object.entries(pending))
@@ -552,6 +557,31 @@ Item {
         }
     }
 
+    //--- Collapsed pages and open group cards, kept in api.py's UI_STATE
+    property var collapsedPages: ({})
+    property var openCards: ({})
+    function setCardOpen(key, open) {
+        const c = Object.assign({}, openCards)
+        if (open)
+            c[key] = true
+        else
+            delete c[key]
+        openCards = c
+        saveUi()
+    }
+    function setPageCollapsed(pid, collapsed) {
+        const c = Object.assign({}, collapsedPages)
+        if (collapsed)
+            c[pid] = true
+        else
+            delete c[pid]
+        collapsedPages = c
+        saveUi()
+    }
+    function saveUi() {
+        Backend.call("saveUi", { collapsed: Object.keys(collapsedPages), open: Object.keys(openCards) }, () => {})
+    }
+
     //--- Notes on the Docs tab show only their title until opened
     property var openNotes: ({})
     function openNote(pid, open) {
@@ -623,7 +653,9 @@ Item {
                 for (const s of g.settings)
                     if (s.title.toLowerCase().includes(q) || s.subtitle.toLowerCase().includes(q))
                         out.push({ kind: "page", tab: item.tab, page: pid, title: s.title,
-                                   subtitle: `${pg.title} · ${s.subtitle}`, icon: s.icon, app: s.icon })
+                                   subtitle: `${g.collapsed ? g.title : pg.title} · ${s.subtitle}`,
+                                   icon: s.icon, app: s.icon,
+                                   card: g.collapsed ? (g.card || `${pid}|${g.title}`) : "" })
         }
         for (const e of info.dmsSearch)
             if (e.label.toLowerCase().includes(q) || e.keywords.includes(q))
@@ -802,10 +834,16 @@ Item {
                     model: omni.results
 
                     function pick(r) {
-                        if (r.kind === "dms")
+                        if (r.kind === "dms") {
                             Quickshell.execDetached(["dms", "ipc", "call", "settings", "openWith", r.tab])
-                        else
+                        } else {
+                            // A setting in a card or a collapsed page shows open
+                            if (omni.collapsedPages[r.page])
+                                omni.setPageCollapsed(r.page, false)
+                            if (r.card && !omni.openCards[r.card])
+                                omni.setCardOpen(r.card, true)
                             omni.go(r.tab, r.page)
+                        }
                         omni.forceActiveFocus()
                     }
 
@@ -1216,8 +1254,8 @@ Item {
     Component { id: fileTypesPage; FileTypesPage { view: omni } }
     Component { id: protonPage; ProtonPage { view: omni } }
     Component { id: protonVersionsPage; ProtonVersionsPage { view: omni } }
-    //--- One page in the tab's scroll: its divider, then the page; a note is only its
-    //--- title until opened
+    //--- One page in the tab's scroll: its section's divider when it starts one, then
+    //--- the page in a card whose header collapses it; a note starts collapsed
     component PageSection: ColumnLayout {
         id: section
         required property var modelData
@@ -1227,7 +1265,7 @@ Item {
         readonly property color pageAccent: omni.pageAccents[pid] || Theme.primary
         readonly property bool note: pid.startsWith("doc:")
         readonly property bool userPkgs: pid.startsWith("userpackages:")
-        readonly property bool open: !note || !!omni.openNotes[pid]
+        readonly property bool open: note ? !!omni.openNotes[pid] : !omni.collapsedPages[pid]
         readonly property var model: omni.info.pages[pid] || null
         readonly property var comp: note ? notePage : userPkgs ? userPkgsPage
             : omni.custom[pid] || (model ? settingsPage : null)
@@ -1238,19 +1276,31 @@ Item {
             omni.showPage()
         }
         onYChanged: omni.sectionMoved(section)
-        // A divider names each page, and a run of notes once
-        readonly property bool divided: !note || index === 0 || !omni.tabPages[index - 1].id.startsWith("doc:")
+        function toggle() {
+            if (note)
+                omni.openNote(pid, !open)
+            else
+                omni.setPageCollapsed(pid, open)
+        }
+        // The rail's group this page starts; the untitled first group takes the tab's name
+        readonly property var prev: index > 0 ? omni.tabPages[index - 1] : null
+        readonly property var next: index + 1 < omni.tabPages.length ? omni.tabPages[index + 1] : null
+        readonly property bool divided: !prev || prev.group !== modelData.group
+        readonly property string sectionTitle: modelData.group
+            || (omni.info.tabs.find(t => t.id === omni.tab) || { title: "" }).title
+        // A section holding one page of its own name shows only the divider
+        readonly property bool headed: !(divided && modelData.title === modelData.group
+                                         && (!next || next.group !== modelData.group))
         visible: !!comp
         Layout.fillWidth: true
-        Layout.topMargin: divided && index > 0 ? 18 : 0
+        Layout.topMargin: index === 0 ? 0 : divided ? 22 : 4
         spacing: 6
 
-        //--- The page's name in a pill, lines fading out to both sides; a run of
-        //--- notes is named after its group
+        //--- The section's name in a pill, lines fading out to both sides
         RowLayout {
-            visible: section.divided
+            visible: section.divided && section.sectionTitle !== ""
             Layout.fillWidth: true
-            Layout.bottomMargin: 12
+            Layout.bottomMargin: 8
             spacing: 8
             Rectangle {
                 Layout.fillWidth: true
@@ -1269,24 +1319,13 @@ Item {
                 color: Qt.tint(Theme.card, Qt.alpha(section.pageAccent, 0.35))
                 border.width: 2
                 border.color: section.pageAccent
-                Row {
+                Text {
                     id: dividerName
                     anchors.centerIn: parent
-                    spacing: 10
-                    Icon {
-                        anchors.verticalCenter: parent.verticalCenter
-                        icon: Theme.glyph(section.modelData.icon, "description")
-                        size: 26
-                        fill: true
-                        color: Theme.inkContainer
-                    }
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: section.note ? section.modelData.group : section.modelData.title
-                        color: Theme.inkContainer
-                        font.pixelSize: 22
-                        font.weight: Font.ExtraBold
-                    }
+                    text: section.sectionTitle
+                    color: Theme.inkContainer
+                    font.pixelSize: 22
+                    font.weight: Font.ExtraBold
                 }
             }
             Rectangle { implicitWidth: 7; implicitHeight: 7; rotation: 45; color: section.pageAccent }
@@ -1301,46 +1340,112 @@ Item {
             }
         }
 
-        ListRow {
-            visible: section.note
-            icon: Theme.glyph(section.modelData.icon, "description")
-            title: section.modelData.title
-            subtitle: section.modelData.subtitle || ""
-            trailing: section.open ? "expand_less" : "expand_more"
-            onClicked: omni.openNote(section.pid, !section.open)
-        }
-
-        // Height from the page itself, as a layout-set one would loop with wrapped text;
-        // a note slides open and shut (Reveal.qml does the same for smaller content)
-        Item {
-            id: body
-            property bool armed: false
-            Connections { target: section; function onOpenChanged() { body.armed = section.note } }
+        //--- The page's card, reaching into the gutter
+        Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: loader.item && section.open ? loader.item.implicitHeight : 0
-            clip: section.note
-            opacity: section.open ? 1 : 0
-            Behavior on Layout.preferredHeight {
-                enabled: body.armed
-                NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
-            }
-            Behavior on opacity { enabled: body.armed; NumberAnimation { duration: 220; easing.type: Easing.OutQuad } }
-            //--- A faint wash of the page's colour, reaching into the gutter
-            Rectangle {
-                visible: section.divided && !!loader.item
-                x: -omni.gutter
-                width: parent.width + omni.gutter
-                height: parent.height
-                radius: 14
-                color: Qt.alpha(section.pageAccent, 0.05)
-            }
-            Loader {
-                id: loader
-                width: parent.width
-                active: (section.open || body.height > 0) && !!section.comp
-                sourceComponent: section.comp
-                // Data that came after the tab showed eases in
-                NumberAnimation on opacity { id: arrived; running: false; from: 0.3; to: 1; duration: 260 }
+            Layout.leftMargin: -omni.gutter
+            implicitHeight: frameCol.implicitHeight
+            radius: 20
+            color: Qt.alpha(section.pageAccent, section.headed && headHover.hovered && !section.open ? 0.1 : 0.05)
+            border.width: section.headed ? 1 : 0
+            border.color: Qt.alpha(section.pageAccent, section.open ? 0.22 : 0.15)
+            Behavior on color { ColorAnimation { duration: 150 } }
+
+            ColumnLayout {
+                id: frameCol
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
+                spacing: 0
+
+                //--- Header: icon, name, a short line and the chevron; tapping it collapses
+                RowLayout {
+                    visible: section.headed
+                    Layout.fillWidth: true
+                    Layout.margins: 12
+                    spacing: 12
+                    Rectangle {
+                        implicitWidth: 36
+                        implicitHeight: 36
+                        radius: 18
+                        color: section.pageAccent
+                        Icon {
+                            anchors.centerIn: parent
+                            icon: Theme.glyph(section.modelData.icon, "description")
+                            size: 20
+                            fill: true
+                            color: Theme.inkPrimary
+                        }
+                    }
+                    ColumnLayout {
+                        spacing: 1
+                        Layout.fillWidth: true
+                        Text {
+                            text: section.modelData.title
+                            color: Theme.text
+                            font.pixelSize: 17
+                            font.weight: Font.Bold
+                            elide: Text.ElideRight
+                            Layout.fillWidth: true
+                        }
+                        // A generated page's blurb, or a custom page's line from the rail
+                        Text {
+                            visible: text !== ""
+                            text: section.modelData.subtitle || (section.model ? section.model.description : "")
+                            color: Theme.dim
+                            font.pixelSize: 13
+                            wrapMode: Text.Wrap
+                            maximumLineCount: 2
+                            elide: Text.ElideRight
+                            Layout.fillWidth: true
+                        }
+                    }
+                    Chevron {
+                        size: 30
+                        open: section.open
+                        lit: headHover.hovered
+                    }
+                    HoverHandler { id: headHover; cursorShape: Qt.PointingHandCursor }
+                    TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: section.toggle() }
+                }
+                Rectangle {
+                    visible: section.headed && body.height > 0
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 14
+                    Layout.rightMargin: 14
+                    implicitHeight: 1
+                    opacity: body.opacity
+                    color: Qt.alpha(section.pageAccent, 0.25)
+                }
+
+                // Height from the page itself, as a layout-set one would loop with wrapped
+                // text; it slides open and shut (Reveal.qml does the same for smaller content)
+                Item {
+                    id: body
+                    property bool armed: false
+                    Connections { target: section; function onOpenChanged() { body.armed = true } }
+                    Layout.fillWidth: true
+                    Layout.leftMargin: omni.gutter
+                    Layout.rightMargin: omni.gutter
+                    Layout.topMargin: section.headed && section.open ? 8 : 0
+                    Layout.bottomMargin: section.open ? 10 : 0
+                    Layout.preferredHeight: loader.item && section.open ? loader.item.implicitHeight : 0
+                    clip: true
+                    opacity: section.open ? 1 : 0
+                    Behavior on Layout.preferredHeight {
+                        enabled: body.armed
+                        NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
+                    }
+                    Behavior on opacity { enabled: body.armed; NumberAnimation { duration: 220; easing.type: Easing.OutQuad } }
+                    Loader {
+                        id: loader
+                        width: parent.width
+                        active: (section.open || body.height > 0) && !!section.comp
+                        sourceComponent: section.comp
+                        // Data that came after the tab showed eases in
+                        NumberAnimation on opacity { id: arrived; running: false; from: 0.3; to: 1; duration: 260 }
+                    }
+                }
             }
         }
 
@@ -1401,5 +1506,33 @@ Item {
         }
         // The toast stays while the cursor is on it
         HoverHandler { onHoveredChanged: hovered ? toastTimer.stop() : toastTimer.restart() }
+    }
+
+    //--- The tooltip a button or indicator asked for (Tip.qml), beside the cursor and
+    //--- kept inside the view
+    Rectangle {
+        id: tipBox
+        readonly property point at: omni.mapFromItem(null, Tip.at.x, Tip.at.y)
+        z: 10
+        visible: opacity > 0
+        opacity: Tip.shown ? 1 : 0
+        Behavior on opacity { NumberAnimation { duration: 120 } }
+        width: Math.min(tipText.implicitWidth, 300) + 22
+        height: tipText.implicitHeight + 14
+        x: Math.max(4, Math.min(at.x + 14, omni.width - width - 4))
+        y: at.y + 22 + height > omni.height - 4 ? at.y - height - 8 : at.y + 22
+        radius: 10
+        color: Theme.toast
+        border.width: 1
+        border.color: Qt.alpha(Theme.primary, 0.35)
+        Text {
+            id: tipText
+            anchors.centerIn: parent
+            width: Math.min(implicitWidth, 300)
+            text: Tip.text
+            color: Theme.inkToast
+            font.pixelSize: 13
+            wrapMode: Text.Wrap
+        }
     }
 }

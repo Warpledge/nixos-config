@@ -42,12 +42,6 @@ PAGE_TITLES = {
 }
 MOVES = {  # setting -> (page, group on that page)
     ("japanese", "vn"): ("Gaming", "Japanese Visual Novels"),
-    #--- Each ArtCraft app with others of its kind; a new one stays on the ArtCraft page
-    **{("artcraft", app): ("Graphics", "ArtCraft") for app in
-       ("photocraft", "lightcraft", "vectorcraft", "designcraft", "figcraft", "effectcraft", "cadcraft")},
-    ("artcraft", "filmcraft"): ("Media", "ArtCraft"),
-    ("artcraft", "soundcraft"): ("Audio", "ArtCraft"),
-    **{("artcraft", app): ("Office", "ArtCraft") for app in ("pdfcraft", "wordcraft", "gridcraft", "deckcraft")},
 }
 
 #--- Sidebar sections, top to bottom; under niri, Desktop is on the Niri tab, and
@@ -121,8 +115,7 @@ PAGES = {
     "File Types": ("filetypes", "text-x-generic-symbolic",
                    "Which app opens one file type, in front of Default Apps.",
                    [("", "", ["mimeTypes"])]),
-    "Browsers": ("apps", "web-browser-symbolic", "Browsers to install. The one that opens links "
-                 "is picked under Default Apps.", None),
+    "Browsers": ("apps", "web-browser-symbolic", "Pick the default under Default Apps.", None),
     "Terminals": ("apps", "utilities-terminal-symbolic", "Terminal emulators to install.", None),
     "Editors": ("apps", "accessories-text-editor-symbolic", "Text and code editors to install.", None),
     "File Browsers": ("apps", "folder-symbolic", "File managers to install.", None),
@@ -135,8 +128,7 @@ PAGES = {
     "System Tools": ("apps", "utilities-system-monitor-symbolic", "Monitoring tools.", None),
     "Android": ("apps", "phone-symbolic", "Phones and tablets.", None),
     "Local": ("apps", "folder-download-symbolic",
-              "Apps run from a prebuilt bundle you put in ~/.local/opt yourself; "
-              "this config only wraps them.",
+              "Prebuilt bundles you put in ~/.local/opt.",
               [("Media", "", ["media.tonkatsuBox"]),
                ("Audio", "", ["audio.katanaFloorboard"]),
                ("Gaming", "", ["gaming.granblueRelinkMods"])]),
@@ -147,8 +139,7 @@ PAGES = {
     "Claude": ("cloudai", "applications-science-symbolic",
                "Anthropic's Claude, signed in with your Claude account.",
                [("", "", ["claude.enable", "claudeDesktop.enable"]),
-                ("Claude Code", "Changes made inside Claude Code stay until you change the same "
-                 "setting here; the reset button on Claude Code puts all of these back.",
+                ("Claude Code", "Changes made in Claude Code stay until set here.",
                  ["claude.model", "claude.effort", "claude.outputStyle", "claude.builtins.agentsMd",
                   "claude.builtins.agentsMdFiles"]),
                 ("Mods", "", ["claude.mods.ribbon", "claude.statusLine",
@@ -159,8 +150,7 @@ PAGES = {
                          "claudeMdManagement", "skillCreator", "claudeCodeSetup", "claudeSecurity")]),
                       ("MCP Servers", "Shared with OpenCode.", [f"claude.mcp.{n}" for n in (
                           "nixos", "context7", "github", "deepwiki", "grep")]),
-                      ("claude.ai Connectors", "A connector turned off here is blocked by name, "
-                       "and Claude Code notes that when it starts.", [f"claude.connectors.{n}" for n in (
+                      ("claude.ai Connectors", "One turned off is blocked by name.", [f"claude.connectors.{n}" for n in (
                            "gmail", "googleCalendar", "googleDrive", "claudeDocs")])]),
     "Claude Skills": ("cloudai", "view-list-symbolic",
                       "What Claude sees of each skill and subagent, and the model it runs on.",
@@ -184,10 +174,8 @@ PAGES = {
     "Models": ("localai", "applications-engineering-symbolic",
                "The models llama-swap runs on this computer, one at a time.",
                [("Code", "For opencode and Zed's agent panel.", ["localAi.code"]),
-                ("Chat", "For conversation in Open WebUI or llama-swap's Playground, which also "
-                 "list the coding models.", ["localAi.chat"]),
-                ("Inline Suggestions", "Zed's suggestions as you type, run on the CPU so the GPU "
-                 "stays free.", ["localAi.edit"])]),
+                ("Chat", "For Open WebUI and llama-swap's Playground.", ["localAi.chat"]),
+                ("Inline Suggestions", "Zed's suggestions as you type, on the CPU.", ["localAi.edit"])]),
 }
 
 #--- (page, group) shown closed until its heading is clicked, and its heading's icon

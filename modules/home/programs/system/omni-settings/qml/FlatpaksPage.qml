@@ -243,10 +243,8 @@ ColumnLayout {
                             Layout.fillWidth: true
                         }
                     }
-                    Icon {
-                        icon: "expand_more"
-                        rotation: page.runtimesOpen ? 180 : 0
-                        Behavior on rotation { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
+                    Chevron {
+                        open: page.runtimesOpen
                     }
                     TapHandler {
                         gesturePolicy: TapHandler.ReleaseWithinBounds

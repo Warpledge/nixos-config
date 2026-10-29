@@ -654,11 +654,8 @@ ColumnLayout {
                     checked: !row.rule.off
                     onToggled: on => page.toggle(row.rule, on)
                 }
-                Icon {
-                    icon: "expand_more"
-                    size: 18
-                    rotation: row.open ? 180 : 0
-                    Behavior on rotation { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
+                Chevron {
+                    open: row.open
                 }
             }
             Reveal {

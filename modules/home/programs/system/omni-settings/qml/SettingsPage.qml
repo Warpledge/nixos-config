@@ -12,7 +12,8 @@ ColumnLayout {
 
     Text {
         visible: text !== ""
-        text: Theme.rich(page.model.intro || page.model.description)
+        // The page's blurb sits in its header (PageSection in OmniView.qml)
+        text: Theme.rich(page.model.intro)
         textFormat: Text.StyledText
         color: Theme.dim
         font.pixelSize: 15
@@ -51,12 +52,29 @@ ColumnLayout {
         ColumnLayout {
             id: group
             required property var modelData
-            property bool open: false
+            // Open cards are kept across launches (OmniView's openCards)
+            readonly property string cardKey: modelData.card || `${page.model.id}|${modelData.title}`
+            readonly property bool open: !!page.view.openCards[cardKey]
             readonly property bool collapsed: modelData.collapsed
             readonly property var bools: modelData.settings.filter(s => s.kind === "bool")
             Layout.fillWidth: true
             spacing: 6
-            Section { visible: !group.collapsed && group.modelData.title !== ""; text: group.modelData.title }
+            RowLayout {
+                visible: !group.collapsed && (group.modelData.title !== "" || group.modelData.locked)
+                Layout.fillWidth: true
+                spacing: 0
+                Section {
+                    text: group.modelData.title
+                    Layout.fillWidth: false
+                }
+                Hint {
+                    visible: group.modelData.locked
+                    icon: "lock"
+                    tip: "Only an admin can change these"
+                    Layout.topMargin: 10
+                }
+                Item { Layout.fillWidth: true }
+            }
             Text {
                 visible: !group.collapsed && text !== ""
                 text: Theme.rich(group.modelData.description)
@@ -65,13 +83,6 @@ ColumnLayout {
                 font.pixelSize: 13
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
-                Layout.leftMargin: 6
-            }
-            Text {
-                visible: !group.collapsed && group.modelData.locked
-                text: "Only an admin can change these."
-                color: Theme.caution
-                font.pixelSize: 13
                 Layout.leftMargin: 6
             }
             Repeater {
@@ -117,7 +128,10 @@ ColumnLayout {
                             color: card.accent
                             Icon {
                                 anchors.centerIn: parent
-                                icon: group.modelData.icon || page.glyph
+                                // A Material name from COLLAPSED, or an app category's icon names
+                                icon: typeof group.modelData.icon === "string"
+                                    ? group.modelData.icon || page.glyph
+                                    : Theme.glyph(group.modelData.icon, page.glyph)
                                 size: 20
                                 color: Theme.inkPrimary
                             }
@@ -125,13 +139,26 @@ ColumnLayout {
                         ColumnLayout {
                             spacing: 1
                             Layout.fillWidth: true
-                            Text {
-                                text: group.modelData.title
-                                color: Theme.text
-                                font.pixelSize: 16
-                                font.weight: Font.DemiBold
-                                elide: Text.ElideRight
+                            RowLayout {
+                                spacing: 6
                                 Layout.fillWidth: true
+                                Text {
+                                    id: cardTitle
+                                    text: group.modelData.title
+                                    color: Theme.text
+                                    font.pixelSize: 16
+                                    font.weight: Font.DemiBold
+                                    elide: Text.ElideRight
+                                    Layout.maximumWidth: Math.ceil(cardTitleWidth.advanceWidth) + 1
+                                    Layout.fillWidth: true
+                                    TextMetrics { id: cardTitleWidth; font: cardTitle.font; text: cardTitle.text }
+                                }
+                                Hint {
+                                    visible: group.modelData.locked
+                                    icon: "lock"
+                                    tip: "Only an admin can change these"
+                                }
+                                Item { Layout.fillWidth: true }
                             }
                             Text {
                                 visible: text !== ""
@@ -177,7 +204,7 @@ ColumnLayout {
                         HoverHandler { id: cardHover; cursorShape: Qt.PointingHandCursor }
                         TapHandler {
                             gesturePolicy: TapHandler.ReleaseWithinBounds
-                            onTapped: group.open = !group.open
+                            onTapped: page.view.setCardOpen(group.cardKey, !group.open)
                         }
                     }
                     Reveal {
@@ -191,21 +218,34 @@ ColumnLayout {
                             implicitHeight: 1
                             color: Qt.alpha(card.accent, 0.25)
                         }
-                        Text {
-                            visible: group.modelData.locked
-                            text: "Only an admin can change these."
-                            color: Theme.caution
-                            font.pixelSize: 13
-                            Layout.leftMargin: 6
-                        }
+                        //--- An app category's template groups head their rows (api.py's app_card)
                         Repeater {
                             model: group.collapsed ? group.modelData.settings : []
-                            SettingRow {
+                            ColumnLayout {
+                                id: cardItem
                                 required property var modelData
-                                setting: modelData
-                                view: page.view
-                                locked: group.modelData.locked
-                                pageGlyph: page.glyph
+                                required property int index
+                                readonly property string sub: modelData.sub || ""
+                                readonly property bool heads: sub !== "" && (index === 0
+                                    || group.modelData.settings[index - 1].sub !== sub)
+                                Layout.fillWidth: true
+                                spacing: 6
+                                Text {
+                                    visible: cardItem.heads
+                                    text: cardItem.sub
+                                    color: card.accent
+                                    font.pixelSize: 13
+                                    font.weight: Font.DemiBold
+                                    font.letterSpacing: 0.4
+                                    Layout.leftMargin: 8
+                                    Layout.topMargin: cardItem.index > 0 ? 6 : 0
+                                }
+                                SettingRow {
+                                    setting: cardItem.modelData
+                                    view: page.view
+                                    locked: group.modelData.locked
+                                    pageGlyph: page.glyph
+                                }
                             }
                         }
                     }

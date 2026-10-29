@@ -72,10 +72,8 @@ ColumnLayout {
                             Layout.fillWidth: true
                         }
                     }
-                    Icon {
-                        icon: "expand_more"
-                        rotation: group.open ? 180 : 0
-                        Behavior on rotation { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
+                    Chevron {
+                        open: group.open
                     }
                     TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: group.open = !group.open }
                 }

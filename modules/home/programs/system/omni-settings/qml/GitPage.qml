@@ -346,14 +346,14 @@ ColumnLayout {
     component CommitRow: ListRow {
         property var commit: null
         property string web: ""
-        property bool expandable: false
         property bool open: false
         signal toggled
         icon: "commit"
         titleLines: 2
         title: commit ? commit.subject : ""
         subtitle: commit ? `${commit.short} · ${commit.author} · ${Fmt.when(commit.when)}` : ""
-        trailing: expandable ? (open ? "expand_less" : "expand_more") : web ? "open_in_new" : ""
+        expanded: open
+        trailing: !expandable && web ? "open_in_new" : ""
         onClicked: {
             if (expandable)
                 toggled()
