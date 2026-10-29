@@ -368,6 +368,8 @@
   #--- Side Rail
   # Changes to the Mod+A side rail's apps, made on Omni Settings' Side Rail
   # page, by id: {brave-ai = {enable = false;}; terminal = {width = 900;};}.
+  # keepRunning = true keeps an app open while hidden; otherwise it closes
+  # after unloadAfter minutes hidden (30 unless set).
   # Your own apps have ids starting custom-, a name, an optional icon, and a
   # url (opened as a Helium app window) or a command (a list) and its appId.
   sideRail = {};

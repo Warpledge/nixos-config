@@ -1,8 +1,22 @@
 # The Side Rail
 
-`Mod+A` shows a row of app icons down the left edge of the screen, with the last app you used open beside it. Press `Mod+A` again and both go away. The apps keep running while hidden, so they come back as you left them.
+`Mod+A` shows a row of app icons down the left edge of the screen, with the last app you used open beside it. Press `Mod+A` again and both go away.
 
-Click an icon to swap the app beside the rail. Click the one already showing to hide the rail. An app starts the first time you pick it, and a dot next to an icon means that app is running but not showing. If you switch workspace while the rail is open, the app comes with you.
+Click an icon to swap the app beside the rail. Click the one already showing to hide the rail. An app starts the first time you pick it, and a dot next to an icon means that app is running. If you switch workspace while the rail is open, the app comes with you.
+
+## Unloading
+
+A hidden app closes on its own after 30 minutes, so it stops using memory, and opens again the next time you pick it. The terminal, Claude Desktop and OpenCode Desktop keep running instead, since closing them ends what's running in them.
+
+Right-click an icon to choose for that app:
+
+- **Unload now** closes it straight away.
+- **Keep running** stops it from closing on its own.
+- **Unload after 5, 15 or 30 min** sets how long it can sit hidden.
+
+Omni Settings' Side Rail page sets the same two things for each app, your own included. The right-click choice wins until you pick Reset to Default there.
+
+An app closes the way it does when you click its ×, so it saves as it would on any quit. If it's still running in the tray a few seconds later, it's stopped. A web app comes back signed in, with Helium's cache and site data, but on its start page: a page you'd moved to inside it, or text you hadn't sent, is gone. An app that asks before closing (unsaved work) is left open for you to answer.
 
 `Mod+C` and `Mod+X` show or hide the rail on Claude Desktop and OpenCode Desktop, the way `Mod+A` does.
 
@@ -21,7 +35,7 @@ Each app shows only when you have it turned on:
 | llama-swap | llama-swap's page for your local models |
 | Open WebUI | Chat with your local models in the browser |
 
-Omni Settings' Side Rail page (Niri tab) turns an app off, moves it up or down, sets how wide it opens, or adds your own: a web page, which opens as a Helium app window, or an app you pick from a window on screen. Like any other setting, changes wait for Apply.
+Omni Settings' Side Rail page (Niri tab) turns an app off, moves it up or down, sets how wide it opens and when it unloads, or adds your own: a web page, which opens as a Helium app window, or an app you pick from a window on screen. Like any other setting, changes wait for Apply.
 
 ## Width
 

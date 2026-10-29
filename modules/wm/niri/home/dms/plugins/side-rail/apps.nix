@@ -3,7 +3,8 @@
 #=====================================================================#
 # The Mod+A rail's shared apps, each kept only when its app is on, with the
 # user's sideRail setting (Omni Settings' Side Rail page): an app turned off,
-# reordered or given a width by id, then the user's own custom- apps.
+# reordered, given a width or an unload time by id, then the user's own
+# custom- apps.
 {
   lib,
   user,
@@ -18,6 +19,8 @@
       Narrow = 640;
       Wide = 1600;
     };
+    unloadAfter = 30; # Minutes hidden before an app not kept running closes
+    unloadPresets = [5 15 30]; # The rail's right-click choices
   };
 
   #--- Helium names an --app window's app-id after the URL, port dropped:
@@ -40,6 +43,7 @@
       icon = "kitty";
       appId = "side-rail-terminal";
       command = ["kitty" "--class" "side-rail-terminal" "--directory" machine.flakePath];
+      keepRunning = true; # Unloading ends what runs in it
     }
     ++ lib.optional user.browsers.helium
     (web "brave-ai" "Ask Brave" "travel_explore" "https://search.brave.com/ask")
@@ -49,6 +53,7 @@
       icon = "claude-desktop";
       appId = "com.anthropic.Claude";
       command = ["claude-desktop"];
+      keepRunning = true;
     }
     ++ lib.optional user.opencodeDesktop.enable {
       id = "opencode-desktop";
@@ -56,6 +61,7 @@
       icon = "opencode-desktop";
       appId = "ai.opencode.desktop";
       command = ["opencode-desktop"];
+      keepRunning = true;
     }
     ++ lib.optional (user.browsers.helium && user.llamaSwap.enable)
     (web "llama-swap" "llama-swap" "memory" "http://127.0.0.1:8090/ui")
@@ -70,7 +76,9 @@
   kept = lib.filter (e: on (changes.${e.id} or {})) (lib.imap0 (i: e: let
     change = changes.${e.id} or {};
   in
-    e // {order = change.order or i;} // lib.optionalAttrs (change ? width) {inherit (change) width;})
+    e
+    // {order = change.order or i;}
+    // lib.filterAttrs (k: _: lib.elem k ["width" "keepRunning" "unloadAfter"]) change)
   shared);
   custom = lib.mapAttrsToList (id: e:
     {
@@ -84,7 +92,11 @@
   #--- A url opens as a Helium app window, its app-id taken from the url
   finish = e:
     removeAttrs e ["order" "url"]
-    // {width = e.width or geometry.width;}
+    // {
+      width = e.width or geometry.width;
+      keepRunning = e.keepRunning or false;
+      unloadAfter = e.unloadAfter or geometry.unloadAfter;
+    }
     // lib.optionalAttrs (e ? url) {
       appId = e.appId or (heliumAppId e.url);
       command = ["helium" "--app=${e.url}"];

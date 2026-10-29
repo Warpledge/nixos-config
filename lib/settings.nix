@@ -107,6 +107,8 @@
     enable = lib.isBool;
     order = lib.isInt;
     width = v: lib.isInt v && v > 0;
+    keepRunning = lib.isBool;
+    unloadAfter = v: lib.isInt v && v > 0;
     name = lib.isString;
     icon = lib.isString;
     appId = lib.isString;
@@ -123,7 +125,7 @@
         allowed =
           if custom
           then lib.attrNames sideRailFields
-          else ["enable" "order" "width"];
+          else ["enable" "order" "width" "keepRunning" "unloadAfter"];
       in
         map (k: "${at} can't set ${k} (use ${lib.concatStringsSep ", " allowed})")
         (lib.filter (k: !(lib.elem k allowed)) (lib.attrNames e))

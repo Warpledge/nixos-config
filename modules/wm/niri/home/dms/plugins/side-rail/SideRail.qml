@@ -1,6 +1,7 @@
 // DMS plugin: the Mod+A side rail (apps.nix), `dms ipc call sideRail toggle|show <id>|hide`.
 // Each app is a real niri window docked floating beside the rail; hidden ones wait on a
 // stash workspace. Moves go over DMS's own niri socket, so nothing spawns per click.
+// Apps start in their own app-dms-side-rail-* scope and unload after sitting hidden.
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -30,6 +31,10 @@ Item {
     property int stashWs: -1
     // The monitor the rail was opened on; it moves only when a rail key is pressed on another
     property string railOutput: ""
+    // When the rail last stashed each app, {id: ms}; only these auto-unload
+    property var hiddenSince: ({})
+    // Apps closed by unload(), {id: pid}, checked once for a process left in the tray
+    property var closing: ({})
 
     function app(id) {
         return config.apps.find(a => a.id === id) ?? null;
@@ -62,6 +67,57 @@ Item {
         const w = windowOf(a);
         if (w)
             act({SetWindowWidth: {id: w.id, change: {SetFixed: widthOf(a)}}});
+    }
+
+    //--- Keep running and minutes to unload: the rail menu's choice, else apps.nix's
+    function keepOf(a) {
+        return state("unload", {})[a.id]?.keep ?? a.keepRunning;
+    }
+
+    function timeoutOf(a) {
+        return state("unload", {})[a.id]?.minutes ?? a.unloadAfter;
+    }
+
+    function setUnload(a, change) {
+        const all = Object.assign({}, state("unload", {}));
+        if (change === null)
+            delete all[a.id];
+        else
+            all[a.id] = Object.assign({}, all[a.id] ?? {}, change);
+        saveState("unload", all);
+        sweepTimer.update();
+    }
+
+    function markHidden(id, hidden) {
+        const all = Object.assign({}, hiddenSince);
+        if (hidden)
+            all[id] = Date.now();
+        else
+            delete all[id];
+        hiddenSince = all;
+        sweepTimer.update();
+    }
+
+    //--- Closes an app's window as × would, so it saves as on any quit. A native app
+    //--- still running after that (a tray icon) has its scope stopped; a web app's
+    //--- pid is the shared Helium browser, so it only gets the close
+    function unload(id) {
+        const a = app(id);
+        const w = windowOf(a);
+        markHidden(id, false);
+        if (!w)
+            return;
+        if (id === activeId && shown) {
+            pendingId = "";
+            shown = false;
+        }
+        if (a.command[0] !== "helium") {
+            const all = Object.assign({}, closing);
+            all[id] = w.pid;
+            closing = all;
+            trayCheck.restart();
+        }
+        act({CloseWindow: {id: w.id}});
     }
 
     function act(action) {
@@ -97,6 +153,7 @@ Item {
             return;
         rememberWidth(id, w);
         act({MoveWindowToWorkspace: {window_id: w.id, reference: {Id: target}, focus: false}});
+        markHidden(id, true);
     }
 
     function rememberWidth(id, w) {
@@ -169,13 +226,16 @@ Item {
         activeId = id;
         saveState("lastId", id);
         shown = true;
+        markHidden(id, false);
         const w = windowOf(a);
         if (w) {
             place(a, w);
         } else {
             pendingId = id;
             pendingTimeout.restart();
-            Quickshell.execDetached(a.command);
+            // Its own scope, out of dms.service, so a DMS restart leaves it running
+            const unit = "app-dms-side-rail-" + id + "-" + Date.now().toString(36);
+            Quickshell.execDetached(["systemd-run", "--user", "--scope", "--collect", "--quiet", "--unit=" + unit].concat(a.command));
         }
     }
 
@@ -205,6 +265,53 @@ Item {
         id: pendingTimeout
         interval: 20000
         onTriggered: root.pendingId = ""
+    }
+
+    //--- Unloads apps hidden past their time, only while one could be
+    Timer {
+        id: sweepTimer
+        interval: 60000
+        repeat: true
+
+        function update() {
+            running = Object.keys(root.hiddenSince).some(id => {
+                const a = root.app(id);
+                return a && !root.keepOf(a);
+            });
+        }
+
+        onTriggered: {
+            for (const id of Object.keys(root.hiddenSince)) {
+                const a = root.app(id);
+                const w = root.windowOf(a);
+                if (!w) {
+                    root.markHidden(id, false);
+                    continue;
+                }
+                const visible = NiriService.workspaces[w.workspace_id]?.is_active ?? false;
+                if (!visible && !root.keepOf(a) && Date.now() - root.hiddenSince[id] >= root.timeoutOf(a) * 60000)
+                    root.unload(id);
+            }
+        }
+    }
+
+    //--- After unload(): an app whose window closed but whose process lives on (tray)
+    //--- gets the scope holding that pid stopped, and the rail's own launch scope.
+    //--- Only app-*.scope units, so never dms.service; an app still showing its window
+    //--- (asking to save, kitty confirming) is left to the user
+    Timer {
+        id: trayCheck
+        interval: 5000
+        onTriggered: {
+            for (const id of Object.keys(root.closing)) {
+                if (root.windowOf(root.app(id)))
+                    continue;
+                Quickshell.execDetached(["sh", "-c", 'u=$(sed -n "s|^0::.*/||p" /proc/$1/cgroup 2>/dev/null); '
+                    + 'case $u in app-*.scope) systemctl --user stop "$u" ;; esac; '
+                    + 'systemctl --user stop "app-dms-side-rail-$2-*.scope"', "sh", String(root.closing[id]), id]);
+            }
+            root.closing = {};
+        }
     }
 
     //--- Saves a drag-resized width a moment after the resize settles
@@ -314,9 +421,9 @@ Item {
                                 anchors.centerIn: parent
                             }
 
-                            // Running, but not the one shown
+                            // Running, shown or not
                             Rectangle {
-                                visible: entry.running && !entry.active
+                                visible: entry.running
                                 width: 4
                                 height: 4
                                 radius: 2
@@ -333,6 +440,8 @@ Item {
                                 onClicked: event => {
                                     if (event.button === Qt.RightButton) {
                                         const p = entry.mapToItem(null, entry.width, 0);
+                                        // Cleared first so the items rebuild
+                                        menu.forApp = null;
                                         menu.forApp = entry.modelData;
                                         menu.open(rail.screen, p.x, p.y, false);
                                     } else if (entry.active) {
@@ -347,7 +456,7 @@ Item {
                 }
             }
 
-            //--- Width presets for one app, and back to its default
+            //--- Unloading and width presets for one app, and back to its defaults
             DContextMenu {
                 id: menu
                 property var forApp: null
@@ -356,17 +465,46 @@ Item {
                     const t = forApp;
                     if (!t)
                         return [];
-                    const items = Object.keys(root.geo.presets).map(name => ({
-                                type: "item",
-                                icon: "width",
-                                text: name + " (" + root.geo.presets[name] + "px)",
-                                action: () => root.setWidth(t, root.geo.presets[name])
-                            }));
+                    const keep = root.keepOf(t);
+                    const minutes = root.timeoutOf(t);
+                    const items = [];
+                    if (root.windowOf(t))
+                        items.push({
+                            type: "item",
+                            icon: "power_settings_new",
+                            text: "Unload now",
+                            action: () => root.unload(t.id)
+                        }, {type: "separator"});
+                    items.push({
+                        type: "item",
+                        icon: keep ? "check_box" : "check_box_outline_blank",
+                        text: "Keep running",
+                        action: () => root.setUnload(t, {keep: !keep})
+                    });
+                    for (const m of root.geo.unloadPresets)
+                        items.push({
+                            type: "item",
+                            icon: !keep && m === minutes ? "radio_button_checked" : "radio_button_unchecked",
+                            text: "Unload after " + m + " min",
+                            enabled: !keep,
+                            action: () => root.setUnload(t, {keep: false, minutes: m})
+                        });
+                    items.push({type: "separator"});
+                    for (const name of Object.keys(root.geo.presets))
+                        items.push({
+                            type: "item",
+                            icon: "width",
+                            text: name + " (" + root.geo.presets[name] + "px)",
+                            action: () => root.setWidth(t, root.geo.presets[name])
+                        });
                     items.push({type: "separator"}, {
                         type: "item",
                         icon: "restart_alt",
-                        text: "Reset to default (" + t.width + "px)",
-                        action: () => root.setWidth(t, null)
+                        text: "Reset to default (" + t.width + "px, " + (t.keepRunning ? "kept running" : t.unloadAfter + " min") + ")",
+                        action: () => {
+                            root.setWidth(t, null);
+                            root.setUnload(t, null);
+                        }
                     });
                     return items;
                 }
@@ -399,6 +537,13 @@ Item {
         function hide(): string {
             root.hide();
             return "CLOSED";
+        }
+
+        function unload(id: string): string {
+            if (!root.app(id))
+                return "NO APP " + id;
+            root.unload(id);
+            return "UNLOADED";
         }
     }
 }
