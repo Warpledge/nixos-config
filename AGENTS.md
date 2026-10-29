@@ -292,6 +292,9 @@ lines, `grep -n` that file for the part you need.
   switch them to `lib.modules.importApply`: it reorders the home modules.
 - Keep the `clearStaleBackups` activation hook in `default.nix`; on a "file
   exists" error, find the real conflicting file.
+- `claudeDesktop.matugen` patches `app.asar` to load `matugen-theme.js` after the
+  `"use strict";` in `index.pre.js`; the template overrides only the app's colour
+  variables (`--bg-*`, `--text-*`, `--cds-*`). Details: `programs/ai/CLAUDE.md`.
 
 **`lib/`**
 
