@@ -37,6 +37,15 @@
   changed = lib.mapAttrs (id: b:
     b // lib.filterAttrs (k: _: lib.elem k ["key" "title" "enable"]) (user.keybinds.${id} or {}))
   defaults;
+  #--- A winsKey bind turns off the other config binds on its key, except ones
+  #--- whose key or on/off the user's keybinds setting chose
+  wonKeys = map (b: lib.toLower b.key) (lib.filter (b: b.winsKey && b.enable) (lib.attrValues changed));
+  lost = lib.filterAttrs (id: b:
+    !b.winsKey
+    && lib.elem (lib.toLower b.key) wonKeys
+    && !(user.keybinds ? ${id}.key || user.keybinds ? ${id}.enable))
+  changed;
+  won = changed // lib.mapAttrs (_: b: b // {enable = false;}) lost;
   custom = lib.mapAttrs (id: o: {
     inherit id;
     inherit (o) key title;
@@ -47,7 +56,7 @@
     allowInhibiting = true;
     enable = o.enable or true;
   }) (lib.filterAttrs (id: _: lib.hasPrefix "custom-" id) user.keybinds);
-  final = changed // custom;
+  final = won // custom;
   enabled = lib.filter (b: b.enable) (lib.attrValues final);
 in {
   #--------------------------------------------------------------------#
@@ -88,6 +97,11 @@ in {
           type = types.bool;
           default = true;
         };
+        # Turns off the config's other binds on this key instead of failing the build
+        winsKey = mkOption {
+          type = types.bool;
+          default = false;
+        };
       };
     }));
   };
@@ -115,7 +129,11 @@ in {
       binds = lib.mapAttrsToList (id: b:
         b
         // {
-          default = {inherit (defaults.${id} or b) key title enable;};
+          # A bind that lost its key to a winsKey one is off by default here
+          default = {
+            inherit (defaults.${id} or b) key title;
+            enable = (defaults.${id} or b).enable && !(lost ? ${id});
+          };
           custom = custom ? ${id};
         })
       final;
