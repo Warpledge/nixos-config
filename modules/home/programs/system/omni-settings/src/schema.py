@@ -146,7 +146,34 @@ PAGES = {
     "Discord": ("apps", "user-available-symbolic", "Discord and showing what you play.", None),
     "Claude": ("cloudai", "applications-science-symbolic",
                "Anthropic's Claude, signed in with your Claude account.",
-               [("", "", ["claude.enable", "claudeDesktop.enable"])]),
+               [("", "", ["claude.enable", "claudeDesktop.enable"]),
+                ("Claude Code", "Changes made inside Claude Code stay until you change the same "
+                 "setting here; the reset button on Claude Code puts all of these back.",
+                 ["claude.model", "claude.effort", "claude.outputStyle", "claude.mods.band",
+                  "claude.builtins.youShouldKnow", "claude.builtins.agentsMd",
+                  "claude.builtins.agentsMdFiles"])]),
+    "Claude Tools": ("cloudai", "application-x-addon-symbolic",
+                     "Plugins, MCP servers and claude.ai connectors Claude Code loads.",
+                     [("Plugins", "", [f"claude.plugins.{n}" for n in (
+                         "claudeMdManagement", "skillCreator", "claudeCodeSetup", "claudeSecurity")]),
+                      ("MCP Servers", "Shared with OpenCode.", [f"claude.mcp.{n}" for n in (
+                          "nixos", "context7", "github", "deepwiki", "grep")]),
+                      ("claude.ai Connectors", "A connector turned off here is blocked by name, "
+                       "and Claude Code notes that when it starts.", [f"claude.connectors.{n}" for n in (
+                           "gmail", "googleCalendar", "googleDrive", "claudeDocs")])]),
+    "Claude Skills": ("cloudai", "view-list-symbolic",
+                      "What Claude sees of each skill and subagent, and the model it runs on.",
+                      [("Repo Skills", "", [f"claude.skills.{n}" for n in (
+                          "addApp", "androidDebloatRedo", "apparmorCheck", "commit", "disablePackage",
+                          "flakeUpdate", "freetubeSync", "gameTroubleshooting", "handoff", "mokuBump",
+                          "onboard", "prReview", "rpgmSetup", "todo", "upstream", "vnSetup")]),
+                       ("Subagents", "", [f"claude.agents.{n}" for n in (
+                           "buildTriager", "docsDriftAuditor", "proseReviewer", "publicRepoAuditor")]),
+                       ("Account Skills", "Synced from your claude.ai account.",
+                        [f"claude.accountSkills.{n}" for n in (
+                            "builtInBrowser", "chromeBrowser", "computerUse", "deepResearch", "docs",
+                            "docx", "googleWorkspace", "importMemory", "mcpBuilder", "morning", "pdf",
+                            "pptx", "xlsx")])]),
     "OpenCode": ("cloudai", "vcs-branch-symbolic",
                  "OpenCode, the coding agent, in the terminal and as a desktop app.",
                  [("", "", ["opencode.enable", "opencodeDesktop.enable"])]),
@@ -161,6 +188,11 @@ PAGES = {
                 ("Inline Suggestions", "Zed's suggestions as you type, run on the CPU so the GPU "
                  "stays free.", ["localAi.edit"])]),
 }
+
+#--- Settings shown inside another's row, by path prefix: claude.skills.commit's row
+#--- also edits claude.skillModels.commit (pair_up)
+PAIRS = {("claude", "skills"): ("claude", "skillModels"),
+         ("claude", "agents"): ("claude", "agentModels")}
 
 #--- List and none-or-one settings shown as one switch per model, straight in their group
 SWITCH_LISTS = {"localAi.code", "localAi.chat", "localAi.edit"}
@@ -208,6 +240,7 @@ class Setting:
     icon: list = field(default_factory=list)  # icon names or .desktop ids to try
     labels: dict = field(default_factory=dict)  # choice value -> label
     default: object = None  # the template's value
+    pair: object = None  # a second Setting edited in this one's row (PAIRS)
 
 
 @dataclass
@@ -494,3 +527,27 @@ def arrange(pages, links=()):
                                       curated.index(p.title) if p.section != "apps" and p.title in curated
                                       else len(curated),
                                       p.title.casefold()))
+
+
+def flat(pages):
+    """Every setting on `pages`, paired ones included."""
+    for p in pages:
+        for g in p.groups:
+            for s in g.settings:
+                yield s
+                if s.pair:
+                    yield s.pair
+
+
+def pair_up(pages):
+    """Moves each PAIRS partner into its main setting's `pair`, off the page it was on."""
+    pool = {s.path: (s, g) for p in pages for g in p.groups for s in g.settings}
+    for path, (s, _) in list(pool.items()):
+        partner = PAIRS.get(path[:2])
+        if partner and len(path) == 3 and partner + path[2:] in pool:
+            other, group = pool[partner + path[2:]]
+            s.pair = other
+            group.settings.remove(other)
+    for page in pages:
+        page.groups = [g for g in page.groups if g.settings or g.links]
+    return [p for p in pages if p.groups]

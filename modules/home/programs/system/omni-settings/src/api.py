@@ -135,6 +135,8 @@ def shown(setting, value):
             return f"{n} entr{'y' if n == 1 else 'ies'}" if n else "Not set"
         n = sum(len(v) for v in value.values())
         return f"{n} in {len(value)} categor{'y' if len(value) == 1 else 'ies'}" if n else "Not set"
+    if value is None and setting.kind == "choice" and "None" in setting.labels:
+        return setting.labels["None"]
     if value is None or value == "" or value == []:
         return "Not set"
     if isinstance(value, list):
@@ -211,6 +213,8 @@ def setting_json(cfg, state, s, multi, modules):
         out["resettable"] = {"app": reset[0], "file": os.path.basename(reset[1]), "extra": reset[4]}
     if s.path in modules:
         out["module"] = os.path.relpath(modules[s.path], cfg.flake)
+    if s.pair:
+        out["pair"] = setting_json(cfg, state, s.pair, multi, modules)
     return out
 
 
@@ -308,7 +312,7 @@ def cmd_load(cfg, _args):
     dismissed = read_dismissed()
     new = [{"key": new_id(d, p), "value": v} for d, p, v in state.new
            if (d == "user" or direct) and new_id(d, p) not in dismissed
-           and any(s.domain == d and s.path == p for pg in state.pages for g in pg.groups for s in g.settings)]
+           and any(s.domain == d and s.path == p for s in schema.flat(state.pages))]
     banner = ""
     if not helper():
         banner = "The Omni Settings helper isn't installed, so changes can't be applied"
@@ -360,7 +364,7 @@ def cmd_review(cfg, args):
     """Each change as before -> after, and the lines it changes in each file.
     args: changes, machine (the Change For pick; null for all computers)."""
     state = loaded(cfg)
-    settings = {(s.domain, s.path): s for p in state.pages for g in p.groups for s in g.settings}
+    settings = {(s.domain, s.path): s for s in schema.flat(state.pages)}
     changes, machine = changes_arg(args), args.get("machine", cfg.machine)
     lines = []
     for key, value in changes.items():

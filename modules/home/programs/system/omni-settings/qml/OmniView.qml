@@ -71,8 +71,11 @@ Item {
         if (info)
             for (const pg of Object.values(info.pages))
                 for (const g of pg.groups)
-                    for (const s of g.settings)
+                    for (const s of g.settings) {
                         out[s.key] = s
+                        if (s.pair)
+                            out[s.pair.key] = s.pair
+                    }
         if (info && info.userPackages)
             out[info.userPackages.key] = info.userPackages
         if (info && info.keybinds)
@@ -327,6 +330,9 @@ Item {
             const c = Object.keys(v).length
             return n ? `${n} in ${c} categor${c === 1 ? "y" : "ies"}` : "Not set"
         }
+        const nullChoice = v === null && s.kind === "choice" && s.choices.find(c => c.value === null)
+        if (nullChoice && nullChoice.label !== "None")
+            return nullChoice.label
         if (v === null || v === undefined || v === "" || (Array.isArray(v) && !v.length))
             return "Not set"
         if (Array.isArray(v))

@@ -325,7 +325,15 @@ def load(cfg):
     for page in pages:
         for group in page.groups:
             for s in group.settings:
-                describe(s, descriptions.get(".".join(s.path), ""))
+                # "a.b.*" describes every a.b.<name>, under its own entry's keys
+                entry = descriptions.get(".".join(s.path), "")
+                shared = descriptions.get(".".join(s.path[:-1] + ("*",)))
+                if isinstance(shared, dict) and isinstance(entry, dict):
+                    entry = {**shared, **entry}
+                elif not entry and shared:
+                    entry = shared
+                describe(s, entry)
+    pages = schema.pair_up(pages)
     machine_doc = nixfile.to_python(nixfile.parse(read("machines", cfg.machine, "settings.nix")).root)
     lists = {name: data_list(name) for name in set(schema.DATA_CHOICES.values())}
     overrides = dig(machine_doc, ["users", cfg.user]) or {}

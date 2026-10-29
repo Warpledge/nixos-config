@@ -14,7 +14,9 @@ Rectangle {
     readonly property var s: setting
     readonly property var value: view.valueOf(s)
     readonly property bool pending: view.pending[s.key] !== undefined
+        || (!!s.pair && view.pending[s.pair.key] !== undefined)
     readonly property bool atDefault: JSON.stringify(value) === JSON.stringify(s.default)
+        && (!s.pair || JSON.stringify(view.valueOf(s.pair)) === JSON.stringify(s.pair.default))
     readonly property bool overridden: !!s.overridden && (view.scope === view.info.machine)
 
     Layout.fillWidth: true
@@ -85,7 +87,9 @@ Rectangle {
                 }
                 Text {
                     visible: row.s.kind !== "bool" && !row.open
-                    text: row.view.shownOf(row.s, row.value)
+                    text: row.view.shownOf(row.s, row.value) + (row.s.pair
+                        ? ` · ${row.s.pair.title}: ${row.view.shownOf(row.s.pair, row.view.valueOf(row.s.pair))}`
+                        : "")
                     color: Theme.primary
                     font.pixelSize: 13
                     elide: Text.ElideRight
@@ -106,7 +110,11 @@ Rectangle {
             IconButton {
                 visible: row.s.kind !== "bool" && !row.atDefault && !row.locked
                 icon: "settings_backup_restore"
-                onClicked: row.view.change(row.s, row.s.default)
+                onClicked: {
+                    row.view.change(row.s, row.s.default)
+                    if (row.s.pair)
+                        row.view.change(row.s.pair, row.s.pair.default)
+                }
             }
             Toggle {
                 visible: row.s.kind === "bool"
@@ -151,17 +159,37 @@ Rectangle {
                            : row.s.kind === "number" ? numberEditor
                            : row.s.kind === "list" ? listEditor : choiceEditor
         }
+        //--- The paired setting's choices (schema.py's PAIRS), under its own title
+        Text {
+            visible: row.open && !!row.s.pair
+            text: row.s.pair ? `${row.s.pair.title} · Default: ${row.s.pair.defaultShown}` : ""
+            color: Theme.dim
+            font.pixelSize: 13
+            Layout.leftMargin: 50
+        }
+        Loader {
+            active: row.open && !row.locked && !!row.s.pair
+            visible: active
+            Layout.fillWidth: true
+            Layout.leftMargin: 50
+            Layout.bottomMargin: 4
+            sourceComponent: choiceEditor
+            onLoaded: item.target = row.s.pair
+        }
     }
 
-    //--- choice, and pick (the list comes from `omni-settings-backend list`)
+    //--- choice, and pick (the list comes from `omni-settings-backend list`);
+    //--- `target` is this row's setting, or its pair's
     Component {
         id: choiceEditor
         ColumnLayout {
             spacing: 4
-            readonly property var options: row.s.kind === "pick"
-                ? (row.view.lists[row.s.data] || [])
-                : row.s.choices
-            Component.onCompleted: if (row.s.kind === "pick") row.view.loadList(row.s.data)
+            property var target: row.s
+            readonly property var targetValue: row.view.valueOf(target)
+            readonly property var options: target.kind === "pick"
+                ? (row.view.lists[target.data] || [])
+                : target.choices
+            Component.onCompleted: if (target.kind === "pick") row.view.loadList(target.data)
             Field {
                 id: filter
                 visible: options.length > 8
@@ -169,7 +197,7 @@ Rectangle {
                 placeholder: "Filter"
             }
             Text {
-                visible: row.s.kind === "pick" && !row.view.lists[row.s.data]
+                visible: target.kind === "pick" && !row.view.lists[target.data]
                 text: "Loading…"
                 color: Theme.dim
             }
@@ -187,7 +215,7 @@ Rectangle {
                 })
                 delegate: Rectangle {
                     required property var modelData
-                    readonly property bool chosen: JSON.stringify(modelData.value) === JSON.stringify(row.value)
+                    readonly property bool chosen: JSON.stringify(modelData.value) === JSON.stringify(targetValue)
                     width: choices.width
                     height: 34
                     radius: 10
@@ -206,7 +234,7 @@ Rectangle {
                         Icon { visible: chosen; icon: "check"; size: 18; color: Theme.primary }
                     }
                     HoverHandler { id: optHover; cursorShape: Qt.PointingHandCursor }
-                    TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: row.view.change(row.s, modelData.value) }
+                    TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: row.view.change(target, modelData.value) }
                 }
             }
         }

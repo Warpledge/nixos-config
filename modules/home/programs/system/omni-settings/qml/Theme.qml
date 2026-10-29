@@ -147,7 +147,7 @@ Singleton {
         "system-shutdown": "power_settings_new", "system-software-install": "install_desktop",
         "system-users": "group", "text-x-generic": "description", "user-available": "chat",
         "utilities-system-monitor": "monitoring", "utilities-terminal": "terminal",
-        "vcs-branch": "commit", "video-display": "desktop_windows",
+        "vcs-branch": "commit", "view-list": "checklist","video-display": "desktop_windows",
         "view-app-grid": "apps", "view-continuous": "view_agenda",
         "view-dual": "splitscreen_left", "view-fullscreen": "fullscreen",
         "view-grid": "view_quilt", "view-more-horizontal": "more_horiz",
