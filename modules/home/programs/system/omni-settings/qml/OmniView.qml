@@ -83,6 +83,8 @@ Item {
             out[info.keybinds.key] = info.keybinds
         if (info && info.windowRules)
             out[info.windowRules.key] = info.windowRules
+        if (info && info.sideRail)
+            out[info.sideRail.key] = info.sideRail
         if (info && info.env)
             out[info.env.key] = info.env
         if (info && info.autostart)
@@ -1328,8 +1330,10 @@ Item {
                                       userpackages: userPackagesPage,
                                       proton: protonPage, protonversions: protonVersionsPage,
                                       windowrules: windowRulesPage, keybinds: keybindsPage,
+                                      siderail: sideRailPage,
                                       startup: startupPage, filetypes: fileTypesPage })
     Component { id: windowRulesPage; WindowRulesPage { view: omni } }
+    Component { id: sideRailPage; SideRailPage { view: omni } }
     Component { id: keybindsPage; KeybindsPage { view: omni } }
     Component { id: startupPage; StartupPage { view: omni } }
     Component { id: fileTypesPage; FileTypesPage { view: omni } }

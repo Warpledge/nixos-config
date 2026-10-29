@@ -65,6 +65,7 @@ TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
        "niri": [("shell", "Shell", ("view-app-grid-symbolic",)),
                 ("windowrules", "Window Rules",
                  ("window-new-symbolic", "preferences-system-windows-symbolic")),
+                ("siderail", "Side Rail", ("view-dual-symbolic", "sidebar-show-symbolic")),
                 ("keybinds", "Keybinds", ("input-keyboard-symbolic", "preferences-desktop-keyboard-symbolic"))],
        "ai": [],
        "docs": []}
@@ -88,6 +89,8 @@ NAV_SUBTITLES = {"overview": "Updates, freeing space, versions", "git": "Changes
                  "windowrules": "Pick a window and choose what niri should do with it, or change or "
                                 "turn off the config's rules. Changes are yours alone and wait for "
                                 "Apply, like any other setting.",
+                 "siderail": "The apps on the Mod+A rail: turn one off, reorder them, set a width, "
+                             "or add a web page or app of your own. Changes wait for Apply.",
                  "keybinds": "Change a key, turn a keybind off, or add your own. Changes are yours "
                              "alone and wait for Apply, like any other setting.",
                  "startup": "Variables every program sees, and autostart",
@@ -111,6 +114,7 @@ SECTION_TAB = {"cloudai": "ai", "localai": "ai", "apps": "packages"}
 USER_PACKAGES = ("user", ("userPackages",))
 KEYBINDS = ("user", schema.KEYBINDS)
 WINDOW_RULES = ("user", schema.WINDOW_RULES)
+SIDE_RAIL = ("user", schema.SIDE_RAIL)
 
 STATE_DIR = os.path.join(os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state"),
                          "omni-settings")
@@ -160,6 +164,8 @@ def shown(setting, value):
         return f"{len(value)} keybind{'' if len(value) == 1 else 's'} changed" if value else "Not set"
     if setting.kind == "windowrules":
         return f"{len(value)} window rule{'' if len(value) == 1 else 's'} changed" if value else "Not set"
+    if setting.kind == "siderail":
+        return f"{len(value)} rail app{'' if len(value) == 1 else 's'} changed" if value else "Not set"
     if isinstance(value, dict):
         if not all(isinstance(v, list) for v in value.values()):
             n = len(value)
@@ -289,7 +295,7 @@ def cmd_load(cfg, _args):
     shell_links = wm == "niri"
     shell = {}
     for page in state.pages:
-        if page.section in ("userpkgs", "keybinds", "windowrules", "startup", "filetypes"):
+        if page.section in ("userpkgs", "keybinds", "windowrules", "siderail", "startup", "filetypes"):
             continue
         pid = schema.TOP_PAGES[page.title] if page.section == "top" else f"page:{page.title}"
         groups = []
@@ -351,6 +357,8 @@ def cmd_load(cfg, _args):
                      if (s.domain, s.path) == KEYBINDS), None)
     window_rules = next((s for p in state.pages for g in p.groups for s in g.settings
                          if (s.domain, s.path) == WINDOW_RULES), None)
+    side_rail = next((s for p in state.pages for g in p.groups for s in g.settings
+                      if (s.domain, s.path) == SIDE_RAIL), None)
     guides = [{"id": d.key, "title": d.title, "icon": ["help-browser-symbolic"], "custom": True}
               for d in docstate.guide_docs(cfg.flake)]
     if guides:
@@ -380,6 +388,7 @@ def cmd_load(cfg, _args):
             "userPackages": user_packages and setting_json(cfg, state, user_packages, multi, modules),
             "keybinds": keybinds and setting_json(cfg, state, keybinds, multi, modules),
             "windowRules": window_rules and setting_json(cfg, state, window_rules, multi, modules),
+            "sideRail": side_rail and setting_json(cfg, state, side_rail, multi, modules),
             "env": next((setting_json(cfg, state, s, multi, modules) for s in startup
                          if s.path == ("env",)), None),
             "autostart": next((setting_json(cfg, state, s, multi, modules) for s in startup
@@ -997,6 +1006,18 @@ def cmd_keybinds(_cfg, _args):
     return {"applied": keybindstate.load_applied(), "dmsKeys": keybindstate.dms_keys()}
 
 
+def cmd_side_rail(_cfg, _args):
+    """{geometry, shared, changes} as the last build wrote them
+    (dms/plugins/side-rail/apps.nix), or None before one did."""
+    path = os.path.join(keybindstate.CONFIG, "omni-settings", "side-rail.json")
+    try:
+        with open(path) as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        return None
+    return data if isinstance(data, dict) and isinstance(data.get("shared"), list) else None
+
+
 def cmd_launch_command(_cfg, args):
     """The command a picked window's app launches with, from its .desktop file."""
     return keybindstate.launch_command(str(args.get("appId") or ""))
@@ -1048,7 +1069,7 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "resetApp": cmd_reset_app, "doc": cmd_doc, "docLink": cmd_doc_link, "launchOptions": cmd_launch_options, "protonVersions": cmd_proton_versions,
             "windowRules": cmd_window_rules, "niriWindows": cmd_niri_windows, "pickWindow": cmd_pick_window,
             "addWindowRule": cmd_add_window_rule, "saveWindowRule": cmd_save_window_rule,
-            "keybinds": cmd_keybinds, "launchCommand": cmd_launch_command,
+            "keybinds": cmd_keybinds, "launchCommand": cmd_launch_command, "sideRail": cmd_side_rail,
             "mimeApps": cmd_mime_apps, "splitCommand": cmd_split_command}
 
 

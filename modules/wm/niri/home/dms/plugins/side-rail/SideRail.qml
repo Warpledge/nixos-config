@@ -291,7 +291,7 @@ Item {
                                 onClicked: event => {
                                     if (event.button === Qt.RightButton) {
                                         const p = entry.mapToItem(null, entry.width, 0);
-                                        menu.target = entry.modelData;
+                                        menu.forApp = entry.modelData;
                                         menu.open(rail.screen, p.x, p.y, false);
                                     } else if (entry.active) {
                                         root.hide();
@@ -308,10 +308,10 @@ Item {
             //--- Width presets for one app, and back to its default
             DContextMenu {
                 id: menu
-                property var target: null
+                property var forApp: null
                 layerNamespace: "dms:side-rail-menu"
                 menuItems: {
-                    const t = target;
+                    const t = forApp;
                     if (!t)
                         return [];
                     const items = Object.keys(root.geo.presets).map(name => ({

@@ -66,11 +66,12 @@
   on = e: e.enable or true;
 
   #--- Shared apps keep their place unless given an order; custom ones follow
-  kept = lib.imap0 (i: e: let
+  #--- Numbered before any are turned off, as the Side Rail page numbers them
+  kept = lib.filter (e: on (changes.${e.id} or {})) (lib.imap0 (i: e: let
     change = changes.${e.id} or {};
   in
     e // {order = change.order or i;} // lib.optionalAttrs (change ? width) {inherit (change) width;})
-  (lib.filter (e: on (changes.${e.id} or {})) shared);
+  shared);
   custom = lib.mapAttrsToList (id: e:
     {
       inherit id;
@@ -90,5 +91,7 @@
     };
 in {
   inherit geometry;
+  # For Omni Settings' Side Rail page: the shared apps before the user's changes
+  shared = map finish shared;
   apps = map finish (lib.sort (a: b: a.order < b.order) (kept ++ custom));
 }

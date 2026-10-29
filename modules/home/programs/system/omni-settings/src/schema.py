@@ -19,7 +19,8 @@ KEYBINDS = ("keybinds",)
 WINDOW_RULES = ("windowRules",)
 #--- The ones holding text rather than lists, e.g. env = {EDITOR = "zeditor";}
 TEXT_SETS = {("env",), ("mimeTypes",)}
-GROUPED = {("userPackages",), ("autostart",), *TEXT_SETS, KEYBINDS, WINDOW_RULES}
+SIDE_RAIL = ("sideRail",)
+GROUPED = {("userPackages",), ("autostart",), *TEXT_SETS, KEYBINDS, WINDOW_RULES, SIDE_RAIL}
 
 #--- Template sections whose `#---` headers each get their own page
 SPLIT_SECTIONS = {"Apps"}
@@ -54,8 +55,8 @@ SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
 #--- their groups: (title, description, [setting paths]). Pages in the apps
 #--- section keep the template's groups; "top" pages are settings a custom page
 #--- lays out (TOP_PAGES), the "userpkgs" one the list the Packages tab's
-#--- pages edit (UserPackagesPage.qml), "keybinds" the Keybinds page's set and
-#--- "windowrules" the Window Rules page's.
+#--- pages edit (UserPackagesPage.qml), "keybinds" the Keybinds page's set,
+#--- "windowrules" the Window Rules page's and "siderail" the Side Rail page's.
 #--- "top" pages: the custom page (its id in api.py and OmniView.qml) each one's settings show on
 TOP_PAGES = {"Flatpaks": "flatpaks", "Users": "people"}
 
@@ -66,6 +67,7 @@ PAGES = {
     "User Packages": ("userpkgs", "package-x-generic-symbolic", "", [("", "", ["userPackages"])]),
     "Keybinds": ("keybinds", "input-keyboard-symbolic", "", [("", "", ["keybinds"])]),
     "Window Rules": ("windowrules", "focus-windows-symbolic", "", [("", "", ["windowRules"])]),
+    "Side Rail": ("siderail", "view-dual-symbolic", "", [("", "", ["sideRail"])]),
     "System": ("computer", "computer-symbolic",
                "This computer's name, desktop and kernel.",
                [("", "", ["hostName", "windowManager", "kernel"])]),
@@ -419,6 +421,8 @@ def make_setting(domain, path, b, values, choices, labels, doc, lead, header_tit
         s.kind = "keybinds"
     elif path == WINDOW_RULES:
         s.kind = "windowrules"
+    elif path == SIDE_RAIL:
+        s.kind = "siderail"
     elif path in GROUPED:
         s.kind = "groups"
     elif isinstance(value, list):
