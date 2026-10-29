@@ -279,9 +279,30 @@ lines, `grep -n` that file for the part you need.
   to a binary Nix builds also run (unzip, tar). Run `apparmor-check` after.
 - `services/ssh.nix` owns sshd and fail2ban; key-only auth, and an assertion
   fails the build if no user lists a key.
+- A NixOS module that configures every user's home writes
+  `home-manager.users = lib.mapAttrs (_: _: {...}) machine.users;`, never
+  `home-manager.sharedModules` (it reorders list options).
+- A new unconditional overlay goes in `nix/nixpkgs.nix`. `allowBroken` is on, so
+  only a build shows a broken package.
+
+**`modules/home/`**
+
+- Home routers take `user` as a plain first argument
+  (`user: {lib, ...}: {...}`, imported with `(import ./gaming user)`). Don't
+  switch them to `lib.modules.importApply`: it reorders the home modules.
+- Keep the `clearStaleBackups` activation hook in `default.nix`; on a "file
+  exists" error, find the real conflicting file.
+
+**`lib/`**
+
+- `settings.nix` fills every setting missing from a settings file with the
+  template's value (true/false turned off) and stops eval on a bad one.
+- Default apps are chosen in `default-apps.nix` (`mimeapps.list` is forced),
+  local models in `local-models.nix`.
 
 **`modules/home/programs/system/omni-settings/`** (a QML app, DMS panel and
-window, over a Python backend)
+window, over a Python backend; full notes split across its `CLAUDE.md`,
+`qml/CLAUDE.md` and `src/CLAUDE.md`)
 
 - It builds its pages from the `_template/settings.nix` layout (`#--` sections,
   `#---` headers, trailing comments), so keep that layout when adding a setting.

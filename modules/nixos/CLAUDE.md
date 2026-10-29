@@ -5,6 +5,20 @@
 Omni Settings' root helper (`system/user/omni-settings-helper.nix`) is described in
 `modules/home/programs/system/omni-settings/CLAUDE.md`; read it before changing the helper.
 
+## Gotchas
+
+- **`boot.kernelModules` silently swallows kernel parameters.** modprobe cannot resolve them, `systemd-modules-load.service` logs `Failed to find module '<param>'` and still exits 0, so the hardening looks applied and is not. Eleven params sat there until 2026-09-22. Check with `grep <param> /proc/cmdline`, not by reading the module. An assertion in `security/hardening/kernel.nix` now fails the build on any `kernelModules` entry containing `=`; a bare flag like `slab_nomerge` still gets through.
+- `gaming.steam` is wired in `gaming/default.nix` (on `anyUser.gaming.steam`, so Steam is installed system-wide for everyone); the rest of `gaming.*` is wired in `home/programs/gaming/default.nix`.
+- `media.moku` loads from both trees: the home-manager bundle plus `services/servers/flaresolverr.nix`. `suwayomi.enable`, `syncthing.enable` and `mullvad.enable` each load one NixOS module (`services/servers/{suwayomi,syncthing}.nix`, `security/mullvad/`) that sets its home-manager half through `home-manager.users`: for every user, except Syncthing's app entry, which goes to `mainUser` alone since Syncthing runs as them. `split-tunnel.nix` builds each user's home wrappers from that user's toggles.
+- A NixOS module that configures every user's home writes `home-manager.users = lib.mapAttrs (_: _: {...}) machine.users;`, as the theme modules and the machine `wm/` files do. Not `home-manager.sharedModules`: those merge ahead of every other definition, which reorders list options and changes the built files.
+- Non-admin users are added to `nix.settings.allowed-users` (`security/hardening/default.nix`, otherwise `@wheel` only): home-manager's activation runs `nix-env` as each user.
+- `services/runtimes/flatpak.nix` (nix-flatpak) loads on the machine's `flatpak.enable` and declares only Flatseal. Other Flatpak apps (the Hytale launcher, Hypixel's own bundle) are installed by hand, not in the repo; Omni Settings' Flatpaks page manages them.
+- `machine.kernel` is read in `system/bootloader.nix` (and `modules/default.nix` for the CachyOS overlay); `gaming/performance/kernel.nix` only holds gaming sysctls, boot params and the sched_ext scheduler (`services.scx`, scx_lavd).
+
+## nixpkgs config and overlays
+
+`modules/default.nix` sets `nixpkgs.config` (`allowUnfree`, `android_sdk.accept_license`) and `home-manager.backupFileExtension = "bak"`. Overlays come from two lists the module system merges: `modules/default.nix` holds the CachyOS kernel one, applied when `machine.kernel == "cachyos"` (`inputs.cachyos-kernel.overlays.pinned`), and `nix/nixpkgs.nix` holds the unconditional ones (NUR, claude-code, affinity-nix), where a new overlay goes unless a toggle gates it. That file also sets `allowBroken`, so a package nixpkgs marks broken still passes `nix flake check` and only a build shows the failure, and `permittedInsecurePackages`, whose entries name exact versions: an update that moves one to a new version fails eval as insecure until the entry matches.
+
 ## Network
 
 - DNS: systemd-resolved (stub listener on 127.0.0.53, opportunistic DNS-over-TLS, no fallback servers) + NetworkManager
@@ -15,6 +29,8 @@ Omni Settings' root helper (`system/user/omni-settings-helper.nix`) is described
 - `network/smb.nix` — imported while the machine's `smb.enable` is on; adds the `netbios-ns` conntrack helper so NetBIOS name replies get past the firewall and `smb://<server>` resolves (Dolphin's and gvfs's SMB support is already there)
 
 ## Security
+
+LUKS, kernel hardening, AppArmor, GNOME Keyring, auditd. Only users with `admin = true` are in wheel. nh, and so `nixm`, elevates with pkexec (`NH_ELEVATION_STRATEGY` in `nix/nh.nix`, whose polkit rule keeps the authorization for the calling process so a rebuild asks once), so `nixm rebuild` prompts in DMS's polkit dialog whether or not a terminal is attached, as with `! nixm rebuild` in Claude Code. `modules/wm/dms-polkit/` patches DMS so that dialog is a full-screen modal holding the keyboard until it closes, and dims every other monitor with a layer that takes clicks and, under niri, the keyboard (niri honours a layer's keyboard grab only on the active monitor, and a click elsewhere changes it); plain `sudo` typed in a terminal still asks there, and GPG and keyring prompts (pinentry-gnome3, gcr-prompter) aren't polkit, so they keep their own windows. Wheel needs a password for sudo; the NOPASSWD list in `security/auth/sudo.nix` covers only sync, poweroff, reboot and shutdown. Keep it to commands that cannot be turned into a root shell (sed, systemctl, nixos-rebuild and dmesg all can). Non-admins can't run sudo at all (`execWheelOnly`); their one root path is Omni Settings' polkit helper, which must keep taking typed values for the caller's own keys only, never file text or Nix. Its admin requests (rebuild as-is, switch to a generation) check wheel membership first.
 
 Audit tooling is `lynis` (configuration) and `sbomnix`/`vulnxscan` (CVE scanning against the real closure, via osv.dev; off since 2026-10-20 while its Python 3.14 build fails, see `docs/nixpkgs/disabled-packages.md`). **Do not go back to `vulnix`**: it only knows NVD's legacy JSON 1.1 feeds, which return 403 since their retirement, so every run ends in a `ConnectionError` traceback. Verified 2026-09-22, when the NVD API 2.0 answered 200 from the same machine.
 

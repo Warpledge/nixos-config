@@ -16,52 +16,42 @@ Unless the machine is `eclipse` or `legion` and the user `warpledge`, the person
 
 ## Applied Learning
 
-When something fails repeatedly, when the user has to re-explain, or when a workaround is found for a platform/tool limitation, add a one-line bullet here. Keep each bullet under 15 words. No explanations. Only add things that will save time in future sessions.
+When something fails repeatedly, the user has to re-explain, or a tool limitation needs a workaround, add a bullet here under 15 words, no explanation.
 
 ## Critical Rules
 
-1. **Never run `nixm rebuild` or `nixos-rebuild`.** Stop and ask instead. When handing back a rebuild, say they can run it from Omni Settings, or with `!` when they want you to see the errors, in the token-light form: `! nixm rebuild 2>&1 | grep -E "error|Error|failed|Failed" || echo "✓"` (same for `nixm boot`). The edit hook formats each `.nix` file with `alejandra`. Run `nix flake check`, and a machine build even more rarely, only when you can't tell whether a change breaks evaluation or the build: a new module or import, a renamed or unfamiliar option, an input or package change, Nix you aren't sure of. A value changed in an option that already works, or a JSON, Markdown or comment edit, needs neither. Commit without asking (see rule 6); pushing and history rewrites stay with the user.
+1. **Never run `nixm rebuild` or `nixos-rebuild`.** Stop and ask instead. Hand back a rebuild as runnable from Omni Settings, or with `!` when they want you to see the errors: `! nixm rebuild 2>&1 | grep -E "error|Error|failed|Failed" || echo "✓"` (same for `nixm boot`). Run `nix flake check`, and a machine build more rarely, only when you can't tell whether a change breaks evaluation or the build (a new module or import, an unfamiliar option, an input or package change, Nix you aren't sure of); a value change in a working option, or a JSON, Markdown or comment edit, needs neither. Commit without asking (rule 6); pushing and history rewrites stay with the user.
 2. **`git add` new files before `nix flake check`** — the flake won't see untracked files.
 3. **Edit existing files in place; don't rewrite them whole.** A rewrite drops commented-out code and disabled options without showing it in review.
 4. **Public repo:** no passwords, API keys, tokens, or secrets.
-5. **DMS's matugen owns colours; Stylix owns fonts and cursor.** Never hardcode colours, fonts or wallpaper in a module. DMS's theme picker runs matugen, which renders each app's colour file at runtime: DMS's built-in template where it has one (GTK, qt6ct, kitty, Zed), otherwise a `matugen.templates` entry (option in `theme/matugen.nix`; the entry sits there or in the app's module) with the template in `modules/theme/matugen/` or beside the module, and the app's config includes the rendered file. Rendered files stay plain files nothing else owns: a home-manager store link stops DMS writing or reloading them. A CSS template is named `.css.matugen` (`modules/theme/CLAUDE.md` says why). Fonts and cursor come from `config.stylix.fonts`/`config.stylix.cursor`; Stylix's colour targets are off except VS Code's and the NixOS console's, and catppuccin/nix only themes Plymouth. Apps nothing can recolour at runtime keep fixed Catppuccin Mocha Mauve.
-6. **Commit format.** Commits you make are authored by whoever is at the keyboard: their own git identity (`git.name`/`git.email` in their `users/<name>/settings.nix`), never warpledge's on someone else's account, and never `--author` or `-c user.name`. Messages use Conventional Commits, `type(scope): subject` plus a bullet body (types, scopes and examples in the `commit` skill; the git commit template mirrors them). A changed `machines/<name>/settings.nix` or `users/<name>/settings.nix` goes into the commit being made, without a mention in its message, or gets a `chore(<machine>): save settings from Omni Settings` commit of its own when nothing else changed: settings written by Omni Settings never sit uncommitted.
-7. **Screenshots need consent.** When capturing the screen, a window or the desktop (screenshot tools, `grim`, niri's screenshot actions, computer-use captures) would help the task, such as debugging a UI, ask with a questionnaire (AskUserQuestion) that says why and that a yes lasts the rest of the session. After a yes, capture for the task without asking again; never capture without one or for anything else.
-8. **Set only what was asked for.** Don't add options, defaults or "nice to have" settings on your own. When an addition looks worth having for the user, their setup or the config as a whole, offer it after the requested change as an optional questionnaire (AskUserQuestion, multi-select) and add only what they pick.
-9. **Ask before writing new docs or long comments.** A new `.md` file, a new section or note in an existing one, or a new comment longer than a line or two needs the user's yes first; propose it with a questionnaire (AskUserQuestion) saying what it covers and where it goes, and let them allow or decline. Always propose docs for critical infrastructure, anything someone needs to understand to change that part of the repo safely, rather than leaving it undocumented. Keeping existing docs accurate needs no approval: CLAUDE.md, AGENTS.md, README rows and links, and the rows and entries a workflow below or a skill keeps current. Neither does a one-line comment where the code would otherwise be unclear.
-10. **Ask before saving a memory, and offer where it goes.** Local memory (`~/.claude/projects/.../memory/`) is for private, personal or security-sensitive notes: real names behind stand-ins, personal data, playthrough notes. Anything that would help the config and is safe to publish belongs in the repo (CLAUDE.md, a skill, `docs/`), so it travels with the flake. Propose the note and let the user pick the location before writing it.
+5. **DMS's matugen owns colours; Stylix owns fonts and cursor.** Never hardcode colours, fonts or wallpaper in a module. An app's colours come from a matugen template rendered at runtime into a plain file its config includes (never a home-manager store link); `modules/theme/CLAUDE.md` has how. Fonts and cursor come from `config.stylix.fonts`/`config.stylix.cursor`.
+6. **Commits go through the `commit` skill**, authored by whoever is at the keyboard (`git.name`/`git.email` in their `users/<name>/settings.nix`), never warpledge's on someone else's account, never `--author` or `-c user.name`. Conventional Commits, `type(scope): subject` plus a bullet body. A changed `machines/*/settings.nix` or `users/*/settings.nix` rides along in the commit being made, unmentioned, or gets its own `chore(<machine>): save settings from Omni Settings`: Omni Settings' writes never sit uncommitted.
+7. **Screenshots need consent.** When capturing the screen or a window (screenshot tools, `grim`, niri's actions, computer use) would help, ask with AskUserQuestion, saying why and that a yes lasts the session. After a yes, capture for the task without asking again; never without one or for anything else.
+8. **Set only what was asked for.** No options, defaults or "nice to have" settings on your own. Offer worthwhile additions after the requested change as an optional multi-select AskUserQuestion and add only what they pick.
+9. **Ask before writing new docs or long comments.** A new `.md` file, a new section or note, or a comment over a line or two needs a yes first: propose it with AskUserQuestion saying what it covers and where. Always propose docs for critical infrastructure someone must understand to change it safely. Keeping existing docs accurate needs no approval (CLAUDE.md, AGENTS.md, README rows and links, entries a skill keeps current), nor does a one-line comment where code would otherwise be unclear.
+10. **Ask before saving a memory, and offer where it goes.** Local memory (`~/.claude/projects/.../memory/`) is for private or sensitive notes (real names behind stand-ins, personal data, playthrough notes); anything safe to publish that helps the config belongs in the repo (CLAUDE.md, a skill, `docs/`). Let the user pick before writing.
 11. **`rm` takes literal paths.** Write the absolute path, never `$VAR` (`rm /run/user/1000/a`, not `rm $XDG_RUNTIME_DIR/a`), and run each deletion as its own command, never chained onto a read-only check or hidden in a script.
 12. **Do not make any changes until you have 95% confidence in what you need to build.** Ask me follow-up questions until you reach that confidence.
 
-`AGENTS.md` at the repo root is for the local AI only (opencode and Zed's agent on llama-swap's models): a standalone, condensed version of this file with the same rule numbers, plus guidance for a smaller model (verifying options in upstream source, breaking retry loops, context budget). Keep it in sync: when a rule, path, workflow or gotcha changes here or in a folder's `CLAUDE.md` (condensed under its **Folder rules**), update `AGENTS.md` in the same commit, and never let the two contradict.
+`AGENTS.md` is the local AI's standalone, condensed copy of this file (same rule numbers, plus guidance for a smaller model). When a rule, path, workflow or gotcha changes here or in a folder's `CLAUDE.md` (condensed under its **Folder rules**), update it in the same commit; the two never contradict.
 
-Only `.claude/settings.json` is tracked (public); the rest of `.claude/` is gitignored, including `settings.local.json`, where approvals can capture a secret. Before committing a `settings.json` change, and in any CLAUDE.md audit, do the **maintenance check** in `modules/home/programs/ai/CLAUDE.md`, which also explains the permission rules and what the post-edit hook flags. The hook (alejandra plus repo checks) runs on `Write|Edit` only, so edit tracked files with Edit or Write, not `sed` or a heredoc.
+Only `.claude/settings.json` is tracked; before committing a change to it, and in any CLAUDE.md audit, do the **maintenance check** in `modules/home/programs/ai/CLAUDE.md`. The post-edit hook (alejandra plus repo checks) runs on `Write|Edit` only, so edit tracked files with Edit or Write, not `sed` or a heredoc.
 
-Several folders carry their own `CLAUDE.md` (`modules/wm/`, `modules/nixos/`, `modules/theme/`, `docs/`, `modules/home/programs/ai/`, `programs/system/omni-settings/`, `programs/media/freetube/`). Claude Code loads one when it reads a file in that folder; the pointers below say when to read one first.
+Several folders carry their own `CLAUDE.md` (`lib/`, `modules/nixos/`, `modules/home/`, `modules/wm/`, `modules/theme/`, `docs/`, `modules/home/programs/ai/`, `programs/system/omni-settings/`, `programs/media/freetube/`). Claude Code loads one when it reads a file in that folder; the pointers below say when to read one first.
 
 ## Commands
 
 ```bash
 nix flake check         # Evaluate all outputs, no build (rule 1 says when); its `stranger` check is a machine on template defaults, so shared modules must work without machines/ or users/warpledge/
 nix build .#nixosConfigurations.<machine>.config.system.build.toplevel --no-link  # Full build, no activation: catches hash and patch failures that flake check (eval only) misses
-alejandra .             # Format all Nix files (v3.0.0 is the standard)
-nix fmt .               # Same formatter through the flake; a bare `nix fmt` leaves alejandra 3.0.0 waiting on stdin
-deadnix --no-lambda-arg # Find unused function arguments in Nix files
-statix check .          # Lint for Nix antipatterns (inherit, empty patterns, etc.)
-nixm lint               # Run both deadnix and statix in one shot (wraps the above two)
-nixm rebuild            # Apply config (wraps `nh os switch`)
-nixm rebuild 2>&1 | grep -E "error|Error|failed|Failed" || echo "✓"  # token-light rebuild
-nixm boot               # Build, activate on next boot (`nh os boot`); use when an update bumps glibc/systemd/niri/xwayland-satellite, since live switches froze the desktop on 2026-10-03 (glibc/systemd) and 2026-10-07 (xwayland-satellite)
-nixm upgrade            # Update flake inputs + rebuild
-nixm flake-update       # Update flake inputs only (no rebuild)
-nixm dryrun             # Rebuild without applying
-nixm gc                 # GC, keep last 5 generations
-nixm rollback           # Pick a generation and switch to it (interactive)
+alejandra .             # Format all Nix files (v3.0.0); a bare `nix fmt` waits on stdin, use `nix fmt .`
+nixm lint               # deadnix --no-lambda-arg + statix check
+nixm rebuild            # Apply config (wraps `nh os switch`); user-only, rule 1
+nixm boot               # Activate on next boot; use when an update bumps glibc/systemd/niri/xwayland-satellite (live switches froze the desktop, 2026-10)
 nix flake update <name> # Bump a single input
 run <pkg> [args]        # Ad-hoc launch a nixpkgs package without installing it (zsh function)
+nixm <bogus>            # List every nixm subcommand (fzf menu in modules/home/nixm.nix, alias n)
 ```
-
-`nixm` is an fzf-driven menu defined in `modules/home/nixm.nix` (aliased to `n`). Run `nixm <bogus>` to print the full subcommand list, including the backup, Android VPN and launch-option ones.
 
 ## Architecture
 
@@ -76,108 +66,53 @@ flake.nix                                  (one system per folder in machines/, 
       → modules/wm/${windowManager}/         (active WM only)
 ```
 
-`lib/settings.nix` turns the settings files into module arguments, so every module can read them. Conditional imports in each subdir's `default.nix` decide what loads.
-
 ### Machine and user settings
 
-Two kinds of settings file, each with a template that lists every setting: **`machines/_template/settings.nix`** (one per computer) and **`users/_template/settings.nix`** (one per person). A setting a file leaves out takes the template's value with every true/false turned off, so a new toggle never breaks someone else's machine. `lib/settings.nix` stops evaluation with a message naming the file on a misspelt setting, a wrong kind of value, an unknown choice, or a missing `users/<name>/`, `stateVersion` or admin main user. Read the templates directly; don't trust this file to stay in sync.
+`machines/<name>/settings.nix` (one per computer) and `users/<name>/settings.nix` (one per person) are read by `lib/settings.nix`; the `_template/` copies list every setting and its default, and a left-out true/false is off. NixOS modules get `machine` and `anyUser`, home modules `machine` and `user`. What a machine or user has on is read from these files, never assumed; a machine's `users.<name>` block overrides the person's file there. How gaps are filled, the module arguments and settings like `flakePath`, `defaultApps` and `localAi` are in `lib/CLAUDE.md`.
 
-Module arguments:
+Omni Settings (`programs/system/omni-settings/`) is a QML app (DMS panel on Mod+S) with a Python backend over these files; read its `CLAUDE.md` before changing the app, its root helper (`nixos/system/user/omni-settings-helper.nix`) or how the templates are laid out (`#--` sections, `#---` headers, trailing comments). Keep the settings files plain data (no `let`, functions or string interpolation), or the app can't parse them.
 
-- NixOS modules get `machine` (the machine's settings plus `name`, `hostName`, `flakePath` and `mainUser`, filled in, and each user's final settings in `machine.users.<name>`) and `anyUser` (each true/false user setting, true when any user on the machine has it on). An app with a system-side piece (an AppArmor profile, Steam, FlareSolverr, the Nautilus extension, the Japanese IME) loads on `anyUser.<app>`.
-- Home modules get `machine` and `user`, that user's settings. Home routers (`home/default.nix`, `programs/default.nix`, `programs/gaming/default.nix`, `audio/guitar/default.nix`) read `user` in `imports`, where `_module.args` can't reach, so they take it as a plain first argument (`user: {lib, ...}: {...}`) and their parent imports them with `(import ./gaming user)`.
+Gotchas that bite from anywhere; the ones for one tree are in `modules/nixos/CLAUDE.md` and `modules/home/CLAUDE.md`. Grep the option name before assuming which file owns it:
 
-Where the settings that need more than their template comment are implemented:
-- `flakePath` (null: `/etc/nixos-config`): `system/user/config-repo.nix` gives every admin write access through a default ACL and sets git's `safe.directory`; skipped for a path under `/home/`.
-- `windowManager`: one per machine, since the greeter and portal setup are per compositor.
-- `gpu.*`: `services/hardware/gpu.nix`; null on a machine whose own `hardware/gpu.nix` does it.
-- `admin = false`: no wheel and no docker group.
-- `defaultApps.*`: choices, `.desktop` ids and launch commands live in `lib/default-apps.nix`, which `mime.nix`, `terminal-exec`, `youtube-dispatch`, niri's app binds and Omni Settings read through its `forUser`; a pick whose app toggle is off falls to the first of its kind that's on. `mimeapps.list` is forced, so DMS's default-app picker doesn't survive a rebuild: change defaults here.
-- `localAi.{code,chat,edit}`: models from `lib/local-models.nix` (folder, file match, llama.cpp flags), read by `lib/settings.nix`, `ai/llama-swap.nix` and `editors/zed.nix`; the first coding model is the default.
-
-Omni Settings (`programs/system/omni-settings/`) is a QML app (DMS panel on Mod+S, window from the launcher) with a Python backend over these files, imported for every user with no toggle; its root helper is `nixos/system/user/omni-settings-helper.nix`. Its internals are in `modules/home/programs/system/omni-settings/CLAUDE.md`: read that before changing the app, the helper, or how the templates are laid out (`#--` sections, `#---` headers, trailing comments), since the app builds its pages from them. Keep the settings files plain data (no `let`, functions or string interpolation), or the app can't parse them.
-
-- `~/.local/opt` bundles (kept out of git) have no category of their own: `media.tonkatsuBox`, `gaming.granblueRelinkMods` and `audio.katanaFloorboard` wrap them; see `docs/personal/local/local-binary-installs.md`. `setup.sh` doesn't offer them.
-
-What a machine or user has on is read from the settings files, never assumed: `users/<name>/settings.nix` holds a person's apps for every machine, and a machine's `users.<name>` block overrides them there. Compare machines with `diff machines/eclipse/settings.nix machines/legion/settings.nix`.
-
-Gotchas. Grep the option name before assuming which file owns it:
-
-- **`boot.kernelModules` silently swallows kernel parameters.** modprobe cannot resolve them, `systemd-modules-load.service` logs `Failed to find module '<param>'` and still exits 0, so the hardening looks applied and is not. Eleven params sat there until 2026-09-22. Check with `grep <param> /proc/cmdline`, not by reading the module. An assertion in `security/hardening/kernel.nix` now fails the build on any `kernelModules` entry containing `=`; a bare flag like `slab_nomerge` still gets through.
-- `gaming.steam` is wired in `modules/nixos/gaming/default.nix` (on `anyUser.gaming.steam`, so Steam is installed system-wide for everyone); the rest of `gaming.*` is wired in `home/programs/gaming/default.nix`.
-- `media.moku` loads from both trees: the home-manager bundle plus `nixos/services/servers/flaresolverr.nix`. `suwayomi.enable`, `syncthing.enable` and `mullvad.enable` each load one NixOS module (`nixos/services/servers/{suwayomi,syncthing}.nix`, `nixos/security/mullvad/`) that sets its home-manager half through `home-manager.users`: for every user, except Syncthing's app entry, which goes to `mainUser` alone since Syncthing runs as them. `split-tunnel.nix` builds each user's home wrappers from that user's toggles.
-- A NixOS module that configures every user's home writes `home-manager.users = lib.mapAttrs (_: _: {...}) machine.users;`, as the theme modules and the machine `wm/` files do. Not `home-manager.sharedModules`: those merge ahead of every other definition, which reorders list options and changes the built files.
-- Don't switch the home routers to `lib.modules.importApply`. Its extra nesting reorders the home modules, and options whose type keeps the last definition flip: FreeTube's `secColor` went from the repo's Lavender to catppuccin/nix's Mauve when this was tried on 2026-10-17. The routers set `_file` so errors still name them.
-- Non-admin users are added to `nix.settings.allowed-users` (`security/hardening/default.nix`, otherwise `@wheel` only): home-manager's activation runs `nix-env` as each user.
-- `nixos/services/runtimes/flatpak.nix` (nix-flatpak) loads on the machine's `flatpak.enable` and declares only Flatseal. Other Flatpak apps (the Hytale launcher, Hypixel's own bundle) are installed by hand, not in the repo; Omni Settings' Flatpaks page manages them.
-- `machine.kernel` is read in `system/bootloader.nix` (and `modules/default.nix` for the CachyOS overlay); `gaming/performance/kernel.nix` only holds gaming sysctls, boot params and the sched_ext scheduler (`services.scx`, scx_lavd).
-- `alejandra`, `claude-code`, `affinity-nix` and `cachyos-kernel` keep their own nixpkgs on purpose (the comments in `flake.nix` say why: a GCC 15 build failure, binary caches that only match their own pin, and CachyOS patches that must match their pin's kernel version), `nix-flatpak` has no nixpkgs input, and `claude-desktop` is source only (`flake = false`). Don't add `inputs.nixpkgs.follows` to them.
-- `audio/guitar/` loads when any of `audio.{guitarix,tone3000,katanaFloorboard}` is on; its `default.nix` holds the shared cab IR, tuner and patchbay packages plus the plugin paths, then gates each app on its own toggle.
-- `ai/{claude,opencode,lmstudio}.nix` are conditionally imported **and** wrap their body in `config = lib.mkIf user.<toggle> {...}`, so the inner guard never fires on its own. New modules take the conditional import alone.
+- `boot.kernelModules` silently swallows kernel parameters; they go in `boot.kernelParams` (`modules/nixos/CLAUDE.md`).
+- `alejandra`, `claude-code`, `affinity-nix` and `cachyos-kernel` keep their own nixpkgs on purpose (`flake.nix` says why), `nix-flatpak` has no nixpkgs input, and `claude-desktop` is source only. Don't add `inputs.nixpkgs.follows` to them.
 - Module *loading* goes through `lib.optionals` in a `default.nix`; config *logic* inside a module uses `if/then/else`. Mixing them up is why an option looks wired but has no effect.
 - Every setting exists once `lib/settings.nix` has filled the gaps, so read it as a bare path (`user.media.mpv`); `or false` isn't needed.
 - Machine-specific hardware lives in the machine's folder, never behind a name check in a shared module: niri monitors and the desktop's DMS bars in `machines/<name>/wm/niri.nix` (the bars through the `dms.extraSettings` option declared in `niri/home/dms/default.nix`), the desktop's DMS GPU widget in `machines/eclipse/hardware/gpu.nix`.
-- **Moku is built from source, pinned twice:** the `moku` and `tsunagu` inputs move together; the `moku-bump` skill has the bump order and the patches. Sources that drive an Android WebView can't work in Tsunagu.
 
-### Conditional import patterns
-
+Import patterns:
 ```nix
-# Machine service (nixos/default.nix)
-++ lib.optionals machine.clamav.enable [./security/clamav.nix]
-
-# User app (a home router)
-++ lib.optionals user.browsers.zen [./browsers/zen]
-++ lib.optionals user.media.mpv [./media/mpv.nix]
-
-# System side of a user app (a NixOS router)
-++ lib.optionals anyUser.media.mpv [./mpv.nix]
-
-# WM module selection (in modules/default.nix) — the WM is split across both trees
-# NixOS imports:
-./wm/${machine.windowManager}/session.nix
-# home-manager imports, for each user:
-./wm/${machine.windowManager}/home
-
-# Per-machine WM override (in machines/<name>/default.nix)
-++ (lib.optional (machine.windowManager == "niri") ./wm/niri.nix)
+++ lib.optionals machine.clamav.enable [./security/clamav.nix]  # machine service (nixos/default.nix)
+++ lib.optionals user.media.mpv [./media/mpv.nix]               # user app (a home router)
+++ lib.optionals anyUser.media.mpv [./mpv.nix]                  # system side of a user app
+./wm/${machine.windowManager}/session.nix  # + ./wm/<wm>/home per user (modules/default.nix)
+++ (lib.optional (machine.windowManager == "niri") ./wm/niri.nix) # machines/<name>/default.nix
 ```
 
-`modules/default.nix` is also where `nixpkgs.config` sets `allowUnfree` and `android_sdk.accept_license`, and where `home-manager.backupFileExtension = "bak"` is set. Overlays come from two lists the module system merges: `modules/default.nix` holds the CachyOS kernel one, applied when `machine.kernel == "cachyos"` (`inputs.cachyos-kernel.overlays.pinned`), and `modules/nixos/nix/nixpkgs.nix` holds the unconditional ones (NUR, claude-code, affinity-nix), where a new overlay goes unless a toggle gates it. That file also sets `allowBroken`, so a package nixpkgs marks broken still passes `nix flake check` and only a build shows the failure, and `permittedInsecurePackages`, whose entries name exact versions: an update that moves one to a new version fails eval as insecure until the entry matches. Both `system.stateVersion` and every user's `home.stateVersion` come from the machine's `stateVersion` (`25.11` on the desktop, `26.05` on the laptop since its reinstall), marked DO NOT CHANGE.
+`nixpkgs.config`, the overlays, `allowBroken` and `permittedInsecurePackages` are covered in `modules/nixos/CLAUDE.md`. Both `system.stateVersion` and every user's `home.stateVersion` come from the machine's `stateVersion` (`25.11` on the desktop, `26.05` on the laptop since its reinstall), marked DO NOT CHANGE.
 
 ### Module layout
 
 `ls` a folder for its files; this lists what a listing won't tell you.
 
 - `modules/nixos/` — system: `gaming/`, `network/`, `nix/`, `security/`, `services/` (`hardware/`, `runtimes/`, `servers/`), `system/`
-- `modules/home/` — user: `programs/<category>/`, plus `options.nix`, `utilities.nix` (the general package list) and `user-packages.nix` (a user's `userPackages`, added from Omni Settings' Packages tab) at its root. `mime.nix`, `nixm.nix`, `services.nix` and `variables.nix` are single files at that level, not directories
-  - Wrappers for prebuilt bundles in `~/.local/opt/` (`media/tonkatsu-box.nix`, `gaming/tools/relink-mod-organizer.nix`, `audio/guitar/katana-floorboard.nix`) and AppImage wraps (`appimageTools`, hash-pinned into the store) both sit in the folder for what the app is, not how it is packaged (`docs/personal/local/{local-binary-installs,appimage-wraps}.md`). `gaming/tools/reloaded-ii-gbfr.nix` is the exception: a Windows `.exe` its installer puts in `~/Desktop/Reloaded-II - Granblue Fantasy Relink/`, run in GBFR's Proton prefix through `protontricks-launch`
-  - `programs/ai/` — Claude Code, opencode and the shared MCP servers (`mcp.nix`; API keys are read at launch from owner-only files in `~/.nixos-config-mcp/`, never the repo or the store). Skills and subagents live in `skills/<name>/` and `agents/<name>.md`, registered in `claude.nix`; new ones (including what skill-creator writes to `~/.claude/skills/`) move here. Its `CLAUDE.md` has the rest
-  - `default.nix` carries a `clearStaleBackups` activation hook that deletes `*.bak` under `~/.config`, `~/.local/{share,state}` before `checkLinkTargets`. This is why HM activation never fails on leftover backups. Don't remove it when debugging a "file exists" error; find the real conflicting file instead.
-- `modules/wm/niri/` — `session.nix` (NixOS: turns the WM on, login screen, keyring unlock) and `home/` (home-manager, everything else, including DankMaterialShell (DMS)); `modules/wm/dms-mutable.nix` is the settings merge its DMS module imports, and `modules/wm/dms-polkit/` the patch it imports (see **Security**)
+- `modules/home/` — user: `programs/<category>/` plus a few root files; its `CLAUDE.md` has the layout, the `~/.local/opt` and AppImage wrappers, and `clearStaleBackups`. Skills and subagents live in `programs/ai/{skills,agents}/`, registered in `claude.nix`
+- `modules/wm/niri/` — `session.nix` (NixOS: turns the WM on, login screen, keyring unlock) and `home/` (home-manager, everything else, including DankMaterialShell (DMS)); `modules/wm/dms-mutable.nix` is the settings merge its DMS module imports, and `modules/wm/dms-polkit/` the polkit dialog patch it imports (`modules/nixos/CLAUDE.md`)
 - `modules/theme/` — matugen templates, the default DMS theme, GTK/Qt and Stylix; its `CLAUDE.md` says what each file does
-- `lib/mutable-merge.jq` — the merge that keeps GUI changes across rebuilds, shared by `wm/dms-mutable.nix`, `editors/zed.nix` and `file-browsers/dux-files.nix`. Zed's template is `~/.config/zed/declarative-settings.json`, whose values the reset button on Omni Settings' Zed switch puts back into `settings.json`; theme and fonts are locked
+- `lib/` — the settings reader, default apps, local models and `mutable-merge.jq` (keeps GUI changes across rebuilds); its `CLAUDE.md` has the details
 - `machines/<name>/` — `default.nix` (machine entry), `settings.nix`, `hardware/` (`gpu.nix`, `hardware-configuration.nix`), `wm/<wm>.nix` (per-WM machine overrides for every user: monitors, GPU env vars, autostart, the desktop's DMS bars)
-- `machines/_template/` and `users/_template/` — what `setup.sh` copies; their `settings.nix` files are also the full setting lists and the defaults. `machines/_template/hardware/hardware-configuration.nix` throws until it's replaced
-- `users/<name>/settings.nix` — one person's account and apps (`users/warpledge/` for the owner); an optional `home.nix` beside it holds their own home-manager config
-- `machines/<name>/CLAUDE.md` and `users/<name>/CLAUDE.md` — that machine's hardware and that person's setup (see **Who and which machine**); the `onboard` skill writes them. The templates have none, so `setup.sh` copies none
-- `setup.sh` — sets up a new computer from the templates (hardware, locale, GPU, monitors, the zen kernel, users, then `nixos-rebuild boot`) or reinstalls one already in `machines/`; also `add-user`, `build` and `share` (moves the clone to `/etc/nixos-config`). It stages its files with git and asks before anything that needs sudo
-- What a machine has beyond the template (eclipse's LUKS game drives, legion's Minecraft servers) is listed in its own `CLAUDE.md`.
+- `machines/_template/` and `users/_template/` — what `setup.sh` copies (no `CLAUDE.md`; the template `hardware-configuration.nix` throws until replaced)
+- `users/<name>/` — `settings.nix` (account and apps) and an optional `home.nix` (their own home-manager config)
+- `setup.sh` — new computer or reinstall from the templates, plus `add-user`, `build` and `share` (moves the clone to `/etc/nixos-config`); asks before sudo
 
 ### Where to place things
-
 | Scope | Path |
 | --- | --- |
-| Shared system | `modules/nixos/` |
-| Shared user | `modules/home/` |
-| Per-machine hardware/entry | `machines/<name>/` |
 | Machine toggle (services, kernel, WM, locale) | `machines/<name>/settings.nix`, listed in `machines/_template/settings.nix` |
 | User toggle (apps, account) | `users/<name>/settings.nix`, listed in `users/_template/settings.nix` |
 | One user's change on one machine | the `users.<name>` block of `machines/<machine>/settings.nix` |
-| WM internals | `modules/wm/{wm}/` |
-| Mullvad VPN | `modules/nixos/security/mullvad/` |
-| Per-machine WM overrides | `machines/<name>/wm/{wm}.nix` (`niri.nix`) |
-| A module only one machine will ever want | `machines/<name>/` (see below) |
-| A module only one person will ever want | `users/<name>/home.nix` |
+| Per-machine WM overrides (monitors, GPU env vars) | `machines/<name>/wm/niri.nix` |
+| Shared system / user / WM | `modules/nixos/`, `modules/home/`, `modules/wm/niri/` |
 
 ### Whose change is it
 
@@ -189,117 +124,58 @@ Gotchas. Grep the option name before assuming which file owns it:
 
 Never a hostname or username check in `modules/`; the post-edit hook flags every machine and user folder name it finds there.
 
-**Forks.** Other people run the repo from a fork of `Warpledge/nixos-config`, with their own `machines/` and `users/` folders on top. Their shared work goes back upstream as a pull request, and upstream's changes come in by merging: the `upstream` skill does both. A fork keeps warpledge's folders untouched so those merges stay clean, and pushing and opening the pull request stay with the person (rule 1).
+**Forks** of `Warpledge/nixos-config` add their own `machines/` and `users/` folders, leave warpledge's untouched, and trade changes through the `upstream` skill; pushing and opening the pull request stay with the person.
 
 ## Workflows
 
-**Add an application:** the `add-app` skill has the steps (toggle, module, router import, `nix flake check`, Omni Settings description, README row and link, a cut-only pass over the prose written; `prose-reviewer` does that pass) and checks the wiring. An app not in nixpkgs is an AppImage wrap or a patched `.deb`/tarball before a Flatpak, which is the last resort.
+Most tasks have a skill whose description says when to use it (`add-app`, `freetube-sync`, `todo`, `game-troubleshooting`, `vn-setup`/`rpgm-setup`, `disable-package`). The rest:
 
-**Never add a `---` line to `README.md`**: Zed's preview pairs them like front-matter delimiters. Verify markdown with `nix run nixpkgs#pulldown-cmark -- < README.md`.
+- **Add an app:** `add-app`. An app not in nixpkgs is an AppImage wrap or a patched `.deb`/tarball before a Flatpak, the last resort.
+- **Add a system service:** the toggle goes in `machines/_template/settings.nix` (off) and the machine's `settings.nix`, the module in `modules/nixos/services/<category>/<name>.nix`, the import (`lib.optionals machine.<name>.enable [...]`) in `modules/nixos/default.nix`, and an entry in `setup.sh`'s `services` list.
+- **Update flake inputs:** point the user at the user-only `/flake-update [input…]` skill (`nixm upgrade` minus the rebuild).
+- **New computer, reinstall or person:** `./setup.sh` / `./setup.sh add-user`, run by the person; never here (sudo, `nixos-rebuild`).
+- **Bring Hyprland back:** restore from the `hyprland-backup` branch, re-add `"hyprland"` to `windowManager` in `lib/settings.nix`, set it in the machine's `settings.nix`.
+- **Never add a `---` line to `README.md`**: Zed's preview pairs them like front-matter. Verify with `nix run nixpkgs#pulldown-cmark -- < README.md`.
 
-**Update FreeTube state** (blocklist or settings), asked for as "I blocked more" / "sync freetube": the `freetube-sync` skill; background in `programs/media/freetube/CLAUDE.md`.
+## Window managers, hardware, network, security
 
-**Update flake inputs:** the user-only `flake-update` skill (`/flake-update [input…]`) does what `nixm upgrade` does, minus the rebuild. It builds this machine without activating it, fixes or switches off failures and rechecks disabled packages, then hands back the rebuild command. Asked to update the flake, point the user at it.
-
-**Add a system service:** same flow, but the toggle goes in `machines/_template/settings.nix` (off) and the machine's `settings.nix`, the module in `modules/nixos/services/<category>/<name>.nix`, the import (`lib.optionals machine.<name>.enable [...]`) in `modules/nixos/default.nix`, and its entry in the `services` list of `setup.sh`.
-
-**New computer, reinstall or person:** `./setup.sh` on the new computer (it offers to reinstall a machine already in `machines/` instead), `./setup.sh add-user` for a person. It's for people installing this config; don't run it here (its last steps use sudo and `nixos-rebuild`).
-
-**Bring Hyprland back:** restore it from the `hyprland-backup` branch (`git show hyprland-backup --stat` lists what was there), re-add `"hyprland"` to `windowManager` in `lib/settings.nix`, then set it in the machine's `settings.nix`.
-
-**Customize WM:** edit `modules/wm/{wm}/home/...` for shared behavior, or `machines/<name>/wm/{wm}.nix` for per-machine overrides (monitors, GPU env vars).
-
-## Window Managers
-
-Niri keybind syntax, DMS, XDG portals, login and the per-machine overrides are in `modules/wm/CLAUDE.md`. Read it before changing a WM file, including `machines/<name>/wm/` and `modules/home/variables.nix`, which don't load it on their own. Two rules that bite from anywhere: Niri spawns with arguments must be lists, not strings (an assertion fails the build on a spaced string), and `QT_QPA_PLATFORM`, `GDK_BACKEND` and `SDL_VIDEODRIVER` keep their X11 fallbacks (`wayland;xcb`, `wayland,x11`, `wayland,x11`) or X11-only apps die when launched from DMS.
-
-## Hardware
-
-Each machine's hardware, quirks and GPU troubleshooting are in its `machines/<name>/CLAUDE.md`. Read it (**Who and which machine**) before diagnosing anything machine-specific, along with its `settings.nix`.
-
-## Network
-
-DNS (systemd-resolved, DoT), Wi-Fi (iwd), which ports each module opens, Mullvad and its split tunnel, and the hosts blocklists are in `modules/nixos/CLAUDE.md`.
-
-## Security
-
-LUKS, kernel hardening, AppArmor, GNOME Keyring, auditd. Mullvad VPN as above. Only users with `admin = true` are in wheel. nh, and so `nixm`, elevates with pkexec (`NH_ELEVATION_STRATEGY` in `nix/nh.nix`, whose polkit rule keeps the authorization for the calling process so a rebuild asks once), so `nixm rebuild` prompts in DMS's polkit dialog whether or not a terminal is attached, as with `! nixm rebuild` in Claude Code. `modules/wm/dms-polkit/` patches DMS so that dialog is a full-screen modal holding the keyboard until it closes, and dims every other monitor with a layer that takes clicks and, under niri, the keyboard (niri honours a layer's keyboard grab only on the active monitor, and a click elsewhere changes it); plain `sudo` typed in a terminal still asks there, and GPG and keyring prompts (pinentry-gnome3, gcr-prompter) aren't polkit, so they keep their own windows. Wheel needs a password for sudo; the NOPASSWD list in `security/auth/sudo.nix` covers only sync, poweroff, reboot and shutdown. Keep it to commands that cannot be turned into a root shell (sed, systemctl, nixos-rebuild and dmesg all can). Non-admins can't run sudo at all (`execWheelOnly`); their one root path is Omni Settings' polkit helper (see **Machine and user settings**), which must keep taking typed values for the caller's own keys only, never file text or Nix. Its admin requests (rebuild as-is, switch to a generation) check wheel membership first.
-
-Audit tooling (`lynis`, `sbomnix`/`vulnxscan`, off while broken per `docs/nixpkgs/disabled-packages.md`; never `vulnix`), the AppArmor profiles (test-compile with the `apparmor-check` skill) and SSH/fail2ban are in `modules/nixos/CLAUDE.md`.
+- **WM:** niri keybinds, DMS, XDG portals, login and per-machine overrides are in `modules/wm/CLAUDE.md`; read it before changing a WM file, including `machines/<name>/wm/` and `modules/home/variables.nix`, which don't load it. From anywhere: niri spawns with arguments are lists, not strings (a spaced string fails the build), and `QT_QPA_PLATFORM`, `GDK_BACKEND` and `SDL_VIDEODRIVER` keep their X11 fallbacks (`wayland;xcb`, `wayland,x11`, `wayland,x11`) or X11-only apps die when launched from DMS.
+- **Hardware:** read the machine's `CLAUDE.md` and `settings.nix` before diagnosing anything machine-specific. **Network** (DNS, Wi-Fi, open ports, Mullvad, blocklists): `modules/nixos/CLAUDE.md`.
+- **Security:** only `admin = true` users are in wheel. The sudo NOPASSWD list (`security/auth/sudo.nix`) holds only commands that can't become a root shell, and Omni Settings' polkit helper takes typed values for the caller's own keys only, never file text or Nix. pkexec/polkit elevation, audit tooling (never `vulnix`), AppArmor (test-compile with `apparmor-check`) and SSH are in `modules/nixos/CLAUDE.md`.
 
 ## Writing Style
 
-Covers chat replies, `README.md`, `docs/` and commit messages; code comments follow
-**Comment Style** below. The `prose-reviewer` subagent holds the full rules and does the
-cut-only pass.
+Covers chat replies, `README.md`, `docs/` and commit messages; the `prose-reviewer` subagent holds the full rules and does the cut-only pass. Code blocks, command output, quotes and table cells are exempt.
 
-- Lead with the answer. No upbeat filler, exclamation marks, affirming the user,
-  hedging boilerplate ("It's worth noting"), or a closing line praising the work.
-- Avoid the LLM tells: "it's not X, it's Y", fragments for emphasis, stacks of short
-  sentences, rule-of-three lists, rigid parallel bullets, puffery (say what a thing does,
-  not how well), empty summary sentences, marketing nouns, and pet words (delve, robust,
-  seamless, leverage, crucial, ensure, comprehensive, streamline, utilize, enhance).
-- Use contractions, plain words, and varied sentence length and openings.
-- No em dashes in `README.md` or `docs/` prose; a `` `path/` — description `` list dash is
-  structure and stays, as does README's `**Label:** text` bullet style.
-- `docs/` notes pin time-bound facts to a date or version, name the condition behind a
-  vague frequency, and cite where a claim came from.
-- A chat reply naming packages or upstream projects ends with a **Sources** list, taken
-  from the lookups under **Looking things up**, not memory.
-- Code blocks, command output, quotes and table cells are exempt.
+- Lead with the answer. No upbeat filler, exclamation marks, affirming the user, hedging boilerplate, or a closing line praising the work.
+- Avoid the LLM tells: "it's not X, it's Y", fragments for emphasis, stacks of short sentences, rule-of-three lists, rigid parallel bullets, puffery, empty summary sentences, and pet words (delve, robust, seamless, leverage, crucial, ensure, comprehensive, streamline, utilize, enhance). Use contractions and plain words.
+- No em dashes in `README.md` or `docs/` prose; a `` `path/` — description `` list dash and README's `**Label:** text` bullets stay.
+- `docs/` notes pin time-bound facts to a date or version and cite where a claim came from.
+- A chat reply naming packages or upstream projects ends with a **Sources** list from the lookups under **Looking things up**, not memory.
 
 ## Formatting Standards
 
-Alejandra (v3.0.0) is the formatter. Header hierarchy used throughout the repo:
-
-- **L1** — `# FILE PURPOSE (UPPERCASE)` between two `#====...====#` rules, one per file
-- **L2** — `#-- Section Name` (title case) between two `#----...----#` rules
-- **L3** — `#--- Item description`
-- **L4** — inline `# comment` (explain *why*, not *what*)
-
-A `default.nix` that imports anything keeps its `imports` in a final `#-- Imports` L2 section, after the rest of its config.
-
-Spacing: 1 blank line before each header level, none after L1 (code starts on the next line), none between L3 items, 1 after closing braces. Alejandra collapses multiple blank lines to one.
-
-When reformatting an existing file: add headers, normalize spacing, convert inline markers to the hierarchy above. **Never delete content**, including commented-out code and disabled options.
+Alejandra (v3.0.0) formats. Headers: **L1** `# FILE PURPOSE (UPPERCASE)` between two `#====...====#` rules, one per file; **L2** `#-- Section Name` between two `#----...----#` rules; **L3** `#--- Item description`; **L4** inline `# comment` (why, not what). A `default.nix` keeps its `imports` in a final `#-- Imports` L2 section. One blank line before each header, none after L1 or between L3 items, one after closing braces. Reformatting a file never deletes content, including commented-out code and disabled options.
 
 ### Comment Style
 
-**Comment only what the code doesn't make obvious.** Most lines need none; a comment belongs where a reader couldn't otherwise tell how or why something works. Comments and user-facing text (Omni Settings descriptions, template comments, README) are plain, short and easy to read. Keep NixOS's own terms (rebuild, generation, flake input, garbage collection) rather than swapping in friendlier words, and explain them briefly where needed.
+Comment only what the code doesn't make obvious, for someone reading the file cold in six months. One or two lines is normal; a paragraph is a smell. This covers generated scripts and inline strings too.
 
-**Keep comments short. A comment earns its place by saving the next reader a trip to the docs, not by narrating.** One or two lines is normal; a paragraph is a smell.
-
-**Keep every comment line within 89 columns**, trailing `# ...` comments included. The user reads files in Zed at half-screen width, where a longer line wraps onto a second row. Shorten the wording first (a detail kept elsewhere, such as a doc, can be pointed at instead), and if it still doesn't fit, move the comment onto its own line above the code. Check with `awk 'length>89' <file>`.
-
-Write comments for someone reading this file cold in six months:
-
-- **Do** name what a non-obvious option or value does, flag a constraint the type system won't catch (`margin` must be 0 when `anchor_gap` is false), and point at where a value came from when it must be kept in sync.
-- **Don't** write session narrative: how a bug was found, what was tried first, what "we" discovered, or which approach got rejected. If a gotcha is worth keeping, it goes in CLAUDE.md once, and the module gets a one-line pointer.
-- **Don't** restate the code (`# Set autotile to true`), explain standard Nix or upstream behavior, list alternatives that were not chosen, or embed verification/debugging steps.
-- **Don't** justify a decision at length. State the constraint in a clause; skip the reasoning chain.
-
-This applies to generated scripts and inline strings too, not just Nix attributes.
+- **Keep every comment line within 89 columns** (Zed at half-screen width), trailing `# ...` included: shorten first, else move it above the code. Check with `awk 'length>89' <file>`.
+- **Do** name what a non-obvious value does, flag a constraint the type system won't catch, and point at where a value must be kept in sync.
+- **Don't** write session narrative (how a bug was found, what was tried), restate the code, explain standard Nix or upstream behaviour, list rejected alternatives, or justify at length. A gotcha worth keeping goes in a CLAUDE.md once, with a one-line pointer in the module.
+- Comments and user-facing text (Omni Settings descriptions, template comments, README) are plain and short, and keep NixOS's own terms (rebuild, generation, flake input, garbage collection).
 
 ## Troubleshooting
 
-```bash
-nix flake check                  # Eval errors (fastest)
-nixm rebuild --show-trace        # Full trace (ask the user to run this)
-journalctl -xeu <service>        # Service logs
-journalctl -b -p err             # Errors this boot
-```
+`nix flake check` for eval errors, `nixm rebuild --show-trace` (the user runs it) for a full trace, `journalctl -xeu <service>` / `journalctl -b -p err` for logs.
 
-Common errors:
 - `infinite recursion` → circular import or self-referencing conditional, or a router reading `user` from module args in `imports` instead of taking it as its first argument
 - A message naming `machines/<name>/settings.nix` or `users/<name>/settings.nix` → `lib/settings.nix` rejected a setting; it lists each one
 - `attribute missing` → a module reads a setting the `_template` files don't define
 - Slow / hung → check `df -h`; try `nix build --offline`
 
 **Rollback:** the user runs `nixm rollback` (rule 1), or picks a generation from the bootloader.
-
-**A game crashes, freezes or won't start:** the `game-troubleshooting` skill has the logging, hang-vs-crash and native-engine steps, and indexes the per-game notes in `docs/gaming/`.
-
-**Upscaling a VN or RPG Maker game:** the `vn-setup` and `rpgm-setup` skills pick the nix-vn/nix-rpgm preset and hand back the launch option.
 
 ## Looking things up
 
@@ -315,20 +191,10 @@ Common errors:
 | How other public flakes configure something (regex code search) | the **grep** MCP tool (grep.app) |
 | An app's own config syntax | `nix-shell -p <pkg> --run 'man <name>'` |
 
-**Check for a home-manager module before falling back to `home.packages`.** Many programs have one and it is the better module:
-
-```bash
-find /nix/store -maxdepth 4 -path '*/modules/programs/<pkg>.nix' | head -1
-```
-
-If that returns a path, read it and use `programs.<pkg>` instead.
-
-**Filter at the source.** Man pages, store listings, and long files go through `grep`/`sed`. Never dump one into the conversation. Target the path you want rather than listing a directory, and if you need several sections of the same document, dump it once to a file and grep that.
-
-**Stop once you have the answer.** A package's own man page is authoritative for its config syntax; don't go on to read the nixpkgs derivation or build inputs, which describe how it is built, not how it is configured. Don't guess documentation URLs: if two web fetches fail, fall back to a local source.
+- **Check for a home-manager module before `home.packages`:** `find /nix/store -maxdepth 4 -path '*/modules/programs/<pkg>.nix' | head -1`; if it returns a path, use `programs.<pkg>`.
+- **Filter at the source.** Man pages, store listings and long files go through `grep`/`sed`, never whole into the conversation. Don't `cat` a folder `CLAUDE.md`: Claude Code loads it when you read a file there. Need several sections of one document? Dump it once to a file and grep that.
+- **Stop once you have the answer.** A package's man page is authoritative for its config syntax; skip the nixpkgs derivation. Don't guess doc URLs: after two failed fetches, use a local source.
 
 ## Reference Notes (`docs/`)
 
-Notes under `docs/` (security, gaming, disabled packages, WM) are indexed in `docs/CLAUDE.md`, which says which to update when; `docs/personal/` holds the user's own notes (audio, Android, local installs, single-game notes). Keep them current: a Minecraft pack's `docs/personal/gaming/minecraft_servers/<pack>/` file when that pack's config, mods or settings change; a `docs/personal/local/local-binary-installs.md` entry per new `~/.local/opt` app; a `docs/nixpkgs/disabled-packages.md` row per package an update forces off (the `disable-package` skill); and the Android debloat after each ZUI OTA (the `android-debloat-redo` skill).
-
-Planned work lives under `docs/todo/`, one file per task. **When the user says "add X to the todo"**, or work a todo file tracks is done, use the `todo` skill.
+`docs/CLAUDE.md` indexes the notes and says which to update when (a Minecraft pack's file, a new `~/.local/opt` app, a disabled package, the Android debloat); `docs/personal/` is warpledge's own. Planned work is in `docs/todo/`, handled by the `todo` skill.

@@ -1,0 +1,20 @@
+# Omni Settings: QML front end
+
+<!-- Claude Code loads this file when it reads a file in this folder. -->
+
+The front end is Quickshell QML in `qml/`; `omni-settings` is `qs -p $share/qml/shell.qml`, the window. The backend path and editor come from `Config.qml`, which `default.nix` writes from `qml/Config.qml.in` along with a `qmldir`, so the same files load in DMS's process: `plugin/` is the DMS plugin (`OmniPanel.qml`, a `DSlideout` with IPC target `omniSettings`), importing the built `qml/` by its store path. The panel stays open until Mod+S or its close button hides it. `OmniView.qml` holds the shell, navigation, pending changes, `ask()` (`ConfirmDialog.qml`), `sheet` and `startJob()`; generated pages are `SettingsPage.qml`/`SettingRow.qml`, and custom pages register in its `custom` map. Data comes from `src/api.py` (`omni-settings-backend <cmd> '<json>'`, one process per call), through `Backend.call`, which a long-lived `omni-settings-backend --serve` answers by forking a child per call (`api.serve`; it stops after 5 idle minutes, and calls while it's down run as their own process), or `Backend.stream` for progress lines on stderr; jobs go to the `omni-settings-jobs` service (`src/jobs.py`, `Jobs.qml`). A new custom page is a QML page in the `custom` map, `api.py` commands for its data, and its logic in a `src/*state.py` module when it's more than a few lines. Extras on a generated page (Running Now, Open Right Now, the boot versions on Boot) are components `SettingsPage.qml` loads by page or group title. When `omni-settings` is in the machine's `mullvad.splitTunnel`, `bin/omni-settings-backend` runs the real one in `libexec/` through `mullvad-exclude`, since the panel's backend calls come from DMS's process, which the split tunnel's PATH wrapper never sees.
+
+Each tab is one scroll of its pages (`tabPages` and `PageSection` in `OmniView.qml`): the rail highlights the page at the top of the view and scrolls to the one clicked, and the section being read stays put while sections above it load (`anchorPage`). A tab fades in once every page in it is `ready` (a page that fetches data declares it), or after 700 ms. Search is pinned above the Packages scroll with its results in a dropdown, and the All user packages page shows only while there's no category.
+
+Page-by-page behaviour and the backend modules behind each page are in `src/CLAUDE.md`.
+
+## Gotchas
+
+- QML reads a property named `on` plus a capital (`onPrimary`, `onLine`) as a signal handler, so it comes out undefined: the colours are `Theme.ink*`, `Backend.stream`'s callback is `each`.
+- Tap handlers take `gesturePolicy: TapHandler.ReleaseWithinBounds`; with the default, a click that closes a dialog also reaches the row under it.
+- Inside an inline component, `view: view` binds the property to itself, which is why `OmniView`'s id is `omni`. Its JS has no `Array.flatMap`.
+- JSON sent back from QML loses `.0` on whole numbers and can come back with its keys sorted, so files are written from data the backend read itself (`windowrulestate.edited`, the window rules undo). A `Repeater` delegate's `modelData` is a copy: edits go through the source list by index (`RuleEditor.qml`).
+- Don't name a property after one `Item` already has (`data`, `state`): the page fails to load.
+- A `Loader` in a layout takes `Layout.preferredHeight: item ? item.implicitHeight : 0`, or the next page it loads keeps the last one's height.
+- A `Loader` whose item wraps text (a `Text` sized by width) gets only `width` from its parent, inside an `Item` taking the item's `implicitHeight`; sizing it from a layout loops (`DocPage.qml`).
+- Matugen has no success or warning colour, and its `tertiary` needn't be yellow: `Theme.success` and `Theme.caution` are DMS's terminal green and yellow (`dank16` color2 and color3). Status colours go through a `tone` on `ListRow`, `Badge` and `Chip`.
