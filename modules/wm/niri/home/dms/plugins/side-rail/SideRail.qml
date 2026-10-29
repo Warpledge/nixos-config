@@ -27,8 +27,10 @@ Item {
     property string activeId: ""
     // An app launched but whose window hasn't opened yet
     property string pendingId: ""
-    // Workspace hidden apps wait on, kept so stashing doesn't spread them out
-    property int stashWs: -1
+    // Each monitor's last non-stash workspace, {output: id}, to return to from a stash
+    property var lastWs: ({})
+    // A stashed app focused from outside the rail, opened once niri has left the stash
+    property string strayId: ""
     // The monitor the rail was opened on; it moves only when a rail key is pressed on another
     property string railOutput: ""
     // When the rail last stashed each app, {id: ms}; only these auto-unload
@@ -135,17 +137,32 @@ Item {
         return NiriService.allWorkspaces.find(ws => ws.output === railOutput && ws.is_active) ?? null;
     }
 
-    //--- The last workspace of the rail's monitor, as nirius's scratchpad uses. Kept on the
-    //--- same monitor, since niri moves the cursor when focus follows a window across
+    //--- Hidden apps wait on a side-rail-<monitor> workspace, which DMS's switcher
+    //--- leaves out (dms-polkit/default.nix). One per monitor, since niri moves the
+    //--- cursor when focus follows a window across
+    function stashName(output) {
+        return "side-rail-" + output;
+    }
+
+    function isStash(ws) {
+        return String(ws?.name ?? "").startsWith("side-rail-");
+    }
+
+    //--- The rail monitor's stash, else its trailing empty workspace named as one;
+    //--- niri keeps a named workspace when it empties
     function stashTarget() {
-        const known = NiriService.workspaces[stashWs];
-        if (known && !known.is_active && known.output === railOutput)
-            return stashWs;
-        const onOutput = NiriService.allWorkspaces.filter(ws => ws.output === railOutput && !ws.is_active);
+        const name = stashName(railOutput);
+        const named = NiriService.allWorkspaces.find(ws => ws.name === name);
+        if (named)
+            return named.is_active ? -1 : named.id;
+        const onOutput = NiriService.allWorkspaces.filter(ws => ws.output === railOutput);
         if (onOutput.length === 0)
             return -1;
-        stashWs = onOutput.reduce((a, b) => (b.idx > a.idx ? b : a)).id;
-        return stashWs;
+        const last = onOutput.reduce((a, b) => (b.idx > a.idx ? b : a));
+        if (last.is_active || last.name)
+            return -1;
+        act({SetWorkspaceName: {name: name, workspace: {Id: last.id}}});
+        return last.id;
     }
 
     function stash(id) {
@@ -206,7 +223,6 @@ Item {
         if (moving)
             stash(activeId);
         railOutput = output;
-        stashWs = -1;
         return moving;
     }
 
@@ -354,11 +370,66 @@ Item {
         function onWorkspacesChanged() {
             const w = root.windowOf(root.app(root.activeId));
             const ws = root.railWs();
-            if (!w || !ws || w.workspace_id === ws.id || ws.id === root.stashWs)
+            if (!w || !ws || w.workspace_id === ws.id || root.isStash(ws))
                 return;
             root.act({MoveWindowToWorkspace: {window_id: w.id, reference: {Id: ws.id}, focus: false}});
             if (NiriService.focusedWorkspaceId == ws.id)
                 root.act({FocusWindow: {id: w.id}});
+        }
+    }
+
+    //--- A stashed app focused from outside the rail (alt-tab, spotlight): back to the
+    //--- monitor's last workspace, then open it in the rail once niri has left the stash
+    function strayFocus() {
+        if (strayId)
+            return;
+        const w = NiriService.windows.find(w => w.is_focused);
+        const ws = w ? NiriService.workspaces[w.workspace_id] : null;
+        const a = ws && isStash(ws) ? config.apps.find(a => a.appId === w.app_id) : null;
+        if (!a)
+            return;
+        const onOutput = NiriService.allWorkspaces.filter(o => o.output === ws.output && !isStash(o));
+        const back = onOutput.find(o => o.id === lastWs[ws.output])
+            ?? onOutput.filter(o => o.idx < ws.idx).reduce((p, o) => (!p || o.idx > p.idx ? o : p), null);
+        if (!back)
+            return;
+        if (shown && railOutput !== ws.output && activeId)
+            stash(activeId);
+        railOutput = ws.output;
+        strayId = a.id;
+        strayTimeout.restart();
+        act({FocusWorkspace: {reference: {Id: back.id}}});
+    }
+
+    Timer {
+        id: strayTimeout
+        interval: 2000
+        onTriggered: root.strayId = ""
+    }
+
+    Connections {
+        target: NiriService
+
+        function onWorkspacesChanged() {
+            const last = Object.assign({}, root.lastWs);
+            for (const ws of NiriService.allWorkspaces) {
+                if (ws.is_active && !root.isStash(ws))
+                    last[ws.output] = ws.id;
+            }
+            root.lastWs = last;
+            const rail = root.railWs();
+            if (root.strayId && rail && !root.isStash(rail)) {
+                const id = root.strayId;
+                root.strayId = "";
+                strayTimeout.stop();
+                root.open(id);
+                return;
+            }
+            root.strayFocus();
+        }
+
+        function onWindowsChanged() {
+            root.strayFocus();
         }
     }
 

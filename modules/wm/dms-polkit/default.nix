@@ -1,7 +1,8 @@
 #=====================================================================#
-# DMS PASSWORD PROMPT
+# DMS PATCHES
 #=====================================================================#
-#- DMS is the polkit agent, so it asks for every admin password (NixOS
+#- The one override of DMS's package, so every patch to it lives here.
+#- Password prompt: DMS is the polkit agent, so it asks for every admin password (NixOS
 #- Settings, pkexec, nixm via nix/nh.nix). This swaps upstream's floating
 #- window, which other windows can take the keyboard from, for DMS's
 #- full-screen modal: it dims the screen and keeps the keyboard until it
@@ -34,6 +35,16 @@
         substituteInPlace $control \
           --replace-fail 'polkitAuthModal?.visible ?? false' \
             'polkitAuthModal?.shouldBeVisible ?? false'
+
+        # Side rail: the workspace switcher hides the rail's side-rail-* stash
+        # workspaces (niri/home/dms/plugins/side-rail/SideRail.qml)
+        switcher=$qml/Widgets/WorkspaceSwitcherModel.qml
+        chmod u+w $qml/Widgets $switcher
+        substituteInPlace $switcher \
+          --replace-fail 'const baseList = CompositorService.workspacesForScreen(' \
+            'const shownList = CompositorService.workspacesForScreen(' \
+          --replace-fail 'if (CompositorService.ephemeralWorkspaces)' \
+            'const baseList = shownList.filter(ws => !String(ws?.name ?? "").startsWith("side-rail-")); if (CompositorService.ephemeralWorkspaces)'
       '';
   });
 }
