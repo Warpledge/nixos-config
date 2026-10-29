@@ -1,6 +1,7 @@
 // Edits one side rail app: a shared one's width, or one of the user's custom-
 // apps (a web page opened as a Helium app window, or a command and the app ID
-// its window opens with, filled from a picked window).
+// its window opens with), filled from an open window, with its icon a theme
+// icon, the app's own, a Material Symbol or an image file.
 import QtQuick
 import QtQuick.Layouts
 
@@ -40,26 +41,94 @@ Sheet {
         return rail.defaultWidth
     }
 
+    property var windows: null  // the open windows, while listed
+    property string ownIcon: ""  // the picked app's icon from its .desktop file
+
     function pick() {
         picking = true
         view.say("Click the window to put on the rail")
         Backend.call("pickWindow", {}, reply => {
             picking = false
-            if (!reply.ok) {
+            if (!reply.ok)
                 view.say(`Couldn't pick a window: ${reply.error}`)
-                return
-            }
-            const w = reply.data
-            if (!w)
-                return
-            appIdField.text = w.appId
-            if (!nameField.text)
-                nameField.text = w.name
-            Backend.call("launchCommand", { appId: w.appId }, r => {
-                const cmd = r.ok ? r.data : []
-                commandField.text = joinCommand(cmd)
-                view.say(cmd.length ? `Picked ${w.name}` : `Picked ${w.name}; type the command that starts it`)
-            })
+            else if (reply.data)
+                use(reply.data)
+        })
+    }
+
+    function listWindows() {
+        if (windows) {
+            windows = null
+            return
+        }
+        windows = []
+        Backend.call("niriWindows", {}, reply => {
+            if (reply.ok)
+                windows = reply.data
+        })
+    }
+
+    //--- Fills the form from a window: a Helium app window back to its page
+    //--- (apps.nix names those chrome-<host>__<path>-Default), else the app
+    function use(w) {
+        windows = null
+        if (!nameField.text)
+            nameField.text = w.name
+        const page = /^chrome-(.+?)__(.*)-Default$/.exec(w.appId || "")
+        if (page) {
+            web = true
+            const local = /^(localhost|127\.0\.0\.1)$/.test(page[1])
+            urlField.text = `${local ? "http" : "https"}://${page[1]}/${page[2].replace(/_/g, "/")}`
+            view.say(local ? `Picked ${w.name}; add the page's port to the address` : `Picked ${w.name}`)
+            return
+        }
+        web = false
+        appIdField.text = w.appId
+        Backend.call("appIcon", { appId: w.appId }, r => {
+            ownIcon = r.ok ? r.data : ""
+            if (ownIcon && !iconField.text)
+                iconField.text = ownIcon
+        })
+        Backend.call("launchCommand", { appId: w.appId }, r => {
+            const cmd = r.ok ? r.data : []
+            commandField.text = joinCommand(cmd)
+            view.say(cmd.length ? `Picked ${w.name}` : `Picked ${w.name}; type the command that starts it`)
+        })
+    }
+
+    function useOwnIcon() {
+        Backend.call("appIcon", { appId: appIdField.text.trim() }, r => {
+            ownIcon = r.ok ? r.data : ""
+            if (ownIcon)
+                iconField.text = ownIcon
+            else
+                view.say("This app's .desktop file names no icon")
+        })
+    }
+
+    readonly property var symbols: ["public", "travel_explore", "smart_toy", "forum", "chat", "mail",
+        "calendar_month", "description", "note_stack", "code", "terminal", "memory", "cloud",
+        "monitoring", "newspaper", "movie", "music_note", "photo_library", "sports_esports",
+        "shopping_cart", "school", "translate", "map", "bookmark", "home", "settings"]
+
+    property bool fetchingIcon: false
+    function useSiteIcon() {
+        fetchingIcon = true
+        Backend.call("siteIcon", { url: urlField.text.trim() }, r => {
+            fetchingIcon = false
+            if (r.ok)
+                iconField.text = r.data
+            else
+                view.say(`No site icon: ${r.error}`)
+        })
+    }
+
+    function chooseIconFile() {
+        Backend.call("pickIconFile", {}, r => {
+            if (!r.ok)
+                view.say(`Couldn't choose a file: ${r.error}`)
+            else if (r.data)
+                iconField.text = r.data
         })
     }
 
@@ -156,12 +225,78 @@ Sheet {
     //--------------------------------------------------------------------//
     //-- Form
     //--------------------------------------------------------------------//
+    //--- Fill the form from a window that's open now
+    Card {
+        visible: ed.custom
+        Label { text: "From an Open Window" }
+        Flow {
+            Layout.fillWidth: true
+            spacing: 8
+            Pill { text: ed.picking ? "Click a Window…" : "Pick a Window"; quiet: true; enabled: !ed.picking; onClicked: ed.pick() }
+            Pill { text: ed.windows ? "Hide Open Windows" : "Open Windows"; quiet: true; onClicked: ed.listWindows() }
+        }
+        Repeater {
+            model: ed.windows || []
+            ListRow {
+                required property var modelData
+                compact: true
+                icon: "view_quilt"
+                app: modelData.appId ? [modelData.appId, modelData.appId.toLowerCase()] : []
+                title: modelData.title || modelData.name || "Untitled"
+                subtitle: modelData.appId || "no app ID"
+                onClicked: ed.use(modelData)
+            }
+        }
+    }
+
     Card {
         visible: ed.custom
         Label { text: "Name" }
         Field { id: nameField; placeholder: "What the rail calls it" }
         Label { text: "Icon"; Layout.topMargin: 4 }
-        Field { id: iconField; placeholder: "An icon name (firefox) or a Material Symbol (forum)" }
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 10
+            Badge { icon: iconField.text.trim() || "apps"; app: iconField.text.trim() ? [iconField.text.trim()] : [] }
+            Field { id: iconField; placeholder: "An icon name, a Material Symbol (forum) or an image file" }
+        }
+        Flow {
+            Layout.fillWidth: true
+            spacing: 8
+            Pill {
+                visible: !ed.web && appIdField.text.trim() !== ""
+                text: "App's Own Icon"
+                quiet: true
+                onClicked: ed.useOwnIcon()
+            }
+            Pill {
+                visible: ed.web
+                text: ed.fetchingIcon ? "Getting Icon…" : "Site's Icon"
+                quiet: true
+                enabled: !ed.fetchingIcon
+                onClicked: ed.useSiteIcon()
+            }
+            Pill { text: "Choose File…"; quiet: true; onClicked: ed.chooseIconFile() }
+        }
+        //--- Material Symbols, the set DMS draws its own icons from
+        Flow {
+            Layout.fillWidth: true
+            spacing: 4
+            Repeater {
+                model: ed.symbols
+                Rectangle {
+                    id: sym
+                    required property string modelData
+                    width: 34
+                    height: 34
+                    radius: 10
+                    color: iconField.text === modelData ? Theme.selected : symHover.hovered ? Theme.hover : "transparent"
+                    Icon { anchors.centerIn: parent; icon: sym.modelData; size: 20 }
+                    HoverHandler { id: symHover; cursorShape: Qt.PointingHandCursor }
+                    TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: iconField.text = sym.modelData }
+                }
+            }
+        }
     }
 
     Card {
@@ -178,12 +313,6 @@ Sheet {
             visible: !ed.web
             Layout.fillWidth: true
             spacing: 8
-            Pill {
-                text: ed.picking ? "Click a Window…" : "Pick a Window"
-                quiet: true
-                enabled: !ed.picking
-                onClicked: ed.pick()
-            }
             Field { id: commandField; placeholder: "Command, e.g. obsidian" }
             Field { id: appIdField; placeholder: "App ID its window opens with, e.g. obsidian" }
         }

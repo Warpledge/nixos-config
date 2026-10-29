@@ -10,6 +10,7 @@ import json
 import os
 import platform
 import pwd
+import re
 import selectors
 import shlex
 import shutil
@@ -1018,6 +1019,82 @@ def cmd_side_rail(_cfg, _args):
     return data if isinstance(data, dict) and isinstance(data.get("shared"), list) else None
 
 
+def cmd_app_icon(_cfg, args):
+    """The icon name a window's app gives in its .desktop file, or ""."""
+    return keybindstate.app_icon(str(args.get("appId") or ""))
+
+
+def cmd_pick_icon_file(_cfg, _args):
+    """An image file picked in zenity's file chooser, or None when cancelled."""
+    try:
+        out = subprocess.run(["zenity", "--file-selection", "--title=Choose an icon",
+                              "--file-filter=Images | *.png *.svg *.jpg *.jpeg *.webp *.ico"],
+                             capture_output=True, text=True, timeout=600, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        raise ValueError("couldn't open the file chooser")
+    path = out.stdout.strip()
+    return path if out.returncode == 0 and os.path.isfile(path) else None
+
+
+def cmd_site_icon(_cfg, args):
+    """A web page's own icon saved under ~/.local/share/omni-settings/side-rail-icons,
+    as its path: the page's apple-touch-icon or largest icon link, else /favicon.ico."""
+    import html.parser
+    import urllib.parse
+    import urllib.request
+
+    url = str(args.get("url") or "")
+    if not re.match(r"^https?://\S+$", url):
+        raise ValueError("type the page's address first")
+
+    def fetch(u, limit):
+        req = urllib.request.Request(u, headers={"User-Agent": "omni-settings (side rail icon)"})
+        with urllib.request.urlopen(req, timeout=10) as r:
+            return r.read(limit), r.headers.get_content_type(), r.geturl()
+
+    class Links(html.parser.HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.found = []
+
+        def handle_starttag(self, tag, attrs):
+            a = dict(attrs)
+            rel = (a.get("rel") or "").lower()
+            if tag == "link" and "icon" in rel and a.get("href"):
+                size = max((int(n) for n in re.findall(r"(\d+)x\d+", a.get("sizes") or "")), default=0)
+                self.found.append(("apple-touch" in rel, size, a["href"]))
+
+    candidates = []
+    try:
+        page, _, final = fetch(url, 2_000_000)
+        links = Links()
+        links.feed(page.decode("utf-8", "replace"))
+        candidates = [urllib.parse.urljoin(final, h) for _, _, h in sorted(links.found, reverse=True)]
+    except (OSError, ValueError):
+        final = url
+    candidates.append(urllib.parse.urljoin(final, "/favicon.ico"))
+    exts = {"image/png": ".png", "image/svg+xml": ".svg", "image/x-icon": ".ico",
+            "image/vnd.microsoft.icon": ".ico", "image/jpeg": ".jpg", "image/webp": ".webp"}
+    for c in candidates:
+        try:
+            body, kind, _ = fetch(c, 5_000_000)
+        except (OSError, ValueError):
+            continue
+        ext = exts.get(kind) or os.path.splitext(urllib.parse.urlparse(c).path)[1].lower()
+        if not body or ext not in exts.values():
+            continue
+        folder = os.path.join(os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share"),
+                              "omni-settings", "side-rail-icons")
+        os.makedirs(folder, exist_ok=True)
+        host = re.sub(r"[^A-Za-z0-9.-]", "_", urllib.parse.urlparse(final).netloc) or "site"
+        path = os.path.join(folder, host + ext)
+        with open(path, "wb") as f:
+            f.write(body)
+        return path
+    raise ValueError("the site didn't hand over an icon (some refuse anything but a browser); "
+                     "pick one below or choose a file")
+
+
 def cmd_launch_command(_cfg, args):
     """The command a picked window's app launches with, from its .desktop file."""
     return keybindstate.launch_command(str(args.get("appId") or ""))
@@ -1070,6 +1147,7 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "windowRules": cmd_window_rules, "niriWindows": cmd_niri_windows, "pickWindow": cmd_pick_window,
             "addWindowRule": cmd_add_window_rule, "saveWindowRule": cmd_save_window_rule,
             "keybinds": cmd_keybinds, "launchCommand": cmd_launch_command, "sideRail": cmd_side_rail,
+            "appIcon": cmd_app_icon, "pickIconFile": cmd_pick_icon_file, "siteIcon": cmd_site_icon,
             "mimeApps": cmd_mime_apps, "splitCommand": cmd_split_command}
 
 

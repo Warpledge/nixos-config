@@ -292,7 +292,8 @@ Item {
                             required property var modelData
                             readonly property bool active: modelData.id === root.activeId
                             readonly property bool running: root.windowOf(modelData) !== null
-                            readonly property string iconPath: Quickshell.iconPath(modelData.icon, true)
+                            // An image file, a theme icon, or else a Material Symbol name
+                            readonly property string iconPath: modelData.icon.startsWith("/") ? "file://" + modelData.icon : Quickshell.iconPath(modelData.icon, true)
                             width: root.geo.rail - root.geo.gap - Theme.spacingS
                             height: width
                             radius: Theme.cornerRadius

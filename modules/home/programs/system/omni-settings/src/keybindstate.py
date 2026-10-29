@@ -80,8 +80,26 @@ def _desktop_entry(path):
 def launch_command(app_id):
     """The command a window's .desktop file runs, as a list: the file named after
     its app ID, or one whose StartupWMClass is the app ID. [] when none is found."""
-    if not app_id:
+    found = desktop_entry_for(app_id)
+    if not found or not found.get("Exec"):
         return []
+    try:
+        words = shlex.split(found["Exec"])
+    except ValueError:
+        return []
+    return [w for w in words if not FIELD_CODE.match(w)]
+
+
+def app_icon(app_id):
+    """The icon a window's .desktop file names, found as launch_command finds it,
+    or "" when there's none."""
+    found = desktop_entry_for(app_id)
+    return found.get("Icon", "") if found else ""
+
+
+def desktop_entry_for(app_id):
+    if not app_id:
+        return None
     home = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
     dirs = [home] + (os.environ.get("XDG_DATA_DIRS") or "/usr/local/share:/usr/share").split(":")
     found = None
@@ -102,10 +120,4 @@ def launch_command(app_id):
                 break
         if found:
             break
-    if not found or not found.get("Exec"):
-        return []
-    try:
-        words = shlex.split(found["Exec"])
-    except ValueError:
-        return []
-    return [w for w in words if not FIELD_CODE.match(w)]
+    return found

@@ -74,7 +74,7 @@
         --set OMNI_SETTINGS_CLEAN_ARGS ${lib.escapeShellArg clean.extraArgs} \
         --set OMNI_SETTINGS_CLEAN_DATES ${lib.escapeShellArg (lib.optionalString clean.enable clean.dates)} \
         --set OMNI_SETTINGS_COMPAT_TOOLS ${lib.escapeShellArg compatTools} \
-        --prefix PATH : ${lib.makeBinPath [alejandra pkgs.nix-search-tv]}
+        --prefix PATH : ${lib.makeBinPath [alejandra pkgs.nix-search-tv pkgs.zenity]}
       ${lib.optionalString excluded ''
         # The split tunnel's own wrapper only covers `omni-settings` run from PATH
         cat > $out/bin/omni-settings-backend <<EOF
