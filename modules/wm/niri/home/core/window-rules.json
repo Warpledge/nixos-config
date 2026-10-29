@@ -243,13 +243,14 @@
   {
     "id": "omni-settings-2",
     "name": "Omni Settings",
-    "note": "omni-settings, a Quickshell window. About 566 px wide on the desktop.",
+    "note": "omni-settings, a Quickshell window, tiled at its own default width.",
     "default-column-width": {
-      "proportion": 0.224
+      "fixed": 618
     },
+    "open-floating": false,
     "matches": [
       {
-        "app-id": "^org\\.quickshell$",
+        "app-id": "^dev\\.duxlabs\\.shell$",
         "title": "^Omni Settings$"
       }
     ]
