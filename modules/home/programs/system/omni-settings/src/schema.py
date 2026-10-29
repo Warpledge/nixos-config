@@ -142,8 +142,11 @@ PAGES = {
                 ("Claude Code", "Changes made in Claude Code stay until set here.",
                  ["claude.model", "claude.effort", "claude.outputStyle", "claude.builtins.agentsMd",
                   "claude.builtins.agentsMdFiles"]),
-                ("Mods", "", ["claude.mods.ribbon", "claude.statusLine",
-                              "claude.builtins.youShouldKnow"])]),
+                ("Mods", "", ["claude.mods.ribbon", "claude.mods.skins",
+                              "claude.mods.fileTree", "claude.mods.savvyProgress",
+                              "claude.mods.blastRadius", "claude.mods.replayTheater",
+                              "claude.mods.chatInventory", "claude.mods.screenShare",
+                              "claude.statusLine", "claude.builtins.youShouldKnow"])]),
     "Claude Tools": ("cloudai", "application-x-addon-symbolic",
                      "Plugins, MCP servers and claude.ai connectors Claude Code loads.",
                      [("Plugins", "", [f"claude.plugins.{n}" for n in (

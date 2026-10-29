@@ -2,12 +2,27 @@
 # CLAUDE CODE - ANTHROPIC AI CODING AGENT
 #=====================================================================#
 {
+  config,
   lib,
   pkgs,
   user,
   ...
 }: let
   c = user.claude;
+  #--- Anthropic's sample mods (Blast Radius, Replay Theater) share one repo
+  playground = pkgs.fetchFromGitHub {
+    owner = "anthropics";
+    repo = "claude-code-playground";
+    rev = "569c5283d9a0a7ee7938df85bb32e4f48cbb8c86";
+    hash = "sha256-rOT2rtXNPayZQEkd2Gbr+9dxClaloxAOoOlDcZp3VQY=";
+  };
+  #--- BenAI's mods have no licence, so they stay out of git in ~/.local/opt
+  #--- (docs/personal/local/local-binary-installs.md)
+  localMod = name: {
+    source =
+      config.lib.file.mkOutOfStoreSymlink
+      "${config.home.homeDirectory}/.local/opt/claude-mods/${name}";
+  };
   on = lib.filterAttrs (_: v: v);
   #--- Settings keys are camelCase (addApp), Claude Code's names kebab-case (add-app)
   kebab = s:
@@ -141,7 +156,10 @@ in {
     #--- gitleaks: the commit skill's secret scan
     #--- python3: the skill-creator and claude-security plugins' scripts
     #--- ruff: the edit hook's check on Omni Settings' Python
-    home.packages = [pkgs.gitleaks pkgs.python3 pkgs.ruff];
+    #--- inotify-tools, pandoc, poppler-utils: File Tree's live updates and previews
+    home.packages =
+      [pkgs.gitleaks pkgs.python3 pkgs.ruff]
+      ++ lib.optionals c.mods.fileTree [pkgs.inotify-tools pkgs.pandoc pkgs.poppler-utils];
 
     #--- Turn off Claude-drafted feedback (the SendFeedback tool)
     home.sessionVariables.CLAUDE_CODE_SEND_FEEDBACK = "0";
@@ -159,6 +177,49 @@ in {
         hash = "sha256-uSdT7j5ogCkuaIl7JYl8DQRXONEQGL8424cpie+KTK8=";
       };
     };
+    #--- The patch adds the matugen skin and drops the daily update check
+    home.file.".claude/skills/skins" = lib.mkIf c.mods.skins {
+      source = pkgs.applyPatches {
+        name = "claude-skins";
+        src = pkgs.fetchFromGitHub {
+          owner = "hellosverre";
+          repo = "claude-skins";
+          rev = "985ad63fdb3483bbb98f61cf57955cac3f56a449";
+          hash = "sha256-xxwF6PSg8xPPXTs3J4DGpiq2N5k2CWBkK/32OnuYhHo=";
+        };
+        patches = [./mods/skins-matugen.patch];
+      };
+    };
+    matugen.templates = lib.mkIf c.mods.skins {
+      claude-skins = {
+        input = ../../../theme/matugen/claude-skins.json;
+        output = "${config.xdg.configHome}/claude-skins/matugen.json";
+      };
+    };
+    home.file.".claude/skills/filetree" = lib.mkIf c.mods.fileTree {
+      source = pkgs.fetchFromGitHub {
+        owner = "data-goblin";
+        repo = "claude-code-filetree";
+        rev = "6bc23f6d824242bea16e53e097051bfa8bcd34a2";
+        hash = "sha256-HXNdr4oCJ9kWEdeDHxUDZm+h1pihEk7anbaKUZzzXj8=";
+      };
+    };
+    home.file.".claude/skills/savvy-progress" = lib.mkIf c.mods.savvyProgress {
+      source = "${pkgs.fetchFromGitHub {
+        owner = "JohnnyVizz";
+        repo = "claude-kit";
+        rev = "c871c153ead54ad9547cc717d0f3e5a676c73986";
+        hash = "sha256-JbCloQU/u0hm9QtUVCQwOFBy0NDbtXMYO9yNPhPMgBw=";
+      }}/plugins/savvy-progress";
+    };
+    home.file.".claude/skills/blast-radius" = lib.mkIf c.mods.blastRadius {
+      source = "${playground}/claude-code/mods/blast-radius";
+    };
+    home.file.".claude/skills/replay-theater" = lib.mkIf c.mods.replayTheater {
+      source = "${playground}/claude-code/mods/replay-theater";
+    };
+    home.file.".claude/skills/chat-inventory" = lib.mkIf c.mods.chatInventory (localMod "chat-inventory");
+    home.file.".claude/skills/screen-share" = lib.mkIf c.mods.screenShare (localMod "screen-share");
 
     #--- Merges `declared` into settings.json the way zed.nix does, so the rest
     #--- of the file and in-app changes stay

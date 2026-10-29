@@ -237,7 +237,7 @@ Turn the tools on in Omni Settings' **AI** tab: Claude Code and Claude Desktop u
 
 - **Rules:** `CLAUDE.md` (plus one in several folders) tells Claude Code how the repo is laid out and what not to do, such as rebuilding on its own or committing a secret. `AGENTS.md` is a shorter copy for local models.
 - **Skills:** step-by-step jobs in `modules/home/programs/ai/skills/`, among them adding an app (`add-app`), updating and fixing what an update broke (`flake-update`, `disable-package`), troubleshooting a game (`game-troubleshooting`) and committing after a secret scan (`commit`). Claude Code, opencode and Zed's agent all read them.
-- **Mods:** `claude.mods.ribbon` adds [Ribbon][ribbon], a band above Claude Code's prompt with the usage left and whether the prompt cache is warm or cold, and `claude.statusLine` a status line with the context used.
+- **Mods:** `claude.mods.ribbon` adds [Ribbon][ribbon], a band above Claude Code's prompt with the usage left and whether the prompt cache is warm or cold, and `claude.statusLine` a status line with the context used. Others, each behind its own `claude.mods.*` toggle: [Skins][claude-skins] (with a matugen skin that follows the wallpaper), [File Tree][claude-filetree], [Savvy Progress][savvy-progress], and Anthropic's [Blast Radius and Replay Theater][claude-playground].
 - **Lookups:** MCP servers search nixpkgs and NixOS options, library docs and GitHub, so answers come from current sources rather than the model's memory (`ai/mcp.nix`).
 - **Local models:** [llama-swap][llama-swap] serves the coding and chat models you pick to opencode, Zed and Open WebUI, with no cloud account.
 
@@ -588,6 +588,10 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 [llama-swap]: https://github.com/mostlygeek/llama-swap
 [open-webui]: https://github.com/open-webui/open-webui
 [ribbon]: https://github.com/robonuggets/ribbon
+[claude-skins]: https://github.com/hellosverre/claude-skins
+[claude-filetree]: https://github.com/data-goblin/claude-code-filetree
+[savvy-progress]: https://github.com/JohnnyVizz/claude-kit/tree/main/plugins/savvy-progress
+[claude-playground]: https://github.com/anthropics/claude-code-playground/tree/main/claude-code/mods
 [docker]: https://www.docker.com
 [mullvad]: https://mullvad.net
 [resolved]: https://www.freedesktop.org/software/systemd/man/systemd-resolved.html

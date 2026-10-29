@@ -1,0 +1,42 @@
+diff --git a/hooks/register.tsx b/hooks/register.tsx
+index 42c3609..117203c 100644
+--- a/hooks/register.tsx
++++ b/hooks/register.tsx
+@@ -384,8 +384,20 @@ function parseCustom(raw: unknown): Record<string, CustomSkin> {
+   )
+ }
+ 
++// The matugen skin: DMS renders this file from the wallpaper (nixos-config patch).
++async function matugenSkin($: EngineInterface): Promise<Record<string, CustomSkin>> {
++  try {
++    const dir = (await $.env.get('XDG_CONFIG_HOME')) || `${await $.env.get('HOME')}/.config`
++    const raw = JSON.parse(String(await $.fs.read(`${dir}/claude-skins/matugen.json`)))
++    const skin = buildCustom(raw, undefined)
++    return typeof skin === 'string' ? {} : { [skin.name]: skin }
++  } catch {
++    return {}
++  }
++}
++
+ async function load($: EngineInterface): Promise<void> {
+-  const custom = parseCustom(await $.store.get('custom'))
++  const custom = { ...parseCustom(await $.store.get('custom')), ...(await matugenSkin($)) }
+   const names = skinNames(custom)
+   const folders = parseFolders(await $.store.get('folders'), names)
+   const folder = await $.session.cwd()
+@@ -663,13 +675,8 @@ export const register: Register = on => {
+     // Off the start's path: a slow or offline network must not hold the session up.
+     // The star ask waits a session when the update notice is showing; one toast at a time.
+     const logDebug = (error: unknown) => $.ui.log(error instanceof Error ? error.message : String(error), { to: 'debug' })
+-    void checkForUpdate($)
+-      .catch((error: unknown) => {
+-        logDebug(error)
+-        return false
+-      })
+-      .then(told => (told ? undefined : askForStar($)))
+-      .catch(logDebug)
++    // No update check (nixos-config patch): the repo pins this copy.
++    void askForStar($).catch(logDebug)
+ 
+     // Only the spinner reads the frame, so a tick redraws the spinner and nothing else.
+     ticker?.cancel()
