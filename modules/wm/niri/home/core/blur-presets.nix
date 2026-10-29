@@ -40,6 +40,9 @@
     )
     (import ./translucent-apps.nix);
 
+  # DMS's Quick Capture stays opaque and unblurred (also excluded in rules.nix)
+  quickCaptureExclude = ''exclude app-id="^dev\\.duxlabs\\.shell$" title="^Quick Capture$"'';
+
   #--- Presets
   # Without blur, the sharp wallpaper is darkened only by the window's own background
   presets = [
@@ -92,6 +95,7 @@
       }
       window-rule {
       ${matchLines}
+          ${quickCaptureExclude}
           opacity ${p.opacity}
       }
 
@@ -115,6 +119,7 @@
 
       window-rule {
           exclude app-id="^steam$"
+          ${quickCaptureExclude}
           background-effect {
               blur ${lib.boolToString (p.blur != null)}
               xray true

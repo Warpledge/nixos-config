@@ -15,6 +15,13 @@
       # Fallback; the active blur preset (blur-presets.nix) overrides the opacity
       {
         matches = import ./translucent-apps.nix;
+        # DMS's Quick Capture stays opaque (also excluded in blur-presets.nix)
+        excludes = [
+          {
+            app-id = "^dev\\.duxlabs\\.shell$";
+            title = "^Quick Capture$";
+          }
+        ];
         opacity = 0.8;
       }
     ];
