@@ -385,6 +385,7 @@ steps.
 | `onboard` | The machine or user has no `CLAUDE.md`, or a person updates theirs |
 | `upstream` | In a fork: sync from upstream, or send a change upstream as a PR |
 | `todo` | "Add X to the todo", or work a `docs/todo/` file tracks is done |
+| `handoff` | Wrapping up for a fresh session, or "continue" with a note in `.claude/handoffs/` |
 | `flake-update` | Only when the user runs `/flake-update`; never on your own |
 
 - `<skill-dir>` is `modules/home/programs/ai/skills/<name>`.

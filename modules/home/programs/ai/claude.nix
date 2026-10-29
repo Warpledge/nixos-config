@@ -46,6 +46,7 @@
         flake-update = ./skills/flake-update;
         freetube-sync = ./skills/freetube-sync;
         game-troubleshooting = ./skills/game-troubleshooting;
+        handoff = ./skills/handoff;
         moku-bump = ./skills/moku-bump;
         onboard = ./skills/onboard;
         pr-review = ./skills/pr-review;
