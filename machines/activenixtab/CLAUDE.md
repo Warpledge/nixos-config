@@ -64,8 +64,8 @@ when Ky approves it.
   `local-ai-bench/`: the at-a-glance table and a plain-language section first (what
   to pick it for, how long Ky waits, RAM left, what to watch out for), then its
   settings to copy and the raw numbers. Show results to Ky the same way. opencode's two coordinator agents,
-  `system` (the default) and `gamedev` (the default in the game's folder through its
-  `opencode.json`), take their prompts from `home/agents/`; `system`'s also carries
+  `system` (the default) and `gamedev` (the default in any project under `~/Projects`,
+  through `~/Projects/opencode.json`), take their prompts from `home/agents/`; `system`'s also carries
   this file and `users/kylerj/CLAUDE.md`, so a change here needs a rebuild to reach
   it. The coordinators can't edit, and opencode denies them shell commands that write
   files (`sed -i`, `mv`, `cp`, `rm`, redirects…), `git config`/`remote`/`push`/

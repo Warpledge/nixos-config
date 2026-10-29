@@ -247,12 +247,21 @@ in {
     '')
   ];
 
+  #--- opencode merges opencode.json from every folder above the one it starts in,
+  #--- so this one file makes `gamedev` the default agent in each project under
+  #--- ~/Projects (Tab switches to `system`)
+  home.file."Projects/opencode.json".text = builtins.toJSON {
+    "$schema" = "https://opencode.ai/config.json";
+    default_agent = "gamedev";
+  };
+
   programs.opencode.settings = {
     model = "llama-swap/${main}";
     # Titles and summaries on the workers' alias, so the model stays loaded
     small_model = "llama-swap/${main}-instruct";
     #--- Two coordinators (Tab switches): `system` for this computer, the default,
-    #--- and `gamedev` for the Godot game, which its project's opencode.json picks.
+    #--- and `gamedev` for the game projects under ~/Projects, which
+    #--- ~/Projects/opencode.json picks.
     #--- The subagents they start run on the workers' alias
     default_agent = "system";
     # Only Ky switches the ask-claude approval off. Edits to Warpledge's shared
@@ -345,7 +354,7 @@ in {
         gamedev =
           coordinator
           // {
-            description = "Coordinates work on the Godot game Clocked Out";
+            description = "Coordinates work on a Godot game in ~/Projects";
             system = builtins.readFile ./agents/gamedev.md;
           };
       };
