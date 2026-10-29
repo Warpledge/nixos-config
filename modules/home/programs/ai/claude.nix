@@ -28,16 +28,13 @@
           rev = "d4226d062928f8d9505dbdeadd10217d23361052";
           hash = "sha256-gdxtwbZnIxc0l1379a9suBLvdUnWoptOsddJySFfxV0=";
         };
-      in
-        {
-          claude-md-management = "${official}/plugins/claude-md-management";
-          skill-creator = "${official}/plugins/skill-creator";
-          claude-code-setup = "${official}/plugins/claude-code-setup";
-          # Off: lists 9 agents every session and a scan costs heavy usage
-          # claude-security = "${official}/plugins/claude-security";
-        }
-        #--- Repo mods (hooks modules), each behind claude.mods.<name>
-        // lib.optionalAttrs user.claude.mods.band {band = ./mods/band;};
+      in {
+        claude-md-management = "${official}/plugins/claude-md-management";
+        skill-creator = "${official}/plugins/skill-creator";
+        claude-code-setup = "${official}/plugins/claude-code-setup";
+        # Off: lists 9 agents every session and a scan costs heavy usage
+        # claude-security = "${official}/plugins/claude-security";
+      };
 
       #--- Repo-local skills and subagents (synced to every host through this module)
       skills = {
@@ -98,5 +95,12 @@
 
     #--- Turn off Claude-drafted feedback (the SendFeedback tool)
     home.sessionVariables.CLAUDE_CODE_SEND_FEEDBACK = "0";
+
+    #--------------------------------------------------------------------#
+    #-- Mods
+    #--------------------------------------------------------------------#
+    #--- Repo mods, each behind claude.mods.<name>. Linked whole, not through
+    #--- programs.claude-code.plugins: its per-file links fail the hooks path check
+    home.file.".claude/skills/band" = lib.mkIf user.claude.mods.band {source = ./mods/band;};
   };
 }
