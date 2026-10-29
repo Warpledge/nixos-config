@@ -27,8 +27,10 @@ git so only the binary bundle needs restoring.
 
 ## claude-mods
 
-- **What:** BenAI's Claude Code mods Chat Inventory and Screen Share (from a YouTube
-  video's download; no licence, so not in git).
+- **What:** BenAI's Claude Code mods Chat Inventory and Screen Share, from the
+  [Claude Code Mods Pack](https://benai.notion.site/Claude-Code-Mods-Pack-3ff1124570fe8169adabc87194ec89fd)
+  under Free resources (the link comes after a name and email sign-up from his
+  YouTube video; no licence, so not in git).
 - **Location:** `~/.local/opt/claude-mods/{chat-inventory,screen-share}/`
 - **Wiring:** not a wrapper; `programs/ai/claude.nix` links each folder into
   `~/.claude/skills/` with `mkOutOfStoreSymlink`, toggles `claude.mods.chatInventory`
