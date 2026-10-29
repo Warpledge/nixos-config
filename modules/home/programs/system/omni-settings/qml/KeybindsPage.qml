@@ -208,23 +208,13 @@ ColumnLayout {
             anchors.fill: parent
             anchors.margins: 14
             spacing: 12
-            RowLayout {
-                spacing: 14
+            Text {
+                visible: !page.niri
+                text: `These are niri's keybinds, and this computer runs ${page.view.info && page.view.info.wm || "another"} window manager.`
+                color: Theme.caution
+                font.pixelSize: 14
+                wrapMode: Text.Wrap
                 Layout.fillWidth: true
-                ColumnLayout {
-                    spacing: 2
-                    Layout.fillWidth: true
-                    Text {
-                        text: !page.niri
-                            ? `These are niri's keybinds, and this computer runs ${page.view.info && page.view.info.wm || "another"} window manager.`
-                            : "Change a key, turn a keybind off, or add your own. Changes are yours alone and "
-                              + "wait for Apply, like any other setting."
-                        color: Theme.dim
-                        font.pixelSize: 13
-                        wrapMode: Text.Wrap
-                        Layout.fillWidth: true
-                    }
-                }
             }
             Flow {
                 visible: !!page.applied
@@ -251,7 +241,7 @@ ColumnLayout {
         icon: "sync"
         tone: "caution"
         title: "Not Applied Yet"
-        subtitle: "Saved keybind changes reach niri with the next rebuild."
+        info: "Saved keybind changes reach niri with the next rebuild."
         button: page.view.info && page.view.info.canApply && page.view.info.admin ? "Rebuild" : ""
         onClicked: if (button) page.rebuild()
     }
@@ -281,8 +271,8 @@ ColumnLayout {
     Text {
         visible: page.dmsKeys.length > 0
         text: `The shell's Keyboard Shortcuts page also binds ${page.dmsKeys.join(", ")}; those win over the keybinds here.`
-        color: Theme.dim
-        font.pixelSize: 13
+        color: Theme.caution
+        font.pixelSize: 14
         wrapMode: Text.Wrap
         Layout.fillWidth: true
         Layout.leftMargin: 6
@@ -343,7 +333,7 @@ ColumnLayout {
                 Text {
                     text: row.bind.title
                     color: Theme.text
-                    font.pixelSize: 15
+                    font.pixelSize: 17
                     font.weight: Font.DemiBold
                     elide: Text.ElideRight
                     Layout.fillWidth: true

@@ -83,16 +83,6 @@ ColumnLayout {
 
     function where(ref) { return ref.installation === "system" ? "Everyone" : "Just you" }
 
-    Text {
-        text: "Apps nixpkgs doesn't have: update them, clean up, and switch each one on or off."
-        color: Theme.dim
-        font.pixelSize: 15
-        wrapMode: Text.Wrap
-        Layout.fillWidth: true
-        Layout.leftMargin: 6
-        Layout.bottomMargin: 4
-    }
-
     //--- Flatpak's own switch, a machine setting like any other
     Repeater {
         model: page.setting ? page.setting.groups : []
@@ -135,8 +125,8 @@ ColumnLayout {
         visible: !!page.fp && !page.fp.installed
         icon: "info"
         title: "Flatpak isn't installed"
-        subtitle: "Turn Flatpak on and apply, and its apps show up here. "
-                  + "It starts working after the rebuild that turns it on."
+        info: "Turn Flatpak on and apply, and its apps show up here. "
+              + "It starts working after the rebuild that turns it on."
     }
 
     ColumnLayout {
@@ -150,7 +140,8 @@ ColumnLayout {
             icon: "shield"
             app: ["com.github.tchx84.Flatseal.desktop", "com.github.tchx84.Flatseal"]
             title: "Flatseal"
-            subtitle: page.fp && page.fp.flatseal ? "Change what each app may reach."
+            info: "Change what each Flatpak app may reach: files, devices and the network"
+            alert: page.fp && page.fp.flatseal ? ""
                 : "Not installed yet. It installs in the background after the rebuild that turned Flatpak on."
             button: page.fp && page.fp.flatseal ? "Open" : ""
             onClicked: if (page.fp.flatseal) Backend.call("flatseal", {})
@@ -163,12 +154,16 @@ ColumnLayout {
             title: "Apps and Runtimes"
             tone: page.busy === "update" || page.checking ? "" : page.checkError ? "error"
                 : page.found === null ? "" : page.found.length ? "caution" : "success"
-            subtitle: page.busy === "update" ? (page.progress || "Updating…")
-                : page.checking ? "Asking each source for its newest versions…"
-                : page.checkError ? `Couldn't check: ${page.checkError}`
-                : page.found === null ? "Look for newer versions."
-                : !page.found.length ? "Everything is up to date."
-                : `${page.found.length} to update: ${page.found.slice(0, 6).join(", ")}${page.found.length > 6 ? "…" : ""}`
+            info: page.found && page.found.length
+                ? `Newer versions of: ${page.found.slice(0, 6).join(", ")}${page.found.length > 6 ? "…" : ""}`
+                : "Looks for newer versions of every Flatpak app and the runtimes they use"
+            subtitle: page.busy === "update" ? page.progress : ""
+            value: page.busy === "update" ? "Updating…"
+                : page.checking ? "Checking…"
+                : page.checkError || page.found === null ? ""
+                : !page.found.length ? "Up to date"
+                : `${page.found.length} to update`
+            alert: page.checkError && !page.checking ? `Couldn't check: ${page.checkError}` : ""
             button: page.checking || page.busy ? "" : page.found && page.found.length ? "Update All"
                   : page.found ? "Check Again" : "Check"
             onClicked: {
@@ -182,15 +177,10 @@ ColumnLayout {
         }
 
         //--- Apps
-        Section { text: "Installed Apps" }
-        Text {
-            text: "Switching an app off uninstalls it and keeps its settings and files, so switching it on "
+        Section {
+            text: "Installed Apps"
+            info: "Switching an app off uninstalls it and keeps its settings and files, so switching it on "
                   + "brings it back as it was."
-            color: Theme.dim
-            font.pixelSize: 13
-            wrapMode: Text.Wrap
-            Layout.fillWidth: true
-            Layout.leftMargin: 6
         }
         Repeater {
             model: page.fp && page.fp.installed ? page.fp.apps.concat(page.fp.off.map(a => Object.assign({ off: true }, a))) : []
@@ -200,7 +190,7 @@ ColumnLayout {
             visible: !!page.fp && page.fp.installed && !page.fp.apps.length && !page.fp.off.length
             icon: "widgets"
             title: "No Flatpak apps yet"
-            subtitle: "Find one on flathub.org, then install it with: flatpak install flathub <its id>"
+            info: "Find one on flathub.org, then install it with: flatpak install flathub <its id>"
             trailing: "open_in_new"
             onClicked: Qt.openUrlExternally("https://flathub.org")
         }
@@ -225,23 +215,23 @@ ColumnLayout {
                     Layout.fillWidth: true
                     spacing: 12
                     Badge { icon: "extension" }
-                    ColumnLayout {
-                        spacing: 1
+                    RowLayout {
+                        spacing: 6
                         Layout.fillWidth: true
                         Text {
                             text: page.fp && page.fp.installed ? `Runtimes (${page.fp.runtimes.length})` : ""
                             color: Theme.text
-                            font.pixelSize: 16
+                            font.pixelSize: 18
                             font.weight: Font.DemiBold
-                            Layout.fillWidth: true
                         }
-                        Text {
-                            text: page.fp && page.fp.installed
-                                ? `Shared parts the apps run on, ${Fmt.size(page.fp.runtimeBytes)} in all` : ""
-                            color: Theme.dim
-                            font.pixelSize: 13
-                            Layout.fillWidth: true
-                        }
+                        Hint { info: true; tip: "Shared parts the apps run on" }
+                        Item { Layout.fillWidth: true }
+                    }
+                    Text {
+                        text: page.fp && page.fp.installed ? Fmt.size(page.fp.runtimeBytes) : ""
+                        color: Theme.accentOf(rtCol)
+                        font.pixelSize: 22
+                        font.weight: Font.Bold
                     }
                     Chevron {
                         open: page.runtimesOpen
@@ -286,16 +276,16 @@ ColumnLayout {
         ListRow {
             icon: page.busy === "unused" ? "progress_activity" : "delete_sweep"
             title: "Remove Unused Runtimes"
-            subtitle: page.busy === "unused" ? (page.progress || "Removing…")
-                : "Uninstalls runtimes and extensions that no installed app needs any more."
+            info: "Uninstalls runtimes and extensions that no installed app needs any more."
+            subtitle: page.busy === "unused" ? (page.progress || "Removing…") : ""
             button: page.busy ? "" : "Remove"
             onClicked: if (!page.busy) page.run("unused")
         }
         ListRow {
             icon: page.busy === "repair" ? "progress_activity" : "build"
             title: "Repair"
-            subtitle: page.busy === "repair" ? (page.progress || "Repairing…")
-                : "Checks every installed file and downloads again any that are missing or damaged."
+            info: "Checks every installed file and downloads again any that are missing or damaged."
+            subtitle: page.busy === "repair" ? (page.progress || "Repairing…") : ""
             button: page.busy ? "" : "Repair"
             onClicked: if (!page.busy) page.run("repair")
         }
@@ -329,7 +319,7 @@ ColumnLayout {
                 Text {
                     text: appRow.app.name
                     color: Theme.text
-                    font.pixelSize: 16
+                    font.pixelSize: 18
                     font.weight: Font.DemiBold
                     elide: Text.ElideRight
                     Layout.fillWidth: true

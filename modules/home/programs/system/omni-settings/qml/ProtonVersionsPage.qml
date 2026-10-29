@@ -26,39 +26,11 @@ ColumnLayout {
             Quickshell.execDetached(["protonplus"])
     }
 
-    //--- Hero
-    Rectangle {
-        Layout.fillWidth: true
-        implicitHeight: hero.implicitHeight + 28
-        radius: 16
-        color: Theme.card
-        ColumnLayout {
-            id: hero
-            anchors.fill: parent
-            anchors.margins: 14
-            spacing: 10
-            RowLayout {
-                spacing: 14
-                ColumnLayout {
-                    spacing: 2
-                    Layout.fillWidth: true
-                    Text {
-                        text: "The Proton and Wine builds each launcher can run games with. Pick one per game "
-                              + "in the launcher, or Steam's default under Settings, Compatibility."
-                        color: Theme.dim
-                        font.pixelSize: 13
-                        wrapMode: Text.Wrap
-                        Layout.fillWidth: true
-                    }
-                }
-            }
-            Pill {
-                visible: !!page.pv && page.pv.protonplus
-                Layout.alignment: Qt.AlignHCenter
-                text: "Open ProtonPlus"
-                onClicked: page.openProtonPlus()
-            }
-        }
+    Pill {
+        visible: !!page.pv && page.pv.protonplus
+        Layout.alignment: Qt.AlignHCenter
+        text: "Open ProtonPlus"
+        onClicked: page.openProtonPlus()
     }
 
     Text {
@@ -83,22 +55,12 @@ ColumnLayout {
             required property var modelData
             Layout.fillWidth: true
             spacing: 6
-            Section { text: group.modelData.title }
-            Text {
-                visible: text !== ""
-                text: group.modelData.description
-                color: Theme.dim
-                font.pixelSize: 13
-                wrapMode: Text.Wrap
-                Layout.fillWidth: true
-                Layout.leftMargin: 6
-                Layout.bottomMargin: 4
-            }
+            Section { text: group.modelData.title; info: group.modelData.description }
             ListRow {
                 visible: !group.modelData.tools.length
                 icon: "deployed_code"
                 title: "No builds yet"
-                subtitle: "Steam lists its own Proton once it has downloaded one."
+                info: "Steam lists its own Proton once it has downloaded one."
             }
             Repeater {
                 model: group.modelData.tools
@@ -129,7 +91,7 @@ ColumnLayout {
                 Text {
                     text: row.tool.name
                     color: Theme.text
-                    font.pixelSize: 16
+                    font.pixelSize: 18
                     font.weight: Font.DemiBold
                     elide: Text.ElideRight
                     Layout.fillWidth: true

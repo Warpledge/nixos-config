@@ -8,13 +8,15 @@ Singleton {
     property string text: ""
     property point at: Qt.point(0, 0)  // the cursor, in scene coordinates
     property var owner: null
+    property bool rich: false  // `text` is StyledText markup (Hint.qml)
     property bool shown: false
 
-    function request(item, text, scenePos) {
+    function request(item, text, scenePos, rich) {
         if (!text)
             return
         owner = item
         tip.text = text
+        tip.rich = !!rich
         at = scenePos
         shown = false
         delay.restart()

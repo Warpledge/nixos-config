@@ -23,31 +23,6 @@ ColumnLayout {
         view.say(`Copied ${option}`)
     }
 
-    //--- Hero
-    Rectangle {
-        Layout.fillWidth: true
-        implicitHeight: hero.implicitHeight + 28
-        radius: 16
-        color: Theme.card
-        RowLayout {
-            id: hero
-            anchors.fill: parent
-            anchors.margins: 14
-            spacing: 14
-            ColumnLayout {
-                spacing: 2
-                Layout.fillWidth: true
-                Text {
-                    text: "Launch options for Steam, Heroic and Lutris. Click one to copy it."
-                    color: Theme.dim
-                    font.pixelSize: 13
-                    wrapMode: Text.Wrap
-                    Layout.fillWidth: true
-                }
-            }
-        }
-    }
-
     Text {
         visible: page.error !== ""
         text: page.error
@@ -107,17 +82,7 @@ ColumnLayout {
         property string description
         Layout.fillWidth: true
         spacing: 2
-        Section { text: head.title }
-        Text {
-            visible: text !== ""
-            text: head.description
-            color: Theme.dim
-            font.pixelSize: 13
-            wrapMode: Text.Wrap
-            Layout.fillWidth: true
-            Layout.leftMargin: 6
-            Layout.bottomMargin: 4
-        }
+        Section { text: head.title; info: head.description }
     }
 
     //--- One option in monospace, its text under it; a click copies it
@@ -137,25 +102,15 @@ ColumnLayout {
             anchors.leftMargin: 14
             anchors.rightMargin: 12
             spacing: 10
-            ColumnLayout {
-                spacing: 2
+            Text {
+                text: row.option
+                color: Theme.text
+                font.family: "monospace"
+                font.pixelSize: 16
+                wrapMode: Text.WrapAnywhere
                 Layout.fillWidth: true
-                Text {
-                    text: row.option
-                    color: Theme.text
-                    font.family: "monospace"
-                    font.pixelSize: 15
-                    wrapMode: Text.WrapAnywhere
-                    Layout.fillWidth: true
-                }
-                Text {
-                    text: row.text
-                    color: Theme.dim
-                    font.pixelSize: 13
-                    wrapMode: Text.Wrap
-                    Layout.fillWidth: true
-                }
             }
+            Hint { info: true; tip: row.text }
             Icon { icon: "content_copy"; size: 18 }
         }
         HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }

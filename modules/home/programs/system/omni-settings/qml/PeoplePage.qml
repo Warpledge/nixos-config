@@ -70,32 +70,6 @@ ColumnLayout {
         passField.text = againField.text = ""
     }
 
-    //--- Hero
-    Rectangle {
-        Layout.fillWidth: true
-        implicitHeight: hero.implicitHeight + 28
-        radius: 16
-        color: Theme.card
-        RowLayout {
-            id: hero
-            anchors.fill: parent
-            anchors.margins: 14
-            spacing: 14
-            ColumnLayout {
-                spacing: 2
-                Layout.fillWidth: true
-                Text {
-                    text: "Who can log in to this computer. Each person picks their own apps by opening "
-                          + "Omni Settings on their own account."
-                    color: Theme.dim
-                    font.pixelSize: 13
-                    wrapMode: Text.Wrap
-                    Layout.fillWidth: true
-                }
-            }
-        }
-    }
-
     Text {
         visible: page.error !== ""
         text: page.error
@@ -159,16 +133,7 @@ ColumnLayout {
             required property var modelData
             Layout.fillWidth: true
             spacing: 6
-            Section { text: group.modelData.title }
-            Text {
-                visible: text !== ""
-                text: group.modelData.description
-                color: Theme.dim
-                font.pixelSize: 13
-                wrapMode: Text.Wrap
-                Layout.fillWidth: true
-                Layout.leftMargin: 6
-            }
+            Section { text: group.modelData.title; info: group.modelData.description }
             Repeater {
                 model: group.modelData.settings
                 SettingRow {
@@ -182,13 +147,16 @@ ColumnLayout {
     }
 
     //--- Add a person
-    Section { text: "Add a Person" }
+    Section {
+        text: "Add a Person"
+        info: "Makes their settings file from the template, lets them log in here, and rebuilds. "
+              + "They can change their apps afterwards from their own account."
+    }
     Text {
-        text: page.allowed ? "Makes their settings file from the template, lets them log in here, and rebuilds. "
-                             + "They can change their apps afterwards from their own account."
-                           : "Only an admin can add people."
-        color: Theme.dim
-        font.pixelSize: 13
+        visible: !page.allowed
+        text: "Only an admin can add people."
+        color: Theme.caution
+        font.pixelSize: 14
         wrapMode: Text.Wrap
         Layout.fillWidth: true
         Layout.leftMargin: 6
@@ -218,18 +186,9 @@ ColumnLayout {
                 Layout.fillWidth: true
                 opacity: page.existing ? 0.45 : 1
                 spacing: 10
-                ColumnLayout {
-                    spacing: 1
-                    Layout.fillWidth: true
-                    Text { text: "Admin"; color: Theme.text; font.pixelSize: 16; font.weight: Font.DemiBold }
-                    Text {
-                        text: "Can use sudo, rebuild and change this computer's settings"
-                        color: Theme.dim
-                        font.pixelSize: 13
-                        wrapMode: Text.Wrap
-                        Layout.fillWidth: true
-                    }
-                }
+                Text { text: "Admin"; color: Theme.text; font.pixelSize: 18; font.weight: Font.DemiBold }
+                Hint { info: true; tip: "Can use sudo, rebuild and change this computer's settings" }
+                Item { Layout.fillWidth: true }
                 Toggle {
                     enabled: !page.existing
                     checked: page.admin

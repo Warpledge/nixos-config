@@ -26,7 +26,7 @@ ColumnLayout {
         visible: view.none
         icon: "check"
         title: "No package versions changed"
-        subtitle: "Only settings and generated files did" + (view.diff.files ? ` (${view.diff.files} settings files)` : "")
+        info: "Only settings and generated files did" + (view.diff.files ? ` (${view.diff.files} settings files)` : "")
     }
 
     Repeater {

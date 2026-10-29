@@ -1,6 +1,6 @@
 # Updates and Clean-Up
 
-Nothing updates on its own. The config pins every source to an exact version (the sources are in [`flake.nix`](../../flake.nix), their versions in [`flake.lock`](../../flake.lock)), so the system stays the same until an admin updates it. All of this is on Main → **Overview**.
+Nothing updates on its own. The config pins every source to an exact version (the sources are in [`flake.nix`](../../flake.nix), their versions in [`flake.lock`](../../flake.lock)), so the system stays the same until an admin updates it. All of this is on Main → **Maintenance**.
 
 ## Updating
 
@@ -8,9 +8,9 @@ Nothing updates on its own. The config pins every source to an exact version (th
 2. Tick the sources to update. Leaving one out keeps it where it is, which helps when one update is known to break something.
 3. **Update Now** moves them and rebuilds. **At Next Restart** waits for a restart, and **Preview** builds and shows what would change, then puts everything back.
 
-The run page lists the packages that changed version. **What's New** on the Overview links to each source's changes on GitHub.
+The run page lists the packages that changed version. **What's New** on the Maintenance page links to each source's changes on GitHub.
 
-Some updates switch at the next restart even if you picked Update Now: a new systemd, glibc, niri or xwayland-satellite has frozen the desktop when switched live. The Overview then shows **Restart to finish**. A new kernel also needs a restart to start using it.
+Some updates switch at the next restart even if you picked Update Now: a new systemd, glibc, niri or xwayland-satellite has frozen the desktop when switched live. The Maintenance page then shows **Restart to finish**. A new kernel also needs a restart to start using it.
 
 Updating every week or two keeps each jump small, which makes problems easier to find.
 

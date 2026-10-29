@@ -14,14 +14,7 @@ ColumnLayout {
     visible: shown.length > 0
     spacing: 6
 
-    Section { text: quick.title }
-    Text {
-        visible: text !== ""
-        text: quick.description
-        color: Theme.dim
-        font.pixelSize: 13
-        Layout.leftMargin: 6
-    }
+    Section { text: quick.title; info: quick.description }
     GridLayout {
         Layout.fillWidth: true
         columns: 3

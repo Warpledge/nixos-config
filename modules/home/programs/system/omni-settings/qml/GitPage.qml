@@ -74,18 +74,19 @@ ColumnLayout {
             anchors.margins: 14
             spacing: 10
             RowLayout {
-                spacing: 14
-                ColumnLayout {
-                    spacing: 2
-                    Layout.fillWidth: true
-                    Text {
-                        text: `Where the config repo stands: ${page.view.info.flake}`
-                              + (page.repo && page.repo.repo ? `, on github.com/${page.repo.repo}` : "") + "."
-                        color: Theme.dim
-                        font.pixelSize: 13
-                        wrapMode: Text.Wrap
-                        Layout.fillWidth: true
-                    }
+                spacing: 8
+                Text {
+                    text: page.view.info.flake
+                    color: Theme.text
+                    font.pixelSize: 18
+                    font.weight: Font.DemiBold
+                    elide: Text.ElideMiddle
+                    Layout.maximumWidth: hero.width - 30
+                }
+                Hint {
+                    info: true
+                    tip: "Where the config repo stands"
+                         + (page.repo && page.repo.repo ? `, on github.com/${page.repo.repo}` : "") + "."
                 }
             }
             RowLayout {
@@ -151,22 +152,26 @@ ColumnLayout {
         visible: !!page.repo
         icon: "commit"
         title: "Branch"
-        subtitle: !page.repo ? "" : page.repo.upstream ? `${page.repo.branch} → ${page.repo.upstream}`
-                                                       : `${page.repo.branch}, not tracking a remote`
+        info: "The branch this config is on, and the remote branch it pulls from"
+        caution: page.repo && !page.repo.upstream ? "Not tracking a remote, so there's nothing to pull" : ""
+        value: !page.repo ? "" : page.repo.upstream ? `${page.repo.branch} → ${page.repo.upstream}`
+                                                    : page.repo.branch
     }
     ListRow {
         visible: !!page.repo
         icon: "history"
         title: "Commits"
-        subtitle: page.repo && page.repo.total ? `${page.repo.total} in total` : ""
+        info: "How many commits the repo has in all"
+        value: page.repo && page.repo.total ? `${page.repo.total}` : ""
     }
     ListRow {
         visible: !!page.repo
         icon: "sync"
         tone: page.repo && page.repo.fetchErr ? "error" : ""
         title: "Last Fetched"
-        subtitle: !page.repo ? "" : (page.repo.fetched ? Fmt.when(page.repo.fetched) : "Never")
-                  + (page.repo.fetchErr ? `\nCouldn't fetch now: ${page.repo.fetchErr}` : "")
+        info: "When the remote was last checked for new commits, at most every 5 minutes"
+        value: !page.repo ? "" : page.repo.fetched ? Fmt.when(page.repo.fetched) : "Never"
+        alert: page.repo && page.repo.fetchErr ? `Couldn't fetch now: ${page.repo.fetchErr}` : ""
     }
 
     //--- Backup
@@ -176,9 +181,10 @@ ColumnLayout {
         icon: page.repo && page.repo.backup ? "cloud_done" : "cloud_off"
         tone: page.repo && page.repo.backup ? "success" : ""
         title: page.repo && page.repo.backup ? "Backing up to" : "Not backed up"
-        subtitle: !page.repo ? ""
-            : page.repo.backup ? `${page.repo.backup}\nEach successful rebuild commits and pushes this `
-                                 + "computer's and your own settings folders there."
+        subtitle: page.repo && page.repo.backup ? page.repo.backup : ""
+        info: !page.repo ? ""
+            : page.repo.backup ? "Each successful rebuild commits and pushes this computer's and "
+                                 + "your own settings folders there."
             : "Paste an empty repo you own (e.g. a private GitHub repo) to keep your own settings "
               + "folders there. Updates still come from the repo above."
         titleLines: 1
@@ -266,8 +272,8 @@ ColumnLayout {
              : page.repo.limited ? "GitHub's limit for requests without signing in is used up"
              : page.repo.prErr ? "Couldn't reach GitHub"
              : "No open pull requests"
-        subtitle: !page.repo ? "" : page.repo.limited ? "Sign in with gh auth login, or try again within the hour."
-                : page.repo.prErr || ""
+        alert: !page.repo ? "" : page.repo.limited ? "Sign in with gh auth login, or try again within the hour."
+             : page.repo.prErr || ""
     }
     Repeater {
         model: page.repo && page.repo.prs ? page.repo.prs : []

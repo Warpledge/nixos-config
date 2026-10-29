@@ -143,8 +143,8 @@ ColumnLayout {
         visible: page.view.packageCount < 0
         icon: page.view.packageError ? "error" : "progress_activity"
         title: page.view.packageError ? "Couldn't read the package list" : "Reading the package list…"
-        subtitle: page.view.packageError
-            || "The first time, and once a week after, the list is downloaded again; that takes a minute or so."
+        alert: page.view.packageError
+        info: "The first time, and once a week after, the list is downloaded again; that takes a minute or so."
         titleLines: 2
     }
 

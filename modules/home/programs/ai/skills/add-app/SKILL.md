@@ -64,7 +64,8 @@ catches the step that usually gets missed.
    grep -n '^\s*"[^"]*":' modules/home/programs/system/omni-settings/src/descriptions.json | tail -1
    ```
    Add an object with at least `summary` and `text` (use the package's description from
-   `nix eval --raw nixpkgs#<pkg>.meta.description` or write a one-liner). Include `icon`
+   `nix eval --raw nixpkgs#<pkg>.meta.description` or write a one-liner; `text` is the
+   row's ? tooltip, so keep it under about 200 characters). Include `icon`
    (`.desktop` id or icon name) when known. If the setting is a value used by another
    setting's dropdown (e.g. `fileBrowsers.duxFiles` as a choice for `defaultApps.fileManager`),
    add it to that parent's `choices` object in the same file.

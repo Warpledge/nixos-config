@@ -65,42 +65,25 @@ ColumnLayout {
             page.error = reply.error
     })
 
-    //--- Hero
-    Rectangle {
-        Layout.fillWidth: true
-        implicitHeight: hero.implicitHeight + 28
-        radius: 16
-        color: Theme.card
-        ColumnLayout {
-            id: hero
-            anchors.fill: parent
-            anchors.margins: 14
-            Text {
-                text: "Which app opens one file type, in front of the Default Apps choices. For example "
-                      + "application/x-cbz to Moku, or video/x-matroska to mpv. A file's type is shown in "
-                      + "its properties window."
-                color: Theme.dim
-                font.pixelSize: 13
-                wrapMode: Text.Wrap
-                Layout.fillWidth: true
-            }
-        }
-    }
-
     Text {
         text: `Saved for ${page.view.scopeTitle()}.`
         color: Theme.dim
-        font.pixelSize: 13
+        font.pixelSize: 14
         Layout.leftMargin: 6
     }
 
     //--- Types of your own
-    Section { text: "File Types" }
+    Section {
+        text: "File Types"
+        info: "Which app opens one file type, in front of the Default Apps choices. For example "
+              + "application/x-cbz to Moku, or video/x-matroska to mpv. A file's type is shown in "
+              + "its properties window."
+    }
     ListRow {
         visible: Object.keys(page.entries).length === 0
         icon: "description"
         title: "No types of your own"
-        subtitle: "The Default Apps choices apply until you add one here."
+        info: "The Default Apps choices apply until you add one here."
     }
     Repeater {
         model: Object.keys(page.entries).sort((a, b) => a.localeCompare(b))
@@ -154,7 +137,7 @@ ColumnLayout {
         visible: page.loaded && page.error !== ""
         icon: "error"
         title: "Couldn't list the installed apps"
-        subtitle: page.error
+        alert: page.error
     }
     Text {
         visible: !page.loaded

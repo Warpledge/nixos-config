@@ -72,9 +72,9 @@ Open **Omni Settings** with `Mod+S` (`Mod` is the Windows key). Change what you 
 | Turn apps on or off | **Packages** → Default Packages |
 | Install any other app from nixpkgs | **Packages** → Search → Install |
 | Change the kernel, services, firewall, language or keyboard | **Main**, the pages in the sidebar |
-| Update everything | **Main** → Overview → Update Now |
-| Go back to an earlier version | **Main** → Overview → Versions |
-| Free up disk space | **Main** → Overview → Clean Up Old Versions |
+| Update everything | **Main** → Maintenance → Update Now |
+| Go back to an earlier version | **Main** → Maintenance → Versions |
+| Free up disk space | **Main** → Maintenance → Clean Up Old Versions |
 | Add a person | **Main** → Users |
 | Change monitors, shortcuts, mouse or theme | **Niri** (opens Dux Shell's settings) |
 | Make a window float, size or open on a workspace | **Niri** → Window Rules |
@@ -105,7 +105,7 @@ git pull --rebase
 
 The commit saves your settings first, so the pull can put my changes underneath them. That's what `--rebase` means: git takes my new commits, then replays yours on top. If there's nothing new of yours to save, the commit says so and stops; run `git pull --rebase` on its own.
 
-Then open Omni Settings and press **Rebuild Now** on the Overview. Settings I've added since show up on its **What's New** page.
+Then open Omni Settings and press **Rebuild** at the top. Settings I've added since show up on its **What's New** page.
 
 **If you forked the repo on GitHub**, your fork is `origin` and mine has to be added once:
 

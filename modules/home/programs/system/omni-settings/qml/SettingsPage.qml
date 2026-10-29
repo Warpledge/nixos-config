@@ -68,22 +68,18 @@ ColumnLayout {
                     Layout.fillWidth: false
                 }
                 Hint {
+                    info: true
+                    tip: group.modelData.description
+                    Layout.topMargin: 10
+                }
+                Hint {
                     visible: group.modelData.locked
                     icon: "lock"
                     tip: "Only an admin can change these"
                     Layout.topMargin: 10
+                    Layout.leftMargin: 6
                 }
                 Item { Layout.fillWidth: true }
-            }
-            Elided {
-                visible: !group.collapsed && text !== ""
-                text: Theme.rich(group.modelData.description)
-                full: Theme.plain(group.modelData.description)
-                textFormat: Text.StyledText
-                color: Theme.dim
-                font.pixelSize: 13
-                Layout.fillWidth: true
-                Layout.leftMargin: 6
             }
             Repeater {
                 model: group.collapsed ? [] : group.modelData.settings
@@ -146,13 +142,14 @@ ColumnLayout {
                                     id: cardTitle
                                     text: group.modelData.title
                                     color: Theme.text
-                                    font.pixelSize: 16
+                                    font.pixelSize: 18
                                     font.weight: Font.DemiBold
                                     elide: Text.ElideRight
                                     Layout.maximumWidth: Math.ceil(cardTitleWidth.advanceWidth) + 1
                                     Layout.fillWidth: true
                                     TextMetrics { id: cardTitleWidth; font: cardTitle.font; text: cardTitle.text }
                                 }
+                                Hint { info: true; tip: group.modelData.description }
                                 Hint {
                                     visible: group.modelData.locked
                                     icon: "lock"
@@ -160,20 +157,11 @@ ColumnLayout {
                                 }
                                 Item { Layout.fillWidth: true }
                             }
-                            Elided {
-                                visible: text !== ""
-                                text: Theme.rich(group.modelData.description)
-                                full: Theme.plain(group.modelData.description)
-                                textFormat: Text.StyledText
-                                color: Theme.dim
-                                font.pixelSize: 13
-                                Layout.fillWidth: true
-                            }
                         }
                         Rectangle {
-                            implicitWidth: countText.implicitWidth + 20
-                            implicitHeight: 26
-                            radius: 13
+                            implicitWidth: countText.implicitWidth + 24
+                            implicitHeight: 32
+                            radius: 16
                             color: Qt.alpha(card.accent, 0.18)
                             Text {
                                 id: countText
@@ -182,8 +170,8 @@ ColumnLayout {
                                     ? `${group.bools.filter(s => page.view.valueOf(s)).length} of ${group.bools.length} on`
                                     : `${group.modelData.settings.length}`
                                 color: card.accent
-                                font.pixelSize: 13
-                                font.weight: Font.DemiBold
+                                font.pixelSize: 16
+                                font.weight: Font.Bold
                             }
                         }
                         Rectangle {
@@ -258,7 +246,7 @@ ColumnLayout {
                     required property var modelData
                     icon: Theme.glyph(modelData.icon, "open_in_new")
                     title: modelData.title
-                    subtitle: modelData.subtitle
+                    info: modelData.subtitle
                     trailing: "open_in_new"
                     onClicked: Quickshell.execDetached(["dms", "ipc", "call", "settings", "openWith", modelData.tab])
                 }

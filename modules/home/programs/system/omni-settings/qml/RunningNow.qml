@@ -28,22 +28,18 @@ ColumnLayout {
 
     RowLayout {
         Layout.fillWidth: true
-        Section { text: "Running Now"; Layout.fillWidth: true }
+        Section {
+            text: "Running Now"
+            info: "The services this computer runs right now. Changes above show up here after Apply."
+            Layout.fillWidth: true
+        }
         IconButton { icon: "refresh"; tip: "Check again"; Layout.topMargin: 10; onClicked: running.load() }
-    }
-    Text {
-        text: "The services this computer runs right now. Changes above show up here after Apply."
-        color: Theme.dim
-        font.pixelSize: 13
-        wrapMode: Text.Wrap
-        Layout.fillWidth: true
-        Layout.leftMargin: 6
     }
     ListRow {
         visible: running.units === null || !running.units.length
         icon: "dns"
         title: running.units === null && !running.error ? "Checking…" : "None of them is on"
-        subtitle: running.error
+        alert: running.error
     }
     Repeater {
         model: running.units || []
@@ -84,7 +80,7 @@ ColumnLayout {
                     Text {
                         text: unitRow.unit.name
                         color: Theme.text
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         font.weight: Font.DemiBold
                         Layout.fillWidth: true
                     }

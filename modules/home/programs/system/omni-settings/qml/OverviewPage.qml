@@ -1,4 +1,4 @@
-// The Overview: what this computer runs, updates, maintenance and earlier versions
+// The Maintenance page (id "overview"): updates, freeing space and earlier versions
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
@@ -213,10 +213,21 @@ ColumnLayout {
         visible: !!page.ov && (page.ov.pending > 0 || page.ov.newKernel !== "")
         icon: "restart_alt"
         title: page.ov && page.ov.pending ? "Restart to finish" : "Restart to use the new kernel"
-        subtitle: !page.ov ? "" : page.ov.pending ? `Version ${page.ov.pending} starts the next time you restart.`
-                                                  : `Linux ${page.ov.newKernel} is installed.`
+        alert: !page.ov ? "" : page.ov.pending ? `Version ${page.ov.pending} starts the next time you restart.`
+                                               : `Linux ${page.ov.newKernel} is installed.`
         button: "Restart"
         onClicked: page.restart()
+    }
+    ListRow {
+        visible: !!page.ov && !!page.ov.lastFailed
+        icon: "warning"
+        tone: "error"
+        title: "Last Failed Run"
+        alert: page.ov && page.ov.lastFailed
+            ? `${page.ov.lastFailed.title}, ${Fmt.when(page.ov.lastFailed.when).toLowerCase()}: ${page.ov.lastFailed.heading}`
+            : ""
+        chevron: true
+        onClicked: page.view.sheet = failedSheet
     }
 
     //--- Updates
@@ -225,7 +236,7 @@ ColumnLayout {
         visible: !!page.ov && page.behind > 0
         icon: "download"
         title: "Config"
-        subtitle: `${page.behind} new commit${page.behind === 1 ? "" : "s"} to pull into the config`
+        alert: `${page.behind} new commit${page.behind === 1 ? "" : "s"} to pull into the config`
         tone: "caution"
         button: page.admin ? "Pull" : ""
         onClicked: if (page.admin) page.pull()
@@ -234,22 +245,17 @@ ColumnLayout {
         visible: !!page.ov
         icon: page.checking ? "progress_activity" : "update"
         title: "Sources"
-        subtitle: !page.ov ? ""
-            : page.checking ? "Looking up each source's newest version"
-            : page.updateError ? `Couldn't check: ${page.updateError}`
-            : !page.updates ? `Flake inputs, locked ${Fmt.day(page.ov.updated)} (${Fmt.ago(page.ov.updated)})`
-            : !page.updates.changes.length ? `Up to date. Sources from ${Fmt.day(page.ov.updated)}.`
-            : `${page.updates.changes.length} newer, up to `
-              + Fmt.day(Math.max(...page.updates.changes.map(c => c.new)))
+        info: page.ov ? "The flake inputs this config is built from, such as nixpkgs. Locked "
+                        + `${Fmt.day(page.ov.updated)} (${Fmt.ago(page.ov.updated)}).` : ""
+        caution: page.admin ? "" : "Only an admin can update this computer"
+        value: !page.ov ? ""
+            : page.checking ? "Checking…"
+            : !page.updates ? Fmt.day(page.ov.updated)
+            : !page.updates.changes.length ? "Up to date"
+            : `${page.updates.changes.length} newer`
+        alert: page.updateError ? `Couldn't check: ${page.updateError}` : ""
         button: page.checking || !page.admin ? "" : page.updates ? "Check Again" : "Check"
         onClicked: if (!page.checking && page.admin) page.check()
-    }
-    Text {
-        visible: !!page.ov && !page.admin
-        text: "Only an admin can update this computer."
-        color: Theme.dim
-        font.pixelSize: 13
-        Layout.leftMargin: 6
     }
     Repeater {
         model: page.updates ? page.updates.changes : []
@@ -310,16 +316,16 @@ ColumnLayout {
         onClicked: page.update()
     }
 
-    //--- Maintenance
-    Section { visible: !!page.ov; text: "Maintenance" }
+    //--- Free Up Space
+    Section { visible: !!page.ov; text: "Free Up Space" }
     ListRow {
         visible: !!page.ov
         enabled: page.admin
         icon: "delete_sweep"
         title: "Clean Up Old Versions"
-        subtitle: page.ov && page.ov.diskFree
-            ? `Garbage collection · ${Fmt.size(page.ov.diskFree)} free of ${Fmt.size(page.ov.diskTotal)}`
-            : "Garbage collection"
+        info: "Garbage collection: deletes old system versions and the packages only they use"
+              + (page.ov && page.ov.diskTotal ? `. ${Fmt.size(page.ov.diskTotal)} disk.` : ".")
+        value: page.ov && page.ov.diskFree ? `${Fmt.size(page.ov.diskFree)} free` : ""
         chevron: true
         bar: page.ov && page.ov.diskTotal ? 1 - page.ov.diskFree / page.ov.diskTotal : -1
         onClicked: page.collect()
@@ -329,20 +335,9 @@ ColumnLayout {
         enabled: page.admin
         icon: "compress"
         title: "Optimize the Nix Store"
-        subtitle: "Frees space by hard-linking identical files"
+        info: "Frees space by hard-linking identical files in the Nix store. Deletes nothing."
         chevron: true
         onClicked: page.optimise()
-    }
-    ListRow {
-        visible: !!page.ov && !!page.ov.lastFailed
-        icon: "warning"
-        tone: "error"
-        title: "Last Failed Run"
-        subtitle: page.ov && page.ov.lastFailed
-            ? `${page.ov.lastFailed.title}, ${Fmt.when(page.ov.lastFailed.when).toLowerCase()}: ${page.ov.lastFailed.heading}`
-            : ""
-        chevron: true
-        onClicked: page.view.sheet = failedSheet
     }
 
     //--- Shell settings; under niri they're on the Niri tab's Shell page
@@ -360,16 +355,18 @@ ColumnLayout {
         icon: page.current && page.current.running ? "radio_button_checked" : "history"
         tone: page.current && page.current.running ? "success" : ""
         title: page.current ? `Version ${page.current.number}` : ""
-        subtitle: !page.current ? ""
-            : [page.older.length
-                   ? `${page.older.length} earlier `
-                     + (page.older.length === 1 ? "generation" : "generations") : "",
-               Fmt.when(page.current.when),
-               // The header shows the running one's
-               page.current.version && !page.current.running
-                   ? "NixOS " + page.current.version.split(".").slice(0, 2).join(".") : "",
-               page.current.kernel && !page.current.running ? `Linux ${page.current.kernel}` : ""]
-              .filter(t => t).join(" · ")
+        info: !page.current ? ""
+            : "Generations: each rebuild saves one, and the boot menu keeps the last ten. "
+              + "Switching back leaves your settings files as they are."
+              + [page.older.length
+                     ? `${page.older.length} earlier `
+                       + (page.older.length === 1 ? "generation" : "generations") : "",
+                 // The header shows the running one's
+                 page.current.version && !page.current.running
+                     ? "NixOS " + page.current.version.split(".").slice(0, 2).join(".") : "",
+                 page.current.kernel && !page.current.running ? `Linux ${page.current.kernel}` : ""]
+                .filter(t => t).map(t => `\n${t}`).join("")
+        value: page.current ? Fmt.when(page.current.when) : ""
         tag: !page.current ? "" : page.current.running ? "Running"
             : page.current.next ? "Next start" : ""
         tagSuccess: true
@@ -382,15 +379,6 @@ ColumnLayout {
         open: page.versionsOpen && page.older.length > 0
         gap: page.spacing
         spacing: page.spacing
-        Text {
-            text: "Generations: each rebuild saves one, and the boot menu keeps the last ten. "
-                  + "Switching back leaves your settings files as they are."
-            color: Theme.dim
-            font.pixelSize: 13
-            wrapMode: Text.Wrap
-            Layout.fillWidth: true
-            Layout.leftMargin: 6
-        }
         Repeater {
             model: olderList.shown ? page.older : []
             Rectangle {
@@ -463,11 +451,10 @@ ColumnLayout {
         visible: !!page.boot && page.boot.stages.total > 0
         icon: "timer"
         title: "Last Startup"
-        subtitle: !page.boot ? ""
-            : page.boot.graphical
-                ? `${Fmt.duration(page.boot.stages.total)} from power on to `
-                  + page.boot.graphical.target
-                : `${Fmt.duration(page.boot.stages.total)} from power on`
+        info: !page.boot ? ""
+            : page.boot.graphical ? `From power on to ${page.boot.graphical.target}`
+            : "From power on"
+        value: page.boot ? Fmt.duration(page.boot.stages.total) : ""
         expandable: true
         expanded: page.bootOpen
         onClicked: page.bootOpen = !page.bootOpen

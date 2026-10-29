@@ -18,8 +18,8 @@ Rectangle {
     readonly property bool atDefault: JSON.stringify(value) === JSON.stringify(s.default)
         && (!s.pair || JSON.stringify(view.valueOf(s.pair)) === JSON.stringify(s.pair.default))
     readonly property bool overridden: !!s.overridden && (view.scope === view.info.machine)
-    // A switch with nothing more to say has no dropdown
-    readonly property bool expandable: s.description !== "" || s.kind !== "bool" || !!s.pair
+    // A switch has no dropdown; what it does is behind the ?
+    readonly property bool expandable: s.kind !== "bool" || !!s.pair
     readonly property color accent: Theme.accentOf(row)
 
     Layout.fillWidth: true
@@ -59,19 +59,18 @@ Rectangle {
                         id: titleText
                         text: row.s.title
                         color: Theme.text
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         font.weight: Font.DemiBold
                         elide: Text.ElideRight
                         // Its full width, so the indicators sit right after the name
                         Layout.maximumWidth: Math.ceil(titleWidth.advanceWidth) + 1
+                        Layout.minimumWidth: Math.min(Layout.maximumWidth, row.width * 0.45)
                         Layout.fillWidth: true
                         TextMetrics { id: titleWidth; font: titleText.font; text: titleText.text }
                     }
-                    //--- Cautions and notes as indicators, read at the cursor
-                    Hint {
-                        visible: row.s.note !== ""
-                        tip: Theme.plain(row.s.note)
-                    }
+                    //--- What it is, cautions and notes as indicators, read at the cursor
+                    Hint { info: true; tip: row.s.description || row.s.subtitle }
+                    Hint { tip: Theme.plain(row.s.note) }
                     Hint {
                         visible: row.overridden
                         icon: "computer"
@@ -84,15 +83,6 @@ Rectangle {
                         color: row.accent
                     }
                     Item { Layout.fillWidth: true }
-                }
-                Text {
-                    visible: text !== ""
-                    text: row.s.subtitle
-                    color: Theme.dim
-                    font.pixelSize: 13
-                    elide: Text.ElideRight
-                    maximumLineCount: 1
-                    Layout.fillWidth: true
                 }
             }
             IconButton {
@@ -120,25 +110,31 @@ Rectangle {
             //--- The current value, as the group cards show their count
             Rectangle {
                 visible: row.s.kind !== "bool"
-                implicitWidth: Math.min(valueText.implicitWidth + 20, row.width * 0.36)
-                implicitHeight: 26
-                radius: 13
+                // Takes what the name leaves; a value too long for it wraps rather than cut
+                Layout.fillWidth: true
+                Layout.minimumWidth: 60
+                Layout.preferredWidth: Math.ceil(valueWidth.advanceWidth) + 26
+                Layout.maximumWidth: Layout.preferredWidth
+                implicitHeight: Math.max(32, valueText.height + 10)
+                radius: 16
                 color: Qt.alpha(row.accent, 0.18)
                 border.width: 1
                 border.color: Qt.alpha(row.accent, 0.3)
                 Text {
                     id: valueText
-                    anchors.fill: parent
-                    anchors.leftMargin: 10
-                    anchors.rightMargin: 10
-                    verticalAlignment: Text.AlignVCenter
+                    x: 12
+                    width: parent.width - 24
+                    anchors.verticalCenter: parent.verticalCenter
                     horizontalAlignment: Text.AlignHCenter
                     text: row.view.shownOf(row.s, row.value) + (row.s.pair
                         ? ` · ${row.view.shownOf(row.s.pair, row.view.valueOf(row.s.pair))}` : "")
                     color: row.accent
-                    font.pixelSize: 13
-                    font.weight: Font.DemiBold
+                    font.pixelSize: 16
+                    font.weight: Font.Bold
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    maximumLineCount: 3
                     elide: Text.ElideRight
+                    TextMetrics { id: valueWidth; font: valueText.font; text: valueText.text }
                 }
             }
             Toggle {
@@ -179,16 +175,6 @@ Rectangle {
                     anchors.right: parent.right
                     anchors.margins: 12
                     spacing: 10
-                    Text {
-                        visible: row.s.description !== ""
-                        text: Theme.rich(row.s.description)
-                        textFormat: Text.StyledText
-                        color: Theme.dim
-                        font.pixelSize: 15
-                        wrapMode: Text.Wrap
-                        lineHeight: 1.15
-                        Layout.fillWidth: true
-                    }
                     Text {
                         visible: row.s.kind !== "bool"
                         text: `Default: ${row.s.defaultShown}`

@@ -276,24 +276,13 @@ ColumnLayout {
             anchors.fill: parent
             anchors.margins: 14
             spacing: 12
-            RowLayout {
-                spacing: 14
+            Text {
+                visible: !page.niri
+                text: `These rules are niri's, and this computer runs ${page.view.info && page.view.info.wm || "another"} window manager.`
+                color: Theme.caution
+                font.pixelSize: 14
+                wrapMode: Text.Wrap
                 Layout.fillWidth: true
-                ColumnLayout {
-                    spacing: 2
-                    Layout.fillWidth: true
-                    Text {
-                        text: !page.niri
-                            ? `These rules are niri's, and this computer runs ${page.view.info && page.view.info.wm || "another"} window manager.`
-                            : "Pick a window and choose what niri should do with it, or change or turn off "
-                              + "the config's rules. Changes are yours alone and wait for Apply, like any "
-                              + "other setting."
-                        color: Theme.dim
-                        font.pixelSize: 13
-                        wrapMode: Text.Wrap
-                        Layout.fillWidth: true
-                    }
-                }
             }
             Flow {
                 visible: page.editable
@@ -453,7 +442,7 @@ ColumnLayout {
         icon: "sync"
         tone: "caution"
         title: "Not Applied Yet"
-        subtitle: "Saved window rule changes reach niri with the next rebuild."
+        info: "Saved window rule changes reach niri with the next rebuild."
         button: page.view.info && page.view.info.canApply && page.view.info.admin ? "Rebuild" : ""
         onClicked: if (button) page.rebuild()
     }
@@ -464,7 +453,7 @@ ColumnLayout {
     RowLayout {
         visible: !!page.wr
         Layout.fillWidth: true
-        Section { text: "Rules" }
+        Section { text: "Rules"; info: "Later rules win where two set the same thing." }
         Item { Layout.fillWidth: true }
         Chip {
             Layout.topMargin: 10
@@ -473,13 +462,6 @@ ColumnLayout {
             accent: page.showIds
             onTapped: page.showIds = !page.showIds
         }
-    }
-    Text {
-        visible: !!page.wr
-        text: "Later rules win where two set the same thing."
-        color: Theme.dim
-        font.pixelSize: 13
-        Layout.leftMargin: 6
     }
     Field {
         visible: !!page.wr
@@ -555,18 +537,9 @@ ColumnLayout {
             Layout.leftMargin: 6
             spacing: 8
             Icon { icon: Theme.glyph(group.icon, "settings"); size: 18; color: Theme.primary }
-            Text { text: group.title; color: Theme.primary; font.pixelSize: 15; font.weight: Font.DemiBold }
+            Text { text: group.title; color: Theme.primary; font.pixelSize: 17; font.weight: Font.DemiBold }
             Chip { tappable: false; text: String(group.rules.length); tone: group.tone; accent: group.tone === "" && group.title !== "Set in Nix" }
-        }
-        Text {
-            visible: text !== ""
-            text: group.description
-            color: Theme.dim
-            font.pixelSize: 13
-            wrapMode: Text.Wrap
-            Layout.fillWidth: true
-            Layout.leftMargin: 6
-            Layout.bottomMargin: 2
+            Hint { info: true; tip: group.description }
         }
         Repeater {
             model: group.rules
@@ -602,13 +575,22 @@ ColumnLayout {
                 ColumnLayout {
                     spacing: 4
                     Layout.fillWidth: true
-                    Text {
-                        text: row.rule.title
-                        color: Theme.text
-                        font.pixelSize: 16
-                        font.weight: Font.DemiBold
-                        elide: Text.ElideRight
+                    RowLayout {
+                        spacing: 6
                         Layout.fillWidth: true
+                        Text {
+                            id: ruleTitle
+                            text: row.rule.title
+                            color: Theme.text
+                            font.pixelSize: 18
+                            font.weight: Font.DemiBold
+                            elide: Text.ElideRight
+                            Layout.maximumWidth: Math.ceil(ruleTitleWidth.advanceWidth) + 1
+                            Layout.fillWidth: true
+                            TextMetrics { id: ruleTitleWidth; font: ruleTitle.font; text: ruleTitle.text }
+                        }
+                        Hint { info: true; tip: row.rule.note }
+                        Item { Layout.fillWidth: true }
                     }
                     Flow {
                         Layout.fillWidth: true
@@ -655,23 +637,15 @@ ColumnLayout {
                     onToggled: on => page.toggle(row.rule, on)
                 }
                 Chevron {
+                    visible: row.rule.matches.length + row.rule.excludes.length > 0
                     open: row.open
                 }
             }
             Reveal {
                 id: matches
-                open: row.open && (row.rule.note !== "" || row.rule.matches.length + row.rule.excludes.length > 0)
+                open: row.open && row.rule.matches.length + row.rule.excludes.length > 0
                 gap: ruleCol.spacing
                 spacing: ruleCol.spacing
-                Text {
-                    visible: row.rule.note !== ""
-                    text: row.rule.note
-                    color: Theme.dim
-                    font.pixelSize: 13
-                    wrapMode: Text.Wrap
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 50
-                }
                 Repeater {
                     model: matches.shown ? row.rule.matches.map(m => Object.assign({ out: false }, m))
                                            .concat(row.rule.excludes.map(m => Object.assign({ out: true }, m))) : []

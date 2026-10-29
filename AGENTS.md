@@ -338,10 +338,12 @@ window, over a Python backend; full notes split across its `CLAUDE.md`,
   backend read; a `Repeater` delegate's `modelData` is a copy, so edit the
   source list by index. What a dropdown opens goes in a `Reveal`
   (`Reveal.qml`), and Loaders inside it gate on its `shown`.
-- Keep the interface clean: a row is its name plus a 2-5 word `summary`, the
-  rest in its `text`. Notes and cautions are `Hint` indicators with a tooltip,
-  never coloured text; every icon button has a `tip`; a switch with no `text`
-  has no dropdown; group and page blurbs stay one short line.
+- Keep the interface clean: rows, cards, headings and page headers show the
+  name only. What it is goes behind a ? `Hint` (a setting's `text`, under
+  ~200 characters); cautions behind a yellow triangle `Hint`. Live alerts stay
+  as yellow text (`alert`), status values show large (`value`), and names keep
+  full width. Switches have no dropdown; no dropdown holds text alone. Every
+  icon button has a `tip`.
 
 **`modules/home/programs/media/freetube/`**
 

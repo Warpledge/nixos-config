@@ -103,7 +103,8 @@ Item {
         if (at > 0)
             out.splice(at, 0, ...packageCategories.map(c => ({ tab: "packages", group: "User Packages",
                 id: `userpackages:${c}`, title: c, icon: ["folder"], custom: true,
-                subtitle: `${userPackages(false)[c] ? userPackages(false)[c].length : 0} installed` })))
+                subtitle: `${userPackages(false)[c] ? userPackages(false)[c].length : 0} installed. `
+                          + "Move one to list it under another category." })))
         return out
     }
     readonly property var current: navItems.find(i => i.id === page) || null
@@ -149,7 +150,7 @@ Item {
                 scope = info.machine
                 const ui = info.ui || {}
                 const set = keys => (keys || []).reduce((o, k) => (o[k] = true, o), {})
-                collapsedPages = set(ui.collapsed)
+                openPages = set(ui.openPages)
                 openCards = set(ui.open)
             }
             // Keep changes that still differ from what the files now hold
@@ -480,6 +481,8 @@ Item {
         }
         if (pageId && pageId.startsWith("doc:"))
             openNote(pageId, true)
+        else if (pageId && !openPages[pageId])
+            setPageOpen(pageId, true)
         if (tabId === tab) {
             if (pageId)
                 scrollTo(pageId)
@@ -596,8 +599,8 @@ Item {
         onFinished: omni.anchorTop()
     }
 
-    //--- Collapsed pages and open group cards, kept in api.py's UI_STATE
-    property var collapsedPages: ({})
+    //--- Open pages and open group cards, kept in api.py's UI_STATE; both start shut
+    property var openPages: ({})
     property var openCards: ({})
     function setCardOpen(key, open) {
         const c = Object.assign({}, openCards)
@@ -608,17 +611,17 @@ Item {
         openCards = c
         saveUi()
     }
-    function setPageCollapsed(pid, collapsed) {
-        const c = Object.assign({}, collapsedPages)
-        if (collapsed)
+    function setPageOpen(pid, open) {
+        const c = Object.assign({}, openPages)
+        if (open)
             c[pid] = true
         else
             delete c[pid]
-        collapsedPages = c
+        openPages = c
         saveUi()
     }
     function saveUi() {
-        Backend.call("saveUi", { collapsed: Object.keys(collapsedPages), open: Object.keys(openCards) }, () => {})
+        Backend.call("saveUi", { openPages: Object.keys(openPages), open: Object.keys(openCards) }, () => {})
     }
 
     //--- Notes on the Docs tab show only their title until opened
@@ -907,8 +910,8 @@ Item {
                             Quickshell.execDetached(["dms", "ipc", "call", "settings", "openWith", r.tab])
                         } else {
                             // A setting in a card or a collapsed page shows open
-                            if (omni.collapsedPages[r.page])
-                                omni.setPageCollapsed(r.page, false)
+                            if (!omni.openPages[r.page])
+                                omni.setPageOpen(r.page, true)
                             if (r.card && !omni.openCards[r.card])
                                 omni.setCardOpen(r.card, true)
                             omni.go(r.tab, r.page)
@@ -1342,7 +1345,7 @@ Item {
         readonly property color pageAccent: omni.pageAccents[pid] || Theme.primary
         readonly property bool note: pid.startsWith("doc:")
         readonly property bool userPkgs: pid.startsWith("userpackages:")
-        readonly property bool open: note ? !!omni.openNotes[pid] : !omni.collapsedPages[pid]
+        readonly property bool open: note ? !!omni.openNotes[pid] : !!omni.openPages[pid]
         readonly property var model: omni.info.pages[pid] || null
         readonly property var comp: note ? notePage : userPkgs ? userPkgsPage
             : omni.custom[pid] || (model ? settingsPage : null)
@@ -1357,7 +1360,7 @@ Item {
             if (note)
                 omni.openNote(pid, !open)
             else
-                omni.setPageCollapsed(pid, open)
+                omni.setPageOpen(pid, !open)
         }
         // The rail's group this page starts; the untitled first group takes the tab's name
         readonly property var prev: index > 0 ? omni.tabPages[index - 1] : null
@@ -1454,25 +1457,26 @@ Item {
                             color: Theme.inkPrimary
                         }
                     }
-                    ColumnLayout {
-                        spacing: 1
+                    RowLayout {
+                        spacing: 8
                         Layout.fillWidth: true
                         Text {
+                            id: pageTitle
                             text: section.modelData.title
                             color: Theme.text
-                            font.pixelSize: 17
+                            font.pixelSize: 20
                             font.weight: Font.Bold
                             elide: Text.ElideRight
+                            Layout.maximumWidth: Math.ceil(pageTitleWidth.advanceWidth) + 1
                             Layout.fillWidth: true
+                            TextMetrics { id: pageTitleWidth; font: pageTitle.font; text: pageTitle.text }
                         }
                         // A generated page's blurb, or a custom page's line from the rail
-                        Elided {
-                            visible: text !== ""
-                            text: section.modelData.subtitle || (section.model ? section.model.description : "")
-                            color: Theme.dim
-                            font.pixelSize: 13
-                            Layout.fillWidth: true
+                        Hint {
+                            info: true
+                            tip: section.modelData.subtitle || (section.model ? section.model.description : "")
                         }
+                        Item { Layout.fillWidth: true }
                     }
                     // Words, not a Chevron, so it reads apart from the dropdowns inside
                     Chip {
@@ -1592,7 +1596,7 @@ Item {
         visible: opacity > 0
         opacity: Tip.shown ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 120 } }
-        width: Math.min(tipText.implicitWidth, 300) + 22
+        width: Math.min(tipText.implicitWidth, 340) + 22
         height: tipText.implicitHeight + 14
         x: Math.max(4, Math.min(at.x + 14, omni.width - width - 4))
         y: at.y + 22 + height > omni.height - 4 ? at.y - height - 8 : at.y + 22
@@ -1603,10 +1607,12 @@ Item {
         Text {
             id: tipText
             anchors.centerIn: parent
-            width: Math.min(implicitWidth, 300)
+            width: Math.min(implicitWidth, 340)
             text: Tip.text
+            textFormat: Tip.rich ? Text.StyledText : Text.PlainText
             color: Theme.inkToast
-            font.pixelSize: 13
+            font.pixelSize: 14
+            lineHeight: 1.1
             wrapMode: Text.Wrap
         }
     }

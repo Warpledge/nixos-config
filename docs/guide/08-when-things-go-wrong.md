@@ -4,7 +4,7 @@ The running system is never touched by a rebuild that fails, so a failure is saf
 
 ## A Rebuild Failed
 
-The run page shows **What Went Wrong**, with a button to copy the error and the full log below it. **Undo My Changes** puts the settings files back as they were. The Overview keeps the last failed run's log under **Last Failed Run** until you choose **Forget It**.
+The run page shows **What Went Wrong**, with a button to copy the error and the full log below it. **Undo My Changes** puts the settings files back as they were. The Maintenance page keeps the last failed run's log under **Last Failed Run** until you choose **Forget It**.
 
 Common causes:
 
@@ -18,7 +18,7 @@ Omni Settings opens on this page when the settings files have a mistake, often a
 
 ## Something Broke After an Update
 
-Go back a version: Overview → **Versions** → **Switch** on the one before. If the desktop won't start at all, restart and pick an older version in the boot menu. Either way your settings files stay as they are, so tell an admin which update broke it.
+Go back a version: Maintenance → **Versions** → **Switch** on the one before. If the desktop won't start at all, restart and pick an older version in the boot menu. Either way your settings files stay as they are, so tell an admin which update broke it.
 
 ## The Desktop Froze or Looks Wrong
 

@@ -54,7 +54,7 @@ TAB_ICONS = {"main": ("go-home-symbolic", "user-home-symbolic"),
 
 #--- Each tab's pages above its sections: key, title and icons to try.
 #--- Shell shows only under niri, which also moves the Desktop section to Niri.
-TOP = {"main": [("overview", "Overview", ("computer-symbolic",)),
+TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
                 ("git", "Git", ("vcs-branch-symbolic", "branch-symbolic", "folder-remote-symbolic")),
                 ("flatpaks", "Flatpaks", ("flatpak-symbolic", "system-software-install-symbolic")),
                 ("backups", "Backups", ("drive-harddisk-symbolic", "document-save-symbolic")),
@@ -73,15 +73,28 @@ DOCS_GAMING = [("proton", "Launch Options", ("input-gaming-symbolic",)),
                 ("system-software-install-symbolic", "input-gaming-symbolic"))]
 
 #--- The line under each page in the page list that has no description of its own
-NAV_SUBTITLES = {"overview": "Updates, clean-up, versions", "git": "Changes, commits, pull requests",
-                 "flatpaks": "Apps, updates, repair", "backups": "Back up app data",
-                 "people": "Who can log in", "packages": "Find packages in nixpkgs",
-                 "shell": "DankMaterialShell's settings", "windowrules": "Rules for each app's windows",
-                 "keybinds": "Change, add and turn off shortcuts",
+NAV_SUBTITLES = {"overview": "Updates, freeing space, versions", "git": "Changes, commits, pull requests",
+                 "flatpaks": "Apps nixpkgs doesn't have: update them, clean up, and switch each one "
+                             "on or off",
+                 "backups": "Back up app data",
+                 "people": "Who can log in to this computer. Each person picks their own apps by "
+                           "opening Omni Settings on their own account.", "packages": "Find packages in nixpkgs",
+                 "shell": "DankMaterialShell, the bar, launcher and lock screen niri runs with. "
+                          "Each tile opens its settings on that page.",
+                 "windowrules": "Pick a window and choose what niri should do with it, or change or "
+                                "turn off the config's rules. Changes are yours alone and wait for "
+                                "Apply, like any other setting.",
+                 "keybinds": "Change a key, turn a keybind off, or add your own. Changes are yours "
+                             "alone and wait for Apply, like any other setting.",
                  "startup": "Variables every program sees, and autostart",
                  "filetypes": "Which app opens one file type",
-                 "userpackages": "Packages you added from Search",
-                 "proton": "Launch options to copy", "protonversions": "Proton builds installed"}
+                 "userpackages": "Packages you added from Search, installed as they come with no "
+                                 "settings of their own. Apps with settings made for them are under "
+                                 "Default Packages.",
+                 "proton": "Launch options for Steam, Heroic and Lutris. Click one to copy it.",
+                 "protonversions": "The Proton and Wine builds each launcher can run games with. Pick "
+                                   "one per game in the launcher, or Steam's default under Settings, "
+                                   "Compatibility."}
 
 #--- DMS tabs shown as buttons on the Overview (Shell page under niri), in this order
 QUICK = ["display_config", "keybinds", "mouse_touchpad", "theme", "wallpaper", "dankbar_settings",
@@ -99,7 +112,7 @@ STATE_DIR = os.path.join(os.environ.get("XDG_STATE_HOME") or os.path.expanduser(
                          "omni-settings")
 #--- What's New items the user dismissed, as "domain:dotted.path"
 DISMISSED = os.path.join(STATE_DIR, "whats-new-dismissed.json")
-#--- Which pages are collapsed and which cards are open, kept across launches
+#--- Which pages and cards are open, kept across launches
 UI_STATE = os.path.join(STATE_DIR, "ui.json")
 #--- The Apps section's pages, merged into one page of cards
 APPS_PAGE = "page:Default Packages"
@@ -444,8 +457,8 @@ def cmd_dismiss(_cfg, args):
 
 
 def cmd_saveUi(_cfg, args):
-    """Keeps the collapsed pages and open cards (args.collapsed, args.open)."""
-    data = {k: sorted(set(args.get(k) or [])) for k in ("collapsed", "open")}
+    """Keeps the open pages and open cards (args.openPages, args.open)."""
+    data = {k: sorted(set(args.get(k) or [])) for k in ("openPages", "open")}
     os.makedirs(STATE_DIR, exist_ok=True)
     with open(UI_STATE, "w") as f:
         json.dump(data, f)

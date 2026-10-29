@@ -52,7 +52,7 @@ Sheet {
             required property var modelData
             icon: "folder"
             title: modelData
-            subtitle: picker.groups[modelData] ? `${picker.groups[modelData].length} installed` : ""
+            value: picker.groups[modelData] ? `${picker.groups[modelData].length}` : ""
             tag: modelData === picker.current ? "Now" : ""
             enabled: modelData !== picker.current
             onClicked: picker.choose(modelData)

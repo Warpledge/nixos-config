@@ -7,7 +7,11 @@ Rectangle {
     property string icon: "settings"
     property var app: []
     property string title
-    property string subtitle
+    property string subtitle  // data that tells list items apart; a description goes in `info`
+    property string info: ""  // what it is, behind a ? beside the title
+    property string caution: ""  // behind a yellow triangle beside the title
+    property string alert: ""  // something to act on, in yellow under the title
+    property string value: ""  // a status value, large on the right
     property string tag: ""
     property bool tagSuccess: false
     property string tone: ""  // tints the row and its badge: Theme.toneColor
@@ -51,23 +55,61 @@ Rectangle {
             ColumnLayout {
                 spacing: 1
                 Layout.fillWidth: true
-                Text {
-                    text: row.title
-                    color: Theme.text
-                    font.pixelSize: 16
-                    font.weight: Font.DemiBold
-                    wrapMode: Text.Wrap
-                    maximumLineCount: row.titleLines
-                    elide: Text.ElideRight
+                RowLayout {
+                    spacing: 6
                     Layout.fillWidth: true
+                    Text {
+                        id: titleText
+                        text: row.title
+                        color: Theme.text
+                        font.pixelSize: 18
+                        font.weight: Font.DemiBold
+                        wrapMode: Text.Wrap
+                        maximumLineCount: row.titleLines
+                        elide: Text.ElideRight
+                        // Its full width, so the indicators sit right after the name; a
+                        // value beside it shrinks before the name is cut
+                        Layout.maximumWidth: Math.ceil(titleWidth.advanceWidth) + 1
+                        Layout.minimumWidth: row.value !== ""
+                            ? Math.min(Layout.maximumWidth, row.width * 0.6) : 0
+                        Layout.fillWidth: true
+                        TextMetrics { id: titleWidth; font: titleText.font; text: titleText.text }
+                    }
+                    Hint { info: true; tip: row.info }
+                    Hint { tip: row.caution }
+                    Item { Layout.fillWidth: true }
                 }
                 Elided {
                     visible: text !== ""
                     text: row.subtitle
                     color: Theme.dim
-                    font.pixelSize: 13
+                    font.pixelSize: 14
                     Layout.fillWidth: true
                 }
+                Text {
+                    visible: text !== ""
+                    text: row.alert
+                    color: Theme.caution
+                    font.pixelSize: 14
+                    wrapMode: Text.Wrap
+                    Layout.fillWidth: true
+                }
+            }
+            //--- Shrinks to fit rather than cutting the value short
+            Text {
+                visible: row.value !== ""
+                text: row.value
+                color: row.tone ? Theme.toneColor(row.tone) : row.accent
+                font.pixelSize: 24
+                font.weight: Font.Bold
+                fontSizeMode: Text.HorizontalFit
+                minimumPixelSize: 12
+                horizontalAlignment: Text.AlignRight
+                elide: Text.ElideRight
+                Layout.fillWidth: true
+                Layout.minimumWidth: 40
+                Layout.preferredWidth: implicitWidth
+                Layout.maximumWidth: implicitWidth
             }
             Chip { tappable: false; visible: row.tag !== ""; text: row.tag; accent: !row.tagSuccess; success: row.tagSuccess }
             Pill { visible: row.button !== ""; text: row.button; onClicked: row.clicked() }

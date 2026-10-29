@@ -54,20 +54,19 @@ ColumnLayout {
             anchors.margins: 14
             spacing: 10
             RowLayout {
-                spacing: 14
-                ColumnLayout {
-                    spacing: 2
-                    Layout.fillWidth: true
-                    Text {
-                        text: "Copies of app data the config can't rebuild, in dated folders under "
-                              + (page.bk ? page.bk.base.replace(/^\/home\/[^/]+/, "~") : "~/SyncBackups")
-                              + ". Syncthing carries them to your other computers, and the newest ten of each "
-                              + "are kept."
-                        color: Theme.dim
-                        font.pixelSize: 13
-                        wrapMode: Text.Wrap
-                        Layout.fillWidth: true
-                    }
+                spacing: 8
+                Text {
+                    text: page.bk ? page.bk.base.replace(/^\/home\/[^/]+/, "~") : "~/SyncBackups"
+                    color: Theme.text
+                    font.pixelSize: 18
+                    font.weight: Font.DemiBold
+                    elide: Text.ElideMiddle
+                    Layout.maximumWidth: hero.width - 30
+                }
+                Hint {
+                    info: true
+                    tip: "Copies of app data the config can't rebuild, in dated folders here. Syncthing "
+                         + "carries them to your other computers, and the newest ten of each are kept."
                 }
             }
             Pill {
@@ -101,7 +100,7 @@ ColumnLayout {
         visible: !!page.bk && !page.bk.kinds.length
         icon: "backup"
         title: "Nothing to back up"
-        subtitle: "FreeTube and Zen are the apps with backups, and neither is on."
+        info: "FreeTube and Zen are the apps with backups, and neither is on."
     }
     Repeater {
         model: page.bk ? page.bk.kinds : []
@@ -158,31 +157,47 @@ ColumnLayout {
             ColumnLayout {
                 spacing: 1
                 Layout.fillWidth: true
-                Text {
-                    text: kindRow.kind.title
-                    color: Theme.text
-                    font.pixelSize: 16
-                    font.weight: Font.DemiBold
-                    elide: Text.ElideRight
+                RowLayout {
+                    spacing: 6
                     Layout.fillWidth: true
-                }
-                Text {
-                    text: kindRow.kind.what + "\n" + (kindRow.working ? "Backing up…"
-                        : kindRow.kind.last ? `Last backed up ${Fmt.when(kindRow.kind.last).toLowerCase()}`
-                        : "Not backed up yet")
-                    color: Theme.dim
-                    font.pixelSize: 13
-                    wrapMode: Text.Wrap
-                    Layout.fillWidth: true
+                    Text {
+                        id: kindTitle
+                        text: kindRow.kind.title
+                        color: Theme.text
+                        font.pixelSize: 18
+                        font.weight: Font.DemiBold
+                        elide: Text.ElideRight
+                        Layout.maximumWidth: Math.ceil(kindTitleWidth.advanceWidth) + 1
+                        Layout.minimumWidth: Math.min(Layout.maximumWidth, kindRow.width * 0.4)
+                        Layout.fillWidth: true
+                        TextMetrics { id: kindTitleWidth; font: kindTitle.font; text: kindTitle.text }
+                    }
+                    Hint { info: true; tip: kindRow.kind.what }
+                    Item { Layout.fillWidth: true }
                 }
                 Text {
                     visible: kindRow.kind.command === "freetube-backup" && page.bk.freetubeOpen
                     text: "Close FreeTube first, so its data is all on disk."
                     color: Theme.caution
-                    font.pixelSize: 13
+                    font.pixelSize: 14
                     wrapMode: Text.Wrap
                     Layout.fillWidth: true
                 }
+            }
+            //--- When it last ran, shrinking to fit rather than cutting it short
+            Text {
+                text: kindRow.working ? "Backing up…"
+                    : kindRow.kind.last ? Fmt.when(kindRow.kind.last) : "Never"
+                color: Theme.accentOf(kindRow)
+                font.pixelSize: 22
+                font.weight: Font.Bold
+                fontSizeMode: Text.HorizontalFit
+                minimumPixelSize: 12
+                horizontalAlignment: Text.AlignRight
+                Layout.fillWidth: true
+                Layout.minimumWidth: 40
+                Layout.preferredWidth: implicitWidth
+                Layout.maximumWidth: implicitWidth
             }
             Pill {
                 enabled: page.busy === ""
