@@ -233,8 +233,8 @@ and the active WM's `modules/wm/<wm>/`.
   `boot.kernelParams`.
 - A package an update broke: the `disable-package` skill. Remove it from the
   package list; nixpkgs has no setting that disables a package.
-- Don't add `inputs.nixpkgs.follows` to `alejandra`, `claude-code`,
-  `affinity-nix` or `cachyos-kernel`.
+- Don't add `inputs.nixpkgs.follows` to `claude-code`, `affinity-nix` or
+  `cachyos-kernel`.
 - **After renaming or removing something, `grep -rn` the old name** across the
   repo (`--exclude=flake.lock`) and fix every hit, docs and README included.
   Deleting a doc means removing its entry in `docs/CLAUDE.md` too.

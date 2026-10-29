@@ -9,13 +9,12 @@
 {
   pkgs,
   lib,
-  inputs,
   machine,
   user,
   osConfig,
   ...
 }: let
-  alejandra = inputs.alejandra.defaultPackage.${pkgs.stdenv.hostPlatform.system};
+  inherit (pkgs) alejandra;
   #--- The weekly nh clean job (nixos/nix/nh.nix), which the Overview's clean-up matches
   clean = osConfig.programs.nh.clean;
   #--- Proton builds steam.nix adds to Steam, listed on Proton Versions

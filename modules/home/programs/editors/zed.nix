@@ -1,6 +1,5 @@
 {
   pkgs,
-  inputs,
   lib,
   config,
   user,
@@ -34,7 +33,7 @@ in {
   #--------------------------------------------------------------------#
   home.packages = [
     #--- Nix Tooling
-    inputs.alejandra.defaultPackage.${pkgs.stdenv.hostPlatform.system}
+    pkgs.alejandra
     pkgs.nixd
 
     #--- Language Servers

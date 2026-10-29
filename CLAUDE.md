@@ -44,7 +44,7 @@ Several folders carry their own `CLAUDE.md` (`lib/`, `modules/nixos/`, `modules/
 ```bash
 nix flake check         # Evaluate all outputs, no build (rule 1 says when); its `stranger` check is a machine on template defaults, so shared modules must work without machines/ or users/warpledge/
 nix build .#nixosConfigurations.<machine>.config.system.build.toplevel --no-link  # Full build, no activation: catches hash and patch failures that flake check (eval only) misses
-alejandra .             # Format all Nix files (v3.0.0); a bare `nix fmt` waits on stdin, use `nix fmt .`
+alejandra .             # Format all Nix files (nixpkgs' copy); a bare `nix fmt` waits on stdin, use `nix fmt .`
 nixm lint               # deadnix --no-lambda-arg + statix check
 nixm rebuild            # Apply config (wraps `nh os switch`); user-only, rule 1
 nixm boot               # Activate on next boot; use when an update bumps glibc/systemd/niri/xwayland-satellite (live switches froze the desktop, 2026-10)
@@ -75,7 +75,7 @@ Omni Settings (`programs/system/omni-settings/`) is a QML app (DMS panel on Mod+
 Gotchas that bite from anywhere; the ones for one tree are in `modules/nixos/CLAUDE.md` and `modules/home/CLAUDE.md`. Grep the option name before assuming which file owns it:
 
 - `boot.kernelModules` silently swallows kernel parameters; they go in `boot.kernelParams` (`modules/nixos/CLAUDE.md`).
-- `alejandra`, `claude-code`, `affinity-nix` and `cachyos-kernel` keep their own nixpkgs on purpose (`flake.nix` says why), `nix-flatpak` has no nixpkgs input, and `claude-desktop` is source only. Don't add `inputs.nixpkgs.follows` to them.
+- `claude-code`, `affinity-nix` and `cachyos-kernel` keep their own nixpkgs on purpose (`flake.nix` says why), `nix-flatpak` has no nixpkgs input, and `claude-desktop` is source only. Don't add `inputs.nixpkgs.follows` to them.
 - Module *loading* goes through `lib.optionals` in a `default.nix`; config *logic* inside a module uses `if/then/else`. Mixing them up is why an option looks wired but has no effect.
 - Every setting exists once `lib/settings.nix` has filled the gaps, so read it as a bare path (`user.media.mpv`); `or false` isn't needed.
 - Machine-specific hardware lives in the machine's folder, never behind a name check in a shared module: niri monitors and the desktop's DMS bars in `machines/<name>/wm/niri.nix` (the bars through the `dms.extraSettings` option declared in `niri/home/dms/default.nix`), the desktop's DMS GPU widget in `machines/eclipse/hardware/gpu.nix`.
@@ -156,7 +156,7 @@ Covers chat replies, `README.md`, `docs/` and commit messages; the `prose-review
 
 ## Formatting Standards
 
-Alejandra (v3.0.0) formats. Headers: **L1** `# FILE PURPOSE (UPPERCASE)` between two `#====...====#` rules, one per file; **L2** `#-- Section Name` between two `#----...----#` rules; **L3** `#--- Item description`; **L4** inline `# comment` (why, not what). A `default.nix` keeps its `imports` in a final `#-- Imports` L2 section. One blank line before each header, none after L1 or between L3 items, one after closing braces. Reformatting a file never deletes content, including commented-out code and disabled options.
+Alejandra (nixpkgs' copy) formats. Headers: **L1** `# FILE PURPOSE (UPPERCASE)` between two `#====...====#` rules, one per file; **L2** `#-- Section Name` between two `#----...----#` rules; **L3** `#--- Item description`; **L4** inline `# comment` (why, not what). A `default.nix` keeps its `imports` in a final `#-- Imports` L2 section. One blank line before each header, none after L1 or between L3 items, one after closing braces. Reformatting a file never deletes content, including commented-out code and disabled options.
 
 ### Comment Style
 
