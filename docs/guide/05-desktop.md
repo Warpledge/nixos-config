@@ -16,7 +16,7 @@ Workspaces stack vertically, one row of columns each. `Mod+1` to `Mod+9` jump to
 | --- | --- |
 | `Mod+Space` | App launcher |
 | `Mod+Return` / `Mod+T` | Terminal |
-| `Mod+A` | Terminal panel on the left edge (see [The Terminal Panel](09-terminal-panel.md)) |
+| `Mod+A` | Side rail of apps on the left edge (see [The Side Rail](09-side-rail.md)) |
 | `Mod+B` / `Mod+E` | Browser / files |
 | `Mod+S` | Omni Settings |
 | `Mod+Comma` | Shell settings |

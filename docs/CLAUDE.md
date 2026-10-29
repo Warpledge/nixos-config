@@ -11,7 +11,7 @@ Security/privacy notes live under `docs/security/`:
 
 Beginner guides to using this setup day to day live under `docs/guide/`, shown in file name order as the Guides section of Omni Settings' Docs tab. Keep them in step when a page, button, keybind or `nixm` command they describe changes; links to repo files open in the user's text editor (`{user}` and `{machine}` stand for the login and machine):
 
-- `guide/01-start-here.md` to `guide/09-terminal-panel.md` — the terms, Omni Settings, installing apps, updates and versions, the desktop and keybinds, backups and git, `nixm`, recovering from a failed rebuild, and the `Mod+A` terminal panel
+- `guide/01-start-here.md` to `guide/09-side-rail.md` — the terms, Omni Settings, installing apps, updates and versions, the desktop and keybinds, backups and git, `nixm`, recovering from a failed rebuild, and the `Mod+A` side rail
 
 Game notes live under `docs/gaming/` (the `game-troubleshooting` skill indexes them; Omni Settings' Docs tab shows the top-level `gaming/*.md` notes):
 

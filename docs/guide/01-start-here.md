@@ -41,4 +41,4 @@ Make changes through Omni Settings or the config, then rebuild. Most app setting
 - [Backups and Git](06-backups-and-git.md): saving your data and seeing what changed in the config
 - [The Terminal](07-terminal.md): the same jobs from a terminal
 - [When Things Go Wrong](08-when-things-go-wrong.md): what to do when a rebuild fails or something breaks
-- [The Terminal Panel](09-terminal-panel.md): the `Mod+A` terminal for Claude Code and opencode, and its tabs
+- [The Side Rail](09-side-rail.md): the `Mod+A` rail of apps docked on the left, its terminal and its tabs
