@@ -25,6 +25,17 @@ git so only the binary bundle needs restoring.
 
 ---
 
+## claude-mods
+
+- **What:** BenAI's Claude Code mods Chat Inventory and Screen Share (from a YouTube
+  video's download; no licence, so not in git).
+- **Location:** `~/.local/opt/claude-mods/{chat-inventory,screen-share}/`
+- **Wiring:** not a wrapper; `programs/ai/claude.nix` links each folder into
+  `~/.claude/skills/` with `mkOutOfStoreSymlink`, toggles `claude.mods.chatInventory`
+  and `claude.mods.screenShare`.
+- **Restore:** unzip `benai-mods.zip` and copy `benai-mods/plugins/chat-inventory` and
+  `benai-mods/plugins/screen-share` into the folder.
+
 ## katana-fxfloorboard
 
 - **What:** Boss Katana MK2 amp patch editor (Colin Willcocks' tool).
