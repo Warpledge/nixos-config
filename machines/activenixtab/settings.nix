@@ -13,7 +13,10 @@
       claude.enable = true;
       claudeDesktop.enable = true;
       opencode.enable = true;
-      userPackages = {Office = ["audacity_3"];};
+      userPackages = {
+        Office = ["audacity_3"];
+        Media = ["freetube"];
+      };
       security.keepassxc = true;
       wallpaper = "engine";
       terminals.ghostty = true;
