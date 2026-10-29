@@ -2,7 +2,7 @@
    matugen-theme.js loads the rendered file and reloads it on each theme change. */
 
 /* Chat: HSL triples, lightest to darkest from bg-000 in both of the app's modes */
-:root[data-theme][data-mode] {
+:root, .darkTheme, :root[data-theme][data-mode] {
 <* if {{ is_dark_mode }} *>
   --bg-000: {{colors.surface_container_high.default.hex | to_color | format: "hue"}} {{colors.surface_container_high.default.hex | to_color | format: "saturation"}}% {{colors.surface_container_high.default.hex | to_color | format: "lightness"}}% !important;
   --bg-100: {{colors.surface_container.default.hex | to_color | format: "hue"}} {{colors.surface_container.default.hex | to_color | format: "saturation"}}% {{colors.surface_container.default.hex | to_color | format: "lightness"}}% !important;
@@ -56,7 +56,8 @@
 }
 
 /* Code tab: the neutral ramp runs from the page colour (0) to the text colour (900) */
-.cds-root, .cds-root[data-mode] {
+/* [class*="cds-"]: some component roots redefine these after .cds-root */
+.cds-root, [class*="cds-"] {
 <* if {{ is_dark_mode }} *>
   --cds-surface-0: {{colors.surface.default.hex}} !important;
   --cds-surface-1: {{colors.surface_container_low.default.hex}} !important;
@@ -136,4 +137,109 @@
 /* Your message's bubble, which the app sets per element from its own accent picker */
 .cds-root [class*="--cds-bg-user-message"] {
   --cds-bg-user-message: color-mix(in oklab, {{colors.primary.default.hex}} 15%, transparent) !important;
+}
+
+/* Sidebar and page behind the frame; a nested element sets these itself, hence * */
+* {
+<* if {{ is_dark_mode }} *>
+  --df-web-sidebar-bg: {{colors.surface_container_lowest.default.hex}} !important;
+  --df-sidebar-bg: {{colors.surface_container_lowest.default.hex}} !important;
+<* else *>
+  --df-web-sidebar-bg: {{colors.surface_container.default.hex}} !important;
+  --df-sidebar-bg: {{colors.surface_container.default.hex}} !important;
+<* endif *>
+  --df-bg-page-hsl: {{colors.surface.default.hex | to_color | format: "hue"}} {{colors.surface.default.hex | to_color | format: "saturation"}}% {{colors.surface.default.hex | to_color | format: "lightness"}}% !important;
+}
+
+/* The app's raw gray scale and frame depths: its own lightness steps, in the
+   theme's hue */
+:root {
+  --cds-gray-0: {{colors.surface_variant.default.hex | to_color | set_lightness: 100.0 | format: "hex"}} !important;
+  --cds-hsl-gray-0: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 100.0% !important;
+  --cds-gray-10: {{colors.surface_variant.default.hex | to_color | set_lightness: 98.6 | format: "hex"}} !important;
+  --cds-hsl-gray-10: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 98.6% !important;
+  --cds-gray-20: {{colors.surface_variant.default.hex | to_color | set_lightness: 97.3 | format: "hex"}} !important;
+  --cds-hsl-gray-20: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 97.3% !important;
+  --cds-gray-30: {{colors.surface_variant.default.hex | to_color | set_lightness: 96.1 | format: "hex"}} !important;
+  --cds-hsl-gray-30: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 96.1% !important;
+  --cds-gray-40: {{colors.surface_variant.default.hex | to_color | set_lightness: 94.7 | format: "hex"}} !important;
+  --cds-hsl-gray-40: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 94.7% !important;
+  --cds-gray-50: {{colors.surface_variant.default.hex | to_color | set_lightness: 93.3 | format: "hex"}} !important;
+  --cds-hsl-gray-50: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 93.3% !important;
+  --cds-gray-60: {{colors.surface_variant.default.hex | to_color | set_lightness: 92.0 | format: "hex"}} !important;
+  --cds-hsl-gray-60: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 92.0% !important;
+  --cds-gray-70: {{colors.surface_variant.default.hex | to_color | set_lightness: 90.6 | format: "hex"}} !important;
+  --cds-hsl-gray-70: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 90.6% !important;
+  --cds-gray-80: {{colors.surface_variant.default.hex | to_color | set_lightness: 89.4 | format: "hex"}} !important;
+  --cds-hsl-gray-80: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 89.4% !important;
+  --cds-gray-90: {{colors.surface_variant.default.hex | to_color | set_lightness: 88.0 | format: "hex"}} !important;
+  --cds-hsl-gray-90: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 88.0% !important;
+  --cds-gray-100: {{colors.surface_variant.default.hex | to_color | set_lightness: 86.7 | format: "hex"}} !important;
+  --cds-hsl-gray-100: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 86.7% !important;
+  --cds-gray-150: {{colors.surface_variant.default.hex | to_color | set_lightness: 80.2 | format: "hex"}} !important;
+  --cds-hsl-gray-150: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 80.2% !important;
+  --cds-gray-200: {{colors.surface_variant.default.hex | to_color | set_lightness: 74.1 | format: "hex"}} !important;
+  --cds-hsl-gray-200: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 74.1% !important;
+  --cds-gray-250: {{colors.surface_variant.default.hex | to_color | set_lightness: 68.2 | format: "hex"}} !important;
+  --cds-hsl-gray-250: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 68.2% !important;
+  --cds-gray-300: {{colors.surface_variant.default.hex | to_color | set_lightness: 62.5 | format: "hex"}} !important;
+  --cds-hsl-gray-300: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 62.5% !important;
+  --cds-gray-350: {{colors.surface_variant.default.hex | to_color | set_lightness: 57.3 | format: "hex"}} !important;
+  --cds-hsl-gray-350: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 57.3% !important;
+  --cds-gray-400: {{colors.surface_variant.default.hex | to_color | set_lightness: 52.2 | format: "hex"}} !important;
+  --cds-hsl-gray-400: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 52.2% !important;
+  --cds-gray-450: {{colors.surface_variant.default.hex | to_color | set_lightness: 46.9 | format: "hex"}} !important;
+  --cds-hsl-gray-450: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 46.9% !important;
+  --cds-gray-500: {{colors.surface_variant.default.hex | to_color | set_lightness: 41.6 | format: "hex"}} !important;
+  --cds-hsl-gray-500: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 41.6% !important;
+  --cds-gray-550: {{colors.surface_variant.default.hex | to_color | set_lightness: 36.3 | format: "hex"}} !important;
+  --cds-hsl-gray-550: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 36.3% !important;
+  --cds-gray-600: {{colors.surface_variant.default.hex | to_color | set_lightness: 31.4 | format: "hex"}} !important;
+  --cds-hsl-gray-600: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 31.4% !important;
+  --cds-gray-650: {{colors.surface_variant.default.hex | to_color | set_lightness: 26.5 | format: "hex"}} !important;
+  --cds-hsl-gray-650: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 26.5% !important;
+  --cds-gray-700: {{colors.surface_variant.default.hex | to_color | set_lightness: 21.4 | format: "hex"}} !important;
+  --cds-hsl-gray-700: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 21.4% !important;
+  --cds-gray-750: {{colors.surface_variant.default.hex | to_color | set_lightness: 16.9 | format: "hex"}} !important;
+  --cds-hsl-gray-750: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 16.9% !important;
+  --cds-gray-800: {{colors.surface_variant.default.hex | to_color | set_lightness: 12.4 | format: "hex"}} !important;
+  --cds-hsl-gray-800: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 12.4% !important;
+  --cds-gray-810: {{colors.surface_variant.default.hex | to_color | set_lightness: 11.6 | format: "hex"}} !important;
+  --cds-hsl-gray-810: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 11.6% !important;
+  --cds-gray-820: {{colors.surface_variant.default.hex | to_color | set_lightness: 10.8 | format: "hex"}} !important;
+  --cds-hsl-gray-820: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 10.8% !important;
+  --cds-gray-830: {{colors.surface_variant.default.hex | to_color | set_lightness: 10.0 | format: "hex"}} !important;
+  --cds-hsl-gray-830: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 10.0% !important;
+  --cds-gray-840: {{colors.surface_variant.default.hex | to_color | set_lightness: 9.2 | format: "hex"}} !important;
+  --cds-hsl-gray-840: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 9.2% !important;
+  --cds-gray-850: {{colors.surface_variant.default.hex | to_color | set_lightness: 8.2 | format: "hex"}} !important;
+  --cds-hsl-gray-850: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 8.2% !important;
+  --cds-gray-860: {{colors.surface_variant.default.hex | to_color | set_lightness: 7.5 | format: "hex"}} !important;
+  --cds-hsl-gray-860: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 7.5% !important;
+  --cds-gray-870: {{colors.surface_variant.default.hex | to_color | set_lightness: 6.7 | format: "hex"}} !important;
+  --cds-hsl-gray-870: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 6.7% !important;
+  --cds-gray-880: {{colors.surface_variant.default.hex | to_color | set_lightness: 5.9 | format: "hex"}} !important;
+  --cds-hsl-gray-880: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 5.9% !important;
+  --cds-gray-890: {{colors.surface_variant.default.hex | to_color | set_lightness: 5.1 | format: "hex"}} !important;
+  --cds-hsl-gray-890: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 5.1% !important;
+  --cds-gray-900: {{colors.surface_variant.default.hex | to_color | set_lightness: 4.3 | format: "hex"}} !important;
+  --cds-hsl-gray-900: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 4.3% !important;
+}
+.dframe-root {
+  --df-z0: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 100% !important;
+  --df-z1: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 96.1% !important;
+  --df-z2: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 92.2% !important;
+  --df-z3: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 87.8% !important;
+  --df-z4: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 83.9% !important;
+  --df-z5: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 60% !important;
+  --df-z6: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 45.1% !important;
+}
+[data-mode=dark] .dframe-root {
+  --df-z0: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 3.9% !important;
+  --df-z1: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 10.2% !important;
+  --df-z2: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 14.9% !important;
+  --df-z3: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 20% !important;
+  --df-z4: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 23.9% !important;
+  --df-z5: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 32.2% !important;
+  --df-z6: {{colors.surface_variant.default.hex | to_color | format: "hue"}} {{colors.surface_variant.default.hex | to_color | format: "saturation"}}% 65.1% !important;
 }
