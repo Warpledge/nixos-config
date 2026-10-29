@@ -249,7 +249,8 @@ lines, `grep -n` that file for the part you need.
 - Niri is the only WM; Hyprland's config is on the `hyprland-backup` branch.
 - Binds go in `niri.keybinds.<id>` (`key`, `title`, `action`, `group`), not
   `programs.niri.settings.binds`; `core/keybinds.nix` converts them, applies
-  each user's `keybinds` setting, and fails the build on two binds sharing a key.
+  each user's `keybinds` setting, and fails the build on two binds sharing a key,
+  unless one has `winsKey = true`, which switches the config's others on it off.
 - Shared window rules are in `core/window-rules.json`, each with an `id`; each
   user's `windowRules` setting turns one off, replaces it or adds `custom-` ones.
 - **Niri spawns with arguments are lists** (`spawn = ["dms" "ipc" "call" ...]`);
