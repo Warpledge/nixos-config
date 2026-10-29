@@ -11,6 +11,7 @@ Item {
 
     property int edge: 14  // gap between the view and the window's edges
     property int gutter: 8  // the part of `edge` left of the pages that holds their band
+    property int frameInset: 6  // the page body inside its frame; clears the frame's corners
     property var info: null
     property string loadError: ""
     property var stale: null  // api.py's `stale`, when the settings files don't evaluate
@@ -725,18 +726,42 @@ Item {
     //--------------------------------------------------------------------//
     //-- Layout
     //--------------------------------------------------------------------//
+    //--- The border the page scrolls under, drawn round the body Flickable
+    Rectangle {
+        id: bodyFrame
+        visible: mainCol.visible && bodyFlick.visible
+        x: mainCol.x + bodyFlick.x - omni.frameInset
+        y: mainCol.y + bodyFlick.y - omni.frameInset
+        width: bodyFlick.width + 2 * omni.frameInset
+        height: bodyFlick.height + 2 * omni.frameInset
+        radius: 20
+        color: "transparent"
+        border.width: 1
+        border.color: Qt.alpha(Theme.primary, 0.22)
+    }
+
+    //--- Across the whole width, over the rail too
+    StatusHeader {
+        id: statusHeader
+        view: omni
+        visible: mainCol.visible
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.margins: omni.edge
+    }
+
     ColumnLayout {
         id: mainCol
-        anchors.fill: parent
+        anchors.top: statusHeader.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
         anchors.margins: omni.edge
+        anchors.topMargin: 10
         anchors.rightMargin: omni.edge + rail.width + 10
         spacing: 10
         visible: !omni.reviewing && !omni.running && omni.sheet === null
-
-        StatusHeader {
-            view: omni
-            Layout.fillWidth: true
-        }
 
         Text {
             visible: !!omni.info && omni.info.banner !== ""
@@ -928,12 +953,15 @@ Item {
             Layout.fillWidth: true
         }
 
-        //--- Page body
+        //--- Page body, inset in its frame (bodyFrame)
         Flickable {
             id: bodyFlick
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.leftMargin: -omni.gutter
+            Layout.leftMargin: -omni.gutter + omni.frameInset
+            Layout.rightMargin: omni.frameInset
+            Layout.topMargin: omni.frameInset
+            Layout.bottomMargin: omni.frameInset
             contentHeight: body.implicitHeight + 16
             clip: true
             boundsBehavior: Flickable.StopAtBounds
@@ -1121,7 +1149,7 @@ Item {
         anchors.top: parent.top
         anchors.right: parent.right
         anchors.margins: omni.edge
-        anchors.topMargin: omni.edge + tabsBar.y + tabsBar.height  // level with the tabs' foot
+        anchors.topMargin: mainCol.y + tabsBar.y + tabsBar.height  // level with the tabs' foot
         // As tall as its icons, up to the window's bottom margin
         height: Math.min(railList.contentHeight + 8, parent.height - anchors.topMargin - omni.edge)
         width: 48

@@ -96,10 +96,10 @@ Singleton {
     }
     function toneFill(tone, base) { return Qt.tint(base, Qt.alpha(toneColor(tone), 0.2)) }
 
-    //--- Rows: the card colour with a breath of the page's accent and a hairline,
-    //--- quieter than the group cards they sit in (SettingsPage.qml)
-    function rowFill(accent, lit) { return Qt.tint(card, Qt.alpha(accent, lit ? 0.14 : 0.05)) }
-    function rowBorder(accent, open) { return Qt.alpha(accent, open ? 0.32 : 0.12) }
+    //--- Rows: a wash of the page's accent and an accent border, the same as the
+    //--- collapsed group cards (SettingsPage.qml)
+    function rowFill(accent, lit) { return Qt.alpha(accent, lit ? 0.13 : 0.07) }
+    function rowBorder(accent, open) { return Qt.alpha(accent, open ? 0.35 : 0.2) }
 
     FileView {
         path: Quickshell.env("HOME") + "/.cache/DankMaterialShell/dms-colors.json"
