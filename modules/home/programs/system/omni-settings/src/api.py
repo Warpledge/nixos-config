@@ -8,6 +8,7 @@ import difflib
 import grp
 import json
 import os
+import platform
 import pwd
 import selectors
 import shlex
@@ -501,6 +502,30 @@ def cmd_freed(_cfg, _args):
     return system.freed_estimate(doomed, [g for g in gens if g not in doomed]) if doomed else 0
 
 
+def cmd_status(_cfg, _args):
+    """What the header shows: this computer, its NixOS release, kernel and running version."""
+    running = os.path.realpath(closure.CURRENT)
+    generation = next((g.number for g in closure.generations() if g.path == running), 0)
+    return {"hostname": socket.gethostname(), "release": system.os_release().split(" (")[0],
+            "kernel": platform.release(), "generation": generation}
+
+
+def cmd_usage(_cfg, _args):
+    """CPU time counters (the header works out the load between two calls), memory and
+    the root disk, in bytes."""
+    with open("/proc/stat") as f:
+        ticks = [int(n) for n in f.readline().split()[1:9]]
+    mem = {}
+    with open("/proc/meminfo") as f:
+        for line in f:
+            key, value = line.split(":", 1)
+            mem[key] = int(value.split()[0]) * 1024
+    disk = shutil.disk_usage("/")
+    return {"cpuTotal": sum(ticks), "cpuIdle": ticks[3] + ticks[4],
+            "memTotal": mem["MemTotal"], "memUsed": mem["MemTotal"] - mem["MemAvailable"],
+            "diskTotal": disk.total, "diskUsed": disk.used}
+
+
 def cmd_boot(_cfg, _args):
     """The last startup's stages, its slowest units and the chain it waited on; slow,
     so asked for apart."""
@@ -983,6 +1008,7 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "dismiss": cmd_dismiss, "saveUi": cmd_saveUi,
             "stale": cmd_stale, "removeStale": cmd_remove_stale,
             "overview": cmd_overview, "freed": cmd_freed, "boot": cmd_boot,
+            "status": cmd_status, "usage": cmd_usage,
             "checkUpdates": cmd_check_updates, "changelog": cmd_changelog,
             "compare": cmd_compare, "failedLog": cmd_failed_log, "forgetFailed": cmd_forget_failed,
             "git": cmd_git, "gitSummary": cmd_git_summary, "setBackup": cmd_set_backup,

@@ -63,20 +63,7 @@ ColumnLayout {
         }
     }
 
-    //--- Whether a job may start now; says why not
-    function canStart() {
-        if (!view.info.canApply || !admin)
-            return false
-        if (view.pendingCount) {
-            view.say("Apply or discard your changes first")
-            return false
-        }
-        if (Jobs.running) {
-            view.say("Another job is running; wait for it to finish")
-            return false
-        }
-        return true
-    }
+    function canStart() { return view.canStart() }
 
     function restart() {
         view.ask({ heading: "Restart now?", body: "Save your work in other apps first.",
@@ -84,18 +71,7 @@ ColumnLayout {
                  () => Quickshell.execDetached(["systemctl", "reboot"]))
     }
 
-    function rebuild() {
-        if (!canStart())
-            return
-        view.ask({
-            heading: "Rebuild now?",
-            body: "Rebuilds from your settings files as they are (nixos-rebuild switch). At Next "
-                  + "Restart uses nixos-rebuild boot; Preview only builds and shows what would change.",
-            buttons: [{ label: "Preview", value: "build", quiet: true },
-                      { label: "At Next Restart", value: "boot", quiet: true },
-                      { label: "Rebuild Now", value: "switch" }]
-        }, mode => view.startJob("rebuild", { mode }))
-    }
+    function rebuild() { view.rebuild() }
 
     function collect() {
         if (!canStart())
@@ -232,50 +208,6 @@ ColumnLayout {
         wrapMode: Text.Wrap
         Layout.fillWidth: true
         Layout.margins: 6
-    }
-
-    //--- Hero
-    Rectangle {
-        visible: !!page.ov
-        Layout.fillWidth: true
-        implicitHeight: hero.implicitHeight + 28
-        radius: 16
-        color: Theme.card
-        RowLayout {
-            id: hero
-            anchors.fill: parent
-            anchors.margins: 14
-            spacing: 14
-            Badge {
-                implicitWidth: 64
-                implicitHeight: 64
-                radius: 32
-                icon: "ac_unit"
-                app: ["distributor-logo-nixos", "nix-snowflake"]
-            }
-            ColumnLayout {
-                spacing: 4
-                Layout.fillWidth: true
-                Text {
-                    text: page.ov ? page.ov.hostname : ""
-                    color: Theme.text
-                    font.pixelSize: 24
-                    font.weight: Font.Bold
-                }
-                Text { text: page.ov ? page.ov.pretty : ""; color: Theme.dim }
-                Flow {
-                    Layout.fillWidth: true
-                    spacing: 6
-                    Chip { tappable: false; text: page.view.info.wm; accent: true }
-                    Chip { tappable: false; text: page.ov ? `Linux ${page.ov.kernel}` : "" }
-                    Chip {
-                        tappable: false
-                        visible: !!page.ov && page.ov.generation > 0
-                        text: page.ov ? `Version ${page.ov.generation}` : ""
-                    }
-                }
-            }
-        }
     }
 
     //--- Waiting for a restart

@@ -421,6 +421,34 @@ Item {
                                         { mode: kind === "update" || kind === "pull" ? "auto" : "switch" }))
     }
 
+    //--- Whether a job may start now; says why not
+    function canStart() {
+        if (!info || !info.canApply || !info.admin)
+            return false
+        if (pendingCount) {
+            say("Apply or discard your changes first")
+            return false
+        }
+        if (Jobs.running) {
+            say("Another job is running; wait for it to finish")
+            return false
+        }
+        return true
+    }
+
+    function rebuild() {
+        if (!canStart())
+            return
+        ask({
+            heading: "Rebuild now?",
+            body: "Rebuilds from your settings files as they are (nixos-rebuild switch). At Next "
+                  + "Restart uses nixos-rebuild boot; Preview only builds and shows what would change.",
+            buttons: [{ label: "Preview", value: "build", quiet: true },
+                      { label: "At Next Restart", value: "boot", quiet: true },
+                      { label: "Rebuild Now", value: "switch" }]
+        }, mode => startJob("rebuild", { mode }))
+    }
+
     //--- A modal question: ask({heading, body, buttons}, done(value))
     function ask(spec, done) { dialog.open(spec, done) }
     readonly property alias dialog: confirm
@@ -704,6 +732,11 @@ Item {
         anchors.rightMargin: omni.edge + rail.width + 10
         spacing: 10
         visible: !omni.reviewing && !omni.running && omni.sheet === null
+
+        StatusHeader {
+            view: omni
+            Layout.fillWidth: true
+        }
 
         Text {
             visible: !!omni.info && omni.info.banner !== ""
@@ -1088,7 +1121,7 @@ Item {
         anchors.top: parent.top
         anchors.right: parent.right
         anchors.margins: omni.edge
-        anchors.topMargin: omni.edge + 44  // starts an icon below the top tabs
+        anchors.topMargin: omni.edge + tabsBar.y + tabsBar.height  // level with the tabs' foot
         // As tall as its icons, up to the window's bottom margin
         height: Math.min(railList.contentHeight + 8, parent.height - anchors.topMargin - omni.edge)
         width: 48
