@@ -223,8 +223,8 @@ ColumnLayout {
                             color: Theme.text
                             font.pixelSize: 18
                             font.weight: Font.DemiBold
+                            TitleTip { tip: "Shared parts the apps run on" }
                         }
-                        Hint { info: true; tip: "Shared parts the apps run on" }
                         Item { Layout.fillWidth: true }
                     }
                     Text {

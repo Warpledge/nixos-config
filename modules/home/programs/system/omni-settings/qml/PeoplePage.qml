@@ -186,8 +186,13 @@ ColumnLayout {
                 Layout.fillWidth: true
                 opacity: page.existing ? 0.45 : 1
                 spacing: 10
-                Text { text: "Admin"; color: Theme.text; font.pixelSize: 18; font.weight: Font.DemiBold }
-                Hint { info: true; tip: "Can use sudo, rebuild and change this computer's settings" }
+                Text {
+                    text: "Admin"
+                    color: Theme.text
+                    font.pixelSize: 18
+                    font.weight: Font.DemiBold
+                    TitleTip { tip: "Can use sudo, rebuild and change this computer's settings" }
+                }
                 Item { Layout.fillWidth: true }
                 Toggle {
                     enabled: !page.existing

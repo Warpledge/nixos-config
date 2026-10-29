@@ -1470,11 +1470,10 @@ Item {
                             Layout.maximumWidth: Math.ceil(pageTitleWidth.advanceWidth) + 1
                             Layout.fillWidth: true
                             TextMetrics { id: pageTitleWidth; font: pageTitle.font; text: pageTitle.text }
-                        }
-                        // A generated page's blurb, or a custom page's line from the rail
-                        Hint {
-                            info: true
-                            tip: section.modelData.subtitle || (section.model ? section.model.description : "")
+                            // A generated page's blurb, or a custom page's line from the rail
+                            TitleTip {
+                                tip: section.modelData.subtitle || (section.model ? section.model.description : "")
+                            }
                         }
                         Item { Layout.fillWidth: true }
                     }

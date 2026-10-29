@@ -61,12 +61,11 @@ ColumnLayout {
                     font.pixelSize: 18
                     font.weight: Font.DemiBold
                     elide: Text.ElideMiddle
-                    Layout.maximumWidth: hero.width - 30
-                }
-                Hint {
-                    info: true
-                    tip: "Copies of app data the config can't rebuild, in dated folders here. Syncthing "
-                         + "carries them to your other computers, and the newest ten of each are kept."
+                    Layout.maximumWidth: hero.width
+                    TitleTip {
+                        tip: "Copies of app data the config can't rebuild, in dated folders here. Syncthing "
+                             + "carries them to your other computers, and the newest ten of each are kept."
+                    }
                 }
             }
             Pill {
@@ -171,8 +170,8 @@ ColumnLayout {
                         Layout.minimumWidth: Math.min(Layout.maximumWidth, kindRow.width * 0.4)
                         Layout.fillWidth: true
                         TextMetrics { id: kindTitleWidth; font: kindTitle.font; text: kindTitle.text }
+                        TitleTip { tip: kindRow.kind.what }
                     }
-                    Hint { info: true; tip: kindRow.kind.what }
                     Item { Layout.fillWidth: true }
                 }
                 Text {

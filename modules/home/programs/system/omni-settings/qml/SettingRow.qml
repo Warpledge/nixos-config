@@ -67,9 +67,9 @@ Rectangle {
                         Layout.minimumWidth: Math.min(Layout.maximumWidth, row.width * 0.45)
                         Layout.fillWidth: true
                         TextMetrics { id: titleWidth; font: titleText.font; text: titleText.text }
+                        TitleTip { tip: row.s.description || row.s.subtitle }
                     }
-                    //--- What it is, cautions and notes as indicators, read at the cursor
-                    Hint { info: true; tip: row.s.description || row.s.subtitle }
+                    //--- Cautions and notes as indicators, read at the cursor
                     Hint { tip: Theme.plain(row.s.note) }
                     Hint {
                         visible: row.overridden

@@ -537,9 +537,14 @@ ColumnLayout {
             Layout.leftMargin: 6
             spacing: 8
             Icon { icon: Theme.glyph(group.icon, "settings"); size: 18; color: Theme.primary }
-            Text { text: group.title; color: Theme.primary; font.pixelSize: 17; font.weight: Font.DemiBold }
+            Text {
+                text: group.title
+                color: Theme.primary
+                font.pixelSize: 17
+                font.weight: Font.DemiBold
+                TitleTip { tip: group.description }
+            }
             Chip { tappable: false; text: String(group.rules.length); tone: group.tone; accent: group.tone === "" && group.title !== "Set in Nix" }
-            Hint { info: true; tip: group.description }
         }
         Repeater {
             model: group.rules
@@ -588,8 +593,8 @@ ColumnLayout {
                             Layout.maximumWidth: Math.ceil(ruleTitleWidth.advanceWidth) + 1
                             Layout.fillWidth: true
                             TextMetrics { id: ruleTitleWidth; font: ruleTitle.font; text: ruleTitle.text }
+                            TitleTip { tip: row.rule.note }
                         }
-                        Hint { info: true; tip: row.rule.note }
                         Item { Layout.fillWidth: true }
                     }
                     Flow {

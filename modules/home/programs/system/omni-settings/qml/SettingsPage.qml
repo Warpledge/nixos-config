@@ -65,12 +65,8 @@ ColumnLayout {
                 spacing: 0
                 Section {
                     text: group.modelData.title
+                    info: group.modelData.description
                     Layout.fillWidth: false
-                }
-                Hint {
-                    info: true
-                    tip: group.modelData.description
-                    Layout.topMargin: 10
                 }
                 Hint {
                     visible: group.modelData.locked
@@ -148,8 +144,8 @@ ColumnLayout {
                                     Layout.maximumWidth: Math.ceil(cardTitleWidth.advanceWidth) + 1
                                     Layout.fillWidth: true
                                     TextMetrics { id: cardTitleWidth; font: cardTitle.font; text: cardTitle.text }
+                                    TitleTip { tip: group.modelData.description }
                                 }
-                                Hint { info: true; tip: group.modelData.description }
                                 Hint {
                                     visible: group.modelData.locked
                                     icon: "lock"

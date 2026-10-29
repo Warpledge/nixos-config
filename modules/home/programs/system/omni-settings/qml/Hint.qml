@@ -1,14 +1,13 @@
 // A small indicator beside a name; its text shows at the cursor on hover. A caution
-// is a bare yellow triangle, `info` a ? in the page's accent; descriptions.json's
-// ** and !! marks are kept, and a caution's whole tip is yellow
+// is a bare yellow triangle with a yellow tip; descriptions.json's ** and !! marks
+// are kept. What a name is shows on hovering the name itself (TitleTip.qml)
 import QtQuick
 
 Rectangle {
     id: hint
-    property bool info: false
-    property string icon: info ? "question_mark" : "warning"
+    property string icon: "warning"
     property string tip: ""
-    property string tone: info ? "" : "caution"  // Theme.toneColor, or "" for the page's accent
+    property string tone: "caution"  // Theme.toneColor, or "" for the page's accent
     readonly property color tint: tone ? Theme.toneColor(tone) : Theme.accentOf(hint)
     readonly property bool bare: icon === "warning"
     readonly property string shown: tone === "caution"

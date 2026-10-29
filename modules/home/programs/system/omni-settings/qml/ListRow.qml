@@ -8,7 +8,7 @@ Rectangle {
     property var app: []
     property string title
     property string subtitle  // data that tells list items apart; a description goes in `info`
-    property string info: ""  // what it is, behind a ? beside the title
+    property string info: ""  // what it is, shown on hovering the title (TitleTip)
     property string caution: ""  // behind a yellow triangle beside the title
     property string alert: ""  // something to act on, in yellow under the title
     property string value: ""  // a status value, large on the right
@@ -74,8 +74,8 @@ Rectangle {
                             ? Math.min(Layout.maximumWidth, row.width * 0.6) : 0
                         Layout.fillWidth: true
                         TextMetrics { id: titleWidth; font: titleText.font; text: titleText.text }
+                        TitleTip { tip: row.info }
                     }
-                    Hint { info: true; tip: row.info }
                     Hint { tip: row.caution }
                     Item { Layout.fillWidth: true }
                 }

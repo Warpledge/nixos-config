@@ -339,8 +339,9 @@ window, over a Python backend; full notes split across its `CLAUDE.md`,
   source list by index. What a dropdown opens goes in a `Reveal`
   (`Reveal.qml`), and Loaders inside it gate on its `shown`.
 - Keep the interface clean: rows, cards, headings and page headers show the
-  name only. What it is goes behind a ? `Hint` (a setting's `text`, under
-  ~200 characters); cautions behind a yellow triangle `Hint`. Live alerts stay
+  name only. What it is shows on hovering the name (`TitleTip.qml`; a
+  setting's `text`, under ~200 characters); cautions behind a yellow triangle
+  `Hint`. Live alerts stay
   as yellow text (`alert`), status values show large (`value`), and names keep
   full width. Switches have no dropdown; no dropdown holds text alone. Every
   icon button has a `tip`.

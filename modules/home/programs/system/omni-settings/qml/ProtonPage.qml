@@ -109,8 +109,8 @@ ColumnLayout {
                 font.pixelSize: 16
                 wrapMode: Text.WrapAnywhere
                 Layout.fillWidth: true
+                TitleTip { tip: row.text }
             }
-            Hint { info: true; tip: row.text }
             Icon { icon: "content_copy"; size: 18 }
         }
         HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }

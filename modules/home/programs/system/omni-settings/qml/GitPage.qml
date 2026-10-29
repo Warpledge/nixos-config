@@ -81,12 +81,11 @@ ColumnLayout {
                     font.pixelSize: 18
                     font.weight: Font.DemiBold
                     elide: Text.ElideMiddle
-                    Layout.maximumWidth: hero.width - 30
-                }
-                Hint {
-                    info: true
-                    tip: "Where the config repo stands"
-                         + (page.repo && page.repo.repo ? `, on github.com/${page.repo.repo}` : "") + "."
+                    Layout.maximumWidth: hero.width
+                    TitleTip {
+                        tip: "Where the config repo stands"
+                             + (page.repo && page.repo.repo ? `, on github.com/${page.repo.repo}` : "") + "."
+                    }
                 }
             }
             RowLayout {
