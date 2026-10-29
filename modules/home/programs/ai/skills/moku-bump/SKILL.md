@@ -30,7 +30,7 @@ the `repo` branch of skepsun/kototoro-parsers by deploy commits).
    ```
    It builds only Moku and prints each `got:` hash; paste it in, rebuild, repeat until it
    builds. Upstream's own `pnpmHash` matches upstream's nixpkgs, not ours, so it never works
-   as-is. Tsunagu's `vendorHash` comes from upstream's `packages.nix` (correct at 0.5.0); on
+   as-is. Tsunagu's `vendorHash` comes from upstream's `packages.nix` (correct at 0.6.0); on
    a Go hash mismatch, add a `vendorHash` override to `tsunaguServer` with the `got:` value.
 3. Patches: a failed `--replace-fail` (the `KeywordTab.svelte` substitution) means upstream
    fixed it, so drop it. A failed hunk in `source-filters.patch` or `open-in-mpv.patch`

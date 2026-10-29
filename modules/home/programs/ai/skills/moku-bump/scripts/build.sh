@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Build only the Moku package (and the Tsunagu pieces it pulls in), not the
-# whole system. On a hash mismatch, prints the derivation and the `got:` hash
-# to paste into default.nix.
+# whole system, straight from its module, so media.moku needn't be on anywhere.
+# On a hash mismatch, prints the derivation and the `got:` hash to paste into
+# default.nix.
 set -uo pipefail
 
 repo="${1:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
@@ -10,9 +11,11 @@ log="$(mktemp)"
 nix build --no-link --print-out-paths --impure -L --expr "
   let
     f = builtins.getFlake (toString $repo);
-    d = f.nixosConfigurations.eclipse;
-    hm = d.config.home-manager.users.\${d._module.specialArgs.machine.mainUser};
-  in builtins.head (builtins.filter (p: (p.pname or \"\") == \"moku\") hm.home.packages)" >"$log" 2>&1
+    pkgs = (builtins.head (builtins.attrValues f.nixosConfigurations)).pkgs;
+    m = import $repo/modules/home/programs/media/moku/default.nix {
+      inherit pkgs; inherit (pkgs) lib; inherit (f) inputs;
+    };
+  in builtins.head m.home.packages" >"$log" 2>&1
 status=$?
 
 if [ "$status" = 0 ]; then

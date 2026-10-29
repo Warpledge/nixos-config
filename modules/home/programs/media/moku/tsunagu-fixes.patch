@@ -21,7 +21,7 @@ diff -ruN a/src/main/kotlin/tsunagu/Main.kt b/src/main/kotlin/tsunagu/Main.kt
 diff -ruN a/src/main/kotlin/tsunagu/registry/ExtensionRegistry.kt b/src/main/kotlin/tsunagu/registry/ExtensionRegistry.kt
 --- a/src/main/kotlin/tsunagu/registry/ExtensionRegistry.kt
 +++ b/src/main/kotlin/tsunagu/registry/ExtensionRegistry.kt
-@@ -94,8 +94,9 @@
+@@ -108,8 +108,9 @@
              throw InvalidExtensionIdException("novel extensions are disabled: $extensionId")
          }
          val target = targetFile(extensionId, ext)
@@ -29,6 +29,6 @@ diff -ruN a/src/main/kotlin/tsunagu/registry/ExtensionRegistry.kt b/src/main/kot
          val upToDate = target.exists() &&
 -            (target.canonicalFile == sourceFile.canonicalFile || target.length() == sourceFile.length())
 +            (!sourceFile.exists() || target.canonicalFile == sourceFile.canonicalFile || target.length() == sourceFile.length())
-         evict(extensionId)
-         if (!upToDate) {
-             replaceFile(target) { Files.copy(sourceFile.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING) }
+         // The backend re-installs every extension on startup; closing a loader that is
+         // serving a request breaks it mid-call, so keep the one already loaded.
+         if (upToDate) get(extensionId)?.let { return it }

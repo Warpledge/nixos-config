@@ -29,8 +29,8 @@
   #--- whatever jar a repo index lists; kototoroApi is its dex turned back
   #--- into JVM classes for compiling the bridge
   kototoroPlugin = pkgs.fetchurl {
-    url = "https://raw.githubusercontent.com/skepsun/kototoro-parsers/82ed4c767c0b4ae15a639fe6a08819c0df15d223/apk/plugin.jar"; # v1.0.137
-    hash = "sha256-CCbIyR1nH6Ki/JYeJ0ziVC8qEkyLKUS2kMs7M2tLBCI=";
+    url = "https://raw.githubusercontent.com/skepsun/kototoro-parsers/bd7612416621db196c08de06f74290f911ec7773/apk/plugin.jar"; # v1.0.155
+    hash = "sha256-FMYWClL+2QFkYoyFoUMthuKVNBKqRAUvfzOy6zOzASQ=";
   };
   kototoroApi = pkgs.runCommand "kototoro-api.jar" {} ''
     ${pkgs.dex2jar}/bin/d2j-dex2jar -o $out ${kototoroPlugin}
@@ -60,6 +60,16 @@
       '';
   });
 
+  #--- patchelf leaves the gRPC plugin's .dynamic in a read-only page, so the
+  #--- loader segfaults; the untouched upstream binary runs through ld.so instead
+  grpcPlugin = pkgs.writeShellScript "protoc-gen-grpc-java" ''
+    exec ${pkgs.stdenv.cc.bintools.dynamicLinker} \
+      --library-path ${pkgs.stdenv.cc.cc.lib}/lib ${pkgs.fetchurl {
+      url = "https://repo1.maven.org/maven2/io/grpc/protoc-gen-grpc-java/1.84.2/protoc-gen-grpc-java-1.84.2-linux-x86_64.exe";
+      hash = "sha256-qLdu/GkQO1JA2d65eJe/n6E9AVil0wkkbhb8Ln9hNsY=";
+    }} "$@"
+  '';
+
   #--- sandbox.patch loads the Kototoro bridge. tsunagu-fixes.patch: ProtoBuf
   #--- joins the DI graph as Mihon registers it, and an installed extension
   #--- still loads after its jar-cache copy is cleared
@@ -70,6 +80,8 @@
     postPatch =
       old.postPatch
       + ''
+        sed -i -E 's|"/nix/store/[^"]*/bin/protoc-gen-grpc-java"|"${grpcPlugin}"|' build.gradle.kts
+        grep -q '${grpcPlugin}' build.gradle.kts
         cp -r ${./tsunagu/sandbox/src}/. src/
         chmod -R u+w src
         mkdir -p kototoro/resources/kototoro/libs
