@@ -136,6 +136,7 @@ in {
   in {
     #--- DankMaterialShell Controls
     launcher = dmsBind "Mod+space" "App launcher" "spotlight toggle";
+    clipboard = dmsBind "Mod+V" "Clipboard history" "clipboardPlus togglePanel";
     task-manager = dmsBind "Mod+P" "Task manager" "processlist toggle";
     shell-settings = dmsBind "Mod+Comma" "Shell settings" "settings toggle";
     notepad = dmsBind "Mod+N" "Notepad" "notepad toggle";

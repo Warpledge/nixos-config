@@ -159,7 +159,7 @@
 
       (section "Windows" {
         overview = bind "Mod+Tab" "Overview" {toggle-overview = {};};
-        center-column = bind "Mod+C" "Center column" {center-column = {};};
+        center-column = bind "Mod+J" "Center column" {center-column = {};};
         cycle-window-height =
           bind "Mod+H" "Cycle window height" {switch-preset-window-height = {};};
         reset-window-height =
@@ -237,6 +237,15 @@
         }
         // lib.optionalAttrs user.gaming.lutris {
           lutris = bind "Mod+Ctrl+G" "Lutris" {spawn = ["lutris"];};
+        }
+        #--- Focuses an open Claude Desktop window instead of starting another
+        // lib.optionalAttrs user.claudeDesktop.enable {
+          claude-desktop = bind "Mod+C" "Claude Desktop" {
+            spawn = ["nirius" "focus-or-spawn" "--app-id" "^com\\.anthropic\\.Claude$" "claude-desktop"];
+          };
+        }
+        // lib.optionalAttrs user.opencodeDesktop.enable {
+          opencode-desktop = bind "Mod+X" "OpenCode Desktop" {spawn = ["opencode-desktop"];};
         }
         #--- Terminal panel on the left edge (ai/ai-panel.nix)
         // lib.optionalAttrs (user.terminals.kitty && (user.claude.enable || user.opencode.enable)) {
