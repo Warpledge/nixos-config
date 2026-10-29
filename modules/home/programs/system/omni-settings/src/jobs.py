@@ -109,7 +109,7 @@ class Job:
         self.mode, self.preview = "", False
         self.result, self.exit_code = {}, None
         self.errors, self.notes, self.diff, self.units = [], [], None, None
-        self.files, self.health, self.before = None, None, None
+        self.health, self.before = None, None
         self.switched = False
         self.restart, self.cleaned, self.deleted = False, None, 0
         self.optimised = None
@@ -127,7 +127,7 @@ class Job:
                 "started": self.started, "ended": self.ended, "outcome": self.outcome,
                 "heading": self.heading, "detail": self.detail, "mode": self.mode,
                 "preview": self.preview, "errors": list(dict.fromkeys(self.errors)),
-                "notes": self.notes, "diff": self.diff, "files": self.files, "health": self.health,
+                "notes": self.notes, "diff": self.diff, "health": self.health,
                 "units": self.units, "restart": self.restart,
                 "cancellable": self.proc is not None and self.current in ("build", "optimise")
                                and self.ended is None,
@@ -202,8 +202,6 @@ class Job:
             self.step(sid, state)
         if "diff" in e:
             self.diff = e["diff"]
-        if "files" in e:
-            self.files = e["files"]
         if "kernel" in e:
             old, new = e["kernel"]
             self.note("system-reboot-symbolic", f"New kernel: Linux {old} → {new}",

@@ -491,12 +491,6 @@ Rectangle {
                     Layout.preferredHeight: item ? item.implicitHeight : 0
                     sourceComponent: DiffView { diff: sheet.job.diff }
                 }
-                Loader {
-                    active: !!sheet.job && !!sheet.job.files
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: item ? item.implicitHeight : 0
-                    sourceComponent: FilesView { files: sheet.job.files }
-                }
             }
         }
         Rectangle {
