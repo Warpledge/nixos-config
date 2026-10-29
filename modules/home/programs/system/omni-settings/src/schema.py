@@ -149,7 +149,8 @@ PAGES = {
                [("", "", ["claude.enable", "claudeDesktop.enable"]),
                 ("Claude Code", "Changes made inside Claude Code stay until you change the same "
                  "setting here; the reset button on Claude Code puts all of these back.",
-                 ["claude.model", "claude.effort", "claude.outputStyle", "claude.mods.band",
+                 ["claude.model", "claude.effort", "claude.outputStyle", "claude.mods.ribbon",
+                  "claude.statusLine",
                   "claude.builtins.youShouldKnow", "claude.builtins.agentsMd",
                   "claude.builtins.agentsMdFiles"])]),
     "Claude Tools": ("cloudai", "application-x-addon-symbolic",

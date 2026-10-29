@@ -171,13 +171,14 @@
   #--- AI Tools
   claude = {
     enable = true;
-    mods.band = true;
+    mods.ribbon = true;
+    statusLine = true;
     builtins.youShouldKnow = true;
-    builtins.agentsMd = true;
+    builtins.agentsMd = false;
     plugins = {
       claudeMdManagement = true;
       skillCreator = true;
-      claudeCodeSetup = true;
+      claudeCodeSetup = false;
     };
     mcp = {
       nixos = true;
@@ -196,6 +197,10 @@
       importMemory = true;
       mcpBuilder = true;
     };
+    model = "opus";
+    effort = "medium";
+    outputStyle = "Concise";
+    builtins.agentsMdFiles = "claude-md";
   };
   claudeDesktop = {enable = true;};
   opencode = {enable = true;};

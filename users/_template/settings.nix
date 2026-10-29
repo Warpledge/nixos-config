@@ -209,7 +209,8 @@
 
   #--- AI Tools
   claude.enable = false; # Claude Code (needs an Anthropic account)
-  claude.mods.band = false; # Band above Claude Code's prompt: context, cache, usage left
+  claude.mods.ribbon = false; # Band above Claude Code's prompt: usage left, prompt cache
+  claude.statusLine = false; # Status line under Claude Code's prompt: context used
   claude.builtins.youShouldKnow = false; # Built-in "you should know" plugin
   claude.builtins.agentsMd = true; # Built-in plugin that reads AGENTS.md files
   claude.builtins.agentsMdFiles = "claude-md-or-agents-md"; # Files it loads

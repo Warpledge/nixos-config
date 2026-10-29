@@ -68,7 +68,15 @@
     }
     // lib.optionalAttrs (c.model != null) {inherit (c) model;}
     // lib.optionalAttrs (c.effort != null) {effortLevel = c.effort;}
-    // lib.optionalAttrs (c.outputStyle != null) {inherit (c) outputStyle;};
+    // lib.optionalAttrs (c.outputStyle != null) {inherit (c) outputStyle;}
+    // lib.optionalAttrs c.statusLine {
+      statusLine = {
+        type = "command";
+        command = "${pkgs.writeShellScript "claude-statusline" ''
+          ${lib.getExe pkgs.jq} -r '"Context \(.context_window.used_percentage // 0 | floor)%"'
+        ''}";
+      };
+    };
 in {
   config = lib.mkIf c.enable {
     #--------------------------------------------------------------------#
@@ -141,9 +149,16 @@ in {
     #--------------------------------------------------------------------#
     #-- Mods and Settings
     #--------------------------------------------------------------------#
-    #--- Repo mods, each behind claude.mods.<name>. Linked whole, not through
+    #--- Mods, each behind claude.mods.<name>. Linked whole, not through
     #--- programs.claude-code.plugins: its per-file links fail the hooks path check
-    home.file.".claude/skills/band" = lib.mkIf c.mods.band {source = ./mods/band;};
+    home.file.".claude/skills/ribbon" = lib.mkIf c.mods.ribbon {
+      source = pkgs.fetchFromGitHub {
+        owner = "robonuggets";
+        repo = "ribbon";
+        rev = "eecb8f9e384e8ae0ebbafb85f5c6490e8d561f72";
+        hash = "sha256-uSdT7j5ogCkuaIl7JYl8DQRXONEQGL8424cpie+KTK8=";
+      };
+    };
 
     #--- Merges `declared` into settings.json the way zed.nix does, so the rest
     #--- of the file and in-app changes stay
