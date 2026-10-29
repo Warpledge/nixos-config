@@ -529,8 +529,22 @@ Item {
                 }
             }
         page = hit.pid
-        anchorPage = hit.pid
-        anchorOffset = y - hit.y
+        anchorTop()
+    }
+    //--- The section under the view's top edge stays put, so a dropdown opened
+    //--- anywhere in view pushes what's below it down instead of what's above up
+    function anchorTop() {
+        const y = bodyFlick.contentY
+        let top = null
+        for (let i = 0; i < sections.count; i++) {
+            const s = sections.itemAt(i)
+            if (s && s.visible && (s.y <= y || !top))
+                top = s
+        }
+        if (!top)
+            return
+        anchorPage = top.pid
+        anchorOffset = y - top.y
     }
     function scrollTo(pid) {
         const s = section(pid)
@@ -550,11 +564,7 @@ Item {
         duration: 380
         easing.type: Easing.OutCubic
         // A section above that grew meanwhile moved the target
-        onFinished: {
-            const s = omni.section(omni.anchorPage)
-            if (s)
-                omni.anchorOffset = bodyFlick.contentY - s.y
-        }
+        onFinished: omni.anchorTop()
     }
 
     //--- Collapsed pages and open group cards, kept in api.py's UI_STATE
