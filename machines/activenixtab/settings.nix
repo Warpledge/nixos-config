@@ -18,7 +18,7 @@
       wallpaper = "engine";
       terminals.ghostty = true;
       defaultApps.terminal = "ghostty";
-      opencodeDesktop.enable = false;
+      opencodeDesktop.enable = true;
       env = {};
       autostart = {};
       mimeTypes = {};
@@ -31,8 +31,8 @@
       claude.mods.replayTheater = false;
       claude.mods.chatInventory = false;
       claude.mods.screenShare = false;
-      claude.statusLine = false;
-      claude.builtins.youShouldKnow = false;
+      claude.statusLine = true;
+      claude.builtins.youShouldKnow = true;
       claude.builtins.agentsMd = true;
       claude.builtins.agentsMdFiles = "claude-md-or-agents-md";
       claude.model = null;
