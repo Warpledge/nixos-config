@@ -238,14 +238,16 @@
         // lib.optionalAttrs user.gaming.lutris {
           lutris = bind "Mod+Ctrl+G" "Lutris" {spawn = ["lutris"];};
         }
-        #--- Focuses an open Claude Desktop window instead of starting another
+        #--- Focus an open Claude / OpenCode Desktop window instead of starting another
         // lib.optionalAttrs user.claudeDesktop.enable {
           claude-desktop = bind "Mod+C" "Claude Desktop" {
             spawn = ["nirius" "focus-or-spawn" "--app-id" "^com\\.anthropic\\.Claude$" "claude-desktop"];
           };
         }
         // lib.optionalAttrs user.opencodeDesktop.enable {
-          opencode-desktop = bind "Mod+X" "OpenCode Desktop" {spawn = ["opencode-desktop"];};
+          opencode-desktop = bind "Mod+X" "OpenCode Desktop" {
+            spawn = ["nirius" "focus-or-spawn" "--app-id" "^ai\\.opencode\\.desktop$" "opencode-desktop"];
+          };
         }
         #--- Terminal panel on the left edge (ai/ai-panel.nix)
         // lib.optionalAttrs (user.terminals.kitty && (user.claude.enable || user.opencode.enable)) {
