@@ -305,12 +305,12 @@ ColumnLayout {
         icon: page.checking ? "progress_activity" : "update"
         title: "Sources"
         subtitle: !page.ov ? ""
-            : page.checking ? "Looking up the newest version of each source; this takes about half a minute."
+            : page.checking ? "Looking up each source's newest version"
             : page.updateError ? `Couldn't check: ${page.updateError}`
             : !page.updates ? `Flake inputs, locked ${Fmt.day(page.ov.updated)} (${Fmt.ago(page.ov.updated)})`
             : !page.updates.changes.length ? `Up to date. Sources from ${Fmt.day(page.ov.updated)}.`
-            : `${page.updates.changes.length} of this config's sources have newer versions, up to `
-              + Fmt.day(Math.max(...page.updates.changes.map(c => c.new))) + "."
+            : `${page.updates.changes.length} newer, up to `
+              + Fmt.day(Math.max(...page.updates.changes.map(c => c.new)))
         button: page.checking || !page.admin ? "" : page.updates ? "Check Again" : "Check"
         onClicked: if (!page.checking && page.admin) page.check()
     }
@@ -408,7 +408,7 @@ ColumnLayout {
         enabled: page.admin
         icon: "compress"
         title: "Optimize the Nix Store"
-        subtitle: "Hard-links identical files, freeing space without deleting anything"
+        subtitle: "Frees space by hard-linking identical files"
         chevron: true
         onClicked: page.optimise()
     }
@@ -444,8 +444,11 @@ ColumnLayout {
                    ? `${page.older.length} earlier `
                      + (page.older.length === 1 ? "generation" : "generations") : "",
                Fmt.when(page.current.when),
-               page.current.version ? "NixOS " + page.current.version.split(".").slice(0, 2).join(".") : "",
-               page.current.kernel ? `Linux ${page.current.kernel}` : ""].filter(t => t).join(" · ")
+               // The header shows the running one's
+               page.current.version && !page.current.running
+                   ? "NixOS " + page.current.version.split(".").slice(0, 2).join(".") : "",
+               page.current.kernel && !page.current.running ? `Linux ${page.current.kernel}` : ""]
+              .filter(t => t).join(" · ")
         tag: !page.current ? "" : page.current.running ? "Running"
             : page.current.next ? "Next start" : ""
         tagSuccess: true

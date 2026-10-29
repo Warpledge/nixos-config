@@ -1404,8 +1404,6 @@ Item {
                             text: section.modelData.subtitle || (section.model ? section.model.description : "")
                             color: Theme.dim
                             font.pixelSize: 13
-                            wrapMode: Text.Wrap
-                            maximumLineCount: 2
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }

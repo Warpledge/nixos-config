@@ -81,7 +81,7 @@ ColumnLayout {
                 textFormat: Text.StyledText
                 color: Theme.dim
                 font.pixelSize: 13
-                wrapMode: Text.Wrap
+                elide: Text.ElideRight
                 Layout.fillWidth: true
                 Layout.leftMargin: 6
             }
@@ -166,7 +166,7 @@ ColumnLayout {
                                 textFormat: Text.StyledText
                                 color: Theme.dim
                                 font.pixelSize: 13
-                                wrapMode: Text.Wrap
+                                elide: Text.ElideRight
                                 Layout.fillWidth: true
                             }
                         }

@@ -66,8 +66,6 @@ Rectangle {
                     text: row.subtitle
                     color: Theme.dim
                     font.pixelSize: 13
-                    wrapMode: Text.Wrap
-                    maximumLineCount: row.compact ? 1 : 3
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }
