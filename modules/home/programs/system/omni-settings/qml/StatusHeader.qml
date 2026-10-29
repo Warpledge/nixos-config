@@ -11,6 +11,7 @@ ColumnLayout {
     property real cpu: -1  // 0 to 1, once two samples are in
     property var lastTicks: null
     readonly property bool canRebuild: !!view.info && view.info.admin && view.info.canApply
+    property bool barOnly: false  // just the usage bar, as over the run page
     spacing: 8
 
     function refresh() {
@@ -40,6 +41,7 @@ ColumnLayout {
 
     //--- Rebuild, the computer's name and the user
     Rectangle {
+        visible: !header.barOnly
         Layout.fillWidth: true
         implicitHeight: headCol.implicitHeight + 24
         radius: 22

@@ -744,7 +744,8 @@ Item {
     StatusHeader {
         id: statusHeader
         view: omni
-        visible: mainCol.visible
+        visible: mainCol.visible || runSheet.visible
+        barOnly: runSheet.visible
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
@@ -1288,8 +1289,13 @@ Item {
     }
 
     RunSheet {
-        anchors.fill: parent
+        id: runSheet
+        anchors.top: statusHeader.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
         anchors.margins: omni.edge
+        anchors.topMargin: 10
         visible: omni.running && !!Jobs.job
         view: omni
     }
