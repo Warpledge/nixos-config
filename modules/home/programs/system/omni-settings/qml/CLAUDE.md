@@ -14,7 +14,7 @@ Page-by-page behaviour and the backend modules behind each page are in `src/CLAU
 - Tap handlers take `gesturePolicy: TapHandler.ReleaseWithinBounds`; with the default, a click that closes a dialog also reaches the row under it.
 - Inside an inline component, `view: view` binds the property to itself, which is why `OmniView`'s id is `omni`. Its JS has no `Array.flatMap`.
 - JSON sent back from QML loses `.0` on whole numbers and can come back with its keys sorted, so files are written from data the backend read itself (`windowrulestate.edited`, the window rules undo). A `Repeater` delegate's `modelData` is a copy: edits go through the source list by index (`RuleEditor.qml`).
-- Don't name a property after one `Item` already has (`data`, `state`): the page fails to load.
+- Don't name a property after one `Item` already has (`data`, `state`): the page fails to load. Nor after one a handler has (`target`): inside a `TapHandler` the name finds the handler's own, silently.
 - A `Loader` in a layout takes `Layout.preferredHeight: item ? item.implicitHeight : 0`, or the next page it loads keeps the last one's height.
 - A `Loader` whose item wraps text (a `Text` sized by width) gets only `width` from its parent, inside an `Item` taking the item's `implicitHeight`; sizing it from a layout loops (`DocPage.qml`).
 - Matugen has no success or warning colour, and its `tertiary` needn't be yellow: `Theme.success` and `Theme.caution` are DMS's terminal green and yellow (`dank16` color2 and color3). Status colours go through a `tone` on `ListRow`, `Badge` and `Chip`.

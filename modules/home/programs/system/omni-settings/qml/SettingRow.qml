@@ -174,22 +174,23 @@ Rectangle {
             Layout.leftMargin: 50
             Layout.bottomMargin: 4
             sourceComponent: choiceEditor
-            onLoaded: item.target = row.s.pair
+            onLoaded: item.subject = row.s.pair
         }
     }
 
     //--- choice, and pick (the list comes from `omni-settings-backend list`);
-    //--- `target` is this row's setting, or its pair's
+    //--- `subject` is this row's setting or its pair's; not `target`, TapHandler's own
     Component {
         id: choiceEditor
         ColumnLayout {
+            id: editor
             spacing: 4
-            property var target: row.s
-            readonly property var targetValue: row.view.valueOf(target)
-            readonly property var options: target.kind === "pick"
-                ? (row.view.lists[target.data] || [])
-                : target.choices
-            Component.onCompleted: if (target.kind === "pick") row.view.loadList(target.data)
+            property var subject: row.s
+            readonly property var subjectValue: row.view.valueOf(subject)
+            readonly property var options: subject.kind === "pick"
+                ? (row.view.lists[subject.data] || [])
+                : subject.choices
+            Component.onCompleted: if (subject.kind === "pick") row.view.loadList(subject.data)
             Field {
                 id: filter
                 visible: options.length > 8
@@ -197,7 +198,7 @@ Rectangle {
                 placeholder: "Filter"
             }
             Text {
-                visible: target.kind === "pick" && !row.view.lists[target.data]
+                visible: editor.subject.kind === "pick" && !row.view.lists[editor.subject.data]
                 text: "Loading…"
                 color: Theme.dim
             }
@@ -215,7 +216,7 @@ Rectangle {
                 })
                 delegate: Rectangle {
                     required property var modelData
-                    readonly property bool chosen: JSON.stringify(modelData.value) === JSON.stringify(targetValue)
+                    readonly property bool chosen: JSON.stringify(modelData.value) === JSON.stringify(editor.subjectValue)
                     width: choices.width
                     height: 34
                     radius: 10
@@ -234,7 +235,7 @@ Rectangle {
                         Icon { visible: chosen; icon: "check"; size: 18; color: Theme.primary }
                     }
                     HoverHandler { id: optHover; cursorShape: Qt.PointingHandCursor }
-                    TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: row.view.change(target, modelData.value) }
+                    TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: row.view.change(editor.subject, modelData.value) }
                 }
             }
         }

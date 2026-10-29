@@ -51,9 +51,39 @@ ColumnLayout {
         ColumnLayout {
             id: group
             required property var modelData
+            //--- schema.py's COLLAPSED groups open from their heading
+            property bool open: !modelData.collapsed
+            readonly property var bools: modelData.settings.filter(s => s.kind === "bool")
             Layout.fillWidth: true
             spacing: 6
-            Section { visible: text !== ""; text: group.modelData.title }
+            RowLayout {
+                visible: group.modelData.title !== ""
+                Layout.fillWidth: true
+                Section { text: group.modelData.title }
+                Text {
+                    visible: group.modelData.collapsed
+                    text: group.bools.length === group.modelData.settings.length
+                        ? `${group.bools.filter(s => page.view.valueOf(s)).length} of ${group.bools.length} on`
+                        : `${group.modelData.settings.length}`
+                    color: Theme.dim
+                    font.pixelSize: 13
+                    Layout.topMargin: 10
+                }
+                Icon {
+                    visible: group.modelData.collapsed
+                    icon: "expand_more"
+                    rotation: group.open ? 180 : 0
+                    Layout.topMargin: 10
+                    Layout.rightMargin: 12
+                    Behavior on rotation { NumberAnimation { duration: 150 } }
+                }
+                HoverHandler { enabled: group.modelData.collapsed; cursorShape: Qt.PointingHandCursor }
+                TapHandler {
+                    enabled: group.modelData.collapsed
+                    gesturePolicy: TapHandler.ReleaseWithinBounds
+                    onTapped: group.open = !group.open
+                }
+            }
             Text {
                 visible: text !== ""
                 text: Theme.rich(group.modelData.description)
@@ -75,6 +105,7 @@ ColumnLayout {
                 model: group.modelData.settings
                 SettingRow {
                     required property var modelData
+                    visible: group.open
                     setting: modelData
                     view: page.view
                     locked: group.modelData.locked

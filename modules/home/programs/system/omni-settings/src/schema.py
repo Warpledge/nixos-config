@@ -189,6 +189,11 @@ PAGES = {
                  "stays free.", ["localAi.edit"])]),
 }
 
+#--- (page, group) shown closed until its heading is clicked
+COLLAPSED = {("Claude Tools", "Plugins"), ("Claude Tools", "claude.ai Connectors"),
+             ("Claude Skills", "Repo Skills"), ("Claude Skills", "Subagents"),
+             ("Claude Skills", "Account Skills")}
+
 #--- Settings shown inside another's row, by path prefix: claude.skills.commit's row
 #--- also edits claude.skillModels.commit (pair_up)
 PAIRS = {("claude", "skills"): ("claude", "skillModels"),

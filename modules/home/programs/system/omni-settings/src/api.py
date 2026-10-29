@@ -261,6 +261,7 @@ def cmd_load(cfg, _args):
                 links = []
             locked = not direct and any(s.domain == "machine" for s in g.settings)
             groups.append({"title": g.title, "description": g.description, "locked": locked,
+                           "collapsed": (page.title, g.title) in schema.COLLAPSED,
                            "settings": [setting_json(cfg, state, s, multi, modules) for s in g.settings],
                            "links": links})
         if not groups:

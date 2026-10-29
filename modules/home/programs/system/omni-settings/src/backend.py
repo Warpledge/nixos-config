@@ -273,6 +273,30 @@ def describe(setting, entry):
     setting.labels = {str(k): v for k, v in (entry.get("choices") or {}).items()}
 
 
+#--- claude.skillModels/agentModels -> the file whose frontmatter model null keeps
+OWN_MODEL_FILES = {"skillModels": "modules/home/programs/ai/skills/{}/SKILL.md",
+                   "agentModels": "modules/home/programs/ai/agents/{}.md"}
+
+
+def name_own_models(flake, pages):
+    """Labels each Claude skill's and subagent's null model with the model its
+    file sets, or the session's when it sets none."""
+    for s in schema.flat(pages):
+        if len(s.path) != 3 or s.path[0] != "claude" or s.path[1] not in OWN_MODEL_FILES:
+            continue
+        name = re.sub(r"[A-Z]", lambda m: "-" + m.group(0).lower(), s.path[2])
+        model = None
+        try:
+            with open(os.path.join(flake, OWN_MODEL_FILES[s.path[1]].format(name))) as f:
+                head = f.read().split("\n---", 1)[0]
+            m = re.search(r"^model:\s*(\S+)", head, re.M)
+            model = m and m.group(1)
+        except OSError:
+            pass
+        own = f"{model[:1].upper()}{model[1:]}" if model and model != "inherit" else "The session's model"
+        s.labels = {**s.labels, "None": f"{own} (its own)"}
+
+
 def data_list(name):
     """One of the lists default.nix builds, as [(value, label)]: a line is a
     value, then optionally whitespace and a label."""
@@ -334,6 +358,7 @@ def load(cfg):
                     entry = shared
                 describe(s, entry)
     pages = schema.pair_up(pages)
+    name_own_models(cfg.flake, pages)
     machine_doc = nixfile.to_python(nixfile.parse(read("machines", cfg.machine, "settings.nix")).root)
     lists = {name: data_list(name) for name in set(schema.DATA_CHOICES.values())}
     overrides = dig(machine_doc, ["users", cfg.user]) or {}
