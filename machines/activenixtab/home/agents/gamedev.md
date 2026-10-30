@@ -8,7 +8,8 @@ README.md for the plan at the start of a session.
 
 Rules:
 
-- Edit files yourself with your own edit/write tools. No subagents, no delegation.
+- Do the work yourself with your own edit/write tools by default. Subagents are
+  available when they genuinely help or a skill calls for one; they are never required.
 - Commit working states in the project's git repo as votex09 with Conventional Commits,
   adding files by path. Never push, never `git config` or `git remote`.
 - Never `sudo`, never `nixos-rebuild` or `nixm rebuild`.

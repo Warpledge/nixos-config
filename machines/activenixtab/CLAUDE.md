@@ -55,7 +55,7 @@ when Ky approves it.
   (`winsKey`), so a repo bind on the same key, even one added later, is switched off
 - `home/local-ai.nix` — llama-swap on llama.cpp 0.7.0 (Vulkan, built here until
   nixpkgs has it) at `127.0.0.1:8090`, Qwen3.8 Flash Next UD-IQ3_XXS (opencode's
-  default: 2 slots of 128K, `reasoning_effort` medium for the coordinator and its `-instruct`
+  default: 2 slots of 128K, `reasoning_effort` medium for the agents and their `-instruct`
   alias alike) and Nemotron 3.5 Super VL (3 slots with MTP drafting, the pick if the
   budget drops to 80 GB), both with vision, loaded from LM Studio's folder, and
   opencode's provider for it. Models stay within 90 GB (Ky, 2026-10-27) so other
@@ -63,14 +63,14 @@ when Ky approves it.
   gets an entry in `local-ai-models.md`, measured with the scripts in
   `local-ai-bench/`: the at-a-glance table and a plain-language section first (what
   to pick it for, how long Ky waits, RAM left, what to watch out for), then its
-  settings to copy and the raw numbers. Show results to Ky the same way. opencode's two coordinator agents,
+  settings to copy and the raw numbers. Show results to Ky the same way. opencode's two primary agents,
   `system` (the default) and `gamedev` (the default in any project under `~/Projects`,
   through `~/Projects/opencode.json`), take their prompts from `home/agents/`; `system`'s also carries
   this file and `users/kylerj/CLAUDE.md`, so a change here needs a rebuild to reach
-  it. The coordinators can't edit, and opencode denies them shell commands that write
-  files (`sed -i`, `mv`, `cp`, `rm`, redirects…), `git config`/`remote`/`push`/
-  `checkout`/`reset` and garbage collection, so changes go through their subagents; opencode
-  compacts their sessions near 48K so a cache miss stays cheap. The agents use v2's
+  it. Both edit files themselves, and use subagents only when it helps or a skill
+   calls for one; opencode denies them `git config`/`remote`/`push`/`checkout`/
+   `reset`/`clean`/`restore` and garbage collection; opencode compacts their sessions
+   near 48K so a cache miss stays cheap. The agents use v2's
   `agents` key: the file is read as v2, which drops a v1 agent's `permission`.
   opencode asks Ky before any agent edits a file in `~/nixos-config` outside
   `machines/activenixtab/` and `users/kylerj/`. When stuck they run

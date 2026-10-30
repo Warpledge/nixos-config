@@ -70,7 +70,7 @@
 
   #--- Whole model on the GPU: shared memory leaves no reason to keep experts on the CPU
   #--- Both take images through their mmproj file (`--mmproj`)
-  main = "qwen3_8-flash-next"; # opencode's coordinators and workers
+  main = "qwen3_8-flash-next"; # opencode's agents and their subagents
   models = {
     #--- opencode's default: one agent, no subagents — one slot of 256K. MoE, 6B active
     #--- Measured in ../local-ai-models.md: 256K single slot decodes 27.5 tok/s, but
@@ -89,7 +89,7 @@
         "-ctv q8_0"
         "--mmproj '${modelsDir}/unsloth/Qwen3.8-Flash-Next-GGUF/mmproj-F16.gguf'"
       ];
-      #--- Coordinator: Qwen's thinking sampling at medium effort. The template's
+      #--- The agents: Qwen's thinking sampling at medium effort. The template's
       #--- default, xhigh, overthinks: it ran out of a 12K budget on small tasks.
       #--- A request's own reasoning_effort beats chat_template_kwargs in llama.cpp,
       #--- so both are set here, which replaces whatever opencode sends
@@ -113,7 +113,7 @@
         chat_template_kwargs.reasoning_effort = "medium";
       };
     };
-    #--- Fits 80 GB: the coordinator plus 2 parallel subagents, one slot each.
+    #--- Fits 80 GB: one agent plus 2 parallel subagents, one slot each.
     #--- MoE with Mamba layers, 12B active; ~72 GB loaded. Tuning and test results
     #--- are in ../local-ai-models.md
     nemotron-3_5-super-vl = {
@@ -130,7 +130,7 @@
         "--top-k 0 --min-p 0"
         "--mmproj '${modelsDir}/unsloth/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-GGUF/mmproj-BF16.gguf'"
       ];
-      #--- Coordinator: full reasoning, NVIDIA's sampling
+      #--- The agents: full reasoning, NVIDIA's sampling
       params = {
         temperature = 1.0;
         top_p = 0.95;
@@ -197,7 +197,7 @@ in {
   #-- OpenCode Provider
   #--------------------------------------------------------------------#
   #--- opencode in a window; it reads the same settings as the terminal one.
-  #--- ask-claude: the coordinators' last resort, a one-off read-only Claude Code
+  #--- ask-claude: the agents' last resort, a one-off read-only Claude Code
   #--- run in the current folder that prints its answer. Each call waits for Ky's
   #--- answer in a notification unless ask-claude-auto has switched that off
   home.packages = [
@@ -214,7 +214,7 @@ in {
         body=$(printf '%s\n\n%s' "$PWD" "''${q:0:400}" | sed 's/&/\&amp;/g;s/</\&lt;/g;s/>/\&gt;/g')
         choice=$(${lib.getExe pkgs.libnotify} -u critical -a "ask-claude" \
           -A allow="Allow once" -A auto="Allow until turned off" -A deny="Deny" \
-          "A coordinator wants to ask Claude" "$body")
+          "An agent wants to ask Claude" "$body")
         case $choice in
           allow) ;;
           auto) mkdir -p "$(dirname "$flag")" && touch "$flag" ;;
@@ -259,9 +259,10 @@ in {
     model = "llama-swap/${main}";
     # Titles and summaries on the workers' alias, so the model stays loaded
     small_model = "llama-swap/${main}-instruct";
-    #--- Two coordinators (Tab switches): `system` for this computer, the default,
+    #--- Two primary agents (Tab switches): `system` for this computer, the default,
     #--- and `gamedev` for the game projects under ~/Projects, which
-    #--- ~/Projects/opencode.json picks.
+    #--- ~/Projects/opencode.json picks. They edit files themselves and start
+    #--- subagents only when it helps or a skill calls for one.
     #--- The subagents they start run on the workers' alias
     default_agent = "system";
     # Only Ky switches the ask-claude approval off. Edits to Warpledge's shared
@@ -288,52 +289,26 @@ in {
     # v2's `agents`: with `permissions` above the file is read as v2, which drops a
     # v1 `agent` entry's `permission`
     agents = let
-      # Coordinators can't edit, so changes go through the subagents
-      coordinator = {
+      # What stays with Ky: git state changes and garbage collection. opencode
+      # checks each part of a compound command on its own
+      base = {
         mode = "primary";
         model = "llama-swap/${main}";
-        permissions =
-          [
-            {
-              action = "edit";
-              resource = "*";
-              effect = "deny";
-            }
-          ]
-          # Shell routes to writing files, and git and GC commands that stay with
-          # Ky. opencode checks each part of a compound command on its own
-          ++ map (resource: {
-            action = "shell";
-            inherit resource;
-            effect = "deny";
-          }) [
-            "sed -i*"
-            "sed * -i*"
-            "sed --in-place*"
-            "sed * --in-place*"
-            "perl -i*"
-            "perl -pi*"
-            "mv *"
-            "cp *"
-            "rm *"
-            "tee *"
-            "touch *"
-            "truncate *"
-            "install *"
-            "ln *"
-            "dd *"
-            "* > *"
-            "* >> *"
-            "git checkout *"
-            "git restore *"
-            "git reset *"
-            "git clean *"
-            "git config *"
-            "git remote *"
-            "git push*"
-            "nix store gc*"
-            "nix-collect-garbage*"
-          ];
+        permissions = map (resource: {
+          action = "shell";
+          inherit resource;
+          effect = "deny";
+        }) [
+          "git checkout *"
+          "git restore *"
+          "git reset *"
+          "git clean *"
+          "git config *"
+          "git remote *"
+          "git push*"
+          "nix store gc*"
+          "nix-collect-garbage*"
+        ];
       };
     in
       lib.genAttrs ["general" "explore"] (_: {
@@ -341,7 +316,7 @@ in {
       })
       // {
         system =
-          coordinator
+          base
           // {
             description = "Answers questions about this computer and fixes its errors";
             # With this machine's and Ky's notes; AGENTS.md loads from the repo itself
@@ -352,9 +327,9 @@ in {
             ];
           };
         gamedev =
-          coordinator
+          base
           // {
-            description = "Coordinates work on a Godot game in ~/Projects";
+            description = "Works on a Godot game in ~/Projects";
             system = builtins.readFile ./agents/gamedev.md;
           };
       };

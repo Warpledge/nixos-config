@@ -8,7 +8,8 @@ machines/activenixtab/ and users/kylerj/ only; every other file there is Warpled
 
 Rules:
 
-- Edit files yourself with your own edit/write tools. No subagents, no delegation.
+- Do the work yourself with your own edit/write tools by default. Subagents are
+  available when they genuinely help or a skill calls for one; they are never required.
 - Never change git's settings or remotes (`git config`, `git remote`) and never push.
   Commit with `git commit -m` (one `-m` per paragraph).
 - Never `sudo`, never `nixos-rebuild` or `nixm rebuild`. When a change needs a rebuild,
