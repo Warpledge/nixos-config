@@ -62,6 +62,8 @@
     ];
   };
   portLists = ["firewall.openTCPPorts" "firewall.openUDPPorts"];
+  #--- Lists of domain names; the pattern is networking.stevenblack.whitelist's
+  domainLists = ["blocklist.allow"];
   #--- Whole-number machine settings and the range each takes
   numberRanges = {
     "boot.menu.timeout" = [0 60];
@@ -303,6 +305,12 @@
     in
       lib.optional (wrong != []) "`${path}` has ${builtins.toJSON wrong}; use port numbers from 1 to 65535")
     portLists
+    ++ lib.concatMap (path: let
+      domain = v: lib.isString v && builtins.match "[a-zA-Z0-9_-]+([.][a-zA-Z0-9_-]+)+" v != null;
+      wrong = lib.filter (v: !(domain v)) (listAt path set);
+    in
+      lib.optional (wrong != []) "`${path}` has ${builtins.toJSON wrong}; use domain names like \"example.com\"")
+    domainLists
     ++ lib.concatLists (lib.mapAttrsToList (path: range: let
       value = lib.attrByPath (lib.splitString "." path) null set;
       low = builtins.elemAt range 0;

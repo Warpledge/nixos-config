@@ -114,6 +114,8 @@
   blocklist.enable = false;
   # Extra categories to block. Known names: fakenews, gambling, porn, social
   blocklist.extra = [];
+  # Domains to unblock, e.g. "s.click.aliexpress.com"
+  blocklist.allow = [];
 
   #--- SMB Shares
   # Lets Dolphin and Nautilus find Windows and Samba servers by name
