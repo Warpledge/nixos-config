@@ -1687,7 +1687,8 @@ Item {
             : omni.custom[pid] || (model ? settingsPage : null)
         readonly property bool ready: !loader.item || loader.item.ready !== false
         readonly property var summary: omni.pageSummary(pid, model)
-        readonly property var changed: omni.changedOn(model)
+        // Not on Default Packages, where every app turned on counts as changed
+        readonly property var changed: pid === "page:Default Packages" ? [] : omni.changedOn(model)
         onReadyChanged: {
             if (ready && loader.item && !omni.waiting)
                 arrived.restart()
