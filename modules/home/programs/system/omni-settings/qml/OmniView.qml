@@ -13,6 +13,7 @@ Item {
     property int gutter: 8  // the part of `edge` left of the pages that holds their band
     property int frameInset: 6  // the page body inside its frame; clears the frame's corners
     readonly property int railGap: 30  // above each later group on the rail, room for its name
+    readonly property int railItem: 36  // each page's icon on the rail, and its name's row
     property var info: null
     property string loadError: ""
     property var stale: null  // api.py's `stale`, when the settings files don't evaluate
@@ -872,7 +873,7 @@ Item {
         anchors.bottom: parent.bottom
         anchors.margins: omni.edge
         anchors.topMargin: 10
-        anchors.rightMargin: omni.edge + rail.width + 10
+        anchors.rightMargin: omni.edge + rail.width + 6
         spacing: 10
         visible: !omni.reviewing && !omni.running && omni.sheet === null
 
@@ -981,42 +982,10 @@ Item {
                     }
                 }
             }
-            //--- A thin scrollbar, only while the tabs don't fit
-            Rectangle {
-                readonly property real over: tabsFlick.contentWidth - tabsFlick.width
-                visible: over > 1
-                x: tabsFlick.x + (tabsFlick.width - width) * (over > 0 ? tabsFlick.contentX / over : 0)
-                y: parent.height - 4
-                width: tabsFlick.width * tabsFlick.width / Math.max(1, tabsFlick.contentWidth)
-                height: 2
-                radius: 1
-                color: Qt.alpha(Theme.dim, 0.5)
-            }
-            //--- Fades where more tabs are scrolled out of sight
-            Rectangle {
-                visible: tabsFlick.contentX > 1
-                anchors.left: tabsFlick.left
-                anchors.top: tabsFlick.top
-                anchors.bottom: tabsFlick.bottom
-                width: 28
-                gradient: Gradient {
-                    orientation: Gradient.Horizontal
-                    GradientStop { position: 0; color: Theme.card }
-                    GradientStop { position: 1; color: Qt.alpha(Theme.card, 0) }
-                }
-            }
-            Rectangle {
-                visible: tabsFlick.contentX + tabsFlick.width < tabsFlick.contentWidth - 1
-                anchors.right: tabsFlick.right
-                anchors.top: tabsFlick.top
-                anchors.bottom: tabsFlick.bottom
-                width: 28
-                gradient: Gradient {
-                    orientation: Gradient.Horizontal
-                    GradientStop { position: 0; color: Qt.alpha(Theme.card, 0) }
-                    GradientStop { position: 1; color: Theme.card }
-                }
-            }
+            //--- Where more tabs are scrolled out of sight: a fade and an arrow that pans
+            //--- that way, each only while there's more that way
+            TabArrow { toLeft: true; shown: tabsFlick.contentX > 1 }
+            TabArrow { toLeft: false; shown: tabsFlick.contentX + tabsFlick.width < tabsFlick.contentWidth - 1 }
         }
 
         //--- Search, opened from the header, pushing the dimmed page down
@@ -1395,15 +1364,15 @@ Item {
         anchors.topMargin: mainCol.y + tabsBar.y + tabsBar.height  // level with the tabs' foot
         // As tall as its icons, up to the window's bottom margin
         height: Math.min(railList.contentHeight + 8, parent.height - anchors.topMargin - omni.edge)
-        width: 52
-        radius: 26
+        width: omni.railItem + 8
+        radius: width / 2
         color: Theme.card
         HoverHandler { id: railArea }
 
         ListView {
             id: railList
             anchors.fill: parent
-            anchors.margins: 5
+            anchors.margins: 4
             clip: true
             boundsBehavior: Flickable.StopAtBounds
             model: omni.tabPages
@@ -1430,14 +1399,14 @@ Item {
                 }
                 Rectangle {
                     width: parent.width
-                    height: 42
-                    radius: 21
+                    height: omni.railItem
+                    radius: height / 2
                     color: railItem.active ? Theme.primary : railHover.hovered ? Theme.hover : "transparent"
                     Behavior on color { ColorAnimation { duration: 120 } }
                     Icon {
                         anchors.centerIn: parent
                         icon: Theme.glyph(railItem.modelData.icon)
-                        size: 22
+                        size: 20
                         fill: railItem.active
                         color: railItem.active ? Theme.inkPrimary : Theme.primary
                     }
@@ -1488,8 +1457,10 @@ Item {
                     readonly property bool active: omni.page === modelData.id
                     x: namesCol.width - width
                     //--- The group's name over the rail's line
+                    // Each part right-aligned, so a wide caption doesn't push its name left
                     Item {
                         visible: !!nameItem.prev && nameItem.prev.group !== nameItem.modelData.group
+                        x: nameItem.width - width
                         width: groupCaption.implicitWidth + 8
                         height: omni.railGap
                         Text {
@@ -1506,8 +1477,9 @@ Item {
                         }
                     }
                     Item {
+                        x: nameItem.width - width
                         width: namePill.width
-                        height: 42
+                        height: omni.railItem
                         Rectangle {
                             id: namePill
                             anchors.verticalCenter: parent.verticalCenter
@@ -1603,6 +1575,42 @@ Item {
     Component { id: protonVersionsPage; ProtonVersionsPage { view: omni } }
     Component { id: gamesPage; GamesPage { view: omni } }
     Component { id: mangoHudPage; MangoHudPage { view: omni } }
+    component TabArrow: Rectangle {
+        id: arrow
+        property bool toLeft
+        property bool shown
+        visible: opacity > 0
+        opacity: shown ? 1 : 0
+        Behavior on opacity { NumberAnimation { duration: 150 } }
+        anchors.left: toLeft ? tabsFlick.left : undefined
+        anchors.right: toLeft ? undefined : tabsFlick.right
+        anchors.top: tabsFlick.top
+        anchors.bottom: tabsFlick.bottom
+        width: 34
+        gradient: Gradient {
+            orientation: Gradient.Horizontal
+            GradientStop { position: 0; color: arrow.toLeft ? Theme.card : Qt.alpha(Theme.card, 0) }
+            GradientStop { position: arrow.toLeft ? 0.6 : 0.4; color: Theme.card }
+            GradientStop { position: 1; color: arrow.toLeft ? Qt.alpha(Theme.card, 0) : Theme.card }
+        }
+        Icon {
+            anchors.verticalCenter: parent.verticalCenter
+            x: arrow.toLeft ? 0 : parent.width - width
+            icon: arrow.toLeft ? "chevron_left" : "chevron_right"
+            size: 20
+            color: arrowHover.hovered ? Theme.primary : Theme.dim
+        }
+        HoverHandler { id: arrowHover; cursorShape: Qt.PointingHandCursor }
+        TapHandler {
+            gesturePolicy: TapHandler.ReleaseWithinBounds
+            onTapped: {
+                const f = tabsFlick
+                f.contentX = Math.max(0, Math.min(f.contentWidth - f.width,
+                                                  f.contentX + (arrow.toLeft ? -1 : 1) * f.width * 0.6))
+            }
+        }
+    }
+
     //--- One page in the tab's scroll: its section's divider when it starts one, then
     //--- the page in a card whose header collapses it; a note starts collapsed
     component PageSection: ColumnLayout {
@@ -1672,11 +1680,11 @@ Item {
             radius: 20
             color: Qt.alpha(Theme.text, (section.index % 2 ? 0.075 : 0.035)
                                         + (section.headed && headHover.hovered && !section.open ? 0.03 : 0))
-            // An open page is edged in primary; the one under the cursor gets a thick
+            // An open page is edged in primary; the one under the cursor gets a firmer
             // ring like niri's focus ring, so the page being read is easy to find
-            border.width: !section.headed ? 0 : cardHover.hovered ? 3 : section.open ? 1.5 : 1
+            border.width: !section.headed ? 0 : cardHover.hovered ? 2 : 1
             border.color: cardHover.hovered ? Theme.primary
-                : section.open ? Qt.alpha(Theme.primary, 0.6) : Theme.rule
+                : section.open ? Qt.alpha(Theme.primary, 0.45) : Theme.rule
             Behavior on color { ColorAnimation { duration: 150 } }
             Behavior on border.color { ColorAnimation { duration: 150 } }
             HoverHandler { id: cardHover; enabled: section.headed }
