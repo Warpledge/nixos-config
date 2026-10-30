@@ -409,7 +409,9 @@ def cmd_load(cfg, _args):
     user_packages = next((s for p in state.pages for g in p.groups for s in g.settings
                           if (s.domain, s.path) == USER_PACKAGES), None)
     if user_packages:
-        nav["packages"].append({"id": "userpkgs", "title": "User Packages",
+        # First after Search, above Default Packages
+        top = sum(1 for g in nav["packages"] if g["id"] == "")
+        nav["packages"].insert(top, {"id": "userpkgs", "title": "User Packages",
                                 "items": [{"id": "userpackages", "title": "All",
                                            "subtitle": NAV_SUBTITLES["userpackages"],
                                            "icon": ["package-x-generic-symbolic"], "custom": True}]})
