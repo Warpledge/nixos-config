@@ -5,7 +5,8 @@ warpledge's laptop, a Legion Slim 5: Ryzen 7 7735HS, hybrid AMD 680M and RTX 407
 
 ## Hardware
 
-TLP power management. The hybrid GPU defaults to the 680M; route an app to the RTX 4070
+TLP power management; conservation mode comes from `battery.chargeLimit` in `settings.nix`,
+not TLP. The hybrid GPU defaults to the 680M; route an app to the RTX 4070
 with `nvidia-offload <app>`. As the server host, sleep, suspend and hibernate are off, the
 lid and power key are ignored, and DMS auto-lock is off under niri.
 

@@ -157,6 +157,9 @@
   #--- Bluetooth
   bluetooth.enable = false;
 
+  #--- Battery Charge Limit (conservation mode on this Lenovo)
+  battery.chargeLimit = 80;
+
   #--- Printing (CUPS)
   printing.enable = false;
 
