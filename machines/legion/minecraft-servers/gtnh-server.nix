@@ -21,7 +21,7 @@
   startScript = pkgs.writeShellScript "gtnh-start" ''
       while true; do
           ${pkgs.jdk25}/bin/java \
-              -Xms10G \
+              -Xms12G \
               -Xmx12G \
               -XX:+UseG1GC \
               -XX:+ParallelRefProcEnabled \

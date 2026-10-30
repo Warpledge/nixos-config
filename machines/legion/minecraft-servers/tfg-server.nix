@@ -51,6 +51,7 @@
               -XX:G1RSetUpdatingPauseTimePercent=5 \
               -XX:SurvivorRatio=32 \
               -XX:+PerfDisableSharedMem \
+              -XX:+UseTransparentHugePages \
               -XX:MaxTenuringThreshold=1 \
               -Dusing.aikars.flags=https://mcflags.emc.gs \
               -Daikars.new.flags=true \
