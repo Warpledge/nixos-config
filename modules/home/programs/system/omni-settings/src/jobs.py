@@ -47,6 +47,7 @@ STEPS = {
     "collect": "Delete old versions and unused files",
     "optimise": "Replace identical files with hard links",
     "firmware": "Install firmware updates",
+    "scheduler": "Switch the CPU scheduler",
     "password": "Set their password",
 }
 #--- Jobs whose success commits and pushes the user's own folders (gitstate.back_up)
@@ -672,6 +673,15 @@ class Service:
         if kind == "firmware":
             job = self.new_job(kind, "Updating Firmware", ["auth", "firmware"], "Firmware updated")
             await self.run(job, {"firmwareUpdate": True})
+            return job
+        if kind == "scheduler":
+            name = args.get("name", "")
+            if not isinstance(name, str) or not name:
+                raise JobError("Pick a scheduler")
+            done = {"stop": "Scheduler stopped", "default": "Back to the default scheduler"}
+            job = self.new_job(kind, "Switching the CPU Scheduler", ["auth", "scheduler"],
+                               done.get(name, f"{name} is running"))
+            await self.run(job, {"scheduler": name})
             return job
         if kind == "clean":
             job = self.new_job(kind, "Removing Old Settings", ["auth"], "Old settings removed")

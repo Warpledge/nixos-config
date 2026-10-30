@@ -26,6 +26,7 @@ import backupstate  # noqa: E402
 import bootstate  # noqa: E402
 import changelog  # noqa: E402
 import closure  # noqa: E402
+import crashstate  # noqa: E402
 import dms  # noqa: E402
 import docstate  # noqa: E402
 import flatpakstate  # noqa: E402
@@ -40,6 +41,7 @@ import resetstate  # noqa: E402
 import protonstate  # noqa: E402
 import schema  # noqa: E402
 import servicestate  # noqa: E402
+import steamstate  # noqa: E402
 import system  # noqa: E402
 import updatestate  # noqa: E402
 import windowrulestate as wr  # noqa: E402
@@ -49,11 +51,12 @@ HELPER = "/run/current-system/sw/bin/omni-settings-apply"
 
 #--- The master tabs across the top, each with its own page list
 TABS = [("main", "Main"), ("packages", "Packages"), ("niri", "Niri"), ("hardware", "Hardware"),
-        ("ai", "AI"), ("docs", "Docs")]
+        ("gaming", "Gaming"), ("ai", "AI"), ("docs", "Docs")]
 TAB_ICONS = {"main": ("go-home-symbolic", "user-home-symbolic"),
              "packages": ("package-x-generic-symbolic", "system-software-install-symbolic"),
              "niri": ("view-grid-symbolic", "view-app-grid-symbolic"),
              "hardware": ("computer-symbolic", "drive-harddisk-symbolic"),
+             "gaming": ("input-gaming-symbolic", "applications-games-symbolic"),
              "ai": ("applications-science-symbolic", "starred-symbolic"),
              "docs": ("accessories-dictionary-symbolic", "help-browser-symbolic")}
 
@@ -74,17 +77,18 @@ TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
                 ("keybinds", "Keybinds", ("input-keyboard-symbolic", "preferences-desktop-keyboard-symbolic"))],
        "hardware": [("firmware", "Firmware", ("software-update-available-symbolic", "application-x-firmware")),
                     ("battery", "Battery", ("battery-symbolic", "battery-full-symbolic")),
-                    ("dgpu", "Run on dGPU", ("video-display-symbolic", "computer-symbolic"))],
+                    ("dgpu", "Run on dGPU", ("video-display-symbolic", "computer-symbolic")),
+                    ("scheduler", "CPU Scheduler", ("utilities-system-monitor-symbolic", "cpu-symbolic"))],
+       "gaming": [("games", "Games", ("input-gaming-symbolic", "applications-games-symbolic")),
+                  ("proton", "Launch Options", ("input-gaming-symbolic",)),
+                  ("protonversions", "Proton Versions",
+                   ("system-software-install-symbolic", "input-gaming-symbolic")),
+                  ("mangohud", "MangoHud", ("utilities-system-monitor-symbolic",))],
        "ai": [],
        "docs": []}
 
-#--- Docs tab Gaming pages ahead of the game notes: [(key, title, icons)]
-DOCS_GAMING = [("proton", "Launch Options", ("input-gaming-symbolic",)),
-               ("protonversions", "Proton Versions",
-                ("system-software-install-symbolic", "input-gaming-symbolic"))]
-
 #--- The line under each page in the page list that has no description of its own
-NAV_SUBTITLES = {"overview": "Updates, freeing space, versions", "git": "Changes, commits, pull requests",
+NAV_SUBTITLES = {"overview": "Updates, freeing space, versions, crashes", "git": "Changes, commits, pull requests",
                  "flatpaks": "Apps nixpkgs doesn't have: update them, clean up, and switch each one "
                              "on or off",
                  "backups": "Back up app data",
@@ -104,12 +108,18 @@ NAV_SUBTITLES = {"overview": "Updates, freeing space, versions", "git": "Changes
                  "firmware": "Firmware for this computer's devices from fwupd, and updates waiting",
                  "battery": "Charge, health, and where charging stops",
                  "dgpu": "Apps whose launcher starts them on the NVIDIA GPU. Changes wait for Apply.",
+                 "scheduler": "The sched_ext CPU scheduler running now. A switch here lasts until "
+                              "the next restart.",
                  "startup": "Variables every program sees, and autostart",
                  "filetypes": "Which app opens one file type",
                  "userpackages": "Packages you added from Search, installed as they come with no "
                                  "settings of their own. Apps with settings made for them are under "
                                  "Default Packages.",
+                 "games": "Your Steam games: build each one's launch options and pick its Proton "
+                          "version. Changes wait for Apply, and reach Steam once it's closed.",
                  "proton": "Launch options for Steam, Heroic and Lutris. Click one to copy it.",
+                 "mangohud": "The in-game overlay: what it shows and where. The test window shows "
+                             "changes as you make them; games get them after Apply.",
                  "protonversions": "The Proton and Wine builds each launcher can run games with. Pick "
                                    "one per game in the launcher, or Steam's default under Settings, "
                                    "Compatibility."}
@@ -121,6 +131,8 @@ HISTORY = 8  # versions the Overview lists
 
 #--- Sections shown on a tab other than Main
 SECTION_TAB = {"cloudai": "ai", "localai": "ai", "apps": "packages"}
+#--- Apps pages that leave Default Packages for a page of their own on another tab
+PAGE_TAB = {"Gaming": "gaming"}
 
 USER_PACKAGES = ("user", ("userPackages",))
 KEYBINDS = ("user", schema.KEYBINDS)
@@ -177,6 +189,8 @@ def shown(setting, value):
         return f"{len(value)} window rule{'' if len(value) == 1 else 's'} changed" if value else "Not set"
     if setting.kind == "siderail":
         return f"{len(value)} rail app{'' if len(value) == 1 else 's'} changed" if value else "Not set"
+    if setting.kind == "steamgames":
+        return f"{len(value)} game{'' if len(value) == 1 else 's'} set" if value else "Not set"
     if isinstance(value, dict):
         if not all(isinstance(v, list) for v in value.values()):
             n = len(value)
@@ -292,6 +306,10 @@ def shows(key, wm):
         return bool(hardwarestate.batteries())
     if key == "dgpu":
         return hardwarestate.has_offload()
+    if key == "mangohud":
+        return bool(shutil.which("mangohud"))
+    if key == "scheduler":
+        return hardwarestate.scx_unit() is not None
     return True
 
 
@@ -312,13 +330,13 @@ def cmd_load(cfg, _args):
         if items:
             nav[tab].append({"id": "", "title": "", "items": items})
     pages, by_section = {}, {key: [] for key, _ in schema.SECTIONS}
-    apps_groups = []
+    apps_groups, tab_pages = [], {}
     # Under niri every DMS link moves to the Shell page, in categories (shellLinks)
     shell_links = wm == "niri"
     shell = {}
     for page in state.pages:
         if page.section in ("userpkgs", "keybinds", "windowrules", "siderail", "startup", "filetypes",
-                            "dgpu"):
+                            "dgpu", "games"):
             continue
         pid = schema.TOP_PAGES[page.title] if page.section == "top" else f"page:{page.title}"
         groups = []
@@ -337,6 +355,13 @@ def cmd_load(cfg, _args):
                            "settings": [setting_json(cfg, state, s, multi, modules) for s in g.settings],
                            "links": links})
         if not groups:
+            continue
+        if page.title in PAGE_TAB:
+            pages[pid] = {"id": pid, "title": "Apps", "description": page.description,
+                          "icon": [page.icon, schema.FALLBACK_ICON], "intro": "",
+                          "changeFor": multi, "groups": groups}
+            tab_pages.setdefault(PAGE_TAB[page.title], []).append(
+                {"id": pid, "title": "Apps", "icon": [page.icon, schema.FALLBACK_ICON]})
             continue
         if page.section == "apps" or page.section not in by_section and page.section != "top":
             apps_groups.append(app_card(page, pid, groups))
@@ -358,6 +383,8 @@ def cmd_load(cfg, _args):
                if (s.domain, s.path) in (("user", ("env",)), ("user", ("autostart",)))]
     mime_types = next((s for p in state.pages for g in p.groups for s in g.settings
                        if (s.domain, s.path) == ("user", ("mimeTypes",))), None)
+    steam_games = next((s for p in state.pages for g in p.groups for s in g.settings
+                        if (s.domain, s.path) == ("user", schema.STEAM_GAMES)), None)
     gpu_offload = next((s for p in state.pages for g in p.groups for s in g.settings
                         if (s.domain, s.path) == ("user", ("gpuOffload",))), None)
     if startup:
@@ -371,6 +398,8 @@ def cmd_load(cfg, _args):
     for key, title in schema.SECTIONS:
         if by_section[key]:
             nav[section_tab.get(key, "main")].append({"id": key, "title": title, "items": by_section[key]})
+    for tab, items in tab_pages.items():
+        nav[tab].append({"id": f"{tab}-apps", "title": "", "items": items})
     user_packages = next((s for p in state.pages for g in p.groups for s in g.settings
                           if (s.domain, s.path) == USER_PACKAGES), None)
     if user_packages:
@@ -388,12 +417,10 @@ def cmd_load(cfg, _args):
               for d in docstate.guide_docs(cfg.flake)]
     if guides:
         nav["docs"].append({"id": "guides", "title": "Guides", "items": guides})
-    nav["docs"].append({"id": "gaming", "title": "Gaming",
-                        "items": [{"id": k, "title": t, "icon": list(i), "custom": True,
-                                   "subtitle": NAV_SUBTITLES.get(k, "")}
-                                  for k, t, i in DOCS_GAMING]
-                        + [{"id": d.key, "title": d.title, "icon": ["input-gaming-symbolic"], "custom": True}
-                           for d in docstate.game_docs(cfg.flake)]})
+    game_docs = [{"id": d.key, "title": d.title, "icon": ["input-gaming-symbolic"], "custom": True}
+                 for d in docstate.game_docs(cfg.flake)]
+    if game_docs:
+        nav["docs"].append({"id": "gaming", "title": "Gaming", "items": game_docs})
 
     dismissed = read_dismissed()
     new = [{"key": new_id(d, p), "value": v} for d, p, v in state.new
@@ -420,6 +447,7 @@ def cmd_load(cfg, _args):
                                if s.path == ("autostart",)), None),
             "mimeTypes": mime_types and setting_json(cfg, state, mime_types, multi, modules),
             "gpuOffload": gpu_offload and setting_json(cfg, state, gpu_offload, multi, modules),
+            "steamGames": steam_games and setting_json(cfg, state, steam_games, multi, modules),
             "starter": packagestate.STARTER,
             "dmsSearch": [{"label": e.label, "description": e.description, "keywords": e.keywords,
                            "tab": e.link.tab, "page": e.link.page} for e in state.dms_entries]}
@@ -455,6 +483,10 @@ def cmd_firmware_summary(_cfg, _args):
 
 def cmd_battery(_cfg, _args):
     return hardwarestate.battery()
+
+
+def cmd_scheduler(_cfg, _args):
+    return hardwarestate.scheduler()
 
 
 def cmd_split_command(_cfg, args):
@@ -817,6 +849,50 @@ def cmd_flatseal(_cfg, args):
     return True
 
 
+MANGOHUD_APPLIED = os.path.expanduser("~/.config/MangoHud/MangoHud.conf")
+
+
+def mangohud_preview_path():
+    return os.path.join(system.runtime_dir(), "mangohud-preview.conf")
+
+
+def cmd_mangohud_preview(_cfg, args):
+    """Writes the overlay as the page's values set it, pending changes too, to the
+    file the test window reads; MangoHud reloads it when it changes. Keep in step
+    with what gaming/default.nix writes."""
+    hud, items = args.get("hud") or {}, args.get("items") or []
+    show = hud.get("show") or []
+    lines = ["fps_only"] if show == ["fps"] else [i if i in show else f"{i}=0" for i in items]
+    def number(key, fallback):
+        try:
+            return int(hud.get(key))
+        except (TypeError, ValueError):
+            return fallback  # a half-typed value
+    background = max(0, min(100, number("background", 0)))
+    lines += [f"position={hud.get('position') or 'top-right'}",
+              f"font_size={number('fontSize', 16)}",
+              f"background_alpha={background / 100:.2f}",
+              f"text_color={hud.get('textColor') or 'FFFFFF'}"]
+    try:
+        with open(MANGOHUD_APPLIED) as f:
+            lines += [line.rstrip("\n") for line in f if line.startswith("font_file=")]
+    except OSError:
+        pass
+    # Written in place, not replaced, so MangoHud's watch on the file sees it
+    with open(mangohud_preview_path(), "w") as f:
+        f.write("\n".join(lines) + "\n")
+    return True
+
+
+def cmd_mangohud_test(cfg, args):
+    """Opens vkcube under MangoHud reading the preview file."""
+    cmd_mangohud_preview(cfg, args)
+    env = dict(os.environ, MANGOHUD_CONFIGFILE=mangohud_preview_path())
+    subprocess.Popen(["mangohud", "vkcube"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                     start_new_session=True, env=env)
+    return True
+
+
 #--------------------------------------------------------------------#
 #-- Upstream updates
 #--------------------------------------------------------------------#
@@ -968,6 +1044,18 @@ def cmd_launch_options(_cfg, _args):
 
 def cmd_proton_versions(_cfg, _args):
     return protonstate.versions()
+
+
+def cmd_steam_games(_cfg, _args):
+    return steamstate.page()
+
+
+def cmd_crashes(_cfg, args):
+    return crashstate.crashes(app=args.get("app") or None)
+
+
+def cmd_crash_report(_cfg, args):
+    return crashstate.report(args.get("pid", ""), args.get("app", ""), args.get("launch", ""))
 
 
 #--------------------------------------------------------------------#
@@ -1188,13 +1276,15 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "ports": cmd_ports,
             "packageNames": cmd_package_names, "packageSearch": cmd_package_search,
             "packagePreviews": cmd_package_previews,
-            "resetApp": cmd_reset_app, "doc": cmd_doc, "docLink": cmd_doc_link, "launchOptions": cmd_launch_options, "protonVersions": cmd_proton_versions,
+            "resetApp": cmd_reset_app, "doc": cmd_doc, "docLink": cmd_doc_link, "launchOptions": cmd_launch_options, "protonVersions": cmd_proton_versions, "steamGames": cmd_steam_games,
+            "crashes": cmd_crashes, "crashReport": cmd_crash_report,
             "windowRules": cmd_window_rules, "niriWindows": cmd_niri_windows, "pickWindow": cmd_pick_window,
             "addWindowRule": cmd_add_window_rule, "saveWindowRule": cmd_save_window_rule,
             "keybinds": cmd_keybinds, "launchCommand": cmd_launch_command, "sideRail": cmd_side_rail,
             "appIcon": cmd_app_icon, "pickIconFile": cmd_pick_icon_file, "siteIcon": cmd_site_icon,
             "mimeApps": cmd_mime_apps, "splitCommand": cmd_split_command,
-            "firmware": cmd_firmware, "firmwareSummary": cmd_firmware_summary, "battery": cmd_battery}
+            "firmware": cmd_firmware, "firmwareSummary": cmd_firmware_summary, "battery": cmd_battery,
+            "mangohudTest": cmd_mangohud_test, "mangohudPreview": cmd_mangohud_preview, "scheduler": cmd_scheduler}
 
 
 def run(cfg, cmd, args):

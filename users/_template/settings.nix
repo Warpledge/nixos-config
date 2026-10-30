@@ -198,6 +198,17 @@
     granblueRelinkMods = false; # GBFR mods: RelinkModOrganizer + Reloaded-II
   };
 
+  #--- MangoHud Overlay
+  # What the overlay shows, set on Omni Settings' Gaming tab. Known names: fps,
+  # frametime, frame_timing, cpu_stats, cpu_temp, cpu_power, cpu_mhz, gpu_stats,
+  # gpu_temp, gpu_power, gpu_core_clock, gpu_name, vram, ram, battery, gamemode,
+  # resolution, time, wine, engine_version, vulkan_driver, show_fps_limit
+  mangohud.show = ["fps"];
+  mangohud.position = "top-right";
+  mangohud.fontSize = 16; # 8 to 64
+  mangohud.textColor = "00FF00"; # hex, no #
+  mangohud.background = 0; # background opacity, 0 to 100 %
+
   #--- Discord: GoofCord (Vencord), built from source with its own Node.js (slow)
   discord.goofcord = false;
   #--- Discord: Vesktop (Vencord), recolours live with the DMS theme (slow first build)
@@ -350,6 +361,13 @@
   # Apps whose launcher entry starts them with nvidia-offload, by .desktop id,
   # set on Omni Settings' Hardware tab: ["steam.desktop"]. Hybrid laptops only
   gpuOffload = [];
+
+  #--- Steam Games
+  # Launch options and Proton build per game, by Steam app id, set on Omni
+  # Settings' Gaming tab. Written into Steam's own files when Steam is closed:
+  # {"1245620" = {launchOptions = "nix-performance %command%";
+  #   proton = "GE-Proton10-25";};}
+  steamGames = {};
 
   #--- User Packages
   # nixpkgs packages added from Omni Settings' Packages tab, installed as they

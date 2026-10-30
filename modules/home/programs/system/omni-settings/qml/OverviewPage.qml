@@ -9,6 +9,7 @@ ColumnLayout {
     property var ov: null
     property var boot: null  // systemd-analyze's last startup, asked for apart
     property bool bootOpen: false  // whether the startup's details are shown
+    property bool crashesOpen: false
     property bool versionsOpen: false  // whether the older generations are listed
     readonly property var versions: ov ? ov.generations : []
     readonly property var current: versions.find(g => g.running) || versions[0] || null
@@ -594,6 +595,24 @@ ColumnLayout {
                 }
             }
         }
+    }
+
+    //--- Programs that crashed lately (CrashList.qml), kept to a count until opened
+    Section { text: "Crashes" }
+    ListRow {
+        icon: "bug_report"
+        title: "Last 30 Days"
+        info: "Programs that crashed, from systemd-coredump, games first. A game's report also holds "
+              + "its launch options and the end of its Proton log, when PROTON_LOG=1 made one."
+        value: !crashList.crashes ? "" : crashList.crashes.length ? `${crashList.crashes.length}` : "None"
+        expandable: !!crashList.crashes && crashList.crashes.length > 0
+        expanded: page.crashesOpen
+        onClicked: page.crashesOpen = !page.crashesOpen
+    }
+    Reveal {
+        open: page.crashesOpen && !!crashList.crashes && crashList.crashes.length > 0
+        gap: page.spacing
+        CrashList { id: crashList; view: page.view; quiet: true; Layout.fillWidth: true }
     }
 
     //--------------------------------------------------------------------//

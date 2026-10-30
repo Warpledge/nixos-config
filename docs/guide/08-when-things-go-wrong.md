@@ -33,4 +33,4 @@ Main → **Services** → **Running Now** shows each service's state and its las
 
 ## A Game Won't Start
 
-The **Launch Options** and **Proton Versions** pages under Gaming on this tab list the launch options that fix common problems and the Proton builds installed. A game that worked before an update often works again on an older Proton version.
+The **Launch Options** and **Proton Versions** pages on the Gaming tab list the launch options that fix common problems and the Proton builds installed. A game that worked before an update often works again on an older Proton version.

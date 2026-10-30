@@ -4,6 +4,7 @@ charge limit in force, and whether apps can run on the NVIDIA GPU."""
 import glob
 import json
 import os
+import re
 import shutil
 import subprocess
 import time
@@ -108,3 +109,59 @@ def battery():
 #--------------------------------------------------------------------#
 def has_offload():
     return shutil.which("nvidia-offload") is not None
+
+
+#--------------------------------------------------------------------#
+#-- CPU Scheduler (sched_ext)
+#--------------------------------------------------------------------#
+#--- The schedulers offered, from each one's README in sched-ext/scx; the
+#--- helper switches only to these
+SCHEDULERS = {
+    "scx_lavd": "Built for gaming: finds the latency-critical tasks and runs them first. "
+                "Best on single-CCX CPUs.",
+    "scx_bpfland": "Keeps interactive tasks (games, streaming, audio) running at their pace "
+                   "while CPU-heavy work runs beside them.",
+    "scx_flash": "Fair and predictable, for multimedia and real-time audio.",
+    "scx_cosmos": "Lightweight and general purpose: keeps tasks on the same CPU until the "
+                  "system is busy.",
+    "scx_p2dq": "General purpose, with load balancing across caches. Needs tuning for games.",
+    "scx_rusty": "General purpose, balancing load between each cache's CPUs from user space.",
+}
+SCX_UNIT = "scx.service"
+SCX_BIN = re.compile(r"(/nix/store/[^ ']+/bin)/\$\{SCX_SCHEDULER")
+
+
+def scx_unit():
+    """{active, bin}: whether scx.service runs and the folder its schedulers are
+    in, or None when the machine has no scx.service."""
+    try:
+        out = subprocess.run(["systemctl", "show", SCX_UNIT, "-p", "LoadState,ActiveState,ExecStart"],
+                             capture_output=True, text=True, timeout=10).stdout
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    props = dict(line.split("=", 1) for line in out.splitlines() if "=" in line)
+    if props.get("LoadState") != "loaded":
+        return None
+    m = SCX_BIN.search(props.get("ExecStart", ""))
+    return {"active": props.get("ActiveState") == "active", "bin": m.group(1) if m else ""}
+
+
+def scheduler():
+    """The running sched_ext scheduler, what the unit was told to run and the
+    choices, or None without scx.service."""
+    unit = scx_unit()
+    if unit is None:
+        return None
+    running = read("/sys/kernel/sched_ext/state") == "enabled"
+    ops = read("/sys/kernel/sched_ext/root/ops") if running else ""
+    env = {}
+    try:
+        out = subprocess.run(["systemctl", "show-environment"], capture_output=True, text=True,
+                             timeout=10).stdout
+        env = dict(line.split("=", 1) for line in out.splitlines() if "=" in line)
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+    return {"running": running, "ops": ops, "active": unit["active"],
+            "override": env.get("SCX_SCHEDULER_OVERRIDE", ""),
+            "choices": [{"name": n, "text": t} for n, t in SCHEDULERS.items()
+                        if not unit["bin"] or os.access(os.path.join(unit["bin"], n), os.X_OK)]}

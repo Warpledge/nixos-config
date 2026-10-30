@@ -96,6 +96,10 @@ Item {
             out[info.autostart.key] = info.autostart
         if (info && info.mimeTypes)
             out[info.mimeTypes.key] = info.mimeTypes
+        if (info && info.gpuOffload)
+            out[info.gpuOffload.key] = info.gpuOffload
+        if (info && info.steamGames)
+            out[info.steamGames.key] = info.steamGames
         return out
     }
     readonly property var navItems: {
@@ -1336,13 +1340,16 @@ Item {
                                       people: peoplePage,
                                       userpackages: userPackagesPage,
                                       proton: protonPage, protonversions: protonVersionsPage,
+                                      games: gamesPage, mangohud: mangoHudPage,
                                       windowrules: windowRulesPage, keybinds: keybindsPage,
                                       siderail: sideRailPage,
                                       startup: startupPage, filetypes: fileTypesPage,
-                                      firmware: firmwarePage, battery: batteryPage, dgpu: dgpuPage })
+                                      firmware: firmwarePage, battery: batteryPage, dgpu: dgpuPage,
+                                      scheduler: schedulerPage })
     Component { id: firmwarePage; FirmwarePage { view: omni } }
     Component { id: batteryPage; BatteryPage { view: omni } }
     Component { id: dgpuPage; DgpuPage { view: omni } }
+    Component { id: schedulerPage; SchedulerPage { view: omni } }
     Component { id: windowRulesPage; WindowRulesPage { view: omni } }
     Component { id: sideRailPage; SideRailPage { view: omni } }
     Component { id: keybindsPage; KeybindsPage { view: omni } }
@@ -1350,6 +1357,8 @@ Item {
     Component { id: fileTypesPage; FileTypesPage { view: omni } }
     Component { id: protonPage; ProtonPage { view: omni } }
     Component { id: protonVersionsPage; ProtonVersionsPage { view: omni } }
+    Component { id: gamesPage; GamesPage { view: omni } }
+    Component { id: mangoHudPage; MangoHudPage { view: omni } }
     //--- One page in the tab's scroll: its section's divider when it starts one, then
     //--- the page in a card whose header collapses it; a note starts collapsed
     component PageSection: ColumnLayout {
