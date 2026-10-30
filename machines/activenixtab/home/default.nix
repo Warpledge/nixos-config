@@ -17,5 +17,6 @@
     ./local-ai.nix
     ./on-screen-input
     ./unreal-engine.nix
+    ./vscodium.nix
   ];
 }
