@@ -117,22 +117,24 @@
       mangohud.background = 0;
       gpuOffload = [];
       sideRail = {
-        opencode-desktop = {
-          enable = false;
-          order = 3;
-        };
         claude-desktop = {
           enable = false;
           order = 2;
         };
         custom-steam = {
-          name = "Steam";
-          command = ["steam"];
           appId = "steam";
+          command = ["steam"];
           icon = "steam";
           keepRunning = true;
+          name = "Steam";
           order = 1;
+          enable = false;
         };
+        opencode-desktop = {
+          enable = false;
+          order = 3;
+        };
+        terminal = {enable = false;};
       };
       steamGames = {};
     };
