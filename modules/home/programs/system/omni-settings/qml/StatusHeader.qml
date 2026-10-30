@@ -52,10 +52,6 @@ ColumnLayout {
         const m = /^([\d.]+)-([a-z]+)\d*$/.exec(k || "")
         return m ? `${m[2]} ${m[1]}` : k
     }
-    function upFor(s) {
-        return s < 3600 ? `up ${Math.max(1, Math.round(s / 60))} min`
-            : s < 172800 ? `up ${Math.round(s / 3600)} h` : `up ${Math.round(s / 86400)} d`
-    }
     readonly property var facts: {
         const out = []
         const info = view.info
@@ -67,102 +63,160 @@ ColumnLayout {
             out.push({ icon: "memory", text: kernelName(st.kernel) },
                      { icon: "", text: st.release, tone: "info" })
         if (usage)
-            out.push({ icon: "schedule", text: upFor(usage.uptime) },
-                     { icon: "hard_drive", text: `${Fmt.size(usage.diskFree)} free` })
+            out.push({ icon: "hard_drive", text: `${Fmt.size(usage.diskFree)} free` })
+        // Git as its icon and what's waiting; the branch and the words are in its tip
         if (git && git.branch)
-            out.push({ icon: "fork_right", text: git.branch, ahead: git.ahead || 0 })
+            out.push({ icon: "fork_right", text: "",
+                       trail: [git.changed ? `±${git.changed}` : "", git.ahead ? `↑${git.ahead}` : "",
+                               git.behind ? `↓${git.behind}` : ""].filter(t => t).join(" "),
+                       tip: [`On ${git.branch}`, git.changed ? `${git.changed} changed` : "",
+                             git.ahead ? `${git.ahead} to push` : "",
+                             git.behind ? `${git.behind} to pull` : ""].filter(t => t).join(" · ") })
         return out
     }
 
-    //--- The computer and the person; its version, state and Rebuild. Side by side,
-    //--- stacked on a thin panel
-    GridLayout {
+    //--- The computer and the person, the version and its state, and the facts under
+    //--- them; Rebuild runs down the right of all three
+    RowLayout {
         visible: !header.barOnly
         Layout.fillWidth: true
-        columns: header.width < 420 ? 1 : 2
-        columnSpacing: 8
-        rowSpacing: 8
+        spacing: 8
 
-        Rectangle {
+        ColumnLayout {
             Layout.fillWidth: true
-            Layout.preferredWidth: 1
-            implicitHeight: 46
-            radius: 12
-            color: Theme.card
-            RowLayout {
-                anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.rightMargin: 8
-                spacing: 9
-                Image {
-                    Layout.preferredWidth: 32
-                    Layout.preferredHeight: 32
-                    sourceSize: Qt.size(64, 64)
-                    source: Qt.resolvedUrl("icon.svg")
-                }
-                Text {
+            spacing: 8
+            GridLayout {
+                Layout.fillWidth: true
+                columns: header.width < 420 ? 1 : 2
+                columnSpacing: 8
+                rowSpacing: 8
+
+                Rectangle {
                     Layout.fillWidth: true
-                    text: header.status ? header.status.hostname : ""
-                    color: Theme.text
-                    font.pixelSize: 16
-                    font.weight: Font.ExtraBold
-                    elide: Text.ElideRight
+                    Layout.preferredWidth: 1
+                    implicitHeight: 46
+                    radius: 12
+                    color: Theme.card
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 8
+                        anchors.rightMargin: 8
+                        spacing: 8
+                        Image {
+                            Layout.preferredWidth: 30
+                            Layout.preferredHeight: 30
+                            sourceSize: Qt.size(60, 60)
+                            source: Qt.resolvedUrl("icon.svg")
+                        }
+                        Tag {
+                            icon: "computer"
+                            text: header.status ? header.status.hostname : ""
+                            big: true
+                            fill: Qt.alpha(Theme.away, 0.2)
+                            ink: Theme.away
+                            tip: "This computer"
+                        }
+                        Item { Layout.fillWidth: true }
+                        // Opens Users
+                        Tag {
+                            icon: "person"
+                            text: header.view.info ? header.view.info.user : ""
+                            big: true
+                            fill: Qt.alpha(Theme.primary, userHover.hovered ? 0.34 : 0.2)
+                            ink: Theme.primary
+                            HoverHandler { id: userHover; cursorShape: Qt.PointingHandCursor }
+                            TapHandler {
+                                gesturePolicy: TapHandler.ReleaseWithinBounds
+                                onTapped: header.view.go("system", "people")
+                            }
+                        }
+                    }
                 }
-                // Opens Users
-                Tag {
-                    icon: "person"
-                    text: header.view.info ? header.view.info.user : ""
-                    fill: userHover.hovered ? Qt.alpha(Theme.primary, 0.42) : Qt.alpha(Theme.primary, 0.28)
-                    ink: Theme.text
-                    HoverHandler { id: userHover; cursorShape: Qt.PointingHandCursor }
-                    TapHandler {
-                        gesturePolicy: TapHandler.ReleaseWithinBounds
-                        onTapped: header.view.go("system", "people")
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 1
+                    implicitHeight: 46
+                    radius: 12
+                    color: Theme.card
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 8
+                        anchors.rightMargin: 8
+                        spacing: 8
+                        Tag {
+                            visible: !!header.status && header.status.generation > 0
+                            icon: "history"
+                            text: header.status ? `v. ${header.status.generation}` : ""
+                            big: true
+                            fill: Theme.cardHover
+                            ink: Theme.text
+                            tip: "The running system version (generation)"
+                        }
+                        Item { Layout.fillWidth: true }
+                        // Changes not yet applied open Review
+                        Tag {
+                            readonly property bool pending: header.waiting > 0
+                            icon: ""
+                            dot: true
+                            big: true
+                            text: pending ? `${header.waiting} change${header.waiting === 1 ? "" : "s"}` : "Up to date"
+                            fill: Qt.alpha(pending ? Theme.caution : Theme.success, 0.14)
+                            ink: pending ? Theme.caution : Theme.success
+                            HoverHandler { enabled: parent.pending; cursorShape: Qt.PointingHandCursor }
+                            TapHandler {
+                                enabled: parent.pending
+                                gesturePolicy: TapHandler.ReleaseWithinBounds
+                                onTapped: header.view.startReview()
+                            }
+                        }
+                    }
+                }
+            }
+
+            //--- Facts as pills, centred; a line that runs out wraps
+            Rectangle {
+                visible: header.facts.length > 0
+                Layout.fillWidth: true
+                implicitHeight: factFlow.implicitHeight + 8
+                radius: 10
+                color: Theme.card
+                Flow {
+                    id: factFlow
+                    // As wide as the pills when they fit on one line, so they centre
+                    readonly property real natural: {
+                        let w = -6
+                        for (let i = 0; i < children.length; i++)
+                            if (children[i].visible)
+                                w += children[i].implicitWidth + 6
+                        return w
+                    }
+                    width: Math.min(parent.width - 12, natural)
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 6
+                    Repeater {
+                        model: header.facts
+                        Tag {
+                            required property var modelData
+                            icon: modelData.icon
+                            text: modelData.text
+                            trail: modelData.trail || ""
+                            tip: modelData.tip || ""
+                            fill: modelData.tone ? Qt.alpha(Theme.toneColor(modelData.tone), 0.16) : Theme.cardHover
+                            ink: modelData.tone ? Theme.toneColor(modelData.tone) : Theme.dim
+                        }
                     }
                 }
             }
         }
 
-        Rectangle {
-            Layout.fillWidth: true
-            Layout.preferredWidth: 1
-            implicitHeight: 46
-            radius: 12
-            color: Theme.card
-            RowLayout {
-                anchors.fill: parent
-                anchors.leftMargin: 12
-                anchors.rightMargin: 6
-                spacing: 9
-                Text {
-                    Layout.fillWidth: true
-                    text: header.status && header.status.generation > 0 ? `Version ${header.status.generation}` : ""
-                    color: Theme.text
-                    font.pixelSize: 15
-                    font.weight: Font.ExtraBold
-                    elide: Text.ElideRight
-                }
-                // Changes not yet applied open Review
-                Tag {
-                    readonly property bool pending: header.waiting > 0
-                    icon: ""
-                    dot: true
-                    text: pending ? `${header.waiting} change${header.waiting === 1 ? "" : "s"}` : "Up to date"
-                    fill: Qt.alpha(pending ? Theme.caution : Theme.success, 0.14)
-                    ink: pending ? Theme.caution : Theme.success
-                    HoverHandler { enabled: parent.pending; cursorShape: Qt.PointingHandCursor }
-                    TapHandler {
-                        enabled: parent.pending
-                        gesturePolicy: TapHandler.ReleaseWithinBounds
-                        onTapped: header.view.startReview()
-                    }
-                }
                 Rectangle {
                     id: rebuildBtn
                     visible: header.canRebuild
-                    implicitWidth: 34
-                    implicitHeight: 34
-                    radius: 10
+                    Layout.fillHeight: true
+                    implicitWidth: 46
+                    radius: 12
                     readonly property bool lit: rebuildHover.hovered && !Jobs.running
                     opacity: Jobs.running ? 0.45 : 1
                     color: lit ? Qt.lighter(Theme.primary, 1.12) : Theme.primary
@@ -170,7 +224,7 @@ ColumnLayout {
                     Icon {
                         anchors.centerIn: parent
                         icon: Jobs.running ? "progress_activity" : "autorenew"
-                        size: 19
+                        size: 24
                         color: Theme.inkPrimary
                     }
                     // Changes waiting: Review takes them, then rebuilds
@@ -208,43 +262,6 @@ ColumnLayout {
                         onTapped: header.waiting ? header.view.startReview() : header.view.rebuild()
                     }
                 }
-            }
-        }
-    }
-
-    //--- Facts as pills, centred; a line that runs out wraps
-    Rectangle {
-        visible: !header.barOnly && header.facts.length > 0
-        Layout.fillWidth: true
-        implicitHeight: factFlow.implicitHeight + 8
-        radius: 10
-        color: Theme.card
-        Flow {
-            id: factFlow
-            // As wide as the pills when they fit on one line, so they centre
-            readonly property real natural: {
-                let w = -6
-                for (let i = 0; i < children.length; i++)
-                    if (children[i].visible)
-                        w += children[i].implicitWidth + 6
-                return w
-            }
-            width: Math.min(parent.width - 12, natural)
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: 6
-            Repeater {
-                model: header.facts
-                Tag {
-                    required property var modelData
-                    icon: modelData.icon
-                    text: modelData.text
-                    trail: modelData.ahead ? `↑${modelData.ahead}` : ""
-                    fill: modelData.tone ? Qt.alpha(Theme.toneColor(modelData.tone), 0.16) : Theme.cardHover
-                    ink: modelData.tone ? Theme.toneColor(modelData.tone) : Theme.dim
-                }
-            }
-        }
     }
 
     //--- CPU and memory, each a value and its last 5 minutes
@@ -266,13 +283,21 @@ ColumnLayout {
         property string text: ""
         property string trail: ""  // in caution after the text
         property bool dot: false
+        property bool big: false  // the larger pills in the header's top cards
+        property string tip: ""
         property color fill: Theme.cardHover
         property color ink: Theme.dim
-        implicitWidth: pillRow.implicitWidth + 18
-        implicitHeight: 22
-        radius: 11
+        implicitWidth: pillRow.implicitWidth + (big ? 22 : 16)
+        implicitHeight: big ? 30 : 22
+        radius: height / 2
         color: fill
         Behavior on color { ColorAnimation { duration: 120 } }
+        readonly property point cursor: tipHover.point.scenePosition
+        onCursorChanged: Tip.move(pill, cursor)
+        HoverHandler {
+            id: tipHover
+            onHoveredChanged: hovered && pill.tip ? Tip.request(pill, pill.tip, point.scenePosition) : Tip.cancel(pill)
+        }
         Row {
             id: pillRow
             anchors.centerIn: parent
@@ -287,15 +312,16 @@ ColumnLayout {
                 visible: pill.icon !== ""
                 anchors.verticalCenter: parent.verticalCenter
                 icon: pill.icon
-                size: 13
+                size: pill.big ? 16 : 13
                 color: pill.ink
             }
             Text {
+                visible: pill.text !== ""
                 anchors.verticalCenter: parent.verticalCenter
                 text: pill.text
                 color: pill.ink
-                font.pixelSize: 11
-                font.weight: Font.DemiBold
+                font.pixelSize: pill.big ? 14 : 11
+                font.weight: pill.big ? Font.Bold : Font.DemiBold
             }
             Text {
                 visible: pill.trail !== ""

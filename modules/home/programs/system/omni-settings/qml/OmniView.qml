@@ -840,15 +840,15 @@ Item {
         border.width: 1
         border.color: Qt.alpha(Theme.primary, 0.22)
     }
-    //--- Holds the pinned page header (stickyHead) to the frame, so it can be pushed up
-    //--- out of sight at its page's end
+    //--- Holds the pinned page header (stickyHead) over the scroll, as wide as the page
+    //--- cards, so it can be pushed up out of sight at its page's end
     Item {
         id: stickyClip
         visible: bodyFrame.visible
-        x: bodyFrame.x
-        y: bodyFrame.y
-        width: bodyFrame.width
-        height: bodyFrame.height
+        x: mainCol.x + bodyFlick.x
+        y: mainCol.y + bodyFlick.y
+        width: bodyFlick.width
+        height: bodyFlick.height
         clip: true
         z: 3
     }
@@ -1130,18 +1130,18 @@ Item {
                 // The last page pinned, kept while it fades out
                 property var shown: null
                 onSecChanged: if (sec) shown = sec
-                // Flush with the frame's top and sides (stickyClip), over the inset too
+                // The top of the page's own card, edged like it (stickyClip)
                 parent: stickyClip
                 width: stickyClip.width
-                height: stickyRow.implicitHeight + 16 + omni.frameInset
-                y: shown ? Math.min(0, shown.y + shown.height - bodyFlick.contentY + omni.frameInset - height) : 0
+                height: stickyRow.implicitHeight + 16
+                y: shown ? Math.min(0, shown.y + shown.height - bodyFlick.contentY - height) : 0
                 visible: opacity > 0
                 opacity: sec ? (omni.picking || packageSearch.open ? 0.35 : 1) : 0
                 Behavior on opacity { NumberAnimation { duration: 120 } }
-                radius: bodyFrame.radius
+                radius: 20  // the page cards' (PageSection)
                 color: Qt.tint(Theme.bg, Qt.alpha(Theme.text, stickyHover.hovered ? 0.09 : 0.06))
                 border.width: 1
-                border.color: bodyFrame.border.color
+                border.color: Qt.alpha(Theme.primary, 0.3)
                 // Square bottom corners, keeping the frame's side edges
                 Rectangle {
                     anchors.bottom: parent.bottom
@@ -1162,7 +1162,6 @@ Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
-                    anchors.verticalCenterOffset: omni.frameInset / 2
                     anchors.leftMargin: 14
                     anchors.rightMargin: 14
                     spacing: 12
@@ -1682,9 +1681,9 @@ Item {
                                         + (section.headed && headHover.hovered && !section.open ? 0.03 : 0))
             // An open page is edged in primary; the one under the cursor gets a firmer
             // ring like niri's focus ring, so the page being read is easy to find
-            border.width: !section.headed ? 0 : cardHover.hovered ? 2 : 1
+            border.width: section.headed ? 1 : 0
             border.color: cardHover.hovered ? Theme.primary
-                : section.open ? Qt.alpha(Theme.primary, 0.45) : Theme.rule
+                : section.open ? Qt.alpha(Theme.primary, 0.3) : Theme.rule
             Behavior on color { ColorAnimation { duration: 150 } }
             Behavior on border.color { ColorAnimation { duration: 150 } }
             HoverHandler { id: cardHover; enabled: section.headed }
