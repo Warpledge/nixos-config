@@ -16,7 +16,7 @@ in rec {
     browser = [
       (browser "zen" ["browsers" "zen"] "zen-beta.desktop" "zen-beta")
       (browser "mullvad" ["browsers" "mullvad"] "mullvad-browser.desktop" "mullvad-browser")
-      (browser "helium" ["browsers" "helium"] "helium.desktop" "helium")
+      (browser "helium" null "helium.desktop" "helium") # Always installed
     ];
     textEditor = [
       (app "zed" ["editors" "zed"] "dev.zed.Zed.desktop" ["zeditor"])
@@ -37,7 +37,7 @@ in rec {
 
   forUser = user:
     lib.mapAttrs (kind: candidates: let
-      on = lib.filter (c: lib.attrByPath c.toggle false user) candidates;
+      on = lib.filter (c: c.toggle == null || lib.attrByPath c.toggle false user) candidates;
       chosen = lib.findFirst (c: c.name == user.defaultApps.${kind}) null on;
     in
       if chosen != null

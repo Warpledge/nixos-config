@@ -44,7 +44,7 @@
   #--------------------------------------------------------------------#
   #-- App Window (home-manager)
   #--------------------------------------------------------------------#
-  #- Opens the web UI as a Helium app window. Needs browsers.helium. Shares
+  #- Opens the web UI as a Helium app window. Shares
   #- the stock entry's name, so it replaces the one that opens the default browser.
   home-manager.users.${machine.mainUser}.xdg.desktopEntries.syncthing-ui = {
     name = "Syncthing";

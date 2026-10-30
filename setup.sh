@@ -781,7 +781,6 @@ detect_gpu() {
 #--- ~/.local/opt bundles aren't offered: the repo can't supply them.
 apps=(
   "Browsers|browsers.mullvad|Mullvad Browser"
-  "Browsers|browsers.helium|Helium (also opens the Syncthing and Suwayomi pages)"
   "Browsers|browsers.ferdium|Ferdium: web messengers in one window"
   "Terminals|terminals.ghostty|Ghostty"
   "File browsers|fileBrowsers.dolphin|Dolphin: KDE's file manager"

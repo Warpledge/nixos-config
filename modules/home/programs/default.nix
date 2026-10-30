@@ -53,7 +53,7 @@ user: {lib, ...}: {
     #--- Browsers (controlled by user settings)
     ++ lib.optionals user.browsers.zen [./browsers/zen]
     ++ lib.optionals user.browsers.mullvad [./browsers/mullvad.nix]
-    ++ lib.optionals user.browsers.helium [./browsers/helium.nix]
+    ++ [./browsers/helium.nix] # Always on: it opens the web app windows
     ++ lib.optionals user.browsers.ferdium [./browsers/ferdium.nix]
     #--- Editors (controlled by user settings)
     ++ lib.optionals user.editors.helix [./editors/helix.nix]

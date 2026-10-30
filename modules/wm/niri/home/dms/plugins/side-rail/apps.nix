@@ -45,8 +45,7 @@
       command = ["kitty" "--class" "side-rail-terminal" "--directory" machine.flakePath];
       keepRunning = true; # Unloading ends what runs in it
     }
-    ++ lib.optional user.browsers.helium
-    (web "brave-ai" "Ask Brave" "travel_explore" "https://search.brave.com/ask")
+    ++ [(web "brave-ai" "Ask Brave" "travel_explore" "https://search.brave.com/ask")]
     ++ lib.optional user.claudeDesktop.enable {
       id = "claude-desktop";
       name = "Claude Desktop";
@@ -63,9 +62,9 @@
       command = ["opencode-desktop"];
       keepRunning = true;
     }
-    ++ lib.optional (user.browsers.helium && user.llamaSwap.enable)
+    ++ lib.optional user.llamaSwap.enable
     (web "llama-swap" "llama-swap" "memory" "http://127.0.0.1:8090/ui")
-    ++ lib.optional (user.browsers.helium && user.openWebui.enable)
+    ++ lib.optional user.openWebui.enable
     (web "open-webui" "Open WebUI" "forum" "http://127.0.0.1:8091");
 
   changes = user.sideRail;

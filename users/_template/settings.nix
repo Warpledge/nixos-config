@@ -44,7 +44,6 @@
   browsers = {
     zen = true;
     mullvad = false;
-    helium = false;
     ferdium = false; # Web messengers in one window (services set in-app)
   };
 

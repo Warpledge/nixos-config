@@ -152,7 +152,7 @@
 
   #--- Suwayomi Manga Server
   # Local manga reader, web UI at http://localhost:4567. Its launcher opens
-  # in Helium (browsers.helium).
+  # in Helium.
   suwayomi.enable = false;
 
   #--- Syncthing File Sync

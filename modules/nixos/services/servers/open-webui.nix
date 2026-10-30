@@ -139,17 +139,13 @@ in {
   #--------------------------------------------------------------------#
   #-- Launcher
   #--------------------------------------------------------------------#
-  #--- A Helium app window (no tabs or address bar) for users with Helium on,
-  #--- the default browser for the rest
+  #--- A Helium app window (no tabs or address bar)
   home-manager.users = lib.mapAttrs (_: user:
     lib.mkIf user.openWebui.enable {
       xdg.desktopEntries.open-webui = {
         name = "Open WebUI";
         comment = "Chat with the local models";
-        exec =
-          if user.browsers.helium
-          then "helium --app=${url}"
-          else "xdg-open ${url}";
+        exec = "helium --app=${url}";
         icon = "${frontend}/static/favicon.png";
         categories = ["Network" "Chat"];
       };

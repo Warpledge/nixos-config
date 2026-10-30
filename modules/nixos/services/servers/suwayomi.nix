@@ -3,8 +3,8 @@
 #=====================================================================#
 #- Local manga reader server at http://localhost:4567. Each user gets a
 #- launcher that asks for a password (hash outside the repo, set with
-#- suwayomi-set-password) and opens it as a Helium app window; needs
-#- browsers.helium. The server stays open to anything else on localhost.
+#- suwayomi-set-password) and opens it as a Helium app window. The server
+#- stays open to anything else on localhost.
 {
   config,
   lib,
