@@ -84,8 +84,15 @@ Item {
                 slideout.slideoutWidth = Math.round(Math.max(480, Math.min(most,
                     slideout.slideoutWidth - (mouse.x - pressX))))
             }
-            onReleased: if (root.pluginService)
-                root.pluginService.savePluginState(root.pluginId, "width", slideout.slideoutWidth)
+            onReleased: save()
+            onDoubleClicked: {
+                slideout.slideoutWidth = root.defaultWidth
+                save()
+            }
+            function save() {
+                if (root.pluginService)
+                    root.pluginService.savePluginState(root.pluginId, "width", slideout.slideoutWidth)
+            }
         }
     }
 
