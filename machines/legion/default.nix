@@ -102,7 +102,8 @@
     [
       ./hardware/gpu.nix
       ./hardware/hardware-configuration.nix
-      ./hardware/storage.nix
+      # Off until the SK Hynix has a LUKS partition labelled "storage"
+      # ./hardware/storage.nix
       ./hardware/swapfile.nix
 
       ../../modules
