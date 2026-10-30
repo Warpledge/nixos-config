@@ -18,6 +18,8 @@ Unless the machine is `eclipse` or `legion` and the user `warpledge`, the person
 
 When something fails repeatedly, the user has to re-explain, or a tool limitation needs a workaround, add a bullet here under 15 words, no explanation.
 
+- Scratch QML check files: don't name them `shell.qml`; the Bash hook blocks it.
+
 ## Critical Rules
 
 1. **Never run `nixm rebuild` or `nixos-rebuild`.** Stop and ask instead. Hand back a rebuild as runnable from Omni Settings, or with `!` when they want you to see the errors: `! nixm rebuild 2>&1 | grep -E "error|Error|failed|Failed" || echo "✓"` (same for `nixm boot`). Run `nix flake check`, and a machine build more rarely, only when you can't tell whether a change breaks evaluation or the build (a new module or import, an unfamiliar option, an input or package change, Nix you aren't sure of); a value change in a working option, or a JSON, Markdown or comment edit, needs neither. Commit without asking (rule 6); pushing and history rewrites stay with the user.

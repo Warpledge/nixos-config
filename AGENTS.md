@@ -31,6 +31,8 @@ to their hardware or apps.
 
 When something fails repeatedly, when the user has to re-explain, or when a workaround is found for a platform/tool limitation, add a one-line bullet here. Keep each bullet under 15 words. No explanations. Only add things that will save time in future sessions.
 
+- Scratch QML check files: don't name them `shell.qml`; the Bash hook blocks it.
+
 ## Rules
 
 Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
