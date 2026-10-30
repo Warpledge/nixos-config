@@ -43,6 +43,7 @@ PAGE_TITLES = {
 }
 MOVES = {  # setting -> (page, group on that page)
     ("japanese", "vn"): ("Gaming", "Japanese Visual Novels"),
+    ("sunshine", "enable"): ("Gaming", "Streaming"),
 }
 
 #--- Sidebar sections, top to bottom; under niri, Desktop is on the Niri tab, and
@@ -96,7 +97,7 @@ PAGES = {
     "Services": ("computer", "network-server-symbolic",
                  "Background services for everyone here.",
                  [("VPN & Remote Access", "", ["mullvad.enable", "mullvad.splitTunnel", "ssh.enable"]),
-                  ("Sharing & Streaming", "", ["syncthing.enable", "sunshine.enable", "suwayomi.enable"]),
+                  ("Sharing & Streaming", "", ["syncthing.enable", "suwayomi.enable"]),
                   ("Containers & Scanning", "", ["docker.enable", "clamav.enable"])]),
     "Appearance": ("desktop", "applications-graphics-symbolic",
                    "Wallpaper and the shell's look.",

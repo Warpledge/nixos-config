@@ -49,11 +49,12 @@ HELPER = "/run/current-system/sw/bin/omni-settings-apply"
 
 #--- The master tabs across the top, each with its own page list
 TABS = [("main", "Main"), ("packages", "Packages"), ("niri", "Niri"), ("hardware", "Hardware"),
-        ("ai", "AI"), ("docs", "Docs")]
+        ("gaming", "Gaming"), ("ai", "AI"), ("docs", "Docs")]
 TAB_ICONS = {"main": ("go-home-symbolic", "user-home-symbolic"),
              "packages": ("package-x-generic-symbolic", "system-software-install-symbolic"),
              "niri": ("view-grid-symbolic", "view-app-grid-symbolic"),
              "hardware": ("computer-symbolic", "drive-harddisk-symbolic"),
+             "gaming": ("input-gaming-symbolic", "applications-games-symbolic"),
              "ai": ("applications-science-symbolic", "starred-symbolic"),
              "docs": ("accessories-dictionary-symbolic", "help-browser-symbolic")}
 
@@ -75,13 +76,11 @@ TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
        "hardware": [("firmware", "Firmware", ("software-update-available-symbolic", "application-x-firmware")),
                     ("battery", "Battery", ("battery-symbolic", "battery-full-symbolic")),
                     ("dgpu", "Run on dGPU", ("video-display-symbolic", "computer-symbolic"))],
+       "gaming": [("proton", "Launch Options", ("input-gaming-symbolic",)),
+                  ("protonversions", "Proton Versions",
+                   ("system-software-install-symbolic", "input-gaming-symbolic"))],
        "ai": [],
        "docs": []}
-
-#--- Docs tab Gaming pages ahead of the game notes: [(key, title, icons)]
-DOCS_GAMING = [("proton", "Launch Options", ("input-gaming-symbolic",)),
-               ("protonversions", "Proton Versions",
-                ("system-software-install-symbolic", "input-gaming-symbolic"))]
 
 #--- The line under each page in the page list that has no description of its own
 NAV_SUBTITLES = {"overview": "Updates, freeing space, versions", "git": "Changes, commits, pull requests",
@@ -121,6 +120,8 @@ HISTORY = 8  # versions the Overview lists
 
 #--- Sections shown on a tab other than Main
 SECTION_TAB = {"cloudai": "ai", "localai": "ai", "apps": "packages"}
+#--- Apps pages that leave Default Packages for a page of their own on another tab
+PAGE_TAB = {"Gaming": "gaming"}
 
 USER_PACKAGES = ("user", ("userPackages",))
 KEYBINDS = ("user", schema.KEYBINDS)
@@ -312,7 +313,7 @@ def cmd_load(cfg, _args):
         if items:
             nav[tab].append({"id": "", "title": "", "items": items})
     pages, by_section = {}, {key: [] for key, _ in schema.SECTIONS}
-    apps_groups = []
+    apps_groups, tab_pages = [], {}
     # Under niri every DMS link moves to the Shell page, in categories (shellLinks)
     shell_links = wm == "niri"
     shell = {}
@@ -337,6 +338,13 @@ def cmd_load(cfg, _args):
                            "settings": [setting_json(cfg, state, s, multi, modules) for s in g.settings],
                            "links": links})
         if not groups:
+            continue
+        if page.title in PAGE_TAB:
+            pages[pid] = {"id": pid, "title": "Apps", "description": page.description,
+                          "icon": [page.icon, schema.FALLBACK_ICON], "intro": "",
+                          "changeFor": multi, "groups": groups}
+            tab_pages.setdefault(PAGE_TAB[page.title], []).append(
+                {"id": pid, "title": "Apps", "icon": [page.icon, schema.FALLBACK_ICON]})
             continue
         if page.section == "apps" or page.section not in by_section and page.section != "top":
             apps_groups.append(app_card(page, pid, groups))
@@ -371,6 +379,8 @@ def cmd_load(cfg, _args):
     for key, title in schema.SECTIONS:
         if by_section[key]:
             nav[section_tab.get(key, "main")].append({"id": key, "title": title, "items": by_section[key]})
+    for tab, items in tab_pages.items():
+        nav[tab].append({"id": f"{tab}-apps", "title": "", "items": items})
     user_packages = next((s for p in state.pages for g in p.groups for s in g.settings
                           if (s.domain, s.path) == USER_PACKAGES), None)
     if user_packages:
@@ -388,12 +398,10 @@ def cmd_load(cfg, _args):
               for d in docstate.guide_docs(cfg.flake)]
     if guides:
         nav["docs"].append({"id": "guides", "title": "Guides", "items": guides})
-    nav["docs"].append({"id": "gaming", "title": "Gaming",
-                        "items": [{"id": k, "title": t, "icon": list(i), "custom": True,
-                                   "subtitle": NAV_SUBTITLES.get(k, "")}
-                                  for k, t, i in DOCS_GAMING]
-                        + [{"id": d.key, "title": d.title, "icon": ["input-gaming-symbolic"], "custom": True}
-                           for d in docstate.game_docs(cfg.flake)]})
+    game_docs = [{"id": d.key, "title": d.title, "icon": ["input-gaming-symbolic"], "custom": True}
+                 for d in docstate.game_docs(cfg.flake)]
+    if game_docs:
+        nav["docs"].append({"id": "gaming", "title": "Gaming", "items": game_docs})
 
     dismissed = read_dismissed()
     new = [{"key": new_id(d, p), "value": v} for d, p, v in state.new
