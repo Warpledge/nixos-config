@@ -14,7 +14,6 @@ ColumnLayout {
     readonly property int samples: 150  // 5 minutes
     readonly property real cpu: cpuHistory.length ? cpuHistory[cpuHistory.length - 1] : -1
     readonly property real mem: memHistory.length ? memHistory[memHistory.length - 1] : -1
-    readonly property bool canRebuild: !!view.info && view.info.admin && view.info.canApply
     readonly property int waiting: view.pendingCount
     property bool barOnly: false  // just the graphs, as over the run page
     spacing: 8
@@ -75,8 +74,7 @@ ColumnLayout {
         return out
     }
 
-    //--- The computer and the person, the version and its state, and the facts under
-    //--- them; Rebuild runs down the right of all three
+    //--- The computer and the person, the version and its state, and the facts under them
     RowLayout {
         visible: !header.barOnly
         Layout.fillWidth: true
@@ -87,7 +85,8 @@ ColumnLayout {
             spacing: 8
             GridLayout {
                 Layout.fillWidth: true
-                columns: header.width < 420 ? 1 : 2
+                readonly property bool stacked: header.width < 420
+                columns: stacked ? 1 : 3
                 columnSpacing: 8
                 rowSpacing: 8
 
@@ -102,12 +101,6 @@ ColumnLayout {
                         anchors.leftMargin: 8
                         anchors.rightMargin: 8
                         spacing: 8
-                        Image {
-                            Layout.preferredWidth: 30
-                            Layout.preferredHeight: 30
-                            sourceSize: Qt.size(60, 60)
-                            source: Qt.resolvedUrl("icon.svg")
-                        }
                         Tag {
                             icon: "computer"
                             text: header.status ? header.status.hostname : ""
@@ -131,6 +124,18 @@ ColumnLayout {
                             }
                         }
                     }
+                }
+
+                // The NixOS logo between the two cards (nixos-icons, beside the QML)
+                Image {
+                    visible: !parent.stacked
+                    Layout.preferredWidth: 34
+                    Layout.preferredHeight: 34
+                    Layout.alignment: Qt.AlignCenter
+                    sourceSize: Qt.size(68, 68)
+                    source: Qt.resolvedUrl("nix-snowflake.png")
+                    smooth: true
+                    mipmap: true
                 }
 
                 Rectangle {
@@ -210,58 +215,6 @@ ColumnLayout {
                 }
             }
         }
-
-                Rectangle {
-                    id: rebuildBtn
-                    visible: header.canRebuild
-                    Layout.fillHeight: true
-                    implicitWidth: 46
-                    radius: 12
-                    readonly property bool lit: rebuildHover.hovered && !Jobs.running
-                    opacity: Jobs.running ? 0.45 : 1
-                    color: lit ? Qt.lighter(Theme.primary, 1.12) : Theme.primary
-                    Behavior on color { ColorAnimation { duration: 120 } }
-                    Icon {
-                        anchors.centerIn: parent
-                        icon: Jobs.running ? "progress_activity" : "autorenew"
-                        size: 24
-                        color: Theme.inkPrimary
-                    }
-                    // Changes waiting: Review takes them, then rebuilds
-                    Rectangle {
-                        visible: header.waiting > 0
-                        x: parent.width - width + 5
-                        y: -5
-                        width: Math.max(18, badgeText.implicitWidth + 8)
-                        height: 18
-                        radius: 9
-                        color: Theme.caution
-                        border.width: 2
-                        border.color: Theme.bg
-                        Text {
-                            id: badgeText
-                            anchors.centerIn: parent
-                            text: header.waiting
-                            color: Theme.bg
-                            font.pixelSize: 11
-                            font.weight: Font.ExtraBold
-                        }
-                    }
-                    readonly property point cursor: rebuildHover.point.scenePosition
-                    onCursorChanged: Tip.move(rebuildBtn, cursor)
-                    HoverHandler {
-                        id: rebuildHover
-                        cursorShape: Jobs.running ? Qt.ArrowCursor : Qt.PointingHandCursor
-                        onHoveredChanged: hovered
-                            ? Tip.request(rebuildBtn, header.waiting ? "Review and apply your changes" : "Rebuild",
-                                          point.scenePosition)
-                            : Tip.cancel(rebuildBtn)
-                    }
-                    TapHandler {
-                        gesturePolicy: TapHandler.ReleaseWithinBounds
-                        onTapped: header.waiting ? header.view.startReview() : header.view.rebuild()
-                    }
-                }
     }
 
     //--- CPU and memory, each a value and its last 5 minutes
@@ -287,8 +240,8 @@ ColumnLayout {
         property string tip: ""
         property color fill: Theme.cardHover
         property color ink: Theme.dim
-        implicitWidth: pillRow.implicitWidth + (big ? 22 : 16)
-        implicitHeight: big ? 30 : 22
+        implicitWidth: pillRow.implicitWidth + (big ? 20 : 16)
+        implicitHeight: big ? 26 : 22
         radius: height / 2
         color: fill
         Behavior on color { ColorAnimation { duration: 120 } }
@@ -312,7 +265,7 @@ ColumnLayout {
                 visible: pill.icon !== ""
                 anchors.verticalCenter: parent.verticalCenter
                 icon: pill.icon
-                size: pill.big ? 16 : 13
+                size: pill.big ? 15 : 13
                 color: pill.ink
             }
             Text {
@@ -320,7 +273,7 @@ ColumnLayout {
                 anchors.verticalCenter: parent.verticalCenter
                 text: pill.text
                 color: pill.ink
-                font.pixelSize: pill.big ? 14 : 11
+                font.pixelSize: pill.big ? 13 : 11
                 font.weight: pill.big ? Font.Bold : Font.DemiBold
             }
             Text {

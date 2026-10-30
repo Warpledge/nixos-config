@@ -1360,7 +1360,7 @@ Item {
         anchors.top: parent.top
         anchors.right: parent.right
         anchors.margins: omni.edge
-        anchors.topMargin: mainCol.y + tabsBar.y + tabsBar.height  // level with the tabs' foot
+        anchors.topMargin: mainCol.y + tabsBar.y + tabsBar.height + 6  // under Rebuild
         // As tall as its icons, up to the window's bottom margin
         height: Math.min(railList.contentHeight + 8, parent.height - anchors.topMargin - omni.edge)
         width: omni.railItem + 8
@@ -1416,6 +1416,63 @@ Item {
                     }
                 }
             }
+        }
+    }
+
+    //--- Rebuild, right of the tabs and over the rail (admins). With changes waiting it
+    //--- carries their count and opens Review, which applies them
+    Rectangle {
+        id: rebuildBtn
+        readonly property int waiting: omni.pendingCount
+        visible: mainCol.visible && !!omni.info && omni.info.admin && omni.info.canApply
+        anchors.right: parent.right
+        anchors.rightMargin: omni.edge
+        y: mainCol.y + tabsBar.y
+        width: rail.width
+        height: tabsBar.height
+        radius: 16
+        readonly property bool lit: rebuildHover.hovered && !Jobs.running
+        opacity: Jobs.running ? 0.45 : 1
+        color: lit ? Qt.lighter(Theme.primary, 1.12) : Theme.primary
+        Behavior on color { ColorAnimation { duration: 120 } }
+        Icon {
+            anchors.centerIn: parent
+            icon: Jobs.running ? "progress_activity" : "autorenew"
+            size: 24
+            color: Theme.inkPrimary
+        }
+        Rectangle {
+            visible: rebuildBtn.waiting > 0
+            x: parent.width - width + 5
+            y: -5
+            width: Math.max(18, badgeText.implicitWidth + 8)
+            height: 18
+            radius: 9
+            color: Theme.caution
+            border.width: 2
+            border.color: Theme.bg
+            Text {
+                id: badgeText
+                anchors.centerIn: parent
+                text: rebuildBtn.waiting
+                color: Theme.bg
+                font.pixelSize: 11
+                font.weight: Font.ExtraBold
+            }
+        }
+        readonly property point cursor: rebuildHover.point.scenePosition
+        onCursorChanged: Tip.move(rebuildBtn, cursor)
+        HoverHandler {
+            id: rebuildHover
+            cursorShape: Jobs.running ? Qt.ArrowCursor : Qt.PointingHandCursor
+            onHoveredChanged: hovered
+                ? Tip.request(rebuildBtn, rebuildBtn.waiting ? "Review and apply your changes" : "Rebuild",
+                              point.scenePosition)
+                : Tip.cancel(rebuildBtn)
+        }
+        TapHandler {
+            gesturePolicy: TapHandler.ReleaseWithinBounds
+            onTapped: rebuildBtn.waiting ? omni.startReview() : omni.rebuild()
         }
     }
 

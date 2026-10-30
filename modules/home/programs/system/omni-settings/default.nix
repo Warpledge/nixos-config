@@ -44,7 +44,8 @@
       # Python can't cache bytecode in the store, so each call would recompile
       ${pkgs.python3}/bin/python3 -m compileall -q --invalidation-mode unchecked-hash $share
       install -Dm644 -t $share/qml ${./qml}/*.qml
-      install -Dm644 ${./icon.svg} $share/qml/icon.svg
+      install -Dm644 -t $share/qml \
+        ${pkgs.nixos-icons}/share/icons/hicolor/128x128/apps/nix-snowflake.png
       substitute ${./qml/Config.qml.in} $share/qml/Config.qml \
         --subst-var-by backend $out/bin/omni-settings-backend \
         --subst-var-by editor ${lib.escapeShellArg (builtins.toJSON {inherit (editor) launch desktop;})}
