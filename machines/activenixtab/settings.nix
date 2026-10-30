@@ -110,6 +110,13 @@
       claudeDesktop.matugen = false;
       defaultApps.browser = "helium";
       defaultApps.textEditor = "vscodium";
+      mangohud.show = ["fps"];
+      mangohud.position = "top-right";
+      mangohud.fontSize = 16;
+      mangohud.textColor = "00FF00";
+      mangohud.background = 0;
+      gpuOffload = [];
+      sideRail = {};
     };
   };
 
@@ -158,4 +165,6 @@
   flatpak.enable = true;
   boot.menu.timeout = 5;
   boot.menu.entries = 10;
+  blocklist.allow = [];
+  apparmor.enforce = [];
 }
