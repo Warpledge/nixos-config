@@ -254,6 +254,27 @@ ColumnLayout {
                 Layout.preferredHeight: item ? item.implicitHeight : 0
                 sourceComponent: OpenPorts {}
             }
+            Loader {
+                active: group.modelData.title === "Ad & Tracker Blocking"
+                visible: active
+                Layout.fillWidth: true
+                Layout.preferredHeight: item ? item.implicitHeight : 0
+                sourceComponent: BlockLookup {}
+            }
+            Loader {
+                active: group.modelData.title === "Mullvad"
+                visible: active && !!item && item.visible
+                Layout.fillWidth: true
+                Layout.preferredHeight: item && item.visible ? item.implicitHeight : 0
+                sourceComponent: MullvadStatus {}
+            }
+            Loader {
+                active: page.model.title === "SSH" && group.modelData.title === "Authorized Keys"
+                visible: active
+                Layout.fillWidth: true
+                Layout.preferredHeight: item ? item.implicitHeight : 0
+                sourceComponent: SshKeys { view: page.view }
+            }
         }
     }
 

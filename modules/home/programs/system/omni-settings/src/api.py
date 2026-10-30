@@ -34,12 +34,14 @@ import gitstate  # noqa: E402
 import hardwarestate  # noqa: E402
 import keybindstate  # noqa: E402
 import mimeapps  # noqa: E402
+import netstate  # noqa: E402
 import nixfile  # noqa: E402
 import packagestate  # noqa: E402
 import peoplestate  # noqa: E402
 import resetstate  # noqa: E402
 import protonstate  # noqa: E402
 import schema  # noqa: E402
+import securitystate  # noqa: E402
 import servicestate  # noqa: E402
 import steamstate  # noqa: E402
 import system  # noqa: E402
@@ -50,11 +52,14 @@ import windowrulestate as wr  # noqa: E402
 HELPER = "/run/current-system/sw/bin/omni-settings-apply"
 
 #--- The master tabs across the top, each with its own page list
-TABS = [("main", "Main"), ("packages", "Packages"), ("niri", "Niri"), ("hardware", "Hardware"),
-        ("gaming", "Gaming"), ("ai", "AI"), ("docs", "Docs")]
+TABS = [("main", "Main"), ("packages", "Packages"), ("niri", "Niri"), ("network", "Network"),
+        ("security", "Security"), ("hardware", "Hardware"), ("gaming", "Gaming"), ("ai", "AI"),
+        ("docs", "Docs")]
 TAB_ICONS = {"main": ("go-home-symbolic", "user-home-symbolic"),
              "packages": ("package-x-generic-symbolic", "system-software-install-symbolic"),
              "niri": ("view-grid-symbolic", "view-app-grid-symbolic"),
+             "network": ("network-workgroup-symbolic", "network-wired-symbolic"),
+             "security": ("security-high-symbolic", "channel-secure-symbolic"),
              "hardware": ("computer-symbolic", "drive-harddisk-symbolic"),
              "gaming": ("input-gaming-symbolic", "applications-games-symbolic"),
              "ai": ("applications-science-symbolic", "starred-symbolic"),
@@ -62,7 +67,8 @@ TAB_ICONS = {"main": ("go-home-symbolic", "user-home-symbolic"),
 
 #--- Each tab's pages above its sections: key, title and icons to try.
 #--- Shell shows only under niri, which also moves the Desktop section to Niri;
-#--- Battery only with a battery and Run on dGPU only with nvidia-offload.
+#--- Battery only with a battery, Run on dGPU only with nvidia-offload and
+#--- AppArmor only with the profile list apparmor/default.nix writes.
 TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
                 ("git", "Git", ("vcs-branch-symbolic", "branch-symbolic", "folder-remote-symbolic")),
                 ("flatpaks", "Flatpaks", ("flatpak-symbolic", "system-software-install-symbolic")),
@@ -75,6 +81,8 @@ TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
                  ("window-new-symbolic", "preferences-system-windows-symbolic")),
                 ("siderail", "Side Rail", ("view-dual-symbolic", "sidebar-show-symbolic")),
                 ("keybinds", "Keybinds", ("input-keyboard-symbolic", "preferences-desktop-keyboard-symbolic"))],
+       "network": [("nettools", "Tools", ("network-workgroup-symbolic", "utilities-terminal-symbolic"))],
+       "security": [("apparmor", "AppArmor", ("security-high-symbolic", "channel-secure-symbolic"))],
        "hardware": [("firmware", "Firmware", ("software-update-available-symbolic", "application-x-firmware")),
                     ("battery", "Battery", ("battery-symbolic", "battery-full-symbolic")),
                     ("dgpu", "Run on dGPU", ("video-display-symbolic", "computer-symbolic")),
@@ -105,6 +113,9 @@ NAV_SUBTITLES = {"overview": "Updates, freeing space, versions, crashes", "git":
                              "or add a web page or app of your own. Changes wait for Apply.",
                  "keybinds": "Change a key, turn a keybind off, or add your own. Changes are yours "
                              "alone and wait for Apply, like any other setting.",
+                 "nettools": "Check the connection and its speed, and how DNS is resolved",
+                 "apparmor": "Each app profile's mode and what it would have blocked since boot. "
+                             "Enforcing one waits for Apply.",
                  "firmware": "Firmware for this computer's devices from fwupd, and updates waiting",
                  "battery": "Charge, health, and where charging stops",
                  "dgpu": "Apps whose launcher starts them on the NVIDIA GPU. Changes wait for Apply.",
@@ -130,9 +141,10 @@ QUICK = ["display_config", "keybinds", "mouse_touchpad", "theme", "wallpaper", "
 HISTORY = 8  # versions the Overview lists
 
 #--- Sections shown on a tab other than Main
-SECTION_TAB = {"cloudai": "ai", "localai": "ai", "apps": "packages"}
+SECTION_TAB = {"cloudai": "ai", "localai": "ai", "apps": "packages", "network": "network",
+               "security": "security"}
 #--- Apps pages that leave Default Packages for a page of their own on another tab
-PAGE_TAB = {"Gaming": "gaming"}
+PAGE_TAB = {"Gaming": "gaming", "Security": "security"}
 
 USER_PACKAGES = ("user", ("userPackages",))
 KEYBINDS = ("user", schema.KEYBINDS)
@@ -310,6 +322,8 @@ def shows(key, wm):
         return bool(shutil.which("mangohud"))
     if key == "scheduler":
         return hardwarestate.scx_unit() is not None
+    if key == "apparmor":
+        return securitystate.profiles() is not None
     return True
 
 
@@ -331,7 +345,8 @@ def cmd_load(cfg, _args):
             nav[tab].append({"id": "", "title": "", "items": items})
     pages, by_section = {}, {key: [] for key, _ in schema.SECTIONS}
     apps_groups, tab_pages = [], {}
-    # Under niri every DMS link moves to the Shell page, in categories (shellLinks)
+    # Under niri every DMS link moves to the Shell page, in categories (shellLinks),
+    # except those on a page of a tab of its own (Network's Connections)
     shell_links = wm == "niri"
     shell = {}
     for page in state.pages:
@@ -342,7 +357,7 @@ def cmd_load(cfg, _args):
         groups = []
         for g in page.groups:
             links = [{"tab": l.tab, "title": l.title, "subtitle": l.subtitle, "icon": l.icon} for l in g.links]
-            if shell_links:
+            if shell_links and page.section not in ("network", "security"):
                 for l, j in zip(g.links, links):
                     shell.setdefault(l.group or l.page, []).append(j)
                 if not g.settings:
@@ -989,6 +1004,80 @@ def cmd_ports(cfg, _args):
     return [{"proto": proto, "port": port, "who": who} for proto, port, who in system.open_ports(state.resolved)]
 
 
+#--------------------------------------------------------------------#
+#-- Network
+#--------------------------------------------------------------------#
+def cmd_net_test(_cfg, args):
+    """The Tools page's ping or speed test, each output line on stderr; the last lines."""
+    commands = {"ping": netstate.PING, "speedtest": netstate.SPEEDTEST}
+    command = commands.get(args.get("kind"))
+    if command is None:
+        raise ValueError(f"unknown test: {args.get('kind')}")
+    ok, tail = run_streamed([command])
+    if not ok:
+        raise ValueError("\n".join(tail[-6:]) or "The test failed without saying why.")
+    return tail
+
+
+def cmd_dns_status(_cfg, _args):
+    try:
+        return netstate.dns()
+    except (RuntimeError, subprocess.TimeoutExpired) as e:
+        raise ValueError(str(e))
+
+
+def cmd_mullvad_status(_cfg, _args):
+    try:
+        return netstate.mullvad()
+    except (RuntimeError, subprocess.TimeoutExpired) as e:
+        raise ValueError(str(e))
+
+
+def cmd_block_lookup(cfg, args):
+    """Which of this computer's blocklists hold args.domain."""
+    allowed = (loaded(cfg).resolved.get("blocklist") or {}).get("allow") or []
+    return netstate.lookup(args.get("domain", ""), allowed)
+
+
+#--------------------------------------------------------------------#
+#-- Security
+#--------------------------------------------------------------------#
+def cmd_apparmor(_cfg, _args):
+    try:
+        return securitystate.apparmor()
+    except (RuntimeError, subprocess.TimeoutExpired) as e:
+        raise ValueError(str(e))
+
+
+def cmd_apparmor_check(_cfg, args):
+    """Compile-tests profile args.name before the page stages it to enforce."""
+    try:
+        return securitystate.compile_check(args.get("name", ""))
+    except (RuntimeError, subprocess.TimeoutExpired) as e:
+        raise ValueError(str(e))
+
+
+def cmd_ssh_keys(_cfg, _args):
+    return securitystate.ssh_keys()
+
+
+def cmd_ssh_github(cfg, args):
+    """Adds the public key args.file to the gh user's GitHub account."""
+    try:
+        return securitystate.github_add(args.get("file", ""), f"{cfg.user}@{socket.gethostname()}")
+    except (RuntimeError, subprocess.TimeoutExpired) as e:
+        raise ValueError(str(e))
+
+
+def cmd_ssh_generate(cfg, _args):
+    """Opens a terminal running ssh-keygen for a new ed25519 key, which asks for its passphrase."""
+    os.makedirs(securitystate.ssh_dir(), mode=0o700, exist_ok=True)
+    command = securitystate.generate_command(f"{cfg.user}@{socket.gethostname()}")
+    subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                     stderr=subprocess.DEVNULL, start_new_session=True)
+    return True
+
+
 def package_names():
     try:
         return packagestate.cached_names()
@@ -1274,6 +1363,10 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "people": cmd_people, "checkPerson": cmd_check_person,
             "services": cmd_services, "serviceLog": cmd_service_log, "serviceRestart": cmd_service_restart,
             "ports": cmd_ports,
+            "netTest": cmd_net_test, "dnsStatus": cmd_dns_status, "mullvadStatus": cmd_mullvad_status,
+            "blockLookup": cmd_block_lookup,
+            "apparmor": cmd_apparmor, "apparmorCheck": cmd_apparmor_check,
+            "sshKeys": cmd_ssh_keys, "sshGithub": cmd_ssh_github, "sshGenerate": cmd_ssh_generate,
             "packageNames": cmd_package_names, "packageSearch": cmd_package_search,
             "packagePreviews": cmd_package_previews,
             "resetApp": cmd_reset_app, "doc": cmd_doc, "docLink": cmd_doc_link, "launchOptions": cmd_launch_options, "protonVersions": cmd_proton_versions, "steamGames": cmd_steam_games,
