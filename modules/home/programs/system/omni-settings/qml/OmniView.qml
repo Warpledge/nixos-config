@@ -562,7 +562,9 @@ Item {
     //--------------------------------------------------------------------//
     //--- A tab is one scroll of its pages: go() to another tab builds its pages out
     //--- of sight, to a page in this tab scrolls there
-    function go(tabId, pageId) {
+    //--- Shows a tab, and scrolls to one of its pages, opening it unless `keepShut`
+    //--- (the rail jumps to a page as it is)
+    function go(tabId, pageId, keepShut) {
         picking = false
         search.text = ""
         omni.forceActiveFocus()
@@ -572,7 +574,9 @@ Item {
             packageSearch.focusField()
             return
         }
-        if (pageId && pageId.startsWith("doc:"))
+        if (keepShut)
+            ;
+        else if (pageId && pageId.startsWith("doc:"))
             openNote(pageId, true)
         else if (pageId && !openPages[pageId])
             setPageOpen(pageId, true)
@@ -716,6 +720,23 @@ Item {
         else
             delete c[pid]
         openPages = c
+        saveUi()
+    }
+    //--- The current tab's pages: any open, and opening or closing them all at once
+    readonly property bool anyOpen: tabPages.some(i => i.id.startsWith("doc:") ? !!openNotes[i.id]
+                                                                               : !!openPages[i.id])
+    function setAllOpen(open) {
+        const pages = Object.assign({}, openPages)
+        const notes = Object.assign({}, openNotes)
+        for (const i of tabPages) {
+            const set = i.id.startsWith("doc:") ? notes : pages
+            if (open)
+                set[i.id] = true
+            else
+                delete set[i.id]
+        }
+        openPages = pages
+        openNotes = notes
         saveUi()
     }
     function saveUi() {
@@ -1362,16 +1383,55 @@ Item {
         anchors.margins: omni.edge
         anchors.topMargin: mainCol.y + tabsBar.y + tabsBar.height + 6  // under Rebuild
         // As tall as its icons, up to the window's bottom margin
-        height: Math.min(railList.contentHeight + 8, parent.height - anchors.topMargin - omni.edge)
+        height: Math.min(railList.contentHeight + allToggle.height + 12,
+                         parent.height - anchors.topMargin - omni.edge)
         width: omni.railItem + 8
         radius: width / 2
         color: Theme.card
         HoverHandler { id: railArea }
 
+        //--- Closes every page in the tab while any is open, else opens them all
+        Rectangle {
+            id: allToggle
+            anchors.top: parent.top
+            anchors.topMargin: 6
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: omni.railItem - 6
+            height: 22
+            radius: 8
+            color: allHover.hovered ? Theme.hover : Qt.alpha(Theme.bg, 0.55)
+            border.width: 1
+            border.color: Theme.rule
+            Behavior on color { ColorAnimation { duration: 120 } }
+            Icon {
+                anchors.centerIn: parent
+                icon: omni.anyOpen ? "collapse_all" : "expand_all"
+                size: 18
+                color: allHover.hovered ? Theme.primary : Theme.dim
+            }
+            readonly property point cursor: allHover.point.scenePosition
+            onCursorChanged: Tip.move(allToggle, cursor)
+            HoverHandler {
+                id: allHover
+                cursorShape: Qt.PointingHandCursor
+                onHoveredChanged: hovered
+                    ? Tip.request(allToggle, omni.anyOpen ? "Close every page" : "Open every page", point.scenePosition)
+                    : Tip.cancel(allToggle)
+            }
+            TapHandler {
+                gesturePolicy: TapHandler.ReleaseWithinBounds
+                onTapped: omni.setAllOpen(!omni.anyOpen)
+            }
+        }
+
         ListView {
             id: railList
-            anchors.fill: parent
+            anchors.top: allToggle.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
             anchors.margins: 4
+            anchors.topMargin: 2
             clip: true
             boundsBehavior: Flickable.StopAtBounds
             model: omni.tabPages
@@ -1412,7 +1472,7 @@ Item {
                     HoverHandler { id: railHover; cursorShape: Qt.PointingHandCursor }
                     TapHandler {
                         gesturePolicy: TapHandler.ReleaseWithinBounds
-                        onTapped: omni.go(omni.tab, railItem.modelData.id)
+                        onTapped: omni.go(omni.tab, railItem.modelData.id, true)
                     }
                 }
             }
@@ -1556,7 +1616,7 @@ Item {
                             HoverHandler { cursorShape: Qt.PointingHandCursor }
                             TapHandler {
                                 gesturePolicy: TapHandler.ReleaseWithinBounds
-                                onTapped: omni.go(omni.tab, nameItem.modelData.id)
+                                onTapped: omni.go(omni.tab, nameItem.modelData.id, true)
                             }
                         }
                     }
