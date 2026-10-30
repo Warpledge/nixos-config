@@ -1,6 +1,6 @@
 # Changing Settings
 
-`Mod+S` opens Omni Settings as a panel on the right of the screen, and so does pushing the mouse into the top-right corner. It closes when the mouse leaves it, or when you press `Mod+S` or `Esc` again, but stays open while you're typing or a question is up. The app launcher (`Mod+Space`) opens it as a window instead. Both show the same thing, and a rebuild keeps going if you close either.
+`Mod+S` opens Omni Settings as a panel on the right of the screen, and so does pushing the mouse into the top-right corner. It closes when the mouse leaves it, or when you press `Mod+S` or `Esc` again, but stays open while you're typing or a question is up. The app launcher (`Mod+Space`) opens it as a window instead. Both show the same thing, and a rebuild keeps going if you close either. Drag the panel's left edge to make it wider or narrower; it keeps that width until you change it, and double-clicking the edge puts it back.
 
 ## Finding Your Way Around
 
