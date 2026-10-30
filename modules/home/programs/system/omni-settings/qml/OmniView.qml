@@ -1707,7 +1707,7 @@ Item {
         readonly property bool soleNamed: omni.soleNamed(index)
         visible: !!comp
         Layout.fillWidth: true
-        Layout.topMargin: index === 0 ? 0 : divided ? 22 : 14
+        Layout.topMargin: index === 0 ? 0 : divided ? 8 : 4
         spacing: 6
 
         //--- The section's name, then a rule to the edge
