@@ -57,13 +57,14 @@ When the config gains a setting your file doesn't have yet, a **What's New** pag
 - **Boot**: how long the boot menu waits and how many generations it keeps
 - **Language & Input**: time zone, language and keyboard layout
 - **Devices**: Bluetooth, printing and the mouse pointer
-- **Network & Firewall**: what other devices can reach here, what this computer blocks, and the SSH keys that may log in as you
 - **Services**: background services, and under **Running Now** each one's state, last log lines and a restart button
 - **Default Apps**: which app opens links, text files, terminal programs and folders. Change these here: picking a default in the shell's settings doesn't survive a rebuild. The choices are listed in [`lib/default-apps.nix`](../../lib/default-apps.nix).
 - **Startup**: variables every program you start sees, and programs started with the desktop
 - **File Types**: which app opens one file type, in front of the Default Apps choices
 
-Monitors, sound, Wi-Fi, keyboard shortcuts, the bar, wallpaper and lock screen are the shell's own settings. Their pages (on the Niri tab) open the matching tab of the shell's settings window, and those changes save straight away with no rebuild.
+The **Network** tab holds **Tools** (a connection check, a speed test and how DNS is resolved), **Connections** (Wi-Fi, wired and VPN connections, and finding file shares), **Firewall** (what other devices can reach here), **Blocking** (ad and tracker lists, domains to let through, and a lookup for whether a site is blocked) and **VPN** (Mullvad and the relay in use). The **Security** tab holds **AppArmor** (each app profile, what it would have blocked, and switching one to enforce), **SSH** (the SSH server, the keys that may log in as you, and your own keys, which it can copy, add to GitHub or make), **Antivirus** and the security apps.
+
+Monitors, sound, Wi-Fi, keyboard shortcuts, the bar, wallpaper and lock screen are the shell's own settings. Their pages (on the Niri tab, and Wi-Fi under Network → Connections) open the matching tab of the shell's settings window, and those changes save straight away with no rebuild.
 
 ## Users
 
