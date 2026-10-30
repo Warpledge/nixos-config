@@ -29,18 +29,37 @@ ColumnLayout {
                 Layout.fillWidth: true
                 opacity: modelData ? 1 : 0
                 enabled: !!modelData
-                implicitHeight: 78
+                implicitHeight: 96
                 radius: 14
-                color: tileHover.hovered ? Theme.hover : Theme.card
+                color: tileHover.hovered ? Theme.hover : Qt.alpha(Theme.bg, 0.55)
+                border.width: 1
+                border.color: Theme.rule
                 Behavior on color { ColorAnimation { duration: 120 } }
+                // Opens in DankMaterialShell's own window
+                Icon {
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.margins: 7
+                    icon: "arrow_outward"
+                    size: 13
+                    color: Theme.dim
+                }
                 ColumnLayout {
                     anchors.centerIn: parent
                     width: parent.width - 12
-                    spacing: 6
-                    Icon {
+                    spacing: 8
+                    Rectangle {
                         Layout.alignment: Qt.AlignHCenter
-                        icon: tile.modelData ? Theme.glyph(tile.modelData.icon, "open_in_new") : ""
-                        color: Theme.primary
+                        implicitWidth: 40
+                        implicitHeight: 40
+                        radius: 20
+                        color: Theme.cardHover
+                        Icon {
+                            anchors.centerIn: parent
+                            icon: tile.modelData ? Theme.glyph(tile.modelData.icon, "open_in_new") : ""
+                            size: 21
+                            color: Theme.primary
+                        }
                     }
                     Text {
                         text: tile.modelData ? tile.modelData.title : ""

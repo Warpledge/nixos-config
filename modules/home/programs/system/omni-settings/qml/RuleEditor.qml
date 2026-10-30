@@ -13,6 +13,7 @@ Sheet {
     required property var now  // the windowRules setting with pending changes
     signal saved(var reply)
     title: `Edit ${rule.title}`
+    subtitle: "Window rule · yours alone · waits for Apply"
     onBack: view.sheet = null
 
     readonly property int pixelsIndex: wr.sizes.findIndex(s => s.value === null)

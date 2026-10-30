@@ -1190,7 +1190,8 @@ def rule_json(rule, index, rule_id=None, off=False, custom=False, now=None, save
             "title": wr.rule_title(rule), "note": rule.get("note", ""),
             "category": rule.get("category", ""),
             "app": wr.plain(matches[0]["app-id"]) if one_app else "",
-            "tags": [{"text": wr.tag_text(p, v), "kind": wr.tag_kind(p)} for p, v in wr.properties(rule)],
+            "tags": [{"text": wr.tag_text(p, v), "kind": wr.tag_kind(p), "group": wr.tag_group(p)}
+                     for p, v in wr.properties(rule)],
             "matches": [match_json(m) for m in matches],
             "excludes": [match_json(m) for m in rule.get("excludes") or []],
             "raw": rule if index is not None else None,

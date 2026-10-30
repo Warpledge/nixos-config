@@ -13,6 +13,7 @@ Sheet {
     readonly property var entry: games.now[game.id] || null
     readonly property var steam: game.steam || {}
     title: game.name
+    subtitle: `Launch options · ${view.scopeTitle()} · Steam reads them once it's closed`
     onBack: view.sheet = null
 
     property string launch: ""

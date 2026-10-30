@@ -141,29 +141,44 @@ ColumnLayout {
         //--- Updates
         Section { text: "Updates" }
         ListRow {
-            icon: page.checking || page.busy === "update" ? "progress_activity" : "update"
+            icon: page.checking || page.busy ? "progress_activity" : "update"
             title: "Apps and Runtimes"
             tone: page.busy === "update" || page.checking ? "" : page.checkError ? "error"
                 : page.found === null ? "" : page.found.length ? "caution" : "success"
             info: page.found && page.found.length
                 ? `Newer versions of: ${page.found.slice(0, 6).join(", ")}${page.found.length > 6 ? "…" : ""}`
                 : "Looks for newer versions of every Flatpak app and the runtimes they use"
-            subtitle: page.busy === "update" ? page.progress : ""
+            subtitle: !page.busy ? ""
+                : page.progress || { update: "Updating…", unused: "Removing…", repair: "Repairing…" }[page.busy]
             value: page.busy === "update" ? "Updating…"
                 : page.checking ? "Checking…"
                 : page.checkError || page.found === null ? ""
                 : !page.found.length ? "Up to date"
                 : `${page.found.length} to update`
             alert: page.checkError && !page.checking ? `Couldn't check: ${page.checkError}` : ""
-            button: page.checking || page.busy ? "" : page.found && page.found.length ? "Update All"
-                  : page.found ? "Check Again" : "Check"
-            onClicked: {
-                if (page.checking || page.busy)
-                    return
-                if (page.found && page.found.length)
-                    page.run("update")
-                else
-                    page.check()
+        }
+        //--- Every Flatpak action together: tidy-ups outlined, the update filled
+        Flow {
+            Layout.fillWidth: true
+            layoutDirection: Qt.RightToLeft
+            spacing: 8
+            OutlineButton {
+                filled: true
+                enabled: !page.checking && !page.busy
+                text: page.found && page.found.length ? "Update All" : page.found ? "Check Again" : "Check for Updates"
+                onClicked: page.found && page.found.length ? page.run("update") : page.check()
+            }
+            OutlineButton {
+                enabled: !page.busy
+                text: "Remove Unused"
+                tip: "Uninstalls runtimes and extensions no installed app needs"
+                onClicked: page.run("unused")
+            }
+            OutlineButton {
+                enabled: !page.busy
+                text: "Repair"
+                tip: "Checks every installed file and downloads again any that are missing or damaged"
+                onClicked: page.run("repair")
             }
         }
 
@@ -260,25 +275,6 @@ ColumnLayout {
                     }
                 }
             }
-        }
-
-        //--- Maintenance
-        Section { text: "Maintenance" }
-        ListRow {
-            icon: page.busy === "unused" ? "progress_activity" : "delete_sweep"
-            title: "Remove Unused Runtimes"
-            info: "Uninstalls runtimes and extensions that no installed app needs any more."
-            subtitle: page.busy === "unused" ? (page.progress || "Removing…") : ""
-            button: page.busy ? "" : "Remove"
-            onClicked: if (!page.busy) page.run("unused")
-        }
-        ListRow {
-            icon: page.busy === "repair" ? "progress_activity" : "build"
-            title: "Repair"
-            info: "Checks every installed file and downloads again any that are missing or damaged."
-            subtitle: page.busy === "repair" ? (page.progress || "Repairing…") : ""
-            button: page.busy ? "" : "Repair"
-            onClicked: if (!page.busy) page.run("repair")
         }
     }
 

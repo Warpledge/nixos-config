@@ -210,6 +210,51 @@ ColumnLayout {
         Layout.margins: 6
     }
 
+    //--- The page's key numbers; each opens or starts what it's about
+    GridLayout {
+        visible: !!page.ov
+        Layout.fillWidth: true
+        Layout.bottomMargin: 4
+        columns: page.width < 360 ? 1 : 2
+        columnSpacing: 8
+        rowSpacing: 8
+        Tile {
+            label: "Running version"
+            value: page.current ? String(page.current.number) : "–"
+            sub: page.current ? `Built ${Fmt.when(page.current.when).toLowerCase()}` : ""
+            tappable: page.older.length > 0
+            onTapped: page.versionsOpen = !page.versionsOpen
+        }
+        Tile {
+            label: "Free space"
+            value: page.ov && page.ov.diskFree ? Fmt.size(page.ov.diskFree) : "–"
+            readonly property real used: page.ov && page.ov.diskTotal ? 1 - page.ov.diskFree / page.ov.diskTotal : 0
+            ink: used > 0.9 ? Theme.error : used > 0.8 ? Theme.caution : Theme.primary
+            sub: page.admin ? "Clean up old versions" : "On the root disk"
+            tappable: page.admin
+            onTapped: page.collect()
+        }
+        Tile {
+            label: "Sources"
+            value: page.checking ? "Checking…" : !page.updates ? "Not checked"
+                : page.updates.changes.length ? `${page.updates.changes.length} newer` : "Up to date"
+            ink: page.updates && page.updates.changes.length ? Theme.caution
+                : page.updates ? Theme.success : Theme.text
+            sub: page.ov ? `Locked ${Fmt.ago(page.ov.updated)}` : ""
+            tappable: page.admin && !page.checking
+            onTapped: page.check()
+        }
+        Tile {
+            readonly property int n: crashList.crashes ? crashList.crashes.length : 0
+            label: "Crashes"
+            value: crashList.crashes ? (n ? String(n) : "None") : "–"
+            ink: n ? Theme.error : Theme.text
+            sub: "Last 30 days"
+            tappable: n > 0
+            onTapped: page.crashesOpen = true
+        }
+    }
+
     //--- Waiting for a restart
     ListRow {
         visible: !!page.ov && (page.ov.pending > 0 || page.ov.newKernel !== "")
@@ -309,9 +354,10 @@ ColumnLayout {
             }
         }
     }
-    Pill {
+    OutlineButton {
         visible: !!page.updates && page.updates.changes.length > 0
         Layout.alignment: Qt.AlignRight
+        filled: true
         enabled: page.pickedCount > 0
         text: !page.updates || page.pickedCount === page.updates.changes.length ? "Update Now"
             : `Update ${page.pickedCount} of ${page.updates.changes.length}`
@@ -320,25 +366,21 @@ ColumnLayout {
 
     //--- Free Up Space
     Section { visible: !!page.ov; text: "Free Up Space" }
-    ListRow {
+    ActionRow {
         visible: !!page.ov
         enabled: page.admin
-        icon: "delete_sweep"
-        title: "Clean Up Old Versions"
-        info: "Garbage collection: deletes old system versions and the packages only they use"
-              + (page.ov && page.ov.diskTotal ? `. ${Fmt.size(page.ov.diskTotal)} disk.` : ".")
-        value: page.ov && page.ov.diskFree ? `${Fmt.size(page.ov.diskFree)} free` : ""
-        chevron: true
-        bar: page.ov && page.ov.diskTotal ? 1 - page.ov.diskFree / page.ov.diskTotal : -1
+        title: "Clean up old versions"
+        note: "Garbage collection: deletes old system versions and the packages only they use"
+        action: "Clean Up"
+        destructive: true
         onClicked: page.collect()
     }
-    ListRow {
+    ActionRow {
         visible: !!page.ov
         enabled: page.admin
-        icon: "compress"
-        title: "Optimize the Nix Store"
-        info: "Frees space by hard-linking identical files in the Nix store. Deletes nothing."
-        chevron: true
+        title: "Optimize the Nix store"
+        note: "Hard-links identical files in the store. Deletes nothing."
+        action: "Optimize"
         onClicked: page.optimise()
     }
 
