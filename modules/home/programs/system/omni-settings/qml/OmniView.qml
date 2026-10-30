@@ -505,6 +505,26 @@ Item {
         return null
     }
 
+    //--- What waits on a page, as icon and count badges on its collapsed header
+    function pageAlerts(pid) {
+        const out = []
+        const add = (n, icon, tip) => { if (n > 0) out.push({ n, icon, tip }) }
+        const c = gitCounts
+        if (pid === "git" && c) {
+            add(c.changed, "edit", `${c.changed} changed`)
+            add(c.ahead, "arrow_upward", `${c.ahead} to push`)
+            add(c.behind, "arrow_downward", `${c.behind} to pull`)
+        }
+        const u = summaries && summaries.updates
+        if (pid === "updates" && u) {
+            add(u.upstream, "download", `${u.upstream} upstream`)
+            add(u.fixed, "build", `${u.fixed} disabled fixed`)
+        }
+        if (pid === "firmware")
+            add(firmwareUpdates, "memory", `${firmwareUpdates} waiting`)
+        return out
+    }
+
     //--- Scrolls the tab bar so the current tab shows whole
     function showTab(item) {
         const f = tabsFlick
@@ -1767,6 +1787,43 @@ Item {
                                 || (section.model ? section.model.description : "")
                             tip: about + (sum ? (about ? "\n" : "")
                                 + (sum.alert ? `!!${sum.text}!!` : sum.text) : "")
+                        }
+                    }
+                    Repeater {
+                        model: section.open ? [] : omni.pageAlerts(section.pid)
+                        Rectangle {
+                            id: alertBadge
+                            required property var modelData
+                            implicitWidth: alertRow.implicitWidth + 14
+                            implicitHeight: 24
+                            radius: 12
+                            color: Qt.alpha(Theme.caution, 0.16)
+                            Row {
+                                id: alertRow
+                                anchors.centerIn: parent
+                                spacing: 3
+                                Icon {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    icon: alertBadge.modelData.icon
+                                    size: 15
+                                    color: Theme.caution
+                                }
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: alertBadge.modelData.n
+                                    color: Theme.caution
+                                    font.pixelSize: 12
+                                    font.weight: Font.DemiBold
+                                }
+                            }
+                            readonly property point cursor: badgeHover.point.scenePosition
+                            onCursorChanged: Tip.move(alertBadge, cursor)
+                            HoverHandler {
+                                id: badgeHover
+                                onHoveredChanged: hovered
+                                    ? Tip.request(alertBadge, alertBadge.modelData.tip, point.scenePosition)
+                                    : Tip.cancel(alertBadge)
+                            }
                         }
                     }
                     Chevron { open: section.open; lit: headHover.hovered }
