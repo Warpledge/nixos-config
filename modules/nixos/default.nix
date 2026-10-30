@@ -53,6 +53,7 @@
     ++ lib.optionals machine.capsLockRemap [./services/hardware/keyd.nix]
     ++ lib.optionals machine.bluetooth.enable [./services/hardware/bluetooth.nix]
     ++ lib.optionals machine.printing.enable [./services/hardware/printing.nix]
+    ++ lib.optionals (machine.battery.chargeLimit != null) [./services/hardware/battery.nix]
     #--- Mullvad VPN, system and home-manager halves (controlled by machine settings)
     ++ lib.optionals machine.mullvad.enable [./security/mullvad]
     #--- ClamAV Antivirus (controlled by machine settings)

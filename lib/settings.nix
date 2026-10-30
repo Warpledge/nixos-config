@@ -26,6 +26,7 @@
     kernel = ["zen" "latest" "xanmod" "cachyos"];
     cursor = ["bibata" "catppuccin"];
     cursorSize = [24 32 48 64];
+    "battery.chargeLimit" = [null 60 70 80 90];
     "gpu.type" = [null "amd" "intel" "nvidia" "amd+nvidia" "intel+nvidia"];
   };
   #--- Lists whose items must come from a known set
