@@ -12,6 +12,7 @@ Item {
     property int edge: 14  // gap between the view and the window's edges
     property int gutter: 8  // the part of `edge` left of the pages that holds their band
     property int frameInset: 6  // the page body inside its frame; clears the frame's corners
+    readonly property int railGap: 22  // above each later group on the rail, room for its name
     property var info: null
     property string loadError: ""
     property var stale: null  // api.py's `stale`, when the settings files don't evaluate
@@ -48,7 +49,17 @@ Item {
         onTriggered: {
             Backend.call("gitSummary", {}, reply => { if (reply.ok) omni.gitCounts = reply.data })
             Backend.call("firmwareSummary", {}, reply => { if (reply.ok) omni.firmwareUpdates = reply.data })
+            Backend.call("summaries", {}, reply => { if (reply.ok) omni.summaries = reply.data })
         }
+    }
+    //--- api.py's `summaries`: cached update counts, crashes and backups, every minute
+    property var summaries: null
+    //--- Tabs with a page that has something waiting get a dot
+    readonly property var tabAlerts: {
+        const c = gitCounts || {}
+        const u = summaries && summaries.updates
+        return { main: !!(c.changed || c.ahead || c.behind || (u && (u.upstream || u.fixed))),
+                 hardware: firmwareUpdates > 0 }
     }
     //--- Firmware updates waiting, for the page list; the Firmware page updates it too
     property int firmwareUpdates: 0
@@ -447,6 +458,25 @@ Item {
         }, mode => startJob("rebuild", { mode }))
     }
 
+    //--- Scrolls the tab bar so the current tab shows whole
+    function showTab(item) {
+        const f = tabsFlick
+        if (f.contentWidth <= f.width)
+            return
+        const left = item.x - 24, right = item.x + item.width + 24
+        if (left < f.contentX)
+            f.contentX = Math.max(0, left)
+        else if (right > f.contentX + f.width)
+            f.contentX = Math.min(f.contentWidth - f.width, right - f.width)
+    }
+
+    function startReview() {
+        if (!info || !info.canApply || Jobs.running)
+            return
+        reviewing = true
+        review.load()
+    }
+
     //--- A modal question: ask({heading, body, buttons}, done(value))
     function ask(spec, done) { dialog.open(spec, done) }
     readonly property alias dialog: confirm
@@ -778,88 +808,135 @@ Item {
             Layout.leftMargin: 6
         }
 
-        //--- Top tabs: icons, the hovered one stretching right to show its name
+        //--- Top tabs: icons, the current one a filled pill with its name. Spread across
+        //--- the width when they fit, else scrolled sideways with faded edges
         Rectangle {
             id: tabsBar
-            z: 3  // a hovered tab's name hangs below it, over the page
-            Layout.preferredWidth: tabsRow.implicitWidth + 6
-            implicitHeight: 44
-            radius: 22
+            Layout.fillWidth: true
+            implicitHeight: 54
+            radius: 16
             color: Theme.card
-            RowLayout {
-                id: tabsRow
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.leftMargin: 3
-                spacing: 2
-                Repeater {
-                    model: omni.info ? omni.info.tabs : []
-                    // Only the current tab shows its name in the row; a hovered tab's name
-                    // shows below its icon, so no tab moves under the cursor
-                    Item {
-                        id: tab
-                        required property var modelData
-                        readonly property bool active: omni.tab === modelData.id
-                        readonly property bool open: active
-                        readonly property real full: tabLabel.x + tabLabel.implicitWidth + 14
-                        Layout.preferredWidth: active ? full : 38
-                        Layout.preferredHeight: 38
-                        Behavior on Layout.preferredWidth { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-                        z: tabHover.hovered ? 2 : 0
-                        HoverHandler { id: tabHover; cursorShape: Qt.PointingHandCursor }
-                        TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: omni.go(tab.modelData.id) }
+            Flickable {
+                id: tabsFlick
+                anchors.fill: parent
+                anchors.margins: 4
+                contentWidth: tabsRow.width
+                flickableDirection: Flickable.HorizontalFlick
+                boundsBehavior: Flickable.StopAtBounds
+                clip: true
+                // A wheel scrolls sideways here
+                WheelHandler {
+                    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                    onWheel: event => {
+                        const d = event.angleDelta.y || event.angleDelta.x
+                        tabsFlick.contentX = Math.max(0, Math.min(tabsFlick.contentWidth - tabsFlick.width,
+                                                                  tabsFlick.contentX - d))
+                    }
+                }
+                Row {
+                    id: tabsRow
+                    readonly property real cells: {
+                        let w = 0
+                        for (let i = 0; i < children.length; i++)
+                            if (children[i].visible)
+                                w += children[i].width
+                        return w
+                    }
+                    readonly property int n: omni.info ? omni.info.tabs.length : 1
+                    height: tabsFlick.height
+                    spacing: Math.max(2, (tabsFlick.width - cells) / Math.max(1, n - 1))
+                    Repeater {
+                        model: omni.info ? omni.info.tabs : []
                         Rectangle {
-                            readonly property var modelData: tab.modelData
-                            readonly property bool active: tab.active
-                            readonly property bool open: tab.open
-                            width: open ? tab.full : 38
-                            height: 38
+                            id: tab
+                            required property var modelData
+                            readonly property bool active: omni.tab === modelData.id
+                            onActiveChanged: if (active) omni.showTab(tab)
+                            width: active ? tabLabel.x + tabLabel.implicitWidth + 16 : 46
+                            height: 46
+                            anchors.verticalCenter: parent.verticalCenter
                             Behavior on width { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-                            radius: 19
+                            radius: 13
                             clip: true
-                            color: active ? Theme.primary : tabHover.hovered ? Theme.hover : "transparent"
+                            color: active ? Qt.alpha(Theme.primary, 0.28) : tabHover.hovered ? Theme.hover : "transparent"
                             Behavior on color { ColorAnimation { duration: 150 } }
                             Icon {
-                                x: 9
+                                id: tabIcon
+                                x: tab.active ? 13 : 11
                                 anchors.verticalCenter: parent.verticalCenter
-                                icon: Theme.glyph(modelData.icon)
-                                size: 20
-                                fill: active
-                                color: active ? Theme.inkPrimary : tabHover.hovered ? Theme.inkSelected : Theme.dim
+                                icon: Theme.glyph(tab.modelData.icon)
+                                size: 24
+                                fill: tab.active
+                                color: tab.active ? Theme.primary : tabHover.hovered ? Theme.text : Theme.dim
+                                // Something waiting on one of the tab's pages
+                                Rectangle {
+                                    visible: !!omni.tabAlerts[tab.modelData.id]
+                                    x: parent.width - 5
+                                    y: -1
+                                    width: 8; height: 8; radius: 4
+                                    color: Theme.caution
+                                    border.width: 1.5
+                                    border.color: Theme.card
+                                }
                             }
                             Text {
                                 id: tabLabel
-                                x: 36
+                                x: 45
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: modelData.title
-                                font.pixelSize: 15
+                                text: tab.modelData.title
+                                font.pixelSize: 14
                                 font.weight: Font.Bold
-                                color: active ? Theme.inkPrimary : Theme.inkSelected
-                                opacity: parent.open ? 1 : 0
+                                color: Theme.primary
+                                opacity: tab.active ? 1 : 0
                                 Behavior on opacity { NumberAnimation { duration: 150 } }
                             }
-                        }
-                        Rectangle {
-                            visible: tabHover.hovered && !tab.active
-                            anchors.top: parent.bottom
-                            anchors.topMargin: 8
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            width: tabTip.implicitWidth + 20
-                            height: tabTip.implicitHeight + 10
-                            radius: height / 2
-                            color: Theme.toast
-                            border.width: 1
-                            border.color: Theme.line
-                            Text {
-                                id: tabTip
-                                anchors.centerIn: parent
-                                text: tab.modelData.title
-                                color: Theme.inkToast
-                                font.pixelSize: 13
-                                font.weight: Font.DemiBold
+                            readonly property point cursor: tabHover.point.scenePosition
+                            onCursorChanged: Tip.move(tab, cursor)
+                            HoverHandler {
+                                id: tabHover
+                                cursorShape: Qt.PointingHandCursor
+                                onHoveredChanged: hovered && !tab.active
+                                    ? Tip.request(tab, tab.modelData.title, point.scenePosition) : Tip.cancel(tab)
                             }
+                            TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: omni.go(tab.modelData.id) }
                         }
                     }
+                }
+            }
+            //--- A thin scrollbar, only while the tabs don't fit
+            Rectangle {
+                readonly property real over: tabsFlick.contentWidth - tabsFlick.width
+                visible: over > 1
+                x: tabsFlick.x + (tabsFlick.width - width) * (over > 0 ? tabsFlick.contentX / over : 0)
+                y: parent.height - 4
+                width: tabsFlick.width * tabsFlick.width / Math.max(1, tabsFlick.contentWidth)
+                height: 2
+                radius: 1
+                color: Qt.alpha(Theme.dim, 0.5)
+            }
+            //--- Fades where more tabs are scrolled out of sight
+            Rectangle {
+                visible: tabsFlick.contentX > 1
+                anchors.left: tabsFlick.left
+                anchors.top: tabsFlick.top
+                anchors.bottom: tabsFlick.bottom
+                width: 28
+                gradient: Gradient {
+                    orientation: Gradient.Horizontal
+                    GradientStop { position: 0; color: Theme.card }
+                    GradientStop { position: 1; color: Qt.alpha(Theme.card, 0) }
+                }
+            }
+            Rectangle {
+                visible: tabsFlick.contentX + tabsFlick.width < tabsFlick.contentWidth - 1
+                anchors.right: tabsFlick.right
+                anchors.top: tabsFlick.top
+                anchors.bottom: tabsFlick.bottom
+                width: 28
+                gradient: Gradient {
+                    orientation: Gradient.Horizontal
+                    GradientStop { position: 0; color: Qt.alpha(Theme.card, 0) }
+                    GradientStop { position: 1; color: Theme.card }
                 }
             }
         }
@@ -1208,10 +1285,7 @@ Item {
                 Pill {
                     text: "Review"
                     enabled: !!omni.info && omni.info.canApply && !Jobs.running
-                    onClicked: {
-                        omni.reviewing = true
-                        review.load()
-                    }
+                    onClicked: omni.startReview()
                 }
             }
         }
@@ -1227,15 +1301,15 @@ Item {
         anchors.topMargin: mainCol.y + tabsBar.y + tabsBar.height  // level with the tabs' foot
         // As tall as its icons, up to the window's bottom margin
         height: Math.min(railList.contentHeight + 8, parent.height - anchors.topMargin - omni.edge)
-        width: 48
-        radius: 24
+        width: 52
+        radius: 26
         color: Theme.card
         HoverHandler { id: railArea }
 
         ListView {
             id: railList
             anchors.fill: parent
-            anchors.margins: 4
+            anchors.margins: 5
             clip: true
             boundsBehavior: Flickable.StopAtBounds
             model: omni.tabPages
@@ -1247,28 +1321,31 @@ Item {
                 readonly property var prev: index > 0 ? railList.model[index - 1] : null
                 readonly property bool active: omni.page === modelData.id
                 width: railList.width
-                //--- A line where the page list starts a new group
+                //--- A line where the page list starts a new group; its name shows here
+                //--- with the page names (railNames)
                 Item {
                     visible: !!railItem.prev && railItem.prev.group !== railItem.modelData.group
                     width: parent.width
-                    height: 13
+                    height: omni.railGap
                     Rectangle {
-                        anchors.centerIn: parent
-                        width: parent.width - 12
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.bottom: parent.bottom
+                        anchors.bottomMargin: 6
+                        width: 26
                         height: 1
                         color: Qt.alpha(Theme.primary, 0.35)
                     }
                 }
                 Rectangle {
                     width: parent.width
-                    height: 40
-                    radius: 20
+                    height: 42
+                    radius: 21
                     color: railItem.active ? Theme.primary : railHover.hovered ? Theme.hover : "transparent"
                     Behavior on color { ColorAnimation { duration: 120 } }
                     Icon {
                         anchors.centerIn: parent
                         icon: Theme.glyph(railItem.modelData.icon)
-                        size: 20
+                        size: 22
                         fill: railItem.active
                         color: railItem.active ? Theme.inkPrimary : Theme.primary
                     }
@@ -1316,14 +1393,28 @@ Item {
                     readonly property var prev: index > 0 ? railList.model[index - 1] : null
                     readonly property bool active: omni.page === modelData.id
                     x: namesCol.width - width
+                    //--- The group's name over the rail's line
                     Item {
                         visible: !!nameItem.prev && nameItem.prev.group !== nameItem.modelData.group
-                        width: 1
-                        height: 13
+                        width: groupCaption.implicitWidth + 8
+                        height: omni.railGap
+                        Text {
+                            id: groupCaption
+                            anchors.right: parent.right
+                            anchors.rightMargin: 4
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: 1
+                            text: nameItem.modelData.group
+                            color: Theme.dim
+                            font.pixelSize: 11
+                            font.weight: Font.Bold
+                            font.capitalization: Font.AllUppercase
+                            font.letterSpacing: 0.6
+                        }
                     }
                     Item {
                         width: namePill.width
-                        height: 40
+                        height: 42
                         Rectangle {
                             id: namePill
                             anchors.verticalCenter: parent.verticalCenter

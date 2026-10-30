@@ -45,11 +45,13 @@ Singleton {
     readonly property color toast: col("surface_container_highest")
     readonly property color inkToast: col("on_surface")
     // Matugen has no success or warning role, and tertiary needn't be yellow; DMS's
-    // terminal green and yellow (dank16 color2 and color3) follow the theme
+    // terminal green, yellow and blue (dank16 color2, color3, color4) follow the theme
     property string green: ""
     property string yellow: ""
+    property string blue: ""
     readonly property color success: green || "#a6e3a1"
     readonly property color caution: yellow || "#f9e2af"
+    readonly property color info: blue || "#89b4fa"
 
     //--- Every page shares primary; pages are told apart by their cards, not hue
     function accentOf(item) { return primary }
@@ -59,10 +61,14 @@ Singleton {
         return Qt.rgba(a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, 1)
     }
 
-    //--- Status tones for rows, badges and chips: "error", "success", "caution", or "" for none
+    //--- Status tones for rows, badges and chips: "error", "success", "caution", "info",
+    //--- or "" for none
     function toneColor(tone) {
-        return tone === "error" ? error : tone === "success" ? success : tone === "caution" ? caution : primary
+        return tone === "error" ? error : tone === "success" ? success : tone === "caution" ? caution
+            : tone === "info" ? info : primary
     }
+    //--- A load from 0 to 1: primary under half, caution to 80%, error above
+    function loadColor(v) { return v > 0.8 ? error : v >= 0.5 ? caution : primary }
     function toneFill(tone, base) { return Qt.tint(base, Qt.alpha(toneColor(tone), 0.2)) }
 
     //--- Rows: a wash of primary and a primary border, the same as the
@@ -83,10 +89,13 @@ Singleton {
                 theme.green = g[d.mode] || g.default || ""
                 const y = (d.dank16 || {}).color3 || {}
                 theme.yellow = y[d.mode] || y.default || ""
+                const b = (d.dank16 || {}).color4 || {}
+                theme.blue = b[d.mode] || b.default || ""
             } catch (e) {
                 theme.c = {}
                 theme.green = ""
                 theme.yellow = ""
+                theme.blue = ""
             }
         }
     }
