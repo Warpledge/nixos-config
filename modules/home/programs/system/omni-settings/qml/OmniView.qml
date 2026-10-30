@@ -839,6 +839,18 @@ Item {
         border.width: 1
         border.color: Qt.alpha(Theme.primary, 0.22)
     }
+    //--- Holds the pinned page header (stickyHead) to the frame, so it can be pushed up
+    //--- out of sight at its page's end
+    Item {
+        id: stickyClip
+        visible: bodyFrame.visible
+        x: bodyFrame.x
+        y: bodyFrame.y
+        width: bodyFrame.width
+        height: bodyFrame.height
+        clip: true
+        z: 3
+    }
 
     //--- Across the whole width, over the rail too
     StatusHeader {
@@ -1149,25 +1161,41 @@ Item {
                 // The last page pinned, kept while it fades out
                 property var shown: null
                 onSecChanged: if (sec) shown = sec
-                parent: bodyFlick
-                z: 2
-                width: bodyFlick.width
-                height: stickyRow.implicitHeight + 16
-                y: shown ? Math.min(0, shown.y + shown.height - bodyFlick.contentY - height) : 0
+                // Flush with the frame's top and sides (stickyClip), over the inset too
+                parent: stickyClip
+                width: stickyClip.width
+                height: stickyRow.implicitHeight + 16 + omni.frameInset
+                y: shown ? Math.min(0, shown.y + shown.height - bodyFlick.contentY + omni.frameInset - height) : 0
                 visible: opacity > 0
-                opacity: sec ? 1 : 0
+                opacity: sec ? (omni.picking || packageSearch.open ? 0.35 : 1) : 0
                 Behavior on opacity { NumberAnimation { duration: 120 } }
-                radius: 16
+                radius: bodyFrame.radius
                 color: Qt.tint(Theme.bg, Qt.alpha(Theme.text, stickyHover.hovered ? 0.09 : 0.06))
                 border.width: 1
-                border.color: Theme.rule
+                border.color: bodyFrame.border.color
+                // Square bottom corners, keeping the frame's side edges
+                Rectangle {
+                    anchors.bottom: parent.bottom
+                    width: parent.width
+                    height: parent.radius
+                    color: parent.color
+                    Rectangle { width: 1; height: parent.height; color: stickyHead.border.color }
+                    Rectangle { x: parent.width - 1; width: 1; height: parent.height; color: stickyHead.border.color }
+                }
+                Rectangle {
+                    anchors.bottom: parent.bottom
+                    width: parent.width
+                    height: 1
+                    color: Theme.rule
+                }
                 RowLayout {
                     id: stickyRow
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
-                    anchors.leftMargin: 12
-                    anchors.rightMargin: 12
+                    anchors.verticalCenterOffset: omni.frameInset / 2
+                    anchors.leftMargin: 14
+                    anchors.rightMargin: 14
                     spacing: 12
                     Rectangle {
                         implicitWidth: 30
