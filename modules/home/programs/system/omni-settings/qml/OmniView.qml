@@ -1383,7 +1383,7 @@ Item {
         anchors.margins: omni.edge
         anchors.topMargin: mainCol.y + tabsBar.y + tabsBar.height + 6  // under Rebuild
         // As tall as its icons, up to the window's bottom margin
-        height: Math.min(railList.contentHeight + allToggle.height + 12,
+        height: Math.min(railList.contentHeight + allToggle.height + 18,
                          parent.height - anchors.topMargin - omni.edge)
         width: omni.railItem + 8
         radius: width / 2
@@ -1431,7 +1431,7 @@ Item {
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             anchors.margins: 4
-            anchors.topMargin: 2
+            anchors.topMargin: 8
             clip: true
             boundsBehavior: Flickable.StopAtBounds
             model: omni.tabPages
@@ -1459,15 +1459,15 @@ Item {
                 Rectangle {
                     width: parent.width
                     height: omni.railItem
-                    radius: height / 2
-                    color: railItem.active ? Theme.primary : railHover.hovered ? Theme.hover : "transparent"
+                    radius: 11  // as the tabs'
+                    color: railItem.active ? Qt.alpha(Theme.primary, 0.28) : railHover.hovered ? Theme.hover : "transparent"
                     Behavior on color { ColorAnimation { duration: 120 } }
                     Icon {
                         anchors.centerIn: parent
                         icon: Theme.glyph(railItem.modelData.icon)
                         size: 20
                         fill: railItem.active
-                        color: railItem.active ? Theme.inkPrimary : Theme.primary
+                        color: railItem.active ? Theme.primary : railHover.hovered ? Theme.text : Theme.dim
                     }
                     HoverHandler { id: railHover; cursorShape: Qt.PointingHandCursor }
                     TapHandler {
