@@ -20,7 +20,9 @@ WINDOW_RULES = ("windowRules",)
 #--- The ones holding text rather than lists, e.g. env = {EDITOR = "zeditor";}
 TEXT_SETS = {("env",), ("mimeTypes",)}
 SIDE_RAIL = ("sideRail",)
-GROUPED = {("userPackages",), ("autostart",), *TEXT_SETS, KEYBINDS, WINDOW_RULES, SIDE_RAIL}
+STEAM_GAMES = ("steamGames",)
+GROUPED = {("userPackages",), ("autostart",), *TEXT_SETS, KEYBINDS, WINDOW_RULES, SIDE_RAIL,
+           STEAM_GAMES}
 
 #--- Template sections whose `#---` headers each get their own page
 SPLIT_SECTIONS = {"Apps"}
@@ -57,7 +59,8 @@ SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
 #--- section keep the template's groups; "top" pages are settings a custom page
 #--- lays out (TOP_PAGES), the "userpkgs" one the list the Packages tab's
 #--- pages edit (UserPackagesPage.qml), "keybinds" the Keybinds page's set,
-#--- "windowrules" the Window Rules page's and "siderail" the Side Rail page's.
+#--- "windowrules" the Window Rules page's, "siderail" the Side Rail page's and
+#--- "games" the Games page's.
 #--- "top" pages: the custom page (its id in api.py and OmniView.qml) each one's settings show on
 TOP_PAGES = {"Flatpaks": "flatpaks", "Users": "people", "Battery": "battery"}
 
@@ -71,6 +74,7 @@ PAGES = {
     "Keybinds": ("keybinds", "input-keyboard-symbolic", "", [("", "", ["keybinds"])]),
     "Window Rules": ("windowrules", "focus-windows-symbolic", "", [("", "", ["windowRules"])]),
     "Side Rail": ("siderail", "view-dual-symbolic", "", [("", "", ["sideRail"])]),
+    "Games": ("games", "input-gaming-symbolic", "", [("", "", ["steamGames"])]),
     "System": ("computer", "computer-symbolic",
                "This computer's name, desktop and kernel.",
                [("", "", ["hostName", "windowManager", "kernel"])]),
@@ -426,6 +430,8 @@ def make_setting(domain, path, b, values, choices, labels, doc, lead, header_tit
         s.kind = "windowrules"
     elif path == SIDE_RAIL:
         s.kind = "siderail"
+    elif path == STEAM_GAMES:
+        s.kind = "steamgames"
     elif path in GROUPED:
         s.kind = "groups"
     elif isinstance(value, list):

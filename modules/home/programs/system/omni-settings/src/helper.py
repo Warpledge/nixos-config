@@ -456,6 +456,15 @@ def side_rail_ok(value):
     return True
 
 
+def steam_games_ok(value):
+    """Whether `value` is launch options and Proton builds by Steam app id, as
+    lib/settings.nix's steamGameProblems."""
+    return isinstance(value, dict) and all(
+        isinstance(app, str) and re.fullmatch(r"[0-9]+", app) and isinstance(g, dict)
+        and all(k in ("launchOptions", "proton") and isinstance(v, str) for k, v in g.items())
+        for app, g in value.items())
+
+
 def user_changes(cfg, raw):
     """The request's changes, refused unless each is a user template key with
     the template's kind of value."""
@@ -482,6 +491,8 @@ def user_changes(cfg, raw):
             ok = window_rules_ok(value)
         elif key == schema.SIDE_RAIL:
             ok = side_rail_ok(value)
+        elif key == schema.STEAM_GAMES:
+            ok = steam_games_ok(value)
         else:
             ok = same_kind(default, value)
         if not ok:

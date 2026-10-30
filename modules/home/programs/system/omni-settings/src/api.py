@@ -178,6 +178,8 @@ def shown(setting, value):
         return f"{len(value)} window rule{'' if len(value) == 1 else 's'} changed" if value else "Not set"
     if setting.kind == "siderail":
         return f"{len(value)} rail app{'' if len(value) == 1 else 's'} changed" if value else "Not set"
+    if setting.kind == "steamgames":
+        return f"{len(value)} game{'' if len(value) == 1 else 's'} set" if value else "Not set"
     if isinstance(value, dict):
         if not all(isinstance(v, list) for v in value.values()):
             n = len(value)
@@ -319,7 +321,7 @@ def cmd_load(cfg, _args):
     shell = {}
     for page in state.pages:
         if page.section in ("userpkgs", "keybinds", "windowrules", "siderail", "startup", "filetypes",
-                            "dgpu"):
+                            "dgpu", "games"):
             continue
         pid = schema.TOP_PAGES[page.title] if page.section == "top" else f"page:{page.title}"
         groups = []
@@ -366,6 +368,8 @@ def cmd_load(cfg, _args):
                if (s.domain, s.path) in (("user", ("env",)), ("user", ("autostart",)))]
     mime_types = next((s for p in state.pages for g in p.groups for s in g.settings
                        if (s.domain, s.path) == ("user", ("mimeTypes",))), None)
+    steam_games = next((s for p in state.pages for g in p.groups for s in g.settings
+                        if (s.domain, s.path) == ("user", schema.STEAM_GAMES)), None)
     gpu_offload = next((s for p in state.pages for g in p.groups for s in g.settings
                         if (s.domain, s.path) == ("user", ("gpuOffload",))), None)
     if startup:
@@ -428,6 +432,7 @@ def cmd_load(cfg, _args):
                                if s.path == ("autostart",)), None),
             "mimeTypes": mime_types and setting_json(cfg, state, mime_types, multi, modules),
             "gpuOffload": gpu_offload and setting_json(cfg, state, gpu_offload, multi, modules),
+            "steamGames": steam_games and setting_json(cfg, state, steam_games, multi, modules),
             "starter": packagestate.STARTER,
             "dmsSearch": [{"label": e.label, "description": e.description, "keywords": e.keywords,
                            "tab": e.link.tab, "page": e.link.page} for e in state.dms_entries]}

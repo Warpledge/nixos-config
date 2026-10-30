@@ -139,6 +139,20 @@
         ++ lib.optional (custom && (e ? url) == (e ? command))
         "${at} needs one of url or command")
       value);
+  #--- Launch options and Proton build per Steam app id (gaming/steam-games.nix);
+  #--- replaced whole by a users.<name> block
+  steamGameProblems = value:
+    if !(lib.isAttrs value && lib.all lib.isAttrs (lib.attrValues value))
+    then ["`steamGames` should be a set of sets, e.g. {\"1245620\" = {launchOptions = \"%command%\";};}"]
+    else
+      lib.concatLists (lib.mapAttrsToList (id: g:
+        lib.optional (builtins.match "[0-9]+" id == null)
+        "`steamGames.${id}` should be a Steam app id, a number in quotes"
+        ++ map (k: "`steamGames.${id}` can't set ${k} (use launchOptions, proton)")
+        (lib.filter (k: !(lib.elem k ["launchOptions" "proton"])) (lib.attrNames g))
+        ++ map (k: "`steamGames.${id}.${k}` should be text in quotes")
+        (lib.filter (k: g ? ${k} && !(lib.isString g.${k})) ["launchOptions" "proton"]))
+      value);
   userChoices =
     {
       wallpaper = ["carousel" "engine"];
@@ -219,6 +233,8 @@
       then windowRuleProblems value
       else if at == ["sideRail"]
       then sideRailProblems value
+      else if at == ["steamGames"]
+      then steamGameProblems value
       else if lib.elem dotted textSets
       then textSetProblems dotted value
       else if lib.elem dotted grouped
@@ -320,7 +336,7 @@ in rec {
       merged = lib.recursiveUpdate (lib.recursiveUpdate userDefaults own) listed.${user};
     in
       merged
-      // lib.genAttrs (grouped ++ textSets ++ ["keybinds" "windowRules" "sideRail"]) (key: listed.${user}.${key} or own.${key} or userDefaults.${key})
+      // lib.genAttrs (grouped ++ textSets ++ ["keybinds" "windowRules" "sideRail" "steamGames"]) (key: listed.${user}.${key} or own.${key} or userDefaults.${key})
       // {name = user;};
 
     merged = lib.recursiveUpdate machineDefaults (removeAttrs own ["users"]);

@@ -5,13 +5,25 @@
   config,
   pkgs,
   ...
-}: {
+}: let
+  #--- Writes each user's steamGames setting into Steam's files (gaming/steam-games.nix)
+  steam-games-apply = pkgs.writers.writePython3Bin "steam-games-apply" {
+    libraries = [pkgs.python3Packages.vdf];
+    flakeIgnore = ["E501"];
+  } (builtins.readFile ./steam-games-apply.py);
+in {
+  environment.systemPackages = [steam-games-apply];
+
   #--------------------------------------------------------------------#
   #-- Steam Program Configuration
   #--------------------------------------------------------------------#
   programs = {
     steam = {
       enable = true;
+      #--- Steam rewrites its config on exit, so changes made while it ran land here
+      package = pkgs.steam.override {
+        extraPreBwrapCmds = "${steam-games-apply}/bin/steam-games-apply || true";
+      };
       gamescopeSession = {
         enable = true;
         args = ["--hdr-enabled"]; # The HDR route: niri has no HDR output

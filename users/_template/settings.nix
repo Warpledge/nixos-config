@@ -351,6 +351,13 @@
   # set on Omni Settings' Hardware tab: ["steam.desktop"]. Hybrid laptops only
   gpuOffload = [];
 
+  #--- Steam Games
+  # Launch options and Proton build per game, by Steam app id, set on Omni
+  # Settings' Gaming tab. Written into Steam's own files when Steam is closed:
+  # {"1245620" = {launchOptions = "nix-performance %command%";
+  #   proton = "GE-Proton10-25";};}
+  steamGames = {};
+
   #--- User Packages
   # nixpkgs packages added from Omni Settings' Packages tab, installed as they
   # come with no settings of their own, sorted into categories you name,

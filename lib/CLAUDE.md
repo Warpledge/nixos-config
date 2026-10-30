@@ -18,6 +18,7 @@ Module arguments:
 - `gpu.*`: `services/hardware/gpu.nix`; null on a machine whose own `hardware/gpu.nix` does it.
 - `admin = false`: no wheel and no docker group.
 - `defaultApps.*`: choices, `.desktop` ids and launch commands live in `default-apps.nix`, which `mime.nix`, `terminal-exec`, `youtube-dispatch`, niri's app binds and Omni Settings read through its `forUser`; a pick whose app toggle is off falls to the first of its kind that's on. `mimeapps.list` is forced, so DMS's default-app picker doesn't survive a rebuild: change defaults here.
+- `steamGames`: `home/programs/gaming/steam-games.nix` hands it to `steam-games-apply` (`nixos/gaming/steam-games-apply.py`), which writes it into Steam's `localconfig.vdf` and `config.vdf` only while Steam is closed; the Steam package's `extraPreBwrapCmds` runs it again before Steam starts. It clears only values it wrote itself (`~/.local/state/omni-settings/steam-games-applied.json`).
 - `localAi.{code,chat,edit}`: models from `local-models.nix` (folder, file match, llama.cpp flags), read by `settings.nix`, `ai/llama-swap.nix` and `editors/zed.nix`; the first coding model is the default.
 
 ## Other files
