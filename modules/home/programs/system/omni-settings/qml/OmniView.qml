@@ -460,27 +460,6 @@ Item {
         }, mode => startJob("rebuild", { mode }))
     }
 
-    //--- A page's settings that differ from the template's default, leaving out locked ones
-    function changedOn(model) {
-        const out = []
-        if (model)
-            for (const g of model.groups)
-                if (!g.locked)
-                    for (const s of g.settings)
-                        for (const t of s.pair ? [s, s.pair] : [s])
-                            if (!same(valueOf(t), t.default))
-                                out.push(t)
-        return out
-    }
-    function resetPage(model) {
-        const list = changedOn(model)
-        ask({ heading: `Reset ${model.title}?`,
-              body: `Puts ${list.length === 1 ? "one setting" : `${list.length} settings`} back to the `
-                    + "default, as changes waiting for Apply.",
-              buttons: [{ label: "Reset", value: "reset" }] },
-            () => { for (const s of list) change(s, s.default) })
-    }
-
     //--- A collapsed page's status in its title tip: {text, alert}, or null
     function pageSummary(pid, model) {
         const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`
@@ -1687,8 +1666,6 @@ Item {
             : omni.custom[pid] || (model ? settingsPage : null)
         readonly property bool ready: !loader.item || loader.item.ready !== false
         readonly property var summary: omni.pageSummary(pid, model)
-        // Not on Default Packages, where every app turned on counts as changed
-        readonly property var changed: pid === "page:Default Packages" ? [] : omni.changedOn(model)
         onReadyChanged: {
             if (ready && loader.item && !omni.waiting)
                 arrived.restart()
@@ -1790,27 +1767,6 @@ Item {
                                 || (section.model ? section.model.description : "")
                             tip: about + (sum ? (about ? "\n" : "")
                                 + (sum.alert ? `!!${sum.text}!!` : sum.text) : "")
-                        }
-                    }
-                    // Settings away from their default, and putting them back
-                    Rectangle {
-                        visible: section.changed.length > 0
-                        implicitWidth: changedText.implicitWidth + 18
-                        implicitHeight: 24
-                        radius: 8
-                        color: Qt.alpha(Theme.primary, resetHover.hovered ? 0.3 : 0.18)
-                        Text {
-                            id: changedText
-                            anchors.centerIn: parent
-                            text: `${section.changed.length} changed · Reset`
-                            color: Theme.primary
-                            font.pixelSize: 12
-                            font.weight: Font.DemiBold
-                        }
-                        HoverHandler { id: resetHover; cursorShape: Qt.PointingHandCursor }
-                        TapHandler {
-                            gesturePolicy: TapHandler.ReleaseWithinBounds
-                            onTapped: omni.resetPage(section.model)
                         }
                     }
                     Chevron { open: section.open; lit: headHover.hovered }
