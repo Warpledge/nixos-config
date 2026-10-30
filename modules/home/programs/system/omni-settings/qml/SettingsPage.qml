@@ -191,7 +191,8 @@ ColumnLayout {
                                 ToggleChip {
                                     required property var modelData
                                     text: modelData.title
-                                    tip: modelData.description || modelData.subtitle
+                                    tip: [modelData.description || modelData.subtitle,
+                                          `Default: ${modelData.defaultShown}`].filter(t => t).join("\n")
                                     checked: !!page.view.valueOf(modelData)
                                     enabled: !group.modelData.locked
                                     onToggled: page.view.change(modelData, !checked)

@@ -10,6 +10,7 @@ Item {
     visible: tip !== ""
     width: Math.min(title.contentWidth, title.width)
     height: Math.min(title.contentHeight, title.height)
+    x: title.horizontalAlignment === Text.AlignRight ? title.width - width : 0
     y: title.height > height && title.verticalAlignment === Text.AlignVCenter ? (title.height - height) / 2 : 0
 
     Row {

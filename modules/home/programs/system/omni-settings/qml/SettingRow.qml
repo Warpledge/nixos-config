@@ -23,6 +23,8 @@ Rectangle {
     readonly property bool changed: !atDefault && !locked
     readonly property bool hasIcon: [].concat(s.icon || []).length > 0
     readonly property color accent: Theme.accentOf(row)
+    readonly property string defaultTip: `Default: ${s.defaultShown}`
+        + (s.pair ? ` · ${s.pair.title}: ${s.pair.defaultShown}` : "")
 
     // A row in its group's card (SettingsPage.qml); the card draws the rules between rows
     Layout.fillWidth: true
@@ -79,7 +81,10 @@ Rectangle {
                         Layout.minimumWidth: Math.min(Layout.maximumWidth, row.width * 0.45)
                         Layout.fillWidth: true
                         TextMetrics { id: titleWidth; font: titleText.font; text: titleText.text }
-                        TitleTip { tip: row.s.description || row.s.subtitle }
+                        TitleTip {
+                            tip: [row.s.description || row.s.subtitle, row.defaultTip]
+                                .filter(t => t).join("\n")
+                        }
                     }
                     //--- Cautions and notes as indicators, read at the cursor
                     Hint { tip: Theme.plain(row.s.note) }
@@ -138,10 +143,12 @@ Rectangle {
                 maximumLineCount: 3
                 elide: Text.ElideRight
                 TextMetrics { id: valueWidth; font: valueText.font; text: valueText.text }
+                TitleTip { tip: row.defaultTip }
             }
             Toggle {
                 visible: row.s.kind === "bool"
                 enabled: !row.locked
+                tip: row.defaultTip
                 checked: !!row.value
                 onToggled: on => row.view.change(row.s, on)
             }
