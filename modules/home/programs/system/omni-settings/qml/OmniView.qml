@@ -9,7 +9,7 @@ Item {
 
     signal closeRequested
 
-    property int edge: 14  // gap between the view and the window's edges
+    property int edge: 6  // gap between the view and the window's edges, as the page frame's
     property int gutter: 8  // the part of `edge` left of the pages that holds their band
     property int frameInset: 6  // the page body inside its frame; clears the frame's corners
     readonly property int railGap: 30  // above each later group on the rail, room for its name
@@ -1089,7 +1089,7 @@ Item {
             id: bodyFlick
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.leftMargin: -omni.gutter + omni.frameInset
+            Layout.leftMargin: omni.frameInset  // the frame lines up with the header and tabs
             Layout.rightMargin: omni.frameInset
             Layout.topMargin: omni.frameInset
             Layout.bottomMargin: omni.frameInset
