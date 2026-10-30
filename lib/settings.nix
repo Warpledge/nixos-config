@@ -35,12 +35,39 @@
     #--- localAi.code and .chat: models lib/local-models.nix lists
     "localAi.code" = lib.attrNames (import ./local-models.nix).code;
     "localAi.chat" = lib.attrNames (import ./local-models.nix).chat;
+    #--- MangoHud.conf's display items (gaming/default.nix)
+    "mangohud.show" = [
+      "fps"
+      "frametime"
+      "frame_timing"
+      "cpu_stats"
+      "cpu_temp"
+      "cpu_power"
+      "cpu_mhz"
+      "gpu_stats"
+      "gpu_temp"
+      "gpu_power"
+      "gpu_core_clock"
+      "gpu_name"
+      "vram"
+      "ram"
+      "battery"
+      "gamemode"
+      "resolution"
+      "time"
+      "wine"
+      "engine_version"
+      "vulkan_driver"
+      "show_fps_limit"
+    ];
   };
   portLists = ["firewall.openTCPPorts" "firewall.openUDPPorts"];
   #--- Whole-number machine settings and the range each takes
   numberRanges = {
     "boot.menu.timeout" = [0 60];
     "boot.menu.entries" = [1 50];
+    "mangohud.fontSize" = [8 64];
+    "mangohud.background" = [0 100];
   };
   #--- Sets of named lists of text, e.g. userPackages = {Media = ["vlc"];};
   #--- a machine's users.<name> block replaces the user's whole set
@@ -156,6 +183,7 @@
   userChoices =
     {
       wallpaper = ["carousel" "engine"];
+      "mangohud.position" = ["top-left" "top-center" "top-right" "middle-left" "middle-right" "bottom-left" "bottom-center" "bottom-right"];
     }
     #--- defaultApps.<kind>: the app names lib/default-apps.nix lists
     // lib.mapAttrs' (kind: candidates: lib.nameValuePair "defaultApps.${kind}" (map (c: c.name) candidates))
@@ -375,7 +403,14 @@ in rec {
   in
     assert report file machineProblems;
     assert lib.all (user: report (userFile user) (problems userDefaults (readUser user) [])) names;
-    assert lib.all (user: report (userFile user) (badChoices userChoices machine.users.${user})) names;
+    assert lib.all (user: let
+      final = machine.users.${user};
+    in
+      report (userFile user) (badChoices userChoices final
+        ++ badLists final
+        ++ lib.optional (builtins.match "[0-9A-Fa-f]{6}" final.mangohud.textColor == null)
+        "`mangohud.textColor` is ${builtins.toJSON final.mangohud.textColor}; use six hex digits, e.g. \"00FF00\""))
+    names;
     assert report file (lib.optional (!machine.users.${mainUser}.admin)
       "the main user `${mainUser}` needs admin = true (in ${userFile mainUser}), or nobody here can rebuild the system"); {
       inherit machine;

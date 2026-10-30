@@ -14,6 +14,11 @@
   "bluetooth.enable": {"title": "Bluetooth", "summary": "Wireless devices", "icon": ["preferences-system-bluetooth"], "text": "Turns on the Bluetooth adapter and powers it up at boot. Pair devices from the Bluetooth panel in the shell's control center."},
   "battery.chargeLimit": {"title": "Charge Limit", "summary": "Where charging stops", "icon": ["battery"], "choices": {"None": "Off (charge to full)", "60": "60%", "70": "70%", "80": "80%", "90": "90%"}, "text": "Stopping short of full makes a battery last more years on a laptop that's mostly plugged in. Lenovo laptops use conservation mode instead, which stops where their firmware picks."},
   "gpuOffload": {"title": "Run on dGPU", "summary": "Apps on the NVIDIA GPU"},
+  "mangohud.show": {"title": "What It Shows", "summary": "Items on the overlay", "text": "Just **fps** shows the frame rate alone. Anything else listed is shown and the rest hidden."},
+  "mangohud.position": {"title": "Position", "summary": "Where on the screen", "choices": {"top-left": "Top Left", "top-center": "Top Centre", "top-right": "Top Right", "middle-left": "Middle Left", "middle-right": "Middle Right", "bottom-left": "Bottom Left", "bottom-center": "Bottom Centre", "bottom-right": "Bottom Right"}},
+  "mangohud.fontSize": {"title": "Text Size", "summary": "8 to 64"},
+  "mangohud.textColor": {"title": "Text Colour", "summary": "Six hex digits, e.g. 00FF00"},
+  "mangohud.background": {"title": "Background", "summary": "Opacity from 0 to 100%"},
   "printing.enable": {"title": "Printing", "summary": "USB and network printers", "icon": ["preferences-devices-printer"], "text": "**CUPS** prints, and **Avahi** finds network printers that need no driver (it opens UDP port 5353). Add printers on the shell's Printers page, below once this is on."},
 
   "firewall.openTCPPorts": {"title": "Open TCP Ports", "summary": "For servers others reach", "icon": ["preferences-system-firewall"], "text": "Ports other devices may connect to over TCP; every other port stays closed. SSH, Syncthing, Sunshine, Steam and printing open their own, so they don't go here."},

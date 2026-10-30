@@ -62,13 +62,17 @@ SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
 #--- "windowrules" the Window Rules page's, "siderail" the Side Rail page's and
 #--- "games" the Games page's.
 #--- "top" pages: the custom page (its id in api.py and OmniView.qml) each one's settings show on
-TOP_PAGES = {"Flatpaks": "flatpaks", "Users": "people", "Battery": "battery"}
+TOP_PAGES = {"Flatpaks": "flatpaks", "Users": "people", "Battery": "battery", "MangoHud": "mangohud"}
 
 PAGES = {
     "Flatpaks": ("top", "system-software-install-symbolic", "", [("", "", ["flatpak.enable"])]),
     "Users": ("top", "system-users-symbolic", "",
               [("Commit As", "Your name and email on git commits you make.", ["git.name", "git.email"])]),
     "Battery": ("top", "battery-symbolic", "", [("", "", ["battery.chargeLimit"])]),
+    "MangoHud": ("top", "utilities-system-monitor-symbolic", "",
+                 [("Shows", "", ["mangohud.show"]),
+                  ("Looks", "", ["mangohud.position", "mangohud.fontSize", "mangohud.textColor",
+                                 "mangohud.background"])]),
     "Run on dGPU": ("dgpu", "video-display-symbolic", "", [("", "", ["gpuOffload"])]),
     "User Packages": ("userpkgs", "package-x-generic-symbolic", "", [("", "", ["userPackages"])]),
     "Keybinds": ("keybinds", "input-keyboard-symbolic", "", [("", "", ["keybinds"])]),

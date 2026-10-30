@@ -91,14 +91,31 @@ user: {
   #--------------------------------------------------------------------#
   #-- MangoHud Overlay
   #--------------------------------------------------------------------#
-  #--- FPS-only overlay, top-right corner (stylix target disabled in theme/stylix.nix)
+  #--- From the user's mangohud settings (stylix target disabled in theme/stylix.nix).
+  #--- Every known item is written on or =0, since MangoHud shows some by default.
   #--- font_file: themed JetBrainsMono Nerd Font, Mono cut for fixed-width digits
-  xdg.configFile."MangoHud/MangoHud.conf".text = ''
-    fps_only
-    position=top-right
-    font_size=16
-    background_alpha=0
-    text_color=00FF00
+  xdg.configFile."MangoHud/MangoHud.conf".text = let
+    hud = user.mangohud;
+    items = (import ../../../../lib/settings.nix {inherit lib;}).listChoices."mangohud.show";
+  in ''
+    ${
+      if hud.show == ["fps"]
+      then "fps_only"
+      else
+        lib.concatMapStringsSep "\n" (i:
+          if lib.elem i hud.show
+          then i
+          else "${i}=0")
+        items
+    }
+    position=${hud.position}
+    font_size=${toString hud.fontSize}
+    background_alpha=${
+      if hud.background >= 100
+      then "1"
+      else "0.${lib.fixedWidthString 2 "0" (toString hud.background)}"
+    }
+    text_color=${hud.textColor}
     font_file=${config.stylix.fonts.monospace.package}/share/fonts/truetype/NerdFonts/JetBrainsMono/JetBrainsMonoNerdFontMono-Regular.ttf
   '';
 

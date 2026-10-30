@@ -82,6 +82,7 @@ TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
                   ("proton", "Launch Options", ("input-gaming-symbolic",)),
                   ("protonversions", "Proton Versions",
                    ("system-software-install-symbolic", "input-gaming-symbolic")),
+                  ("mangohud", "MangoHud", ("utilities-system-monitor-symbolic",)),
                   ("crashes", "Crashes", ("dialog-warning-symbolic", "computer-fail-symbolic"))],
        "ai": [],
        "docs": []}
@@ -115,6 +116,7 @@ NAV_SUBTITLES = {"overview": "Updates, freeing space, versions", "git": "Changes
                  "games": "Your Steam games: build each one's launch options and pick its Proton "
                           "version. Changes wait for Apply, and reach Steam once it's closed.",
                  "proton": "Launch options for Steam, Heroic and Lutris. Click one to copy it.",
+                 "mangohud": "The in-game overlay: what it shows and where. Changes wait for Apply.",
                  "crashes": "Programs that crashed in the last 30 days, games first, with a report "
                             "to copy for troubleshooting",
                  "protonversions": "The Proton and Wine builds each launcher can run games with. Pick "
@@ -303,6 +305,8 @@ def shows(key, wm):
         return bool(hardwarestate.batteries())
     if key == "dgpu":
         return hardwarestate.has_offload()
+    if key == "mangohud":
+        return bool(shutil.which("mangohud"))
     return True
 
 
@@ -838,6 +842,13 @@ def cmd_flatseal(_cfg, args):
     return True
 
 
+def cmd_mangohud_test(_cfg, _args):
+    """Opens vkcube under MangoHud, with the overlay as last applied."""
+    subprocess.Popen(["mangohud", "vkcube"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                     start_new_session=True)
+    return True
+
+
 #--------------------------------------------------------------------#
 #-- Upstream updates
 #--------------------------------------------------------------------#
@@ -1228,7 +1239,8 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "keybinds": cmd_keybinds, "launchCommand": cmd_launch_command, "sideRail": cmd_side_rail,
             "appIcon": cmd_app_icon, "pickIconFile": cmd_pick_icon_file, "siteIcon": cmd_site_icon,
             "mimeApps": cmd_mime_apps, "splitCommand": cmd_split_command,
-            "firmware": cmd_firmware, "firmwareSummary": cmd_firmware_summary, "battery": cmd_battery}
+            "firmware": cmd_firmware, "firmwareSummary": cmd_firmware_summary, "battery": cmd_battery,
+            "mangohudTest": cmd_mangohud_test}
 
 
 def run(cfg, cmd, args):
