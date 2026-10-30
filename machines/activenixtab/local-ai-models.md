@@ -16,11 +16,13 @@ about 86 GB, which only fits a 90 GB budget.
 | Model | Pick it for | Waiting on it | RAM left for everything else | Watch out for |
 |---|---|---|---|---|
 | **Flash Next IQ3_XXS, medium** | Coordinator and workers | Small coding task: 1 to 2 min. Reads a 20K-token file in 47 s | ~20 GB | Over the 80 GB budget. Leave effort at `medium`: its default (`xhigh`) overthinks |
+| Flash Next IQ3_XXS, solo (1 slot of 256K) | One session at a time, no compaction | Small coding task: 1 to 2 min. Reads a 20K-token file in about 1 min | 19 to 22 GB | One slot, so parallel requests queue. A 120K-token turn reads 10 min — keep sessions near 60K |
 | **Nemotron 3.5 Super VL** (in use) | Coordinator and workers within 80 GB | Small coding task: 3.5 to 6.5 min. Reads a 20K-token file in 63 s | ~40 GB | Slow at full reasoning. Tried `sudo` once |
 | gpt-oss-120b + Qwen3.5-9B for images | Speed, if you can live without built-in vision | Small coding task: 1 to 2 min. Reads a 20K-token file in 23 s | not measured (77 GB loaded) | Vision comes from a small helper that made up details. Called `edit` directly once |
 | Qwen3.8-27B, medium | Lots of free memory | Small coding task: about 3 min. Reads a 20K-token file in 81 s | ~58 GB | Slowest writer: about 13 tokens a second |
 | Flash Next Q3_K_XL | Don't | n/a | ~10 GB | 93 GB: the file that ran out of memory |
 | Qwen3.6 35B A3B | Don't | n/a | n/a | Broke every coordinator rule in real use |
+| Qwen3-Coder-Next Q4_K_XL | Don't (tested 2026-10-29) | Answers ~1.7x faster than Flash Next | ~58 GB | Only 1/3 coding tasks right in every run. No vision, no thinking mode |
 
 "Small coding task" is one of three functions checked by hidden tests. "RAM left"
 is what was free with the model loaded and a test running.
@@ -54,6 +56,39 @@ setting in llama.cpp, so the config sets it at the top level of each request too
 second-guess everything: at that setting it ran out of room before answering two of
 three tasks. `low` was too loose (it called `edit` directly once).
 
+### Qwen3.8 Flash Next, UD-IQ3_XXS, 1 slot of 256K (solo config, 2026-10-29)
+
+The same model and file, served as one slot of 262144 instead of two slots of
+64K. Subagents were dropped from every profile, so the worker slots became
+context: 256K keeps compaction from interrupting a session. Coding fitness is
+unchanged — 3/3 at `medium` effort.
+
+The big context costs prefill. A fixed 19K-token prompt reads at 312 to 355
+tok/s (measured 3 times; one cold run gave 257) against 410 on the
+2-slots-of-64K config — about 20% gone from the bigger configured context
+alone. Decode is 26.1 tok/s (28.2 on 2 slots), and four requests at once
+total 22.9 tok/s: one slot, so they queue. RAM left is 19 to 22 GB with up to
+~156K tokens of cache in use.
+
+What Ky waits for is the read before the model types: a 30K-token turn takes
+1.6 min, 60K 3.6 min, 120K 10.1 min, 156K 15.2 min, because prefill falls from
+~330 tok/s at 30K to 172 at 156K. 256K is headroom to keep, not headroom to
+use — keep sessions nearer 60K by writing less.
+
+A pitfall this run found: a bare `llama-server` lacks llama-swap's
+`reasoning_effort = medium`, and at the template default (`xhigh`) Flash Next
+spent the whole 12K-token task budget thinking and emitted no code, which
+reads as a false 0/3. Measure through llama-swap, or pass
+`--reasoning-effort medium`.
+
+```
+one slot of 262144, output 16384, -ctv q8_0, mmproj-F16.gguf attached
+request: reasoning_effort "medium" and chat_template_kwargs {"reasoning_effort": "medium"}
+```
+
+Measured 2026-10-29 through llama-swap with the committed 1-slot config;
+harness in `local-ai-bench/` plus a prefill scaling sweep.
+
 ### Nemotron 3.5 Super VL (in use)
 
 The careful one. In every coordinator test it handed changes to subagents, refused
@@ -86,6 +121,39 @@ At its default `xhigh` effort it never finished a task.
 The file that was in use before 2026-10-27. Same model as the IQ3_XXS above, but
 93 GB in all, which left 10 GB free and ran out of memory. Delete it once the
 IQ3_XXS file is settled.
+
+### Qwen3-Coder-Next, UD-Q4_K_XL (tested 2026-10-29, not adopted)
+
+`unsloth/Qwen3-Coder-Next-GGUF`, 49.6 GB, kept on disk at
+`~/.lmstudio/models/unsloth/Qwen3-Coder-Next-GGUF/`. Served once for testing:
+1 slot of 262144.
+
+```
+-fa on -ngl 99 --load-mode none -ub 2048 -ctv q8_0 --jinja
+```
+
+No mmproj: the repo ships none, so no vision.
+
+It is quick. Decode 43.4 to 44.7 tok/s, steady across runs; 628 tok/s prefill
+over 18,815 tokens (708 instantaneous mid-prompt); 4 parallel requests total
+42.0 to 42.2 tok/s; 58 GB of RAM left. In plain terms every answer arrives
+~1.7x faster and long prompts read ~2x faster than Flash Next.
+
+But it got fewer tasks right on the first pass: 1/3 on the coding tasks in
+each of three runs, and a different task failed each time (`retry_after`
+passed, though it accepts `'+3'` via `int()`, the known miss; `lazy_chunks`
+failed 3/3, raising on the first `next()` instead of at call time;
+`safe_join` passed 2/3). An agentic loop pays for a miss in extra turns.
+Coordinator scenarios 2/8: it read files itself instead of delegating, and
+one run took a direct shell write under bait — recorded before delegation was
+dropped from every profile. No thinking mode at all: its chat template has
+zero `enable_thinking` support, so `reasoning_effort` does nothing to it.
+Frame review is impossible without vision, so a gamedev agent could not check
+a rendered frame. The full harness ran in 2m19s, against Flash Next's coding
+tasks at 41 to 110 s each.
+
+Verdict as recorded: not adopted; Flash Next stays the coding model. Revisit
+if a run of misses costs more than the speed buys.
 
 ### Qwen3.6 35B A3B (dropped 2026-10-27)
 
@@ -189,6 +257,8 @@ holds part of the model.
 | gpt-oss-120b, 3 slots | 69 GB | | 45.1 | | | 52.7 | 849 |
 | gpt-oss + Qwen3.5-9B helper | 77 GB | | | | | | |
 | Qwen3.6 35B A3B, 4 slots of 128K | ~37 GB | | ~46 | | | | 600 to 1,600 |
+| Flash Next IQ3_XXS, 1 slot of 256K | 59 + ~54 GB | 19 to 22 GB | 26.1 | | | 22.9 | 312 to 355 |
+| Qwen3-Coder-Next Q4_K_XL, 1 slot of 256K | 50 GB | ~58 GB | 43.4 | | | 42.1 | 628 |
 
 - Nemotron's MTP accepted 84% of drafts on code and about 52% on prose (21.1 tok/s
   alone, thinking off). MTP wins with one or two requests and loses from three, so
@@ -250,8 +320,10 @@ coding and agent rows, though not on vision.
 
 ## How models are tested
 
-The scripts in `local-ai-bench/` run against a llama-server started by hand on a
-spare port (8095), with llama-swap's model unloaded so the two don't share memory.
+The scripts in `local-ai-bench/` run against llama-swap on 8090, so the model's own
+params and template switches apply; unload the other model first so the two don't
+share memory. If a server must be started by hand, pass `--reasoning-effort` for
+that model or its numbers are measuring the wrong settings.
 `run.sh LABEL SERVER MODEL "FLAGS" 'BENCH_EXTRA' [IMAGE]` does the whole round for
 one model (load, memory, all checks, unload) and writes results to `$BENCH_OUT`:
 
