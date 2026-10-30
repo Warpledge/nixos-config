@@ -4,7 +4,7 @@ There are three ways to get software, and they suit different apps.
 
 ## Default Packages: Apps the Config Sets Up
 
-Packages → **Default Packages** has a page per kind of app (Browsers, Media, Office…), and the Gaming tab's **Apps** page holds the game launchers and tools. Each switch installs an app *and* sets it up: its settings, theme, file types, and sometimes a service or a security profile. Use these whenever the app you want has a switch.
+Packages → **Default Packages** has a card per kind of app (Browsers, Media, Gaming, AI…). Each switch installs an app *and* sets it up: its settings, theme, file types, and sometimes a service or a security profile. Use these whenever the app you want has a switch.
 
 Turn a switch on or off, then Apply. The button beside a switch opens the file that sets the app up, if you're curious how. Which switch loads which file is in [`modules/home/programs/default.nix`](../../modules/home/programs/default.nix).
 

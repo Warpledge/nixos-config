@@ -724,8 +724,14 @@ Item {
         saveUi()
     }
     //--- The current tab's pages: any open, and opening or closing them all at once
-    readonly property bool anyOpen: tabPages.some(i => i.id.startsWith("doc:") ? !!openNotes[i.id]
-                                                                               : !!openPages[i.id])
+    readonly property bool anyOpen: tabPages.some((i, n) => !headless(n)
+        && (i.id.startsWith("doc:") ? !!openNotes[i.id] : !!openPages[i.id]))
+    //--- A section holding one page of its own name: no header, so always open
+    function headless(n) {
+        const p = tabPages[n], prev = tabPages[n - 1], next = tabPages[n + 1]
+        return (!prev || prev.group !== p.group) && p.title === p.group
+            && (!next || next.group !== p.group)
+    }
     function setAllOpen(open) {
         const pages = Object.assign({}, openPages)
         const notes = Object.assign({}, openNotes)
@@ -861,18 +867,6 @@ Item {
         color: "transparent"
         border.width: 1
         border.color: Qt.alpha(Theme.primary, 0.22)
-    }
-    //--- Holds the pinned page header (stickyHead) over the scroll, as wide as the page
-    //--- cards, so it can be pushed up out of sight at its page's end
-    Item {
-        id: stickyClip
-        visible: bodyFrame.visible
-        x: mainCol.x + bodyFlick.x
-        y: mainCol.y + bodyFlick.y
-        width: bodyFlick.width
-        height: bodyFlick.height
-        clip: true
-        z: 3
     }
 
     //--- Across the whole width, over the rail too
@@ -1137,89 +1131,6 @@ Item {
                     search.text = ""
                     packageSearch.close()
                     omni.forceActiveFocus()
-                }
-            }
-
-            //--- The open page's header, pinned while its own has scrolled away; pushed
-            //--- up by the page's end
-            Rectangle {
-                id: stickyHead
-                readonly property var sec: {
-                    const y = bodyFlick.contentY
-                    const s = sections.count ? omni.topSection() : null
-                    return s && s.open && s.headed && y > s.y + s.headBottom ? s : null
-                }
-                // The last page pinned, kept while it fades out
-                property var shown: null
-                onSecChanged: if (sec) shown = sec
-                // The top of the page's own card, edged like it (stickyClip)
-                parent: stickyClip
-                width: stickyClip.width
-                height: stickyRow.implicitHeight + 16
-                y: shown ? Math.min(0, shown.y + shown.height - bodyFlick.contentY - height) : 0
-                visible: opacity > 0
-                opacity: sec ? (omni.picking || packageSearch.open ? 0.35 : 1) : 0
-                Behavior on opacity { NumberAnimation { duration: 120 } }
-                radius: 20  // the page cards' (PageSection)
-                color: Qt.tint(Theme.bg, Qt.alpha(Theme.text, stickyHover.hovered ? 0.09 : 0.06))
-                border.width: 1
-                border.color: Qt.alpha(Theme.primary, 0.3)
-                // Square bottom corners, keeping the frame's side edges
-                Rectangle {
-                    anchors.bottom: parent.bottom
-                    width: parent.width
-                    height: parent.radius
-                    color: parent.color
-                    Rectangle { width: 1; height: parent.height; color: stickyHead.border.color }
-                    Rectangle { x: parent.width - 1; width: 1; height: parent.height; color: stickyHead.border.color }
-                }
-                Rectangle {
-                    anchors.bottom: parent.bottom
-                    width: parent.width
-                    height: 1
-                    color: Theme.rule
-                }
-                RowLayout {
-                    id: stickyRow
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.leftMargin: 14
-                    anchors.rightMargin: 14
-                    spacing: 12
-                    Rectangle {
-                        implicitWidth: 30
-                        implicitHeight: 30
-                        radius: 15
-                        color: Theme.primary
-                        Icon {
-                            anchors.centerIn: parent
-                            icon: stickyHead.shown ? Theme.glyph(stickyHead.shown.modelData.icon, "description") : ""
-                            size: 17
-                            fill: true
-                            color: Theme.inkPrimary
-                        }
-                    }
-                    Text {
-                        Layout.fillWidth: true
-                        text: stickyHead.shown ? stickyHead.shown.modelData.title : ""
-                        color: Theme.text
-                        font.pixelSize: 16
-                        font.weight: Font.Bold
-                        elide: Text.ElideRight
-                    }
-                    Chevron { open: true; lit: stickyHover.hovered }
-                }
-                HoverHandler { id: stickyHover; cursorShape: Qt.PointingHandCursor }
-                TapHandler {
-                    gesturePolicy: TapHandler.ReleaseWithinBounds
-                    onTapped: {
-                        const s = stickyHead.sec
-                        if (!s)
-                            return
-                        omni.scrollTo(s.pid)
-                        s.toggle()
-                    }
                 }
             }
 
@@ -1770,7 +1681,7 @@ Item {
         readonly property string pid: modelData.id
         readonly property bool note: pid.startsWith("doc:")
         readonly property bool userPkgs: pid.startsWith("userpackages:")
-        readonly property bool open: note ? !!omni.openNotes[pid] : !!omni.openPages[pid]
+        readonly property bool open: !headed || (note ? !!omni.openNotes[pid] : !!omni.openPages[pid])
         readonly property var model: omni.info.pages[pid] || null
         readonly property var comp: note ? notePage : userPkgs ? userPkgsPage
             : omni.custom[pid] || (model ? settingsPage : null)
@@ -1791,15 +1702,11 @@ Item {
         }
         // The rail's group this page starts; the untitled first group takes the tab's name
         readonly property var prev: index > 0 ? omni.tabPages[index - 1] : null
-        readonly property var next: index + 1 < omni.tabPages.length ? omni.tabPages[index + 1] : null
         readonly property bool divided: !prev || prev.group !== modelData.group
         readonly property string sectionTitle: modelData.group
             || (omni.info.tabs.find(t => t.id === omni.tab) || { title: "" }).title
         // A section holding one page of its own name shows only the divider
-        readonly property bool headed: !(divided && modelData.title === modelData.group
-                                         && (!next || next.group !== modelData.group))
-        // Where the header ends, for the sticky copy over the scroll (stickyHead)
-        readonly property real headBottom: card.y + head.y + head.height
+        readonly property bool headed: !omni.headless(index)
         visible: !!comp
         Layout.fillWidth: true
         Layout.topMargin: index === 0 ? 0 : divided ? 22 : 14

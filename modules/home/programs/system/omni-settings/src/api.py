@@ -144,8 +144,6 @@ HISTORY = 8  # versions the Overview lists
 #--- Each section's tab; one not listed goes on System
 SECTION_TAB = {"computer": "system", "personal": "system", "cloudai": "ai", "localai": "ai",
                "apps": "packages", "network": "network", "security": "security"}
-#--- Apps pages that leave Default Packages for a page of their own on another tab
-PAGE_TAB = {"Gaming": "gaming", "Security": "security"}
 
 USER_PACKAGES = ("user", ("userPackages",))
 KEYBINDS = ("user", schema.KEYBINDS)
@@ -345,7 +343,7 @@ def cmd_load(cfg, _args):
         if items:
             nav[tab].append({"id": "", "title": "", "items": items})
     pages, by_section = {}, {key: [] for key, _ in schema.SECTIONS}
-    apps_groups, tab_pages = [], {}
+    apps_groups = []
     # Under niri every DMS link moves to the Shell page, in categories (shellLinks),
     # except those on a page of a tab of its own (Network's Connections)
     shell_links = wm == "niri"
@@ -372,13 +370,6 @@ def cmd_load(cfg, _args):
                            "settings": [setting_json(cfg, state, s, multi, modules) for s in g.settings],
                            "links": links})
         if not groups:
-            continue
-        if page.title in PAGE_TAB:
-            pages[pid] = {"id": pid, "title": "Apps", "description": page.description,
-                          "icon": [page.icon, schema.FALLBACK_ICON], "intro": "",
-                          "changeFor": multi, "groups": groups}
-            tab_pages.setdefault(PAGE_TAB[page.title], []).append(
-                {"id": pid, "title": "Apps", "icon": [page.icon, schema.FALLBACK_ICON]})
             continue
         if page.section == "apps" or page.section not in by_section and page.section != "top":
             apps_groups.append(app_card(page, pid, groups))
@@ -415,8 +406,6 @@ def cmd_load(cfg, _args):
     for key, title in schema.SECTIONS:
         if by_section[key]:
             nav[section_tab.get(key, "system")].append({"id": key, "title": title, "items": by_section[key]})
-    for tab, items in tab_pages.items():
-        nav[tab].append({"id": f"{tab}-apps", "title": "", "items": items})
     user_packages = next((s for p in state.pages for g in p.groups for s in g.settings
                           if (s.domain, s.path) == USER_PACKAGES), None)
     if user_packages:
