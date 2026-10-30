@@ -42,7 +42,7 @@ Legitimate accesses become rules in that app's module; anything reaching into
 ## Moving a profile to enforce
 
 1. Use the app normally for a week or two, until its log lines stop showing up.
-2. Change `state = "complain"` to `state = "enforce"` in its module and rebuild.
+2. Add its name to the machine's `apparmor.enforce` list and rebuild. Omni Settings' Security → AppArmor page does this with each profile's switch, offered once its count since boot is zero, after compiling the profile.
 3. If the app then misbehaves, `journalctl -b -g 'apparmor="DENIED"'` shows what was blocked.
 
 ## Things to fix before enforcing

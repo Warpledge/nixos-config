@@ -2,9 +2,9 @@
 # APPARMOR: YT-DLP
 #=====================================================================#
 #- Only when run directly; started by mpv it inherits mpv's profile.
-_: {
+{apparmorState, ...}: {
   security.apparmor.policies.yt-dlp = {
-    state = "complain";
+    state = apparmorState "yt-dlp";
     profile = ''
       abi <abi/4.0>,
       include <tunables/global>

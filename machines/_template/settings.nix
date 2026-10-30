@@ -141,6 +141,11 @@
   # Background scanner, definition updates and the ClamTK window
   clamav.enable = false;
 
+  #--- AppArmor
+  # Profiles that block instead of only logging (see docs/security/apparmor.md).
+  # Known names: the policies in nixos/security/apparmor/, e.g. mpv, evince
+  apparmor.enforce = [];
+
   #--- Docker Containerization
   # Docker and Docker Compose; admins join the docker group
   docker.enable = false;

@@ -4,9 +4,9 @@
 #- Mods are arbitrary Java code; this keeps them out of browser profiles,
 #- Discord tokens and ~/.ssh. Attaches to the real binary, so the
 #- mullvad-exclude wrapper in front of it stays unconfined.
-_: {
+{apparmorState, ...}: {
   security.apparmor.policies.prismlauncher = {
-    state = "complain";
+    state = apparmorState "prismlauncher";
     profile = ''
       abi <abi/4.0>,
       include <tunables/global>

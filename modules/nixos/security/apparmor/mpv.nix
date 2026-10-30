@@ -3,9 +3,9 @@
 #=====================================================================#
 #- Also covers mpv started by ani-cli; under streamlink it inherits
 #- streamlink's profile instead.
-_: {
+{apparmorState, ...}: {
   security.apparmor.policies.mpv = {
-    state = "complain";
+    state = apparmorState "mpv";
     profile = ''
       abi <abi/4.0>,
       include <tunables/global>

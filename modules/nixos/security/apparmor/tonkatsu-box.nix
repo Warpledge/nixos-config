@@ -3,9 +3,9 @@
 #=====================================================================#
 #- Prebuilt Flutter bundle in ~/.local/opt, built and reviewed by nobody
 #- here. Starts from what a desktop app needs; the log shows the rest.
-_: {
+{apparmorState, ...}: {
   security.apparmor.policies.tonkatsu-box = {
-    state = "complain";
+    state = apparmorState "tonkatsu-box";
     profile = ''
       abi <abi/4.0>,
       include <tunables/global>
