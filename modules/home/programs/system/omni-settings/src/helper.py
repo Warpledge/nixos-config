@@ -272,6 +272,25 @@ def collect():
                   "freed": freed.group(2) if freed else ""})
 
 
+def firmware():
+    """Installs every firmware update fwupd offers; a reboot it needs is left
+    to the user (--no-reboot-check)."""
+    fwupdmgr = shutil.which("fwupdmgr")
+    if fwupdmgr is None:
+        raise RuntimeError("fwupd isn't installed on this computer")
+    emit(step="firmware", state="start")
+    stream([fwupdmgr, "refresh", "--force"])
+    code, lines = stream([fwupdmgr, "update", "-y", "--no-reboot-check"])
+    text = "\n".join(lines).lower()
+    # fwupdmgr exits 2 when there was nothing to do
+    if code not in (0, 2):
+        emit(step="firmware", state="failed")
+        raise RuntimeError("the firmware update failed")
+    emit(step="firmware", state="done")
+    if "reboot" in text or "restart" in text:
+        emit(note=["Restart to finish", "A device installs its new firmware while the computer restarts."])
+
+
 def store_free():
     try:
         return shutil.disk_usage("/nix/store").free
@@ -407,6 +426,36 @@ def window_rules_ok(value):
     return True
 
 
+SIDE_RAIL_FIELDS = {"enable": bool, "order": int, "width": int, "keepRunning": bool,
+                    "unloadAfter": int, "name": str, "icon": str, "appId": str, "url": str,
+                    "command": list}
+SIDE_RAIL_SHARED = ("enable", "order", "width", "keepRunning", "unloadAfter")
+
+
+def side_rail_ok(value):
+    """Whether `value` is a set of side rail changes by id, as lib/settings.nix's
+    sideRailProblems: a shared app's SIDE_RAIL_SHARED fields, or a custom- app."""
+    if not isinstance(value, dict):
+        return False
+    for app_id, e in value.items():
+        if not (isinstance(app_id, str) and re.fullmatch(r"[A-Za-z0-9_-]+", app_id) and isinstance(e, dict)):
+            return False
+        custom = app_id.startswith("custom-")
+        allowed = SIDE_RAIL_FIELDS if custom else SIDE_RAIL_SHARED
+        for k, v in e.items():
+            kind = SIDE_RAIL_FIELDS.get(k)
+            if k not in allowed or not isinstance(v, kind) or (kind is int and isinstance(v, bool)):
+                return False
+            if k == "command" and not (v and all(isinstance(w, str) for w in v)):
+                return False
+            if k in ("width", "unloadAfter") and v <= 0:
+                return False
+        if custom and ("name" not in e or ("url" in e) == ("command" in e)
+                       or ("command" in e and "appId" not in e)):
+            return False
+    return True
+
+
 def user_changes(cfg, raw):
     """The request's changes, refused unless each is a user template key with
     the template's kind of value."""
@@ -431,6 +480,8 @@ def user_changes(cfg, raw):
             ok = keybinds_ok(value)
         elif key == schema.WINDOW_RULES:
             ok = window_rules_ok(value)
+        elif key == schema.SIDE_RAIL:
+            ok = side_rail_ok(value)
         else:
             ok = same_kind(default, value)
         if not ok:
@@ -492,7 +543,9 @@ def main():
     changes, system, target, new_user, password = None, None, None, None, None
     collecting = request.get("collectGarbage") is True
     optimising = request.get("optimise") is True
-    if mode == "build" and (collecting or optimising or "activate" in request or "newUser" in request
+    updating_firmware = request.get("firmwareUpdate") is True
+    if mode == "build" and (collecting or optimising or updating_firmware
+                            or "activate" in request or "newUser" in request
                             or request.get("clean") is True):
         refuse("bad request")
     if request.get("clean") is True:
@@ -503,6 +556,9 @@ def main():
     elif optimising:
         if not admin:
             refuse("only an admin can optimise the store")
+    elif updating_firmware:
+        if not admin:
+            refuse("only an admin can update firmware")
     elif "activate" in request:
         if not admin:
             refuse("only an admin can switch to another version")
@@ -538,6 +594,15 @@ def main():
         if collecting:
             try:
                 collect()
+            except Exception as e:  # noqa: BLE001
+                emit(error=str(e))
+                emit(result="failed", restored=False)
+                sys.exit(1)
+            emit(result="ok")
+            return
+        if updating_firmware:
+            try:
+                firmware()
             except Exception as e:  # noqa: BLE001
                 emit(error=str(e))
                 emit(result="failed", restored=False)

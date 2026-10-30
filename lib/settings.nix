@@ -26,6 +26,7 @@
     kernel = ["zen" "latest" "xanmod" "cachyos"];
     cursor = ["bibata" "catppuccin"];
     cursorSize = [24 32 48 64];
+    "battery.chargeLimit" = [null 60 70 80 90];
     "gpu.type" = [null "amd" "intel" "nvidia" "amd+nvidia" "intel+nvidia"];
   };
   #--- Lists whose items must come from a known set
@@ -100,6 +101,43 @@
         "${at}.enable should be true or false"
         ++ map (k: "${at}.${k} should be text in quotes")
         (lib.filter (k: r ? ${k} && !(lib.isString r.${k})) ["name" "note" "category"]))
+      value);
+  #--- Changes to the Mod+A side rail's apps by id (dms/plugins/side-rail/apps.nix);
+  #--- replaced whole by a users.<name> block
+  sideRailFields = {
+    enable = lib.isBool;
+    order = lib.isInt;
+    width = v: lib.isInt v && v > 0;
+    keepRunning = lib.isBool;
+    unloadAfter = v: lib.isInt v && v > 0;
+    name = lib.isString;
+    icon = lib.isString;
+    appId = lib.isString;
+    url = lib.isString;
+    command = v: lib.isList v && v != [] && lib.all lib.isString v;
+  };
+  sideRailProblems = value:
+    if !(lib.isAttrs value && lib.all lib.isAttrs (lib.attrValues value))
+    then ["`sideRail` should be a set of sets, e.g. {brave-ai = {enable = false;};}"]
+    else
+      lib.concatLists (lib.mapAttrsToList (id: e: let
+        at = "`sideRail.${id}`";
+        custom = lib.hasPrefix "custom-" id;
+        allowed =
+          if custom
+          then lib.attrNames sideRailFields
+          else ["enable" "order" "width" "keepRunning" "unloadAfter"];
+      in
+        map (k: "${at} can't set ${k} (use ${lib.concatStringsSep ", " allowed})")
+        (lib.filter (k: !(lib.elem k allowed)) (lib.attrNames e))
+        ++ map (k: "`sideRail.${id}.${k}` has the wrong kind of value")
+        (lib.filter (k: lib.elem k allowed && !(sideRailFields.${k} e.${k})) (lib.attrNames e))
+        ++ lib.optional (custom && !(e ? name))
+        "${at} needs a name"
+        ++ lib.optional (custom && e ? command && !(e ? appId))
+        "${at} needs the appId its command's window opens with"
+        ++ lib.optional (custom && (e ? url) == (e ? command))
+        "${at} needs one of url or command")
       value);
   userChoices =
     {
@@ -179,6 +217,8 @@
       then keybindProblems value
       else if at == ["windowRules"]
       then windowRuleProblems value
+      else if at == ["sideRail"]
+      then sideRailProblems value
       else if lib.elem dotted textSets
       then textSetProblems dotted value
       else if lib.elem dotted grouped
@@ -280,7 +320,7 @@ in rec {
       merged = lib.recursiveUpdate (lib.recursiveUpdate userDefaults own) listed.${user};
     in
       merged
-      // lib.genAttrs (grouped ++ textSets ++ ["keybinds" "windowRules"]) (key: listed.${user}.${key} or own.${key} or userDefaults.${key})
+      // lib.genAttrs (grouped ++ textSets ++ ["keybinds" "windowRules" "sideRail"]) (key: listed.${user}.${key} or own.${key} or userDefaults.${key})
       // {name = user;};
 
     merged = lib.recursiveUpdate machineDefaults (removeAttrs own ["users"]);

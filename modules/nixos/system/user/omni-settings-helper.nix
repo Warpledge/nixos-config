@@ -9,11 +9,10 @@
   config,
   pkgs,
   lib,
-  inputs,
   machine,
   ...
 }: let
-  alejandra = inputs.alejandra.defaultPackage.${pkgs.stdenv.hostPlatform.system};
+  inherit (pkgs) alejandra;
 
   helper = pkgs.stdenvNoCC.mkDerivation {
     pname = "omni-settings-apply";

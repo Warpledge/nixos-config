@@ -46,6 +46,7 @@ STEPS = {
     "check": "See what came back",
     "collect": "Delete old versions and unused files",
     "optimise": "Replace identical files with hard links",
+    "firmware": "Install firmware updates",
     "password": "Set their password",
 }
 #--- Jobs whose success commits and pushes the user's own folders (gitstate.back_up)
@@ -667,6 +668,10 @@ class Service:
         if kind == "optimise":
             job = self.new_job(kind, "Optimizing the Nix Store", ["auth", "optimise"], "Store optimized")
             await self.run(job, {"optimise": True})
+            return job
+        if kind == "firmware":
+            job = self.new_job(kind, "Updating Firmware", ["auth", "firmware"], "Firmware updated")
+            await self.run(job, {"firmwareUpdate": True})
             return job
         if kind == "clean":
             job = self.new_job(kind, "Removing Old Settings", ["auth"], "Old settings removed")

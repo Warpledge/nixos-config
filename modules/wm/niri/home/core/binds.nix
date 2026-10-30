@@ -14,6 +14,9 @@
   niri.keybinds = let
     # The user's defaultApps, for the app binds
     chosen = (import ../../../../../lib/default-apps.nix {inherit lib;}).forUser user;
+    railApps = (import ../dms/plugins/side-rail/apps.nix {inherit lib user machine;}).apps;
+    inRail = id: lib.any (a: a.id == id) railApps;
+    railToggle = id: ["dms" "ipc" "call" "sideRail" "toggleApp" id];
     # Each bind in a section gets its group, the heading Omni Settings shows
     section = group: lib.mapAttrs (_: b: b // {inherit group;});
     # The title is what the Mod+/ cheatsheet (DMS) shows for the bind
@@ -239,20 +242,27 @@
         // lib.optionalAttrs user.gaming.lutris {
           lutris = bind "Mod+Ctrl+G" "Lutris" {spawn = ["lutris"];};
         }
-        #--- Focus an open Claude / OpenCode Desktop window instead of starting another
+        #--- Claude / OpenCode Desktop show or hide the side rail on them when it has
+        #--- them, else focus an open window instead of starting another
         // lib.optionalAttrs user.claudeDesktop.enable {
           claude-desktop = bind "Mod+C" "Claude Desktop" {
-            spawn = ["nirius" "focus-or-spawn" "--app-id" "^com\\.anthropic\\.Claude$" "claude-desktop"];
+            spawn =
+              if inRail "claude-desktop"
+              then railToggle "claude-desktop"
+              else ["nirius" "focus-or-spawn" "--app-id" "^com\\.anthropic\\.Claude$" "claude-desktop"];
           };
         }
         // lib.optionalAttrs user.opencodeDesktop.enable {
           opencode-desktop = bind "Mod+X" "OpenCode Desktop" {
-            spawn = ["nirius" "focus-or-spawn" "--app-id" "^ai\\.opencode\\.desktop$" "opencode-desktop"];
+            spawn =
+              if inRail "opencode-desktop"
+              then railToggle "opencode-desktop"
+              else ["nirius" "focus-or-spawn" "--app-id" "^ai\\.opencode\\.desktop$" "opencode-desktop"];
           };
         }
-        #--- Terminal panel on the left edge (ai/ai-panel.nix)
-        // lib.optionalAttrs (user.terminals.kitty && (user.claude.enable || user.opencode.enable)) {
-          ai-panel = bind "Mod+A" "Terminal panel" {spawn = ["ai-panel"];};
+        #--- The side rail of docked apps on the left edge (dms/plugins/side-rail)
+        // lib.optionalAttrs (railApps != []) {
+          side-rail = bind "Mod+A" "Side rail" {spawn = ["dms" "ipc" "call" "sideRail" "toggle"];};
         }))
     ];
 }

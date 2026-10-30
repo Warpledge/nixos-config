@@ -65,7 +65,9 @@
           enable = true;
           max-scroll-amount = "0%"; # hovering a part-hidden window won't scroll to it
         };
-        warp-mouse-to-focus.enable = false; # automatically move cursor to focused window
+        # Cursor stays put on focus changes; niri-flake has no enable = false, any
+        # value here writes warp-mouse-to-focus into hm.kdl
+        warp-mouse-to-focus = null;
         # re-pressing the active workspace's key returns to the previous one
         workspace-auto-back-and-forth = true;
       };

@@ -18,6 +18,7 @@ user: {lib, ...}: {
     #--- Other
     (import ./programs user)
     ./env.nix
+    ./gpu-offload.nix # Always loaded: it also removes copies when the list empties
     ./mime.nix
     ./nixm.nix
     ./services.nix

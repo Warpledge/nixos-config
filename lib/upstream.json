@@ -1,0 +1,33 @@
+{
+  "release": [
+    {"name": "Boorusama", "repo": "khoadng/Boorusama", "file": "modules/home/programs/media/boorusama.nix", "tagPrefix": "v"},
+    {"name": "Streamlink Twitch GUI", "repo": "streamlink/streamlink-twitch-gui", "file": "modules/home/programs/media/streamlink-twitch-gui.nix", "tagPrefix": "v"},
+    {"name": "TONE3000", "repo": "tone-3000/tone3000-plugin", "file": "modules/home/programs/audio/guitar/tone3000.nix", "tagPrefix": "v"},
+    {"name": "Twintail Launcher", "repo": "TwintailTeam/TwintailLauncher", "file": "modules/home/programs/gaming/launchers/twintail.nix", "tagPrefix": "ttl-v"},
+    {"name": "Suwayomi Server", "repo": "Suwayomi/Suwayomi-Server", "file": "modules/nixos/services/servers/suwayomi.nix", "tagPrefix": "v", "machineToggle": "suwayomi.enable"},
+    {"name": "CadCraft", "repo": "storytold/cadcraft", "file": "modules/home/programs/artcraft/cadcraft.nix", "tagPrefix": "v"},
+    {"name": "DeckCraft", "repo": "storytold/deckcraft", "file": "modules/home/programs/artcraft/deckcraft.nix", "tagPrefix": "v"},
+    {"name": "DesignCraft", "repo": "storytold/designcraft", "file": "modules/home/programs/artcraft/designcraft.nix", "tagPrefix": "v"},
+    {"name": "EffectCraft", "repo": "storytold/effectcraft", "file": "modules/home/programs/artcraft/effectcraft.nix", "tagPrefix": "v"},
+    {"name": "FigCraft", "repo": "storytold/figcraft", "file": "modules/home/programs/artcraft/figcraft.nix", "tagPrefix": "v"},
+    {"name": "FilmCraft", "repo": "storytold/filmcraft", "file": "modules/home/programs/artcraft/filmcraft.nix", "tagPrefix": "v"},
+    {"name": "GridCraft", "repo": "storytold/gridcraft", "file": "modules/home/programs/artcraft/gridcraft.nix", "tagPrefix": "v"},
+    {"name": "LightCraft", "repo": "storytold/lightcraft", "file": "modules/home/programs/artcraft/lightcraft.nix", "tagPrefix": "v"},
+    {"name": "PdfCraft", "repo": "storytold/pdfcraft", "file": "modules/home/programs/artcraft/pdfcraft.nix", "tagPrefix": "v"},
+    {"name": "PhotoCraft", "repo": "storytold/photocraft", "file": "modules/home/programs/artcraft/photocraft.nix", "tagPrefix": "v"},
+    {"name": "SoundCraft", "repo": "storytold/soundcraft", "file": "modules/home/programs/artcraft/soundcraft.nix", "tagPrefix": "v"},
+    {"name": "VectorCraft", "repo": "storytold/vectorcraft", "file": "modules/home/programs/artcraft/vectorcraft.nix", "tagPrefix": "v"},
+    {"name": "WordCraft", "repo": "storytold/wordcraft", "file": "modules/home/programs/artcraft/wordcraft.nix", "tagPrefix": "v"}
+  ],
+  "nightly": [
+    {"name": "fee[dB]ack", "repo": "got-feedBack/feedBack-desktop", "file": "modules/home/programs/gaming/games/feedback.nix", "tag": "nightly"}
+  ],
+  "commit": [
+    {"name": "ArtCNN shader", "repo": "Artoriuz/ArtCNN", "file": "modules/home/programs/media/mpv.nix"}
+  ],
+  "local": [
+    {"name": "Tonkatsu Box", "repo": "hacan359/tonkatsu_box", "dir": "~/.local/opt/tonkatsu-box", "file": "modules/home/programs/media/tonkatsu-box.nix", "tagPrefix": "v", "versionJson": ["data/flutter_assets/version.json", "version"]},
+    {"name": "Relink Mod Organizer", "repo": "RokyZevon/RelinkModOrganizer", "dir": "~/.local/opt/relink-mod-organizer", "file": "modules/home/programs/gaming/tools/relink-mod-organizer.nix", "tagPrefix": "v"},
+    {"name": "GBFRDataTools", "repo": "Nenkai/GBFRDataTools", "dir": "~/.local/opt/gbfrdatatools", "file": "modules/home/programs/gaming/tools/relink-mod-organizer.nix", "tagPrefix": "v"}
+  ]
+}

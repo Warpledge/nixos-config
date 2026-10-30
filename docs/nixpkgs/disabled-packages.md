@@ -10,6 +10,8 @@ Packages switched off because they stopped building after a flake update. Add a 
 
 ## Checking whether a fix has landed
 
+`nixm check-updates` (or Omni Settings' Updates page) runs the free-package check below for every row against nixos-unstable's head, without updating the flake.
+
 Run `nixm flake-update` first, so the checks below look at the new nixpkgs revision.
 
 **Free packages** (GOverlay): if Hydra built the package, it's in the binary cache. Once `path-info` prints the path instead of `is not valid`, the build is fixed:

@@ -374,7 +374,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | **Editors / IDE** | [Zed][zed], [Helix][helix], [VSCodium][vscodium], [micro][micro] (quick edits) |
 | **Terminal Toys** | [cmatrix][cmatrix], [figlet][figlet], [ttyper][ttyper] (typing test) |
 | **Developer Tools** | [Rust][rustup] through rustup, [Go][go], Node.js, gdb, make, [lazygit][lazygit], onefetch and ilspycmd |
-| **Formatter** | [alejandra][alejandra] v3.0.0 |
+| **Formatter** | [alejandra][alejandra] |
 | **Rebuild Wrapper** | [`nixm`](./modules/home/nixm.nix) (fzf menu over [nh][nh]) |
 </details>
 
@@ -692,5 +692,4 @@ flake.nix
 | [`claude-code`](https://github.com/sadjow/claude-code-nix) | Claude Code, packaged so it updates without waiting on nixpkgs |
 | [`claude-desktop`](https://github.com/kubastick/claude-desktop-nixos) | Anthropic's Linux .deb of the Claude desktop app, patched for NixOS |
 | [`nix-index-database`](https://github.com/nix-community/nix-index-database) | Prebuilt weekly nix-index database for comma and the command-not-found hint |
-| [`alejandra`](https://github.com/kamadorueda/alejandra) (pinned 3.0.0) | Nix formatter |
 | [`affinity-nix`](https://github.com/mrshmllow/affinity-nix) | Affinity Suite v3 (Photo, Designer, Publisher) via Wine |

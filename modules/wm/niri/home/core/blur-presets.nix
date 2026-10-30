@@ -102,19 +102,9 @@
       // DMS popouts; not their :background click-catchers, which cover the screen.
       // They blur through the region DMS sends, since popupTransparency is under 1
       layer-rule {
-          match namespace="^dms:(app-launcher|control-center|dash|keybinds|omni-settings|plugins:plugin|process-list-popout|slideout)$"
+          match namespace="^dms:(app-launcher|control-center|dash|keybinds|omni-settings|plugins:plugin|process-list-popout|side-rail|slideout)$"
           match namespace="^dms-clipboardPlus-panel-"
           opacity ${p.opacity}
-      }
-
-      // kitty's quick-access panel (ai/ai-panel.nix), styled like the kitty window
-      layer-rule {
-          match namespace="^kitty-quick-access$"
-          opacity ${p.opacity}
-          background-effect {
-              blur ${lib.boolToString (p.blur != null)}
-              xray true
-          }
       }
 
       window-rule {

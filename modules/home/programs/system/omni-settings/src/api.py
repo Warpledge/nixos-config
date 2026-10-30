@@ -10,6 +10,7 @@ import json
 import os
 import platform
 import pwd
+import re
 import selectors
 import shlex
 import shutil
@@ -29,6 +30,7 @@ import dms  # noqa: E402
 import docstate  # noqa: E402
 import flatpakstate  # noqa: E402
 import gitstate  # noqa: E402
+import hardwarestate  # noqa: E402
 import keybindstate  # noqa: E402
 import mimeapps  # noqa: E402
 import nixfile  # noqa: E402
@@ -39,31 +41,40 @@ import protonstate  # noqa: E402
 import schema  # noqa: E402
 import servicestate  # noqa: E402
 import system  # noqa: E402
+import updatestate  # noqa: E402
 import windowrulestate as wr  # noqa: E402
 
 #--- The root helper every rebuild goes through (nixos/system/user/omni-settings-helper.nix)
 HELPER = "/run/current-system/sw/bin/omni-settings-apply"
 
 #--- The master tabs across the top, each with its own page list
-TABS = [("main", "Main"), ("packages", "Packages"), ("niri", "Niri"), ("ai", "AI"), ("docs", "Docs")]
+TABS = [("main", "Main"), ("packages", "Packages"), ("niri", "Niri"), ("hardware", "Hardware"),
+        ("ai", "AI"), ("docs", "Docs")]
 TAB_ICONS = {"main": ("go-home-symbolic", "user-home-symbolic"),
              "packages": ("package-x-generic-symbolic", "system-software-install-symbolic"),
              "niri": ("view-grid-symbolic", "view-app-grid-symbolic"),
+             "hardware": ("computer-symbolic", "drive-harddisk-symbolic"),
              "ai": ("applications-science-symbolic", "starred-symbolic"),
              "docs": ("accessories-dictionary-symbolic", "help-browser-symbolic")}
 
 #--- Each tab's pages above its sections: key, title and icons to try.
-#--- Shell shows only under niri, which also moves the Desktop section to Niri.
+#--- Shell shows only under niri, which also moves the Desktop section to Niri;
+#--- Battery only with a battery and Run on dGPU only with nvidia-offload.
 TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
                 ("git", "Git", ("vcs-branch-symbolic", "branch-symbolic", "folder-remote-symbolic")),
                 ("flatpaks", "Flatpaks", ("flatpak-symbolic", "system-software-install-symbolic")),
                 ("backups", "Backups", ("drive-harddisk-symbolic", "document-save-symbolic")),
+                ("updates", "Updates", ("software-update-available-symbolic", "view-refresh-symbolic")),
                 ("people", "Users", ("system-users-symbolic", "avatar-default-symbolic"))],
        "packages": [("packages", "Search", ("system-search-symbolic", "edit-find-symbolic"))],
        "niri": [("shell", "Shell", ("view-app-grid-symbolic",)),
                 ("windowrules", "Window Rules",
                  ("window-new-symbolic", "preferences-system-windows-symbolic")),
+                ("siderail", "Side Rail", ("view-dual-symbolic", "sidebar-show-symbolic")),
                 ("keybinds", "Keybinds", ("input-keyboard-symbolic", "preferences-desktop-keyboard-symbolic"))],
+       "hardware": [("firmware", "Firmware", ("software-update-available-symbolic", "application-x-firmware")),
+                    ("battery", "Battery", ("battery-symbolic", "battery-full-symbolic")),
+                    ("dgpu", "Run on dGPU", ("video-display-symbolic", "computer-symbolic"))],
        "ai": [],
        "docs": []}
 
@@ -77,6 +88,8 @@ NAV_SUBTITLES = {"overview": "Updates, freeing space, versions", "git": "Changes
                  "flatpaks": "Apps nixpkgs doesn't have: update them, clean up, and switch each one "
                              "on or off",
                  "backups": "Back up app data",
+                 "updates": "New upstream versions of hand-pinned apps, and disabled packages that "
+                            "build again",
                  "people": "Who can log in to this computer. Each person picks their own apps by "
                            "opening Omni Settings on their own account.", "packages": "Find packages in nixpkgs",
                  "shell": "DankMaterialShell, the bar, launcher and lock screen niri runs with. "
@@ -84,8 +97,13 @@ NAV_SUBTITLES = {"overview": "Updates, freeing space, versions", "git": "Changes
                  "windowrules": "Pick a window and choose what niri should do with it, or change or "
                                 "turn off the config's rules. Changes are yours alone and wait for "
                                 "Apply, like any other setting.",
+                 "siderail": "The apps on the Mod+A rail: turn one off, reorder them, set a width, "
+                             "or add a web page or app of your own. Changes wait for Apply.",
                  "keybinds": "Change a key, turn a keybind off, or add your own. Changes are yours "
                              "alone and wait for Apply, like any other setting.",
+                 "firmware": "Firmware for this computer's devices from fwupd, and updates waiting",
+                 "battery": "Charge, health, and where charging stops",
+                 "dgpu": "Apps whose launcher starts them on the NVIDIA GPU. Changes wait for Apply.",
                  "startup": "Variables every program sees, and autostart",
                  "filetypes": "Which app opens one file type",
                  "userpackages": "Packages you added from Search, installed as they come with no "
@@ -107,6 +125,7 @@ SECTION_TAB = {"cloudai": "ai", "localai": "ai", "apps": "packages"}
 USER_PACKAGES = ("user", ("userPackages",))
 KEYBINDS = ("user", schema.KEYBINDS)
 WINDOW_RULES = ("user", schema.WINDOW_RULES)
+SIDE_RAIL = ("user", schema.SIDE_RAIL)
 
 STATE_DIR = os.path.join(os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state"),
                          "omni-settings")
@@ -156,6 +175,8 @@ def shown(setting, value):
         return f"{len(value)} keybind{'' if len(value) == 1 else 's'} changed" if value else "Not set"
     if setting.kind == "windowrules":
         return f"{len(value)} window rule{'' if len(value) == 1 else 's'} changed" if value else "Not set"
+    if setting.kind == "siderail":
+        return f"{len(value)} rail app{'' if len(value) == 1 else 's'} changed" if value else "Not set"
     if isinstance(value, dict):
         if not all(isinstance(v, list) for v in value.values()):
             n = len(value)
@@ -263,6 +284,17 @@ def app_card(page, pid, groups):
             "card": pid, "settings": settings, "links": [l for g in groups for l in g["links"]]}
 
 
+def shows(key, wm):
+    """Whether a TOP page applies to this computer."""
+    if key == "shell":
+        return wm == "niri"
+    if key == "battery":
+        return bool(hardwarestate.batteries())
+    if key == "dgpu":
+        return hardwarestate.has_offload()
+    return True
+
+
 def cmd_load(cfg, _args):
     """Everything the generated pages need, from one read of the settings."""
     state = loaded(cfg)
@@ -276,7 +308,7 @@ def cmd_load(cfg, _args):
     for tab, _ in TABS:
         items = [{"id": key, "title": title, "icon": list(icons), "custom": True,
                   "subtitle": NAV_SUBTITLES.get(key, "")}
-                 for key, title, icons in TOP[tab] if key != "shell" or wm == "niri"]
+                 for key, title, icons in TOP[tab] if shows(key, wm)]
         if items:
             nav[tab].append({"id": "", "title": "", "items": items})
     pages, by_section = {}, {key: [] for key, _ in schema.SECTIONS}
@@ -285,7 +317,8 @@ def cmd_load(cfg, _args):
     shell_links = wm == "niri"
     shell = {}
     for page in state.pages:
-        if page.section in ("userpkgs", "keybinds", "windowrules", "startup", "filetypes"):
+        if page.section in ("userpkgs", "keybinds", "windowrules", "siderail", "startup", "filetypes",
+                            "dgpu"):
             continue
         pid = schema.TOP_PAGES[page.title] if page.section == "top" else f"page:{page.title}"
         groups = []
@@ -325,6 +358,8 @@ def cmd_load(cfg, _args):
                if (s.domain, s.path) in (("user", ("env",)), ("user", ("autostart",)))]
     mime_types = next((s for p in state.pages for g in p.groups for s in g.settings
                        if (s.domain, s.path) == ("user", ("mimeTypes",))), None)
+    gpu_offload = next((s for p in state.pages for g in p.groups for s in g.settings
+                        if (s.domain, s.path) == ("user", ("gpuOffload",))), None)
     if startup:
         by_section["personal"].append({"id": "startup", "title": "Startup",
                                        "icon": ["system-run-symbolic"],
@@ -347,6 +382,8 @@ def cmd_load(cfg, _args):
                      if (s.domain, s.path) == KEYBINDS), None)
     window_rules = next((s for p in state.pages for g in p.groups for s in g.settings
                          if (s.domain, s.path) == WINDOW_RULES), None)
+    side_rail = next((s for p in state.pages for g in p.groups for s in g.settings
+                      if (s.domain, s.path) == SIDE_RAIL), None)
     guides = [{"id": d.key, "title": d.title, "icon": ["help-browser-symbolic"], "custom": True}
               for d in docstate.guide_docs(cfg.flake)]
     if guides:
@@ -376,11 +413,13 @@ def cmd_load(cfg, _args):
             "userPackages": user_packages and setting_json(cfg, state, user_packages, multi, modules),
             "keybinds": keybinds and setting_json(cfg, state, keybinds, multi, modules),
             "windowRules": window_rules and setting_json(cfg, state, window_rules, multi, modules),
+            "sideRail": side_rail and setting_json(cfg, state, side_rail, multi, modules),
             "env": next((setting_json(cfg, state, s, multi, modules) for s in startup
                          if s.path == ("env",)), None),
             "autostart": next((setting_json(cfg, state, s, multi, modules) for s in startup
                                if s.path == ("autostart",)), None),
             "mimeTypes": mime_types and setting_json(cfg, state, mime_types, multi, modules),
+            "gpuOffload": gpu_offload and setting_json(cfg, state, gpu_offload, multi, modules),
             "starter": packagestate.STARTER,
             "dmsSearch": [{"label": e.label, "description": e.description, "keywords": e.keywords,
                            "tab": e.link.tab, "page": e.link.page} for e in state.dms_entries]}
@@ -396,6 +435,26 @@ def cmd_list(_cfg, args):
 def cmd_mime_apps(_cfg, _args):
     """The apps installed here, for the File Types page."""
     return mimeapps.apps()
+
+
+def cmd_firmware(_cfg, args):
+    """The Firmware page: every device and the updates waiting."""
+    try:
+        return hardwarestate.firmware(fresh=bool(args.get("fresh")))
+    except (RuntimeError, subprocess.TimeoutExpired) as e:
+        raise ValueError(str(e)) from e
+
+
+def cmd_firmware_summary(_cfg, _args):
+    """How many firmware updates wait, for the page list."""
+    try:
+        return len(hardwarestate.updates())
+    except (RuntimeError, OSError, subprocess.TimeoutExpired):
+        return 0
+
+
+def cmd_battery(_cfg, _args):
+    return hardwarestate.battery()
 
 
 def cmd_split_command(_cfg, args):
@@ -759,6 +818,14 @@ def cmd_flatseal(_cfg, args):
 
 
 #--------------------------------------------------------------------#
+#-- Upstream updates
+#--------------------------------------------------------------------#
+def cmd_upstream(cfg, args):
+    """What upstream released past the hand-pinned versions; cached: the last check only."""
+    return updatestate.run(cfg, force=bool(args.get("force")), cached_only=bool(args.get("cached")))
+
+
+#--------------------------------------------------------------------#
 #-- Backups
 #--------------------------------------------------------------------#
 def cmd_backups(cfg, _args):
@@ -985,6 +1052,94 @@ def cmd_keybinds(_cfg, _args):
     return {"applied": keybindstate.load_applied(), "dmsKeys": keybindstate.dms_keys()}
 
 
+def cmd_side_rail(_cfg, _args):
+    """{geometry, shared, changes} as the last build wrote them
+    (dms/plugins/side-rail/apps.nix), or None before one did."""
+    path = os.path.join(keybindstate.CONFIG, "omni-settings", "side-rail.json")
+    try:
+        with open(path) as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        return None
+    return data if isinstance(data, dict) and isinstance(data.get("shared"), list) else None
+
+
+def cmd_app_icon(_cfg, args):
+    """The icon name a window's app gives in its .desktop file, or ""."""
+    return keybindstate.app_icon(str(args.get("appId") or ""))
+
+
+def cmd_pick_icon_file(_cfg, _args):
+    """An image file picked in zenity's file chooser, or None when cancelled."""
+    try:
+        out = subprocess.run(["zenity", "--file-selection", "--title=Choose an icon",
+                              "--file-filter=Images | *.png *.svg *.jpg *.jpeg *.webp *.ico"],
+                             capture_output=True, text=True, timeout=600, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        raise ValueError("couldn't open the file chooser")
+    path = out.stdout.strip()
+    return path if out.returncode == 0 and os.path.isfile(path) else None
+
+
+def cmd_site_icon(_cfg, args):
+    """A web page's own icon saved under ~/.local/share/omni-settings/side-rail-icons,
+    as its path: the page's apple-touch-icon or largest icon link, else /favicon.ico."""
+    import html.parser
+    import urllib.parse
+    import urllib.request
+
+    url = str(args.get("url") or "")
+    if not re.match(r"^https?://\S+$", url):
+        raise ValueError("type the page's address first")
+
+    def fetch(u, limit):
+        req = urllib.request.Request(u, headers={"User-Agent": "omni-settings (side rail icon)"})
+        with urllib.request.urlopen(req, timeout=10) as r:
+            return r.read(limit), r.headers.get_content_type(), r.geturl()
+
+    class Links(html.parser.HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.found = []
+
+        def handle_starttag(self, tag, attrs):
+            a = dict(attrs)
+            rel = (a.get("rel") or "").lower()
+            if tag == "link" and "icon" in rel and a.get("href"):
+                size = max((int(n) for n in re.findall(r"(\d+)x\d+", a.get("sizes") or "")), default=0)
+                self.found.append(("apple-touch" in rel, size, a["href"]))
+
+    candidates = []
+    try:
+        page, _, final = fetch(url, 2_000_000)
+        links = Links()
+        links.feed(page.decode("utf-8", "replace"))
+        candidates = [urllib.parse.urljoin(final, h) for _, _, h in sorted(links.found, reverse=True)]
+    except (OSError, ValueError):
+        final = url
+    candidates.append(urllib.parse.urljoin(final, "/favicon.ico"))
+    exts = {"image/png": ".png", "image/svg+xml": ".svg", "image/x-icon": ".ico",
+            "image/vnd.microsoft.icon": ".ico", "image/jpeg": ".jpg", "image/webp": ".webp"}
+    for c in candidates:
+        try:
+            body, kind, _ = fetch(c, 5_000_000)
+        except (OSError, ValueError):
+            continue
+        ext = exts.get(kind) or os.path.splitext(urllib.parse.urlparse(c).path)[1].lower()
+        if not body or ext not in exts.values():
+            continue
+        folder = os.path.join(os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share"),
+                              "omni-settings", "side-rail-icons")
+        os.makedirs(folder, exist_ok=True)
+        host = re.sub(r"[^A-Za-z0-9.-]", "_", urllib.parse.urlparse(final).netloc) or "site"
+        path = os.path.join(folder, host + ext)
+        with open(path, "wb") as f:
+            f.write(body)
+        return path
+    raise ValueError("the site didn't hand over an icon (some refuse anything but a browser); "
+                     "pick one below or choose a file")
+
+
 def cmd_launch_command(_cfg, args):
     """The command a picked window's app launches with, from its .desktop file."""
     return keybindstate.launch_command(str(args.get("appId") or ""))
@@ -1027,7 +1182,7 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "git": cmd_git, "gitSummary": cmd_git_summary, "setBackup": cmd_set_backup,
             "flatpaks": cmd_flatpaks, "flatpakUpdates": cmd_flatpak_updates, "flatpakRun": cmd_flatpak_run,
             "flatpakForget": cmd_flatpak_forget, "flatseal": cmd_flatseal,
-            "backups": cmd_backups, "backup": cmd_backup,
+            "backups": cmd_backups, "backup": cmd_backup, "upstream": cmd_upstream,
             "people": cmd_people, "checkPerson": cmd_check_person,
             "services": cmd_services, "serviceLog": cmd_service_log, "serviceRestart": cmd_service_restart,
             "ports": cmd_ports,
@@ -1036,8 +1191,10 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "resetApp": cmd_reset_app, "doc": cmd_doc, "docLink": cmd_doc_link, "launchOptions": cmd_launch_options, "protonVersions": cmd_proton_versions,
             "windowRules": cmd_window_rules, "niriWindows": cmd_niri_windows, "pickWindow": cmd_pick_window,
             "addWindowRule": cmd_add_window_rule, "saveWindowRule": cmd_save_window_rule,
-            "keybinds": cmd_keybinds, "launchCommand": cmd_launch_command,
-            "mimeApps": cmd_mime_apps, "splitCommand": cmd_split_command}
+            "keybinds": cmd_keybinds, "launchCommand": cmd_launch_command, "sideRail": cmd_side_rail,
+            "appIcon": cmd_app_icon, "pickIconFile": cmd_pick_icon_file, "siteIcon": cmd_site_icon,
+            "mimeApps": cmd_mime_apps, "splitCommand": cmd_split_command,
+            "firmware": cmd_firmware, "firmwareSummary": cmd_firmware_summary, "battery": cmd_battery}
 
 
 def run(cfg, cmd, args):

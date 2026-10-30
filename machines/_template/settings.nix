@@ -96,6 +96,10 @@
   #--- Printing (CUPS); Avahi finds network printers and opens UDP 5353
   printing.enable = false;
 
+  #--- Battery Charge Limit: stop charging at this %, null charges to full.
+  #--- Lenovo's conservation mode stops at its own fixed point instead
+  battery.chargeLimit = null;
+
   #--------------------------------------------------------------------#
   #-- Network & Firewall
   #--------------------------------------------------------------------#

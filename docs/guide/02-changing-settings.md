@@ -6,7 +6,7 @@
 
 The icons across the top are tabs. Each tab is one long page you scroll through, with a divider naming each of its pages; the icons down the right edge jump to them:
 
-- **Main**: Maintenance (updates, freeing space, versions), Git, Flatpaks, Backups, Users, and the computer and personal setting pages
+- **Main**: Maintenance (updates, freeing space, versions), Git, Flatpaks, Backups, Updates, Users, and the computer and personal setting pages
 - **Packages**: searching for software, the app switches (Default Packages) and what you've installed yourself (User Packages)
 - **Niri**: the desktop's shell settings and window rules
 - **AI**: Claude and the local AI models

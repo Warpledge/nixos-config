@@ -115,7 +115,7 @@ up `data.i` to `orig_data.i`, then `GBFRDataTools add-external-files -i
 - **Restore:** download `tonkatsu-box-v<version>-linux.tar.gz` from
   <https://github.com/hacan359/tonkatsu_box/releases>, extract so `tonkatsu_box`
   lands directly in the folder next to `lib/` and `data/`, `chmod +x` it.
-  Installed as v0.44.0 on 2026-09-20.
+  Installed as v0.45.0 on 2026-10-29.
 
 ### Steam library import
 

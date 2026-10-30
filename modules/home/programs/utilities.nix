@@ -1,17 +1,13 @@
 #=====================================================================#
 # UTILITIES
 #=====================================================================#
-{
-  pkgs,
-  inputs,
-  ...
-}: {
+{pkgs, ...}: {
   #--------------------------------------------------------------------#
   #-- Packages
   #--------------------------------------------------------------------#
   home.packages = with pkgs; [
     #--- Utils
-    inputs.alejandra.defaultPackage.${pkgs.stdenv.hostPlatform.system}
+    alejandra
     poppler-utils # PDF rendering library
     # localsend
 

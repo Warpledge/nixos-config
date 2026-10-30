@@ -69,8 +69,8 @@
       // {nixos = stranger;};
 
     #--- Formatter (nix fmt)
-    # `nix fmt .`: alejandra 3.0.0 reads stdin when given no path
-    formatter.x86_64-linux = inputs.alejandra.defaultPackage.x86_64-linux;
+    # `nix fmt .`: alejandra reads stdin when given no path
+    formatter.x86_64-linux = inputs.nixpkgs.legacyPackages.x86_64-linux.alejandra;
   };
 
   #--------------------------------------------------------------------#
@@ -89,8 +89,6 @@
     };
 
     #--- System Utilities & Tools
-    # Own nixpkgs: 3.0.0 vendors a mimalloc that GCC 15 rejects
-    alejandra.url = "github:kamadorueda/alejandra/3.0.0";
     nix-flatpak.url = "github:gmodena/nix-flatpak"; # has no nixpkgs input
     # Own nixpkgs: following ours misses claude-code.cachix.org
     claude-code.url = "github:sadjow/claude-code-nix";
@@ -130,12 +128,12 @@
     };
     tsunagu = {
       # The backend Moku 0.14.0 ships with; bump with `moku`
-      url = "github:moku-project/Tsunagu/v0.5.0";
+      url = "github:moku-project/Tsunagu/v0.6.0";
       flake = false;
     };
     moku = {
       # Built in home-manager media/moku; bump with `tsunagu`
-      url = "github:moku-project/Moku/v0.14.0";
+      url = "github:moku-project/Moku/v0.14.1";
       flake = false;
     };
     retroshelf = {

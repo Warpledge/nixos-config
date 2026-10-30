@@ -199,6 +199,8 @@ Singleton {
     }
     function lookUp(key) {
         for (const n of key.split("\n")) {
+            if (n.startsWith("/"))  // an image file, as a side rail app's icon can be
+                return "file://" + n
             const entry = DesktopEntries.byId(n.replace(/\.desktop$/, ""))
             const path = Quickshell.iconPath(entry ? entry.icon : n, true)
             if (path)
