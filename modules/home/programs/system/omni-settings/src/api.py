@@ -40,6 +40,7 @@ import resetstate  # noqa: E402
 import protonstate  # noqa: E402
 import schema  # noqa: E402
 import servicestate  # noqa: E402
+import steamstate  # noqa: E402
 import system  # noqa: E402
 import updatestate  # noqa: E402
 import windowrulestate as wr  # noqa: E402
@@ -76,7 +77,8 @@ TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
        "hardware": [("firmware", "Firmware", ("software-update-available-symbolic", "application-x-firmware")),
                     ("battery", "Battery", ("battery-symbolic", "battery-full-symbolic")),
                     ("dgpu", "Run on dGPU", ("video-display-symbolic", "computer-symbolic"))],
-       "gaming": [("proton", "Launch Options", ("input-gaming-symbolic",)),
+       "gaming": [("games", "Games", ("input-gaming-symbolic", "applications-games-symbolic")),
+                  ("proton", "Launch Options", ("input-gaming-symbolic",)),
                   ("protonversions", "Proton Versions",
                    ("system-software-install-symbolic", "input-gaming-symbolic"))],
        "ai": [],
@@ -108,6 +110,8 @@ NAV_SUBTITLES = {"overview": "Updates, freeing space, versions", "git": "Changes
                  "userpackages": "Packages you added from Search, installed as they come with no "
                                  "settings of their own. Apps with settings made for them are under "
                                  "Default Packages.",
+                 "games": "Your Steam games: build each one's launch options and pick its Proton "
+                          "version. Changes wait for Apply, and reach Steam once it's closed.",
                  "proton": "Launch options for Steam, Heroic and Lutris. Click one to copy it.",
                  "protonversions": "The Proton and Wine builds each launcher can run games with. Pick "
                                    "one per game in the launcher, or Steam's default under Settings, "
@@ -983,6 +987,10 @@ def cmd_proton_versions(_cfg, _args):
     return protonstate.versions()
 
 
+def cmd_steam_games(_cfg, _args):
+    return steamstate.page()
+
+
 #--------------------------------------------------------------------#
 #-- Window Rules (niri)
 #--------------------------------------------------------------------#
@@ -1201,7 +1209,7 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "ports": cmd_ports,
             "packageNames": cmd_package_names, "packageSearch": cmd_package_search,
             "packagePreviews": cmd_package_previews,
-            "resetApp": cmd_reset_app, "doc": cmd_doc, "docLink": cmd_doc_link, "launchOptions": cmd_launch_options, "protonVersions": cmd_proton_versions,
+            "resetApp": cmd_reset_app, "doc": cmd_doc, "docLink": cmd_doc_link, "launchOptions": cmd_launch_options, "protonVersions": cmd_proton_versions, "steamGames": cmd_steam_games,
             "windowRules": cmd_window_rules, "niriWindows": cmd_niri_windows, "pickWindow": cmd_pick_window,
             "addWindowRule": cmd_add_window_rule, "saveWindowRule": cmd_save_window_rule,
             "keybinds": cmd_keybinds, "launchCommand": cmd_launch_command, "sideRail": cmd_side_rail,

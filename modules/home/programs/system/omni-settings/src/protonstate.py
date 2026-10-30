@@ -54,16 +54,25 @@ OPTIONS = [
         ("PROTON_LOG=1", "Writes steam-<game id>.log to your home folder, for troubleshooting."),
     ]),
     ("Upscaling", "GE, DW and CachyOS Proton only.", [
+        ("PROTON_XESS_UPGRADE=1", "Swaps in the newest XeSS. On for every game here already."),
+    ]),
+    ("AMD", "For Radeon cards. The Proton variables need GE, DW or CachyOS Proton.", [
         ("PROTON_FSR4_UPGRADE=1", "Swaps in the newest FSR 4 for RX 9000 cards. This config turns it on "
                                   "for every game; =0 turns it off, a version number pins one."),
         ("PROTON_FSR4_INDICATOR=1", "Shows FSR 4's watermark, to check it's working."),
-        ("PROTON_DLSS_UPGRADE=1", "Swaps in the newest DLSS on NVIDIA cards."),
+        ("PROTON_FSR3_UPGRADE=1", "Swaps in the newest FSR 3.1 for a game that ships an older one."),
+        ("ENABLE_LAYER_MESA_ANTI_LAG=1", "Mesa's Anti-Lag: less input lag when the graphics card "
+                                         "is the bottleneck."),
+    ]),
+    ("NVIDIA", "For GeForce cards. The Proton variables need GE, DW or CachyOS Proton.", [
+        ("PROTON_DLSS_UPGRADE=1", "Swaps in the newest DLSS."),
         ("PROTON_DLSS_INDICATOR=1", "Shows DLSS's on-screen indicator."),
-        ("PROTON_XESS_UPGRADE=1", "Swaps in the newest XeSS. On for every game here already."),
+        ("PROTON_FORCE_NVAPI=1", "Keeps NVAPI on for a game Proton turns it off for, so DLSS and "
+                                 "Reflex show up in its settings."),
+        ("PROTON_DISABLE_NVAPI=1", "Turns NVAPI off, for a game that crashes when it finds an "
+                                   "NVIDIA card."),
     ]),
     ("Graphics & Performance", "", [
-        ("ENABLE_LAYER_MESA_ANTI_LAG=1", "Mesa's Anti-Lag on AMD: less input lag when the graphics card "
-                                         "is the bottleneck."),
         ('DXVK_CONFIG="dxgi.maxFrameRate=60"', "Caps the frame rate of Direct3D 10 and 11 games; edit "
                                                "the number."),
         ("VKD3D_FRAME_RATE=60", "Caps the frame rate of DirectX 12 games."),
@@ -215,6 +224,31 @@ def launch_options():
                for t, d, opts in OPTIONS]
     session = sorted(f"{k}={v}" for k, v in os.environ.items() if k.startswith(SESSION_PREFIXES))
     return {"session": session, "groups": groups}
+
+
+def builder_groups():
+    """The Games editor's option groups, [{title, description, options: [{option,
+    text, main}]}]. `main` options run the game themselves (nix-performance,
+    nix-vn, nix-rpgm), so only one is picked; nix-gamescope has its own builder."""
+    main = [{"option": o, "text": t, "main": True} for o, needs, t in WRAPPERS
+            if needs == "nix-performance" and shutil.which(needs)]
+    if shutil.which("nix-rpgm"):
+        main.append({"option": "nix-rpgm %command%", "main": True,
+                     "text": "RPG Maker, upscaled with NVL at the resolution the engine reads."})
+    main += [{"option": f"{n} %command%", "text": f"A visual novel made for {r}, upscaled with NVL.",
+              "main": True} for n, r in presets("nix-vn")]
+    main += [{"option": f"{n} %command%", "text": f"RPG Maker forced to {r}, upscaled with NVL.",
+              "main": True} for n, r in presets("nix-rpgm")]
+    chained = [{"option": o, "text": t, "main": False} for o, needs, t in WRAPPERS
+               if needs == "tml-prelaunch" and shutil.which(needs)]
+    groups = []
+    if main or chained:
+        groups.append({"title": "This Config", "options": main + chained,
+                       "description": "This config's wrappers. Pick one that runs the game; "
+                                      "nix-gamescope is under Gamescope."})
+    return groups + [{"title": t, "description": d,
+                      "options": [{"option": o, "text": x, "main": False} for o, x in opts]}
+                     for t, d, opts in OPTIONS]
 
 
 def versions():

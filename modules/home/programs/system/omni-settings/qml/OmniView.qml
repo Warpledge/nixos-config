@@ -96,6 +96,10 @@ Item {
             out[info.autostart.key] = info.autostart
         if (info && info.mimeTypes)
             out[info.mimeTypes.key] = info.mimeTypes
+        if (info && info.gpuOffload)
+            out[info.gpuOffload.key] = info.gpuOffload
+        if (info && info.steamGames)
+            out[info.steamGames.key] = info.steamGames
         return out
     }
     readonly property var navItems: {
@@ -1336,6 +1340,7 @@ Item {
                                       people: peoplePage,
                                       userpackages: userPackagesPage,
                                       proton: protonPage, protonversions: protonVersionsPage,
+                                      games: gamesPage,
                                       windowrules: windowRulesPage, keybinds: keybindsPage,
                                       siderail: sideRailPage,
                                       startup: startupPage, filetypes: fileTypesPage,
@@ -1350,6 +1355,7 @@ Item {
     Component { id: fileTypesPage; FileTypesPage { view: omni } }
     Component { id: protonPage; ProtonPage { view: omni } }
     Component { id: protonVersionsPage; ProtonVersionsPage { view: omni } }
+    Component { id: gamesPage; GamesPage { view: omni } }
     //--- One page in the tab's scroll: its section's divider when it starts one, then
     //--- the page in a card whose header collapses it; a note starts collapsed
     component PageSection: ColumnLayout {

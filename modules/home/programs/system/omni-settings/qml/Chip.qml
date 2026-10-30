@@ -40,7 +40,19 @@ Rectangle {
             color: label.color
         }
     }
-    HoverHandler { id: hover; cursorShape: chip.tappable ? Qt.PointingHandCursor : Qt.ArrowCursor }
+    property string tip: ""  // shown on hovering, through the Tip singleton
+    readonly property point cursor: hover.point.scenePosition
+    onCursorChanged: if (tip) Tip.move(chip, cursor)
+    HoverHandler {
+        id: hover
+        cursorShape: chip.tappable ? Qt.PointingHandCursor : Qt.ArrowCursor
+        onHoveredChanged: if (chip.tip) {
+            if (hovered)
+                Tip.request(chip, chip.tip, point.scenePosition, false)
+            else
+                Tip.cancel(chip)
+        }
+    }
     // A label leaves the tap to what's under it
     TapHandler { enabled: chip.tappable; gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: chip.tapped() }
 }
