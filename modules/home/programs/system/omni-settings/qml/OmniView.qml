@@ -1340,7 +1340,7 @@ Item {
                                       people: peoplePage,
                                       userpackages: userPackagesPage,
                                       proton: protonPage, protonversions: protonVersionsPage,
-                                      games: gamesPage,
+                                      games: gamesPage, crashes: crashesPage,
                                       windowrules: windowRulesPage, keybinds: keybindsPage,
                                       siderail: sideRailPage,
                                       startup: startupPage, filetypes: fileTypesPage,
@@ -1356,6 +1356,7 @@ Item {
     Component { id: protonPage; ProtonPage { view: omni } }
     Component { id: protonVersionsPage; ProtonVersionsPage { view: omni } }
     Component { id: gamesPage; GamesPage { view: omni } }
+    Component { id: crashesPage; CrashesPage { view: omni } }
     //--- One page in the tab's scroll: its section's divider when it starts one, then
     //--- the page in a card whose header collapses it; a note starts collapsed
     component PageSection: ColumnLayout {

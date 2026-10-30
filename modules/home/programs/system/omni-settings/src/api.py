@@ -26,6 +26,7 @@ import backupstate  # noqa: E402
 import bootstate  # noqa: E402
 import changelog  # noqa: E402
 import closure  # noqa: E402
+import crashstate  # noqa: E402
 import dms  # noqa: E402
 import docstate  # noqa: E402
 import flatpakstate  # noqa: E402
@@ -80,7 +81,8 @@ TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
        "gaming": [("games", "Games", ("input-gaming-symbolic", "applications-games-symbolic")),
                   ("proton", "Launch Options", ("input-gaming-symbolic",)),
                   ("protonversions", "Proton Versions",
-                   ("system-software-install-symbolic", "input-gaming-symbolic"))],
+                   ("system-software-install-symbolic", "input-gaming-symbolic")),
+                  ("crashes", "Crashes", ("dialog-warning-symbolic", "computer-fail-symbolic"))],
        "ai": [],
        "docs": []}
 
@@ -113,6 +115,8 @@ NAV_SUBTITLES = {"overview": "Updates, freeing space, versions", "git": "Changes
                  "games": "Your Steam games: build each one's launch options and pick its Proton "
                           "version. Changes wait for Apply, and reach Steam once it's closed.",
                  "proton": "Launch options for Steam, Heroic and Lutris. Click one to copy it.",
+                 "crashes": "Programs that crashed in the last 30 days, games first, with a report "
+                            "to copy for troubleshooting",
                  "protonversions": "The Proton and Wine builds each launcher can run games with. Pick "
                                    "one per game in the launcher, or Steam's default under Settings, "
                                    "Compatibility."}
@@ -991,6 +995,14 @@ def cmd_steam_games(_cfg, _args):
     return steamstate.page()
 
 
+def cmd_crashes(_cfg, args):
+    return crashstate.crashes(app=args.get("app") or None)
+
+
+def cmd_crash_report(_cfg, args):
+    return crashstate.report(args.get("pid", ""), args.get("app", ""), args.get("launch", ""))
+
+
 #--------------------------------------------------------------------#
 #-- Window Rules (niri)
 #--------------------------------------------------------------------#
@@ -1210,6 +1222,7 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "packageNames": cmd_package_names, "packageSearch": cmd_package_search,
             "packagePreviews": cmd_package_previews,
             "resetApp": cmd_reset_app, "doc": cmd_doc, "docLink": cmd_doc_link, "launchOptions": cmd_launch_options, "protonVersions": cmd_proton_versions, "steamGames": cmd_steam_games,
+            "crashes": cmd_crashes, "crashReport": cmd_crash_report,
             "windowRules": cmd_window_rules, "niriWindows": cmd_niri_windows, "pickWindow": cmd_pick_window,
             "addWindowRule": cmd_add_window_rule, "saveWindowRule": cmd_save_window_rule,
             "keybinds": cmd_keybinds, "launchCommand": cmd_launch_command, "sideRail": cmd_side_rail,

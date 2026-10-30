@@ -343,4 +343,11 @@ Sheet {
             }
         }
     }
+
+    Section {
+        text: "Crashes"
+        info: "This game's crashes in the last 30 days. The report holds the crash, these launch "
+              + "options and the end of its Proton log."
+    }
+    CrashList { view: ed.view; app: ed.game.id; launch: ed.launch; Layout.fillWidth: true }
 }
