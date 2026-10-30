@@ -13,7 +13,7 @@ Sheet {
     readonly property bool isNew: !app.id
     readonly property bool custom: isNew || app.custom
     title: isNew ? "New Rail App" : `Edit ${app.name}`
-    subtitle: "Side rail app · yours alone · waits for Apply"
+    info: "Side rail app · yours alone · waits for Apply"
     onBack: view.sheet = null
 
     property bool web: true

@@ -12,7 +12,7 @@ Sheet {
     readonly property bool isNew: !bind.id
     readonly property bool custom: isNew || bind.custom
     title: isNew ? "New Keybind" : `Edit ${bind.title}`
-    subtitle: "Keybind · yours alone · waits for Apply"
+    info: "Keybind · yours alone · waits for Apply"
     onBack: view.sheet = null
 
     readonly property var modifiers: ["Mod", "Ctrl", "Alt", "Shift"]

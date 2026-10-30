@@ -344,11 +344,11 @@ window, over a Python backend; full notes split across its `CLAUDE.md`,
   backend read; a `Repeater` delegate's `modelData` is a copy, so edit the
   source list by index. What a dropdown opens goes in a `Reveal`
   (`Reveal.qml`), and Loaders inside it gate on its `shown`.
-- Keep the interface clean: rows, cards and headings show the name only; a
-  page header adds one dim line (its summary while collapsed, else its
-  description), and action rows, tiles and editor sheet headers keep a short
+- Keep the interface clean: rows, cards, headings, page headers and editor
+  sheet headers show the name only; only action rows and tiles keep a short
   line. What it is shows on hovering the name (`TitleTip.qml`; a
-  setting's `text`, under ~200 characters); cautions behind a yellow triangle
+  setting's `text`, under ~200 characters; a page's description, plus its
+  summary while collapsed); cautions behind a yellow triangle
   `Hint`. Live alerts stay
   as yellow text (`alert`), status values show large (`value`), and names keep
   full width. Switches have no dropdown; no dropdown holds text alone. Every

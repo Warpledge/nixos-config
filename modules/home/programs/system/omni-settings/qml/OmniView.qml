@@ -481,7 +481,7 @@ Item {
             () => { for (const s of list) change(s, s.default) })
     }
 
-    //--- The line under a collapsed page's title: {text, alert}, or null for its description
+    //--- A collapsed page's status in its title tip: {text, alert}, or null
     function pageSummary(pid, model) {
         const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`
         if (pid === "git" && gitCounts) {
@@ -1868,29 +1868,21 @@ Item {
                             color: section.open ? Theme.inkPrimary : Theme.primary
                         }
                     }
-                    ColumnLayout {
-                        spacing: 2
+                    Text {
+                        id: pageTitle
                         Layout.fillWidth: true
-                        Text {
-                            id: pageTitle
-                            Layout.fillWidth: true
-                            text: section.modelData.title
-                            color: Theme.text
-                            font.pixelSize: section.open ? 17 : 15
-                            font.weight: Font.Bold
-                            elide: Text.ElideRight
-                        }
-                        // Collapsed, what's inside (pageSummary); open, what the page is for
-                        Text {
+                        text: section.modelData.title
+                        color: Theme.text
+                        font.pixelSize: section.open ? 17 : 15
+                        font.weight: Font.Bold
+                        elide: Text.ElideRight
+                        // What it's for, then while collapsed what's inside
+                        TitleTip {
                             readonly property var sum: section.open ? null : section.summary
                             readonly property string about: section.modelData.subtitle
                                 || (section.model ? section.model.description : "")
-                            visible: text !== ""
-                            Layout.fillWidth: true
-                            text: sum ? sum.text : about
-                            color: sum && sum.alert ? Theme.caution : Theme.dim
-                            font.pixelSize: 12
-                            elide: Text.ElideRight
+                            tip: about + (sum ? (about ? "\n" : "")
+                                + (sum.alert ? `!!${sum.text}!!` : sum.text) : "")
                         }
                     }
                     // Settings away from their default, and putting them back
