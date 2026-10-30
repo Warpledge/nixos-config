@@ -724,10 +724,10 @@ Item {
         saveUi()
     }
     //--- The current tab's pages: any open, and opening or closing them all at once
-    readonly property bool anyOpen: tabPages.some((i, n) => !headless(n)
-        && (i.id.startsWith("doc:") ? !!openNotes[i.id] : !!openPages[i.id]))
-    //--- A section holding one page of its own name: no header, so always open
-    function headless(n) {
+    readonly property bool anyOpen: tabPages.some(i => i.id.startsWith("doc:") ? !!openNotes[i.id]
+                                                                               : !!openPages[i.id])
+    //--- A section holding one page of its own name (PageSection's soleNamed)
+    function soleNamed(n) {
         const p = tabPages[n], prev = tabPages[n - 1], next = tabPages[n + 1]
         return (!prev || prev.group !== p.group) && p.title === p.group
             && (!next || next.group !== p.group)
@@ -1681,7 +1681,7 @@ Item {
         readonly property string pid: modelData.id
         readonly property bool note: pid.startsWith("doc:")
         readonly property bool userPkgs: pid.startsWith("userpackages:")
-        readonly property bool open: !headed || (note ? !!omni.openNotes[pid] : !!omni.openPages[pid])
+        readonly property bool open: note ? !!omni.openNotes[pid] : !!omni.openPages[pid]
         readonly property var model: omni.info.pages[pid] || null
         readonly property var comp: note ? notePage : userPkgs ? userPkgsPage
             : omni.custom[pid] || (model ? settingsPage : null)
@@ -1705,8 +1705,8 @@ Item {
         readonly property bool divided: !prev || prev.group !== modelData.group
         readonly property string sectionTitle: modelData.group
             || (omni.info.tabs.find(t => t.id === omni.tab) || { title: "" }).title
-        // A section holding one page of its own name shows only the divider
-        readonly property bool headed: !omni.headless(index)
+        // A section holding one page of its own name shows only the page's header
+        readonly property bool soleNamed: omni.soleNamed(index)
         visible: !!comp
         Layout.fillWidth: true
         Layout.topMargin: index === 0 ? 0 : divided ? 22 : 14
@@ -1714,7 +1714,7 @@ Item {
 
         //--- The section's name, then a rule to the edge
         RowLayout {
-            visible: section.divided && section.sectionTitle !== ""
+            visible: section.divided && section.sectionTitle !== "" && !section.soleNamed
             Layout.fillWidth: true
             Layout.leftMargin: 4
             Layout.bottomMargin: 6
@@ -1736,15 +1736,15 @@ Item {
             implicitHeight: frameCol.implicitHeight
             radius: 20
             color: Qt.alpha(Theme.text, (section.index % 2 ? 0.075 : 0.035)
-                                        + (section.headed && headHover.hovered && !section.open ? 0.03 : 0))
+                                        + (headHover.hovered && !section.open ? 0.03 : 0))
             // An open page is edged in primary; the one under the cursor gets a firmer
             // ring like niri's focus ring, so the page being read is easy to find
-            border.width: section.headed ? 1 : 0
+            border.width: 1
             border.color: cardHover.hovered ? Theme.primary
                 : section.open ? Qt.alpha(Theme.primary, 0.3) : Theme.rule
             Behavior on color { ColorAnimation { duration: 150 } }
             Behavior on border.color { ColorAnimation { duration: 150 } }
-            HoverHandler { id: cardHover; enabled: section.headed }
+            HoverHandler { id: cardHover }
 
             ColumnLayout {
                 id: frameCol
@@ -1757,7 +1757,6 @@ Item {
                 //--- chevron; tapping it collapses
                 RowLayout {
                     id: head
-                    visible: section.headed
                     Layout.fillWidth: true
                     Layout.margins: 12
                     spacing: 12
@@ -1818,7 +1817,7 @@ Item {
                     TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: section.toggle() }
                 }
                 Rectangle {
-                    visible: section.headed && body.height > 0
+                    visible: body.height > 0
                     Layout.fillWidth: true
                     implicitHeight: 1
                     opacity: body.opacity
@@ -1834,7 +1833,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.leftMargin: omni.gutter
                     Layout.rightMargin: omni.gutter
-                    Layout.topMargin: section.headed && section.open ? 8 : 0
+                    Layout.topMargin: section.open ? 8 : 0
                     Layout.bottomMargin: section.open ? 10 : 0
                     Layout.preferredHeight: loader.item && section.open ? loader.item.implicitHeight : 0
                     clip: true
