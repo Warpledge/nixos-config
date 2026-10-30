@@ -174,7 +174,6 @@ PAGES = {
                 ("Mods", "", ["claude.mods.ribbon", "claude.mods.skins",
                               "claude.mods.fileTree", "claude.mods.savvyProgress",
                               "claude.mods.blastRadius", "claude.mods.replayTheater",
-                              "claude.mods.chatInventory", "claude.mods.screenShare",
                               "claude.statusLine", "claude.builtins.youShouldKnow"])]),
     "Claude Tools": ("cloudai", "application-x-addon-symbolic",
                      "Plugins, MCP servers and claude.ai connectors Claude Code loads.",

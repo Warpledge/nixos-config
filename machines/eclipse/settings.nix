@@ -113,6 +113,7 @@
       mangohud.background = 0;
       gpuOffload = [];
       steamGames = {};
+      claude.mods.ribbon = true;
     };
   };
 

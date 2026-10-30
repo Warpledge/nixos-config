@@ -177,8 +177,6 @@
     mods.savvyProgress = true;
     mods.blastRadius = true;
     mods.replayTheater = true;
-    mods.chatInventory = true;
-    mods.screenShare = true;
     statusLine = true;
     builtins.youShouldKnow = true;
     builtins.agentsMd = false;
