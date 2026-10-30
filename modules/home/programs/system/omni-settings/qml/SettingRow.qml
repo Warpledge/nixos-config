@@ -35,17 +35,6 @@ Rectangle {
 
     HoverHandler { id: hover }
 
-    //--- Changed from the template's default
-    Rectangle {
-        visible: row.changed
-        x: 0
-        y: 8
-        width: 3
-        height: parent.height - 16
-        radius: 1.5
-        color: row.accent
-    }
-
     ColumnLayout {
         id: col
         anchors.top: parent.top
@@ -101,6 +90,12 @@ Rectangle {
                         icon: "computer"
                         tone: ""
                         tip: "Set for this computer only; other computers keep your own setting"
+                    }
+                    //--- Changed from the template's default; the solid dot while unsaved
+                    Rectangle {
+                        visible: row.changed && !row.pending
+                        width: 6; height: 6; radius: 3
+                        color: Qt.alpha(row.accent, 0.55)
                     }
                     Rectangle {
                         visible: row.pending
