@@ -116,7 +116,24 @@
       mangohud.textColor = "00FF00";
       mangohud.background = 0;
       gpuOffload = [];
-      sideRail = {};
+      sideRail = {
+        opencode-desktop = {
+          enable = false;
+          order = 3;
+        };
+        claude-desktop = {
+          enable = false;
+          order = 2;
+        };
+        custom-steam = {
+          name = "Steam";
+          command = ["steam"];
+          appId = "steam";
+          icon = "steam";
+          keepRunning = true;
+          order = 1;
+        };
+      };
     };
   };
 
