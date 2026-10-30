@@ -346,6 +346,11 @@
   # {"application/x-cbz" = "moku.desktop";}
   mimeTypes = {};
 
+  #--- Run on the dGPU
+  # Apps whose launcher entry starts them with nvidia-offload, by .desktop id,
+  # set on Omni Settings' Hardware tab: ["steam.desktop"]. Hybrid laptops only
+  gpuOffload = [];
+
   #--- User Packages
   # nixpkgs packages added from Omni Settings' Packages tab, installed as they
   # come with no settings of their own, sorted into categories you name,
