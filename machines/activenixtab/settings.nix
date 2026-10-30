@@ -134,6 +134,7 @@
           order = 1;
         };
       };
+      steamGames = {};
     };
   };
 
