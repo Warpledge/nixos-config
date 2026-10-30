@@ -39,6 +39,9 @@
   };
 
   services = {
+    #--- lavd follows the EPP TLP sets: performance on AC, core packing on battery
+    scx.extraArgs = lib.mkForce ["--autopower"];
+
     #--- TLP Power Management (Legion Slim 5 optimized for server)
     tlp = {
       enable = true;
