@@ -1562,6 +1562,7 @@ Item {
         // Laid out like the rail's list and scrolled with it
         Column {
             id: namesCol
+            x: railNames.fade
             y: -railList.contentY
             Repeater {
                 model: railList.model
