@@ -52,10 +52,11 @@ import windowrulestate as wr  # noqa: E402
 HELPER = "/run/current-system/sw/bin/omni-settings-apply"
 
 #--- The master tabs across the top, each with its own page list
-TABS = [("main", "Main"), ("packages", "Packages"), ("niri", "Niri"), ("network", "Network"),
-        ("security", "Security"), ("hardware", "Hardware"), ("gaming", "Gaming"), ("ai", "AI"),
-        ("docs", "Docs")]
-TAB_ICONS = {"main": ("go-home-symbolic", "user-home-symbolic"),
+TABS = [("main", "Maintenance"), ("system", "System"), ("packages", "Packages"), ("niri", "Niri"),
+        ("network", "Network"), ("security", "Security"), ("hardware", "Hardware"), ("gaming", "Gaming"),
+        ("ai", "AI"), ("docs", "Docs")]
+TAB_ICONS = {"main": ("applications-engineering-symbolic",),
+             "system": ("applications-system-symbolic",),
              "packages": ("package-x-generic-symbolic", "system-software-install-symbolic"),
              "niri": ("view-grid-symbolic", "view-app-grid-symbolic"),
              "network": ("network-workgroup-symbolic", "network-wired-symbolic"),
@@ -70,11 +71,11 @@ TAB_ICONS = {"main": ("go-home-symbolic", "user-home-symbolic"),
 #--- Battery only with a battery, Run on dGPU only with nvidia-offload and
 #--- AppArmor only with the profile list apparmor/default.nix writes.
 TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
+                ("updates", "Updates", ("software-update-available-symbolic", "view-refresh-symbolic")),
                 ("git", "Git", ("vcs-branch-symbolic", "branch-symbolic", "folder-remote-symbolic")),
                 ("flatpaks", "Flatpaks", ("flatpak-symbolic", "system-software-install-symbolic")),
-                ("backups", "Backups", ("drive-harddisk-symbolic", "document-save-symbolic")),
-                ("updates", "Updates", ("software-update-available-symbolic", "view-refresh-symbolic")),
-                ("people", "Users", ("system-users-symbolic", "avatar-default-symbolic"))],
+                ("backups", "Backups", ("drive-harddisk-symbolic", "document-save-symbolic"))],
+       "system": [("people", "Users", ("system-users-symbolic", "avatar-default-symbolic"))],
        "packages": [("packages", "Search", ("system-search-symbolic", "edit-find-symbolic"))],
        "niri": [("shell", "Shell", ("view-app-grid-symbolic",)),
                 ("windowrules", "Window Rules",
@@ -140,9 +141,9 @@ QUICK = ["display_config", "keybinds", "mouse_touchpad", "theme", "wallpaper", "
          "notifications", "network_wifi", "audio"]
 HISTORY = 8  # versions the Overview lists
 
-#--- Sections shown on a tab other than Main
-SECTION_TAB = {"cloudai": "ai", "localai": "ai", "apps": "packages", "network": "network",
-               "security": "security"}
+#--- Each section's tab; one not listed goes on System
+SECTION_TAB = {"computer": "system", "personal": "system", "cloudai": "ai", "localai": "ai",
+               "apps": "packages", "network": "network", "security": "security"}
 #--- Apps pages that leave Default Packages for a page of their own on another tab
 PAGE_TAB = {"Gaming": "gaming", "Security": "security"}
 
@@ -412,7 +413,7 @@ def cmd_load(cfg, _args):
                                        "subtitle": NAV_SUBTITLES["filetypes"]})
     for key, title in schema.SECTIONS:
         if by_section[key]:
-            nav[section_tab.get(key, "main")].append({"id": key, "title": title, "items": by_section[key]})
+            nav[section_tab.get(key, "system")].append({"id": key, "title": title, "items": by_section[key]})
     for tab, items in tab_pages.items():
         nav[tab].append({"id": f"{tab}-apps", "title": "", "items": items})
     user_packages = next((s for p in state.pages for g in p.groups for s in g.settings
@@ -640,9 +641,12 @@ def cmd_usage(_cfg, _args):
             key, value = line.split(":", 1)
             mem[key] = int(value.split()[0]) * 1024
     disk = shutil.disk_usage("/")
+    with open("/proc/uptime") as f:
+        uptime = float(f.read().split()[0])
     return {"cpuTotal": sum(ticks), "cpuIdle": ticks[3] + ticks[4],
             "memTotal": mem["MemTotal"], "memUsed": mem["MemTotal"] - mem["MemAvailable"],
-            "diskTotal": disk.total, "diskUsed": disk.used}
+            "diskTotal": disk.total, "diskUsed": disk.used, "diskFree": disk.free,
+            "uptime": int(uptime)}
 
 
 def cmd_boot(_cfg, _args):
@@ -740,6 +744,20 @@ def cmd_git_summary(cfg, _args):
         return gitstate.summary(cfg.flake)
     except (RuntimeError, subprocess.TimeoutExpired) as e:
         raise ValueError(str(e))
+
+
+def cmd_summaries(cfg, _args):
+    """What collapsed custom pages say under their title, from cached or quick reads only."""
+    up = updatestate.run(cfg, cached_only=True)
+    rows = up["rows"]
+    user = loaded(cfg).resolved["users"][cfg.user]
+    base = os.path.join(backupstate.ROOT, socket.gethostname())
+    backups = [{"title": title, "last": backupstate.newest(os.path.join(base, folder))}
+               for _, title, _, _, folder in backupstate.kinds(user)]
+    return {"updates": None if up["checked"] is None else {
+                "upstream": sum(r["status"] == "update" and r["kind"] != "disabled" for r in rows),
+                "fixed": sum(r["status"] == "update" and r["kind"] == "disabled" for r in rows)},
+            "crashes": len(crashstate.crashes()), "backups": backups}
 
 
 #--------------------------------------------------------------------#
@@ -1356,7 +1374,7 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "status": cmd_status, "usage": cmd_usage,
             "checkUpdates": cmd_check_updates, "changelog": cmd_changelog,
             "compare": cmd_compare, "failedLog": cmd_failed_log, "forgetFailed": cmd_forget_failed,
-            "git": cmd_git, "gitSummary": cmd_git_summary, "setBackup": cmd_set_backup,
+            "git": cmd_git, "gitSummary": cmd_git_summary, "summaries": cmd_summaries, "setBackup": cmd_set_backup,
             "flatpaks": cmd_flatpaks, "flatpakUpdates": cmd_flatpak_updates, "flatpakRun": cmd_flatpak_run,
             "flatpakForget": cmd_flatpak_forget, "flatseal": cmd_flatseal,
             "backups": cmd_backups, "backup": cmd_backup, "upstream": cmd_upstream,

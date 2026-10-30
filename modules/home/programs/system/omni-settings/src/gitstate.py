@@ -126,7 +126,8 @@ def summary(flake):
     """The page list's counts; prs is left out when GitHub can't be read."""
     _, prs, _, _ = remote(flake, github_repo(flake))
     status = system.git_status(flake)
-    counts = {"changed": status.changed, "ahead": status.ahead, "behind": status.behind}
+    counts = {"branch": status.branch, "changed": status.changed, "ahead": status.ahead,
+              "behind": status.behind}
     if prs is not None:
         counts["prs"] = len(prs)
     return counts

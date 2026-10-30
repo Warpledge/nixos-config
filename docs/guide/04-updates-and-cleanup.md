@@ -1,6 +1,6 @@
 # Updates and Clean-Up
 
-Nothing updates on its own. The config pins every source to an exact version (the sources are in [`flake.nix`](../../flake.nix), their versions in [`flake.lock`](../../flake.lock)), so the system stays the same until an admin updates it. All of this is on Main → **Maintenance**.
+Nothing updates on its own. The config pins every source to an exact version (the sources are in [`flake.nix`](../../flake.nix), their versions in [`flake.lock`](../../flake.lock)), so the system stays the same until an admin updates it. All of this is on the **Maintenance** tab.
 
 ## Updating
 

@@ -6,7 +6,7 @@ A reinstall brings back every app and setting the config holds, since the config
 
 ## Backups
 
-Main → **Backups** saves the app data that's hardest to rebuild by hand, for the apps you have on:
+Maintenance → **Backups** saves the app data that's hardest to rebuild by hand, for the apps you have on:
 
 - **FreeTube**: subscriptions, playlists and history. Close FreeTube first.
 - **Zen**: bookmarks, as a `bookmarks.html` any browser can import
@@ -19,7 +19,7 @@ Where Syncthing is on ([`syncthing.nix`](../../modules/nixos/services/servers/sy
 
 ## Git
 
-The config is a git repository, a folder that records every change made to it. Main → **Git** shows:
+The config is a git repository, a folder that records every change made to it. Maintenance → **Git** shows:
 
 - the branch, and files changed but not committed yet
 - commits waiting to be pushed to GitHub, or pulled from it

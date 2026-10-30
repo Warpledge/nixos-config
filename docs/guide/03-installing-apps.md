@@ -18,7 +18,7 @@ The search box at the top of the Packages tab looks through nixpkgs, the main pa
 
 ## Flatpaks: Apps Outside nixpkgs
 
-Some apps only ship as a Flatpak. Main → **Flatpaks** needs Flatpak turned on for the computer (an admin's switch, which loads [`flatpak.nix`](../../modules/nixos/services/runtimes/flatpak.nix)). The page then:
+Some apps only ship as a Flatpak. Maintenance → **Flatpaks** needs Flatpak turned on for the computer (an admin's switch, which loads [`flatpak.nix`](../../modules/nixos/services/runtimes/flatpak.nix)). The page then:
 
 - checks for updates and updates everything
 - removes runtimes nothing uses any more, and repairs the installation
@@ -39,4 +39,4 @@ It's gone from your apps afterwards (garbage collection deletes the download lat
 
 ## Which App Opens What
 
-Main → **Default Apps** picks your browser, text editor, terminal and file manager. These decide what opens links and files, and what `Mod+B`, `Mod+E`, `Mod+Return` and `Mod+Z` start. A pick whose app is switched off falls back to the first one you have of that kind.
+System → **Default Apps** picks your browser, text editor, terminal and file manager. These decide what opens links and files, and what `Mod+B`, `Mod+E`, `Mod+Return` and `Mod+Z` start. A pick whose app is switched off falls back to the first one you have of that kind.

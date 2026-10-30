@@ -132,7 +132,7 @@ ColumnLayout {
                             HoverHandler { id: userHover; cursorShape: Qt.PointingHandCursor }
                             TapHandler {
                                 gesturePolicy: TapHandler.ReleaseWithinBounds
-                                onTapped: header.view.go("main", "people")
+                                onTapped: header.view.go("system", "people")
                             }
                         }
                     }
