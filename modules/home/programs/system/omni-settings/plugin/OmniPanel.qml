@@ -22,6 +22,15 @@ Item {
             show(screen)
     }
 
+    //--- The width dragged to, kept in DMS's plugin state across restarts
+    readonly property real defaultWidth: 618
+    function loadWidth() {
+        if (pluginService)
+            slideout.slideoutWidth = pluginService.loadPluginState(pluginId, "width", defaultWidth)
+    }
+    onPluginServiceChanged: loadWidth()
+    Component.onCompleted: loadWidth()
+
     function show(screen) {
         // One slideout, moved to the focused screen, so pending changes aren't split
         if (!slideout.isVisible)
@@ -33,8 +42,8 @@ Item {
         id: slideout
         layerNamespace: "dms:omni-settings"
         slideEdge: "right"
-        // The window's default width (shell.qml), so pages lay out the same in both
-        slideoutWidth: 618
+        // The window's default width (shell.qml), until a drag changes it (loadWidth)
+        slideoutWidth: root.defaultWidth
         // Drops DSlideout's own content margin; OmniView's edge is the only gap
         Component.onCompleted: {
             container.anchors.topMargin = 0
@@ -57,6 +66,26 @@ Item {
                 focus: true
                 onCloseRequested: slideout.hide()
             }
+        }
+
+        //--- Dragging the left edge resizes the panel; the window grows leftward, so
+        //--- each move adds how far the cursor got from where it was pressed
+        MouseArea {
+            z: 10
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            width: 6
+            cursorShape: Qt.SizeHorCursor
+            property real pressX: 0
+            onPressed: mouse => pressX = mouse.x
+            onPositionChanged: mouse => {
+                const most = (slideout.modelData ? slideout.modelData.width : 1920) * 0.8
+                slideout.slideoutWidth = Math.round(Math.max(480, Math.min(most,
+                    slideout.slideoutWidth - (mouse.x - pressX))))
+            }
+            onReleased: if (root.pluginService)
+                root.pluginService.savePluginState(root.pluginId, "width", slideout.slideoutWidth)
         }
     }
 

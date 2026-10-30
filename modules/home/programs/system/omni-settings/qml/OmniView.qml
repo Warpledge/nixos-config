@@ -123,21 +123,6 @@ Item {
     //--- Packages scroll, and All user packages shows only while there's no category
     readonly property var tabPages: navItems.filter(i => i.tab === tab && i.id !== "packages"
                                                     && !(i.id === "userpackages" && packageCategories.length))
-    //--- Each page's colour by id; a page that would match the one above takes the
-    //--- next, and a run of notes shares the first one's
-    readonly property var pageAccents: {
-        const out = {}
-        let prev = -1
-        tabPages.forEach((p, i) => {
-            const runOn = p.id.startsWith("doc:") && i > 0 && tabPages[i - 1].id.startsWith("doc:")
-            let n = runOn ? prev : Theme.accentIndex(p.id)
-            if (!runOn && n === prev)
-                n = (n + 1) % Theme.accentHues.length
-            out[p.id] = Theme.pageAccent(n)
-            prev = n
-        })
-        return out
-    }
     readonly property var scopes: !info ? [] : [{ id: info.machine, title: `This computer (${info.machine})` }]
         .concat(info.userMachines.filter(m => m !== info.machine).map(m => ({ id: m, title: m })))
         .concat([{ id: "", title: "All computers" }])
@@ -577,6 +562,14 @@ Item {
     //--- The section under the view's top edge stays put, so a dropdown opened
     //--- anywhere in view pushes what's below it down instead of what's above up
     function anchorTop() {
+        const top = topSection()
+        if (!top)
+            return
+        anchorPage = top.pid
+        anchorOffset = bodyFlick.contentY - top.y
+    }
+    //--- The section under the view's top edge
+    function topSection() {
         const y = bodyFlick.contentY
         let top = null
         for (let i = 0; i < sections.count; i++) {
@@ -584,10 +577,7 @@ Item {
             if (s && s.visible && (s.y <= y || !top))
                 top = s
         }
-        if (!top)
-            return
-        anchorPage = top.pid
-        anchorOffset = y - top.y
+        return top
     }
     function scrollTo(pid) {
         const s = section(pid)
@@ -1004,6 +994,74 @@ Item {
                 }
             }
 
+            //--- The open page's header, pinned while its own has scrolled away; pushed
+            //--- up by the page's end
+            Rectangle {
+                id: stickyHead
+                readonly property var sec: {
+                    const y = bodyFlick.contentY
+                    const s = sections.count ? omni.topSection() : null
+                    return s && s.open && s.headed && y > s.y + s.headBottom ? s : null
+                }
+                // The last page pinned, kept while it fades out
+                property var shown: null
+                onSecChanged: if (sec) shown = sec
+                parent: bodyFlick
+                z: 2
+                width: bodyFlick.width
+                height: stickyRow.implicitHeight + 16
+                y: shown ? Math.min(0, shown.y + shown.height - bodyFlick.contentY - height) : 0
+                visible: opacity > 0
+                opacity: sec ? 1 : 0
+                Behavior on opacity { NumberAnimation { duration: 120 } }
+                radius: 16
+                color: Qt.tint(Theme.bg, Qt.alpha(Theme.text, stickyHover.hovered ? 0.09 : 0.06))
+                border.width: 1
+                border.color: Theme.rule
+                RowLayout {
+                    id: stickyRow
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.leftMargin: 12
+                    anchors.rightMargin: 12
+                    spacing: 12
+                    Rectangle {
+                        implicitWidth: 30
+                        implicitHeight: 30
+                        radius: 15
+                        color: Theme.primary
+                        Icon {
+                            anchors.centerIn: parent
+                            icon: stickyHead.shown ? Theme.glyph(stickyHead.shown.modelData.icon, "description") : ""
+                            size: 17
+                            fill: true
+                            color: Theme.inkPrimary
+                        }
+                    }
+                    Text {
+                        Layout.fillWidth: true
+                        text: stickyHead.shown ? stickyHead.shown.modelData.title : ""
+                        color: Theme.text
+                        font.pixelSize: 18
+                        font.weight: Font.Bold
+                        elide: Text.ElideRight
+                    }
+                    Chip { tappable: false; text: "Hide"; accent: stickyHover.hovered }
+                }
+                HoverHandler { id: stickyHover; cursorShape: Qt.PointingHandCursor }
+                TapHandler {
+                    gesturePolicy: TapHandler.ReleaseWithinBounds
+                    onTapped: {
+                        const s = stickyHead.sec
+                        if (!s)
+                            return
+                        omni.scrollTo(s.pid)
+                        s.toggle()
+                    }
+                }
+            }
+
             ColumnLayout {
                 id: body
                 x: omni.gutter
@@ -1188,7 +1246,6 @@ Item {
                 required property int index
                 readonly property var prev: index > 0 ? railList.model[index - 1] : null
                 readonly property bool active: omni.page === modelData.id
-                readonly property color accent: omni.pageAccents[modelData.id] || Theme.primary
                 width: railList.width
                 //--- A line where the page list starts a new group
                 Item {
@@ -1206,14 +1263,14 @@ Item {
                     width: parent.width
                     height: 40
                     radius: 20
-                    color: railItem.active ? railItem.accent : railHover.hovered ? Theme.hover : "transparent"
+                    color: railItem.active ? Theme.primary : railHover.hovered ? Theme.hover : "transparent"
                     Behavior on color { ColorAnimation { duration: 120 } }
                     Icon {
                         anchors.centerIn: parent
                         icon: Theme.glyph(railItem.modelData.icon)
                         size: 20
                         fill: railItem.active
-                        color: railItem.active ? Theme.inkPrimary : railItem.accent
+                        color: railItem.active ? Theme.inkPrimary : Theme.primary
                     }
                     HoverHandler { id: railHover; cursorShape: Qt.PointingHandCursor }
                     TapHandler {
@@ -1369,8 +1426,6 @@ Item {
         required property var modelData
         required property int index
         readonly property string pid: modelData.id
-        //--- This page's own colour, which its headings and badges read (Theme.accentOf)
-        readonly property color pageAccent: omni.pageAccents[pid] || Theme.primary
         readonly property bool note: pid.startsWith("doc:")
         readonly property bool userPkgs: pid.startsWith("userpackages:")
         readonly property bool open: note ? !!omni.openNotes[pid] : !!omni.openPages[pid]
@@ -1399,65 +1454,53 @@ Item {
         // A section holding one page of its own name shows only the divider
         readonly property bool headed: !(divided && modelData.title === modelData.group
                                          && (!next || next.group !== modelData.group))
+        // Where the header ends, for the sticky copy over the scroll (stickyHead)
+        readonly property real headBottom: card.y + head.y + head.height
         visible: !!comp
         Layout.fillWidth: true
-        Layout.topMargin: index === 0 ? 0 : divided ? 22 : 4
+        Layout.topMargin: index === 0 ? 0 : divided ? 22 : 14
         spacing: 6
 
-        //--- The section's name in a pill, lines fading out to both sides
+        //--- The section's name between two plain rules
         RowLayout {
             visible: section.divided && section.sectionTitle !== ""
             Layout.fillWidth: true
             Layout.bottomMargin: 8
-            spacing: 8
-            Rectangle {
-                Layout.fillWidth: true
-                implicitHeight: 2
-                gradient: Gradient {
-                    orientation: Gradient.Horizontal
-                    GradientStop { position: 0; color: "transparent" }
-                    GradientStop { position: 1; color: section.pageAccent }
-                }
+            spacing: 12
+            Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: Theme.rule }
+            Text {
+                text: section.sectionTitle
+                color: Theme.text
+                font.pixelSize: 20
+                font.weight: Font.ExtraBold
             }
-            Rectangle { implicitWidth: 7; implicitHeight: 7; rotation: 45; color: section.pageAccent }
-            Rectangle {
-                implicitWidth: dividerName.implicitWidth + 40
-                implicitHeight: 46
-                radius: 23
-                color: Qt.tint(Theme.card, Qt.alpha(section.pageAccent, 0.35))
-                border.width: 2
-                border.color: section.pageAccent
-                Text {
-                    id: dividerName
-                    anchors.centerIn: parent
-                    text: section.sectionTitle
-                    color: Theme.inkContainer
-                    font.pixelSize: 22
-                    font.weight: Font.ExtraBold
-                }
-            }
-            Rectangle { implicitWidth: 7; implicitHeight: 7; rotation: 45; color: section.pageAccent }
-            Rectangle {
-                Layout.fillWidth: true
-                implicitHeight: 2
-                gradient: Gradient {
-                    orientation: Gradient.Horizontal
-                    GradientStop { position: 0; color: section.pageAccent }
-                    GradientStop { position: 1; color: "transparent" }
-                }
-            }
+            Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: Theme.rule }
         }
 
-        //--- The page's card, reaching into the gutter
+        //--- The page's card, reaching into the gutter; every other card a shade lighter
         Rectangle {
+            id: card
             Layout.fillWidth: true
             Layout.leftMargin: -omni.gutter
             implicitHeight: frameCol.implicitHeight
             radius: 20
-            color: Qt.alpha(section.pageAccent, section.headed && headHover.hovered && !section.open ? 0.1 : 0.05)
+            color: Qt.alpha(Theme.text, (section.index % 2 ? 0.075 : 0.035)
+                                        + (section.headed && headHover.hovered && !section.open ? 0.03 : 0))
             border.width: section.headed ? 1 : 0
-            border.color: Qt.alpha(section.pageAccent, section.open ? 0.22 : 0.15)
+            border.color: Theme.rule
             Behavior on color { ColorAnimation { duration: 150 } }
+
+            //--- A faint line down the open page's left edge, so its end is easy to find
+            Rectangle {
+                visible: section.headed
+                x: 9
+                y: frameCol.y + head.y + head.height + 12
+                width: 2
+                height: Math.max(0, parent.height - y - parent.radius)
+                radius: 1
+                color: Qt.alpha(Theme.dim, 0.3)
+                opacity: body.opacity
+            }
 
             ColumnLayout {
                 id: frameCol
@@ -1468,6 +1511,7 @@ Item {
 
                 //--- Header: icon, name, a short line and the chevron; tapping it collapses
                 RowLayout {
+                    id: head
                     visible: section.headed
                     Layout.fillWidth: true
                     Layout.margins: 12
@@ -1476,7 +1520,7 @@ Item {
                         implicitWidth: 36
                         implicitHeight: 36
                         radius: 18
-                        color: section.pageAccent
+                        color: Theme.primary
                         Icon {
                             anchors.centerIn: parent
                             icon: Theme.glyph(section.modelData.icon, "description")
@@ -1492,7 +1536,7 @@ Item {
                             id: pageTitle
                             text: section.modelData.title
                             color: Theme.text
-                            font.pixelSize: 20
+                            font.pixelSize: 22
                             font.weight: Font.Bold
                             elide: Text.ElideRight
                             Layout.maximumWidth: Math.ceil(pageTitleWidth.advanceWidth) + 1
@@ -1517,11 +1561,9 @@ Item {
                 Rectangle {
                     visible: section.headed && body.height > 0
                     Layout.fillWidth: true
-                    Layout.leftMargin: 14
-                    Layout.rightMargin: 14
                     implicitHeight: 1
                     opacity: body.opacity
-                    color: Qt.alpha(section.pageAccent, 0.25)
+                    color: Theme.rule
                 }
 
                 // Height from the page itself, as a layout-set one would loop with wrapped
@@ -1531,7 +1573,8 @@ Item {
                     property bool armed: false
                     Connections { target: section; function onOpenChanged() { body.armed = true } }
                     Layout.fillWidth: true
-                    Layout.leftMargin: omni.gutter
+                    // Room for the side line
+                    Layout.leftMargin: omni.gutter + (section.headed ? 10 : 0)
                     Layout.rightMargin: omni.gutter
                     Layout.topMargin: section.headed && section.open ? 8 : 0
                     Layout.bottomMargin: section.open ? 10 : 0

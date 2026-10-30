@@ -2,6 +2,7 @@
 // and disk use (api.py's `status` and `usage`)
 import QtQuick
 import QtQuick.Layouts
+import Quickshell.Io
 
 ColumnLayout {
     id: header
@@ -39,40 +40,111 @@ ColumnLayout {
         })
     }
 
-    //--- Rebuild, the computer's name and the user
+    //--- One card: the computer and Rebuild, then CPU, memory and disk under a rule;
+    //--- over the run page only the meters
     Rectangle {
-        visible: !header.barOnly
         Layout.fillWidth: true
-        implicitHeight: headCol.implicitHeight + 24
-        radius: 22
+        implicitHeight: cardCol.implicitHeight + (header.barOnly ? 16 : 24)
+        radius: header.barOnly ? 16 : 22
         color: Theme.card
         border.width: 1
         border.color: Qt.alpha(Theme.primary, 0.12)
 
         ColumnLayout {
-            id: headCol
+            id: cardCol
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            anchors.leftMargin: 12
+            anchors.leftMargin: 14
             anchors.rightMargin: 12
-            spacing: 8
+            spacing: 10
 
-            Item {
-                id: topLine
+            RowLayout {
+                visible: !header.barOnly
                 Layout.fillWidth: true
-                implicitHeight: 34
-                // The name stays centred on the card, clear of whichever side is wider
-                readonly property real side: Math.max(rebuildBtn.visible ? rebuildBtn.width : 0, userChip.width) + 10
+                spacing: 12
+
+                //--- The computer's name, what it runs and who's logged in
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 2
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 8
+                        // The white logo with its white swapped for primary
+                        Image {
+                            id: logo
+                            Layout.preferredWidth: 22
+                            Layout.preferredHeight: 22
+                            sourceSize: Qt.size(44, 44)
+                            property string svg: ""
+                            source: svg ? "data:image/svg+xml;utf8," + encodeURIComponent(
+                                svg.replace(/#ffffff/gi, Theme.primary.toString())) : ""
+                            FileView {
+                                path: Qt.resolvedUrl("nix-snowflake-white.svg").toString().replace("file://", "")
+                                onLoaded: logo.svg = text()
+                            }
+                        }
+                        Text {
+                            Layout.fillWidth: true
+                            text: header.status ? header.status.hostname : ""
+                            color: Theme.text
+                            font.pixelSize: 19
+                            font.weight: Font.Bold
+                            elide: Text.ElideRight
+                        }
+                    }
+                    Text {
+                        Layout.fillWidth: true
+                        visible: !!header.status
+                        text: header.status ? [header.view.info ? header.view.info.wm : "",
+                                               header.status.release,
+                                               `Linux ${header.status.kernel}`].filter(s => s).join(" · ") : ""
+                        color: Theme.dim
+                        font.pixelSize: 13
+                        elide: Text.ElideRight
+                    }
+                    Row {
+                        spacing: 0
+                        Text {
+                            visible: !!header.status && header.status.generation > 0
+                            text: header.status ? `Version ${header.status.generation} · ` : ""
+                            color: Theme.dim
+                            font.pixelSize: 13
+                        }
+                        // Opens Users
+                        Row {
+                            spacing: 3
+                            Icon {
+                                anchors.verticalCenter: parent.verticalCenter
+                                icon: "person"
+                                size: 15
+                                fill: true
+                                color: userHover.hovered ? Theme.primary : Theme.dim
+                            }
+                            Text {
+                                text: header.view.info ? header.view.info.user : ""
+                                color: userHover.hovered ? Theme.primary : Theme.dim
+                                font.pixelSize: 13
+                                font.weight: Font.DemiBold
+                                font.underline: userHover.hovered
+                            }
+                            HoverHandler { id: userHover; cursorShape: Qt.PointingHandCursor }
+                            TapHandler {
+                                gesturePolicy: TapHandler.ReleaseWithinBounds
+                                onTapped: header.view.go("main", "people")
+                            }
+                        }
+                    }
+                }
 
                 Rectangle {
                     id: rebuildBtn
                     visible: header.canRebuild
-                    anchors.left: parent.left
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: rebuildRow.implicitWidth + 26
-                    height: 34
-                    radius: 17
+                    Layout.alignment: Qt.AlignVCenter
+                    implicitWidth: rebuildRow.implicitWidth + 36
+                    implicitHeight: 52
+                    radius: 18
                     readonly property bool lit: rebuildHover.hovered && !Jobs.running
                     opacity: Jobs.running ? 0.45 : 1
                     color: lit ? Qt.lighter(Theme.primary, 1.12) : Theme.primary
@@ -82,18 +154,18 @@ ColumnLayout {
                     Row {
                         id: rebuildRow
                         anchors.centerIn: parent
-                        spacing: 6
+                        spacing: 8
                         Icon {
                             anchors.verticalCenter: parent.verticalCenter
                             icon: Jobs.running ? "progress_activity" : "build"
-                            size: 18
+                            size: 22
                             fill: true
                             color: Theme.inkPrimary
                         }
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
                             text: "Rebuild"
-                            font.pixelSize: 15
+                            font.pixelSize: 17
                             font.weight: Font.Bold
                             color: Theme.inkPrimary
                         }
@@ -101,106 +173,32 @@ ColumnLayout {
                     HoverHandler { id: rebuildHover; cursorShape: Jobs.running ? Qt.ArrowCursor : Qt.PointingHandCursor }
                     TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: header.view.rebuild() }
                 }
-
-                Row {
-                    anchors.centerIn: parent
-                    spacing: 8
-                    Icon {
-                        id: flake
-                        anchors.verticalCenter: parent.verticalCenter
-                        icon: "ac_unit"
-                        size: 20
-                        color: Theme.primary
-                    }
-                    Text {
-                        id: hostName
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: Math.max(0, Math.min(Math.ceil(hostWidth.advanceWidth) + 1,
-                                                    topLine.width - 2 * topLine.side - flake.width - 8))
-                        text: header.status ? header.status.hostname : ""
-                        color: Theme.text
-                        font.pixelSize: 19
-                        font.weight: Font.Bold
-                        elide: Text.ElideRight
-                        TextMetrics { id: hostWidth; font: hostName.font; text: hostName.text }
-                    }
-                }
-
-                Rectangle {
-                    id: userChip
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: userRow.implicitWidth + 24
-                    height: 34
-                    radius: 17
-                    color: Qt.alpha(Theme.primary, userHover.hovered ? 0.26 : 0.14)
-                    Behavior on color { ColorAnimation { duration: 120 } }
-                    border.width: 1
-                    border.color: Qt.alpha(Theme.primary, 0.3)
-                    Row {
-                        id: userRow
-                        anchors.centerIn: parent
-                        spacing: 6
-                        Icon {
-                            anchors.verticalCenter: parent.verticalCenter
-                            icon: "person"
-                            size: 18
-                            fill: true
-                            color: Theme.primary
-                        }
-                        Text {
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: header.view.info ? header.view.info.user : ""
-                            font.pixelSize: 14
-                            font.weight: Font.DemiBold
-                            color: Theme.primary
-                        }
-                    }
-                    HoverHandler { id: userHover; cursorShape: Qt.PointingHandCursor }
-                    TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: header.view.go("main", "people") }
-                }
             }
 
-            //--- What it runs
-            Row {
-                visible: !!header.status
-                Layout.alignment: Qt.AlignHCenter
-                spacing: 6
-                Chip { tappable: false; accent: true; text: header.view.info ? header.view.info.wm : "" }
-                Chip { tappable: false; text: header.status ? header.status.release : "" }
-                Chip { tappable: false; text: header.status ? `Linux ${header.status.kernel}` : "" }
-                Chip {
-                    tappable: false
-                    visible: !!header.status && header.status.generation > 0
-                    text: header.status ? `Version ${header.status.generation}` : ""
-                }
+            Rectangle {
+                visible: !header.barOnly
+                Layout.fillWidth: true
+                implicitHeight: 1
+                color: Theme.rule
             }
-        }
-    }
 
-    //--- CPU, memory and disk
-    Rectangle {
-        Layout.fillWidth: true
-        implicitHeight: 32
-        radius: 16
-        color: Theme.card
-        RowLayout {
-            anchors.fill: parent
-            anchors.leftMargin: 14
-            anchors.rightMargin: 14
-            spacing: 16
-            Meter { icon: "memory"; label: "CPU"; value: header.cpu }
-            Meter {
-                icon: "memory_alt"
-                label: "RAM"
-                value: header.usage ? header.usage.memUsed / header.usage.memTotal : -1
-                tip: header.usage ? `${Fmt.size(header.usage.memUsed)} of ${Fmt.size(header.usage.memTotal)}` : ""
-            }
-            Meter {
-                icon: "hard_drive"
-                label: "Disk"
-                value: header.usage ? header.usage.diskUsed / header.usage.diskTotal : -1
-                tip: header.usage ? `${Fmt.size(header.usage.diskUsed)} of ${Fmt.size(header.usage.diskTotal)}` : ""
+            //--- CPU, memory and disk
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 16
+                Meter { icon: "memory"; label: "CPU"; value: header.cpu }
+                Meter {
+                    icon: "memory_alt"
+                    label: "RAM"
+                    value: header.usage ? header.usage.memUsed / header.usage.memTotal : -1
+                    tip: header.usage ? `${Fmt.size(header.usage.memUsed)} of ${Fmt.size(header.usage.memTotal)}` : ""
+                }
+                Meter {
+                    icon: "hard_drive"
+                    label: "Disk"
+                    value: header.usage ? header.usage.diskUsed / header.usage.diskTotal : -1
+                    tip: header.usage ? `${Fmt.size(header.usage.diskUsed)} of ${Fmt.size(header.usage.diskTotal)}` : ""
+                }
             }
         }
     }
@@ -211,7 +209,10 @@ ColumnLayout {
         property string label
         property real value: -1
         property string tip: ""
-        readonly property color tint: value >= 0.9 ? Theme.error : value >= 0.75 ? Theme.caution : Theme.primary
+        // Primary to 60%, then easing into yellow by 80% and red by 100%
+        readonly property color tint: value < 0.6 ? Theme.primary
+            : value < 0.8 ? Theme.mix(Theme.primary, Theme.caution, (value - 0.6) / 0.2)
+            : Theme.mix(Theme.caution, Theme.error, Math.min(1, (value - 0.8) / 0.2))
         Layout.fillWidth: true
         Layout.preferredWidth: 1  // equal thirds
         spacing: 6
