@@ -1,6 +1,7 @@
 // Omni Settings' content, the same in the window and (later) DMS's slideout.
 // Pending changes live here until Review hands them to api.py and the job service.
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
 
@@ -1536,6 +1537,47 @@ Item {
         }
     }
 
+    //--- Hides the page behind the rail's names so they read on any page; it reaches
+    //--- vfade past the names' top and bottom and fades out there
+    Item {
+        id: namesBackdrop
+        visible: railNames.visible
+        z: 4
+        x: railNames.x
+        y: railNames.y - railNames.vfade
+        width: railNames.width
+        height: railNames.height + 2 * railNames.vfade
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            maskEnabled: true
+            maskSource: namesMask
+            maskThresholdMin: 0.5
+            maskSpreadAtMin: 1.0
+        }
+        Rectangle {
+            anchors.fill: parent
+            gradient: Gradient {
+                orientation: Gradient.Horizontal
+                GradientStop { position: 0; color: "transparent" }
+                GradientStop { position: railNames.fade / railNames.width; color: Qt.alpha(Theme.bg, 0.96) }
+                GradientStop { position: 1; color: Theme.bg }
+            }
+        }
+    }
+    Rectangle {
+        id: namesMask
+        anchors.fill: namesBackdrop
+        visible: false
+        layer.enabled: true
+        readonly property real edge: railNames.vfade / Math.max(1, height)
+        gradient: Gradient {
+            GradientStop { position: 0; color: "transparent" }
+            GradientStop { position: namesMask.edge; color: "black" }
+            GradientStop { position: 1 - namesMask.edge; color: "black" }
+            GradientStop { position: 1; color: "transparent" }
+        }
+    }
+
     //--- Every page's name, left of its icon, while the cursor is on the rail or the names
     Item {
         id: railNames
@@ -1546,19 +1588,10 @@ Item {
         height: railList.height
         // The gap to the rail counts as hovering the names; the fade sits left of them
         width: namesCol.implicitWidth + 8 + fade
-        readonly property real fade: 36
+        readonly property real fade: 20
+        readonly property real vfade: 24
         clip: true
         HoverHandler { id: namesArea }
-        // Hides the page behind the names so they read on any page
-        Rectangle {
-            anchors.fill: parent
-            gradient: Gradient {
-                orientation: Gradient.Horizontal
-                GradientStop { position: 0; color: "transparent" }
-                GradientStop { position: railNames.fade / railNames.width; color: Qt.alpha(Theme.bg, 0.96) }
-                GradientStop { position: 1; color: Theme.bg }
-            }
-        }
         // Laid out like the rail's list and scrolled with it
         Column {
             id: namesCol
