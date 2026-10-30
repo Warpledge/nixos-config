@@ -1344,10 +1344,12 @@ Item {
                                       windowrules: windowRulesPage, keybinds: keybindsPage,
                                       siderail: sideRailPage,
                                       startup: startupPage, filetypes: fileTypesPage,
-                                      firmware: firmwarePage, battery: batteryPage, dgpu: dgpuPage })
+                                      firmware: firmwarePage, battery: batteryPage, dgpu: dgpuPage,
+                                      scheduler: schedulerPage })
     Component { id: firmwarePage; FirmwarePage { view: omni } }
     Component { id: batteryPage; BatteryPage { view: omni } }
     Component { id: dgpuPage; DgpuPage { view: omni } }
+    Component { id: schedulerPage; SchedulerPage { view: omni } }
     Component { id: windowRulesPage; WindowRulesPage { view: omni } }
     Component { id: sideRailPage; SideRailPage { view: omni } }
     Component { id: keybindsPage; KeybindsPage { view: omni } }

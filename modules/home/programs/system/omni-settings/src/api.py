@@ -77,7 +77,8 @@ TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
                 ("keybinds", "Keybinds", ("input-keyboard-symbolic", "preferences-desktop-keyboard-symbolic"))],
        "hardware": [("firmware", "Firmware", ("software-update-available-symbolic", "application-x-firmware")),
                     ("battery", "Battery", ("battery-symbolic", "battery-full-symbolic")),
-                    ("dgpu", "Run on dGPU", ("video-display-symbolic", "computer-symbolic"))],
+                    ("dgpu", "Run on dGPU", ("video-display-symbolic", "computer-symbolic")),
+                    ("scheduler", "CPU Scheduler", ("utilities-system-monitor-symbolic", "cpu-symbolic"))],
        "gaming": [("games", "Games", ("input-gaming-symbolic", "applications-games-symbolic")),
                   ("proton", "Launch Options", ("input-gaming-symbolic",)),
                   ("protonversions", "Proton Versions",
@@ -108,6 +109,8 @@ NAV_SUBTITLES = {"overview": "Updates, freeing space, versions", "git": "Changes
                  "firmware": "Firmware for this computer's devices from fwupd, and updates waiting",
                  "battery": "Charge, health, and where charging stops",
                  "dgpu": "Apps whose launcher starts them on the NVIDIA GPU. Changes wait for Apply.",
+                 "scheduler": "The sched_ext CPU scheduler running now. A switch here lasts until "
+                              "the next restart.",
                  "startup": "Variables every program sees, and autostart",
                  "filetypes": "Which app opens one file type",
                  "userpackages": "Packages you added from Search, installed as they come with no "
@@ -307,6 +310,8 @@ def shows(key, wm):
         return hardwarestate.has_offload()
     if key == "mangohud":
         return bool(shutil.which("mangohud"))
+    if key == "scheduler":
+        return hardwarestate.scx_unit() is not None
     return True
 
 
@@ -480,6 +485,10 @@ def cmd_firmware_summary(_cfg, _args):
 
 def cmd_battery(_cfg, _args):
     return hardwarestate.battery()
+
+
+def cmd_scheduler(_cfg, _args):
+    return hardwarestate.scheduler()
 
 
 def cmd_split_command(_cfg, args):
@@ -1240,7 +1249,7 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "appIcon": cmd_app_icon, "pickIconFile": cmd_pick_icon_file, "siteIcon": cmd_site_icon,
             "mimeApps": cmd_mime_apps, "splitCommand": cmd_split_command,
             "firmware": cmd_firmware, "firmwareSummary": cmd_firmware_summary, "battery": cmd_battery,
-            "mangohudTest": cmd_mangohud_test}
+            "mangohudTest": cmd_mangohud_test, "scheduler": cmd_scheduler}
 
 
 def run(cfg, cmd, args):

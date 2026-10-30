@@ -43,6 +43,7 @@ sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 
 import backend  # noqa: E402
 import closure  # noqa: E402
+import hardwarestate  # noqa: E402
 import nixfile  # noqa: E402
 import nixlog  # noqa: E402
 import schema  # noqa: E402
@@ -289,6 +290,29 @@ def firmware():
     emit(step="firmware", state="done")
     if "reboot" in text or "restart" in text:
         emit(note=["Restart to finish", "A device installs its new firmware while the computer restarts."])
+
+
+def switch_scheduler(name):
+    """Runs sched_ext scheduler `name` until the next boot (scx.service reads
+    SCX_SCHEDULER_OVERRIDE from the manager's environment), "stop" stops it,
+    "default" goes back to the one the config sets."""
+    emit(step="scheduler", state="start")
+    if name == "stop":
+        cmds = [["systemctl", "stop", hardwarestate.SCX_UNIT]]
+    elif name == "default":
+        cmds = [["systemctl", "unset-environment", "SCX_SCHEDULER_OVERRIDE", "SCX_FLAGS_OVERRIDE"],
+                ["systemctl", "restart", hardwarestate.SCX_UNIT]]
+    else:
+        # The config's flags are for its own scheduler; a lone space stands for none
+        cmds = [["systemctl", "set-environment", f"SCX_SCHEDULER_OVERRIDE={name}",
+                 "SCX_FLAGS_OVERRIDE= "],
+                ["systemctl", "restart", hardwarestate.SCX_UNIT]]
+    for cmd in cmds:
+        code, _ = stream(cmd)
+        if code != 0:
+            emit(step="scheduler", state="failed")
+            raise RuntimeError(f"{' '.join(cmd[:2])} failed")
+    emit(step="scheduler", state="done")
 
 
 def store_free():
@@ -555,7 +579,8 @@ def main():
     collecting = request.get("collectGarbage") is True
     optimising = request.get("optimise") is True
     updating_firmware = request.get("firmwareUpdate") is True
-    if mode == "build" and (collecting or optimising or updating_firmware
+    scheduler = request.get("scheduler")
+    if mode == "build" and (collecting or optimising or updating_firmware or scheduler is not None
                             or "activate" in request or "newUser" in request
                             or request.get("clean") is True):
         refuse("bad request")
@@ -570,6 +595,13 @@ def main():
     elif updating_firmware:
         if not admin:
             refuse("only an admin can update firmware")
+    elif scheduler is not None:
+        if not admin:
+            refuse("only an admin can switch the CPU scheduler")
+        if scheduler not in ("stop", "default") and (
+                scheduler not in hardwarestate.SCHEDULERS
+                or not shutil.which(scheduler, path=(hardwarestate.scx_unit() or {}).get("bin") or None)):
+            refuse("that isn't a scheduler this computer has")
     elif "activate" in request:
         if not admin:
             refuse("only an admin can switch to another version")
@@ -605,6 +637,15 @@ def main():
         if collecting:
             try:
                 collect()
+            except Exception as e:  # noqa: BLE001
+                emit(error=str(e))
+                emit(result="failed", restored=False)
+                sys.exit(1)
+            emit(result="ok")
+            return
+        if scheduler is not None:
+            try:
+                switch_scheduler(scheduler)
             except Exception as e:  # noqa: BLE001
                 emit(error=str(e))
                 emit(result="failed", restored=False)
