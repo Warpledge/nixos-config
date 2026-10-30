@@ -347,8 +347,8 @@ window, over a Python backend; full notes split across its `CLAUDE.md`,
 - Keep the interface clean: rows, cards, headings, page headers and editor
   sheet headers show the name only; only action rows and tiles keep a short
   line. What it is shows on hovering the name (`TitleTip.qml`; a
-  setting's `text`, under ~200 characters, then its default, which its value,
-  switch or chip also shows on hover; a page's description, plus its
+  setting's `text`, under ~200 characters, its default on hovering its value,
+  switch or chip; a page's description, plus its
   summary while collapsed); cautions behind a yellow triangle
   `Hint`. Live alerts stay
   as yellow text (`alert`), status values show large (`value`), and names keep
