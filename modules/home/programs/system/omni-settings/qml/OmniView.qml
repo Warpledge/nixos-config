@@ -12,7 +12,7 @@ Item {
     property int edge: 14  // gap between the view and the window's edges
     property int gutter: 8  // the part of `edge` left of the pages that holds their band
     property int frameInset: 6  // the page body inside its frame; clears the frame's corners
-    readonly property int railGap: 22  // above each later group on the rail, room for its name
+    readonly property int railGap: 30  // above each later group on the rail, room for its name
     property var info: null
     property string loadError: ""
     property var stale: null  // api.py's `stale`, when the settings files don't evaluate
@@ -1394,9 +1394,7 @@ Item {
                     width: parent.width
                     height: omni.railGap
                     Rectangle {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.bottom: parent.bottom
-                        anchors.bottomMargin: 6
+                        anchors.centerIn: parent
                         width: 26
                         height: 1
                         color: Qt.alpha(Theme.primary, 0.35)
@@ -1433,17 +1431,19 @@ Item {
         anchors.right: rail.left
         y: rail.y + railList.y
         height: railList.height
-        width: namesCol.implicitWidth + 8  // the gap to the rail counts as hovering the names
+        // The gap to the rail counts as hovering the names; the fade sits left of them
+        width: namesCol.implicitWidth + 8 + fade
+        readonly property real fade: 36
         clip: true
         HoverHandler { id: namesArea }
-        // Mutes the page behind the names so they read on any page
+        // Hides the page behind the names so they read on any page
         Rectangle {
             anchors.fill: parent
             gradient: Gradient {
                 orientation: Gradient.Horizontal
                 GradientStop { position: 0; color: "transparent" }
-                GradientStop { position: 0.35; color: Qt.alpha(Theme.bg, 0.85) }
-                GradientStop { position: 1; color: Qt.alpha(Theme.bg, 0.95) }
+                GradientStop { position: railNames.fade / railNames.width; color: Qt.alpha(Theme.bg, 0.96) }
+                GradientStop { position: 1; color: Theme.bg }
             }
         }
         // Laid out like the rail's list and scrolled with it
@@ -1468,8 +1468,7 @@ Item {
                             id: groupCaption
                             anchors.right: parent.right
                             anchors.rightMargin: 4
-                            anchors.bottom: parent.bottom
-                            anchors.bottomMargin: 1
+                            anchors.verticalCenter: parent.verticalCenter  // level with the rail's line
                             text: nameItem.modelData.group
                             color: Theme.dim
                             font.pixelSize: 11
@@ -1645,21 +1644,14 @@ Item {
             radius: 20
             color: Qt.alpha(Theme.text, (section.index % 2 ? 0.075 : 0.035)
                                         + (section.headed && headHover.hovered && !section.open ? 0.03 : 0))
-            border.width: section.headed ? 1 : 0
-            border.color: Theme.rule
+            // An open page is edged in primary; the one under the cursor gets a thick
+            // ring like niri's focus ring, so the page being read is easy to find
+            border.width: !section.headed ? 0 : cardHover.hovered ? 3 : section.open ? 1.5 : 1
+            border.color: cardHover.hovered ? Theme.primary
+                : section.open ? Qt.alpha(Theme.primary, 0.6) : Theme.rule
             Behavior on color { ColorAnimation { duration: 150 } }
-
-            //--- A faint line down the open page's left edge, so its end is easy to find
-            Rectangle {
-                visible: section.headed
-                x: 9
-                y: frameCol.y + head.y + head.height + 12
-                width: 2
-                height: Math.max(0, parent.height - y - parent.radius)
-                radius: 1
-                color: Qt.alpha(Theme.dim, 0.3)
-                opacity: body.opacity
-            }
+            Behavior on border.color { ColorAnimation { duration: 150 } }
+            HoverHandler { id: cardHover; enabled: section.headed }
 
             ColumnLayout {
                 id: frameCol
@@ -1755,8 +1747,7 @@ Item {
                     property bool armed: false
                     Connections { target: section; function onOpenChanged() { body.armed = true } }
                     Layout.fillWidth: true
-                    // Room for the side line
-                    Layout.leftMargin: omni.gutter + (section.headed ? 10 : 0)
+                    Layout.leftMargin: omni.gutter
                     Layout.rightMargin: omni.gutter
                     Layout.topMargin: section.headed && section.open ? 8 : 0
                     Layout.bottomMargin: section.open ? 10 : 0
