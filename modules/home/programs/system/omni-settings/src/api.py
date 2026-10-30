@@ -83,13 +83,12 @@ TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
                   ("proton", "Launch Options", ("input-gaming-symbolic",)),
                   ("protonversions", "Proton Versions",
                    ("system-software-install-symbolic", "input-gaming-symbolic")),
-                  ("mangohud", "MangoHud", ("utilities-system-monitor-symbolic",)),
-                  ("crashes", "Crashes", ("dialog-warning-symbolic", "computer-fail-symbolic"))],
+                  ("mangohud", "MangoHud", ("utilities-system-monitor-symbolic",))],
        "ai": [],
        "docs": []}
 
 #--- The line under each page in the page list that has no description of its own
-NAV_SUBTITLES = {"overview": "Updates, freeing space, versions", "git": "Changes, commits, pull requests",
+NAV_SUBTITLES = {"overview": "Updates, freeing space, versions, crashes", "git": "Changes, commits, pull requests",
                  "flatpaks": "Apps nixpkgs doesn't have: update them, clean up, and switch each one "
                              "on or off",
                  "backups": "Back up app data",
@@ -119,9 +118,8 @@ NAV_SUBTITLES = {"overview": "Updates, freeing space, versions", "git": "Changes
                  "games": "Your Steam games: build each one's launch options and pick its Proton "
                           "version. Changes wait for Apply, and reach Steam once it's closed.",
                  "proton": "Launch options for Steam, Heroic and Lutris. Click one to copy it.",
-                 "mangohud": "The in-game overlay: what it shows and where. Changes wait for Apply.",
-                 "crashes": "Programs that crashed in the last 30 days, games first, with a report "
-                            "to copy for troubleshooting",
+                 "mangohud": "The in-game overlay: what it shows and where. The test window shows "
+                             "changes as you make them; games get them after Apply.",
                  "protonversions": "The Proton and Wine builds each launcher can run games with. Pick "
                                    "one per game in the launcher, or Steam's default under Settings, "
                                    "Compatibility."}
@@ -851,10 +849,47 @@ def cmd_flatseal(_cfg, args):
     return True
 
 
-def cmd_mangohud_test(_cfg, _args):
-    """Opens vkcube under MangoHud, with the overlay as last applied."""
+MANGOHUD_APPLIED = os.path.expanduser("~/.config/MangoHud/MangoHud.conf")
+
+
+def mangohud_preview_path():
+    return os.path.join(system.runtime_dir(), "mangohud-preview.conf")
+
+
+def cmd_mangohud_preview(_cfg, args):
+    """Writes the overlay as the page's values set it, pending changes too, to the
+    file the test window reads; MangoHud reloads it when it changes. Keep in step
+    with what gaming/default.nix writes."""
+    hud, items = args.get("hud") or {}, args.get("items") or []
+    show = hud.get("show") or []
+    lines = ["fps_only"] if show == ["fps"] else [i if i in show else f"{i}=0" for i in items]
+    def number(key, fallback):
+        try:
+            return int(hud.get(key))
+        except (TypeError, ValueError):
+            return fallback  # a half-typed value
+    background = max(0, min(100, number("background", 0)))
+    lines += [f"position={hud.get('position') or 'top-right'}",
+              f"font_size={number('fontSize', 16)}",
+              f"background_alpha={background / 100:.2f}",
+              f"text_color={hud.get('textColor') or 'FFFFFF'}"]
+    try:
+        with open(MANGOHUD_APPLIED) as f:
+            lines += [line.rstrip("\n") for line in f if line.startswith("font_file=")]
+    except OSError:
+        pass
+    # Written in place, not replaced, so MangoHud's watch on the file sees it
+    with open(mangohud_preview_path(), "w") as f:
+        f.write("\n".join(lines) + "\n")
+    return True
+
+
+def cmd_mangohud_test(cfg, args):
+    """Opens vkcube under MangoHud reading the preview file."""
+    cmd_mangohud_preview(cfg, args)
+    env = dict(os.environ, MANGOHUD_CONFIGFILE=mangohud_preview_path())
     subprocess.Popen(["mangohud", "vkcube"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                     start_new_session=True)
+                     start_new_session=True, env=env)
     return True
 
 
@@ -1249,7 +1284,7 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "appIcon": cmd_app_icon, "pickIconFile": cmd_pick_icon_file, "siteIcon": cmd_site_icon,
             "mimeApps": cmd_mime_apps, "splitCommand": cmd_split_command,
             "firmware": cmd_firmware, "firmwareSummary": cmd_firmware_summary, "battery": cmd_battery,
-            "mangohudTest": cmd_mangohud_test, "scheduler": cmd_scheduler}
+            "mangohudTest": cmd_mangohud_test, "mangohudPreview": cmd_mangohud_preview, "scheduler": cmd_scheduler}
 
 
 def run(cfg, cmd, args):

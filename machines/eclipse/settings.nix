@@ -106,6 +106,13 @@
       claude.agentModels.publicRepoAuditor = null;
       windowRules = {};
       sideRail = {};
+      mangohud.show = ["fps"];
+      mangohud.position = "top-right";
+      mangohud.fontSize = 16;
+      mangohud.textColor = "00FF00";
+      mangohud.background = 0;
+      gpuOffload = [];
+      steamGames = {};
     };
   };
 

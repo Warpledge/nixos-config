@@ -13,6 +13,8 @@ ColumnLayout {
     readonly property bool ready: !!steam || error !== ""
     spacing: 6
 
+    property var crashCount: ({})  // app id: crashes in the last 30 days
+
     Component.onCompleted: load()
     function load() {
         Backend.call("steamGames", {}, reply => {
@@ -22,6 +24,15 @@ ColumnLayout {
                 page.steam = reply.data
             else
                 page.error = reply.error
+        })
+        Backend.call("crashes", {}, reply => {
+            if (!page || !reply.ok)
+                return
+            const out = {}
+            for (const c of reply.data)
+                if (c.app)
+                    out[c.app] = (out[c.app] || 0) + 1
+            page.crashCount = out
         })
     }
 
@@ -44,8 +55,9 @@ ColumnLayout {
             return []
         const q = search.text.trim().toLowerCase()
         const match = steam.games.filter(g => !q || g.name.toLowerCase().includes(q) || g.id.includes(q))
-        // Games with a setting first
-        return match.filter(g => g.id in now).concat(match.filter(g => !(g.id in now)))
+        // Games with a setting first, then ones that crashed
+        const rank = g => g.id in now ? 0 : crashCount[g.id] ? 1 : 2
+        return [0, 1, 2].map(r => match.filter(g => rank(g) === r)).reduce((a, b) => a.concat(b), [])
     }
 
     function summary(g) {
@@ -145,8 +157,18 @@ ColumnLayout {
                         Layout.fillWidth: true
                     }
                 }
+                Chip {
+                    readonly property int count: page.crashCount[gameRow.modelData.id] || 0
+                    visible: count > 0
+                    text: count === 1 ? "Crashed" : `Crashed ${count}×`
+                    icon: "bug_report"
+                    tone: "caution"
+                    tip: "Crashes in the last 30 days. Edit the game to see them and copy a report."
+                    onTapped: page.edit(gameRow.modelData)
+                }
                 Chip { visible: gameRow.hasEntry; text: "Set Here"; accent: true; tappable: false }
-                Chevron { lit: rowHover.hovered }
+                // Words, as the page headers' Show and Hide, not a dropdown's arrow
+                Chip { text: "Edit"; tappable: false; accent: rowHover.hovered }
             }
         }
     }
