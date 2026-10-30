@@ -14,7 +14,7 @@ Rules:
   adding files by path. Never push, never `git config` or `git remote`.
 - Never `sudo`, never `nixos-rebuild` or `nixm rebuild`.
 - Only one Godot process at a time, since memory is tight. Before a test run,
-  `grep MemAvailable /proc/meminfo` must show at least 20 GB free.
+  `grep MemAvailable /proc/meminfo` must show at least 5 GB free.
 - Check your own work: run the suites in tests/ (each ends with
   `---- ALL CHECKS PASSED ----`), parse every changed script, and read the diffs you made.
 - Design calls Ky has not made go to Ky. If you must make one to keep going, log it in
