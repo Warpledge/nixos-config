@@ -13,7 +13,7 @@ Item {
     property int gutter: 8  // the part of `edge` left of the pages that holds their band
     property int frameInset: 6  // the page body inside its frame; clears the frame's corners
     readonly property int railGap: 30  // above each later group on the rail, room for its name
-    readonly property int railItem: 36  // each page's icon on the rail, and its name's row
+    readonly property int railItem: 38  // each page's icon on the rail, and its name's row
     property var info: null
     property string loadError: ""
     property var stale: null  // api.py's `stale`, when the settings files don't evaluate
@@ -892,8 +892,8 @@ Item {
         Rectangle {
             id: tabsBar
             Layout.fillWidth: true
-            implicitHeight: 54
-            radius: 16
+            implicitHeight: omni.railItem + 8  // the rail's width, so Rebuild beside it is square
+            radius: 14
             color: Theme.card
             Flickable {
                 id: tabsFlick
@@ -931,20 +931,20 @@ Item {
                             required property var modelData
                             readonly property bool active: omni.tab === modelData.id
                             onActiveChanged: if (active) omni.showTab(tab)
-                            width: active ? tabLabel.x + tabLabel.implicitWidth + 16 : 46
-                            height: 46
+                            width: active ? tabLabel.x + tabLabel.implicitWidth + 14 : 38
+                            height: 38
                             anchors.verticalCenter: parent.verticalCenter
                             Behavior on width { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-                            radius: 13
+                            radius: 11
                             clip: true
                             color: active ? Qt.alpha(Theme.primary, 0.28) : tabHover.hovered ? Theme.hover : "transparent"
                             Behavior on color { ColorAnimation { duration: 150 } }
                             Icon {
                                 id: tabIcon
-                                x: tab.active ? 13 : 11
+                                x: tab.active ? 10 : 8
                                 anchors.verticalCenter: parent.verticalCenter
                                 icon: Theme.glyph(tab.modelData.icon)
-                                size: 24
+                                size: 22
                                 fill: tab.active
                                 color: tab.active ? Theme.primary : tabHover.hovered ? Theme.text : Theme.dim
                                 // Something waiting on one of the tab's pages
@@ -960,7 +960,7 @@ Item {
                             }
                             Text {
                                 id: tabLabel
-                                x: 45
+                                x: 38
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: tab.modelData.title
                                 font.pixelSize: 14
@@ -1429,8 +1429,8 @@ Item {
         anchors.rightMargin: omni.edge
         y: mainCol.y + tabsBar.y
         width: rail.width
-        height: tabsBar.height
-        radius: 16
+        height: width  // square; the tab bar is as tall as the rail is wide
+        radius: tabsBar.radius
         readonly property bool lit: rebuildHover.hovered && !Jobs.running
         opacity: Jobs.running ? 0.45 : 1
         color: lit ? Qt.lighter(Theme.primary, 1.12) : Theme.primary
