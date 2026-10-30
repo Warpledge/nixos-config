@@ -91,12 +91,6 @@ Rectangle {
                         tone: ""
                         tip: "Set for this computer only; other computers keep your own setting"
                     }
-                    //--- Changed from the template's default; the solid dot while unsaved
-                    Rectangle {
-                        visible: row.changed && !row.pending
-                        width: 6; height: 6; radius: 3
-                        color: Qt.alpha(row.accent, 0.55)
-                    }
                     Rectangle {
                         visible: row.pending
                         width: 8; height: 8; radius: 4
