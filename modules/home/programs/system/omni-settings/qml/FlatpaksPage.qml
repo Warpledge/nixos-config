@@ -86,21 +86,12 @@ ColumnLayout {
     //--- Flatpak's own switch, a machine setting like any other
     Repeater {
         model: page.setting ? page.setting.groups : []
-        ColumnLayout {
-            id: group
+        SettingGroup {
             required property var modelData
-            Layout.fillWidth: true
-            spacing: 6
-            Repeater {
-                model: group.modelData.settings
-                SettingRow {
-                    required property var modelData
-                    setting: modelData
-                    view: page.view
-                    locked: !page.view.info.direct
-                    pageGlyph: "widgets"
-                }
-            }
+            settings: modelData.settings
+            view: page.view
+            locked: !page.view.info.direct
+            pageGlyph: "widgets"
         }
     }
     Text {

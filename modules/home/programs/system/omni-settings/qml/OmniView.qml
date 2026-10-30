@@ -458,6 +458,72 @@ Item {
         }, mode => startJob("rebuild", { mode }))
     }
 
+    //--- A page's settings that differ from the template's default, leaving out locked ones
+    function changedOn(model) {
+        const out = []
+        if (model)
+            for (const g of model.groups)
+                if (!g.locked)
+                    for (const s of g.settings)
+                        for (const t of s.pair ? [s, s.pair] : [s])
+                            if (!same(valueOf(t), t.default))
+                                out.push(t)
+        return out
+    }
+    function resetPage(model) {
+        const list = changedOn(model)
+        ask({ heading: `Reset ${model.title}?`,
+              body: `Puts ${list.length === 1 ? "one setting" : `${list.length} settings`} back to the `
+                    + "default, as changes waiting for Apply.",
+              buttons: [{ label: "Reset", value: "reset" }] },
+            () => { for (const s of list) change(s, s.default) })
+    }
+
+    //--- The line under a collapsed page's title: {text, alert}, or null for its description
+    function pageSummary(pid, model) {
+        const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`
+        if (pid === "git" && gitCounts) {
+            const c = gitCounts
+            return { text: `${c.branch ? c.branch + " · " : ""}${gitTag}`, alert: !!(c.changed || c.ahead || c.behind) }
+        }
+        if (pid === "updates" && summaries) {
+            const u = summaries.updates
+            if (!u)
+                return { text: "Not checked yet", alert: false }
+            const parts = [u.upstream ? `${plural(u.upstream, "update")} upstream` : "",
+                           u.fixed ? `${plural(u.fixed, "disabled package")} fixed` : ""].filter(p => p)
+            return { text: parts.join(" · ") || "Up to date", alert: parts.length > 0 }
+        }
+        if (pid === "backups" && summaries && summaries.backups.length) {
+            const last = Math.max(...summaries.backups.map(b => b.last || 0))
+            return { text: summaries.backups.map(b => b.title).join(", ")
+                           + (last ? ` · last ${Fmt.ago(last)}` : " · none yet"), alert: false }
+        }
+        if (pid === "overview" && summaries && summaries.crashes)
+            return { text: `${plural(summaries.crashes, "crash")} in 30 days`, alert: false }
+        if (pid === "firmware" && firmwareUpdates > 0)
+            return { text: `${plural(firmwareUpdates, "update")} waiting`, alert: true }
+        if (pid === "page:Services" && servicesRunning >= 0)
+            return { text: `${servicesRunning} running`, alert: false }
+        // A generated page: its first values, a switch by its name while it's on
+        if (model && !pid.startsWith("doc:")) {
+            const parts = []
+            for (const g of model.groups)
+                for (const s of g.settings) {
+                    const v = valueOf(s)
+                    if (s.kind === "bool") {
+                        if (v)
+                            parts.push(s.title)
+                    } else if (!(s.kind === "list" && !(v || []).length)) {
+                        parts.push(s.kind === "number" ? `${s.title} ${shownOf(s, v)}` : shownOf(s, v))
+                    }
+                }
+            if (parts.length)
+                return { text: parts.slice(0, 3).join(" · ") + (parts.length > 3 ? " …" : ""), alert: false }
+        }
+        return null
+    }
+
     //--- Scrolls the tab bar so the current tab shows whole
     function showTab(item) {
         const f = tabsFlick
@@ -1120,11 +1186,11 @@ Item {
                         Layout.fillWidth: true
                         text: stickyHead.shown ? stickyHead.shown.modelData.title : ""
                         color: Theme.text
-                        font.pixelSize: 18
+                        font.pixelSize: 16
                         font.weight: Font.Bold
                         elide: Text.ElideRight
                     }
-                    Chip { tappable: false; text: "Hide"; accent: stickyHover.hovered }
+                    Chevron { open: true; lit: stickyHover.hovered }
                 }
                 HoverHandler { id: stickyHover; cursorShape: Qt.PointingHandCursor }
                 TapHandler {
@@ -1524,6 +1590,8 @@ Item {
         readonly property var comp: note ? notePage : userPkgs ? userPkgsPage
             : omni.custom[pid] || (model ? settingsPage : null)
         readonly property bool ready: !loader.item || loader.item.ready !== false
+        readonly property var summary: omni.pageSummary(pid, model)
+        readonly property var changed: omni.changedOn(model)
         onReadyChanged: {
             if (ready && loader.item && !omni.waiting)
                 arrived.restart()
@@ -1552,18 +1620,18 @@ Item {
         Layout.topMargin: index === 0 ? 0 : divided ? 22 : 14
         spacing: 6
 
-        //--- The section's name between two plain rules
+        //--- The section's name, then a rule to the edge
         RowLayout {
             visible: section.divided && section.sectionTitle !== ""
             Layout.fillWidth: true
-            Layout.bottomMargin: 8
-            spacing: 12
-            Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: Theme.rule }
+            Layout.leftMargin: 4
+            Layout.bottomMargin: 6
+            spacing: 10
             Text {
                 text: section.sectionTitle
                 color: Theme.text
-                font.pixelSize: 20
-                font.weight: Font.ExtraBold
+                font.pixelSize: 15
+                font.weight: Font.Bold
             }
             Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: Theme.rule }
         }
@@ -1600,7 +1668,8 @@ Item {
                 anchors.right: parent.right
                 spacing: 0
 
-                //--- Header: icon, name, a short line and the chevron; tapping it collapses
+                //--- Header: icon, name, one line under it, then what's changed and the
+                //--- chevron; tapping it collapses
                 RowLayout {
                     id: head
                     visible: section.headed
@@ -1608,44 +1677,66 @@ Item {
                     Layout.margins: 12
                     spacing: 12
                     Rectangle {
-                        implicitWidth: 36
-                        implicitHeight: 36
-                        radius: 18
-                        color: Theme.primary
+                        implicitWidth: 34
+                        implicitHeight: 34
+                        radius: 17
+                        color: section.open ? Theme.primary : Theme.cardHover
+                        Behavior on color { ColorAnimation { duration: 150 } }
                         Icon {
                             anchors.centerIn: parent
                             icon: Theme.glyph(section.modelData.icon, "description")
-                            size: 20
-                            fill: true
-                            color: Theme.inkPrimary
+                            size: 19
+                            fill: section.open
+                            color: section.open ? Theme.inkPrimary : Theme.primary
                         }
                     }
-                    RowLayout {
-                        spacing: 8
+                    ColumnLayout {
+                        spacing: 2
                         Layout.fillWidth: true
                         Text {
                             id: pageTitle
+                            Layout.fillWidth: true
                             text: section.modelData.title
                             color: Theme.text
-                            font.pixelSize: 22
+                            font.pixelSize: section.open ? 17 : 15
                             font.weight: Font.Bold
                             elide: Text.ElideRight
-                            Layout.maximumWidth: Math.ceil(pageTitleWidth.advanceWidth) + 1
-                            Layout.fillWidth: true
-                            TextMetrics { id: pageTitleWidth; font: pageTitle.font; text: pageTitle.text }
-                            // A generated page's blurb, or a custom page's line from the rail
-                            TitleTip {
-                                tip: section.modelData.subtitle || (section.model ? section.model.description : "")
-                            }
                         }
-                        Item { Layout.fillWidth: true }
+                        // Collapsed, what's inside (pageSummary); open, what the page is for
+                        Text {
+                            readonly property var sum: section.open ? null : section.summary
+                            readonly property string about: section.modelData.subtitle
+                                || (section.model ? section.model.description : "")
+                            visible: text !== ""
+                            Layout.fillWidth: true
+                            text: sum ? sum.text : about
+                            color: sum && sum.alert ? Theme.caution : Theme.dim
+                            font.pixelSize: 12
+                            elide: Text.ElideRight
+                        }
                     }
-                    // Words, not a Chevron, so it reads apart from the dropdowns inside
-                    Chip {
-                        tappable: false  // the whole header takes the tap
-                        text: section.open ? "Hide" : "Show"
-                        accent: headHover.hovered
+                    // Settings away from their default, and putting them back
+                    Rectangle {
+                        visible: section.changed.length > 0
+                        implicitWidth: changedText.implicitWidth + 18
+                        implicitHeight: 24
+                        radius: 8
+                        color: Qt.alpha(Theme.primary, resetHover.hovered ? 0.3 : 0.18)
+                        Text {
+                            id: changedText
+                            anchors.centerIn: parent
+                            text: `${section.changed.length} changed · Reset`
+                            color: Theme.primary
+                            font.pixelSize: 12
+                            font.weight: Font.DemiBold
+                        }
+                        HoverHandler { id: resetHover; cursorShape: Qt.PointingHandCursor }
+                        TapHandler {
+                            gesturePolicy: TapHandler.ReleaseWithinBounds
+                            onTapped: omni.resetPage(section.model)
+                        }
                     }
+                    Chevron { open: section.open; lit: headHover.hovered }
                     HoverHandler { id: headHover; cursorShape: Qt.PointingHandCursor }
                     TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: section.toggle() }
                 }

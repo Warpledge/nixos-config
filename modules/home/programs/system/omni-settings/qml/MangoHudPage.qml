@@ -36,22 +36,13 @@ ColumnLayout {
 
     Repeater {
         model: page.setting ? page.setting.groups : []
-        ColumnLayout {
-            id: group
+        SettingGroup {
             required property var modelData
-            Layout.fillWidth: true
-            spacing: 6
-            Section { text: group.modelData.title }
-            Repeater {
-                model: group.modelData.settings
-                SettingRow {
-                    required property var modelData
-                    setting: modelData
-                    view: page.view
-                    locked: group.modelData.locked
-                    pageGlyph: "monitoring"
-                }
-            }
+            settings: modelData.settings
+            title: modelData.title
+            view: page.view
+            locked: modelData.locked
+            pageGlyph: "monitoring"
         }
     }
 

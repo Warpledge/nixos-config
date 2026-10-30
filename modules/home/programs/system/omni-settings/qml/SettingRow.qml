@@ -18,21 +18,33 @@ Rectangle {
     readonly property bool atDefault: JSON.stringify(value) === JSON.stringify(s.default)
         && (!s.pair || JSON.stringify(view.valueOf(s.pair)) === JSON.stringify(s.pair.default))
     readonly property bool overridden: !!s.overridden && (view.scope === view.info.machine)
-    // A switch has no dropdown; what it does is behind the ?
-    readonly property bool expandable: s.kind !== "bool" || !!s.pair
+    // A choice of up to four picks on the row itself
+    readonly property bool segmented: s.kind === "choice" && s.choices.length <= 4 && !s.pair
+    // A switch or a segmented choice has no dropdown; what it does is behind the ?
+    readonly property bool expandable: (s.kind !== "bool" && !segmented) || !!s.pair
+    readonly property bool changed: !atDefault && !locked
+    readonly property bool hasIcon: [].concat(s.icon || []).length > 0
     readonly property color accent: Theme.accentOf(row)
 
+    // A row in its group's card (SettingsPage.qml); the card draws the rules between rows
     Layout.fillWidth: true
     implicitHeight: col.implicitHeight + 20
-    radius: 16
-    color: Theme.rowFill(accent, hover.hovered && !open)
-    border.width: 1
-    border.color: Theme.rowBorder(accent, open)
+    color: Qt.alpha(accent, open ? 0.05 : hover.hovered && expandable ? 0.04 : 0)
     opacity: locked ? 0.6 : 1
     Behavior on color { ColorAnimation { duration: 120 } }
-    Behavior on border.color { ColorAnimation { duration: 150 } }
 
     HoverHandler { id: hover }
+
+    //--- Changed from the template's default
+    Rectangle {
+        visible: row.changed
+        x: 0
+        y: 8
+        width: 3
+        height: parent.height - 16
+        radius: 1.5
+        color: row.accent
+    }
 
     ColumnLayout {
         id: col
@@ -40,7 +52,7 @@ Rectangle {
         anchors.topMargin: 10
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.leftMargin: 10
+        anchors.leftMargin: 14
         anchors.rightMargin: 12
         spacing: 10
 
@@ -48,19 +60,32 @@ Rectangle {
         RowLayout {
             Layout.fillWidth: true
             spacing: 12
-            Badge { icon: Theme.glyph(row.s.icon, row.pageGlyph); app: row.s.icon; implicitWidth: 34; implicitHeight: 34 }
+            // Only a setting with an icon of its own, such as an app
+            Badge {
+                visible: row.hasIcon
+                icon: Theme.glyph(row.s.icon, row.pageGlyph)
+                app: row.s.icon
+                implicitWidth: 32
+                implicitHeight: 32
+            }
             ColumnLayout {
                 spacing: 1
                 Layout.fillWidth: true
                 RowLayout {
                     spacing: 6
                     Layout.fillWidth: true
+                    Hint {
+                        visible: row.locked
+                        icon: "lock"
+                        tone: ""
+                        tip: `Set by an admin for everyone on ${row.view.info.machine}`
+                    }
                     Text {
                         id: titleText
                         text: row.s.title
-                        color: Theme.text
-                        font.pixelSize: 18
-                        font.weight: Font.DemiBold
+                        color: row.locked ? Theme.dim : Theme.text
+                        font.pixelSize: 15
+                        font.weight: Font.Medium
                         elide: Text.ElideRight
                         // Its full width, so the indicators sit right after the name
                         Layout.maximumWidth: Math.ceil(titleWidth.advanceWidth) + 1
@@ -107,35 +132,32 @@ Rectangle {
                         row.view.change(row.s.pair, row.s.pair.default)
                 }
             }
-            //--- The current value, as the group cards show their count
-            Rectangle {
-                visible: row.s.kind !== "bool"
-                // Takes what the name leaves; a value too long for it wraps rather than cut
+            //--- The current value; in primary once it differs from the default.
+            //--- Takes what the name leaves, and wraps rather than cut
+            Text {
+                id: valueText
+                visible: row.s.kind !== "bool" && !row.segmented
                 Layout.fillWidth: true
-                Layout.minimumWidth: 60
-                Layout.preferredWidth: Math.ceil(valueWidth.advanceWidth) + 26
+                Layout.minimumWidth: 40
+                Layout.preferredWidth: Math.ceil(valueWidth.advanceWidth) + 2
                 Layout.maximumWidth: Layout.preferredWidth
-                implicitHeight: Math.max(32, valueText.height + 10)
-                radius: 16
-                color: Qt.alpha(row.accent, 0.18)
-                border.width: 1
-                border.color: Qt.alpha(row.accent, 0.3)
-                Text {
-                    id: valueText
-                    x: 12
-                    width: parent.width - 24
-                    anchors.verticalCenter: parent.verticalCenter
-                    horizontalAlignment: Text.AlignHCenter
-                    text: row.view.shownOf(row.s, row.value) + (row.s.pair
-                        ? ` · ${row.view.shownOf(row.s.pair, row.view.valueOf(row.s.pair))}` : "")
-                    color: row.accent
-                    font.pixelSize: 16
-                    font.weight: Font.Bold
-                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                    maximumLineCount: 3
-                    elide: Text.ElideRight
-                    TextMetrics { id: valueWidth; font: valueText.font; text: valueText.text }
-                }
+                horizontalAlignment: Text.AlignRight
+                text: row.view.shownOf(row.s, row.value) + (row.s.pair
+                    ? ` · ${row.view.shownOf(row.s.pair, row.view.valueOf(row.s.pair))}` : "")
+                color: row.changed ? row.accent : row.locked ? Theme.dim : Theme.text
+                font.pixelSize: 14
+                font.weight: row.changed ? Font.DemiBold : Font.Normal
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                maximumLineCount: 3
+                elide: Text.ElideRight
+                TextMetrics { id: valueWidth; font: valueText.font; text: valueText.text }
+            }
+            Segmented {
+                visible: row.segmented
+                enabled: !row.locked
+                options: row.segmented ? row.s.choices : []
+                current: row.value
+                onPicked: v => row.view.change(row.s, v)
             }
             Toggle {
                 visible: row.s.kind === "bool"

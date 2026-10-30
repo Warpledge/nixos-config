@@ -25,26 +25,23 @@ ColumnLayout {
     }
 
     //--- Change For: this computer, another listing the user, or all of them
-    ColumnLayout {
+    RowLayout {
         visible: page.model.changeFor
         Layout.fillWidth: true
-        spacing: 4
-        Section { text: "Change For" }
-        Flow {
-            Layout.fillWidth: true
-            Layout.leftMargin: 4
-            spacing: 6
-            Repeater {
-                model: page.view.scopes
-                Chip {
-                    required property var modelData
-                    text: modelData.title
-                    accent: page.view.scope === modelData.id
-                    opacity: page.view.pendingCount && !accent ? 0.5 : 1
-                    onTapped: page.view.setScope(modelData.id)
-                }
-            }
+        Layout.bottomMargin: 4
+        spacing: 10
+        Text {
+            text: "Change for"
+            color: Theme.dim
+            font.pixelSize: 13
+            font.weight: Font.DemiBold
         }
+        Segmented {
+            options: page.view.scopes.map(s => ({ value: s.id, label: s.id === "" ? "All" : s.id }))
+            current: page.view.scope
+            onPicked: v => page.view.setScope(v)
+        }
+        Item { Layout.fillWidth: true }
     }
 
     Repeater {
@@ -59,33 +56,14 @@ ColumnLayout {
             readonly property var bools: modelData.settings.filter(s => s.kind === "bool")
             Layout.fillWidth: true
             spacing: 6
-            RowLayout {
-                visible: !group.collapsed && (group.modelData.title !== "" || group.modelData.locked)
-                Layout.fillWidth: true
-                spacing: 0
-                Section {
-                    text: group.modelData.title
-                    info: group.modelData.description
-                    Layout.fillWidth: false
-                }
-                Hint {
-                    visible: group.modelData.locked
-                    icon: "lock"
-                    tip: "Only an admin can change these"
-                    Layout.topMargin: 10
-                    Layout.leftMargin: 6
-                }
-                Item { Layout.fillWidth: true }
-            }
-            Repeater {
-                model: group.collapsed ? [] : group.modelData.settings
-                SettingRow {
-                    required property var modelData
-                    setting: modelData
-                    view: page.view
-                    locked: group.modelData.locked
-                    pageGlyph: page.glyph
-                }
+            SettingGroup {
+                visible: !group.collapsed && group.modelData.settings.length > 0
+                view: page.view
+                settings: group.collapsed ? [] : group.modelData.settings
+                title: group.modelData.title
+                info: group.modelData.description
+                locked: group.modelData.locked
+                pageGlyph: page.glyph
             }
 
             //--- schema.py's COLLAPSED groups: a card that opens from its heading
@@ -202,33 +180,71 @@ ColumnLayout {
                             implicitHeight: 1
                             color: Qt.alpha(card.accent, 0.25)
                         }
-                        //--- An app category's template groups head their rows (api.py's app_card)
-                        Repeater {
-                            model: group.collapsed ? group.modelData.settings : []
-                            ColumnLayout {
-                                id: cardItem
-                                required property var modelData
-                                required property int index
-                                readonly property string sub: modelData.sub || ""
-                                readonly property bool heads: sub !== "" && (index === 0
-                                    || group.modelData.settings[index - 1].sub !== sub)
-                                Layout.fillWidth: true
-                                spacing: 6
-                                Text {
-                                    visible: cardItem.heads
-                                    text: cardItem.sub
-                                    color: card.accent
-                                    font.pixelSize: 13
-                                    font.weight: Font.DemiBold
-                                    font.letterSpacing: 0.4
-                                    Layout.leftMargin: 8
-                                    Layout.topMargin: cardItem.index > 0 ? 6 : 0
+                        //--- schema.py's CHIPS groups: each switch a chip, filled while on
+                        Flow {
+                            visible: !!group.modelData.chips
+                            Layout.fillWidth: true
+                            Layout.margins: 6
+                            spacing: 6
+                            Repeater {
+                                model: group.collapsed && group.modelData.chips ? group.modelData.settings : []
+                                ToggleChip {
+                                    required property var modelData
+                                    text: modelData.title
+                                    tip: modelData.description || modelData.subtitle
+                                    checked: !!page.view.valueOf(modelData)
+                                    enabled: !group.modelData.locked
+                                    onToggled: page.view.change(modelData, !checked)
                                 }
-                                SettingRow {
-                                    setting: cardItem.modelData
-                                    view: page.view
-                                    locked: group.modelData.locked
-                                    pageGlyph: page.glyph
+                            }
+                        }
+                        //--- An app category's template groups head their rows (api.py's app_card)
+                        Rectangle {
+                            visible: !group.modelData.chips
+                            Layout.fillWidth: true
+                            implicitHeight: cardRows.implicitHeight
+                            radius: 14
+                            color: Qt.alpha(Theme.bg, 0.55)
+                            border.width: 1
+                            border.color: Theme.rule
+                            ColumnLayout {
+                                id: cardRows
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                spacing: 0
+                                Repeater {
+                                    model: group.collapsed && !group.modelData.chips ? group.modelData.settings : []
+                                    ColumnLayout {
+                                        id: cardItem
+                                        required property var modelData
+                                        required property int index
+                                        readonly property string sub: modelData.sub || ""
+                                        readonly property bool heads: sub !== "" && (index === 0
+                                            || group.modelData.settings[index - 1].sub !== sub)
+                                        Layout.fillWidth: true
+                                        spacing: 0
+                                        Rectangle {
+                                            visible: cardItem.index > 0
+                                            Layout.fillWidth: true
+                                            implicitHeight: 1
+                                            color: Theme.rule
+                                        }
+                                        Text {
+                                            visible: cardItem.heads
+                                            text: cardItem.sub
+                                            color: card.accent
+                                            font.pixelSize: 13
+                                            font.weight: Font.Bold
+                                            Layout.leftMargin: 14
+                                            Layout.topMargin: 10
+                                        }
+                                        SettingRow {
+                                            setting: cardItem.modelData
+                                            view: page.view
+                                            locked: group.modelData.locked
+                                            pageGlyph: page.glyph
+                                        }
+                                    }
                                 }
                             }
                         }

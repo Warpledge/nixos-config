@@ -128,21 +128,13 @@ ColumnLayout {
     //--- Commit As: the user's own settings, so anyone can change them
     Repeater {
         model: page.view.info.pages["people"] ? page.view.info.pages["people"].groups : []
-        ColumnLayout {
-            id: group
+        SettingGroup {
             required property var modelData
-            Layout.fillWidth: true
-            spacing: 6
-            Section { text: group.modelData.title; info: group.modelData.description }
-            Repeater {
-                model: group.modelData.settings
-                SettingRow {
-                    required property var modelData
-                    setting: modelData
-                    view: page.view
-                    pageGlyph: "person"
-                }
-            }
+            settings: modelData.settings
+            title: modelData.title
+            info: modelData.description
+            view: page.view
+            pageGlyph: "person"
         }
     }
 
