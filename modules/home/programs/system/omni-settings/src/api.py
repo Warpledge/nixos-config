@@ -30,6 +30,7 @@ import dms  # noqa: E402
 import docstate  # noqa: E402
 import flatpakstate  # noqa: E402
 import gitstate  # noqa: E402
+import hardwarestate  # noqa: E402
 import keybindstate  # noqa: E402
 import mimeapps  # noqa: E402
 import nixfile  # noqa: E402
@@ -47,15 +48,18 @@ import windowrulestate as wr  # noqa: E402
 HELPER = "/run/current-system/sw/bin/omni-settings-apply"
 
 #--- The master tabs across the top, each with its own page list
-TABS = [("main", "Main"), ("packages", "Packages"), ("niri", "Niri"), ("ai", "AI"), ("docs", "Docs")]
+TABS = [("main", "Main"), ("packages", "Packages"), ("niri", "Niri"), ("hardware", "Hardware"),
+        ("ai", "AI"), ("docs", "Docs")]
 TAB_ICONS = {"main": ("go-home-symbolic", "user-home-symbolic"),
              "packages": ("package-x-generic-symbolic", "system-software-install-symbolic"),
              "niri": ("view-grid-symbolic", "view-app-grid-symbolic"),
+             "hardware": ("computer-symbolic", "drive-harddisk-symbolic"),
              "ai": ("applications-science-symbolic", "starred-symbolic"),
              "docs": ("accessories-dictionary-symbolic", "help-browser-symbolic")}
 
 #--- Each tab's pages above its sections: key, title and icons to try.
-#--- Shell shows only under niri, which also moves the Desktop section to Niri.
+#--- Shell shows only under niri, which also moves the Desktop section to Niri;
+#--- Battery only with a battery and Run on dGPU only with nvidia-offload.
 TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
                 ("git", "Git", ("vcs-branch-symbolic", "branch-symbolic", "folder-remote-symbolic")),
                 ("flatpaks", "Flatpaks", ("flatpak-symbolic", "system-software-install-symbolic")),
@@ -68,6 +72,9 @@ TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
                  ("window-new-symbolic", "preferences-system-windows-symbolic")),
                 ("siderail", "Side Rail", ("view-dual-symbolic", "sidebar-show-symbolic")),
                 ("keybinds", "Keybinds", ("input-keyboard-symbolic", "preferences-desktop-keyboard-symbolic"))],
+       "hardware": [("firmware", "Firmware", ("software-update-available-symbolic", "application-x-firmware")),
+                    ("battery", "Battery", ("battery-symbolic", "battery-full-symbolic")),
+                    ("dgpu", "Run on dGPU", ("video-display-symbolic", "computer-symbolic"))],
        "ai": [],
        "docs": []}
 
@@ -94,6 +101,9 @@ NAV_SUBTITLES = {"overview": "Updates, freeing space, versions", "git": "Changes
                              "or add a web page or app of your own. Changes wait for Apply.",
                  "keybinds": "Change a key, turn a keybind off, or add your own. Changes are yours "
                              "alone and wait for Apply, like any other setting.",
+                 "firmware": "Firmware for this computer's devices from fwupd, and updates waiting",
+                 "battery": "Charge, health, and where charging stops",
+                 "dgpu": "Apps whose launcher starts them on the NVIDIA GPU. Changes wait for Apply.",
                  "startup": "Variables every program sees, and autostart",
                  "filetypes": "Which app opens one file type",
                  "userpackages": "Packages you added from Search, installed as they come with no "
@@ -274,6 +284,17 @@ def app_card(page, pid, groups):
             "card": pid, "settings": settings, "links": [l for g in groups for l in g["links"]]}
 
 
+def shows(key, wm):
+    """Whether a TOP page applies to this computer."""
+    if key == "shell":
+        return wm == "niri"
+    if key == "battery":
+        return bool(hardwarestate.batteries())
+    if key == "dgpu":
+        return hardwarestate.has_offload()
+    return True
+
+
 def cmd_load(cfg, _args):
     """Everything the generated pages need, from one read of the settings."""
     state = loaded(cfg)
@@ -287,7 +308,7 @@ def cmd_load(cfg, _args):
     for tab, _ in TABS:
         items = [{"id": key, "title": title, "icon": list(icons), "custom": True,
                   "subtitle": NAV_SUBTITLES.get(key, "")}
-                 for key, title, icons in TOP[tab] if key != "shell" or wm == "niri"]
+                 for key, title, icons in TOP[tab] if shows(key, wm)]
         if items:
             nav[tab].append({"id": "", "title": "", "items": items})
     pages, by_section = {}, {key: [] for key, _ in schema.SECTIONS}
@@ -296,7 +317,8 @@ def cmd_load(cfg, _args):
     shell_links = wm == "niri"
     shell = {}
     for page in state.pages:
-        if page.section in ("userpkgs", "keybinds", "windowrules", "siderail", "startup", "filetypes"):
+        if page.section in ("userpkgs", "keybinds", "windowrules", "siderail", "startup", "filetypes",
+                            "dgpu"):
             continue
         pid = schema.TOP_PAGES[page.title] if page.section == "top" else f"page:{page.title}"
         groups = []
@@ -336,6 +358,8 @@ def cmd_load(cfg, _args):
                if (s.domain, s.path) in (("user", ("env",)), ("user", ("autostart",)))]
     mime_types = next((s for p in state.pages for g in p.groups for s in g.settings
                        if (s.domain, s.path) == ("user", ("mimeTypes",))), None)
+    gpu_offload = next((s for p in state.pages for g in p.groups for s in g.settings
+                        if (s.domain, s.path) == ("user", ("gpuOffload",))), None)
     if startup:
         by_section["personal"].append({"id": "startup", "title": "Startup",
                                        "icon": ["system-run-symbolic"],
@@ -395,6 +419,7 @@ def cmd_load(cfg, _args):
             "autostart": next((setting_json(cfg, state, s, multi, modules) for s in startup
                                if s.path == ("autostart",)), None),
             "mimeTypes": mime_types and setting_json(cfg, state, mime_types, multi, modules),
+            "gpuOffload": gpu_offload and setting_json(cfg, state, gpu_offload, multi, modules),
             "starter": packagestate.STARTER,
             "dmsSearch": [{"label": e.label, "description": e.description, "keywords": e.keywords,
                            "tab": e.link.tab, "page": e.link.page} for e in state.dms_entries]}
@@ -410,6 +435,26 @@ def cmd_list(_cfg, args):
 def cmd_mime_apps(_cfg, _args):
     """The apps installed here, for the File Types page."""
     return mimeapps.apps()
+
+
+def cmd_firmware(_cfg, args):
+    """The Firmware page: every device and the updates waiting."""
+    try:
+        return hardwarestate.firmware(fresh=bool(args.get("fresh")))
+    except (RuntimeError, subprocess.TimeoutExpired) as e:
+        raise ValueError(str(e)) from e
+
+
+def cmd_firmware_summary(_cfg, _args):
+    """How many firmware updates wait, for the page list."""
+    try:
+        return len(hardwarestate.updates())
+    except (RuntimeError, OSError, subprocess.TimeoutExpired):
+        return 0
+
+
+def cmd_battery(_cfg, _args):
+    return hardwarestate.battery()
 
 
 def cmd_split_command(_cfg, args):
@@ -1148,7 +1193,8 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "addWindowRule": cmd_add_window_rule, "saveWindowRule": cmd_save_window_rule,
             "keybinds": cmd_keybinds, "launchCommand": cmd_launch_command, "sideRail": cmd_side_rail,
             "appIcon": cmd_app_icon, "pickIconFile": cmd_pick_icon_file, "siteIcon": cmd_site_icon,
-            "mimeApps": cmd_mime_apps, "splitCommand": cmd_split_command}
+            "mimeApps": cmd_mime_apps, "splitCommand": cmd_split_command,
+            "firmware": cmd_firmware, "firmwareSummary": cmd_firmware_summary, "battery": cmd_battery}
 
 
 def run(cfg, cmd, args):

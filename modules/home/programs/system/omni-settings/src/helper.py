@@ -272,6 +272,25 @@ def collect():
                   "freed": freed.group(2) if freed else ""})
 
 
+def firmware():
+    """Installs every firmware update fwupd offers; a reboot it needs is left
+    to the user (--no-reboot-check)."""
+    fwupdmgr = shutil.which("fwupdmgr")
+    if fwupdmgr is None:
+        raise RuntimeError("fwupd isn't installed on this computer")
+    emit(step="firmware", state="start")
+    stream([fwupdmgr, "refresh", "--force"])
+    code, lines = stream([fwupdmgr, "update", "-y", "--no-reboot-check"])
+    text = "\n".join(lines).lower()
+    # fwupdmgr exits 2 when there was nothing to do
+    if code not in (0, 2):
+        emit(step="firmware", state="failed")
+        raise RuntimeError("the firmware update failed")
+    emit(step="firmware", state="done")
+    if "reboot" in text or "restart" in text:
+        emit(note=["Restart to finish", "A device installs its new firmware while the computer restarts."])
+
+
 def store_free():
     try:
         return shutil.disk_usage("/nix/store").free
@@ -524,7 +543,9 @@ def main():
     changes, system, target, new_user, password = None, None, None, None, None
     collecting = request.get("collectGarbage") is True
     optimising = request.get("optimise") is True
-    if mode == "build" and (collecting or optimising or "activate" in request or "newUser" in request
+    updating_firmware = request.get("firmwareUpdate") is True
+    if mode == "build" and (collecting or optimising or updating_firmware
+                            or "activate" in request or "newUser" in request
                             or request.get("clean") is True):
         refuse("bad request")
     if request.get("clean") is True:
@@ -535,6 +556,9 @@ def main():
     elif optimising:
         if not admin:
             refuse("only an admin can optimise the store")
+    elif updating_firmware:
+        if not admin:
+            refuse("only an admin can update firmware")
     elif "activate" in request:
         if not admin:
             refuse("only an admin can switch to another version")
@@ -570,6 +594,15 @@ def main():
         if collecting:
             try:
                 collect()
+            except Exception as e:  # noqa: BLE001
+                emit(error=str(e))
+                emit(result="failed", restored=False)
+                sys.exit(1)
+            emit(result="ok")
+            return
+        if updating_firmware:
+            try:
+                firmware()
             except Exception as e:  # noqa: BLE001
                 emit(error=str(e))
                 emit(result="failed", restored=False)

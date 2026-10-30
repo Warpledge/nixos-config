@@ -58,12 +58,14 @@ SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
 #--- pages edit (UserPackagesPage.qml), "keybinds" the Keybinds page's set,
 #--- "windowrules" the Window Rules page's and "siderail" the Side Rail page's.
 #--- "top" pages: the custom page (its id in api.py and OmniView.qml) each one's settings show on
-TOP_PAGES = {"Flatpaks": "flatpaks", "Users": "people"}
+TOP_PAGES = {"Flatpaks": "flatpaks", "Users": "people", "Battery": "battery"}
 
 PAGES = {
     "Flatpaks": ("top", "system-software-install-symbolic", "", [("", "", ["flatpak.enable"])]),
     "Users": ("top", "system-users-symbolic", "",
               [("Commit As", "Your name and email on git commits you make.", ["git.name", "git.email"])]),
+    "Battery": ("top", "battery-symbolic", "", [("", "", ["battery.chargeLimit"])]),
+    "Run on dGPU": ("dgpu", "video-display-symbolic", "", [("", "", ["gpuOffload"])]),
     "User Packages": ("userpkgs", "package-x-generic-symbolic", "", [("", "", ["userPackages"])]),
     "Keybinds": ("keybinds", "input-keyboard-symbolic", "", [("", "", ["keybinds"])]),
     "Window Rules": ("windowrules", "focus-windows-symbolic", "", [("", "", ["windowRules"])]),

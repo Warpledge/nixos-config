@@ -45,8 +45,13 @@ Item {
         repeat: true
         running: !!omni.info && omni.shown
         triggeredOnStart: true
-        onTriggered: Backend.call("gitSummary", {}, reply => { if (reply.ok) omni.gitCounts = reply.data })
+        onTriggered: {
+            Backend.call("gitSummary", {}, reply => { if (reply.ok) omni.gitCounts = reply.data })
+            Backend.call("firmwareSummary", {}, reply => { if (reply.ok) omni.firmwareUpdates = reply.data })
+        }
     }
+    //--- Firmware updates waiting, for the page list; the Firmware page updates it too
+    property int firmwareUpdates: 0
 
     //--- Services running now, for the page list; Running Now updates it too
     property int servicesRunning: -1
@@ -941,7 +946,9 @@ Item {
                             trailing: modelData.kind === "dms" ? "open_in_new" : ""
                             tag: modelData.page === "git" ? omni.gitTag
                                  : modelData.page === "page:Services" && omni.servicesRunning > 0
-                                 ? `${omni.servicesRunning} running` : ""
+                                 ? `${omni.servicesRunning} running`
+                                 : modelData.page === "firmware" && omni.firmwareUpdates > 0
+                                 ? `${omni.firmwareUpdates} update${omni.firmwareUpdates === 1 ? "" : "s"}` : ""
                             tagSuccess: modelData.page === "page:Services"
                             compact: true
                             onClicked: list.pick(modelData)
@@ -1331,7 +1338,11 @@ Item {
                                       proton: protonPage, protonversions: protonVersionsPage,
                                       windowrules: windowRulesPage, keybinds: keybindsPage,
                                       siderail: sideRailPage,
-                                      startup: startupPage, filetypes: fileTypesPage })
+                                      startup: startupPage, filetypes: fileTypesPage,
+                                      firmware: firmwarePage, battery: batteryPage, dgpu: dgpuPage })
+    Component { id: firmwarePage; FirmwarePage { view: omni } }
+    Component { id: batteryPage; BatteryPage { view: omni } }
+    Component { id: dgpuPage; DgpuPage { view: omni } }
     Component { id: windowRulesPage; WindowRulesPage { view: omni } }
     Component { id: sideRailPage; SideRailPage { view: omni } }
     Component { id: keybindsPage; KeybindsPage { view: omni } }
