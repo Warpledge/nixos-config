@@ -18,10 +18,8 @@ Rectangle {
     readonly property bool atDefault: JSON.stringify(value) === JSON.stringify(s.default)
         && (!s.pair || JSON.stringify(view.valueOf(s.pair)) === JSON.stringify(s.pair.default))
     readonly property bool overridden: !!s.overridden && (view.scope === view.info.machine)
-    // A choice of up to four picks on the row itself
-    readonly property bool segmented: s.kind === "choice" && s.choices.length <= 4 && !s.pair
-    // A switch or a segmented choice has no dropdown; what it does is behind the ?
-    readonly property bool expandable: (s.kind !== "bool" && !segmented) || !!s.pair
+    // A switch has no dropdown; what it does is behind the ?
+    readonly property bool expandable: s.kind !== "bool" || !!s.pair
     readonly property bool changed: !atDefault && !locked
     readonly property bool hasIcon: [].concat(s.icon || []).length > 0
     readonly property color accent: Theme.accentOf(row)
@@ -125,7 +123,7 @@ Rectangle {
             //--- Takes what the name leaves, and wraps rather than cut
             Text {
                 id: valueText
-                visible: row.s.kind !== "bool" && !row.segmented
+                visible: row.s.kind !== "bool"
                 Layout.fillWidth: true
                 Layout.minimumWidth: 40
                 Layout.preferredWidth: Math.ceil(valueWidth.advanceWidth) + 2
@@ -140,13 +138,6 @@ Rectangle {
                 maximumLineCount: 3
                 elide: Text.ElideRight
                 TextMetrics { id: valueWidth; font: valueText.font; text: valueText.text }
-            }
-            Segmented {
-                visible: row.segmented
-                enabled: !row.locked
-                options: row.segmented ? row.s.choices : []
-                current: row.value
-                onPicked: v => row.view.change(row.s, v)
             }
             Toggle {
                 visible: row.s.kind === "bool"
