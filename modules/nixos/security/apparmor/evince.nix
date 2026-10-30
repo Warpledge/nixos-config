@@ -2,9 +2,9 @@
 # APPARMOR: EVINCE
 #=====================================================================#
 #- No network rules: a hostile PDF can read documents but not send them out.
-_: {
+{apparmorState, ...}: {
   security.apparmor.policies.evince = {
-    state = "complain";
+    state = apparmorState "evince";
     profile = ''
       abi <abi/4.0>,
       include <tunables/global>

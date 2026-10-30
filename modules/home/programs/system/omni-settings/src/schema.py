@@ -49,10 +49,12 @@ MOVES = {  # setting -> (page, group on that page)
 }
 
 #--- Sidebar sections, top to bottom; under niri, Desktop is on the Niri tab, and
-#--- the two AI sections are always on the AI tab
+#--- the AI, Network and Security sections are always on their own tabs (api.py's
+#--- SECTION_TAB), untitled since each is its tab's only one
 SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
             ("personal", "Personal"), ("apps", "Default Packages"),
-            ("cloudai", "Cloud AI"), ("localai", "Local AI")]
+            ("cloudai", "Cloud AI"), ("localai", "Local AI"),
+            ("network", ""), ("security", "")]
 
 #--- Each page's sidebar section, icon and blurb, and for the curated ones
 #--- their groups: (title, description, [setting paths]). Pages in the apps
@@ -62,7 +64,8 @@ SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
 #--- "windowrules" the Window Rules page's, "siderail" the Side Rail page's and
 #--- "games" the Games page's.
 #--- "top" pages: the custom page (its id in api.py and OmniView.qml) each one's settings show on
-TOP_PAGES = {"Flatpaks": "flatpaks", "Users": "people", "Battery": "battery", "MangoHud": "mangohud"}
+TOP_PAGES = {"Flatpaks": "flatpaks", "Users": "people", "Battery": "battery", "MangoHud": "mangohud",
+             "AppArmor": "apparmor"}
 
 PAGES = {
     "Flatpaks": ("top", "system-software-install-symbolic", "", [("", "", ["flatpak.enable"])]),
@@ -73,6 +76,7 @@ PAGES = {
                  [("Shows", "", ["mangohud.show"]),
                   ("Looks", "", ["mangohud.position", "mangohud.fontSize", "mangohud.textColor",
                                  "mangohud.background"])]),
+    "AppArmor": ("top", "security-high-symbolic", "", [("", "", ["apparmor.enforce"])]),
     "Run on dGPU": ("dgpu", "video-display-symbolic", "", [("", "", ["gpuOffload"])]),
     "User Packages": ("userpkgs", "package-x-generic-symbolic", "", [("", "", ["userPackages"])]),
     "Keybinds": ("keybinds", "input-keyboard-symbolic", "", [("", "", ["keybinds"])]),
@@ -94,26 +98,38 @@ PAGES = {
                 "Bluetooth, printing and the mouse pointer.",
                 [("", "", ["bluetooth.enable", "printing.enable"]),
                  ("Mouse Pointer", "", ["cursor", "cursorSize"])]),
-    "Network & Firewall": ("computer", "network-workgroup-symbolic",
-                           "What other devices may reach, and what's blocked.",
-                           [("Open Ports", "Other devices can connect on these.",
-                             ["firewall.openTCPPorts", "firewall.openUDPPorts"]),
-                            ("Ad & Tracker Blocking", "",
-                             ["blocklist.enable", "blocklist.extra"]),
-                            ("Remote Login", "Keys that may log in as you over SSH.",
-                             ["ssh.authorizedKeys"])]),
+    "Connections": ("network", "network-wireless-symbolic",
+                    "Wi-Fi, wired and VPN connections, and finding file shares.",
+                    [("File Sharing", "", ["smb.enable"])]),
+    "Firewall": ("network", "preferences-system-firewall-symbolic",
+                 "What other devices may reach.",
+                 [("Open Ports", "Other devices can connect on these.",
+                   ["firewall.openTCPPorts", "firewall.openUDPPorts"])]),
+    "Blocking": ("network", "preferences-system-privacy-symbolic",
+                 "Ads, trackers and other sites blocked for every app.",
+                 [("Ad & Tracker Blocking", "",
+                   ["blocklist.enable", "blocklist.extra", "blocklist.allow"])]),
+    "VPN": ("network", "network-vpn-symbolic",
+            "Mullvad, and the apps that skip it.",
+            [("Mullvad", "", ["mullvad.enable", "mullvad.splitTunnel"])]),
+    "SSH": ("security", "utilities-terminal-symbolic",
+            "Logging in to this computer from another device, and your own keys.",
+            [("Server", "", ["ssh.enable"]),
+             ("Authorized Keys", "Keys that may log in as you over SSH.", ["ssh.authorizedKeys"])]),
+    "Antivirus": ("security", "security-medium-symbolic",
+                  "Scanning files for viruses.",
+                  [("", "", ["clamav.enable"])]),
     "Services": ("computer", "network-server-symbolic",
                  "Background services for everyone here.",
-                 [("VPN & Remote Access", "", ["mullvad.enable", "mullvad.splitTunnel", "ssh.enable"]),
-                  ("Sharing & Streaming", "", ["syncthing.enable", "suwayomi.enable"]),
-                  ("Containers & Scanning", "", ["docker.enable", "clamav.enable"])]),
+                 [("Sharing & Streaming", "", ["syncthing.enable", "suwayomi.enable"]),
+                  ("Containers", "", ["docker.enable"])]),
     "Appearance": ("desktop", "applications-graphics-symbolic",
                    "Wallpaper and the shell's look.",
                    [("Wallpaper", "", ["wallpaper"])]),
     "Displays": ("desktop", "video-display-symbolic",
                  "Monitors, night light and what each screen shows.", []),
-    "Input & Connections": ("desktop", "input-keyboard-symbolic",
-                            "Keyboard, mouse, sound, printers and network.", []),
+    "Input & Sound": ("desktop", "input-keyboard-symbolic",
+                      "Keyboard, mouse, sound and printers.", []),
     "Desktop Shell": ("desktop", "view-app-grid-symbolic",
                       "Bar, dock, launcher, notifications and widgets.", []),
     "Power & Lock": ("desktop", "system-lock-screen-symbolic",

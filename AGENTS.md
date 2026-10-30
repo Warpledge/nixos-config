@@ -275,9 +275,11 @@ lines, `grep -n` that file for the part you need.
   never by templating its `settings.json`.
 - Audit tooling is `lynis` and `sbomnix`/`vulnxscan`. **Never `vulnix`**: its NVD
   feeds are retired.
-- AppArmor profiles (`security/apparmor/`, one module per app) stay in
-  `complain` mode, attach by store-path glob (`/nix/store/*-mpv-*/bin/mpv`), never
-  to a binary Nix builds also run (unzip, tar). Run `apparmor-check` after.
+- AppArmor profiles (`security/apparmor/`, one module per app) start in
+  `complain` mode (`state = apparmorState "<name>"`; the machine's
+  `apparmor.enforce` lists the enforced ones), attach by store-path glob
+  (`/nix/store/*-mpv-*/bin/mpv`), never to a binary Nix builds also run (unzip,
+  tar). Run `apparmor-check` after.
 - `services/ssh.nix` owns sshd and fail2ban; key-only auth, and an assertion
   fails the build if no user lists a key.
 - A NixOS module that configures every user's home writes

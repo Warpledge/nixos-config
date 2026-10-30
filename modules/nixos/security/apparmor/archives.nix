@@ -6,12 +6,13 @@
 {
   lib,
   anyUser,
+  apparmorState,
   ...
 }: {
   security.apparmor.policies = {
     #--- File Roller, plus the 7z/bsdtar/unrar backends it runs
     file-roller = {
-      state = "complain";
+      state = apparmorState "file-roller";
       profile = ''
         abi <abi/4.0>,
         include <tunables/global>
@@ -30,7 +31,7 @@
 
     #--- Ark, installed with Dolphin; its context-menu actions run `ark --batch`
     ark = lib.mkIf anyUser.fileBrowsers.dolphin {
-      state = "complain";
+      state = apparmorState "ark";
       profile = ''
         abi <abi/4.0>,
         include <tunables/global>
@@ -51,7 +52,7 @@
 
     #--- unrar from a terminal
     unrar = {
-      state = "complain";
+      state = apparmorState "unrar";
       profile = ''
         abi <abi/4.0>,
         include <tunables/global>

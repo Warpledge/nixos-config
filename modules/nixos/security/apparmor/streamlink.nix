@@ -3,9 +3,9 @@
 #=====================================================================#
 #- Runs inside the Streamlink Twitch GUI's bubblewrap sandbox, and the
 #- mpv it pipes into inherits this profile, so it carries mpv's rules.
-_: {
+{apparmorState, ...}: {
   security.apparmor.policies.streamlink = {
-    state = "complain";
+    state = apparmorState "streamlink";
     profile = ''
       abi <abi/4.0>,
       include <tunables/global>

@@ -4,9 +4,9 @@
 #- Moku's backend runs source extensions from third-party repos in its
 #- sandbox JVM, which has no OS-level confinement of its own. Attaches to
 #- the Go server; the JVM and ffmpeg it starts inherit the profile.
-_: {
+{apparmorState, ...}: {
   security.apparmor.policies.tsunagu = {
-    state = "complain";
+    state = apparmorState "tsunagu";
     profile = ''
       abi <abi/4.0>,
       include <tunables/global>

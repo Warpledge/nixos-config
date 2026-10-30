@@ -2,6 +2,8 @@
 # HOST BLOCKLISTS AND FILTERING
 #=====================================================================#
 {
+  config,
+  lib,
   pkgs,
   machine,
   ...
@@ -23,6 +25,15 @@
           '';
       });
       block = machine.blocklist.extra; # The machine's settings.nix
+      whitelist = machine.blocklist.allow;
     };
   };
+
+  #--------------------------------------------------------------------#
+  #-- List Paths for Omni Settings
+  #--------------------------------------------------------------------#
+  #--- Each list's own hosts file, for Network's "Was this blocked?" lookup
+  environment.etc."omni-settings/blocklists.json".text = builtins.toJSON (lib.genAttrs
+    (["ads"] ++ config.networking.stevenblack.block)
+    (name: "${lib.getOutput name config.networking.stevenblack.package}/hosts"));
 }

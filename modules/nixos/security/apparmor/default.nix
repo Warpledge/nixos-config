@@ -2,10 +2,13 @@
 # APPARMOR PROFILES
 #=====================================================================#
 #- Every profile starts in complain mode: nothing is blocked, would-be
-#- denials are logged. See docs/security/apparmor.md before enforcing.
+#- denials are logged. The machine's apparmor.enforce switches one to
+#- enforce; see docs/security/apparmor.md first.
 {
+  config,
   lib,
   pkgs,
+  machine,
   anyUser,
   ...
 }: {
@@ -96,6 +99,20 @@
       network netlink raw,
     '';
   };
+
+  #--------------------------------------------------------------------#
+  #-- Profile Modes
+  #--------------------------------------------------------------------#
+  #--- Each profile's `state`: enforce once named in the machine's apparmor.enforce
+  _module.args.apparmorState = name:
+    if lib.elem name machine.apparmor.enforce
+    then "enforce"
+    else "complain";
+
+  #--- Each loaded profile's mode, for Omni Settings' AppArmor page (the kernel's
+  #--- own list is root-only)
+  environment.etc."omni-settings/apparmor.json".text =
+    builtins.toJSON (lib.mapAttrs (_: p: p.state) config.security.apparmor.policies);
 
   #--------------------------------------------------------------------#
   #-- Imports

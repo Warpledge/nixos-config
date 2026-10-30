@@ -3,9 +3,9 @@
 #=====================================================================#
 #- Prebuilt Qt bundle in ~/.local/opt, run through nix-ld. Reaches the amp
 #- over the ALSA sequencer, which abstractions/audio already allows.
-_: {
+{apparmorState, ...}: {
   security.apparmor.policies.katana-floorboard = {
-    state = "complain";
+    state = apparmorState "katana-floorboard";
     profile = ''
       abi <abi/4.0>,
       include <tunables/global>

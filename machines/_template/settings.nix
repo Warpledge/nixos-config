@@ -114,6 +114,8 @@
   blocklist.enable = false;
   # Extra categories to block. Known names: fakenews, gambling, porn, social
   blocklist.extra = [];
+  # Domains to unblock, e.g. "s.click.aliexpress.com"
+  blocklist.allow = [];
 
   #--- SMB Shares
   # Lets Dolphin and Nautilus find Windows and Samba servers by name
@@ -138,6 +140,11 @@
   #--- ClamAV Antivirus
   # Background scanner, definition updates and the ClamTK window
   clamav.enable = false;
+
+  #--- AppArmor
+  # Profiles that block instead of only logging (see docs/security/apparmor.md).
+  # Known names: the policies in nixos/security/apparmor/, e.g. mpv, evince
+  apparmor.enforce = [];
 
   #--- Docker Containerization
   # Docker and Docker Compose; admins join the docker group

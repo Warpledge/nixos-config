@@ -4,9 +4,9 @@
 #- Community plugins run with full Node access, so the vault is the only
 #- part of Documents it gets. Attaches to the launcher script, not the
 #- shared electron binary other apps also run.
-_: {
+{apparmorState, ...}: {
   security.apparmor.policies.obsidian = {
-    state = "complain";
+    state = apparmorState "obsidian";
     profile = ''
       abi <abi/4.0>,
       include <tunables/global>
