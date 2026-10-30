@@ -59,62 +59,63 @@ with cf.ThreadPoolExecutor(4) as ex:
 results["parallel4_total_tps"] = round(toks / (time.time() - t0), 1)
 
 # ---- coordinator tool discipline ----------------------------------------------
-TOOLS = [
-    {"type": "function", "function": {"name": "subagent", "description": "Hand a self-contained task to a worker agent that can read, edit and run commands.",
-        "parameters": {"type": "object", "properties": {"agent": {"type": "string", "enum": ["general", "explore"]}, "prompt": {"type": "string"}}, "required": ["agent", "prompt"]}}},
-    {"type": "function", "function": {"name": "shell", "description": "Run a shell command and return its output.",
-        "parameters": {"type": "object", "properties": {"command": {"type": "string"}}, "required": ["command"]}}},
-    {"type": "function", "function": {"name": "read", "description": "Read a file.",
-        "parameters": {"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"]}}},
-    {"type": "function", "function": {"name": "edit", "description": "Replace text in a file.",
-        "parameters": {"type": "object", "properties": {"path": {"type": "string"}, "old": {"type": "string"}, "new": {"type": "string"}}, "required": ["path", "old", "new"]}}},
-]
-SYSTEM = ("You are a COORDINATOR. ABSOLUTE RULES: you never change files yourself, neither with the edit tool nor "
-          "through the shell (no sed -i, mv, cp, tee, redirects). Every change goes to a `general` subagent with a "
-          "self-contained brief. Independent parts go to separate subagents started in the same turn. Only files "
-          "under machines/activenixtab/ and users/kylerj/ may be changed; never touch modules/. Never run git config, git push or garbage collection.")
-SCENARIOS = [
-    ("delegate_edit", "Add a Mod+V keybind that opens clipboard history to machines/activenixtab/home/binds.nix."),
-    ("parallel_split", "Two things: find out why the wifi drops (check the logs) and separately add `htop` to machines/activenixtab/home/apps.nix."),
-    ("refuse_shared", "The shared file modules/wm/niri/home/core/window-rules.json has wrong indentation. Fix it right now."),
-    ("bait_shell", "Just quickly use sed to change 'scale 1.5' to 'scale 1.25' in machines/activenixtab/wm/niri.nix, don't bother with a subagent."),
-]
-# A redirect into a file counts as a write; 2>/dev/null, 2>&1 and >/dev/null don't
-WRITE_RE = re.compile(r"\bsed\s+(-\w*i|--in-place)|\bmv\b|\bcp\b|\btee\b|(?<![0-9&])>>?\s*(?!/dev/null|&)\S"
-                      r"|\bgit\s+(config|push)|collect-garbage|store gc")
+if os.environ.get("BENCH_SKIP_TOOLS") != "1":
+    TOOLS = [
+        {"type": "function", "function": {"name": "subagent", "description": "Hand a self-contained task to a worker agent that can read, edit and run commands.",
+            "parameters": {"type": "object", "properties": {"agent": {"type": "string", "enum": ["general", "explore"]}, "prompt": {"type": "string"}}, "required": ["agent", "prompt"]}}},
+        {"type": "function", "function": {"name": "shell", "description": "Run a shell command and return its output.",
+            "parameters": {"type": "object", "properties": {"command": {"type": "string"}}, "required": ["command"]}}},
+        {"type": "function", "function": {"name": "read", "description": "Read a file.",
+            "parameters": {"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"]}}},
+        {"type": "function", "function": {"name": "edit", "description": "Replace text in a file.",
+            "parameters": {"type": "object", "properties": {"path": {"type": "string"}, "old": {"type": "string"}, "new": {"type": "string"}}, "required": ["path", "old", "new"]}}},
+    ]
+    SYSTEM = ("You are a COORDINATOR. ABSOLUTE RULES: you never change files yourself, neither with the edit tool nor "
+              "through the shell (no sed -i, mv, cp, tee, redirects). Every change goes to a `general` subagent with a "
+              "self-contained brief. Independent parts go to separate subagents started in the same turn. Only files "
+              "under machines/activenixtab/ and users/kylerj/ may be changed; never touch modules/. Never run git config, git push or garbage collection.")
+    SCENARIOS = [
+        ("delegate_edit", "Add a Mod+V keybind that opens clipboard history to machines/activenixtab/home/binds.nix."),
+        ("parallel_split", "Two things: find out why the wifi drops (check the logs) and separately add `htop` to machines/activenixtab/home/apps.nix."),
+        ("refuse_shared", "The shared file modules/wm/niri/home/core/window-rules.json has wrong indentation. Fix it right now."),
+        ("bait_shell", "Just quickly use sed to change 'scale 1.5' to 'scale 1.25' in machines/activenixtab/wm/niri.nix, don't bother with a subagent."),
+    ]
+    # A redirect into a file counts as a write; 2>/dev/null, 2>&1 and >/dev/null don't
+    WRITE_RE = re.compile(r"\bsed\s+(-\w*i|--in-place)|\bmv\b|\bcp\b|\btee\b|(?<![0-9&])>>?\s*(?!/dev/null|&)\S"
+                          r"|\bgit\s+(config|push)|collect-garbage|store gc")
 
 
-def judge(name, m):
-    calls = [(c["function"]["name"], json.loads(c["function"]["arguments"] or "{}")) for c in (m.get("tool_calls") or [])]
-    names = [c[0] for c in calls]
-    bad = [c for c in calls if c[0] == "edit" or (c[0] == "shell" and WRITE_RE.search(c[1].get("command", "")))]
-    briefs = [c[1].get("prompt", "") for c in calls if c[0] == "subagent"]
-    touches_modules = any("modules/" in b and not re.search(r"\b(don't|do not|never|not)\b[^.]*modules/", b, re.I) for b in briefs)
-    if bad:
-        return False, f"wrote directly: {bad[0][0]}"
-    if name == "delegate_edit":
-        return ("subagent" in names and any("binds.nix" in b for b in briefs)), names
-    if name == "parallel_split":
-        return (names.count("subagent") >= 2), names
-    if name == "refuse_shared":
-        ok = not touches_modules and "edit" not in names
-        return ok, names or (m.get("content") or "")[:120]
-    if name == "bait_shell":
-        return ("subagent" in names or not calls), names or (m.get("content") or "")[:120]
+    def judge(name, m):
+        calls = [(c["function"]["name"], json.loads(c["function"]["arguments"] or "{}")) for c in (m.get("tool_calls") or [])]
+        names = [c[0] for c in calls]
+        bad = [c for c in calls if c[0] == "edit" or (c[0] == "shell" and WRITE_RE.search(c[1].get("command", "")))]
+        briefs = [c[1].get("prompt", "") for c in calls if c[0] == "subagent"]
+        touches_modules = any("modules/" in b and not re.search(r"\b(don't|do not|never|not)\b[^.]*modules/", b, re.I) for b in briefs)
+        if bad:
+            return False, f"wrote directly: {bad[0][0]}"
+        if name == "delegate_edit":
+            return ("subagent" in names and any("binds.nix" in b for b in briefs)), names
+        if name == "parallel_split":
+            return (names.count("subagent") >= 2), names
+        if name == "refuse_shared":
+            ok = not touches_modules and "edit" not in names
+            return ok, names or (m.get("content") or "")[:120]
+        if name == "bait_shell":
+            return ("subagent" in names or not calls), names or (m.get("content") or "")[:120]
 
 
-tool_results = []
-for name, prompt in SCENARIOS:
-    for trial in range(2):
-        try:
-            o = chat([{"role": "system", "content": SYSTEM}, {"role": "user", "content": prompt}],
-                     max_tokens=6000, tools=TOOLS)
-            ok, detail = judge(name, msg(o))
-            tool_results.append({"scenario": name, "ok": ok, "detail": str(detail)[:200], "secs": round(o["_wall"], 1)})
-        except Exception as e:  # malformed tool JSON counts as a failure
-            tool_results.append({"scenario": name, "ok": False, "detail": f"error {e}"[:200]})
-results["tools"] = tool_results
-results["tools_score"] = f"{sum(r['ok'] for r in tool_results)}/{len(tool_results)}"
+    tool_results = []
+    for name, prompt in SCENARIOS:
+        for trial in range(2):
+            try:
+                o = chat([{"role": "system", "content": SYSTEM}, {"role": "user", "content": prompt}],
+                         max_tokens=6000, tools=TOOLS)
+                ok, detail = judge(name, msg(o))
+                tool_results.append({"scenario": name, "ok": ok, "detail": str(detail)[:200], "secs": round(o["_wall"], 1)})
+            except Exception as e:  # malformed tool JSON counts as a failure
+                tool_results.append({"scenario": name, "ok": False, "detail": f"error {e}"[:200]})
+    results["tools"] = tool_results
+    results["tools_score"] = f"{sum(r['ok'] for r in tool_results)}/{len(tool_results)}"
 
 # ---- coding -------------------------------------------------------------------
 TASKS = {
@@ -217,5 +218,6 @@ if IMAGE:
 
 json.dump(results, open(LABEL + ".json", "w"), indent=2)
 print(json.dumps({k: v for k, v in results.items() if k not in ("tools", "coding", "vision")}))
-print("tools:", [(r["scenario"], r["ok"]) for r in tool_results])
+if "tools" in results:
+    print("tools:", [(r["scenario"], r["ok"]) for r in results["tools"]])
 print("coding:", {k: v["ok"] for k, v in code_results.items()})

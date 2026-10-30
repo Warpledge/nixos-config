@@ -108,6 +108,8 @@
       claude.agentModels.proseReviewer = null;
       claude.agentModels.publicRepoAuditor = null;
       claudeDesktop.matugen = false;
+      defaultApps.browser = "helium";
+      defaultApps.textEditor = "vscodium";
     };
   };
 
