@@ -20,11 +20,10 @@
   #--- NPU driver
   boot.kernelModules = ["amdxdna"];
 
+  #--- GPU shared memory for local models (120 GiB GTT; keep UMA low in BIOS)
+  #--- comes from localModels.gpuSharedGB in settings.nix
   boot.kernelParams = [
     "amd_pstate=active"
-    # Let the GPU borrow up to 120 GiB of system RAM (GTT); keep UMA low in BIOS
-    "ttm.pages_limit=31457280"
-    "ttm.page_pool_size=31457280"
   ];
 
   #--- MT7925 Wi-Fi drops with PCIe power saving on some kernels

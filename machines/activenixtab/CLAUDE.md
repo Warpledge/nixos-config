@@ -53,12 +53,19 @@ when Ky approves it.
   browser (it isn't one of `lib/default-apps.nix`'s choices)
 - `home/binds.nix` — niri binds matching Ky's KDE Plasma shortcuts; each wins its key
   (`winsKey`), so a repo bind on the same key, even one added later, is switched off
-- `home/local-ai.nix` — llama-swap on llama.cpp 0.7.0 (Vulkan, built here until
-  nixpkgs has it) at `127.0.0.1:8090`, Qwen3.8 Flash Next UD-IQ3_XXS (opencode's
-  default: 2 slots of 128K, `reasoning_effort` medium for the agents and their `-instruct`
-  alias alike) and Nemotron 3.5 Super VL (3 slots with MTP drafting, the pick if the
-  budget drops to 80 GB), both with vision, loaded from LM Studio's folder, and
-  opencode's provider for it. Models stay within 90 GB (Ky, 2026-10-27) so other
+- `home/local-ai.nix` — Ky's opencode agents and extras around the config's
+  llama-swap (`user.llamaSwap.enable`): ask-claude, ask-claude-auto,
+  opencode-desktop, `Projects/opencode.json`, and `modalities`/`limit.output`
+  overrides for the provider entries (upstream's provider block has neither).
+  The models themselves are machine settings: `settings.nix`'s `localModels`
+  block adds Qwen3.8 Flash Next UD-IQ3_XXS (opencode's default, one slot of
+  256K, `reasoning_effort` medium for the agents and their `-instruct` alias
+  alike) and Nemotron 3.5 Super VL (3 slots with MTP drafting, the pick if the
+  budget drops to 80 GB) to the config's catalog, both with vision through
+  `--mmproj`, loaded from LM Studio's folder on `127.0.0.1:8090`;
+  `localModels.profile = "strix-halo"` and `gpuSharedGB = 120` carry the GPU
+  tuning and the GTT kernelParams (llama.cpp 0.7.0 from nixpkgs). Models stay
+  within 90 GB (Ky, 2026-10-27) so other
   work keeps memory; a Godot test needs 5 GB free to start. Every model tested or tuned here
   gets an entry in `local-ai-models.md`, measured with the scripts in
   `local-ai-bench/`: the at-a-glance table and a plain-language section first (what
