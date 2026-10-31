@@ -2,11 +2,15 @@
   pkgs,
   lib,
   config,
+  machine,
   user,
   ...
 }: let
-  #--- The models picked in localAi (lib/local-models.nix), served by ai/llama-swap.nix
-  models = import ../../../../lib/local-models.nix;
+  #--- The models picked in localAi (lib/local-ai.nix), served by ai/llama-swap.nix
+  models = import ../../../../lib/local-ai.nix {
+    inherit lib;
+    inherit (machine) localModels;
+  };
   #--- Every coding model turned on; the first is the default
   codeIds = lib.optionals user.llamaSwap.enable user.localAi.code;
   codeId = lib.head codeIds;

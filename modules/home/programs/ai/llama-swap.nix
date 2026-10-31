@@ -1,17 +1,21 @@
 #=====================================================================#
 # LLAMA-SWAP - LOCAL LLM SERVER (LLAMA.CPP, VULKAN)
 #=====================================================================#
-#- Serves the models picked in localAi (lib/local-models.nix lists them)
-#- and makes them opencode's and Zed's defaults.
+#- Serves the models picked in localAi (lib/local-ai.nix gives this
+#- machine's models and flags) and makes them opencode's and Zed's defaults.
 {
   config,
   lib,
   pkgs,
+  machine,
   user,
   ...
 }: let
   port = 8090; # 8080 is taken by Steam's webhelper
-  catalog = import ../../../../lib/local-models.nix;
+  catalog = import ../../../../lib/local-ai.nix {
+    inherit lib;
+    inherit (machine) localModels;
+  };
   #--- The coding and chat models turned on, by ID; the first coding one is the default
   codes = lib.genAttrs user.localAi.code (id: catalog.code.${id});
   chats = lib.genAttrs user.localAi.chat (id: catalog.chat.${id});

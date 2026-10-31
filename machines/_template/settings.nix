@@ -63,6 +63,16 @@
   gpu.nvidiaBusId = ""; # Hybrid laptops only, e.g. "PCI:1:0:0"
   gpu.integratedBusId = ""; # Hybrid laptops only: the AMD or Intel chip
 
+  #--- Local AI Models (Omni Settings' Local Models page edits these)
+  # profile: a GPU from lib/gpu-profiles.nix whose tuning the models use;
+  # null lets llama.cpp fit each model itself. models: per model id, tuning
+  # changes for a lib/local-models.nix model, or a whole model to add.
+  localModels.profile = null;
+  localModels.models = {};
+  # Unified-memory chips (Strix Halo): GB of RAM the GPU may use, e.g. 120 on
+  # a 128GB machine; null keeps the kernel's default (about half the RAM)
+  localModels.gpuSharedGB = null;
+
   #--------------------------------------------------------------------#
   #-- Boot
   #--------------------------------------------------------------------#
