@@ -15,20 +15,27 @@
   colors = "${config.xdg.configHome}/wvkbd/colors.sh";
 
   #--- Keyboard strip (logical px): wvkbd's height and the screen it leaves
-  height = 360;
+  height = 390;
   #--- The DMS bar strip on top, which the touchpad must never swallow
   barStrip = 36;
   #--- Panel opacity (0-255). Under 255 wvkbd's own panel lets the blur through
   keyAlpha = 217;
 
-  #--- The desktop layout (F keys, number row, Tab, Ctrl…), plus:
-  #- a PAD key (F13) on the bottom row of both letter layers,
-  #- no pointer listener at all (only touches press keys).
+  #--- The desktop layout, rebuilt for Ky (see wvkbd-layout.patch), plus:
+  #- caps locks on a double-tap of shift (wvkbd-caps-shift.patch),
+  #- no pointer listener at all (only touches press keys),
+  #- keys via uinput so niri's binds see the PAD key's F13 (wvkbd-uinput.patch;
+  #- without it the PAD key is dead and no OSK key ever reaches a bind).
   wvkbd = pkgs.wvkbd.overrideAttrs (old: {
     makeFlags = (old.makeFlags or []) ++ ["LAYOUT=deskintl"];
     patches =
       (old.patches or [])
-      ++ [./wvkbd-pad-key.patch ./wvkbd-touch-only.patch];
+      ++ [
+        ./wvkbd-layout.patch
+        ./wvkbd-caps-shift.patch
+        ./wvkbd-touch-only.patch
+        ./wvkbd-uinput.patch
+      ];
   });
 
   keyboard = pkgs.writeShellScript "wvkbd-start" ''

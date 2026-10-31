@@ -212,9 +212,21 @@ def activate(app):
     monitor.connect("changed", load_theme)
     win.monitor = monitor  # keeps it alive
 
+    # Anchoring all edges is not a size: GTK asks for the child's natural size,
+    # which is 0x0, so the surface is asked to be the screen minus the margins.
+    # (Gdk monitors do not change while niri lives, except by rotation.)
+    def resize_to_screen(*_):
+        mon = display.get_monitors()
+        if not mon:
+            return None
+        return mon[0].get_geometry()
+
     # The virtual device covers the pad area; remade if it resizes (rotation)
     def check_size(*_):
         global pad, pad_size
+        geo = resize_to_screen()
+        want = (geo.width, max(1, geo.height - MARGIN_TOP - MARGIN_BOTTOM))
+        area.set_size_request(*want)
         a = area.get_allocation()
         if a.width > 1 and a.height > 1 and (a.width, a.height) != pad_size:
             if pad:

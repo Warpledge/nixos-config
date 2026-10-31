@@ -1,0 +1,61 @@
+# No Caps key any more: a double-tap of shift toggles CapsLock, locking
+# shift on. A lone shift release opens a 400 ms window; a second shift
+# press inside it fires CapsLock and is swallowed (never reaches the
+# app); its release then unlatches nothing. Any other key closes the window.
+--- a/keyboard.c	2026-07-24 14:16:05.000000000 -0700
++++ b/keyboard.c	2026-10-30 19:38:15.424005085 -0700
+@@ -291,6 +291,13 @@
+         zwp_virtual_keyboard_v1_key(vkbd, time, KEY_RIGHTALT, state);
+ }
+ 
++/* Shift-double-tap state: a lone shift tap's release time (a second shift
++ * press within SHIFT_TAP_WINDOW after it toggles CapsLock, i.e. caps locks
++ * shift on), and whether the shift press since the release was alone */
++#define SHIFT_TAP_WINDOW 400
++static uint32_t shift_up = 0;
++static bool shift_lone = false;
++
+ void
+ kbd_unpress_key(struct kbd *kb, uint32_t time)
+ {
+@@ -324,6 +331,9 @@
+         }
+ 
+         if (unlatch_shift) {
++            if (shift_lone)
++                shift_up = time;
++            shift_lone = false;
+             if (kb->debug) fprintf(stderr, "unlatch shift");
+             kb->mods ^= Shift;
+             zwp_virtual_keyboard_v1_key_mods(kb->vkbd, time, Shift, WL_KEYBOARD_KEY_STATE_RELEASED);
+@@ -406,6 +416,8 @@
+ void
+ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
+ {
++    if ((k->type != Mod) || (k->code != Shift))
++        shift_up = 0;
+     if ((kb->compose == 1) && (k->type != Compose) && (k->type != Mod)) {
+         if ((k->type == NextLayer) || (k->type == BackLayer) ||
+             ((k->type == Code) && (k->code == KEY_SPACE))) {
+@@ -461,6 +473,21 @@
+         }
+         break;
+     case Mod:
++        if (k->code == Shift) {
++            if (!(kb->mods & Shift)) {
++                shift_lone = true;
++                if (shift_up && time > shift_up &&
++                    time - shift_up <= SHIFT_TAP_WINDOW) {
++                    shift_up = 0;
++                    shift_lone = false;
++                    zwp_virtual_keyboard_v1_key_mods(kb->vkbd, time, CapsLock,
++                                                     WL_KEYBOARD_KEY_STATE_PRESSED);
++                    zwp_virtual_keyboard_v1_key_mods(kb->vkbd, time + 1, CapsLock,
++                                                     WL_KEYBOARD_KEY_STATE_RELEASED);
++                    break;
++                }
++            }
++        }
+         kb->mods ^= k->code;
+         if (kb->mods & k->code) {
+             if (kb->debug)
