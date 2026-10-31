@@ -188,77 +188,56 @@
   #--- what serve() has no field for (--mmproj vision, KV pools, MTP drafting).
   #--- Measured with -ctk f16 -ctv q8_0 (q8_0 V cache: ~17% faster prompts)
   localModels.models = {
-    #--- opencode's default: MoE, 6B active; one agent carries the whole
-    #--- session in one slot, so 256K keeps compaction rare
-    "qwen3_8-flash-next" = {
-      category = "code";
-      name = "Qwen3.8 Flash Next";
-      dir = "unsloth/Qwen3.8-Flash-Next-GGUF";
-      match = "Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-*.gguf";
-      context = 262144;
-      cache = "q8_0";
+    nemotron-3_5-super-vl = {
+      args = ["-np 3" "--kv-unified-per-slot 65536" "--spec-type draft-mtp" "--top-k 0 --min-p 0" "--mmproj '/home/kylerj/.lmstudio/models/unsloth/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-GGUF/mmproj-BF16.gguf'"];
       batch = 2048;
-      args = [
-        "-ctk f16"
-        # Images through the mmproj file sitting beside the model
-        "--mmproj '/home/kylerj/.lmstudio/models/unsloth/Qwen3.8-Flash-Next-GGUF/mmproj-F16.gguf'"
-      ];
-      #--- Qwen's thinking sampling at medium effort; the template's default
-      #--- (xhigh) overthinks and ran out of a 12K budget on small tasks
-      think = {
-        temperature = 1.0;
-        top_p = 0.95;
-        top_k = 20;
-        min_p = 0;
-        presence_penalty = 0.0;
-        reasoning_effort = "medium";
-        chat_template_kwargs.reasoning_effort = "medium";
-      };
-      #--- Workers (the -instruct alias): the same; at low effort it edited directly
-      fast = {
-        temperature = 1.0;
-        top_p = 0.95;
-        top_k = 20;
-        min_p = 0;
-        presence_penalty = 0.0;
-        reasoning_effort = "medium";
-        chat_template_kwargs.reasoning_effort = "medium";
-      };
-    };
-    #--- Fits 80 GB: one agent plus 2 parallel subagents. MoE with Mamba
-    #--- layers, 12B active; ~72 GB loaded. Tuning in ../local-ai-models.md
-    "nemotron-3_5-super-vl" = {
-      category = "code";
-      name = "Nemotron 3.5 Super VL";
-      dir = "unsloth/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-GGUF";
-      match = "NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-UD-Q3_K_XL-00001-of-*.gguf";
-      # Three slots share one cache pool: -np 3 with a KV pool per slot
-      context = 65536;
       cache = "f16";
-      batch = 2048;
-      args = [
-        "-np 3"
-        "--kv-unified-per-slot 65536"
-        # MTP drafting: 28 tok/s alone and 29 with two requests, against 19 and 26 without
-        "--spec-type draft-mtp"
-        "--top-k 0 --min-p 0"
-        "--mmproj '/home/kylerj/.lmstudio/models/unsloth/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-GGUF/mmproj-BF16.gguf'"
-      ];
-      #--- Full reasoning, NVIDIA's sampling
-      think = {
-        temperature = 1.0;
-        top_p = 0.95;
-        chat_template_kwargs.enable_thinking = true;
-      };
-      #--- Workers (the -instruct alias): medium effort, ~3x fewer thinking tokens
+      category = "code";
+      context = 65536;
+      dir = "unsloth/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-GGUF";
       fast = {
-        temperature = 1.0;
-        top_p = 0.95;
         chat_template_kwargs = {
           enable_thinking = true;
           medium_effort = true;
         };
+        temperature = 1;
+        top_p = 0.95;
       };
+      match = "NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-UD-Q3_K_XL-00001-of-*.gguf";
+      name = "Nemotron 3.5 Super VL";
+      think = {
+        chat_template_kwargs = {enable_thinking = true;};
+        temperature = 1;
+        top_p = 0.95;
+      };
+    };
+    qwen3_8-flash-next = {
+      args = ["-ctk f16" "--mmproj '/home/kylerj/.lmstudio/models/unsloth/Qwen3.8-Flash-Next-GGUF/mmproj-F16.gguf'"];
+      category = "code";
+      dir = "unsloth/Qwen3.8-Flash-Next-GGUF";
+      fast = {
+        chat_template_kwargs = {reasoning_effort = "medium";};
+        min_p = 0;
+        presence_penalty = 0;
+        reasoning_effort = "medium";
+        temperature = 1;
+        top_k = 20;
+        top_p = 0.95;
+      };
+      match = "Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-*.gguf";
+      name = "Qwen3.8 Flash Next";
+      think = {
+        chat_template_kwargs = {reasoning_effort = "medium";};
+        min_p = 0;
+        presence_penalty = 0;
+        reasoning_effort = "medium";
+        temperature = 1;
+        top_k = 20;
+        top_p = 0.95;
+      };
+      context = 262144;
+      gpuLayers = "all";
+      batch = 4096;
     };
   };
 
