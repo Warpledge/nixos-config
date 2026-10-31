@@ -3,10 +3,13 @@
 # columns and workspaces under the fingers. Fewer fingers pass through untouched.
 # It also holds the touchpad while ~/.config/niri/touchpad-off isn't empty, and
 # runs the optional command on a one-finger swipe up from the bottom edge.
+# SIGUSR2 (osk-pad-mode) switches pad mode: touches outside the bar and the
+# on-screen keyboard drive a virtual touchpad instead of the screen.
 # Usage: touch-gestures <touchscreen event device> [command...]
 import json
 import os
 import select
+import signal
 import subprocess
 import sys
 import time
@@ -24,6 +27,10 @@ MOVE = 40
 EDGE = 0.03
 EDGE_RISE = 0.05
 EDGE_HOLD = 0.4
+# Strips pad mode leaves alone (logical px); the keyboard's only while it's shown.
+# BAR_STRIP and KEYBOARD_STRIP match `barStrip` and `height` in on-screen-input
+BAR_STRIP = 36
+KEYBOARD_STRIP = 390
 edge_command = sys.argv[2:]
 
 src = evdev.InputDevice(sys.argv[1])
@@ -72,16 +79,47 @@ pad = UInput(
 TOOLS = [e.BTN_TOOL_FINGER, e.BTN_TOOL_DOUBLETAP, e.BTN_TOOL_TRIPLETAP]
 TOOLS.append(e.BTN_TOOL_QUADTAP)
 
+# Pad mode's touchpad, at the panel's own resolution so a finger moves it its
+# real distance. Large enough that a drag from its middle never hits an edge.
+TP_RES = ax[e.ABS_X].resolution
+TP_YGAIN = TP_RES / ax[e.ABS_Y].resolution
+TP_MID = 2 * round(max(xmax, ymax * TP_YGAIN))
+tp = UInput(
+    {
+        e.EV_KEY: [
+            e.BTN_LEFT,
+            e.BTN_RIGHT,
+            e.BTN_TOUCH,
+            e.BTN_TOOL_FINGER,
+            e.BTN_TOOL_DOUBLETAP,
+        ],
+        e.EV_ABS: [
+            (e.ABS_X, AbsInfo(0, 0, 2 * TP_MID, 0, 0, TP_RES)),
+            (e.ABS_Y, AbsInfo(0, 0, 2 * TP_MID, 0, 0, TP_RES)),
+            (e.ABS_MT_SLOT, AbsInfo(0, 0, 1, 0, 0, 0)),
+            (e.ABS_MT_TRACKING_ID, AbsInfo(0, 0, 65535, 0, 0, 0)),
+            (e.ABS_MT_POSITION_X, AbsInfo(0, 0, 2 * TP_MID, 0, 0, TP_RES)),
+            (e.ABS_MT_POSITION_Y, AbsInfo(0, 0, 2 * TP_MID, 0, 0, TP_RES)),
+        ],
+    },
+    name="On-screen touchpad",
+    input_props=[e.INPUT_PROP_POINTER],
+)
+
+
+def niri_msg(what):
+    out = subprocess.run(
+        ["niri", "msg", "--json", what],
+        capture_output=True,
+        text=True,
+        timeout=1,
+    )
+    return json.loads(out.stdout)
+
 
 def transform():
     try:
-        out = subprocess.run(
-            ["niri", "msg", "--json", "focused-output"],
-            capture_output=True,
-            text=True,
-            timeout=1,
-        )
-        return json.loads(out.stdout)["logical"]["transform"]
+        return niri_msg("focused-output")["logical"]["transform"]
     except Exception:
         return "Normal"
 
@@ -104,6 +142,99 @@ start = {}  # slot -> position when the touch landed
 g = {}  # gesture state
 edge = False  # the held touch landed on the bottom edge
 edge_t = "Normal"  # the screen's transform when it did
+pad_on = False
+pad_flip = False  # set by SIGUSR2, acted on between frames
+to_pad = False  # the held touch belongs to the virtual touchpad
+peak = {}  # slot -> position, every finger down during the hold
+tp_t = "Normal"  # the screen's transform for this pad touch
+tp_fingers = {}  # source slot -> (pad slot, anchor x, anchor y)
+tp_next_id = 0
+
+
+def on_pad_flip(*_):
+    global pad_flip
+    pad_flip = True
+
+
+signal.signal(signal.SIGUSR2, on_pad_flip)
+
+
+def in_pad_area(pos):
+    # Whether a touch landing here drives the touchpad, and the transform to use
+    global tp_t
+    try:
+        logical = niri_msg("focused-output")["logical"]
+        shown = any(s["namespace"] == "wvkbd" for s in niri_msg("layers"))
+    except Exception:
+        return False  # can't tell where the strips are: leave the screen working
+    tp_t = logical["transform"]
+    y = on_screen(pos, tp_t)[1] * logical["height"]
+    bottom = logical["height"] - (KEYBOARD_STRIP if shown else 0)
+    return BAR_STRIP <= y < bottom
+
+
+def tp_offset(dx, dy):
+    return rotate(dx, dy * TP_YGAIN, tp_t)
+
+
+def tp_frame(live):
+    # Fingers in `live` (slot -> position) move the pad relative to where they
+    # landed; later fingers keep their distance from the first for libinput
+    global tp_next_id
+    for s in [s for s in tp_fingers if s not in live]:
+        tp.write(e.EV_ABS, e.ABS_MT_SLOT, tp_fingers.pop(s)[0])
+        tp.write(e.EV_ABS, e.ABS_MT_TRACKING_ID, -1)
+    for s, pos in live.items():
+        origin = start.get(s, pos)
+        if s not in tp_fingers:
+            free = {0, 1} - {f[0] for f in tp_fingers.values()}
+            if not free:
+                continue
+            ox, oy = TP_MID, TP_MID
+            if tp_fingers:
+                first, (_, ax0, ay0) = next(iter(tp_fingers.items()))
+                dx, dy = tp_offset(
+                    origin[0] - start.get(first, live[first])[0],
+                    origin[1] - start.get(first, live[first])[1],
+                )
+                ox, oy = ax0 + dx, ay0 + dy
+            tp_fingers[s] = (min(free), ox, oy)
+            tp.write(e.EV_ABS, e.ABS_MT_SLOT, min(free))
+            tp.write(e.EV_ABS, e.ABS_MT_TRACKING_ID, tp_next_id)
+            tp_next_id = (tp_next_id + 1) % 65535
+        slot, ox, oy = tp_fingers[s]
+        dx, dy = tp_offset(pos[0] - origin[0], pos[1] - origin[1])
+        x = min(max(round(ox + dx), 0), 2 * TP_MID)
+        y = min(max(round(oy + dy), 0), 2 * TP_MID)
+        tp.write(e.EV_ABS, e.ABS_MT_SLOT, slot)
+        tp.write(e.EV_ABS, e.ABS_MT_POSITION_X, x)
+        tp.write(e.EV_ABS, e.ABS_MT_POSITION_Y, y)
+        if slot == min(f[0] for f in tp_fingers.values()):
+            tp.write(e.EV_ABS, e.ABS_X, x)
+            tp.write(e.EV_ABS, e.ABS_Y, y)
+    n = len(tp_fingers)
+    tp.write(e.EV_KEY, e.BTN_TOUCH, 1 if n else 0)
+    tp.write(e.EV_KEY, e.BTN_TOOL_FINGER, 1 if n == 1 else 0)
+    tp.write(e.EV_KEY, e.BTN_TOOL_DOUBLETAP, 1 if n == 2 else 0)
+    tp.syn()
+
+
+def let_go():
+    # The hold is over with fewer than three fingers: give the touch to its owner
+    global mode, held
+    if not to_pad:
+        flush()
+        mode = "pass" if slots else "idle"
+        return
+    held = []
+    if slots:
+        mode = "pad"
+        tp_frame(slots)
+    else:
+        # A tap shorter than the hold: replay it, it's all libinput needs
+        mode = "idle"
+        tp_frame(peak)
+        tp_frame({})
 
 
 def forward(frame, slot):
@@ -246,6 +377,12 @@ frame_slot = cur
 try:
     while True:
         touchpad_switch()
+        if pad_flip:
+            pad_flip = False
+            pad_on = not pad_on
+            if mode == "pad":
+                tp_frame({})
+                mode = "drain" if slots else "idle"
         timeout = 0.5
         if mode == "hold":
             wait = EDGE_HOLD if edge else HOLD
@@ -254,9 +391,8 @@ try:
         if not r and mode != "hold":
             continue
         if not r:
-            # Held long enough with fewer than three fingers: hand it to the app
-            flush()
-            mode = "pass"
+            # Held long enough with fewer than three fingers: hand it on
+            let_go()
             continue
         for ev in src.read():
             if ev.type == e.EV_ABS and ev.code == e.ABS_MT_SLOT:
@@ -289,15 +425,18 @@ try:
                 if slots:
                     mode, hold_start, held = "hold", time.monotonic(), []
                     edge = False
+                    pos = next(iter(slots.values()))
                     if edge_command and len(slots) == 1:
                         edge_t = transform()
-                        pos = next(iter(slots.values()))
                         edge = on_screen(pos, edge_t)[1] > 1 - EDGE
+                    to_pad = pad_on and in_pad_area(pos)
+                    peak = {}
                 else:
                     forward(done, fslot)
                     continue
             if mode == "hold":
                 held.append((done, fslot))
+                peak.update({s: list(pos) for s, pos in slots.items()})
                 up, side = rise() if edge and len(slots) == 1 else (0.0, 0.0)
                 if len(slots) >= 3:
                     held = []
@@ -307,8 +446,15 @@ try:
                     subprocess.Popen(edge_command)
                     mode = "drain"
                 elif not slots or (moved() and not (edge and up > side)):
-                    flush()
-                    mode = "pass" if slots else "idle"
+                    let_go()
+            elif mode == "pad":
+                if len(slots) >= 3:
+                    tp_frame({})
+                    begin_gesture()
+                else:
+                    tp_frame(slots)
+                    if not slots:
+                        mode = "idle"
             elif mode == "pass":
                 if len(slots) >= 3:
                     lift_screen([s for s in slots if s in start])

@@ -1,7 +1,7 @@
-"""Keeps wvkbd and the touchpad's pad-mode window above other overlay surfaces
-(DMS's launcher, the polkit dialog). niri stacks a layer surface above the ones
-made before it, so when a new overlay surface appears while either is shown,
-they are hidden and shown again to be made anew on top."""
+"""Keeps wvkbd above other overlay surfaces (DMS's launcher, the polkit dialog).
+niri stacks a layer surface above the ones made before it, so when a new overlay
+surface appears while it's shown, it is hidden and shown again to be made anew
+on top."""
 
 import json
 import subprocess
@@ -9,7 +9,6 @@ import time
 from collections import Counter
 
 KEYBOARD = "wvkbd"
-TOUCHPAD = "on-screen-touchpad"
 
 
 def overlays():
@@ -40,13 +39,11 @@ while True:
     if now is None:
         time.sleep(1)
         continue
-    others = now - Counter({KEYBOARD: now[KEYBOARD], TOUCHPAD: now[TOUCHPAD]})
+    others = now - Counter({KEYBOARD: now[KEYBOARD]})
     if others - last:
         # wvkbd's hide destroys its surface, so it's listed only while shown
         if now[KEYBOARD]:
             signal("USR1", "-x", "wvkbd-deskintl")
             signal("USR2", "-x", "wvkbd-deskintl")
-        if now[TOUCHPAD]:
-            signal("USR1", "-f", r"on-screen-touchpad\.py")
     last = others
     time.sleep(0.2)

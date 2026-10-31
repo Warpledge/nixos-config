@@ -2,10 +2,10 @@
 # ON-SCREEN KEYBOARD AND TOUCHPAD MODE
 #=====================================================================#
 #- For using the Z13 without its folio: wvkbd as the keyboard (full width,
-#- translucent over niri's blur, touch-only), and a pad mode that turns the
-#- whole screen above the keyboard into one big touchpad. The PAD key on the
-#- keyboard (F13, niri bind) or the DMS bar button toggles pad mode; a swipe
-#- up from the bottom edge (wm/touch-gestures.py) toggles the keyboard.
+#- translucent over niri's blur, touch-only), and a pad mode (wm/touch-gestures.py)
+#- that turns the whole screen above the keyboard into one big touchpad. The PAD
+#- key on the keyboard (F13, niri bind) or the DMS bar button toggles pad mode; a
+#- swipe up from the bottom edge (also there) toggles the keyboard.
 {
   config,
   lib,
@@ -14,10 +14,8 @@
 }: let
   colors = "${config.xdg.configHome}/wvkbd/colors.sh";
 
-  #--- Keyboard strip (logical px): wvkbd's height and the screen it leaves
+  #--- Keyboard strip (logical px); KEYBOARD_STRIP in wm/touch-gestures.py matches
   height = 390;
-  #--- The DMS bar strip on top, which the touchpad must never swallow
-  barStrip = 36;
   #--- Panel opacity (0-255). Under 255 wvkbd's own panel lets the blur through
   keyAlpha = 217;
 
@@ -57,33 +55,8 @@
   '';
 
   pad-mode = pkgs.writeShellScriptBin "osk-pad-mode" ''
-    pkill --signal USR2 -f 'on-screen-touchpad\.py'
+    pkill --signal USR2 -f 'touch-gestures\.py'
   '';
-
-  touchpad = pkgs.stdenv.mkDerivation {
-    pname = "on-screen-touchpad";
-    version = "2.0";
-    dontUnpack = true;
-    nativeBuildInputs = [pkgs.wrapGAppsHook4 pkgs.gobject-introspection];
-    buildInputs = [pkgs.gtk4 pkgs.gtk4-layer-shell];
-    installPhase = ''
-      install -Dm644 ${./touchpad.py} $out/share/on-screen-touchpad.py
-      mkdir -p $out/bin
-      makeWrapper ${pkgs.python3.withPackages (p: [p.evdev p.pygobject3])}/bin/python3 \
-        $out/bin/on-screen-touchpad --add-flags $out/share/on-screen-touchpad.py
-    '';
-    # gtk4-layer-shell has to load before libwayland; the margins are the
-    # keyboard strip (bottom) and the bar strip (top) the pad never covers
-    preFixup = ''
-      gappsWrapperArgs+=(--set LD_PRELOAD ${pkgs.gtk4-layer-shell}/lib/libgtk4-layer-shell.so
-        --set OSK_PAD_BOTTOM ${toString height}
-        --set OSK_PAD_TOP ${toString barStrip})
-    '';
-    postFixup = ''
-      wrapGApp $out/bin/on-screen-touchpad
-    '';
-    dontWrapGApps = true;
-  };
 
   #--- One DMS bar button per toggle
   button = id: name: icon: command:
@@ -124,25 +97,10 @@ in {
     Install.WantedBy = ["graphical-session.target"];
   };
 
-  #--- The touchpad daemon waits hidden; pad mode maps its window
-  systemd.user.services.on-screen-touchpad = {
-    Unit = {
-      Description = "On-screen touchpad (pad mode daemon)";
-      PartOf = ["graphical-session.target"];
-      After = ["graphical-session.target"];
-    };
-    Service = {
-      ExecStart = "${touchpad}/bin/on-screen-touchpad";
-      Restart = "always";
-      RestartSec = 1;
-    };
-    Install.WantedBy = ["graphical-session.target"];
-  };
-
-  #--- Raises the keyboard and touchpad over DMS's launcher and polkit dialog
+  #--- Raises the keyboard over DMS's launcher and polkit dialog
   systemd.user.services.osk-raise = {
     Unit = {
-      Description = "Keep the on-screen keyboard and touchpad on top";
+      Description = "Keep the on-screen keyboard on top";
       PartOf = ["graphical-session.target"];
       After = ["graphical-session.target"];
     };
@@ -160,12 +118,6 @@ in {
     input = ./wvkbd-colors.sh;
     output = colors;
     postHook = "systemctl --user restart wvkbd.service";
-  };
-
-  #--- The touchpad daemon watches this file itself
-  matugen.templates.on-screen-touchpad = {
-    input = ./touchpad.css.matugen;
-    output = "${config.xdg.configHome}/on-screen-touchpad/style.css";
   };
 
   #--------------------------------------------------------------------#
