@@ -10,6 +10,8 @@ Nothing updates on its own. The config pins every source to an exact version (th
 
 The run page lists the packages that changed version. **What's New** on the Maintenance page links to each source's changes on GitHub.
 
+**Pinned Versions**, under the sources, lists what an update never moves: apps pinned by hand to one release, nightly or commit, and packages switched off because they broke. It only reads; **Check Now** asks upstream which have something newer and which broken packages build again.
+
 Some updates switch at the next restart even if you picked Update Now: a new systemd, glibc, niri or xwayland-satellite has frozen the desktop when switched live. The Maintenance page then shows **Restart to finish**. A new kernel also needs a restart to start using it.
 
 Updating every week or two keeps each jump small, which makes problems easier to find.

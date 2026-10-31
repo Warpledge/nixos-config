@@ -1,4 +1,5 @@
-// The Maintenance page (id "overview"): updates, freeing space and earlier versions
+// The Maintenance page (id "overview"): updates, pinned versions, freeing space and
+// earlier versions
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
@@ -61,6 +62,17 @@ ColumnLayout {
             if (job.kind === "pull")
                 Backend.call("gitSummary", {}, reply => { if (reply.ok) page.view.gitCounts = reply.data })
             page.load()
+        }
+    }
+
+    //--- The header's pills jump to these sections (OmniView's focusOn)
+    Connections {
+        target: page.view
+        function onFocusRequested(key) {
+            const to = { "overview:sources": updatesHead, "overview:space": spaceHead,
+                         "overview:versions": versionsHead }[key]
+            if (to)
+                page.view.scrollToItem(to)
         }
     }
 
@@ -278,7 +290,7 @@ ColumnLayout {
     }
 
     //--- Updates
-    Section { visible: !!page.ov; text: "Updates" }
+    Section { id: updatesHead; visible: !!page.ov; text: "Updates" }
     ListRow {
         visible: !!page.ov && page.behind > 0
         icon: "download"
@@ -364,8 +376,12 @@ ColumnLayout {
         onClicked: page.update()
     }
 
+    //--- Pinned Versions: what a flake update never moves
+    Section { visible: !!page.ov; text: "Pinned Versions" }
+    PinnedVersions { visible: !!page.ov; view: page.view; Layout.fillWidth: true }
+
     //--- Free Up Space
-    Section { visible: !!page.ov; text: "Free Up Space" }
+    Section { id: spaceHead; visible: !!page.ov; text: "Free Up Space" }
     ActionRow {
         visible: !!page.ov
         enabled: page.admin
@@ -393,7 +409,7 @@ ColumnLayout {
     }
 
     //--- Earlier versions; the row keeps the running one and opens the rest
-    Section { visible: page.versions.length > 0; text: "Versions" }
+    Section { id: versionsHead; visible: page.versions.length > 0; text: "Versions" }
     ListRow {
         visible: !!page.current
         icon: page.current && page.current.running ? "radio_button_checked" : "history"

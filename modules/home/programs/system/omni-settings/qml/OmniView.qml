@@ -467,21 +467,19 @@ Item {
             const c = gitCounts
             return { text: `${c.branch ? c.branch + " · " : ""}${gitTag}`, alert: !!(c.changed || c.ahead || c.behind) }
         }
-        if (pid === "updates" && summaries) {
+        // Pinned Versions' cached check, then crashes
+        if (pid === "overview" && summaries) {
             const u = summaries.updates
-            if (!u)
-                return { text: "Not checked yet", alert: false }
-            const parts = [u.upstream ? `${plural(u.upstream, "update")} upstream` : "",
-                           u.fixed ? `${plural(u.fixed, "disabled package")} fixed` : ""].filter(p => p)
-            return { text: parts.join(" · ") || "Up to date", alert: parts.length > 0 }
+            const parts = u ? [u.upstream ? `${plural(u.upstream, "update")} upstream` : "",
+                               u.fixed ? `${plural(u.fixed, "disabled package")} fixed` : ""].filter(p => p) : []
+            const all = parts.concat(summaries.crashes ? [`${plural(summaries.crashes, "crash")} in 30 days`] : [])
+            return all.length ? { text: all.join(" · "), alert: parts.length > 0 } : null
         }
         if (pid === "backups" && summaries && summaries.backups.length) {
             const last = Math.max(...summaries.backups.map(b => b.last || 0))
             return { text: summaries.backups.map(b => b.title).join(", ")
                            + (last ? ` · last ${Fmt.ago(last)}` : " · none yet"), alert: false }
         }
-        if (pid === "overview" && summaries && summaries.crashes)
-            return { text: `${plural(summaries.crashes, "crash")} in 30 days`, alert: false }
         if (pid === "firmware" && firmwareUpdates > 0)
             return { text: `${plural(firmwareUpdates, "update")} waiting`, alert: true }
         if (pid === "page:Services" && servicesRunning >= 0)
@@ -516,7 +514,7 @@ Item {
             add(c.behind, "arrow_downward", `${c.behind} to pull`)
         }
         const u = summaries && summaries.updates
-        if (pid === "updates" && u) {
+        if (pid === "overview" && u) {
             add(u.upstream, "download", `${u.upstream} upstream`)
             add(u.fixed, "build", `${u.fixed} disabled fixed`)
         }
@@ -690,6 +688,28 @@ Item {
         scrollAnim.stop()
         scrollAnim.to = Math.max(0, Math.min(s.y, maxY()))
         scrollAnim.start()
+    }
+    //--- Scrolls to something inside an open page, a little below the top edge
+    function scrollToItem(item) {
+        const y = item.mapToItem(bodyFlick.contentItem, 0, 0).y - 16
+        scrollAnim.stop()
+        scrollAnim.to = Math.max(0, Math.min(y, maxY()))
+        scrollAnim.start()
+    }
+    //--- Opens a page, then asks whatever answers to `key` inside it (a SettingRow by
+    //--- its setting key, an OverviewPage section) to come into view, once the tab has
+    //--- built and the page has opened
+    signal focusRequested(string key)
+    function focusOn(tabId, pageId, key) {
+        focusTimer.interval = tabId !== tab ? 800 : 400
+        focusTimer.key = key
+        go(tabId, pageId)
+        focusTimer.restart()
+    }
+    Timer {
+        id: focusTimer
+        property string key
+        onTriggered: omni.focusRequested(key)
     }
     NumberAnimation {
         id: scrollAnim
@@ -1609,7 +1629,7 @@ Item {
 
     //--- Custom pages by id
     readonly property var custom: ({ overview: overviewPage, shell: shellPage, git: gitPage,
-                                      flatpaks: flatpaksPage, backups: backupsPage, updates: updatesPage,
+                                      flatpaks: flatpaksPage, backups: backupsPage,
                                       people: peoplePage,
                                       userpackages: userPackagesPage,
                                       proton: protonPage, protonversions: protonVersionsPage,
@@ -1877,7 +1897,6 @@ Item {
     Component { id: userPackagesPage; UserPackagesPage { view: omni } }
     Component { id: peoplePage; PeoplePage { view: omni } }
     Component { id: backupsPage; BackupsPage { view: omni } }
-    Component { id: updatesPage; UpdatesPage { view: omni } }
     Component { id: flatpaksPage; FlatpaksPage { view: omni } }
     Component { id: overviewPage; OverviewPage { view: omni } }
     Component { id: gitPage; GitPage { view: omni } }

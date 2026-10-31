@@ -35,6 +35,31 @@ Rectangle {
 
     HoverHandler { id: hover }
 
+    //--- Brought into view and flashed when OmniView's focusOn names this setting
+    Connections {
+        target: row.view
+        function onFocusRequested(key) {
+            if (key !== row.s.key)
+                return
+            row.view.scrollToItem(row)
+            flash.restart()
+        }
+    }
+    Rectangle {
+        id: glow
+        anchors.fill: parent
+        radius: 8
+        color: row.accent
+        opacity: 0
+        SequentialAnimation on opacity {
+            id: flash
+            running: false
+            PauseAnimation { duration: 250 }
+            NumberAnimation { to: 0.25; duration: 180 }
+            NumberAnimation { to: 0; duration: 900; easing.type: Easing.InQuad }
+        }
+    }
+
     ColumnLayout {
         id: col
         anchors.top: parent.top

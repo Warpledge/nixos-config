@@ -1,4 +1,4 @@
-"""The Updates page and `nixm check-updates`: what upstream has released since the
+"""Pinned Versions on the Maintenance page and `nixm check-updates`: what upstream has released since the
 versions the config pins by hand (lib/upstream.json, plus the machine's own
 machines/<name>/upstream.json), flake inputs locked to a version tag, and
 whether the packages in docs/nixpkgs/disabled-packages.md build again on

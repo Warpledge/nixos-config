@@ -2,6 +2,7 @@
 // facts, then CPU and memory over the last 5 minutes (api.py's `status` and `usage`)
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 
 ColumnLayout {
     id: header
@@ -51,23 +52,33 @@ ColumnLayout {
         const m = /^([\d.]+)-([a-z]+)\d*$/.exec(k || "")
         return m ? `${m[2]} ${m[1]}` : k
     }
+    //--- The NixOS manual's notes for "NixOS 26.11"'s release
+    function releaseNotes(release) {
+        const v = (/(\d+\.\d+)/.exec(release || "") || ["", ""])[1]
+        Qt.openUrlExternally(`https://nixos.org/manual/nixos/unstable/release-notes#sec-release-${v}`)
+    }
+    //--- Each fact's `act` opens what it describes
     readonly property var facts: {
         const out = []
         const info = view.info
         const st = status
         const git = view.gitCounts
         if (info && info.wm)
-            out.push({ icon: "view_column", text: info.wm, tone: "primary" })
+            out.push({ icon: "view_column", text: info.wm, tone: "primary",
+                       act: () => view.focusOn("system", "page:System", "machine:windowManager") })
         if (st)
-            out.push({ icon: "memory", text: kernelName(st.kernel), tone: "primary" },
-                     { icon: "", text: st.release, tone: "info" })
+            out.push({ icon: "memory", text: kernelName(st.kernel), tone: "primary",
+                       act: () => view.focusOn("system", "page:System", "machine:kernel") },
+                     { icon: "", text: st.release, tone: "info", act: () => releaseNotes(st.release) })
         if (usage)
-            out.push({ icon: "hard_drive", text: `${Fmt.size(usage.diskFree)} free`, tone: "primary" })
+            out.push({ icon: "hard_drive", text: `${Fmt.size(usage.diskFree)} free`, tone: "primary",
+                       act: () => view.focusOn("main", "overview", "overview:space") })
         // Git as its icon, then the collapsed Git page's badges for what's waiting
+        const toGit = () => view.go("main", "git")
         if (git && git.branch)
-            return out.concat([{ icon: "fork_right", text: "", tip: `On ${git.branch}` }],
+            return out.concat([{ icon: "fork_right", text: "", tip: `On ${git.branch}`, act: toGit }],
                               view.pageAlerts("git").map(a => ({ icon: a.icon, text: `${a.n}`,
-                                                                 tip: a.tip, tone: "caution" })))
+                                                                 tip: a.tip, tone: "caution", act: toGit })))
         return out
     }
 
@@ -105,6 +116,7 @@ ColumnLayout {
                             fill: Qt.alpha(Theme.primary, 0.2)
                             ink: Theme.primary
                             tip: "This computer"
+                            act: () => header.view.go("system", "page:System")
                         }
                         Item { Layout.fillWidth: true }
                         // Opens Users
@@ -154,9 +166,10 @@ ColumnLayout {
                             fill: Theme.cardHover
                             ink: Theme.text
                             tip: "The running system version (generation)"
+                            act: () => header.view.focusOn("main", "overview", "overview:versions")
                         }
                         Item { Layout.fillWidth: true }
-                        // Changes not yet applied open Review
+                        // Changes not yet applied open Review; up to date, the update check
                         Tag {
                             readonly property bool pending: header.waiting > 0
                             icon: ""
@@ -165,12 +178,8 @@ ColumnLayout {
                             text: pending ? `${header.waiting} change${header.waiting === 1 ? "" : "s"}` : "Up to date"
                             fill: Qt.alpha(pending ? Theme.caution : Theme.success, 0.14)
                             ink: pending ? Theme.caution : Theme.success
-                            HoverHandler { enabled: parent.pending; cursorShape: Qt.PointingHandCursor }
-                            TapHandler {
-                                enabled: parent.pending
-                                gesturePolicy: TapHandler.ReleaseWithinBounds
-                                onTapped: header.view.startReview()
-                            }
+                            act: () => pending ? header.view.startReview()
+                                : header.view.focusOn("main", "overview", "overview:sources")
                         }
                     }
                 }
@@ -204,6 +213,7 @@ ColumnLayout {
                             icon: modelData.icon
                             text: modelData.text
                             tip: modelData.tip || ""
+                            act: modelData.act || null
                             fill: modelData.tone ? Qt.alpha(Theme.toneColor(modelData.tone), 0.16) : Theme.cardHover
                             ink: modelData.tone ? Theme.toneColor(modelData.tone) : Theme.dim
                         }
@@ -213,13 +223,16 @@ ColumnLayout {
         }
     }
 
-    //--- CPU and memory, each a value and its last 5 minutes
+    //--- CPU and memory, each a value and its last 5 minutes; both open Resources
+    readonly property var openMonitor: status && status.monitor
+        ? () => Quickshell.execDetached(["resources"]) : null
     RowLayout {
         Layout.fillWidth: true
         spacing: 8
-        Graph { label: "CPU"; values: header.cpuHistory; value: header.cpu }
+        Graph { label: "CPU"; values: header.cpuHistory; value: header.cpu; act: header.openMonitor }
         Graph {
             label: "RAM"
+            act: header.openMonitor
             values: header.memHistory
             value: header.mem
             tip: header.usage ? `${Fmt.size(header.usage.memUsed)} of ${Fmt.size(header.usage.memTotal)}` : ""
@@ -235,6 +248,7 @@ ColumnLayout {
         property string tip: ""
         property color fill: Theme.cardHover
         property color ink: Theme.dim
+        property var act: null  // run on a click, when set
         implicitWidth: pillRow.implicitWidth + (big ? 20 : 16)
         implicitHeight: big ? 26 : 22
         radius: height / 2
@@ -245,6 +259,12 @@ ColumnLayout {
         HoverHandler {
             id: tipHover
             onHoveredChanged: hovered && pill.tip ? Tip.request(pill, pill.tip, point.scenePosition) : Tip.cancel(pill)
+        }
+        HoverHandler { enabled: !!pill.act; cursorShape: Qt.PointingHandCursor }
+        TapHandler {
+            enabled: !!pill.act
+            gesturePolicy: TapHandler.ReleaseWithinBounds
+            onTapped: pill.act()
         }
         Row {
             id: pillRow
@@ -280,6 +300,7 @@ ColumnLayout {
         property var values: []
         property real value: -1
         property string tip: ""
+        property var act: null  // run on a click, when set
         readonly property color tint: value < 0 ? Theme.dim : Theme.loadColor(value)
         Layout.fillWidth: true
         Layout.preferredWidth: 1  // equal halves
@@ -318,6 +339,12 @@ ColumnLayout {
         HoverHandler {
             id: hover
             onHoveredChanged: hovered && graph.tip ? Tip.request(graph, graph.tip, point.scenePosition) : Tip.cancel(graph)
+        }
+        HoverHandler { enabled: !!graph.act; cursorShape: Qt.PointingHandCursor }
+        TapHandler {
+            enabled: !!graph.act
+            gesturePolicy: TapHandler.ReleaseWithinBounds
+            onTapped: graph.act()
         }
     }
 }

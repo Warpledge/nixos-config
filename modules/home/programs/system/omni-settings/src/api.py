@@ -71,7 +71,6 @@ TAB_ICONS = {"main": ("applications-engineering-symbolic",),
 #--- Battery only with a battery, Run on dGPU only with nvidia-offload and
 #--- AppArmor only with the profile list apparmor/default.nix writes.
 TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
-                ("updates", "Updates", ("software-update-available-symbolic", "view-refresh-symbolic")),
                 ("git", "Git", ("vcs-branch-symbolic", "branch-symbolic", "folder-remote-symbolic")),
                 ("flatpaks", "Flatpaks", ("flatpak-symbolic", "system-software-install-symbolic")),
                 ("backups", "Backups", ("drive-harddisk-symbolic", "document-save-symbolic"))],
@@ -97,12 +96,11 @@ TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
        "docs": []}
 
 #--- The line under each page in the page list that has no description of its own
-NAV_SUBTITLES = {"overview": "Updates, freeing space, versions, crashes", "git": "Changes, commits, pull requests",
+NAV_SUBTITLES = {"overview": "Updates, pinned versions, freeing space, versions, crashes",
+                 "git": "Changes, commits, pull requests",
                  "flatpaks": "Apps nixpkgs doesn't have: update them, clean up, and switch each one "
                              "on or off",
                  "backups": "Back up app data",
-                 "updates": "New upstream versions of hand-pinned apps, and disabled packages that "
-                            "build again",
                  "people": "Who can log in to this computer. Each person picks their own apps by "
                            "opening Omni Settings on their own account.", "packages": "Find packages in nixpkgs",
                  "shell": "DankMaterialShell, the bar, launcher and lock screen niri runs with. "
@@ -615,11 +613,13 @@ def cmd_freed(_cfg, _args):
 
 
 def cmd_status(_cfg, _args):
-    """What the header shows: this computer, its NixOS release, kernel and running version."""
+    """What the header shows: this computer, its NixOS release, kernel and running version,
+    and whether Resources is installed for the CPU and RAM graphs to open."""
     running = os.path.realpath(closure.CURRENT)
     generation = next((g.number for g in closure.generations() if g.path == running), 0)
     return {"hostname": socket.gethostname(), "release": system.os_release().split(" (")[0],
-            "kernel": platform.release(), "generation": generation}
+            "kernel": platform.release(), "generation": generation,
+            "monitor": shutil.which("resources") is not None}
 
 
 def cmd_usage(_cfg, _args):

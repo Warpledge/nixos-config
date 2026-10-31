@@ -1,4 +1,5 @@
-// The Updates page: upstream versions past the config's hand-made pins (api.py's `upstream`)
+// Pinned Versions, on the Maintenance page: upstream versions past the config's hand-made
+// pins (api.py's `upstream`)
 import QtQuick
 import QtQuick.Layouts
 
@@ -52,51 +53,18 @@ ColumnLayout {
         return r.status === "update" ? `${r.current} → ${r.latest}` : "Up to date"
     }
 
-    //--- Hero
-    Rectangle {
-        Layout.fillWidth: true
-        implicitHeight: hero.implicitHeight + 28
-        radius: 16
-        color: Theme.card
-        ColumnLayout {
-            id: hero
-            anchors.fill: parent
-            anchors.margins: 14
-            spacing: 10
-            Text {
-                text: !page.up ? "Not checked yet"
-                    : page.updates ? `${page.updates} update${page.updates > 1 ? "s" : ""} upstream`
-                    : "Everything is current"
-                color: Theme.text
-                font.pixelSize: 18
-                font.weight: Font.DemiBold
-                TitleTip {
-                    tip: "Read-only: nothing here changes a pin. Checked at most once an hour unless "
-                         + "you check now. Also in a terminal as `nixm check-updates`."
-                }
-            }
-            Text {
-                visible: !!page.up && !!page.up.checked
-                text: page.up && page.up.checked ? `Checked ${Fmt.when(page.up.checked)}` : ""
-                color: Theme.dim
-                font.pixelSize: 14
-            }
-            Pill {
-                Layout.alignment: Qt.AlignHCenter
-                enabled: !page.loading
-                text: page.loading ? "Checking…" : "Check Now"
-                onClicked: page.load(true, false)
-            }
-        }
-    }
-
-    Text {
-        visible: page.error !== ""
-        text: page.error
-        color: Theme.error
-        wrapMode: Text.Wrap
-        Layout.fillWidth: true
-        Layout.margins: 6
+    ListRow {
+        icon: page.loading ? "progress_activity" : "push_pin"
+        title: "Pinned Versions"
+        info: "Hand-pinned apps and disabled packages, against upstream. Read-only: nothing here "
+              + "changes a pin. Checked at most once an hour unless you check now. Also in a "
+              + "terminal as `nixm check-updates`."
+              + (page.up && page.up.checked ? ` Checked ${Fmt.when(page.up.checked)}.` : "")
+        value: page.loading ? "Checking…" : !page.up ? "Not checked"
+            : page.updates ? `${page.updates} upstream` : "Up to date"
+        alert: page.error ? `Couldn't check: ${page.error}` : ""
+        button: page.loading ? "" : "Check Now"
+        onClicked: if (!page.loading) page.load(true, false)
     }
 
     Repeater {
