@@ -6,6 +6,7 @@ SIGUSR1 (osk-autocorrect) turns it on; the state survives restarts. Swipe stroke
 loads the dictionary ahead of the first one. Words stay in memory and are never logged."""
 
 import functools
+import itertools
 import math
 import os
 import select
@@ -164,7 +165,8 @@ class Speller:
             if not (word[-1] == path[-1] or near(word[-1], path[-1])):
                 continue
             middle = iter(path[1:-1] if word[0] != path[0] or word[-1] != path[-1] else path)
-            if not all(c in middle for c in word[1:-1]):
+            # A stroke crosses a doubled letter once
+            if not all(c in middle for c, _ in itertools.groupby(word[1:-1])):
                 continue
             # How far the keys crossed are from the straight lines through the word
             shape = plain_distance(path, stroke_of(word)) / len(path)
