@@ -135,6 +135,7 @@
         terminal = {enable = false;};
       };
       steamGames = {};
+      pi.enable = false;
     };
   };
 
@@ -185,4 +186,9 @@
   boot.menu.entries = 10;
   blocklist.allow = [];
   apparmor.enforce = [];
+  maintenance.clean = "weekly";
+  maintenance.keepDays = 5;
+  maintenance.keepGenerations = 5;
+  maintenance.optimise = "daily";
+  maintenance.updateReminderDays = 30;
 }
