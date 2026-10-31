@@ -63,6 +63,8 @@ WEAK_MIN_COUNT = 1_000_000
 SHORT_LEN = 4
 SHORT_MIN_COUNT = 100_000_000
 STROKE_FREQ = 0.04  # swipe: score per factor of ten, against a stroke's shape match
+STROKE_END_MISS = 0.3  # swipe: a word not starting or ending where the stroke did
+STROKE_MIN_COUNT = 0  # swipe: words rarer than this aren't considered
 
 
 def near(a, b):
@@ -158,7 +160,7 @@ class Speller:
         letters must be on or beside the stroke's ends, the rest in order between."""
         best, best_score = None, None
         for word, count in self.sym.words.items():
-            if len(word) < 2 or len(word) > len(path) + 3:
+            if len(word) < 2 or len(word) > len(path) + 3 or count < STROKE_MIN_COUNT:
                 continue
             if not (word[0] == path[0] or near(word[0], path[0])):
                 continue
@@ -171,6 +173,7 @@ class Speller:
             # How far the keys crossed are from the straight lines through the word
             shape = plain_distance(path, stroke_of(word)) / len(path)
             score = STROKE_FREQ * math.log10(count) - shape
+            score -= STROKE_END_MISS * ((word[0] != path[0]) + (word[-1] != path[-1]))
             if best_score is None or score > best_score:
                 best, best_score = word, score
         return best

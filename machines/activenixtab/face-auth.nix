@@ -19,7 +19,8 @@
     control = "sufficient";
     #--- The IR camera; /dev/videoN numbers can change
     settings.video.device_path = "/dev/v4l/by-path/pci-0000:c4:00.4-usb-0:1:1.2-video-index0";
-    settings.debug.end_report = true;
+    #--- IR frames are mostly dark; the default of 60 rejects whole scans as too dark
+    settings.video.dark_threshold = 90;
   };
 
   services.linux-enable-ir-emitter = {
