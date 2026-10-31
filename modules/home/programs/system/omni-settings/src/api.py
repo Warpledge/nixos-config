@@ -1076,6 +1076,49 @@ def cmd_apparmor_check(_cfg, args):
         raise ValueError(str(e))
 
 
+#--------------------------------------------------------------------#
+#-- MCP Keys
+#--------------------------------------------------------------------#
+#--- The MCP servers that read a key from ~/.nixos-config-mcp (ai/mcp.nix)
+MCP_KEYS = {"context7": "Context7", "github": "GitHub"}
+MCP_DIR = os.path.expanduser("~/.nixos-config-mcp")
+
+
+def cmd_mcp_keys(cfg, _args):
+    """Each keyed server the user has on and whether its file holds a key; never the key."""
+    mcp = (loaded(cfg).resolved["users"][cfg.user].get("claude") or {}).get("mcp") or {}
+    out = []
+    for server, title in MCP_KEYS.items():
+        if not mcp.get(server):
+            continue
+        try:
+            st = os.lstat(os.path.join(MCP_DIR, server))
+            is_set = st.st_size > 0 and not os.path.islink(os.path.join(MCP_DIR, server))
+        except OSError:
+            is_set = False
+        out.append({"server": server, "title": title, "set": is_set})
+    return out
+
+
+def cmd_set_mcp_key(_cfg, args):
+    """Writes args.key as the owner-only file for args.server; an empty key clears it.
+    Called only through --serve's stdin (Backend.callPrivate), so the key is never in argv."""
+    server, key = args.get("server", ""), args.get("key", "")
+    if server not in MCP_KEYS:
+        raise ValueError("Unknown MCP server.")
+    if key and sys.argv[1:] != ["--serve"]:
+        raise ValueError("A key goes through the --serve backend, never the command line.")
+    if not isinstance(key, str) or "\n" in key.strip() or len(key) > 4096:
+        raise ValueError("Paste the key on one line.")
+    os.makedirs(MCP_DIR, mode=0o700, exist_ok=True)
+    os.chmod(MCP_DIR, 0o700)
+    fd = os.open(os.path.join(MCP_DIR, server), os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o600)
+    with os.fdopen(fd, "w") as f:
+        os.fchmod(fd, 0o600)
+        f.write(key.strip())
+    return {"set": bool(key.strip())}
+
+
 def cmd_ssh_keys(_cfg, _args):
     return securitystate.ssh_keys()
 
@@ -1387,6 +1430,7 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "blockLookup": cmd_block_lookup,
             "apparmor": cmd_apparmor, "apparmorCheck": cmd_apparmor_check,
             "sshKeys": cmd_ssh_keys, "sshGithub": cmd_ssh_github, "sshGenerate": cmd_ssh_generate,
+            "mcpKeys": cmd_mcp_keys, "setMcpKey": cmd_set_mcp_key,
             "packageNames": cmd_package_names, "packageSearch": cmd_package_search,
             "packagePreviews": cmd_package_previews,
             "resetApp": cmd_reset_app, "doc": cmd_doc, "docLink": cmd_doc_link, "launchOptions": cmd_launch_options, "protonVersions": cmd_proton_versions, "steamGames": cmd_steam_games,

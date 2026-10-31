@@ -25,6 +25,18 @@ Singleton {
         server.write(JSON.stringify({ id, cmd, args: args || {} }) + "\n")
     }
 
+    //--- As call(), but only through the --serve backend's stdin, never argv (which
+    //--- /proc shows every user), for secrets like an API key; waits for it to start
+    property var held: []
+    function callPrivate(cmd, args, done) {
+        if (server.up) {
+            call(cmd, args, done)
+            return
+        }
+        held = held.concat([[cmd, args, done]])
+        server.running = true
+    }
+
     function answer(line) {
         let msg
         try {
@@ -47,6 +59,10 @@ Singleton {
         onStarted: {
             up = true
             idle.restart()
+            const queued = backend.held
+            backend.held = []
+            for (const q of queued)
+                backend.call(q[0], q[1], q[2])
         }
         onExited: {
             up = false
@@ -55,6 +71,11 @@ Singleton {
             for (const id in lost)
                 if (lost[id])
                     lost[id]({ ok: false, error: "omni-settings-backend stopped" })
+            const held = backend.held
+            backend.held = []
+            for (const q of held)
+                if (q[2])
+                    q[2]({ ok: false, error: "omni-settings-backend didn't start" })
         }
     }
 

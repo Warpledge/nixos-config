@@ -292,6 +292,13 @@ ColumnLayout {
                 Layout.preferredHeight: item ? item.implicitHeight : 0
                 sourceComponent: SshKeys { view: page.view }
             }
+            Loader {
+                active: group.modelData.title === "MCP Servers"
+                visible: active
+                Layout.fillWidth: true
+                Layout.preferredHeight: item ? item.implicitHeight : 0
+                sourceComponent: McpKeys { view: page.view }
+            }
         }
     }
 
