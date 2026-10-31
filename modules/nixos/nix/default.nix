@@ -4,6 +4,7 @@
 {
   pkgs,
   inputs,
+  machine,
   ...
 }: {
   #--------------------------------------------------------------------#
@@ -21,9 +22,18 @@
     daemonCPUSchedPolicy = "batch"; # Low CPU priority for daemon
     daemonIOSchedClass = "idle"; # Idle IO priority for daemon
     daemonIOSchedPriority = 7; # Lowest IO priority level
+    #--- maintenance.optimise in the machine's settings.nix
     optimise = {
-      automatic = true;
-      dates = ["04:00"];
+      automatic = machine.maintenance.optimise != "off";
+      dates =
+        {
+          daily = ["04:00"];
+          weekly = ["Mon 04:00"];
+          monthly = ["*-*-01 04:00"];
+          off = ["04:00"];
+        }.${
+          machine.maintenance.optimise
+        };
     };
 
     #--------------------------------------------------------------------#

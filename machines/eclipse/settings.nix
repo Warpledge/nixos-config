@@ -57,6 +57,7 @@
       media.aniCli = false;
       security.keepassxc = false;
       opencodeDesktop.enable = true;
+      pi.enable = true;
       openWebui.enable = false;
       claude.plugins.claudeSecurity = false;
       claude.accountSkills.docx = true;
@@ -112,7 +113,14 @@
       mangohud.textColor = "00FF00";
       mangohud.background = 0;
       gpuOffload = [];
-      steamGames = {};
+      steamGames = {
+        "438130" = {launchOptions = "nix-vn-720p %command%";};
+        "948740" = {launchOptions = "nix-vn-1080p %command%";};
+        "1698960" = {launchOptions = "";};
+        "4256180" = {launchOptions = "nix-vn-768p %command%";};
+        "4732690" = {launchOptions = "PROTON_LOG=1 ENABLE_LAYER_MESA_ANTI_LAG=1 nix-performance %command%";};
+      };
+      claude.mods.ribbon = true;
     };
   };
 
@@ -213,4 +221,9 @@
   boot.menu.entries = 10;
   apparmor.enforce = ["evince" "file-roller" "katana-floorboard" "mpv" "obsidian" "prismlauncher" "streamlink" "tonkatsu-box" "tsunagu" "unrar" "yt-dlp"];
   blocklist.allow = [];
+  maintenance.clean = "weekly";
+  maintenance.keepDays = 5;
+  maintenance.keepGenerations = 5;
+  maintenance.optimise = "daily";
+  maintenance.updateReminderDays = 30;
 }

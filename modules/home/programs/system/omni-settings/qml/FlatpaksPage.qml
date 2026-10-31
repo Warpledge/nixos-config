@@ -1,5 +1,6 @@
 // The Flatpaks page: Flatpak's own switch, the apps and runtimes installed,
-// updates and clean-up. An app's switch uninstalls or reinstalls it right away.
+// updates and clean-up, and Flathub search. An app's switch uninstalls or
+// reinstalls it right away, and Install puts a Flathub app in the user's installation.
 import QtQuick
 import QtQuick.Layouts
 
@@ -31,19 +32,21 @@ ColumnLayout {
 
     Component.onCompleted: load()
 
-    function run(action, key) {
+    function run(action, key, extra) {
         if (busy) {
             view.say("Wait for the running Flatpak job to finish")
             return
         }
         busy = key || action
         progress = ""
-        Backend.stream("flatpakRun", { action, key }, line => progress = line, reply => {
+        Backend.stream("flatpakRun", Object.assign({ action, key }, extra || {}), line => progress = line, reply => {
             busy = ""
             if (reply.ok) {
                 view.say(reply.data)
                 if (action === "update")
                     found = []
+                if (action === "flathub")
+                    page.search()
             } else {
                 const [heading, ...rest] = reply.error.split("\n\n")
                 view.ask({ heading, body: rest.join("\n\n"), cancel: false,
@@ -81,26 +84,42 @@ ColumnLayout {
         }, () => run("uninstall", app.key))
     }
 
+    //--- Flathub search: flatpak's local appstream data, so no request per key
+    property var results: null  // flatpakSearch's {results, count}
+    property string searchError: ""
+    function search() {
+        const text = hubField.text.trim()
+        if (text.length < 2) {
+            results = null
+            return
+        }
+        Backend.call("flatpakSearch", { text }, reply => {
+            if (!page || hubField.text.trim() !== text)
+                return  // left, or typed on since
+            results = reply.ok ? reply.data : null
+            searchError = reply.ok ? "" : reply.error
+        })
+    }
+    Timer { id: searchDelay; interval: 300; onTriggered: page.search() }
+
+    function install(r) {
+        view.ask({ heading: `Install ${r.name}?`,
+                   body: `From Flathub, for you alone (${r.id}).`,
+                   buttons: [{ label: "Install", value: true }] },
+                 () => run("flathub", "flathub:" + r.id, { id: r.id, name: r.name }))
+    }
+
     function where(ref) { return ref.installation === "system" ? "Everyone" : "Just you" }
 
     //--- Flatpak's own switch, a machine setting like any other
     Repeater {
         model: page.setting ? page.setting.groups : []
-        ColumnLayout {
-            id: group
+        SettingGroup {
             required property var modelData
-            Layout.fillWidth: true
-            spacing: 6
-            Repeater {
-                model: group.modelData.settings
-                SettingRow {
-                    required property var modelData
-                    setting: modelData
-                    view: page.view
-                    locked: !page.view.info.direct
-                    pageGlyph: "widgets"
-                }
-            }
+            settings: modelData.settings
+            view: page.view
+            locked: !page.view.info.direct
+            pageGlyph: "widgets"
         }
     }
     Text {
@@ -150,29 +169,44 @@ ColumnLayout {
         //--- Updates
         Section { text: "Updates" }
         ListRow {
-            icon: page.checking || page.busy === "update" ? "progress_activity" : "update"
+            icon: page.checking || page.busy ? "progress_activity" : "update"
             title: "Apps and Runtimes"
             tone: page.busy === "update" || page.checking ? "" : page.checkError ? "error"
                 : page.found === null ? "" : page.found.length ? "caution" : "success"
             info: page.found && page.found.length
                 ? `Newer versions of: ${page.found.slice(0, 6).join(", ")}${page.found.length > 6 ? "…" : ""}`
                 : "Looks for newer versions of every Flatpak app and the runtimes they use"
-            subtitle: page.busy === "update" ? page.progress : ""
+            subtitle: !page.busy ? ""
+                : page.progress || { update: "Updating…", unused: "Removing…", repair: "Repairing…" }[page.busy]
             value: page.busy === "update" ? "Updating…"
                 : page.checking ? "Checking…"
                 : page.checkError || page.found === null ? ""
                 : !page.found.length ? "Up to date"
                 : `${page.found.length} to update`
             alert: page.checkError && !page.checking ? `Couldn't check: ${page.checkError}` : ""
-            button: page.checking || page.busy ? "" : page.found && page.found.length ? "Update All"
-                  : page.found ? "Check Again" : "Check"
-            onClicked: {
-                if (page.checking || page.busy)
-                    return
-                if (page.found && page.found.length)
-                    page.run("update")
-                else
-                    page.check()
+        }
+        //--- Every Flatpak action together: tidy-ups outlined, the update filled
+        Flow {
+            Layout.fillWidth: true
+            layoutDirection: Qt.RightToLeft
+            spacing: 8
+            OutlineButton {
+                filled: true
+                enabled: !page.checking && !page.busy
+                text: page.found && page.found.length ? "Update All" : page.found ? "Check Again" : "Check for Updates"
+                onClicked: page.found && page.found.length ? page.run("update") : page.check()
+            }
+            OutlineButton {
+                enabled: !page.busy
+                text: "Remove Unused"
+                tip: "Uninstalls runtimes and extensions no installed app needs"
+                onClicked: page.run("unused")
+            }
+            OutlineButton {
+                enabled: !page.busy
+                text: "Repair"
+                tip: "Checks every installed file and downloads again any that are missing or damaged"
+                onClicked: page.run("repair")
             }
         }
 
@@ -190,9 +224,62 @@ ColumnLayout {
             visible: !!page.fp && page.fp.installed && !page.fp.apps.length && !page.fp.off.length
             icon: "widgets"
             title: "No Flatpak apps yet"
-            info: "Find one on flathub.org, then install it with: flatpak install flathub <its id>"
+            info: "Search Flathub below, or browse flathub.org."
             trailing: "open_in_new"
             onClicked: Qt.openUrlExternally("https://flathub.org")
+        }
+
+        //--- Flathub
+        Section {
+            text: "Get Apps from Flathub"
+            info: "Installs for you alone, straight away. Prefer the app's switch under Default Packages "
+                  + "when the config has one."
+        }
+        Rectangle {
+            Layout.fillWidth: true
+            implicitHeight: 52
+            radius: 14
+            color: Theme.card
+            Field {
+                id: hubField
+                anchors.fill: parent
+                anchors.margins: 8
+                icon: "search"
+                placeholder: "Search Flathub"
+                onTextChanged: searchDelay.restart()
+            }
+        }
+        Text {
+            visible: page.searchError !== ""
+            text: page.searchError
+            color: Theme.error
+            wrapMode: Text.Wrap
+            Layout.fillWidth: true
+            Layout.leftMargin: 6
+        }
+        Repeater {
+            model: page.results ? page.results.results : []
+            ListRow {
+                required property var modelData
+                readonly property bool working: page.busy === "flathub:" + modelData.id
+                icon: working ? "progress_activity" : "widgets"
+                app: [modelData.id + ".desktop", modelData.id]
+                title: modelData.name
+                subtitle: working ? page.progress || "Installing…" : modelData.id
+                info: modelData.description + (modelData.version ? ` (${modelData.version})` : "")
+                value: modelData.installed ? "Installed" : ""
+                tone: modelData.installed ? "success" : ""
+                button: modelData.installed || page.busy ? "" : "Install"
+                onClicked: page.install(modelData)
+            }
+        }
+        Text {
+            visible: !!page.results && (page.results.count === 0 || page.results.count > page.results.results.length)
+            text: !page.results ? "" : page.results.count === 0 ? "Nothing on Flathub matches."
+                : `${page.results.count - page.results.results.length} more: type more of the name.`
+            color: Theme.dim
+            font.pixelSize: 13
+            Layout.leftMargin: 6
         }
 
         //--- Runtimes
@@ -269,25 +356,6 @@ ColumnLayout {
                     }
                 }
             }
-        }
-
-        //--- Maintenance
-        Section { text: "Maintenance" }
-        ListRow {
-            icon: page.busy === "unused" ? "progress_activity" : "delete_sweep"
-            title: "Remove Unused Runtimes"
-            info: "Uninstalls runtimes and extensions that no installed app needs any more."
-            subtitle: page.busy === "unused" ? (page.progress || "Removing…") : ""
-            button: page.busy ? "" : "Remove"
-            onClicked: if (!page.busy) page.run("unused")
-        }
-        ListRow {
-            icon: page.busy === "repair" ? "progress_activity" : "build"
-            title: "Repair"
-            info: "Checks every installed file and downloads again any that are missing or damaged."
-            subtitle: page.busy === "repair" ? (page.progress || "Repairing…") : ""
-            button: page.busy ? "" : "Repair"
-            onClicked: if (!page.busy) page.run("repair")
         }
     }
 

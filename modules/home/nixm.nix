@@ -397,7 +397,7 @@
           echo "Running dry-run rebuild (no changes will be made)..."
           nh os switch --dry "$FLAKE_PATH#nixosConfigurations.$MACHINE"
           ;;
-        #--- Omni Settings' Updates page check (src/updatestate.py), as a table
+        #--- Omni Settings' Pinned Versions check (src/updatestate.py), as a table
         check-updates)
           echo "Checking upstream versions..."
           ${config.omni-settings.package}/bin/omni-settings-backend upstream '{"force":true}' |

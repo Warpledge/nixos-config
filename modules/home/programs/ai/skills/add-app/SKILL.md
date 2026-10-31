@@ -47,7 +47,7 @@ catches the step that usually gets missed.
    `modules/nixos/services/<category>/`). L1 header, short comments per Comment Style.
    An app pinned to an upstream GitHub release (AppImage, `.deb`, jar, tarball) or commit
    also gets an entry in `lib/upstream.json` (a machine's own app: that machine's
-   `upstream.json`), so Omni Settings' Updates page and `nixm check-updates` watch it.
+   `upstream.json`), so Omni Settings' Pinned Versions and `nixm check-updates` watch it.
 3. **Import** in the router, `programs/default.nix` (`gaming.*` apps: `programs/gaming/default.nix`;
    services: `nixos/default.nix`):
    `++ lib.optionals user.<category>.<app> [./<category>/<app>.nix]`. A NixOS-side gate on

@@ -606,8 +606,9 @@ ColumnLayout {
                                 tappable: false
                                 required property var modelData
                                 text: modelData.text
-                                tone: page.tone(modelData.kind)
-                                accent: modelData.kind === "accent"
+                                // What changes where the window opens stands out from styling
+                                tone: modelData.group === "Privacy" ? "error" : ""
+                                accent: ["Floating", "Size & Position", "Placement"].includes(modelData.group)
                             }
                         }
                         Chip { tappable: false; visible: row.rule.custom; text: "Yours" }

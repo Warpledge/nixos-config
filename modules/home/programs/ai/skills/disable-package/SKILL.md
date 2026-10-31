@@ -38,4 +38,5 @@ The record lives in `docs/nixpkgs/disabled-packages.md`; read it first, since it
    **unfree** one isn't built by Hydra, so flip it back on and try `nixm dryrun` (ask the
    user to run it).
 2. When it builds, undo step 2, **delete** its table row, and check. If it still fails,
-   update the row's revision and reason instead of guessing.
+   update the row's revision and reason instead of guessing. A toggle row can also be
+   turned back on from Omni Settings' Disabled Packages page, which drops the row itself.

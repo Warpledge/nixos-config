@@ -1,6 +1,7 @@
 // Omni Settings' content, the same in the window and (later) DMS's slideout.
 // Pending changes live here until Review hands them to api.py and the job service.
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
 
@@ -9,9 +10,11 @@ Item {
 
     signal closeRequested
 
-    property int edge: 14  // gap between the view and the window's edges
+    property int edge: 6  // gap between the view and the window's edges, as the page frame's
     property int gutter: 8  // the part of `edge` left of the pages that holds their band
     property int frameInset: 6  // the page body inside its frame; clears the frame's corners
+    readonly property int railGap: 30  // above each later group on the rail, room for its name
+    readonly property int railItem: 38  // each page's icon on the rail, and its name's row
     property var info: null
     property string loadError: ""
     property var stale: null  // api.py's `stale`, when the settings files don't evaluate
@@ -48,7 +51,17 @@ Item {
         onTriggered: {
             Backend.call("gitSummary", {}, reply => { if (reply.ok) omni.gitCounts = reply.data })
             Backend.call("firmwareSummary", {}, reply => { if (reply.ok) omni.firmwareUpdates = reply.data })
+            Backend.call("summaries", {}, reply => { if (reply.ok) omni.summaries = reply.data })
         }
+    }
+    //--- api.py's `summaries`: cached update counts, crashes and backups, every minute
+    property var summaries: null
+    //--- Tabs with a page that has something waiting get a dot
+    readonly property var tabAlerts: {
+        const c = gitCounts || {}
+        const u = summaries && summaries.updates
+        return { main: !!(c.changed || c.ahead || c.behind || (u && (u.upstream || u.fixed))),
+                 hardware: firmwareUpdates > 0 }
     }
     //--- Firmware updates waiting, for the page list; the Firmware page updates it too
     property int firmwareUpdates: 0
@@ -123,21 +136,6 @@ Item {
     //--- Packages scroll, and All user packages shows only while there's no category
     readonly property var tabPages: navItems.filter(i => i.tab === tab && i.id !== "packages"
                                                     && !(i.id === "userpackages" && packageCategories.length))
-    //--- Each page's colour by id; a page that would match the one above takes the
-    //--- next, and a run of notes shares the first one's
-    readonly property var pageAccents: {
-        const out = {}
-        let prev = -1
-        tabPages.forEach((p, i) => {
-            const runOn = p.id.startsWith("doc:") && i > 0 && tabPages[i - 1].id.startsWith("doc:")
-            let n = runOn ? prev : Theme.accentIndex(p.id)
-            if (!runOn && n === prev)
-                n = (n + 1) % Theme.accentHues.length
-            out[p.id] = Theme.pageAccent(n)
-            prev = n
-        })
-        return out
-    }
     readonly property var scopes: !info ? [] : [{ id: info.machine, title: `This computer (${info.machine})` }]
         .concat(info.userMachines.filter(m => m !== info.machine).map(m => ({ id: m, title: m })))
         .concat([{ id: "", title: "All computers" }])
@@ -462,6 +460,89 @@ Item {
         }, mode => startJob("rebuild", { mode }))
     }
 
+    //--- A collapsed page's status in its title tip: {text, alert}, or null
+    function pageSummary(pid, model) {
+        const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`
+        if (pid === "git" && gitCounts) {
+            const c = gitCounts
+            return { text: `${c.branch ? c.branch + " · " : ""}${gitTag}`, alert: !!(c.changed || c.ahead || c.behind) }
+        }
+        // An update due (maintenance.updateReminderDays), Pinned Versions' cached check, then crashes
+        if (pid === "overview" && summaries) {
+            const u = summaries.updates
+            const due = summaries.updateDue ? [`packages ${summaries.updateDue} days old`] : []
+            const parts = due.concat(u ? [u.upstream ? `${plural(u.upstream, "update")} upstream` : "",
+                               u.fixed ? `${plural(u.fixed, "disabled package")} fixed` : ""].filter(p => p) : [])
+            const all = parts.concat(summaries.crashes ? [`${plural(summaries.crashes, "crash")} in 30 days`] : [])
+            return all.length ? { text: all.join(" · "), alert: parts.length > 0 } : null
+        }
+        if (pid === "backups" && summaries && summaries.backups.length) {
+            const last = Math.max(...summaries.backups.map(b => b.last || 0))
+            return { text: summaries.backups.map(b => b.title).join(", ")
+                           + (last ? ` · last ${Fmt.ago(last)}` : " · none yet"), alert: false }
+        }
+        if (pid === "firmware" && firmwareUpdates > 0)
+            return { text: `${plural(firmwareUpdates, "update")} waiting`, alert: true }
+        if (pid === "page:Services" && servicesRunning >= 0)
+            return { text: `${servicesRunning} running`, alert: false }
+        // A generated page: its first values, a switch by its name while it's on
+        if (model && !pid.startsWith("doc:")) {
+            const parts = []
+            for (const g of model.groups)
+                for (const s of g.settings) {
+                    const v = valueOf(s)
+                    if (s.kind === "bool") {
+                        if (v)
+                            parts.push(s.title)
+                    } else if (!(s.kind === "list" && !(v || []).length)) {
+                        parts.push(s.kind === "number" ? `${s.title} ${shownOf(s, v)}` : shownOf(s, v))
+                    }
+                }
+            if (parts.length)
+                return { text: parts.slice(0, 3).join(" · ") + (parts.length > 3 ? " …" : ""), alert: false }
+        }
+        return null
+    }
+
+    //--- What waits on a page, as icon and count badges on its collapsed header
+    function pageAlerts(pid) {
+        const out = []
+        const add = (n, icon, tip) => { if (n > 0) out.push({ n, icon, tip }) }
+        const c = gitCounts
+        if (pid === "git" && c) {
+            add(c.changed, "edit", `${c.changed} changed`)
+            add(c.ahead, "arrow_upward", `${c.ahead} to push`)
+            add(c.behind, "arrow_downward", `${c.behind} to pull`)
+        }
+        const u = summaries && summaries.updates
+        if (pid === "overview" && u) {
+            add(u.upstream, "download", `${u.upstream} upstream`)
+            add(u.fixed, "build", `${u.fixed} disabled fixed`)
+        }
+        if (pid === "firmware")
+            add(firmwareUpdates, "memory", `${firmwareUpdates} waiting`)
+        return out
+    }
+
+    //--- Scrolls the tab bar so the current tab shows whole
+    function showTab(item) {
+        const f = tabsFlick
+        if (f.contentWidth <= f.width)
+            return
+        const left = item.x - 24, right = item.x + item.width + 24
+        if (left < f.contentX)
+            f.contentX = Math.max(0, left)
+        else if (right > f.contentX + f.width)
+            f.contentX = Math.min(f.contentWidth - f.width, right - f.width)
+    }
+
+    function startReview() {
+        if (!info || !info.canApply || Jobs.running)
+            return
+        reviewing = true
+        review.load()
+    }
+
     //--- A modal question: ask({heading, body, buttons}, done(value))
     function ask(spec, done) { dialog.open(spec, done) }
     readonly property alias dialog: confirm
@@ -480,7 +561,9 @@ Item {
     //--------------------------------------------------------------------//
     //--- A tab is one scroll of its pages: go() to another tab builds its pages out
     //--- of sight, to a page in this tab scrolls there
-    function go(tabId, pageId) {
+    //--- Shows a tab, and scrolls to one of its pages, opening it unless `keepShut`
+    //--- (the rail jumps to a page as it is)
+    function go(tabId, pageId, keepShut) {
         picking = false
         search.text = ""
         omni.forceActiveFocus()
@@ -490,7 +573,9 @@ Item {
             packageSearch.focusField()
             return
         }
-        if (pageId && pageId.startsWith("doc:"))
+        if (keepShut)
+            ;
+        else if (pageId && pageId.startsWith("doc:"))
             openNote(pageId, true)
         else if (pageId && !openPages[pageId])
             setPageOpen(pageId, true)
@@ -577,6 +662,14 @@ Item {
     //--- The section under the view's top edge stays put, so a dropdown opened
     //--- anywhere in view pushes what's below it down instead of what's above up
     function anchorTop() {
+        const top = topSection()
+        if (!top)
+            return
+        anchorPage = top.pid
+        anchorOffset = bodyFlick.contentY - top.y
+    }
+    //--- The section under the view's top edge
+    function topSection() {
         const y = bodyFlick.contentY
         let top = null
         for (let i = 0; i < sections.count; i++) {
@@ -584,10 +677,7 @@ Item {
             if (s && s.visible && (s.y <= y || !top))
                 top = s
         }
-        if (!top)
-            return
-        anchorPage = top.pid
-        anchorOffset = y - top.y
+        return top
     }
     function scrollTo(pid) {
         const s = section(pid)
@@ -599,6 +689,28 @@ Item {
         scrollAnim.stop()
         scrollAnim.to = Math.max(0, Math.min(s.y, maxY()))
         scrollAnim.start()
+    }
+    //--- Scrolls to something inside an open page, a little below the top edge
+    function scrollToItem(item) {
+        const y = item.mapToItem(bodyFlick.contentItem, 0, 0).y - 16
+        scrollAnim.stop()
+        scrollAnim.to = Math.max(0, Math.min(y, maxY()))
+        scrollAnim.start()
+    }
+    //--- Opens a page, then asks whatever answers to `key` inside it (a SettingRow by
+    //--- its setting key, an OverviewPage section) to come into view, once the tab has
+    //--- built and the page has opened
+    signal focusRequested(string key)
+    function focusOn(tabId, pageId, key) {
+        focusTimer.interval = tabId !== tab ? 800 : 400
+        focusTimer.key = key
+        go(tabId, pageId)
+        focusTimer.restart()
+    }
+    Timer {
+        id: focusTimer
+        property string key
+        onTriggered: omni.focusRequested(key)
     }
     NumberAnimation {
         id: scrollAnim
@@ -629,6 +741,29 @@ Item {
         else
             delete c[pid]
         openPages = c
+        saveUi()
+    }
+    //--- The current tab's pages: any open, and opening or closing them all at once
+    readonly property bool anyOpen: tabPages.some(i => i.id.startsWith("doc:") ? !!openNotes[i.id]
+                                                                               : !!openPages[i.id])
+    //--- A section holding one page of its own name (PageSection's soleNamed)
+    function soleNamed(n) {
+        const p = tabPages[n], prev = tabPages[n - 1], next = tabPages[n + 1]
+        return (!prev || prev.group !== p.group) && p.title === p.group
+            && (!next || next.group !== p.group)
+    }
+    function setAllOpen(open) {
+        const pages = Object.assign({}, openPages)
+        const notes = Object.assign({}, openNotes)
+        for (const i of tabPages) {
+            const set = i.id.startsWith("doc:") ? notes : pages
+            if (open)
+                set[i.id] = true
+            else
+                delete set[i.id]
+        }
+        openPages = pages
+        openNotes = notes
         saveUi()
     }
     function saveUi() {
@@ -774,7 +909,7 @@ Item {
         anchors.bottom: parent.bottom
         anchors.margins: omni.edge
         anchors.topMargin: 10
-        anchors.rightMargin: omni.edge + rail.width + 10
+        anchors.rightMargin: omni.edge + rail.width + 6
         spacing: 10
         visible: !omni.reviewing && !omni.running && omni.sheet === null
 
@@ -788,90 +923,105 @@ Item {
             Layout.leftMargin: 6
         }
 
-        //--- Top tabs: icons, the hovered one stretching right to show its name
+        //--- Top tabs: icons, the current one a filled pill with its name. Spread across
+        //--- the width when they fit, else scrolled sideways with faded edges
         Rectangle {
             id: tabsBar
-            z: 3  // a hovered tab's name hangs below it, over the page
-            Layout.preferredWidth: tabsRow.implicitWidth + 6
-            implicitHeight: 44
-            radius: 22
+            Layout.fillWidth: true
+            implicitHeight: omni.railItem + 8  // the rail's width, so Rebuild beside it is square
+            radius: 14
             color: Theme.card
-            RowLayout {
-                id: tabsRow
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.leftMargin: 3
-                spacing: 2
-                Repeater {
-                    model: omni.info ? omni.info.tabs : []
-                    // Only the current tab shows its name in the row; a hovered tab's name
-                    // shows below its icon, so no tab moves under the cursor
-                    Item {
-                        id: tab
-                        required property var modelData
-                        readonly property bool active: omni.tab === modelData.id
-                        readonly property bool open: active
-                        readonly property real full: tabLabel.x + tabLabel.implicitWidth + 14
-                        Layout.preferredWidth: active ? full : 38
-                        Layout.preferredHeight: 38
-                        Behavior on Layout.preferredWidth { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-                        z: tabHover.hovered ? 2 : 0
-                        HoverHandler { id: tabHover; cursorShape: Qt.PointingHandCursor }
-                        TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: omni.go(tab.modelData.id) }
+            Flickable {
+                id: tabsFlick
+                anchors.fill: parent
+                anchors.margins: 4
+                contentWidth: tabsRow.width
+                flickableDirection: Flickable.HorizontalFlick
+                boundsBehavior: Flickable.StopAtBounds
+                clip: true
+                // A wheel scrolls sideways here
+                WheelHandler {
+                    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                    onWheel: event => {
+                        const d = event.angleDelta.y || event.angleDelta.x
+                        tabsFlick.contentX = Math.max(0, Math.min(tabsFlick.contentWidth - tabsFlick.width,
+                                                                  tabsFlick.contentX - d))
+                    }
+                }
+                Row {
+                    id: tabsRow
+                    readonly property real cells: {
+                        let w = 0
+                        for (let i = 0; i < children.length; i++)
+                            if (children[i].visible)
+                                w += children[i].width
+                        return w
+                    }
+                    readonly property int n: omni.info ? omni.info.tabs.length : 1
+                    height: tabsFlick.height
+                    spacing: Math.max(2, (tabsFlick.width - cells) / Math.max(1, n - 1))
+                    Repeater {
+                        model: omni.info ? omni.info.tabs : []
                         Rectangle {
-                            readonly property var modelData: tab.modelData
-                            readonly property bool active: tab.active
-                            readonly property bool open: tab.open
-                            width: open ? tab.full : 38
+                            id: tab
+                            required property var modelData
+                            readonly property bool active: omni.tab === modelData.id
+                            onActiveChanged: if (active) omni.showTab(tab)
+                            width: active ? tabLabel.x + tabLabel.implicitWidth + 14 : 38
                             height: 38
+                            anchors.verticalCenter: parent.verticalCenter
                             Behavior on width { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-                            radius: 19
+                            radius: 11
                             clip: true
-                            color: active ? Theme.primary : tabHover.hovered ? Theme.hover : "transparent"
+                            color: active ? Qt.alpha(Theme.primary, 0.28) : tabHover.hovered ? Theme.hover : "transparent"
                             Behavior on color { ColorAnimation { duration: 150 } }
                             Icon {
-                                x: 9
+                                id: tabIcon
+                                x: tab.active ? 10 : 8
                                 anchors.verticalCenter: parent.verticalCenter
-                                icon: Theme.glyph(modelData.icon)
-                                size: 20
-                                fill: active
-                                color: active ? Theme.inkPrimary : tabHover.hovered ? Theme.inkSelected : Theme.dim
+                                icon: Theme.glyph(tab.modelData.icon)
+                                size: 22
+                                fill: tab.active
+                                color: tab.active ? Theme.primary : tabHover.hovered ? Theme.text : Theme.dim
+                                // Something waiting on one of the tab's pages
+                                Rectangle {
+                                    visible: !!omni.tabAlerts[tab.modelData.id]
+                                    x: parent.width - 5
+                                    y: -1
+                                    width: 8; height: 8; radius: 4
+                                    color: Theme.caution
+                                    border.width: 1.5
+                                    border.color: Theme.card
+                                }
                             }
                             Text {
                                 id: tabLabel
-                                x: 36
+                                x: 38
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: modelData.title
-                                font.pixelSize: 15
+                                text: tab.modelData.title
+                                font.pixelSize: 14
                                 font.weight: Font.Bold
-                                color: active ? Theme.inkPrimary : Theme.inkSelected
-                                opacity: parent.open ? 1 : 0
+                                color: Theme.primary
+                                opacity: tab.active ? 1 : 0
                                 Behavior on opacity { NumberAnimation { duration: 150 } }
                             }
-                        }
-                        Rectangle {
-                            visible: tabHover.hovered && !tab.active
-                            anchors.top: parent.bottom
-                            anchors.topMargin: 8
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            width: tabTip.implicitWidth + 20
-                            height: tabTip.implicitHeight + 10
-                            radius: height / 2
-                            color: Theme.toast
-                            border.width: 1
-                            border.color: Theme.line
-                            Text {
-                                id: tabTip
-                                anchors.centerIn: parent
-                                text: tab.modelData.title
-                                color: Theme.inkToast
-                                font.pixelSize: 13
-                                font.weight: Font.DemiBold
+                            readonly property point cursor: tabHover.point.scenePosition
+                            onCursorChanged: Tip.move(tab, cursor)
+                            HoverHandler {
+                                id: tabHover
+                                cursorShape: Qt.PointingHandCursor
+                                onHoveredChanged: hovered && !tab.active
+                                    ? Tip.request(tab, tab.modelData.title, point.scenePosition) : Tip.cancel(tab)
                             }
+                            TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: omni.go(tab.modelData.id) }
                         }
                     }
                 }
             }
+            //--- Where more tabs are scrolled out of sight: a fade and an arrow that pans
+            //--- that way, each only while there's more that way
+            TabArrow { toLeft: true; shown: tabsFlick.contentX > 1 }
+            TabArrow { toLeft: false; shown: tabsFlick.contentX + tabsFlick.width < tabsFlick.contentWidth - 1 }
         }
 
         //--- Search, opened from the header, pushing the dimmed page down
@@ -975,7 +1125,7 @@ Item {
             id: bodyFlick
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.leftMargin: -omni.gutter + omni.frameInset
+            Layout.leftMargin: omni.frameInset  // the frame lines up with the header and tabs
             Layout.rightMargin: omni.frameInset
             Layout.topMargin: omni.frameInset
             Layout.bottomMargin: omni.frameInset
@@ -1150,10 +1300,7 @@ Item {
                 Pill {
                     text: "Review"
                     enabled: !!omni.info && omni.info.canApply && !Jobs.running
-                    onClicked: {
-                        omni.reviewing = true
-                        review.load()
-                    }
+                    onClicked: omni.startReview()
                 }
             }
         }
@@ -1166,18 +1313,57 @@ Item {
         anchors.top: parent.top
         anchors.right: parent.right
         anchors.margins: omni.edge
-        anchors.topMargin: mainCol.y + tabsBar.y + tabsBar.height  // level with the tabs' foot
+        anchors.topMargin: mainCol.y + tabsBar.y + tabsBar.height + 6  // under Rebuild
         // As tall as its icons, up to the window's bottom margin
-        height: Math.min(railList.contentHeight + 8, parent.height - anchors.topMargin - omni.edge)
-        width: 48
-        radius: 24
+        height: Math.min(railList.contentHeight + allToggle.height + 18,
+                         parent.height - anchors.topMargin - omni.edge)
+        width: omni.railItem + 8
+        radius: width / 2
         color: Theme.card
         HoverHandler { id: railArea }
 
+        //--- Closes every page in the tab while any is open, else opens them all
+        Rectangle {
+            id: allToggle
+            anchors.top: parent.top
+            anchors.topMargin: 6
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: omni.railItem - 6
+            height: 22
+            radius: 8
+            color: allHover.hovered ? Theme.hover : Qt.alpha(Theme.bg, 0.55)
+            border.width: 1
+            border.color: Theme.rule
+            Behavior on color { ColorAnimation { duration: 120 } }
+            Icon {
+                anchors.centerIn: parent
+                icon: omni.anyOpen ? "collapse_all" : "expand_all"
+                size: 18
+                color: allHover.hovered ? Theme.primary : Theme.dim
+            }
+            readonly property point cursor: allHover.point.scenePosition
+            onCursorChanged: Tip.move(allToggle, cursor)
+            HoverHandler {
+                id: allHover
+                cursorShape: Qt.PointingHandCursor
+                onHoveredChanged: hovered
+                    ? Tip.request(allToggle, omni.anyOpen ? "Close every page" : "Open every page", point.scenePosition)
+                    : Tip.cancel(allToggle)
+            }
+            TapHandler {
+                gesturePolicy: TapHandler.ReleaseWithinBounds
+                onTapped: omni.setAllOpen(!omni.anyOpen)
+            }
+        }
+
         ListView {
             id: railList
-            anchors.fill: parent
+            anchors.top: allToggle.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
             anchors.margins: 4
+            anchors.topMargin: 8
             clip: true
             boundsBehavior: Flickable.StopAtBounds
             model: omni.tabPages
@@ -1188,40 +1374,138 @@ Item {
                 required property int index
                 readonly property var prev: index > 0 ? railList.model[index - 1] : null
                 readonly property bool active: omni.page === modelData.id
-                readonly property color accent: omni.pageAccents[modelData.id] || Theme.primary
                 width: railList.width
-                //--- A line where the page list starts a new group
+                //--- A line where the page list starts a new group; its name shows here
+                //--- with the page names (railNames)
                 Item {
                     visible: !!railItem.prev && railItem.prev.group !== railItem.modelData.group
                     width: parent.width
-                    height: 13
+                    height: omni.railGap
                     Rectangle {
                         anchors.centerIn: parent
-                        width: parent.width - 12
+                        width: 26
                         height: 1
                         color: Qt.alpha(Theme.primary, 0.35)
                     }
                 }
                 Rectangle {
                     width: parent.width
-                    height: 40
-                    radius: 20
-                    color: railItem.active ? railItem.accent : railHover.hovered ? Theme.hover : "transparent"
+                    height: omni.railItem
+                    radius: 11  // as the tabs'
+                    color: railItem.active ? Qt.alpha(Theme.primary, 0.28) : railHover.hovered ? Theme.hover : "transparent"
                     Behavior on color { ColorAnimation { duration: 120 } }
                     Icon {
                         anchors.centerIn: parent
                         icon: Theme.glyph(railItem.modelData.icon)
                         size: 20
                         fill: railItem.active
-                        color: railItem.active ? Theme.inkPrimary : railItem.accent
+                        color: railItem.active ? Theme.primary : railHover.hovered ? Theme.text : Theme.dim
                     }
                     HoverHandler { id: railHover; cursorShape: Qt.PointingHandCursor }
                     TapHandler {
                         gesturePolicy: TapHandler.ReleaseWithinBounds
-                        onTapped: omni.go(omni.tab, railItem.modelData.id)
+                        onTapped: omni.go(omni.tab, railItem.modelData.id, true)
                     }
                 }
             }
+        }
+    }
+
+    //--- Rebuild, right of the tabs and over the rail (admins). With changes waiting it
+    //--- carries their count and opens Review, which applies them
+    Rectangle {
+        id: rebuildBtn
+        readonly property int waiting: omni.pendingCount
+        visible: mainCol.visible && !!omni.info && omni.info.admin && omni.info.canApply
+        anchors.right: parent.right
+        anchors.rightMargin: omni.edge
+        y: mainCol.y + tabsBar.y
+        width: rail.width
+        height: width  // square; the tab bar is as tall as the rail is wide
+        radius: tabsBar.radius
+        readonly property bool lit: rebuildHover.hovered && !Jobs.running
+        opacity: Jobs.running ? 0.45 : 1
+        color: lit ? Qt.lighter(Theme.primary, 1.12) : Theme.primary
+        Behavior on color { ColorAnimation { duration: 120 } }
+        Icon {
+            anchors.centerIn: parent
+            icon: Jobs.running ? "progress_activity" : "autorenew"
+            size: 24
+            color: Theme.inkPrimary
+        }
+        Rectangle {
+            visible: rebuildBtn.waiting > 0
+            x: parent.width - width + 5
+            y: -5
+            width: Math.max(18, badgeText.implicitWidth + 8)
+            height: 18
+            radius: 9
+            color: Theme.caution
+            border.width: 2
+            border.color: Theme.bg
+            Text {
+                id: badgeText
+                anchors.centerIn: parent
+                text: rebuildBtn.waiting
+                color: Theme.bg
+                font.pixelSize: 11
+                font.weight: Font.ExtraBold
+            }
+        }
+        readonly property point cursor: rebuildHover.point.scenePosition
+        onCursorChanged: Tip.move(rebuildBtn, cursor)
+        HoverHandler {
+            id: rebuildHover
+            cursorShape: Jobs.running ? Qt.ArrowCursor : Qt.PointingHandCursor
+            onHoveredChanged: hovered
+                ? Tip.request(rebuildBtn, rebuildBtn.waiting ? "Review and apply your changes" : "Rebuild",
+                              point.scenePosition)
+                : Tip.cancel(rebuildBtn)
+        }
+        TapHandler {
+            gesturePolicy: TapHandler.ReleaseWithinBounds
+            onTapped: rebuildBtn.waiting ? omni.startReview() : omni.rebuild()
+        }
+    }
+
+    //--- Hides the page behind the rail's names so they read on any page; it reaches
+    //--- vfade past the names' top and bottom and fades out there
+    Item {
+        id: namesBackdrop
+        visible: railNames.visible
+        z: 4
+        x: railNames.x
+        y: railNames.y - railNames.vfade
+        width: railNames.width
+        height: railNames.height + 2 * railNames.vfade
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            maskEnabled: true
+            maskSource: namesMask
+            maskThresholdMin: 0.5
+            maskSpreadAtMin: 1.0
+        }
+        Rectangle {
+            anchors.fill: parent
+            gradient: Gradient {
+                orientation: Gradient.Horizontal
+                GradientStop { position: 0; color: "transparent" }
+                GradientStop { position: railNames.fade / railNames.width; color: Qt.alpha(Theme.bg, 0.96) }
+                GradientStop { position: 1; color: Theme.bg }
+            }
+        }
+    }
+    Rectangle {
+        id: namesMask
+        anchors.fill: namesBackdrop
+        visible: false
+        layer.enabled: true
+        readonly property real edge: railNames.vfade / Math.max(1, height)
+        gradient: Gradient {
+            GradientStop { position: 0; color: "transparent" }
+            GradientStop { position: namesMask.edge; color: "black" }
+            GradientStop { position: 1 - namesMask.edge; color: "black" }
+            GradientStop { position: 1; color: "transparent" }
         }
     }
 
@@ -1233,22 +1517,16 @@ Item {
         anchors.right: rail.left
         y: rail.y + railList.y
         height: railList.height
-        width: namesCol.implicitWidth + 8  // the gap to the rail counts as hovering the names
+        // The gap to the rail counts as hovering the names; the fade sits left of them
+        width: namesCol.implicitWidth + 8 + fade
+        readonly property real fade: 20
+        readonly property real vfade: 24
         clip: true
         HoverHandler { id: namesArea }
-        // Mutes the page behind the names so they read on any page
-        Rectangle {
-            anchors.fill: parent
-            gradient: Gradient {
-                orientation: Gradient.Horizontal
-                GradientStop { position: 0; color: "transparent" }
-                GradientStop { position: 0.35; color: Qt.alpha(Theme.bg, 0.85) }
-                GradientStop { position: 1; color: Qt.alpha(Theme.bg, 0.95) }
-            }
-        }
         // Laid out like the rail's list and scrolled with it
         Column {
             id: namesCol
+            x: railNames.fade
             y: -railList.contentY
             Repeater {
                 model: railList.model
@@ -1259,14 +1537,30 @@ Item {
                     readonly property var prev: index > 0 ? railList.model[index - 1] : null
                     readonly property bool active: omni.page === modelData.id
                     x: namesCol.width - width
+                    //--- The group's name over the rail's line
+                    // Each part right-aligned, so a wide caption doesn't push its name left
                     Item {
                         visible: !!nameItem.prev && nameItem.prev.group !== nameItem.modelData.group
-                        width: 1
-                        height: 13
+                        x: nameItem.width - width
+                        width: groupCaption.implicitWidth + 8
+                        height: omni.railGap
+                        Text {
+                            id: groupCaption
+                            anchors.right: parent.right
+                            anchors.rightMargin: 4
+                            anchors.verticalCenter: parent.verticalCenter  // level with the rail's line
+                            text: nameItem.modelData.group
+                            color: Theme.dim
+                            font.pixelSize: 11
+                            font.weight: Font.Bold
+                            font.capitalization: Font.AllUppercase
+                            font.letterSpacing: 0.6
+                        }
                     }
                     Item {
+                        x: nameItem.width - width
                         width: namePill.width
-                        height: 40
+                        height: omni.railItem
                         Rectangle {
                             id: namePill
                             anchors.verticalCenter: parent.verticalCenter
@@ -1287,7 +1581,7 @@ Item {
                             HoverHandler { cursorShape: Qt.PointingHandCursor }
                             TapHandler {
                                 gesturePolicy: TapHandler.ReleaseWithinBounds
-                                onTapped: omni.go(omni.tab, nameItem.modelData.id)
+                                onTapped: omni.go(omni.tab, nameItem.modelData.id, true)
                             }
                         }
                     }
@@ -1336,7 +1630,8 @@ Item {
 
     //--- Custom pages by id
     readonly property var custom: ({ overview: overviewPage, shell: shellPage, git: gitPage,
-                                      flatpaks: flatpaksPage, backups: backupsPage, updates: updatesPage,
+                                      flatpaks: flatpaksPage, backups: backupsPage,
+                                      disabled: disabledPage,
                                       people: peoplePage,
                                       userpackages: userPackagesPage,
                                       proton: protonPage, protonversions: protonVersionsPage,
@@ -1362,6 +1657,42 @@ Item {
     Component { id: protonVersionsPage; ProtonVersionsPage { view: omni } }
     Component { id: gamesPage; GamesPage { view: omni } }
     Component { id: mangoHudPage; MangoHudPage { view: omni } }
+    component TabArrow: Rectangle {
+        id: arrow
+        property bool toLeft
+        property bool shown
+        visible: opacity > 0
+        opacity: shown ? 1 : 0
+        Behavior on opacity { NumberAnimation { duration: 150 } }
+        anchors.left: toLeft ? tabsFlick.left : undefined
+        anchors.right: toLeft ? undefined : tabsFlick.right
+        anchors.top: tabsFlick.top
+        anchors.bottom: tabsFlick.bottom
+        width: 34
+        gradient: Gradient {
+            orientation: Gradient.Horizontal
+            GradientStop { position: 0; color: arrow.toLeft ? Theme.card : Qt.alpha(Theme.card, 0) }
+            GradientStop { position: arrow.toLeft ? 0.6 : 0.4; color: Theme.card }
+            GradientStop { position: 1; color: arrow.toLeft ? Qt.alpha(Theme.card, 0) : Theme.card }
+        }
+        Icon {
+            anchors.verticalCenter: parent.verticalCenter
+            x: arrow.toLeft ? 0 : parent.width - width
+            icon: arrow.toLeft ? "chevron_left" : "chevron_right"
+            size: 20
+            color: arrowHover.hovered ? Theme.primary : Theme.dim
+        }
+        HoverHandler { id: arrowHover; cursorShape: Qt.PointingHandCursor }
+        TapHandler {
+            gesturePolicy: TapHandler.ReleaseWithinBounds
+            onTapped: {
+                const f = tabsFlick
+                f.contentX = Math.max(0, Math.min(f.contentWidth - f.width,
+                                                  f.contentX + (arrow.toLeft ? -1 : 1) * f.width * 0.6))
+            }
+        }
+    }
+
     //--- One page in the tab's scroll: its section's divider when it starts one, then
     //--- the page in a card whose header collapses it; a note starts collapsed
     component PageSection: ColumnLayout {
@@ -1369,8 +1700,6 @@ Item {
         required property var modelData
         required property int index
         readonly property string pid: modelData.id
-        //--- This page's own colour, which its headings and badges read (Theme.accentOf)
-        readonly property color pageAccent: omni.pageAccents[pid] || Theme.primary
         readonly property bool note: pid.startsWith("doc:")
         readonly property bool userPkgs: pid.startsWith("userpackages:")
         readonly property bool open: note ? !!omni.openNotes[pid] : !!omni.openPages[pid]
@@ -1378,6 +1707,7 @@ Item {
         readonly property var comp: note ? notePage : userPkgs ? userPkgsPage
             : omni.custom[pid] || (model ? settingsPage : null)
         readonly property bool ready: !loader.item || loader.item.ready !== false
+        readonly property var summary: omni.pageSummary(pid, model)
         onReadyChanged: {
             if (ready && loader.item && !omni.waiting)
                 arrived.restart()
@@ -1392,72 +1722,49 @@ Item {
         }
         // The rail's group this page starts; the untitled first group takes the tab's name
         readonly property var prev: index > 0 ? omni.tabPages[index - 1] : null
-        readonly property var next: index + 1 < omni.tabPages.length ? omni.tabPages[index + 1] : null
         readonly property bool divided: !prev || prev.group !== modelData.group
         readonly property string sectionTitle: modelData.group
             || (omni.info.tabs.find(t => t.id === omni.tab) || { title: "" }).title
-        // A section holding one page of its own name shows only the divider
-        readonly property bool headed: !(divided && modelData.title === modelData.group
-                                         && (!next || next.group !== modelData.group))
+        // A section holding one page of its own name shows only the page's header
+        readonly property bool soleNamed: omni.soleNamed(index)
         visible: !!comp
         Layout.fillWidth: true
-        Layout.topMargin: index === 0 ? 0 : divided ? 22 : 4
+        Layout.topMargin: index === 0 ? 0 : divided ? 8 : 4
         spacing: 6
 
-        //--- The section's name in a pill, lines fading out to both sides
+        //--- The section's name, then a rule to the edge
         RowLayout {
-            visible: section.divided && section.sectionTitle !== ""
+            visible: section.divided && section.sectionTitle !== "" && !section.soleNamed
             Layout.fillWidth: true
-            Layout.bottomMargin: 8
-            spacing: 8
-            Rectangle {
-                Layout.fillWidth: true
-                implicitHeight: 2
-                gradient: Gradient {
-                    orientation: Gradient.Horizontal
-                    GradientStop { position: 0; color: "transparent" }
-                    GradientStop { position: 1; color: section.pageAccent }
-                }
+            Layout.leftMargin: 4
+            Layout.bottomMargin: 6
+            spacing: 10
+            Text {
+                text: section.sectionTitle
+                color: Theme.text
+                font.pixelSize: 15
+                font.weight: Font.Bold
             }
-            Rectangle { implicitWidth: 7; implicitHeight: 7; rotation: 45; color: section.pageAccent }
-            Rectangle {
-                implicitWidth: dividerName.implicitWidth + 40
-                implicitHeight: 46
-                radius: 23
-                color: Qt.tint(Theme.card, Qt.alpha(section.pageAccent, 0.35))
-                border.width: 2
-                border.color: section.pageAccent
-                Text {
-                    id: dividerName
-                    anchors.centerIn: parent
-                    text: section.sectionTitle
-                    color: Theme.inkContainer
-                    font.pixelSize: 22
-                    font.weight: Font.ExtraBold
-                }
-            }
-            Rectangle { implicitWidth: 7; implicitHeight: 7; rotation: 45; color: section.pageAccent }
-            Rectangle {
-                Layout.fillWidth: true
-                implicitHeight: 2
-                gradient: Gradient {
-                    orientation: Gradient.Horizontal
-                    GradientStop { position: 0; color: section.pageAccent }
-                    GradientStop { position: 1; color: "transparent" }
-                }
-            }
+            Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: Theme.rule }
         }
 
-        //--- The page's card, reaching into the gutter
+        //--- The page's card, reaching into the gutter; every other card a shade lighter
         Rectangle {
+            id: card
             Layout.fillWidth: true
             Layout.leftMargin: -omni.gutter
             implicitHeight: frameCol.implicitHeight
             radius: 20
-            color: Qt.alpha(section.pageAccent, section.headed && headHover.hovered && !section.open ? 0.1 : 0.05)
-            border.width: section.headed ? 1 : 0
-            border.color: Qt.alpha(section.pageAccent, section.open ? 0.22 : 0.15)
+            color: Qt.alpha(Theme.text, (section.index % 2 ? 0.075 : 0.035)
+                                        + (headHover.hovered && !section.open ? 0.03 : 0))
+            // An open page is edged in primary; the one under the cursor gets a firmer
+            // ring like niri's focus ring, so the page being read is easy to find
+            border.width: 1
+            border.color: cardHover.hovered ? Theme.primary
+                : section.open ? Qt.alpha(Theme.primary, 0.3) : Theme.rule
             Behavior on color { ColorAnimation { duration: 150 } }
+            Behavior on border.color { ColorAnimation { duration: 150 } }
+            HoverHandler { id: cardHover }
 
             ColumnLayout {
                 id: frameCol
@@ -1466,62 +1773,91 @@ Item {
                 anchors.right: parent.right
                 spacing: 0
 
-                //--- Header: icon, name, a short line and the chevron; tapping it collapses
+                //--- Header: icon, name, one line under it, then what's changed and the
+                //--- chevron; tapping it collapses
                 RowLayout {
-                    visible: section.headed
+                    id: head
                     Layout.fillWidth: true
                     Layout.margins: 12
                     spacing: 12
                     Rectangle {
-                        implicitWidth: 36
-                        implicitHeight: 36
-                        radius: 18
-                        color: section.pageAccent
+                        implicitWidth: 34
+                        implicitHeight: 34
+                        radius: 17
+                        color: section.open ? Theme.primary : Theme.cardHover
+                        Behavior on color { ColorAnimation { duration: 150 } }
                         Icon {
                             anchors.centerIn: parent
                             icon: Theme.glyph(section.modelData.icon, "description")
-                            size: 20
-                            fill: true
-                            color: Theme.inkPrimary
+                            size: 19
+                            fill: section.open
+                            color: section.open ? Theme.inkPrimary : Theme.primary
                         }
                     }
-                    RowLayout {
-                        spacing: 8
+                    Text {
+                        id: pageTitle
                         Layout.fillWidth: true
-                        Text {
-                            id: pageTitle
-                            text: section.modelData.title
-                            color: Theme.text
-                            font.pixelSize: 20
-                            font.weight: Font.Bold
-                            elide: Text.ElideRight
-                            Layout.maximumWidth: Math.ceil(pageTitleWidth.advanceWidth) + 1
-                            Layout.fillWidth: true
-                            TextMetrics { id: pageTitleWidth; font: pageTitle.font; text: pageTitle.text }
-                            // A generated page's blurb, or a custom page's line from the rail
-                            TitleTip {
-                                tip: section.modelData.subtitle || (section.model ? section.model.description : "")
+                        text: section.modelData.title
+                        color: Theme.text
+                        font.pixelSize: section.open ? 17 : 15
+                        font.weight: Font.Bold
+                        elide: Text.ElideRight
+                        // What it's for, then while collapsed what's inside
+                        TitleTip {
+                            readonly property var sum: section.open ? null : section.summary
+                            readonly property string about: section.modelData.subtitle
+                                || (section.model ? section.model.description : "")
+                            tip: about + (sum ? (about ? "\n" : "")
+                                + (sum.alert ? `!!${sum.text}!!` : sum.text) : "")
+                        }
+                    }
+                    Repeater {
+                        model: section.open ? [] : omni.pageAlerts(section.pid)
+                        Rectangle {
+                            id: alertBadge
+                            required property var modelData
+                            implicitWidth: alertRow.implicitWidth + 14
+                            implicitHeight: 24
+                            radius: 12
+                            color: Qt.alpha(Theme.caution, 0.16)
+                            Row {
+                                id: alertRow
+                                anchors.centerIn: parent
+                                spacing: 3
+                                Icon {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    icon: alertBadge.modelData.icon
+                                    size: 15
+                                    color: Theme.caution
+                                }
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: alertBadge.modelData.n
+                                    color: Theme.caution
+                                    font.pixelSize: 12
+                                    font.weight: Font.DemiBold
+                                }
+                            }
+                            readonly property point cursor: badgeHover.point.scenePosition
+                            onCursorChanged: Tip.move(alertBadge, cursor)
+                            HoverHandler {
+                                id: badgeHover
+                                onHoveredChanged: hovered
+                                    ? Tip.request(alertBadge, alertBadge.modelData.tip, point.scenePosition)
+                                    : Tip.cancel(alertBadge)
                             }
                         }
-                        Item { Layout.fillWidth: true }
                     }
-                    // Words, not a Chevron, so it reads apart from the dropdowns inside
-                    Chip {
-                        tappable: false  // the whole header takes the tap
-                        text: section.open ? "Hide" : "Show"
-                        accent: headHover.hovered
-                    }
+                    Chevron { open: section.open; lit: headHover.hovered }
                     HoverHandler { id: headHover; cursorShape: Qt.PointingHandCursor }
                     TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: section.toggle() }
                 }
                 Rectangle {
-                    visible: section.headed && body.height > 0
+                    visible: body.height > 0
                     Layout.fillWidth: true
-                    Layout.leftMargin: 14
-                    Layout.rightMargin: 14
                     implicitHeight: 1
                     opacity: body.opacity
-                    color: Qt.alpha(section.pageAccent, 0.25)
+                    color: Theme.rule
                 }
 
                 // Height from the page itself, as a layout-set one would loop with wrapped
@@ -1533,7 +1869,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.leftMargin: omni.gutter
                     Layout.rightMargin: omni.gutter
-                    Layout.topMargin: section.headed && section.open ? 8 : 0
+                    Layout.topMargin: section.open ? 8 : 0
                     Layout.bottomMargin: section.open ? 10 : 0
                     Layout.preferredHeight: loader.item && section.open ? loader.item.implicitHeight : 0
                     clip: true
@@ -1563,8 +1899,8 @@ Item {
     Component { id: userPackagesPage; UserPackagesPage { view: omni } }
     Component { id: peoplePage; PeoplePage { view: omni } }
     Component { id: backupsPage; BackupsPage { view: omni } }
-    Component { id: updatesPage; UpdatesPage { view: omni } }
     Component { id: flatpaksPage; FlatpaksPage { view: omni } }
+    Component { id: disabledPage; DisabledPackagesPage { view: omni } }
     Component { id: overviewPage; OverviewPage { view: omni } }
     Component { id: gitPage; GitPage { view: omni } }
     Component { id: shellPage; ShellPage { view: omni } }

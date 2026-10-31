@@ -59,8 +59,6 @@ in {
     plugins = {
       # amdGpuMonitor is per machine: machines/eclipse/hardware/gpu.nix
 
-      # Claude Code usage bar widget
-      claudeCodeUsage.enable = user.claude.enable;
       quickCapture.enable = true;
 
       # Omni Settings' QML front end as a slideout (Mod+S)

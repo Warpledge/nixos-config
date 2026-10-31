@@ -1,12 +1,13 @@
 # Changing Settings
 
-`Mod+S` opens Omni Settings as a panel on the right of the screen, and so does pushing the mouse into the top-right corner. It closes when the mouse leaves it, or when you press `Mod+S` or `Esc` again, but stays open while you're typing or a question is up. The app launcher (`Mod+Space`) opens it as a window instead. Both show the same thing, and a rebuild keeps going if you close either.
+`Mod+S` opens Omni Settings as a panel on the right of the screen, and so does pushing the mouse into the top-right corner. It closes when the mouse leaves it, or when you press `Mod+S` or `Esc` again, but stays open while you're typing or a question is up. The app launcher (`Mod+Space`) opens it as a window instead. Both show the same thing, and a rebuild keeps going if you close either. Drag the panel's left edge to make it narrower, or back out to its full width; it keeps that width until you change it, and double-clicking the edge puts it back.
 
 ## Finding Your Way Around
 
 The icons across the top are tabs. Each tab is one long page you scroll through, with a divider naming each of its pages; the icons down the right edge jump to them:
 
-- **Main**: Maintenance (updates, freeing space, versions), Git, Flatpaks, Backups, Updates, Users, and the computer and personal setting pages
+- **Maintenance**: updates, pinned versions, freeing space and versions, then Git, Flatpaks and Backups
+- **System**: Users, and the computer and personal setting pages
 - **Packages**: searching for software, the app switches (Default Packages) and what you've installed yourself (User Packages)
 - **Niri**: the desktop's shell settings and window rules
 - **Hardware**: firmware updates, and the battery and dGPU pages on a laptop

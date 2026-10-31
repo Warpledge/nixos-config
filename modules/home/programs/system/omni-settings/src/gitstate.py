@@ -126,7 +126,8 @@ def summary(flake):
     """The page list's counts; prs is left out when GitHub can't be read."""
     _, prs, _, _ = remote(flake, github_repo(flake))
     status = system.git_status(flake)
-    counts = {"changed": status.changed, "ahead": status.ahead, "behind": status.behind}
+    counts = {"branch": status.branch, "changed": status.changed, "ahead": status.ahead,
+              "behind": status.behind}
     if prs is not None:
         counts["prs"] = len(prs)
     return counts
@@ -236,7 +237,7 @@ def back_up(flake, machine, paths):
     pushes. Returns a line for the log, or None when there's no push remote."""
     if push_remote(flake) is None:
         return None
-    paths = [p for p in paths if os.path.isdir(os.path.join(flake, p))]
+    paths = [p for p in paths if os.path.exists(os.path.join(flake, p))]
     if not paths:  # with no paths, add and commit would take the whole tree
         return "Didn't back up: this machine's and user's folders aren't there."
     try:

@@ -5,6 +5,7 @@ import QtQuick.Layouts
 Rectangle {
     id: sheet
     property string title
+    property string info: ""  // on hovering the title: what's edited, where it's saved
     default property alias content: body.data
     property alias actions: actionRow.data
     signal back
@@ -18,16 +19,19 @@ Rectangle {
 
         RowLayout {
             Layout.fillWidth: true
-            IconButton { icon: "arrow_back"; onClicked: sheet.back() }
+            spacing: 8
+            IconButton { icon: "arrow_back"; tip: "Back"; onClicked: sheet.back() }
             Text {
                 text: sheet.title
                 color: Theme.text
-                font.pixelSize: 18
-                font.weight: Font.DemiBold
+                font.pixelSize: 17
+                font.weight: Font.Bold
                 elide: Text.ElideRight
                 Layout.fillWidth: true
+                TitleTip { tip: sheet.info }
             }
         }
+        Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: Theme.rule }
 
         Flickable {
             Layout.fillWidth: true
@@ -42,6 +46,12 @@ Rectangle {
             }
         }
 
+        Rectangle {
+            visible: actionRow.visible
+            Layout.fillWidth: true
+            implicitHeight: 1
+            color: Theme.rule
+        }
         RowLayout {
             id: actionRow
             visible: children.length > 0

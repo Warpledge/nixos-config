@@ -3,6 +3,7 @@
 // service's `person` job)
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 
 ColumnLayout {
     id: page
@@ -128,22 +129,25 @@ ColumnLayout {
     //--- Commit As: the user's own settings, so anyone can change them
     Repeater {
         model: page.view.info.pages["people"] ? page.view.info.pages["people"].groups : []
-        ColumnLayout {
-            id: group
+        SettingGroup {
             required property var modelData
-            Layout.fillWidth: true
-            spacing: 6
-            Section { text: group.modelData.title; info: group.modelData.description }
-            Repeater {
-                model: group.modelData.settings
-                SettingRow {
-                    required property var modelData
-                    setting: modelData
-                    view: page.view
-                    pageGlyph: "person"
-                }
-            }
+            settings: modelData.settings
+            title: modelData.title
+            info: modelData.description
+            view: page.view
+            pageGlyph: "person"
         }
+    }
+
+    //--- The shell's own User Accounts tab sets it through AccountsService. No
+    //--- password change here: passwd leaves the login keyring on the old one
+    ListRow {
+        icon: "account_circle"
+        title: "Profile Picture"
+        info: "Your picture on the lock screen, the login screen and the Control Center."
+        trailing: "open_in_new"
+        Layout.fillWidth: true
+        onClicked: Quickshell.execDetached(["dms", "ipc", "call", "settings", "openWith", "user_accounts"])
     }
 
     //--- Add a person

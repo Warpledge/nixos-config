@@ -32,6 +32,7 @@ import nixfile  # noqa: E402
 import nixlog  # noqa: E402
 import peoplestate  # noqa: E402
 import system  # noqa: E402
+import updatestate  # noqa: E402
 
 STEPS = {
     "write": "Save and check your settings",
@@ -432,12 +433,23 @@ class Service:
             pass
 
     def back_up(self, job):
-        """Commits and pushes this machine's and user's folders in the background."""
+        """Drops the disabled-packages.md rows whose switch is on again, then
+        commits and pushes this machine's and user's folders in the background."""
         cfg = self.cfg
 
+        def prune():
+            try:
+                return updatestate.prune_disabled(cfg.flake, backend.load(cfg).resolved, cfg.user)
+            except (OSError, ValueError, KeyError, backend.SettingsError):
+                return []
+
         async def work():
-            note = await asyncio.get_running_loop().run_in_executor(
-                None, gitstate.back_up, cfg.flake, cfg.machine, [f"machines/{cfg.machine}", f"users/{cfg.user}"])
+            loop = asyncio.get_running_loop()
+            dropped = await loop.run_in_executor(None, prune)
+            if dropped:
+                job.append("info", f"Back on, so removed from {updatestate.DISABLED_DOC}: {', '.join(dropped)}")
+            paths = [f"machines/{cfg.machine}", f"users/{cfg.user}"] + ([updatestate.DISABLED_DOC] if dropped else [])
+            note = await loop.run_in_executor(None, gitstate.back_up, cfg.flake, cfg.machine, paths)
             if note:
                 job.append("info", note)
                 self.flush()

@@ -16,13 +16,6 @@
     rev = "569c5283d9a0a7ee7938df85bb32e4f48cbb8c86";
     hash = "sha256-rOT2rtXNPayZQEkd2Gbr+9dxClaloxAOoOlDcZp3VQY=";
   };
-  #--- BenAI's mods have no licence, so they stay out of git in ~/.local/opt
-  #--- (docs/personal/local/local-binary-installs.md)
-  localMod = name: {
-    source =
-      config.lib.file.mkOutOfStoreSymlink
-      "${config.home.homeDirectory}/.local/opt/claude-mods/${name}";
-  };
   on = lib.filterAttrs (_: v: v);
   #--- Settings keys are camelCase (addApp), Claude Code's names kebab-case (add-app)
   kebab = s:
@@ -218,8 +211,6 @@ in {
     home.file.".claude/skills/replay-theater" = lib.mkIf c.mods.replayTheater {
       source = "${playground}/claude-code/mods/replay-theater";
     };
-    home.file.".claude/skills/chat-inventory" = lib.mkIf c.mods.chatInventory (localMod "chat-inventory");
-    home.file.".claude/skills/screen-share" = lib.mkIf c.mods.screenShare (localMod "screen-share");
 
     #--- Merges `declared` into settings.json the way zed.nix does, so the rest
     #--- of the file and in-app changes stay

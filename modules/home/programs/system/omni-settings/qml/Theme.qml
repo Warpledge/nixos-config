@@ -27,6 +27,8 @@ Singleton {
     readonly property color text: col("on_surface")
     readonly property color dim: col("on_surface_variant")
     readonly property color line: col("outline_variant")
+    // Rules and card edges: outline_variant can match the background in some schemes
+    readonly property color rule: Qt.alpha(dim, 0.22)
     readonly property color primary: col("primary")
     readonly property color inkPrimary: col("on_primary")
     readonly property color primaryContainer: col("primary_container")
@@ -43,62 +45,33 @@ Singleton {
     readonly property color toast: col("surface_container_highest")
     readonly property color inkToast: col("on_surface")
     // Matugen has no success or warning role, and tertiary needn't be yellow; DMS's
-    // terminal green and yellow (dank16 color2 and color3) follow the theme
+    // terminal green, yellow and blue (dank16 color2, color3, color4) follow the theme
     property string green: ""
     property string yellow: ""
+    property string blue: ""
     readonly property color success: green || "#a6e3a1"
     readonly property color caution: yellow || "#f9e2af"
+    readonly property color info: blue || "#89b4fa"
 
-    //--- Page accents: primary's hue turned in 30° steps, leaving out any within 45°
-    //--- of a status colour so a page never reads as a state; ordered so the hues
-    //--- next to each other in the list sit far apart on the wheel
-    readonly property var accentHues: {
-        const base = Math.max(0, primary.hslHue)  // -1 for a grey primary
-        const status = [success, caution, error].map(c => c.hslHue).filter(h => h >= 0)
-        const near = (a, b) => Math.min(Math.abs(a - b), 1 - Math.abs(a - b)) < 0.125
-        const hues = []
-        for (let k = 0; k < 12; k++) {
-            const h = (base + k / 12) % 1
-            if (k === 0 || !status.some(s => near(h, s)))
-                hues.push(h)
-        }
-        const half = Math.ceil(hues.length / 2), out = []
-        for (let i = 0; i < half; i++) {
-            out.push(hues[i])
-            if (i + half < hues.length)
-                out.push(hues[i + half])
-        }
-        return out
-    }
-    //--- A grey scheme would leave them all grey, so keep a little saturation
-    function pageAccent(n) {
-        const h = accentHues[n % accentHues.length]
-        return Qt.hsla(h, Math.max(0.3, primary.hslSaturation), primary.hslLightness, 1)
-    }
-    //--- A page's place in accentHues from its id, so it keeps its colour as pages
-    //--- around it come and go
-    function accentIndex(id) {
-        let h = 0
-        for (let i = 0; i < id.length; i++)
-            h = (h * 31 + id.charCodeAt(i)) | 0
-        return Math.abs(h) % accentHues.length
-    }
-    //--- The accent of the page `item` sits in (the nearest `pageAccent` above it),
-    //--- or primary outside one, as in sheets and dialogs
-    function accentOf(item) {
-        for (let p = item; p; p = p.parent)
-            if (p.pageAccent !== undefined)
-                return p.pageAccent
-        return primary
+    //--- Every page shares primary; pages are told apart by their cards, not hue
+    function accentOf(item) { return primary }
+
+    //--- `a` blended toward `b` by t (0 to 1)
+    function mix(a, b, t) {
+        return Qt.rgba(a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, 1)
     }
 
-    //--- Status tones for rows, badges and chips: "error", "success", "caution", or "" for none
+    //--- Status tones for rows, badges and chips: "error", "success", "caution", "info",
+    //--- or "" for none
     function toneColor(tone) {
-        return tone === "error" ? error : tone === "success" ? success : tone === "caution" ? caution : primary
+        return tone === "error" ? error : tone === "success" ? success : tone === "caution" ? caution
+            : tone === "info" ? info : primary
     }
+    //--- A load from 0 to 1: primary under half, caution to 80%, error above
+    function loadColor(v) { return v > 0.8 ? error : v >= 0.5 ? caution : primary }
     function toneFill(tone, base) { return Qt.tint(base, Qt.alpha(toneColor(tone), 0.2)) }
 
-    //--- Rows: a wash of the page's accent and an accent border, the same as the
+    //--- Rows: a wash of primary and a primary border, the same as the
     //--- collapsed group cards (SettingsPage.qml)
     function rowFill(accent, lit) { return Qt.alpha(accent, lit ? 0.13 : 0.07) }
     function rowBorder(accent, open) { return Qt.alpha(accent, open ? 0.35 : 0.2) }
@@ -116,10 +89,13 @@ Singleton {
                 theme.green = g[d.mode] || g.default || ""
                 const y = (d.dank16 || {}).color3 || {}
                 theme.yellow = y[d.mode] || y.default || ""
+                const b = (d.dank16 || {}).color4 || {}
+                theme.blue = b[d.mode] || b.default || ""
             } catch (e) {
                 theme.c = {}
                 theme.green = ""
                 theme.yellow = ""
+                theme.blue = ""
             }
         }
     }

@@ -1,6 +1,6 @@
 # Updates and Clean-Up
 
-Nothing updates on its own. The config pins every source to an exact version (the sources are in [`flake.nix`](../../flake.nix), their versions in [`flake.lock`](../../flake.lock)), so the system stays the same until an admin updates it. All of this is on Main → **Maintenance**.
+Nothing updates on its own. The config pins every source to an exact version (the sources are in [`flake.nix`](../../flake.nix), their versions in [`flake.lock`](../../flake.lock)), so the system stays the same until an admin updates it. All of this is on the **Maintenance** tab.
 
 ## Updating
 
@@ -9,6 +9,8 @@ Nothing updates on its own. The config pins every source to an exact version (th
 3. **Update Now** moves them and rebuilds. **At Next Restart** waits for a restart, and **Preview** builds and shows what would change, then puts everything back.
 
 The run page lists the packages that changed version. **What's New** on the Maintenance page links to each source's changes on GitHub.
+
+**Pinned Versions**, under the sources, lists what an update never moves: apps pinned by hand to one release, nightly or commit, and packages switched off because they broke. It only reads; **Check Now** asks upstream which have something newer and which broken packages build again.
 
 Some updates switch at the next restart even if you picked Update Now: a new systemd, glibc, niri or xwayland-satellite has frozen the desktop when switched live. The Maintenance page then shows **Restart to finish**. A new kernel also needs a restart to start using it.
 
@@ -27,9 +29,9 @@ The boot menu keeps the last ten by default, set on Omni Settings' **Boot** page
 
 ## Clean-Up
 
-Old generations and their packages take disk space. **Clean Up Old Versions** deletes the old ones, keeping the newest five plus any made in the last five days, then removes the files nothing uses any more. The dialog estimates how much it frees. Deleted versions leave the boot menu and you can't switch back to them.
+Old generations and their packages take disk space. **Clean Up Old Versions** deletes the old ones, keeping the newest five plus any made in the last five days by default, then removes the files nothing uses any more. The dialog estimates how much it frees. Deleted versions leave the boot menu and you can't switch back to them.
 
-The same clean-up runs on its own every week ([`nh.nix`](../../modules/nixos/nix/nh.nix) sets what it keeps), so you only need the button when space is short.
+The same clean-up runs on its own every week, so you only need the button when space is short. The Maintenance page's **Schedule** card sets how often it runs, what it keeps, how often the store is optimised, and after how many days you get a reminder to update (0 turns the reminder off).
 
 ## Rebuild Now
 

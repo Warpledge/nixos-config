@@ -65,7 +65,7 @@ SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
 #--- "games" the Games page's.
 #--- "top" pages: the custom page (its id in api.py and OmniView.qml) each one's settings show on
 TOP_PAGES = {"Flatpaks": "flatpaks", "Users": "people", "Battery": "battery", "MangoHud": "mangohud",
-             "AppArmor": "apparmor"}
+             "AppArmor": "apparmor", "Maintenance": "overview"}
 
 PAGES = {
     "Flatpaks": ("top", "system-software-install-symbolic", "", [("", "", ["flatpak.enable"])]),
@@ -77,6 +77,10 @@ PAGES = {
                   ("Looks", "", ["mangohud.position", "mangohud.fontSize", "mangohud.textColor",
                                  "mangohud.background"])]),
     "AppArmor": ("top", "security-high-symbolic", "", [("", "", ["apparmor.enforce"])]),
+    "Maintenance": ("top", "computer-symbolic", "",
+                    [("Schedule", "What runs on its own, and how often.",
+                      ["maintenance.clean", "maintenance.keepDays", "maintenance.keepGenerations",
+                       "maintenance.optimise", "maintenance.updateReminderDays"])]),
     "Run on dGPU": ("dgpu", "video-display-symbolic", "", [("", "", ["gpuOffload"])]),
     "User Packages": ("userpkgs", "package-x-generic-symbolic", "", [("", "", ["userPackages"])]),
     "Keybinds": ("keybinds", "input-keyboard-symbolic", "", [("", "", ["keybinds"])]),
@@ -165,16 +169,18 @@ PAGES = {
     "Dev": ("apps", "applications-engineering-symbolic", "Programming languages and developer tools.", None),
     "Gaming": ("apps", "applications-games-symbolic", "Launchers, games and gaming tools.", None),
     "Discord": ("apps", "user-available-symbolic", "Discord and showing what you play.", None),
+    "AI": ("apps", "applications-science-symbolic", "Coding agents and local model apps.",
+           [("", "", ["claude.enable", "claudeDesktop.enable", "opencode.enable",
+                      "opencodeDesktop.enable", "pi.enable", "lmstudio.enable"])]),
     "Claude": ("cloudai", "applications-science-symbolic",
                "Anthropic's Claude, signed in with your Claude account.",
-               [("", "", ["claude.enable", "claudeDesktop.enable", "claudeDesktop.matugen"]),
+               [("", "", ["claudeDesktop.matugen"]),
                 ("Claude Code", "Changes made in Claude Code stay until set here.",
                  ["claude.model", "claude.effort", "claude.outputStyle", "claude.builtins.agentsMd",
                   "claude.builtins.agentsMdFiles"]),
                 ("Mods", "", ["claude.mods.ribbon", "claude.mods.skins",
                               "claude.mods.fileTree", "claude.mods.savvyProgress",
                               "claude.mods.blastRadius", "claude.mods.replayTheater",
-                              "claude.mods.chatInventory", "claude.mods.screenShare",
                               "claude.statusLine", "claude.builtins.youShouldKnow"])]),
     "Claude Tools": ("cloudai", "application-x-addon-symbolic",
                      "Plugins, MCP servers and claude.ai connectors Claude Code loads.",
@@ -197,12 +203,9 @@ PAGES = {
                             "builtInBrowser", "chromeBrowser", "computerUse", "deepResearch", "docs",
                             "docx", "googleWorkspace", "importMemory", "mcpBuilder", "morning", "pdf",
                             "pptx", "xlsx")])]),
-    "OpenCode": ("cloudai", "vcs-branch-symbolic",
-                 "OpenCode, the coding agent, in the terminal and as a desktop app.",
-                 [("", "", ["opencode.enable", "opencodeDesktop.enable"])]),
     "Tools": ("localai", "utilities-terminal-symbolic",
-              "The local model server and the app that downloads models.",
-              [("", "", ["llamaSwap.enable", "lmstudio.enable", "openWebui.enable"])]),
+              "The local model server and its chat page.",
+              [("", "", ["llamaSwap.enable", "openWebui.enable"])]),
     "Models": ("localai", "applications-engineering-symbolic",
                "The models llama-swap runs on this computer, one at a time.",
                [("Code", "For opencode and Zed's agent panel.", ["localAi.code"]),
@@ -217,6 +220,8 @@ COLLAPSED = {("Claude", "Mods"): "brush",
              ("Claude Skills", "Repo Skills"): "construction",
              ("Claude Skills", "Subagents"): "smart_toy",
              ("Claude Skills", "Account Skills"): "cloud"}
+#--- COLLAPSED groups of switches shown as on/off chips instead of rows
+CHIPS = {("Claude", "Mods")}
 
 #--- Settings shown inside another's row, by path prefix: claude.skills.commit's row
 #--- also edits claude.skillModels.commit (pair_up)

@@ -2,6 +2,7 @@
 # NIX HELPER (NH) AND BUILD MONITORING
 #=====================================================================#
 {
+  lib,
   pkgs,
   machine,
   ...
@@ -11,9 +12,11 @@
   #--------------------------------------------------------------------#
   programs.nh = {
     enable = true;
-    clean = {
-      enable = true;
-      extraArgs = "--keep-since 5d --keep 5"; # Keep 5 days + 5 generations
+    #--- maintenance.* in the machine's settings.nix
+    clean = with machine.maintenance; {
+      enable = clean != "off";
+      dates = lib.mkIf (clean != "off") clean;
+      extraArgs = "--keep-since ${toString keepDays}d --keep ${toString keepGenerations}";
     };
     flake = machine.flakePath; # flakePath in the machine's settings.nix
   };

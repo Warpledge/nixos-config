@@ -138,23 +138,27 @@ ColumnLayout {
         Layout.fillWidth: true
         implicitHeight: kindLayout.implicitHeight + 22
         radius: 14
-        color: Theme.card
+        color: Qt.alpha(Theme.bg, 0.55)
+        border.width: 1
+        border.color: Theme.rule
         RowLayout {
             id: kindLayout
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.leftMargin: 10
-            anchors.rightMargin: 12
+            anchors.rightMargin: 10
             spacing: 10
             // Green within a week of the last backup, yellow after that or before the first
             Badge {
                 icon: kindRow.working ? "progress_activity" : "save"
                 tone: kindRow.working ? "" : kindRow.kind.last && Date.now() / 1000 - kindRow.kind.last < 7 * 86400
                     ? "success" : "caution"
+                implicitWidth: 32
+                implicitHeight: 32
             }
             ColumnLayout {
-                spacing: 1
+                spacing: 2
                 Layout.fillWidth: true
                 RowLayout {
                     spacing: 6
@@ -163,42 +167,33 @@ ColumnLayout {
                         id: kindTitle
                         text: kindRow.kind.title
                         color: Theme.text
-                        font.pixelSize: 18
-                        font.weight: Font.DemiBold
+                        font.pixelSize: 15
+                        font.weight: Font.Medium
                         elide: Text.ElideRight
                         Layout.maximumWidth: Math.ceil(kindTitleWidth.advanceWidth) + 1
-                        Layout.minimumWidth: Math.min(Layout.maximumWidth, kindRow.width * 0.4)
                         Layout.fillWidth: true
                         TextMetrics { id: kindTitleWidth; font: kindTitle.font; text: kindTitle.text }
                         TitleTip { tip: kindRow.kind.what }
                     }
+                    Hint {
+                        tip: kindRow.kind.command === "freetube-backup" && page.bk.freetubeOpen
+                            ? "Close FreeTube first, so its data is all on disk." : ""
+                    }
                     Item { Layout.fillWidth: true }
                 }
+                // When it last ran
                 Text {
-                    visible: kindRow.kind.command === "freetube-backup" && page.bk.freetubeOpen
-                    text: "Close FreeTube first, so its data is all on disk."
-                    color: Theme.caution
-                    font.pixelSize: 14
-                    wrapMode: Text.Wrap
+                    text: kindRow.working ? "Backing up…"
+                        : kindRow.kind.last ? `Last backed up ${Fmt.when(kindRow.kind.last).replace(/^(Today|Yesterday)/,
+                                                                                                    w => w.toLowerCase())}`
+                        : "Never backed up"
+                    color: Theme.dim
+                    font.pixelSize: 12
+                    elide: Text.ElideRight
                     Layout.fillWidth: true
                 }
             }
-            //--- When it last ran, shrinking to fit rather than cutting it short
-            Text {
-                text: kindRow.working ? "Backing up…"
-                    : kindRow.kind.last ? Fmt.when(kindRow.kind.last) : "Never"
-                color: Theme.accentOf(kindRow)
-                font.pixelSize: 22
-                font.weight: Font.Bold
-                fontSizeMode: Text.HorizontalFit
-                minimumPixelSize: 12
-                horizontalAlignment: Text.AlignRight
-                Layout.fillWidth: true
-                Layout.minimumWidth: 40
-                Layout.preferredWidth: implicitWidth
-                Layout.maximumWidth: implicitWidth
-            }
-            Pill {
+            OutlineButton {
                 enabled: page.busy === ""
                 text: "Back Up"
                 onClicked: page.run(kindRow.kind.command, kindRow.kind.title)

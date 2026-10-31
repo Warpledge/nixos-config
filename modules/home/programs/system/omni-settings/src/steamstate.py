@@ -4,8 +4,12 @@ can be set to. The user's own choices are their steamGames setting, which
 steam-games-apply (nixos/gaming/steam-games-apply.py) writes into Steam."""
 
 import glob
+import json
 import os
 import re
+import shutil
+import subprocess
+import time
 
 import protonstate
 
@@ -162,3 +166,54 @@ def page():
     return {"games": [dict(g, icon=icon(g["id"]), steam=now.get(g["id"], {})) for g in games()],
             "tools": tools(), "default": protonstate.steam_default() or "",
             "groups": protonstate.builder_groups()}
+
+
+#--------------------------------------------------------------------#
+#-- Waiting for Steam
+#--------------------------------------------------------------------#
+APPLY = "/run/current-system/sw/bin/steam-games-apply"
+
+
+def running():
+    """Whether Steam's client is up, as steam-games-apply checks it."""
+    uid = os.getuid()
+    for pid in os.listdir("/proc"):
+        try:
+            if not pid.isdigit() or os.stat(f"/proc/{pid}").st_uid != uid:
+                continue
+            with open(f"/proc/{pid}/cmdline", "rb") as f:
+                argv0 = f.read().split(b"\0", 1)[0]
+        except OSError:
+            continue
+        if argv0.endswith((b"/ubuntu12_32/steam", b"/steamrt64/steam")):
+            return True
+    return False
+
+
+def pending():
+    """{running, games: [{id, name}]}: games whose applied steamGames values
+    Steam's files don't hold yet (steam-games-apply --pending)."""
+    if not os.access(APPLY, os.X_OK):
+        return {"running": running(), "games": []}
+    proc = subprocess.run([APPLY, "--pending"], capture_output=True, text=True, timeout=60,
+                          stdin=subprocess.DEVNULL)
+    try:
+        ids = json.loads(proc.stdout or "[]")
+    except ValueError:
+        ids = []
+    names = {g["id"]: g["name"] for g in games()}
+    return {"running": running(), "games": [{"id": i, "name": names.get(i, i)} for i in ids]}
+
+
+def shut_down():
+    """Quits Steam and waits until it's gone; the page starts it again, and the
+    wrapper runs steam-games-apply before it does."""
+    if running():
+        steam = shutil.which("steam") or "/run/current-system/sw/bin/steam"
+        subprocess.run([steam, "-shutdown"], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                       stderr=subprocess.DEVNULL, timeout=60)
+        end = time.time() + 90
+        while running():
+            if time.time() > end:
+                raise ValueError("Steam didn't quit within 90 seconds; quit it from its menu instead.")
+            time.sleep(1)

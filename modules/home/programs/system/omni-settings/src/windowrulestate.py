@@ -34,6 +34,7 @@ KINDS = [
     ("open-focused", "Focus When Opened", "Focus", "choice",
      [("Don't Focus", False), ("Always Focus", True)]),
     ("opacity", "Opacity", "Appearance", "opacity", []),
+    ("translucent", "Translucent", "Appearance", "on", []),
     ("block-out-from", "Hide From Screen Capture", "Privacy", "choice",
      [("Screenshots and Recording", "screen-capture"), ("Recording Only", "screencast")]),
     ("variable-refresh-rate", "Variable Refresh Rate", "Performance", "on", []),
@@ -354,9 +355,12 @@ def tag_text(prop, value):
     return prop.replace("-", " ").capitalize()
 
 
+def tag_group(prop):
+    return KIND[prop][2] if prop in KIND else EXTRA_GROUPS.get(prop, "Other")
+
+
 def tag_kind(prop):
-    group = KIND[prop][2] if prop in KIND else EXTRA_GROUPS.get(prop, "Other")
-    return GROUP[group][3]
+    return GROUP[tag_group(prop)][3]
 
 
 def plain(pattern):

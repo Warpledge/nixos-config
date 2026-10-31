@@ -53,7 +53,7 @@ user: {lib, ...}: {
     #--- Browsers (controlled by user settings)
     ++ lib.optionals user.browsers.zen [./browsers/zen]
     ++ lib.optionals user.browsers.mullvad [./browsers/mullvad.nix]
-    ++ lib.optionals user.browsers.helium [./browsers/helium.nix]
+    ++ [./browsers/helium.nix] # Always on: it opens the web app windows
     ++ lib.optionals user.browsers.ferdium [./browsers/ferdium.nix]
     #--- Editors (controlled by user settings)
     ++ lib.optionals user.editors.helix [./editors/helix.nix]
@@ -122,9 +122,10 @@ user: {lib, ...}: {
     ++ lib.optionals user.claudeDesktop.enable [./ai/claude-desktop.nix]
     ++ lib.optionals user.opencode.enable [./ai/opencode.nix]
     ++ lib.optionals user.opencodeDesktop.enable [./ai/opencode-desktop.nix]
+    ++ lib.optionals user.pi.enable [./ai/pi.nix]
     ++ lib.optionals user.lmstudio.enable [./ai/lmstudio.nix]
     ++ lib.optionals user.llamaSwap.enable [./ai/llama-swap.nix]
-    ++ lib.optionals (user.claude.enable || user.opencode.enable) [./ai/mcp.nix]
+    ++ lib.optionals (user.claude.enable || user.opencode.enable || user.pi.enable) [./ai/mcp.nix]
     ++ lib.optionals (user.opencode.enable || (user.editors.zed && (user.llamaSwap.enable || user.claude.enable))) [./ai/agent-skills.nix]
     #--- Discord (controlled by user settings)
     ++ lib.optionals (user.discord.goofcord || user.discord.vesktop) [./discord/discord.nix]

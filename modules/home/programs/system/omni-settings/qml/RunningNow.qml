@@ -57,47 +57,57 @@ ColumnLayout {
                                         activating: ["Starting", "caution"], deactivating: ["Stopping", "caution"],
                                         reloading: ["Reloading", "caution"] })[unit.active] || ["Stopped", ""]
         readonly property bool mayRestart: unit.scope === "user" || running.view.info.admin
+        // systemd's "Thu 2026-10-29 18:19:54 CDT" as "Thu 18:19"
+        readonly property string since: {
+            const p = (unit.since || "").split(" ")
+            return p.length >= 3 ? `${p[0]} ${p[2].slice(0, 5)}` : unit.since || ""
+        }
         Layout.fillWidth: true
         implicitHeight: unitCol.implicitHeight + 22
         radius: 14
-        color: Theme.card
+        color: Qt.alpha(Theme.bg, 0.55)
+        border.width: 1
+        border.color: Theme.rule
+        readonly property color ink: unitRow.look[1] ? Theme.toneColor(unitRow.look[1]) : Theme.dim
         ColumnLayout {
             id: unitCol
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.margins: 11
-            anchors.leftMargin: 10
+            anchors.leftMargin: 14
             anchors.rightMargin: 12
             spacing: 8
             RowLayout {
                 Layout.fillWidth: true
-                spacing: 10
-                Badge { icon: "dns" }
+                spacing: 12
+                Rectangle { implicitWidth: 9; implicitHeight: 9; radius: 4.5; color: unitRow.ink }
                 ColumnLayout {
-                    spacing: 1
+                    spacing: 2
                     Layout.fillWidth: true
                     Text {
                         text: unitRow.unit.name
                         color: Theme.text
-                        font.pixelSize: 18
-                        font.weight: Font.DemiBold
+                        font.pixelSize: 15
+                        font.weight: Font.Medium
+                        elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
                     Text {
                         text: unitRow.unit.unit + (unitRow.unit.scope === "user" ? " (yours)" : "")
                               + (unitRow.unit.active === "active" && unitRow.unit.since
-                                 ? `\nSince ${unitRow.unit.since}` : "")
+                                 ? ` · since ${unitRow.since}` : "")
                         color: Theme.dim
-                        font.pixelSize: 13
-                        wrapMode: Text.Wrap
+                        font.pixelSize: 11
+                        elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
                 }
-                Chip {
-                    tappable: false
+                Text {
                     text: unitRow.look[0]
-                    tone: unitRow.look[1]
+                    color: unitRow.ink
+                    font.pixelSize: 13
+                    font.weight: Font.DemiBold
                 }
                 IconButton {
                     icon: unitRow.restarting ? "progress_activity" : "restart_alt"

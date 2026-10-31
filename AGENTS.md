@@ -31,6 +31,8 @@ to their hardware or apps.
 
 When something fails repeatedly, when the user has to re-explain, or when a workaround is found for a platform/tool limitation, add a one-line bullet here. Keep each bullet under 15 words. No explanations. Only add things that will save time in future sessions.
 
+- Scratch QML check files: don't name them `shell.qml`; the Bash hook blocks it.
+
 ## Rules
 
 Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
@@ -344,9 +346,12 @@ window, over a Python backend; full notes split across its `CLAUDE.md`,
   backend read; a `Repeater` delegate's `modelData` is a copy, so edit the
   source list by index. What a dropdown opens goes in a `Reveal`
   (`Reveal.qml`), and Loaders inside it gate on its `shown`.
-- Keep the interface clean: rows, cards, headings and page headers show the
-  name only. What it is shows on hovering the name (`TitleTip.qml`; a
-  setting's `text`, under ~200 characters); cautions behind a yellow triangle
+- Keep the interface clean: rows, cards, headings, page headers and editor
+  sheet headers show the name only; only action rows and tiles keep a short
+  line. What it is shows on hovering the name (`TitleTip.qml`; a
+  setting's `text`, under ~200 characters, its default on hovering its value,
+  switch or chip; a page's description, plus its
+  summary while collapsed); cautions behind a yellow triangle
   `Hint`. Live alerts stay
   as yellow text (`alert`), status values show large (`value`), and names keep
   full width. Switches have no dropdown; no dropdown holds text alone. Every
@@ -364,7 +369,8 @@ window, over a Python backend; full notes split across its `CLAUDE.md`,
 - `.claude/settings.json` is the only tracked file under `.claude/`; nothing
   secret goes in it. Its Bash allow rules stay read-only.
 - MCP API keys are read at launch from `~/.nixos-config-mcp/`, never written into
-  the repo or the store.
+  the repo or the store. Omni Settings' API Keys block writes them, through the
+  backend's stdin only.
 - A new skill or subagent also needs its `claude.skills`/`claude.agents` and model
   lines in `users/_template/settings.nix`, a row on Omni Settings' Claude Skills
   page (`schema.py`) and a `descriptions.json` title.

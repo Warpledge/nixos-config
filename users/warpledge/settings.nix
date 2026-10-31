@@ -27,7 +27,6 @@
   browsers = {
     zen = true;
     mullvad = true;
-    helium = true;
     ferdium = true; # Web messengers in one window (services set in-app)
   };
 
@@ -177,8 +176,6 @@
     mods.savvyProgress = true;
     mods.blastRadius = true;
     mods.replayTheater = true;
-    mods.chatInventory = true;
-    mods.screenShare = true;
     statusLine = true;
     builtins.youShouldKnow = true;
     builtins.agentsMd = false;

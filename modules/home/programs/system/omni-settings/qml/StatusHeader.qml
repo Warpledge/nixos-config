@@ -1,22 +1,28 @@
-// Above the tabs: Rebuild, this computer and who's logged in, then live CPU, memory
-// and disk use (api.py's `status` and `usage`)
+// Above the tabs: this computer and who's logged in, its version and Rebuild, a row of
+// facts, then CPU and memory over the last 5 minutes (api.py's `status` and `usage`)
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 
 ColumnLayout {
     id: header
     required property var view
     property var status: null
     property var usage: null
-    property real cpu: -1  // 0 to 1, once two samples are in
     property var lastTicks: null
-    readonly property bool canRebuild: !!view.info && view.info.admin && view.info.canApply
-    property bool barOnly: false  // just the usage bar, as over the run page
+    property var cpuHistory: []  // 0 to 1, one sample every 2 s, oldest first
+    property var memHistory: []
+    readonly property int samples: 150  // 5 minutes
+    readonly property real cpu: cpuHistory.length ? cpuHistory[cpuHistory.length - 1] : -1
+    readonly property real mem: memHistory.length ? memHistory[memHistory.length - 1] : -1
+    readonly property int waiting: view.pendingCount
+    property bool barOnly: false  // just the graphs, as over the run page
     spacing: 8
 
     function refresh() {
         Backend.call("status", {}, reply => { if (reply.ok) header.status = reply.data })
     }
+    function push(list, v) { return list.concat([v]).slice(-samples) }
     Component.onCompleted: refresh()
     Connections {
         target: Jobs
@@ -33,222 +39,312 @@ ColumnLayout {
             const u = reply.data
             const last = header.lastTicks
             if (last && u.cpuTotal > last.total)
-                header.cpu = 1 - (u.cpuIdle - last.idle) / (u.cpuTotal - last.total)
+                header.cpuHistory = header.push(header.cpuHistory,
+                                                1 - (u.cpuIdle - last.idle) / (u.cpuTotal - last.total))
             header.lastTicks = { total: u.cpuTotal, idle: u.cpuIdle }
+            header.memHistory = header.push(header.memHistory, u.memUsed / u.memTotal)
             header.usage = u
         })
     }
 
-    //--- Rebuild, the computer's name and the user
-    Rectangle {
+    //--- "7.2.11-zen1" reads as "zen 7.2.11"; anything else stays as it is
+    function kernelName(k) {
+        const m = /^([\d.]+)-([a-z]+)\d*$/.exec(k || "")
+        return m ? `${m[2]} ${m[1]}` : k
+    }
+    //--- The NixOS manual's notes for "NixOS 26.11"'s release
+    function releaseNotes(release) {
+        const v = (/(\d+\.\d+)/.exec(release || "") || ["", ""])[1]
+        Qt.openUrlExternally(`https://nixos.org/manual/nixos/unstable/release-notes#sec-release-${v}`)
+    }
+    //--- Each fact's `act` opens what it describes
+    readonly property var facts: {
+        const out = []
+        const info = view.info
+        const st = status
+        const git = view.gitCounts
+        if (info && info.wm)
+            out.push({ icon: "view_column", text: info.wm, tone: "primary",
+                       act: () => view.focusOn("system", "page:System", "machine:windowManager") })
+        if (st)
+            out.push({ icon: "memory", text: kernelName(st.kernel), tone: "primary",
+                       act: () => view.focusOn("system", "page:System", "machine:kernel") },
+                     { icon: "", text: st.release, tone: "info", act: () => releaseNotes(st.release) })
+        if (usage)
+            out.push({ icon: "hard_drive", text: `${Fmt.size(usage.diskFree)} free`, tone: "primary",
+                       act: () => view.focusOn("main", "overview", "overview:space") })
+        // Git as its icon, then the collapsed Git page's badges for what's waiting
+        const toGit = () => view.go("main", "git")
+        if (git && git.branch)
+            return out.concat([{ icon: "fork_right", text: "", tip: `On ${git.branch}`, act: toGit }],
+                              view.pageAlerts("git").map(a => ({ icon: a.icon, text: `${a.n}`,
+                                                                 tip: a.tip, tone: "caution", act: toGit })))
+        return out
+    }
+
+    //--- The computer and the person, the version and its state, and the facts under them
+    RowLayout {
         visible: !header.barOnly
         Layout.fillWidth: true
-        implicitHeight: headCol.implicitHeight + 24
-        radius: 22
-        color: Theme.card
-        border.width: 1
-        border.color: Qt.alpha(Theme.primary, 0.12)
+        spacing: 8
 
         ColumnLayout {
-            id: headCol
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.leftMargin: 12
-            anchors.rightMargin: 12
+            Layout.fillWidth: true
             spacing: 8
-
-            Item {
-                id: topLine
+            GridLayout {
                 Layout.fillWidth: true
-                implicitHeight: 34
-                // The name stays centred on the card, clear of whichever side is wider
-                readonly property real side: Math.max(rebuildBtn.visible ? rebuildBtn.width : 0, userChip.width) + 10
+                readonly property bool stacked: header.width < 420
+                columns: stacked ? 1 : 3
+                columnSpacing: 8
+                rowSpacing: 8
 
                 Rectangle {
-                    id: rebuildBtn
-                    visible: header.canRebuild
-                    anchors.left: parent.left
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: rebuildRow.implicitWidth + 26
-                    height: 34
-                    radius: 17
-                    readonly property bool lit: rebuildHover.hovered && !Jobs.running
-                    opacity: Jobs.running ? 0.45 : 1
-                    color: lit ? Qt.lighter(Theme.primary, 1.12) : Theme.primary
-                    scale: lit ? 1.03 : 1
-                    Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
-                    Behavior on color { ColorAnimation { duration: 120 } }
-                    Row {
-                        id: rebuildRow
-                        anchors.centerIn: parent
-                        spacing: 6
-                        Icon {
-                            anchors.verticalCenter: parent.verticalCenter
-                            icon: Jobs.running ? "progress_activity" : "build"
-                            size: 18
-                            fill: true
-                            color: Theme.inkPrimary
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 1
+                    implicitHeight: 46
+                    radius: 12
+                    color: Theme.card
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 8
+                        anchors.rightMargin: 8
+                        spacing: 8
+                        Tag {
+                            icon: "computer"
+                            text: header.status ? header.status.hostname : ""
+                            big: true
+                            fill: Qt.alpha(Theme.primary, 0.2)
+                            ink: Theme.primary
+                            tip: "This computer"
+                            act: () => header.view.go("system", "page:System")
                         }
-                        Text {
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: "Rebuild"
-                            font.pixelSize: 15
-                            font.weight: Font.Bold
-                            color: Theme.inkPrimary
-                        }
-                    }
-                    HoverHandler { id: rebuildHover; cursorShape: Jobs.running ? Qt.ArrowCursor : Qt.PointingHandCursor }
-                    TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: header.view.rebuild() }
-                }
-
-                Row {
-                    anchors.centerIn: parent
-                    spacing: 8
-                    Icon {
-                        id: flake
-                        anchors.verticalCenter: parent.verticalCenter
-                        icon: "ac_unit"
-                        size: 20
-                        color: Theme.primary
-                    }
-                    Text {
-                        id: hostName
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: Math.max(0, Math.min(Math.ceil(hostWidth.advanceWidth) + 1,
-                                                    topLine.width - 2 * topLine.side - flake.width - 8))
-                        text: header.status ? header.status.hostname : ""
-                        color: Theme.text
-                        font.pixelSize: 19
-                        font.weight: Font.Bold
-                        elide: Text.ElideRight
-                        TextMetrics { id: hostWidth; font: hostName.font; text: hostName.text }
-                    }
-                }
-
-                Rectangle {
-                    id: userChip
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: userRow.implicitWidth + 24
-                    height: 34
-                    radius: 17
-                    color: Qt.alpha(Theme.primary, userHover.hovered ? 0.26 : 0.14)
-                    Behavior on color { ColorAnimation { duration: 120 } }
-                    border.width: 1
-                    border.color: Qt.alpha(Theme.primary, 0.3)
-                    Row {
-                        id: userRow
-                        anchors.centerIn: parent
-                        spacing: 6
-                        Icon {
-                            anchors.verticalCenter: parent.verticalCenter
+                        Item { Layout.fillWidth: true }
+                        // Opens Users
+                        Tag {
                             icon: "person"
-                            size: 18
-                            fill: true
-                            color: Theme.primary
-                        }
-                        Text {
-                            anchors.verticalCenter: parent.verticalCenter
                             text: header.view.info ? header.view.info.user : ""
-                            font.pixelSize: 14
-                            font.weight: Font.DemiBold
-                            color: Theme.primary
+                            big: true
+                            fill: Qt.alpha(Theme.primary, userHover.hovered ? 0.34 : 0.2)
+                            ink: Theme.primary
+                            HoverHandler { id: userHover; cursorShape: Qt.PointingHandCursor }
+                            TapHandler {
+                                gesturePolicy: TapHandler.ReleaseWithinBounds
+                                onTapped: header.view.go("system", "people")
+                            }
                         }
                     }
-                    HoverHandler { id: userHover; cursorShape: Qt.PointingHandCursor }
-                    TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: header.view.go("main", "people") }
+                }
+
+                // The NixOS logo between the two cards (nixos-icons, beside the QML)
+                Image {
+                    visible: !parent.stacked
+                    Layout.preferredWidth: 34
+                    Layout.preferredHeight: 34
+                    Layout.alignment: Qt.AlignCenter
+                    sourceSize: Qt.size(68, 68)
+                    source: Qt.resolvedUrl("nix-snowflake.png")
+                    smooth: true
+                    mipmap: true
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 1
+                    implicitHeight: 46
+                    radius: 12
+                    color: Theme.card
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 8
+                        anchors.rightMargin: 8
+                        spacing: 8
+                        Tag {
+                            visible: !!header.status && header.status.generation > 0
+                            icon: "history"
+                            text: header.status ? `v. ${header.status.generation}` : ""
+                            big: true
+                            fill: Theme.cardHover
+                            ink: Theme.text
+                            tip: "The running system version (generation)"
+                            act: () => header.view.focusOn("main", "overview", "overview:versions")
+                        }
+                        Item { Layout.fillWidth: true }
+                        // Changes not yet applied open Review; up to date, the update check
+                        Tag {
+                            readonly property bool pending: header.waiting > 0
+                            icon: ""
+                            dot: true
+                            big: true
+                            text: pending ? `${header.waiting} change${header.waiting === 1 ? "" : "s"}` : "Up to date"
+                            fill: Qt.alpha(pending ? Theme.caution : Theme.success, 0.14)
+                            ink: pending ? Theme.caution : Theme.success
+                            act: () => pending ? header.view.startReview()
+                                : header.view.focusOn("main", "overview", "overview:sources")
+                        }
+                    }
                 }
             }
 
-            //--- What it runs
-            Row {
-                visible: !!header.status
-                Layout.alignment: Qt.AlignHCenter
-                spacing: 6
-                Chip { tappable: false; accent: true; text: header.view.info ? header.view.info.wm : "" }
-                Chip { tappable: false; text: header.status ? header.status.release : "" }
-                Chip { tappable: false; text: header.status ? `Linux ${header.status.kernel}` : "" }
-                Chip {
-                    tappable: false
-                    visible: !!header.status && header.status.generation > 0
-                    text: header.status ? `Version ${header.status.generation}` : ""
+            //--- Facts as pills, centred; a line that runs out wraps
+            Rectangle {
+                visible: header.facts.length > 0
+                Layout.fillWidth: true
+                implicitHeight: factFlow.implicitHeight + 8
+                radius: 10
+                color: Theme.card
+                Flow {
+                    id: factFlow
+                    // As wide as the pills when they fit on one line, so they centre
+                    readonly property real natural: {
+                        let w = -6
+                        for (let i = 0; i < children.length; i++)
+                            if (children[i].visible)
+                                w += children[i].implicitWidth + 6
+                        return w
+                    }
+                    width: Math.min(parent.width - 12, natural)
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 6
+                    Repeater {
+                        model: header.facts
+                        Tag {
+                            required property var modelData
+                            icon: modelData.icon
+                            text: modelData.text
+                            tip: modelData.tip || ""
+                            act: modelData.act || null
+                            fill: modelData.tone ? Qt.alpha(Theme.toneColor(modelData.tone), 0.16) : Theme.cardHover
+                            ink: modelData.tone ? Theme.toneColor(modelData.tone) : Theme.dim
+                        }
+                    }
                 }
             }
         }
     }
 
-    //--- CPU, memory and disk
-    Rectangle {
+    //--- CPU and memory, each a value and its last 5 minutes; both open Resources
+    readonly property var openMonitor: status && status.monitor
+        ? () => Quickshell.execDetached(["resources"]) : null
+    RowLayout {
         Layout.fillWidth: true
-        implicitHeight: 32
-        radius: 16
+        spacing: 8
+        Graph { label: "CPU"; values: header.cpuHistory; value: header.cpu; act: header.openMonitor }
+        Graph {
+            label: "RAM"
+            act: header.openMonitor
+            values: header.memHistory
+            value: header.mem
+            tip: header.usage ? `${Fmt.size(header.usage.memUsed)} of ${Fmt.size(header.usage.memTotal)}` : ""
+        }
+    }
+
+    component Tag: Rectangle {
+        id: pill
+        property string icon: ""
+        property string text: ""
+        property bool dot: false
+        property bool big: false  // the larger pills in the header's top cards
+        property string tip: ""
+        property color fill: Theme.cardHover
+        property color ink: Theme.dim
+        property var act: null  // run on a click, when set
+        implicitWidth: pillRow.implicitWidth + (big ? 20 : 16)
+        implicitHeight: big ? 26 : 22
+        radius: height / 2
+        color: fill
+        Behavior on color { ColorAnimation { duration: 120 } }
+        readonly property point cursor: tipHover.point.scenePosition
+        onCursorChanged: Tip.move(pill, cursor)
+        HoverHandler {
+            id: tipHover
+            onHoveredChanged: hovered && pill.tip ? Tip.request(pill, pill.tip, point.scenePosition) : Tip.cancel(pill)
+        }
+        HoverHandler { enabled: !!pill.act; cursorShape: Qt.PointingHandCursor }
+        TapHandler {
+            enabled: !!pill.act
+            gesturePolicy: TapHandler.ReleaseWithinBounds
+            onTapped: pill.act()
+        }
+        Row {
+            id: pillRow
+            anchors.centerIn: parent
+            spacing: 5
+            Rectangle {
+                visible: pill.dot
+                anchors.verticalCenter: parent.verticalCenter
+                width: 6; height: 6; radius: 3
+                color: pill.ink
+            }
+            Icon {
+                visible: pill.icon !== ""
+                anchors.verticalCenter: parent.verticalCenter
+                icon: pill.icon
+                size: pill.big ? 15 : 13
+                color: pill.ink
+            }
+            Text {
+                visible: pill.text !== ""
+                anchors.verticalCenter: parent.verticalCenter
+                text: pill.text
+                color: pill.ink
+                font.pixelSize: pill.big ? 13 : 11
+                font.weight: pill.big ? Font.Bold : Font.DemiBold
+            }
+        }
+    }
+
+    component Graph: Rectangle {
+        id: graph
+        property string label
+        property var values: []
+        property real value: -1
+        property string tip: ""
+        property var act: null  // run on a click, when set
+        readonly property color tint: value < 0 ? Theme.dim : Theme.loadColor(value)
+        Layout.fillWidth: true
+        Layout.preferredWidth: 1  // equal halves
+        implicitHeight: 34
+        radius: 10
         color: Theme.card
         RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: 14
-            anchors.rightMargin: 14
-            spacing: 16
-            Meter { icon: "memory"; label: "CPU"; value: header.cpu }
-            Meter {
-                icon: "memory_alt"
-                label: "RAM"
-                value: header.usage ? header.usage.memUsed / header.usage.memTotal : -1
-                tip: header.usage ? `${Fmt.size(header.usage.memUsed)} of ${Fmt.size(header.usage.memTotal)}` : ""
+            anchors.leftMargin: 10
+            anchors.rightMargin: 10
+            spacing: 8
+            Text {
+                text: graph.label
+                color: Theme.dim
+                font.pixelSize: 10
+                font.weight: Font.DemiBold
             }
-            Meter {
-                icon: "hard_drive"
-                label: "Disk"
-                value: header.usage ? header.usage.diskUsed / header.usage.diskTotal : -1
-                tip: header.usage ? `${Fmt.size(header.usage.diskUsed)} of ${Fmt.size(header.usage.diskTotal)}` : ""
+            Text {
+                text: graph.value < 0 ? "–" : `${Math.round(graph.value * 100)}%`
+                color: graph.tint
+                font.pixelSize: 13
+                font.weight: Font.Bold
+                font.features: { "tnum": 1 }
+                Layout.preferredWidth: 32
             }
-        }
-    }
-
-    component Meter: RowLayout {
-        id: meter
-        property string icon
-        property string label
-        property real value: -1
-        property string tip: ""
-        readonly property color tint: value >= 0.9 ? Theme.error : value >= 0.75 ? Theme.caution : Theme.primary
-        Layout.fillWidth: true
-        Layout.preferredWidth: 1  // equal thirds
-        spacing: 6
-        Icon { icon: meter.icon; size: 16; color: meter.tint }
-        Text {
-            text: meter.label
-            color: Theme.dim
-            font.pixelSize: 12
-            font.weight: Font.DemiBold
-        }
-        Rectangle {
-            Layout.fillWidth: true
-            implicitHeight: 4
-            radius: 2
-            color: Qt.alpha(meter.tint, 0.18)
-            Rectangle {
-                width: parent.width * Math.max(0, Math.min(1, meter.value))
-                height: parent.height
-                radius: 2
-                color: meter.tint
-                Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
+            LineGraph {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 14
+                values: graph.values
+                count: header.samples
+                color: graph.tint
             }
-        }
-        Text {
-            text: meter.value < 0 ? "–" : `${Math.round(meter.value * 100)}%`
-            color: Theme.text
-            font.pixelSize: 12
-            font.weight: Font.DemiBold
-            font.features: { "tnum": 1 }
-            horizontalAlignment: Text.AlignRight
-            Layout.preferredWidth: 32
         }
         readonly property point cursor: hover.point.scenePosition
-        onCursorChanged: Tip.move(meter, cursor)
+        onCursorChanged: Tip.move(graph, cursor)
         HoverHandler {
             id: hover
-            onHoveredChanged: hovered ? Tip.request(meter, meter.tip, point.scenePosition) : Tip.cancel(meter)
+            onHoveredChanged: hovered && graph.tip ? Tip.request(graph, graph.tip, point.scenePosition) : Tip.cancel(graph)
+        }
+        HoverHandler { enabled: !!graph.act; cursorShape: Qt.PointingHandCursor }
+        TapHandler {
+            enabled: !!graph.act
+            gesturePolicy: TapHandler.ReleaseWithinBounds
+            onTapped: graph.act()
         }
     }
 }

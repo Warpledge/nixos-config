@@ -4,7 +4,7 @@ There are three ways to get software, and they suit different apps.
 
 ## Default Packages: Apps the Config Sets Up
 
-Packages → **Default Packages** has a page per kind of app (Browsers, Media, Office…), and the Gaming tab's **Apps** page holds the game launchers and tools. Each switch installs an app *and* sets it up: its settings, theme, file types, and sometimes a service or a security profile. Use these whenever the app you want has a switch.
+Packages → **Default Packages** has a card per kind of app (Browsers, Media, Gaming, AI…). Each switch installs an app *and* sets it up: its settings, theme, file types, and sometimes a service or a security profile. Use these whenever the app you want has a switch.
 
 Turn a switch on or off, then Apply. The button beside a switch opens the file that sets the app up, if you're curious how. Which switch loads which file is in [`modules/home/programs/default.nix`](../../modules/home/programs/default.nix).
 
@@ -18,7 +18,7 @@ The search box at the top of the Packages tab looks through nixpkgs, the main pa
 
 ## Flatpaks: Apps Outside nixpkgs
 
-Some apps only ship as a Flatpak. Main → **Flatpaks** needs Flatpak turned on for the computer (an admin's switch, which loads [`flatpak.nix`](../../modules/nixos/services/runtimes/flatpak.nix)). The page then:
+Some apps only ship as a Flatpak. Maintenance → **Flatpaks** needs Flatpak turned on for the computer (an admin's switch, which loads [`flatpak.nix`](../../modules/nixos/services/runtimes/flatpak.nix)). The page then:
 
 - checks for updates and updates everything
 - removes runtimes nothing uses any more, and repairs the installation
@@ -39,4 +39,4 @@ It's gone from your apps afterwards (garbage collection deletes the download lat
 
 ## Which App Opens What
 
-Main → **Default Apps** picks your browser, text editor, terminal and file manager. These decide what opens links and files, and what `Mod+B`, `Mod+E`, `Mod+Return` and `Mod+Z` start. A pick whose app is switched off falls back to the first one you have of that kind.
+System → **Default Apps** picks your browser, text editor, terminal and file manager. These decide what opens links and files, and what `Mod+B`, `Mod+E`, `Mod+Return` and `Mod+Z` start. A pick whose app is switched off falls back to the first one you have of that kind.

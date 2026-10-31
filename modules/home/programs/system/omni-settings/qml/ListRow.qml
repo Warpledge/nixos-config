@@ -34,9 +34,9 @@ Rectangle {
     color: selected ? Theme.selected
          : tone ? Theme.toneFill(tone, hover.hovered ? Theme.hover : Theme.card)
          : compact ? (hover.hovered ? Theme.hover : "transparent")
-         : Theme.rowFill(accent, hover.hovered && !expanded)
+         : hover.hovered && !expanded ? Theme.hover : Qt.alpha(Theme.bg, 0.55)
     border.width: plainCard ? 1 : 0
-    border.color: Theme.rowBorder(accent, expanded)
+    border.color: expanded ? Qt.alpha(accent, 0.35) : Theme.rule
     Behavior on color { ColorAnimation { duration: 120 } }
 
     ColumnLayout {
@@ -51,7 +51,7 @@ Rectangle {
         RowLayout {
             Layout.fillWidth: true
             spacing: 12
-            Badge { icon: row.icon; app: row.app; tone: row.tone }
+            Badge { icon: row.icon; app: row.app; tone: row.tone; implicitWidth: 32; implicitHeight: 32 }
             ColumnLayout {
                 spacing: 1
                 Layout.fillWidth: true
@@ -62,8 +62,8 @@ Rectangle {
                         id: titleText
                         text: row.title
                         color: Theme.text
-                        font.pixelSize: 18
-                        font.weight: Font.DemiBold
+                        font.pixelSize: row.compact ? 14 : 15
+                        font.weight: Font.Medium
                         wrapMode: Text.Wrap
                         maximumLineCount: row.titleLines
                         elide: Text.ElideRight
@@ -83,7 +83,7 @@ Rectangle {
                     visible: text !== ""
                     text: row.subtitle
                     color: Theme.dim
-                    font.pixelSize: 14
+                    font.pixelSize: 12
                     Layout.fillWidth: true
                 }
                 Text {
@@ -100,7 +100,7 @@ Rectangle {
                 visible: row.value !== ""
                 text: row.value
                 color: row.tone ? Theme.toneColor(row.tone) : row.accent
-                font.pixelSize: 24
+                font.pixelSize: 18
                 font.weight: Font.Bold
                 fontSizeMode: Text.HorizontalFit
                 minimumPixelSize: 12

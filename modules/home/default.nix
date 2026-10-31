@@ -14,14 +14,16 @@ user: {lib, ...}: {
   #--------------------------------------------------------------------#
   #-- Imports
   #--------------------------------------------------------------------#
-  imports = [
-    #--- Other
-    (import ./programs user)
-    ./env.nix
-    ./gpu-offload.nix # Always loaded: it also removes copies when the list empties
-    ./mime.nix
-    ./nixm.nix
-    ./services.nix
-    ./variables.nix
-  ];
+  imports =
+    [
+      #--- Other
+      (import ./programs user)
+      ./env.nix
+      ./gpu-offload.nix # Always loaded: it also removes copies when the list empties
+      ./mime.nix
+      ./nixm.nix
+      ./services.nix
+      ./variables.nix
+    ]
+    ++ lib.optionals user.admin [./update-reminder.nix];
 }

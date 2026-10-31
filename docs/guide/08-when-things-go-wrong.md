@@ -29,7 +29,7 @@ Go back a version: Maintenance → **Versions** → **Switch** on the one before
 
 ## A Service Isn't Working
 
-Main → **Services** → **Running Now** shows each service's state and its last log lines, with a restart button. In a terminal, `journalctl -b -p err` lists this boot's errors.
+System → **Services** → **Running Now** shows each service's state and its last log lines, with a restart button. In a terminal, `journalctl -b -p err` lists this boot's errors.
 
 ## A Game Won't Start
 

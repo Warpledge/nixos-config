@@ -397,7 +397,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | **Guitar** | [TONE3000][tone3000] (official NAM player, browses its capture and IR library in-app), [Guitarix][guitarix] (modular amp rig), [ir.lv2][ir-lv2] for cabinet IRs, [qpwgraph][qpwgraph] for patching, plus [FxFloorBoard][katana-fxfloorboard] to edit patches on the Boss Katana itself |
 | **Rhythm Games** | [feedBack][feedback] plays Guitar Pro tabs through its own audio engine, with VST hosting and amp modeling, so the Katana DI feed doubles as the game input; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs. [Rocksmith 2014][rocksmith] runs on Proton and reads the same DI through [PipeASIO][pipeasio] and [RS_ASIO][rs-asio]; the module writes their config, and the hand-done install steps live in `docs/personal/gaming/rocksmith-2014.md` |
 | **Chat / Productivity** | [GoofCord][goofcord] or [Vesktop][vesktop] (follows the shell's theme live) via [nixcord][nixcord] (Vencord, with [arRPC][arrpc] running alongside it so Steam and Proton games show up as rich presence), [Ferdium][ferdium] (all your web messengers in one window), [Thunderbird][thunderbird], [Obsidian][obsidian] |
-| **AI Tooling** | [Claude Code][claude-code], [Claude Desktop][claude-desktop], [OpenCode][opencode], [OpenCode Desktop][opencode-desktop], [LM Studio][lmstudio], [llama-swap][llama-swap], [Open WebUI][open-webui] |
+| **AI Tooling** | [Claude Code][claude-code], [Claude Desktop][claude-desktop], [OpenCode][opencode], [OpenCode Desktop][opencode-desktop], [Pi][pi], [LM Studio][lmstudio], [llama-swap][llama-swap], [Open WebUI][open-webui] |
 | **Android** | [scrcpy][scrcpy] (mirror and control a device over USB or wifi, nothing to install on the phone), [Flutter][flutter] and [Gradle][gradle] with adb |
 | **Video Trimming** | [Video Trimmer][video-trimmer] (cut a clip out of a video without re-encoding it), [Constrict][constrict] (re-encode a video to fit a chosen file size) |
 | **Manga / Anime Reader** | [Suwayomi][suwayomi] is a local manga reader, opened from the launcher as a [Helium][helium] app window (`localhost:4567`) after a password prompt. [Moku][moku] covers manga, light novels and anime, built from source with a fix for overlapping search results, a per-source filter panel and a button that opens the current episode in mpv, with a local [FlareSolverr][flaresolverr] for Cloudflare-protected sources |
@@ -584,6 +584,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 [claude-desktop]: https://code.claude.com/docs/en/desktop-linux
 [opencode]: https://github.com/opencode-ai/opencode
 [opencode-desktop]: https://opencode.ai
+[pi]: https://pi.dev/
 [lmstudio]: https://lmstudio.ai
 [llama-swap]: https://github.com/mostlygeek/llama-swap
 [open-webui]: https://github.com/open-webui/open-webui
@@ -675,7 +676,7 @@ flake.nix
 | [`nur`](https://github.com/nix-community/NUR) | NixOS User Repository |
 | [`niri`](https://github.com/epireyn/niri-flake) (epireyn/niri-flake) | Niri WM |
 | [`dms`](https://github.com/duxlabs-dev/dux-shell) (duxlabs-dev, stable) | Dux Shell (formerly DankMaterialShell) |
-| [`dms-plugin-registry`](https://github.com/duxlabs-dev/dux-plugin-registry) | Dux Shell plugins (Claude Code usage, Quick Capture, AMD GPU monitor, ClipBoard+, Wallpaper Carousel, Linux Wallpaper Engine) |
+| [`dms-plugin-registry`](https://github.com/duxlabs-dev/dux-plugin-registry) | Dux Shell plugins (Quick Capture, AMD GPU monitor, ClipBoard+, Wallpaper Carousel, Linux Wallpaper Engine) |
 | [`dux-files`](https://github.com/duxlabs-dev/dux-files) | Dux Files, standalone file manager from Dux Labs |
 | [`dux-greeter`](https://github.com/duxlabs-dev/dux-greeter) | Login screen that matches Dux Shell |
 | [`stylix`](https://github.com/nix-community/stylix) | Fonts and cursor |

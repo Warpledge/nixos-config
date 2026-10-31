@@ -44,7 +44,6 @@
   browsers = {
     zen = true;
     mullvad = false;
-    helium = false;
     ferdium = false; # Web messengers in one window (services set in-app)
   };
 
@@ -226,9 +225,6 @@
   claude.mods.savvyProgress = false; # Progress bar and a live panel of subagents
   claude.mods.blastRadius = false; # Shows what a risky rm or git command would change
   claude.mods.replayTheater = false; # /replay steps through the last turn's edits
-  # Need BenAI's mods unzipped into ~/.local/opt/claude-mods
-  claude.mods.chatInventory = false; # Pane listing the chat's to-dos, files and tools
-  claude.mods.screenShare = false; # /screen-share hides names and emails while recording
   claude.statusLine = false; # Status line under Claude Code's prompt: context used
   claude.builtins.youShouldKnow = false; # Built-in "you should know" plugin
   claude.builtins.agentsMd = true; # Built-in plugin that reads AGENTS.md files
@@ -237,6 +233,7 @@
   claudeDesktop.matugen = false; # Claude desktop app in your wallpaper's colours
   opencode.enable = false;
   opencodeDesktop.enable = false; # OpenCode's desktop app: a Claude Desktop-style GUI
+  pi.enable = false; # Pi: a minimal terminal coding agent, on llama-swap's models
   lmstudio.enable = false; # Runs language models locally
   llamaSwap.enable = false; # llama.cpp server on the GPU, opencode's default model
   openWebui.enable = false; # Chat with llama-swap's models in the browser

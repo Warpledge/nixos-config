@@ -106,10 +106,6 @@
         nixd = {
           command = "nixd";
         };
-        typescript-language-server = {
-          command = "typescript-language-server";
-          args = ["--stdio"];
-        };
         rust-analyzer = {
           command = "rust-analyzer";
         };
@@ -133,7 +129,6 @@
         {
           name = "javascript";
           auto-format = true;
-          language-servers = ["typescript-language-server"];
           indent = {
             tab-width = 2;
             unit = "  ";
@@ -142,7 +137,6 @@
         {
           name = "typescript";
           auto-format = true;
-          language-servers = ["typescript-language-server"];
           indent = {
             tab-width = 2;
             unit = "  ";
@@ -163,7 +157,6 @@
   home.packages = with pkgs; [
     # LSP servers, installed in zed.nix
     # nixd
-    # typescript-language-server
     # rust-analyzer
     # lua-language-server
 
