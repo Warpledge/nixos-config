@@ -3,7 +3,8 @@ space or punctuation, replaces a misspelled word when one correction clearly win
 only knows what was typed on the on-screen keyboard, never the app's text. Off until
 SIGUSR1 (osk-autocorrect) turns it on; the state survives restarts. Swipe strokes
 (wvkbd-swipe.patch) arrive as \\x02keys\\x03 and are typed as a word; SIGUSR2 (osk-swipe)
-loads the dictionary ahead of the first one. Words stay in memory and are never logged."""
+loads the dictionary ahead of the first one. Typed words stay in memory and are never
+logged; TEMPORARILY, swipe strokes and their words go to STROKE_LOG for tuning."""
 
 import functools
 import itertools
@@ -38,6 +39,7 @@ signal.signal(signal.SIGUSR2, on_swipe)
 STATE_DIR = os.environ.get("XDG_STATE_HOME", os.path.expanduser("~/.local/state"))
 STATE = os.path.join(STATE_DIR, "osk-autocorrect-on")
 SWIPE_STATE = os.path.join(STATE_DIR, "osk-swipe-on")  # osk-swipe keeps this one
+STROKE_LOG = os.path.join(STATE_DIR, "osk-swipe-strokes.log")  # TEMPORARY
 PAUSE = 5.0  # seconds without a key after which a word's start can't be trusted
 DELIMITERS = " .,!?;:"
 SKIP_APPS = ("kitty", "ghostty", "foot", "alacritty", "konsole", "keepassxc")
@@ -62,7 +64,16 @@ WEAK_COST = 1.0
 WEAK_MIN_COUNT = 1_000_000
 SHORT_LEN = 4
 SHORT_MIN_COUNT = 100_000_000
-STROKE_FREQ = 0.12  # swipe: score per factor of ten, against a stroke's shape match
+# Left out: ones that are common words without the apostrophe (we're, let's, I'll, it's)
+CONTRACTIONS = {
+    c.replace("'", "").lower(): c
+    for c in (
+        "I'm I've don't can't won't didn't doesn't isn't wasn't aren't couldn't shouldn't"
+        " wouldn't haven't that's what's there's you're they're you've you'll he's she's"
+    ).split()
+}
+CONTRACTION_COUNT = 100_000_000  # how common they rank in swipe
+STROKE_FREQ = 0.12 # swipe: score per factor of ten, against a stroke's shape match
 STROKE_END_MISS = 0.3  # swipe: a word not starting or ending where the stroke did
 
 
@@ -158,7 +169,8 @@ class Speller:
         """The word a swipe across these keys spells, or None. Its first and last
         letters must be on or beside the stroke's ends, the rest in order between."""
         best, best_score = None, None
-        for word, count in self.sym.words.items():
+        words = {**self.sym.words, **dict.fromkeys(CONTRACTIONS, CONTRACTION_COUNT)}
+        for word, count in words.items():
             if len(word) < 2 or len(word) > len(path) + 3:
                 continue
             if not (word[0] == path[0] or near(word[0], path[0])):
@@ -175,12 +187,14 @@ class Speller:
             score -= STROKE_END_MISS * ((word[0] != path[0]) + (word[-1] != path[-1]))
             if best_score is None or score > best_score:
                 best, best_score = word, score
-        return best
+        return CONTRACTIONS.get(best, best)
 
     def correct(self, word):
         """The correction for a lowercase word, or None to leave it alone."""
         from symspellpy import Verbosity
 
+        if word in CONTRACTIONS:
+            return CONTRACTIONS[word]
         # Two letters are too little to go on: "ok" would become "of"
         if len(word) < 3 or self.known(word):
             return None
@@ -226,7 +240,15 @@ class Typist:
     """Types through its own uinput keyboard."""
 
     SHIFTED = {"!": "1", "?": "/", ":": ";"}
-    NAMES = {" ": "SPACE", ".": "DOT", ",": "COMMA", ";": "SEMICOLON", "/": "SLASH", "1": "1"}
+    NAMES = {
+        " ": "SPACE",
+        ".": "DOT",
+        ",": "COMMA",
+        ";": "SEMICOLON",
+        "/": "SLASH",
+        "1": "1",
+        "'": "APOSTROPHE",
+    }
 
     def __init__(self):
         from evdev import UInput
@@ -262,6 +284,13 @@ class Typist:
             self.tap(getattr(self.e, f"KEY_{name}"), c.isupper() or c in self.SHIFTED)
 
 
+def log_stroke(path, word):
+    # TEMPORARY, for tuning decode_stroke on real strokes; remove with its file
+    fd = os.open(STROKE_LOG, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o600)
+    with os.fdopen(fd, "a") as log:
+        log.write(f"{path} -> {word}\n")
+
+
 class Corrector:
     def __init__(self, speller, typist, safe=safe_to_correct):
         self.speller = speller
@@ -289,6 +318,7 @@ class Corrector:
     def swiped(self, path):
         word = self.speller.decode_stroke(path.lower())
         self.word, self.clean, self.last_fix = "", True, None
+        log_stroke(path, word)
         if word:
             word = word.capitalize() if path[0].isupper() else word
             self.typist.text(word + " ")

@@ -1,5 +1,50 @@
 # wvkbd: swipe mode (SIGRTMIN+1, or WVKBD_SWIPE at start). A first finger on a letter sends
-# nothing until it lifts: a tap types the letter, a stroke prints keys on stdout.
+# nothing until it lifts: a tap types the letter, a stroke prints its keys between the
+# bytes 0x02 and 0x03 on stdout, with a line drawn behind the finger.
+--- a/drw.h
++++ b/drw.h
+@@ -50,6 +50,8 @@
+ void drw_over_rectangle(struct drwsurf *ds, Color color, uint32_t x, uint32_t y,
+                         uint32_t w, uint32_t h, int rounding);
+ 
++void drw_draw_line(struct drwsurf *ds, Color color, double x0, double y0,
++                   double x1, double y1, double width);
+ void drw_draw_text(struct drwsurf *ds, Color color, uint32_t x, uint32_t y,
+                    uint32_t w, uint32_t h, uint32_t b, const char *label,
+                    PangoFontDescription *font_description);
+--- a/drw.c
++++ b/drw.c
+@@ -172,6 +172,30 @@
+ }
+ 
+ void
++drw_draw_line(struct drwsurf *ds, Color color, double x0, double y0, double x1,
++              double y1, double width)
++{
++    drwsurf_flip(ds);
++    struct drwbuf *d = ds->back_buffer;
++    double left = (x0 < x1 ? x0 : x1) - width, top = (y0 < y1 ? y0 : y1) - width;
++    double right = (x0 > x1 ? x0 : x1) + width, bottom = (y0 > y1 ? y0 : y1) + width;
++    drwsurf_damage(ds, left < 0 ? 0 : left, top < 0 ? 0 : top,
++                   right - left + 1, bottom - top + 1);
++
++    cairo_save(d->cairo);
++    cairo_set_operator(d->cairo, CAIRO_OPERATOR_OVER);
++    cairo_set_source_rgba(
++      d->cairo, color.bgra[2] / (double)255, color.bgra[1] / (double)255,
++      color.bgra[0] / (double)255, color.bgra[3] / (double)255);
++    cairo_set_line_width(d->cairo, width);
++    cairo_set_line_cap(d->cairo, CAIRO_LINE_CAP_ROUND);
++    cairo_move_to(d->cairo, x0, y0);
++    cairo_line_to(d->cairo, x1, y1);
++    cairo_stroke(d->cairo);
++    cairo_restore(d->cairo);
++}
++
++void
+ drw_do_rectangle(struct drwsurf *ds, Color color, uint32_t x, uint32_t y,
+                  uint32_t w, uint32_t h, bool over, int rounding)
+ {
 --- a/main.c
 +++ b/main.c
 @@ -6,6 +6,7 @@
@@ -10,16 +55,18 @@
  #include <stdio.h>
  #include <stdlib.h>
  #include <string.h>
-@@ -104,6 +105,8 @@
+@@ -104,6 +105,10 @@
  #define MAX_FINGERS 10
  #define SLIDE_AFTER_MS 150 /* held this long, sliding presses the next key */
  #define MOD_TAP_MS 300     /* a modifier let go sooner, unused, latches */
 +#define STROKE_MAX 63
++#define TRAIL_START_PX 8
++#define TRAIL_WIDTH_PX 4.0
 +#define STROKE_TAP_MS 150  /* two keys crossed this fast is a tap that drifted */
  
  static struct finger {
      bool down;
-@@ -112,8 +115,40 @@
+@@ -112,8 +117,57 @@
      struct key *mod; /* the modifier it holds */
      bool mod_used;
      uint32_t time;
@@ -27,6 +74,8 @@
 +    char stroke[STROKE_MAX + 1];
 +    int stroke_len;
 +    struct key *stroke_first, *stroke_last;
++    double trail_x, trail_y;
++    bool trail_started;
  } fingers[MAX_FINGERS];
  
 +static bool swipe_mode = false;
@@ -54,13 +103,37 @@
 +    if (f->stroke_len < STROKE_MAX)
 +        f->stroke[f->stroke_len++] = tolower(k->label[0]);
 +    f->stroke_last = k;
-+    kbd_draw_key(&keyboard, k, f->stroke_len > 1 ? Swipe : Press);
++    if (f->stroke_len == 1)
++        kbd_draw_key(&keyboard, k, Press);
++}
++
++/* The line behind the finger; the first few px don't count, so taps show none */
++static void
++stroke_trail(struct finger *f, double x, double y)
++{
++    double dx = x - f->trail_x, dy = y - f->trail_y;
++    if (!f->trail_started && dx * dx + dy * dy < TRAIL_START_PX * TRAIL_START_PX)
++        return;
++    f->trail_started = true;
++    drw_draw_line(keyboard.surf, keyboard.schemes[f->stroke_first->scheme].swipe,
++                  f->trail_x, f->trail_y, x, y, TRAIL_WIDTH_PX);
++    f->trail_x = x;
++    f->trail_y = y;
 +}
 +
  static struct finger *
  finger_find(int32_t id)
  {
-@@ -155,7 +190,13 @@
+@@ -147,7 +201,7 @@
+ }
+ 
+ static void
+-finger_press(int32_t id, struct key *k, uint32_t time)
++finger_press(int32_t id, struct key *k, uint32_t x, uint32_t y, uint32_t time)
+ {
+     struct finger *f = NULL;
+     for (int i = 0; i < MAX_FINGERS && !f; i++)
+@@ -155,7 +209,15 @@
              f = &fingers[i];
      if (!f)
          return;
@@ -68,13 +141,15 @@
      *f = (struct finger){.down = true, .id = id, .time = time};
 +    if (stroke) {
 +        f->stroke_first = k;
++        f->trail_x = x;
++        f->trail_y = y;
 +        stroke_add(f, k);
 +        return;
 +    }
      finger_press_key(f, k, time);
      /* Pressing a latched modifier turns it off; there's nothing to hold then */
      if (k->type == Mod && (keyboard.mods & k->code)) {
-@@ -170,6 +211,26 @@
+@@ -170,6 +232,26 @@
      struct finger *f = finger_find(id);
      if (!f)
          return;
@@ -101,11 +176,16 @@
      finger_release_key(f, time);
      if (f->mod) {
          uint32_t code = f->mod->code;
-@@ -187,6 +248,11 @@
- finger_motion(int32_t id, struct key *k, uint32_t time)
+@@ -184,9 +266,15 @@
+ }
+ 
+ static void
+-finger_motion(int32_t id, struct key *k, uint32_t time)
++finger_motion(int32_t id, struct key *k, uint32_t x, uint32_t y, uint32_t time)
  {
      struct finger *f = finger_find(id);
 +    if (f && f->stroke_first) {
++        stroke_trail(f, x, y);
 +        if (is_letter(k) && k != f->stroke_last)
 +            stroke_add(f, k);
 +        return;
@@ -113,7 +193,7 @@
      if (!f || !f->key || f->key == k)
          return;
      finger_release_key(f, time);
-@@ -198,9 +264,12 @@
+@@ -198,9 +286,12 @@
  static void
  fingers_release_all(uint32_t time)
  {
@@ -127,7 +207,25 @@
  }
  
  static void wl_touch_down(void *data, struct wl_touch *wl_touch,
-@@ -1009,6 +1078,7 @@
+@@ -373,7 +464,7 @@
+ 
+     next_key = kbd_get_key(&keyboard, touch_x, touch_y);
+     if (next_key) {
+-        finger_press(id, next_key, time);
++        finger_press(id, next_key, touch_x, touch_y, time);
+     } else if (keyboard.compose) {
+         keyboard.compose = 0;
+         kbd_switch_layout(&keyboard, keyboard.prevlayout,
+@@ -405,7 +496,7 @@
+     touch_x = wl_fixed_to_int(x);
+     touch_y = wl_fixed_to_int(y);
+ 
+-    finger_motion(id, kbd_get_key(&keyboard, touch_x, touch_y), time);
++    finger_motion(id, kbd_get_key(&keyboard, touch_x, touch_y), touch_x, touch_y, time);
+ }
+ 
+ void
+@@ -1009,6 +1100,7 @@
          layer_names_list = estrdup(tmp);
      if ((tmp = getenv("WVKBD_LANDSCAPE_LAYERS")))
          landscape_layer_names_list = estrdup(tmp);
@@ -135,7 +233,7 @@
      if ((tmp = getenv("WVKBD_HEIGHT")))
          normal_height = atoi(tmp);
      if ((tmp = getenv("WVKBD_LANDSCAPE_HEIGHT")))
-@@ -1388,6 +1458,7 @@
+@@ -1388,6 +1480,7 @@
      sigaddset(&signal_mask, SIGUSR1);
      sigaddset(&signal_mask, SIGUSR2);
      sigaddset(&signal_mask, SIGRTMIN);
@@ -143,7 +241,7 @@
      sigaddset(&signal_mask, SIGPIPE);
      if (sigprocmask(SIG_BLOCK, &signal_mask, NULL) == -1) {
          die("Failed to disable handled signals: %d\n", errno);
-@@ -1420,6 +1491,8 @@
+@@ -1420,6 +1513,8 @@
                  hide();
              else if (si.ssi_signo == SIGUSR2)
                  show();
