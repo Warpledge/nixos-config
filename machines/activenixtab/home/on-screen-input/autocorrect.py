@@ -306,6 +306,7 @@ class Corrector:
         self.last_key = 0.0
         self.last_fix = None  # (what was typed, what replaced it)
         self.last_swiped = ""
+        self.auto_space = False  # the last thing typed is a space we added
         self.stroke = None  # the keys of a stroke being read
         self.leave_alone = set()
 
@@ -347,14 +348,16 @@ class Corrector:
             self.typist.erase(len(swiped))
             self.last_key = now
             return
-        if swiped and ch == " ":
-            self.typist.erase(1)  # the stroke already typed one
+        auto_space, self.auto_space = self.auto_space or bool(swiped), False
+        if auto_space and ch == " ":
+            self.typist.erase(1)  # one is already there
             self.last_key = now
             return
-        if swiped and ch in DELIMITERS:
-            # "well ." becomes "well. "
+        if auto_space and ch in DELIMITERS:
+            # "well ." becomes "well. ", and another "." stays with it: "well.. "
             self.typist.erase(2)
             self.typist.text(ch + " ")
+            self.auto_space = True
             self.last_key = now
             return
         if now - self.last_key > PAUSE:
