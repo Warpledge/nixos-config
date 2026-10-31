@@ -9,6 +9,7 @@ ColumnLayout {
     property var up: null  // { checked, rows }
     property string error: ""
     property bool loading: false
+    property bool open: false  // whether the pins are listed
     readonly property bool ready: !!up || error !== ""
     readonly property var groups: [
         { kind: "disabled", title: "Disabled Packages",
@@ -63,34 +64,49 @@ ColumnLayout {
         value: page.loading ? "Checking…" : !page.up ? "Not checked"
             : page.updates ? `${page.updates} upstream` : "Up to date"
         alert: page.error ? `Couldn't check: ${page.error}` : ""
-        button: page.loading ? "" : "Check Now"
-        onClicked: if (!page.loading) page.load(true, false)
+        expandable: true
+        expanded: page.open
+        onClicked: page.open = !page.open
     }
 
-    Repeater {
-        model: page.up ? page.groups : []
-        ColumnLayout {
-            id: group
-            required property var modelData
-            readonly property var rows: page.up.rows.filter(r => r.kind === modelData.kind)
-            visible: rows.length > 0
-            spacing: 6
-            Layout.fillWidth: true
-            Section { text: group.modelData.title; info: group.modelData.info }
-            Repeater {
-                model: group.rows
-                ListRow {
-                    required property var modelData
-                    icon: modelData.status === "update" ? "upgrade"
-                        : modelData.status === "ok" ? (modelData.kind === "disabled" ? "block" : "check") : modelData.status === "error" ? "error" : "help"
-                    tone: modelData.status === "update" ? "success"
-                        : modelData.status === "error" ? "error" : modelData.status === "unknown" ? "caution" : ""
-                    title: modelData.name
-                    info: modelData.file ? `Pinned in ${modelData.file}` : ""
-                    alert: modelData.status === "ok" ? "" : modelData.note
-                    value: page.shown(modelData)
-                    trailing: "open_in_new"
-                    onClicked: Qt.openUrlExternally(modelData.link)
+    Reveal {
+        id: reveal
+        open: page.open
+        gap: page.spacing
+        spacing: 6
+
+        Pill {
+            Layout.alignment: Qt.AlignRight
+            enabled: !page.loading
+            text: page.loading ? "Checking…" : "Check Now"
+            onClicked: page.load(true, false)
+        }
+
+        Repeater {
+            model: page.up && reveal.shown ? page.groups : []
+            ColumnLayout {
+                id: group
+                required property var modelData
+                readonly property var rows: page.up.rows.filter(r => r.kind === modelData.kind)
+                visible: rows.length > 0
+                spacing: 6
+                Layout.fillWidth: true
+                Section { text: group.modelData.title; info: group.modelData.info }
+                Repeater {
+                    model: group.rows
+                    ListRow {
+                        required property var modelData
+                        icon: modelData.status === "update" ? "upgrade"
+                            : modelData.status === "ok" ? (modelData.kind === "disabled" ? "block" : "check") : modelData.status === "error" ? "error" : "help"
+                        tone: modelData.status === "update" ? "success"
+                            : modelData.status === "error" ? "error" : modelData.status === "unknown" ? "caution" : ""
+                        title: modelData.name
+                        info: modelData.file ? `Pinned in ${modelData.file}` : ""
+                        alert: modelData.status === "ok" ? "" : modelData.note
+                        value: page.shown(modelData)
+                        trailing: "open_in_new"
+                        onClicked: Qt.openUrlExternally(modelData.link)
+                    }
                 }
             }
         }
