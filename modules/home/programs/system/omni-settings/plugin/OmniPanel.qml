@@ -68,8 +68,9 @@ Item {
             }
         }
 
-        //--- Dragging the left edge resizes the panel; the window grows leftward, so
-        //--- each move adds how far the cursor got from where it was pressed
+        //--- Dragging the left edge resizes the panel. The window's right edge stays put
+        //--- while this handle moves with its left one, so the width follows the cursor's
+        //--- distance from the right edge, not how far it moved inside the handle
         MouseArea {
             z: 10
             anchors.left: parent.left
@@ -77,12 +78,12 @@ Item {
             anchors.bottom: parent.bottom
             width: 6
             cursorShape: Qt.SizeHorCursor
-            property real pressX: 0
-            onPressed: mouse => pressX = mouse.x
+            property real grab: 0  // the width less the cursor's distance from the right edge
+            onPressed: mouse => grab = slideout.slideoutWidth - (parent.width - mouse.x)
             onPositionChanged: mouse => {
                 const most = (slideout.modelData ? slideout.modelData.width : 1920) * 0.8
                 slideout.slideoutWidth = Math.round(Math.max(480, Math.min(most,
-                    slideout.slideoutWidth - (mouse.x - pressX))))
+                    parent.width - mouse.x + grab)))
             }
             onReleased: save()
             onDoubleClicked: {
