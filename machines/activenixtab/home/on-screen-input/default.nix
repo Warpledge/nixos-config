@@ -38,6 +38,7 @@
         ./wvkbd-swipe.patch
         ./wvkbd-glow.patch
         ./wvkbd-indicators.patch
+        ./wvkbd-auto-open.patch
       ];
   });
 
@@ -51,16 +52,20 @@
   #--- autocorrect.py keeps the first, osk-swipe the second; their keys light from these
   autocorrectState = "${config.xdg.stateHome}/osk-autocorrect-on";
   swipeState = "${config.xdg.stateHome}/osk-swipe-on";
+  #--- folio-watch.py reads the off switch and keeps the folio's state
+  autoOffState = "${config.xdg.stateHome}/osk-auto-off";
+  folioState = "${config.xdg.stateHome}/osk-folio-attached";
 
   keyboard = pkgs.writeShellScript "wvkbd-start" ''
     WVKBD_COLORS=""
     [ -r "${colors}" ] && . "${colors}"
     [ -e "${swipeState}" ] && export WVKBD_SWIPE=1
+    { [ -e "${folioState}" ] || [ -e "${autoOffState}" ]; } && export WVKBD_IM_BLOCKED=1
     [ -e "${autocorrectState}" ] && export WVKBD_AUTOCORRECT=1
     # Type through uinput, so niri's binds, keyd and polkit prompts see the keys
     export WVKBD_UINPUT=1
     # shellcheck disable=SC2086 # one flag per word
-    ${wvkbd}/bin/wvkbd-deskintl -o --no-popup --hidden -H ${toString height} -L ${toString height} \
+    ${wvkbd}/bin/wvkbd-deskintl -o --auto --no-popup --hidden -H ${toString height} -L ${toString height} \
       --alpha ${toString keyAlpha} \
       --fn "${config.stylix.fonts.sansSerif.name}, Material Symbols Rounded ${toString config.stylix.fonts.sizes.popups}" \
       $WVKBD_COLORS | ${autocorrect}
@@ -86,16 +91,29 @@
     pkill --signal RTMIN+1 -x wvkbd-deskintl
   '';
 
+  #--- Off switch for opening on text fields
+  auto-toggle = pkgs.writeShellScriptBin "osk-auto" ''
+    if [ -e "${autoOffState}" ]; then
+      ${pkgs.coreutils}/bin/rm "${autoOffState}"
+      echo "On-screen keyboard opens on text fields"
+    else
+      ${pkgs.coreutils}/bin/mkdir -p "$(${pkgs.coreutils}/bin/dirname "${autoOffState}")"
+      ${pkgs.coreutils}/bin/touch "${autoOffState}"
+      echo "On-screen keyboard stays closed on text fields"
+    fi
+  '';
+
   pad-mode = pkgs.writeShellScriptBin "osk-pad-mode" ''
     pkill --signal USR2 -f 'touch-gestures\.py'
   '';
 
   #--- One DMS bar button per toggle
-  button = id: name: icon: command:
+  button = id: name: icon: command: visibility:
     pkgs.runCommand "dms-${id}" {} ''
       mkdir $out
       substitute ${./ToggleWidget.qml} $out/ToggleWidget.qml \
-        --subst-var-by command ${command} --subst-var-by icon ${icon}
+        --subst-var-by command ${command} --subst-var-by icon ${icon} \
+        --subst-var-by visibility ${lib.escapeShellArg visibility}
       cat > $out/plugin.json <<'EOF'
       ${builtins.toJSON {
         inherit id name icon;
@@ -113,7 +131,7 @@ in {
   #--------------------------------------------------------------------#
   #-- Keyboard
   #--------------------------------------------------------------------#
-  home.packages = [osk-toggle pad-mode autocorrect-toggle swipe-toggle];
+  home.packages = [osk-toggle pad-mode autocorrect-toggle swipe-toggle auto-toggle];
 
   systemd.user.services.wvkbd = {
     Unit = {
@@ -125,6 +143,22 @@ in {
       ExecStart = "${keyboard}";
       Restart = "always";
       RestartSec = 1;
+    };
+    Install.WantedBy = ["graphical-session.target"];
+  };
+
+  #--- Stops text fields opening the keyboard while the folio is on, and hides it
+  systemd.user.services.osk-folio = {
+    Unit = {
+      Description = "Watch for the folio for the on-screen keyboard";
+      PartOf = ["graphical-session.target"];
+      After = ["graphical-session.target"];
+    };
+    Service = {
+      ExecStart = "${pkgs.python3}/bin/python3 -I ${./folio-watch.py}";
+      Environment = "PATH=${lib.makeBinPath [pkgs.procps]}";
+      Restart = "always";
+      RestartSec = 2;
     };
     Install.WantedBy = ["graphical-session.target"];
   };
@@ -190,10 +224,11 @@ in {
   #--------------------------------------------------------------------#
   programs.dank-material-shell.plugins = {
     oskToggle.src =
-      button "oskToggle" "On-screen keyboard" "keyboard" (lib.getExe osk-toggle);
+      button "oskToggle" "On-screen keyboard" "keyboard" (lib.getExe osk-toggle)
+      "test ! -e ${folioState}";
     touchpadToggle.src =
-      button "touchpadToggle" "Touchpad mode" "touch_app" (lib.getExe pad-mode);
+      button "touchpadToggle" "Touchpad mode" "touch_app" (lib.getExe pad-mode) "";
     autocorrectToggle.src =
-      button "autocorrectToggle" "Autocorrect" "spellcheck" (lib.getExe autocorrect-toggle);
+      button "autocorrectToggle" "Autocorrect" "spellcheck" (lib.getExe autocorrect-toggle) "";
   };
 }

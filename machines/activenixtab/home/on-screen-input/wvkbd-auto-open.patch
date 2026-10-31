@@ -1,0 +1,85 @@
+# wvkbd --auto: act on the input method only at "done", and only close a keyboard a text field
+# opened. SIGRTMIN+3/+4 or WVKBD_IM_BLOCKED stop fields opening it (folio-watch.py).
+--- a/main.c
++++ b/main.c
+@@ -75,6 +75,9 @@
+ static int rounding = DEFAULT_ROUNDING;
+ static bool hidden = false;
+ static bool im_auto = false;
++static bool im_wanted = false, im_active = false;
++static bool im_opened = false;  /* shown by a text field, not by hand */
++static bool im_blocked = false; /* folio-watch.py: don't open on text fields */
+ static uint32_t custom_width = 0;
+ static double width_ratio = 1.0;
+ static enum { DOCK_FULL = 0, DOCK_LEFT = 1, DOCK_RIGHT = 2 } dock_mode = DOCK_FULL;
+@@ -724,13 +727,13 @@
+ void
+ im_activate(void *data, struct zwp_input_method_v2 *zwp_input_method_v2)
+ {
+-    show();
++    im_wanted = true;
+ }
+ 
+ void
+ im_deactivate(void *data, struct zwp_input_method_v2 *zwp_input_method_v2)
+ {
+-    hide();
++    im_wanted = false;
+ }
+ 
+ void
+@@ -752,6 +755,18 @@
+ void
+ im_done(void *data, struct zwp_input_method_v2 *zwp_input_method_v2)
+ {
++    /* Acting here, not on each event, stops a flicker when focus moves between
++     * fields. Only a keyboard a text field opened closes with it. */
++    if (im_wanted == im_active)
++        return;
++    im_active = im_wanted;
++    if (im_active && !im_blocked && hidden) {
++        show();
++        im_opened = true;
++    } else if (!im_active && im_opened) {
++        hide();
++        im_opened = false;
++    }
+ }
+ 
+ void
+@@ -1043,6 +1058,7 @@
+ void
+ toggle_visibility()
+ {
++    im_opened = false;
+     if (hidden)
+         show();
+     else
+@@ -1109,6 +1125,7 @@
+     if ((tmp = getenv("WVKBD_LANDSCAPE_LAYERS")))
+         landscape_layer_names_list = estrdup(tmp);
+     swipe_mode = getenv("WVKBD_SWIPE") != NULL;
++    im_blocked = getenv("WVKBD_IM_BLOCKED") != NULL;
+     keyboard.swipe_lit = swipe_mode;
+     keyboard.autocorrect_lit = getenv("WVKBD_AUTOCORRECT") != NULL;
+     if ((tmp = getenv("WVKBD_HEIGHT")))
+@@ -1495,6 +1512,8 @@
+     sigaddset(&signal_mask, SIGRTMIN);
+     sigaddset(&signal_mask, SIGRTMIN + 1);
+     sigaddset(&signal_mask, SIGRTMIN + 2);
++    sigaddset(&signal_mask, SIGRTMIN + 3);
++    sigaddset(&signal_mask, SIGRTMIN + 4);
+     sigaddset(&signal_mask, SIGPIPE);
+     if (sigprocmask(SIG_BLOCK, &signal_mask, NULL) == -1) {
+         die("Failed to disable handled signals: %d\n", errno);
+@@ -1540,6 +1559,10 @@
+                 if (!hidden)
+                     kbd_draw_layout(&keyboard);
+             }
++            else if (si.ssi_signo == (uint32_t)(SIGRTMIN + 3))
++                im_blocked = true;
++            else if (si.ssi_signo == (uint32_t)(SIGRTMIN + 4))
++                im_blocked = false;
+             else if (si.ssi_signo == SIGRTMIN)
+                 toggle_visibility();
+             else if (si.ssi_signo == SIGPIPE)

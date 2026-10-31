@@ -12,6 +12,10 @@ PluginComponent {
 
     pillClickAction: () => Quickshell.execDetached(["@command@"])
 
+    // Empty for a button that's always shown
+    visibilityCommand: "@visibility@"
+    visibilityInterval: 2
+
     horizontalBarPill: Component {
         DIcon {
             name: "@icon@"
