@@ -55,7 +55,8 @@
     ++ lib.optional (fit != null) "--fit-target ${toString fit}";
 
   resolve = id: model: let
-    t =
+    own = models.${id} or {};
+    measured =
       (
         if gpu == null
         then {}
@@ -65,8 +66,15 @@
         if profile == null
         then {}
         else model.tuned.${profile} or {}
+      );
+    # The machine's gpuLayers "auto" hands offload back to llama-server's fit
+    t =
+      (
+        if own.gpuLayers or null == "auto"
+        then removeAttrs measured ["gpuLayers" "cpuMoe"]
+        else measured
       )
-      // lib.getAttrs (lib.filter (f: (models.${id} or {}) ? ${f}) tuningFields) (models.${id} or {});
+      // lib.getAttrs (lib.filter (f: own ? ${f}) tuningFields) own;
   in
     removeAttrs model ["tuned" "cpuMoe" "gpuLayers" "batch" "cacheRam" "fitTarget" "loadMode"]
     // {

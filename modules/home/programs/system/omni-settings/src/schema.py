@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 import nixfile
 
 #--- Never shown: account plumbing, hardware, and values set once at install
-HIDDEN = {"users", "mainUser", "stateVersion", "flakePath", "gpu", "admin", "localModels"}
+HIDDEN = {"users", "mainUser", "stateVersion", "flakePath", "gpu", "admin"}
 #--- Settings read and written whole: sets of named lists or text, and the
 #--- keybind changes by id (lib/settings.nix checks both)
 KEYBINDS = ("keybinds",)
@@ -21,8 +21,10 @@ WINDOW_RULES = ("windowRules",)
 TEXT_SETS = {("env",), ("mimeTypes",)}
 SIDE_RAIL = ("sideRail",)
 STEAM_GAMES = ("steamGames",)
+#--- A machine's per-model tuning and added models (lib/local-ai.nix)
+LOCAL_MODELS = ("localModels", "models")
 GROUPED = {("userPackages",), ("autostart",), *TEXT_SETS, KEYBINDS, WINDOW_RULES, SIDE_RAIL,
-           STEAM_GAMES}
+           STEAM_GAMES, LOCAL_MODELS}
 
 #--- Template sections whose `#---` headers each get their own page
 SPLIT_SECTIONS = {"Apps"}
@@ -61,8 +63,8 @@ SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
 #--- section keep the template's groups; "top" pages are settings a custom page
 #--- lays out (TOP_PAGES), the "userpkgs" one the list the Packages tab's
 #--- pages edit (UserPackagesPage.qml), "keybinds" the Keybinds page's set,
-#--- "windowrules" the Window Rules page's, "siderail" the Side Rail page's and
-#--- "games" the Games page's.
+#--- "windowrules" the Window Rules page's, "siderail" the Side Rail page's,
+#--- "games" the Games page's and "localmodels" the Local Models page's.
 #--- "top" pages: the custom page (its id in api.py and OmniView.qml) each one's settings show on
 TOP_PAGES = {"Flatpaks": "flatpaks", "Users": "people", "Battery": "battery", "MangoHud": "mangohud",
              "AppArmor": "apparmor", "Maintenance": "overview"}
@@ -87,6 +89,8 @@ PAGES = {
     "Window Rules": ("windowrules", "focus-windows-symbolic", "", [("", "", ["windowRules"])]),
     "Side Rail": ("siderail", "view-dual-symbolic", "", [("", "", ["sideRail"])]),
     "Games": ("games", "input-gaming-symbolic", "", [("", "", ["steamGames"])]),
+    "Local Models": ("localmodels", "applications-engineering-symbolic", "",
+                     [("", "", ["localModels.profile", "localModels.models"])]),
     "System": ("computer", "computer-symbolic",
                "This computer's name, desktop and kernel.",
                [("", "", ["hostName", "windowManager", "kernel"])]),
@@ -457,6 +461,8 @@ def make_setting(domain, path, b, values, choices, labels, doc, lead, header_tit
         s.kind = "siderail"
     elif path == STEAM_GAMES:
         s.kind = "steamgames"
+    elif path == LOCAL_MODELS:
+        s.kind = "localmodels"
     elif path in GROUPED:
         s.kind = "groups"
     elif isinstance(value, list):

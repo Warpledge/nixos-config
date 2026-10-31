@@ -1641,7 +1641,9 @@ Item {
                                       startup: startupPage, filetypes: fileTypesPage,
                                       firmware: firmwarePage, battery: batteryPage, dgpu: dgpuPage,
                                       scheduler: schedulerPage,
-                                      nettools: networkToolsPage, apparmor: appArmorPage })
+                                      nettools: networkToolsPage, apparmor: appArmorPage,
+                                      localmodels: localModelsPage })
+    Component { id: localModelsPage; LocalModelsPage { view: omni } }
     Component { id: networkToolsPage; NetworkToolsPage { view: omni } }
     Component { id: appArmorPage; AppArmorPage { view: omni } }
     Component { id: firmwarePage; FirmwarePage { view: omni } }

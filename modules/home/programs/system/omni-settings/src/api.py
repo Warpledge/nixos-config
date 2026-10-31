@@ -33,6 +33,7 @@ import flatpakstate  # noqa: E402
 import gitstate  # noqa: E402
 import hardwarestate  # noqa: E402
 import keybindstate  # noqa: E402
+import localmodelstate  # noqa: E402
 import mimeapps  # noqa: E402
 import netstate  # noqa: E402
 import nixfile  # noqa: E402
@@ -94,7 +95,7 @@ TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
                   ("protonversions", "Proton Versions",
                    ("system-software-install-symbolic", "input-gaming-symbolic")),
                   ("mangohud", "MangoHud", ("utilities-system-monitor-symbolic",))],
-       "ai": [],
+       "ai": [("localmodels", "Local Models", ("applications-engineering-symbolic", "cpu-symbolic"))],
        "docs": []}
 
 #--- The line under each page in the page list that has no description of its own
@@ -135,6 +136,9 @@ NAV_SUBTITLES = {"overview": "Updates, pinned versions, freeing space, versions,
                            "pick a game's window for its upscaling option.",
                  "mangohud": "The in-game overlay: what it shows and where. The test window shows "
                              "changes as you make them; games get them after Apply.",
+                 "localmodels": "Tune how each local model loads on this computer's GPU, see "
+                                "whether it fits, test it, and add models LM Studio downloaded. "
+                                "Changes wait for Apply.",
                  "protonversions": "The Proton and Wine builds each launcher can run games with. Pick "
                                    "one per game in the launcher, or Steam's default under Settings, "
                                    "Compatibility."}
@@ -205,6 +209,8 @@ def shown(setting, value):
         return f"{len(value)} rail app{'' if len(value) == 1 else 's'} changed" if value else "Not set"
     if setting.kind == "steamgames":
         return f"{len(value)} game{'' if len(value) == 1 else 's'} set" if value else "Not set"
+    if setting.kind == "localmodels":
+        return f"{len(value)} model{'' if len(value) == 1 else 's'} changed or added" if value else "Not set"
     if isinstance(value, dict):
         if not all(isinstance(v, list) for v in value.values()):
             n = len(value)
@@ -278,6 +284,11 @@ def setting_json(cfg, state, s, multi, modules):
         out["data"] = s.data
     if s.kind == "list":
         out["options"] = s.options
+        # Models this machine adds (localModels.models) can be picked here too
+        if s.path in (("localAi", "code"), ("localAi", "chat")):
+            added = (state.resolved.get("localModels") or {}).get("models") or {}
+            out["options"] = s.options + [m for m, e in added.items()
+                                          if e.get("category") == s.path[1] and m not in s.options]
         out["ports"] = s.ports
     if ".".join(s.path) in schema.SWITCH_LISTS:
         out["switchList"] = True
@@ -328,6 +339,8 @@ def shows(key, wm, cfg=None):
         return hardwarestate.scx_unit() is not None
     if key == "apparmor":
         return securitystate.profiles() is not None
+    if key == "localmodels":
+        return bool(os.environ.get("OMNI_SETTINGS_LLAMA_SERVER"))
     return True
 
 
@@ -355,7 +368,7 @@ def cmd_load(cfg, _args):
     shell = {}
     for page in state.pages:
         if page.section in ("userpkgs", "keybinds", "windowrules", "siderail", "startup", "filetypes",
-                            "dgpu", "games"):
+                            "dgpu", "games", "localmodels"):
             continue
         pid = schema.TOP_PAGES[page.title] if page.section == "top" else f"page:{page.title}"
         groups = []
@@ -400,6 +413,8 @@ def cmd_load(cfg, _args):
                         if (s.domain, s.path) == ("user", schema.STEAM_GAMES)), None)
     gpu_offload = next((s for p in state.pages for g in p.groups for s in g.settings
                         if (s.domain, s.path) == ("user", ("gpuOffload",))), None)
+    local_models = {s.path[-1]: setting_json(cfg, state, s, multi, modules) for s in schema.flat(state.pages)
+                    if s.domain == "machine" and s.path[0] == "localModels"}
     if startup:
         by_section["personal"].append({"id": "startup", "title": "Startup",
                                        "icon": ["system-run-symbolic"],
@@ -461,6 +476,7 @@ def cmd_load(cfg, _args):
             "mimeTypes": mime_types and setting_json(cfg, state, mime_types, multi, modules),
             "gpuOffload": gpu_offload and setting_json(cfg, state, gpu_offload, multi, modules),
             "steamGames": steam_games and setting_json(cfg, state, steam_games, multi, modules),
+            "localModels": local_models or None,
             "starter": packagestate.STARTER,
             "dmsSearch": [{"label": e.label, "description": e.description, "keywords": e.keywords,
                            "tab": e.link.tab, "page": e.link.page} for e in state.dms_entries]}
@@ -476,6 +492,86 @@ def cmd_list(_cfg, args):
 def cmd_mime_apps(_cfg, _args):
     """The apps installed here, for the File Types page."""
     return mimeapps.apps()
+
+
+#--------------------------------------------------------------------#
+#-- Local Models
+#--------------------------------------------------------------------#
+def local_models_arg(cfg, args):
+    """The page's localModels value, pending changes included, else this machine's."""
+    value = args.get("localModels")
+    if not isinstance(value, dict):
+        value = loaded(cfg).resolved.get("localModels") or {}
+    return {"profile": value.get("profile"), "models": value.get("models") or {}}
+
+
+def local_model(cfg, args):
+    """(local models setting, profiles, id, category, entry, file) for args.id."""
+    lm = local_models_arg(cfg, args)
+    profs = localmodelstate.profiles(cfg.flake)
+    found = localmodelstate.entries(cfg.flake, lm).get(args.get("id"))
+    if not found:
+        raise ValueError(f"no model {args.get('id')}")
+    category, entry = found
+    path = localmodelstate.find_file(entry)
+    if not path:
+        raise ValueError(f"{entry.get('name', args.get('id'))} isn't downloaded: no "
+                         f"{entry.get('match')} in ~/.lmstudio/models/{entry.get('dir')}")
+    return lm, profs, args["id"], category, entry, path
+
+
+def cmd_local_models(cfg, args):
+    """The page: the GPU, the profiles, every model with its tuning, and the
+    files LM Studio downloaded."""
+    lm = local_models_arg(cfg, args)
+    profs = localmodelstate.profiles(cfg.flake)
+    card = localmodelstate.gpu(profs)
+    entries = localmodelstate.entries(cfg.flake, lm)
+    profile = lm["profile"]
+    models = []
+    for mid, (category, entry) in entries.items():
+        own = lm["models"].get(mid) or {}
+        t = localmodelstate.effective(entry, profile, profs, own)
+        path = localmodelstate.find_file(entry)
+        models.append({"id": mid, "category": category, "name": entry.get("name", mid),
+                       "dir": entry.get("dir", ""), "match": entry.get("match", ""),
+                       "added": mid in lm["models"] and "category" in own, "own": own,
+                       "measured": localmodelstate.measured(entry, profile, profs),
+                       "effective": t, "context": entry.get("context", 32768),
+                       "cache": entry.get("cache") or "q8_0",
+                       "flags": localmodelstate.flags(t, profile, profs) + list(entry.get("args") or []),
+                       "file": path and os.path.basename(path),
+                       "bytes": path and localmodelstate.size_of(path)})
+    return {"gpu": card, "profile": profile,
+            "profiles": [{"id": k, "name": v.get("name", k), "memory": v.get("memory"),
+                          "note": v.get("note", "")} for k, v in profs.items()],
+            "models": models,
+            "files": localmodelstate.scan({**(localmodelstate.catalog(cfg.flake).get("edit") or {}),
+                                           **{m: e for m, (_, e) in entries.items()}}),
+            "canTest": bool(os.environ.get("OMNI_SETTINGS_LLAMA_SERVER"))}
+
+
+def cmd_local_model_estimate(cfg, args):
+    """How a model's tuning fits (args.id, args.localModels), and the presets."""
+    lm, profs, mid, _, entry, path = local_model(cfg, args)
+    profile = lm["profile"]
+    card = localmodelstate.gpu(profs)
+    t = localmodelstate.effective(entry, profile, profs, lm["models"].get(mid))
+    try:
+        out = localmodelstate.estimate(path, t, card, profile, profs)
+        out["presets"] = localmodelstate.presets(path, t, card, profile, profs, entry)
+    except (OSError, ValueError, KeyError) as e:
+        raise ValueError(f"Couldn't read {os.path.basename(path)}: {e}") from None
+    return out
+
+
+def cmd_local_model_test(cfg, args):
+    """Loads the model with its tuning in llama-server, progress on stderr, and
+    returns what it used and how fast it ran."""
+    lm, profs, mid, _, entry, path = local_model(cfg, args)
+    t = localmodelstate.effective(entry, lm["profile"], profs, lm["models"].get(mid))
+    return localmodelstate.test(os.environ.get("OMNI_SETTINGS_LLAMA_SERVER"), path, t, entry,
+                                lm["profile"], profs)
 
 
 def cmd_firmware(_cfg, args):
@@ -1498,6 +1594,8 @@ def cmd_save_window_rule(cfg, args):
 
 
 COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cmd_save,
+            "localModels": cmd_local_models, "localModelEstimate": cmd_local_model_estimate,
+            "localModelTest": cmd_local_model_test,
             "dismiss": cmd_dismiss, "saveUi": cmd_saveUi,
             "stale": cmd_stale, "removeStale": cmd_remove_stale,
             "overview": cmd_overview, "freed": cmd_freed, "boot": cmd_boot,
