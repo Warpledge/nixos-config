@@ -1,0 +1,177 @@
+# wvkbd: light the keys for states that are on (caps, Fn, autocorrect, swipe). Caps comes from
+# the LED the compositor sets on the uinput keyboard; SIGRTMIN+2 flips the autocorrect key.
+--- a/keyboard.h
++++ b/keyboard.h
+@@ -46,6 +46,7 @@
+ 	Unpress,
+ 	Press,
+ 	Swipe,
++	Lit, // shows a state that's on: the press colour with no glow
+ };
+ 
+ struct clr_scheme {
+@@ -113,6 +114,9 @@
+ 	bool exclusive;
+ 	uint8_t mods;
+ 	uint8_t held_mods; // modifiers a finger is still on
++	bool caps_lit;       // caps lock is on, as the compositor reports it
++	bool autocorrect_lit; // autocorrect.py is on
++	bool swipe_lit;      // swipe mode is on
+ 	uint8_t compose;
+ 	struct key *last_press;
+ 	struct key *last_swipe;
+@@ -147,6 +151,8 @@
+ void kbd_unpress_key(struct kbd *kb, uint32_t time);
+ void kbd_release_key(struct kbd *kb, uint32_t time);
+ void kbd_release_mod(struct kbd *kb, uint32_t code, uint32_t time);
++int kbd_led_fd(void);
++bool kbd_read_leds(struct kbd *kb);
+ void kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y);
+ void kbd_press_key(struct kbd *kb, struct key *k, uint32_t time);
+ void kbd_print_key_stdout(struct kbd *kb, struct key *k);
+--- a/keyboard.c
++++ b/keyboard.c
+@@ -43,12 +43,15 @@
+     uinput_fd = -1;
+     if (!getenv("WVKBD_UINPUT"))
+         return -1;
+-    int fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
++    /* Read too: the compositor sends each keyboard's caps lock LED back here */
++    int fd = open("/dev/uinput", O_RDWR | O_NONBLOCK);
+     if (fd < 0) {
+         perror("wvkbd: /dev/uinput");
+         return -1;
+     }
+     ioctl(fd, UI_SET_EVBIT, EV_KEY);
++    ioctl(fd, UI_SET_EVBIT, EV_LED);
++    ioctl(fd, UI_SET_LEDBIT, LED_CAPSL);
+     for (int code = 1; code < 256; code++)
+         ioctl(fd, UI_SET_KEYBIT, code);
+     struct uinput_setup setup;
+@@ -64,6 +67,27 @@
+     return fd;
+ }
+ 
++int
++kbd_led_fd(void)
++{
++    return uinput_fd;
++}
++
++/* True if caps lock changed */
++bool
++kbd_read_leds(struct kbd *kb)
++{
++    struct input_event ev;
++    bool changed = false;
++    while (read(uinput_fd, &ev, sizeof(ev)) == sizeof(ev)) {
++        if (ev.type == EV_LED && ev.code == LED_CAPSL && kb->caps_lit != !!ev.value) {
++            kb->caps_lit = !!ev.value;
++            changed = true;
++        }
++    }
++    return changed;
++}
++
+ static void
+ uinput_emit(int fd, uint16_t type, uint16_t code, int32_t value)
+ {
+@@ -748,6 +772,18 @@
+ #define KEY_GLOW_PX 22
+ 
+ static bool
++key_is_lit(struct kbd *kb, struct key *k)
++{
++    if (k->type == NextLayer)
++        return kb->layer_index != 0;
++    if (k->type != Code)
++        return false;
++    return (k->code == KEY_CAPSLOCK && kb->caps_lit) ||
++           (k->code == KEY_F14 && kb->autocorrect_lit) ||
++           (k->code == KEY_F15 && kb->swipe_lit);
++}
++
++static bool
+ keys_touch(struct key *a, int x, int y, int w, int h)
+ {
+     return (int)a->x < x + w && (int)(a->x + a->w) > x && (int)a->y < y + h &&
+@@ -803,7 +839,16 @@
+         return;
+     }
+ 
++    if ((type == None || type == Unpress) && key_is_lit(kb, k))
++        type = Lit;
++
+     switch (type) {
++    case Lit:
++        draw_inset(kb->surf, k->x, k->y, k->w, k->h, KBD_KEY_BORDER,
++                   scheme->high, scheme->rounding);
++        drw_draw_text(kb->surf, scheme->text_press, k->x, k->y, k->w, k->h,
++                      KBD_KEY_BORDER, label, scheme->font_description);
++        break;
+     case None:
+     case Unpress:
+         draw_inset(kb->surf, k->x, k->y, k->w, k->h, KBD_KEY_BORDER,
+--- a/main.c
++++ b/main.c
+@@ -1109,6 +1109,8 @@
+     if ((tmp = getenv("WVKBD_LANDSCAPE_LAYERS")))
+         landscape_layer_names_list = estrdup(tmp);
+     swipe_mode = getenv("WVKBD_SWIPE") != NULL;
++    keyboard.swipe_lit = swipe_mode;
++    keyboard.autocorrect_lit = getenv("WVKBD_AUTOCORRECT") != NULL;
+     if ((tmp = getenv("WVKBD_HEIGHT")))
+         normal_height = atoi(tmp);
+     if ((tmp = getenv("WVKBD_LANDSCAPE_HEIGHT")))
+@@ -1472,9 +1474,12 @@
+     if (!hidden)
+         show();
+ 
+-    struct pollfd fds[2];
++    struct pollfd fds[3];
+     int WAYLAND_FD = 0;
+     int SIGNAL_FD = 1;
++    int LED_FD = 2;
++    fds[LED_FD].events = POLLIN;
++    fds[LED_FD].fd = kbd_led_fd(); /* negative without uinput: poll skips it */
+     fds[WAYLAND_FD].events = POLLIN;
+     fds[SIGNAL_FD].events = POLLIN;
+ 
+@@ -1489,6 +1494,7 @@
+     sigaddset(&signal_mask, SIGUSR2);
+     sigaddset(&signal_mask, SIGRTMIN);
+     sigaddset(&signal_mask, SIGRTMIN + 1);
++    sigaddset(&signal_mask, SIGRTMIN + 2);
+     sigaddset(&signal_mask, SIGPIPE);
+     if (sigprocmask(SIG_BLOCK, &signal_mask, NULL) == -1) {
+         die("Failed to disable handled signals: %d\n", errno);
+@@ -1501,7 +1507,10 @@
+ 
+     while (run_display) {
+         wl_display_flush(display);
+-        poll(fds, 2, -1);
++        poll(fds, 3, -1);
++
++        if ((fds[LED_FD].revents & POLLIN) && kbd_read_leds(&keyboard) && !hidden)
++            kbd_draw_layout(&keyboard);
+ 
+         if (fds[WAYLAND_FD].revents & POLLIN)
+             wl_display_dispatch(display);
+@@ -1521,8 +1530,16 @@
+                 hide();
+             else if (si.ssi_signo == SIGUSR2)
+                 show();
+-            else if (si.ssi_signo == (uint32_t)(SIGRTMIN + 1))
++            else if (si.ssi_signo == (uint32_t)(SIGRTMIN + 1)) {
+                 swipe_mode = !swipe_mode;
++                keyboard.swipe_lit = swipe_mode;
++                if (!hidden)
++                    kbd_draw_layout(&keyboard);
++            } else if (si.ssi_signo == (uint32_t)(SIGRTMIN + 2)) {
++                keyboard.autocorrect_lit = !keyboard.autocorrect_lit;
++                if (!hidden)
++                    kbd_draw_layout(&keyboard);
++            }
+             else if (si.ssi_signo == SIGRTMIN)
+                 toggle_visibility();
+             else if (si.ssi_signo == SIGPIPE)

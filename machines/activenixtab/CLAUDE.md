@@ -124,7 +124,9 @@ when Ky approves it.
   when the text ends in a word;
   backspace straight after removes the word. A line follows the finger during a stroke.
   The key preview popup is off (`--no-popup`); a pressed key glows out over its neighbours
-  instead (wvkbd-glow.patch).
+  instead (wvkbd-glow.patch). Caps, Fn, autocorrect and swipe keys light while on
+  (wvkbd-indicators.patch); caps comes from the LED niri sets on wvkbd's uinput device, so
+  it also follows the folio.
   Both know common contractions, except ones that are real words without the apostrophe.
   Each has a DMS bar plugin (`oskToggle`, `touchpadToggle`, `autocorrectToggle`) added
   from DMS's bar settings; a one-finger swipe up from the bottom edge also runs `osk-toggle`

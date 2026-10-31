@@ -37,22 +37,26 @@
         ./wvkbd-multitouch.patch
         ./wvkbd-swipe.patch
         ./wvkbd-glow.patch
+        ./wvkbd-indicators.patch
       ];
   });
 
   #--- Reads wvkbd's -o output; the dictionary path and tools it calls are set here
   autocorrect = pkgs.writeShellScript "osk-autocorrect-daemon" ''
     export DICPATH=${pkgs.hunspellDicts.en_US}/share/hunspell
-    export PATH=${lib.makeBinPath [config.programs.niri.package pkgs.hunspell pkgs.libnotify]}
+    export PATH=${lib.makeBinPath [config.programs.niri.package pkgs.hunspell]}
     exec ${pkgs.python3.withPackages (p: [p.evdev p.symspellpy])}/bin/python3 ${./autocorrect.py}
   '';
 
+  #--- autocorrect.py keeps the first, osk-swipe the second; their keys light from these
+  autocorrectState = "${config.xdg.stateHome}/osk-autocorrect-on";
   swipeState = "${config.xdg.stateHome}/osk-swipe-on";
 
   keyboard = pkgs.writeShellScript "wvkbd-start" ''
     WVKBD_COLORS=""
     [ -r "${colors}" ] && . "${colors}"
     [ -e "${swipeState}" ] && export WVKBD_SWIPE=1
+    [ -e "${autocorrectState}" ] && export WVKBD_AUTOCORRECT=1
     # Type through uinput, so niri's binds, keyd and polkit prompts see the keys
     export WVKBD_UINPUT=1
     # shellcheck disable=SC2086 # one flag per word
@@ -68,20 +72,18 @@
 
   autocorrect-toggle = pkgs.writeShellScriptBin "osk-autocorrect" ''
     pkill --signal USR1 -f 'autocorrect\.py'
+    pkill --signal RTMIN+2 -x wvkbd-deskintl
   '';
 
   swipe-toggle = pkgs.writeShellScriptBin "osk-swipe" ''
     if [ -e "${swipeState}" ]; then
       ${pkgs.coreutils}/bin/rm "${swipeState}"
-      message="Swipe typing off"
     else
       ${pkgs.coreutils}/bin/mkdir -p "$(${pkgs.coreutils}/bin/dirname "${swipeState}")"
       ${pkgs.coreutils}/bin/touch "${swipeState}"
-      message="Swipe typing on"
       pkill --signal USR2 -f 'autocorrect\.py'
     fi
     pkill --signal RTMIN+1 -x wvkbd-deskintl
-    ${pkgs.libnotify}/bin/notify-send -t 1500 -a "On-screen keyboard" "$message"
   '';
 
   pad-mode = pkgs.writeShellScriptBin "osk-pad-mode" ''

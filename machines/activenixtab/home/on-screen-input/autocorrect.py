@@ -397,12 +397,6 @@ class Corrector:
             self.word, self.clean = "", False
 
 
-def notify(text):
-    subprocess.run(
-        ["notify-send", "-t", "1500", "-a", "On-screen keyboard", text], check=False
-    )
-
-
 def main():
     global toggled, swipe_on
     corrector = None
@@ -432,7 +426,6 @@ def main():
                 corrector = build()
             if corrector:
                 corrector.on = on
-            notify("Autocorrect on" if on else "Autocorrect off")
         if not select.select([0], [], [], 0.5)[0]:
             continue
         data = os.read(0, 4096)
