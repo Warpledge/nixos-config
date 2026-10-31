@@ -117,6 +117,8 @@
         "438130" = {launchOptions = "nix-vn-720p %command%";};
         "948740" = {launchOptions = "nix-vn-1080p %command%";};
         "1698960" = {launchOptions = "";};
+        "4256180" = {launchOptions = "nix-vn-768p %command%";};
+        "4732690" = {launchOptions = "PROTON_LOG=1 ENABLE_LAYER_MESA_ANTI_LAG=1 nix-performance %command%";};
       };
       claude.mods.ribbon = true;
     };
