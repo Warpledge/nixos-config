@@ -22,11 +22,13 @@ Item {
             show(screen)
     }
 
-    //--- The width dragged to, kept in DMS's plugin state across restarts
+    //--- The width dragged to, kept in DMS's plugin state across restarts; the default
+    //--- is also the widest it goes (a wider one saved earlier comes back at the default)
     readonly property real defaultWidth: 618
     function loadWidth() {
         if (pluginService)
-            slideout.slideoutWidth = pluginService.loadPluginState(pluginId, "width", defaultWidth)
+            slideout.slideoutWidth = Math.min(defaultWidth,
+                pluginService.loadPluginState(pluginId, "width", defaultWidth))
     }
     onPluginServiceChanged: loadWidth()
     Component.onCompleted: loadWidth()
@@ -81,8 +83,7 @@ Item {
             property real grab: 0  // the width less the cursor's distance from the right edge
             onPressed: mouse => grab = slideout.slideoutWidth - (parent.width - mouse.x)
             onPositionChanged: mouse => {
-                const most = (slideout.modelData ? slideout.modelData.width : 1920) * 0.8
-                slideout.slideoutWidth = Math.round(Math.max(480, Math.min(most,
+                slideout.slideoutWidth = Math.round(Math.max(480, Math.min(root.defaultWidth,
                     parent.width - mouse.x + grab)))
             }
             onReleased: save()
