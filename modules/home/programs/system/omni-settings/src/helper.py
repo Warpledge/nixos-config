@@ -443,7 +443,7 @@ def window_rules_ok(value):
                 return False
             if k in ("matches", "excludes") and not (isinstance(v, list) and all(isinstance(m, dict) for m in v)):
                 return False
-            if k == "enable" and not isinstance(v, bool):
+            if k in ("enable", "translucent") and not isinstance(v, bool):
                 return False
             if k in ("name", "note", "category") and not isinstance(v, str):
                 return False

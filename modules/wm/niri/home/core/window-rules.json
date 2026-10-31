@@ -57,7 +57,121 @@
     ]
   },
   {
-    "include": "translucent"
+    "id": "translucent-apps",
+    "name": "Translucent Apps",
+    "note": "The wallpaper shows through these, at the Mod+Y blur preset's opacity. Claude only while tiled, so Quick Entry keeps a solid card. dev.duxlabs.shell is Dux Shell's own windows (Settings, Notepad and the rest).",
+    "translucent": true,
+    "matches": [
+      {
+        "app-id": "kitty"
+      },
+      {
+        "app-id": "com.mitchellh.ghostty"
+      },
+      {
+        "app-id": "dev.zed.Zed"
+      },
+      {
+        "app-id": "org.gnome.Nautilus"
+      },
+      {
+        "app-id": "org.gnome.FileRoller"
+      },
+      {
+        "app-id": "org.kde.ark"
+      },
+      {
+        "app-id": "org.kde.dolphin"
+      },
+      {
+        "app-id": "dev.duxlabs.files"
+      },
+      {
+        "app-id": "thunar"
+      },
+      {
+        "app-id": "org.pulseaudio.pavucontrol"
+      },
+      {
+        "app-id": "pavucontrol"
+      },
+      {
+        "app-id": "nm-connection-editor"
+      },
+      {
+        "app-id": "org.gnome.Calculator"
+      },
+      {
+        "app-id": "guifetch"
+      },
+      {
+        "app-id": "blueberry.py"
+      },
+      {
+        "app-id": "Zotero"
+      },
+      {
+        "app-id": "io.github.alainm23.planify"
+      },
+      {
+        "app-id": "org.quickshell"
+      },
+      {
+        "app-id": "^com\\.anthropic\\.Claude$",
+        "is-floating": false
+      },
+      {
+        "app-id": "^ai\\.opencode\\.desktop$"
+      },
+      {
+        "app-id": "^dev\\.duxlabs\\.shell$"
+      },
+      {
+        "app-id": "Revolt"
+      },
+      {
+        "app-id": "discord"
+      },
+      {
+        "app-id": "(?i)goofcord$"
+      },
+      {
+        "app-id": "(?i)^vesktop$"
+      },
+      {
+        "app-id": "heroic"
+      },
+      {
+        "app-id": "spotify"
+      },
+      {
+        "app-id": "org.prismlauncher.PrismLauncher"
+      },
+      {
+        "app-id": "^org\\.gnome\\.Resources$"
+      },
+      {
+        "app-id": "^dev\\.nixosconfig\\.Settings$"
+      },
+      {
+        "app-id": "^com\\.github\\.tchx84\\.Flatseal$"
+      },
+      {
+        "title": "Volume Control"
+      },
+      {
+        "title": "Open File"
+      },
+      {
+        "title": "File Upload"
+      },
+      {
+        "title": "branchdialog"
+      },
+      {
+        "title": "Confirm to replace files"
+      }
+    ]
   },
   {
     "id": "never-open-maximized",

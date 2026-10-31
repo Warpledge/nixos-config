@@ -34,6 +34,7 @@ KINDS = [
     ("open-focused", "Focus When Opened", "Focus", "choice",
      [("Don't Focus", False), ("Always Focus", True)]),
     ("opacity", "Opacity", "Appearance", "opacity", []),
+    ("translucent", "Translucent", "Appearance", "on", []),
     ("block-out-from", "Hide From Screen Capture", "Privacy", "choice",
      [("Screenshots and Recording", "screen-capture"), ("Recording Only", "screencast")]),
     ("variable-refresh-rate", "Variable Refresh Rate", "Performance", "on", []),

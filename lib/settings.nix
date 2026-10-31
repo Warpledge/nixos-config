@@ -126,8 +126,8 @@
         "${at}.matches should be a list of sets"
         ++ lib.optional (r ? excludes && !(matchList r.excludes))
         "${at}.excludes should be a list of sets"
-        ++ lib.optional (r ? enable && !(lib.isBool r.enable))
-        "${at}.enable should be true or false"
+        ++ map (k: "${at}.${k} should be true or false")
+        (lib.filter (k: r ? ${k} && !(lib.isBool r.${k})) ["enable" "translucent"])
         ++ map (k: "${at}.${k} should be text in quotes")
         (lib.filter (k: r ? ${k} && !(lib.isString r.${k})) ["name" "note" "category"]))
       value);

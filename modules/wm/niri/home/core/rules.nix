@@ -10,25 +10,9 @@
 }: let
   sideRail = import ../dms/plugins/side-rail/apps.nix {inherit lib user machine;};
 
-  #--- Rules that need Nix (the translucent app list), spliced in
-  #--- where window-rules.json has {"include": "<name>"}
+  #--- Rules that need Nix, spliced in where window-rules.json has
+  #--- {"include": "<name>"}
   included = {
-    translucent = [
-      #--- Opacity Rules (enables blur to show through)
-      # Fallback; the active blur preset (blur-presets.nix) overrides the opacity
-      {
-        matches = import ./translucent-apps.nix;
-        # DMS's Quick Capture stays opaque (also excluded in blur-presets.nix)
-        excludes = [
-          {
-            app-id = "^dev\\.duxlabs\\.shell$";
-            title = "^Quick Capture$";
-          }
-        ];
-        opacity = 0.8;
-      }
-    ];
-
     styling = [
       #--------------------------------------------------------------------#
       #-- GLOBAL WINDOW STYLING --#
@@ -74,7 +58,22 @@
   #--- Every other rule is window-rules.json's, with the user's windowRules
   #--- changes; id, name, note and category are labels for Omni Settings
   labelled = import ./window-rules.nix {inherit lib user;};
-  labels = ["id" "name" "note" "category" "enable"];
+  labels = ["id" "name" "note" "category" "enable" "translucent"];
+
+  #--- A rule marked translucent gets an opacity rule of its own after it, so the
+  #--- Quick Capture exclude doesn't reach the rule's other properties. Fallback
+  #--- opacity: the active blur preset (blur-presets.nix) overrides it
+  opacityRule = r: {
+    inherit (r) matches;
+    # DMS's Quick Capture stays opaque (also excluded in blur-presets.nix)
+    excludes = [
+      {
+        app-id = "^dev\\.duxlabs\\.shell$";
+        title = "^Quick Capture$";
+      }
+    ];
+    opacity = 0.8;
+  };
 
   # niri-flake wants floats; a whole number typed in the settings is an int
   floats = v:
@@ -94,7 +93,13 @@
     (r:
       if r ? include
       then included.${r.include}
-      else [(floats (removeAttrs r labels))])
+      else let
+        rule = floats (removeAttrs r labels);
+        # A rule that only marks windows translucent sets nothing else
+        bare = removeAttrs rule ["matches" "excludes"] == {};
+      in
+        lib.optional (!(r.translucent or false && bare)) rule
+        ++ lib.optional (r.translucent or false) (opacityRule r))
     labelled;
 in {
   programs.niri.settings = {

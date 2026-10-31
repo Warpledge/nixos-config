@@ -15,12 +15,16 @@
   extraFile = "${config.xdg.configHome}/niri/dms/opacity-extra.kdl";
   extraList = "${config.xdg.stateHome}/niri/translucent-extra";
 
+  #--- Matches of the rules marked translucent (window-rules.json and the user's
+  #--- windowRules), which get the preset's opacity
+  rules = import ./window-rules.nix {inherit lib user;};
+  translucentMatches = lib.concatMap (r: r.matches or []) (lib.filter (r: r.translucent or false) rules);
+
   #--- Matches of every rule with a translucent opacity, so Mod+Y knows to toggle it
   opacityMatches =
     lib.filter (m: lib.all (k: k == "app-id" || k == "title") (lib.attrNames m))
-    (import ./translucent-apps.nix
-      ++ lib.concatMap (r: r.matches or [])
-      (lib.filter (r: (r.opacity or 1) < 1) (import ./window-rules.nix {inherit lib user;})));
+    (translucentMatches
+      ++ lib.concatMap (r: r.matches or []) (lib.filter (r: (r.opacity or 1) < 1) rules));
   matchTest = m:
     "{ "
     + lib.concatStringsSep " && " (lib.mapAttrsToList (k: v: let
@@ -38,7 +42,7 @@
         "    match "
         + lib.concatStringsSep " " (lib.mapAttrsToList (k: v: "${k}=${builtins.toJSON v}") m)
     )
-    (import ./translucent-apps.nix);
+    translucentMatches;
 
   # DMS's Quick Capture stays opaque and unblurred (also excluded in rules.nix)
   quickCaptureExclude = ''exclude app-id="^dev\\.duxlabs\\.shell$" title="^Quick Capture$"'';
