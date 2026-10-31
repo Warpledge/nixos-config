@@ -67,6 +67,9 @@
       makeWrapper ${pkgs.quickshell}/bin/qs $out/bin/omni-settings \
         --add-flags "-p $share/qml/shell.qml"
       #--- The backend the QML calls, one process per command (src/api.py)
+      #- The llama-server test arg rides inline on the --prefix line: an optional
+      #- argument on its own template line leaves a blank line mid-command when it
+      #- is off, which breaks the wrapper build (bash runs --prefix as a command).
       makeWrapper ${pkgs.python3}/bin/python3 $out/${backendPath} \
         --add-flags $share/api.py \
         --set OMNI_SETTINGS_FLAKE ${lib.escapeShellArg machine.flakePath} \
@@ -77,9 +80,6 @@
         --set OMNI_SETTINGS_CLEAN_DATES ${lib.escapeShellArg (lib.optionalString clean.enable clean.dates)} \
         --set OMNI_SETTINGS_COMPAT_TOOLS ${lib.escapeShellArg compatTools} \
         --set OMNI_SETTINGS_APPARMOR_INCLUDES ${pkgs.apparmor-profiles}/etc/apparmor.d \
-        ${lib.optionalString user.llamaSwap.enable
-        # The Local Models page's test: the same build llama-swap runs
-        "--set OMNI_SETTINGS_LLAMA_SERVER ${lib.getExe' pkgs.llama-cpp-vulkan "llama-server"} \\"}
         --prefix PATH : ${lib.makeBinPath [
         alejandra
         pkgs.nix-search-tv
@@ -87,7 +87,7 @@
         pkgs.vulkan-tools
         pkgs.speedtest-cli
         pkgs.apparmor-parser
-      ]}
+      ]} ${lib.optionalString user.llamaSwap.enable "--set OMNI_SETTINGS_LLAMA_SERVER ${lib.getExe' pkgs.llama-cpp-vulkan "llama-server"}"}
       ${lib.optionalString excluded ''
         # The split tunnel's own wrapper only covers `omni-settings` run from PATH
         cat > $out/bin/omni-settings-backend <<EOF
