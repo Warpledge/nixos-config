@@ -65,7 +65,7 @@ SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
 #--- "games" the Games page's.
 #--- "top" pages: the custom page (its id in api.py and OmniView.qml) each one's settings show on
 TOP_PAGES = {"Flatpaks": "flatpaks", "Users": "people", "Battery": "battery", "MangoHud": "mangohud",
-             "AppArmor": "apparmor"}
+             "AppArmor": "apparmor", "Maintenance": "overview"}
 
 PAGES = {
     "Flatpaks": ("top", "system-software-install-symbolic", "", [("", "", ["flatpak.enable"])]),
@@ -77,6 +77,10 @@ PAGES = {
                   ("Looks", "", ["mangohud.position", "mangohud.fontSize", "mangohud.textColor",
                                  "mangohud.background"])]),
     "AppArmor": ("top", "security-high-symbolic", "", [("", "", ["apparmor.enforce"])]),
+    "Maintenance": ("top", "computer-symbolic", "",
+                    [("Schedule", "What runs on its own, and how often.",
+                      ["maintenance.clean", "maintenance.keepDays", "maintenance.keepGenerations",
+                       "maintenance.optimise", "maintenance.updateReminderDays"])]),
     "Run on dGPU": ("dgpu", "video-display-symbolic", "", [("", "", ["gpuOffload"])]),
     "User Packages": ("userpkgs", "package-x-generic-symbolic", "", [("", "", ["userPackages"])]),
     "Keybinds": ("keybinds", "input-keyboard-symbolic", "", [("", "", ["keybinds"])]),

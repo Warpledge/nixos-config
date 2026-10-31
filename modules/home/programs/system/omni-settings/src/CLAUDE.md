@@ -12,7 +12,7 @@ Git (`GitPage.qml`, `src/gitstate.py`) only reads (the writes are the Maintenanc
 
 Backups (`BackupsPage.qml`, `src/backupstate.py`) runs `nixm backup`, `freetube-backup` and `zen-backup` for the apps the user has on.
 
-A collapsed page's header line comes from api.py's `summaries` for Maintenance (Pinned Versions' cached check only, never a fetch, and Crashes) and Backups, and from data the front end already polls for the rest.
+The Maintenance page's Schedule card is the machine's `maintenance.*` settings (a `"top"` page in `PAGES`), read by `nixos/nix/nh.nix` (clean-up, whose arguments the Clean Up button reuses), `nixos/nix/default.nix` (optimise) and `home/update-reminder.nix`. A collapsed page's header line comes from api.py's `summaries` for Maintenance (packages older than `updateReminderDays`, Pinned Versions' cached check only, never a fetch, and Crashes) and Backups, and from data the front end already polls for the rest.
 
 Pinned Versions (`PinnedVersions.qml`, a block of the Maintenance page under its update check; `src/updatestate.py`, also `nixm check-updates`) only reads: it compares the pins listed in `lib/upstream.json` and `machines/<name>/upstream.json` (release, nightly, commit and `~/.local/opt` bundle entries, skipped when the file is missing or the app's toggle, found through `backend.toggle_modules` or an entry's `machineToggle`, is off) and the flake's own inputs locked to a version tag with GitHub (`gitstate.github`). It also asks cache.nixos.org whether each package in `docs/nixpkgs/disabled-packages.md` is built at nixos-unstable's head. A bundle with no version file of its own reads `<dir>/.version`. Results are kept an hour in `$XDG_RUNTIME_DIR/omni-settings/upstream.json`; Check Now and nixm skip the cache.
 

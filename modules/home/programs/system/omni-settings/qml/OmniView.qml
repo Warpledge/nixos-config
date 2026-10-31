@@ -467,11 +467,12 @@ Item {
             const c = gitCounts
             return { text: `${c.branch ? c.branch + " · " : ""}${gitTag}`, alert: !!(c.changed || c.ahead || c.behind) }
         }
-        // Pinned Versions' cached check, then crashes
+        // An update due (maintenance.updateReminderDays), Pinned Versions' cached check, then crashes
         if (pid === "overview" && summaries) {
             const u = summaries.updates
-            const parts = u ? [u.upstream ? `${plural(u.upstream, "update")} upstream` : "",
-                               u.fixed ? `${plural(u.fixed, "disabled package")} fixed` : ""].filter(p => p) : []
+            const due = summaries.updateDue ? [`packages ${summaries.updateDue} days old`] : []
+            const parts = due.concat(u ? [u.upstream ? `${plural(u.upstream, "update")} upstream` : "",
+                               u.fixed ? `${plural(u.fixed, "disabled package")} fixed` : ""].filter(p => p) : [])
             const all = parts.concat(summaries.crashes ? [`${plural(summaries.crashes, "crash")} in 30 days`] : [])
             return all.length ? { text: all.join(" · "), alert: parts.length > 0 } : null
         }

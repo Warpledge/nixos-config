@@ -742,14 +742,23 @@ def cmd_summaries(cfg, _args):
     """What collapsed custom pages say under their title, from cached or quick reads only."""
     up = updatestate.run(cfg, cached_only=True)
     rows = up["rows"]
-    user = loaded(cfg).resolved["users"][cfg.user]
+    state = loaded(cfg)
+    user = state.resolved["users"][cfg.user]
+    # Days old once past the machine's maintenance.updateReminderDays, else 0
+    remind = (state.resolved.get("maintenance") or {}).get("updateReminderDays", 30)
+    try:
+        lock = system.lock_nodes(os.path.join(cfg.flake, "flake.lock"))
+        age = int((time.time() - lock["nixpkgs"]["locked"]["lastModified"]) // 86400)
+    except (OSError, KeyError, ValueError):
+        age = 0
     base = os.path.join(backupstate.ROOT, socket.gethostname())
     backups = [{"title": title, "last": backupstate.newest(os.path.join(base, folder))}
                for _, title, _, _, folder in backupstate.kinds(user)]
     return {"updates": None if up["checked"] is None else {
                 "upstream": sum(r["status"] == "update" and r["kind"] != "disabled" for r in rows),
                 "fixed": sum(r["status"] == "update" and r["kind"] == "disabled" for r in rows)},
-            "crashes": len(crashstate.crashes()), "backups": backups}
+            "crashes": len(crashstate.crashes()), "backups": backups,
+            "updateDue": age if remind and age >= remind else 0}
 
 
 #--------------------------------------------------------------------#

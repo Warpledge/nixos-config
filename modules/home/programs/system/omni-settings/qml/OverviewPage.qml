@@ -400,6 +400,20 @@ ColumnLayout {
         onClicked: page.optimise()
     }
 
+    //--- The machine's maintenance.* schedule, a setting like any other
+    Repeater {
+        model: page.ov && page.view.info.pages["overview"] ? page.view.info.pages["overview"].groups : []
+        SettingGroup {
+            required property var modelData
+            settings: modelData.settings
+            title: modelData.title
+            info: modelData.description
+            view: page.view
+            locked: !page.view.info.direct
+            pageGlyph: "schedule"
+        }
+    }
+
     //--- Shell settings; under niri they're on the Niri tab's Shell page
     QuickLinks {
         visible: !!page.ov && page.view.info.wm !== "niri" && shown.length > 0

@@ -28,6 +28,8 @@
     cursorSize = [24 32 48 64];
     "battery.chargeLimit" = [null 60 70 80 90];
     "gpu.type" = [null "amd" "intel" "nvidia" "amd+nvidia" "intel+nvidia"];
+    "maintenance.clean" = ["daily" "weekly" "monthly" "off"];
+    "maintenance.optimise" = ["daily" "weekly" "monthly" "off"];
   };
   #--- Lists whose items must come from a known set
   listChoices = {
@@ -68,6 +70,9 @@
   numberRanges = {
     "boot.menu.timeout" = [0 60];
     "boot.menu.entries" = [1 50];
+    "maintenance.keepDays" = [0 90];
+    "maintenance.keepGenerations" = [1 50];
+    "maintenance.updateReminderDays" = [0 365];
     "mangohud.fontSize" = [8 64];
     "mangohud.background" = [0 100];
   };

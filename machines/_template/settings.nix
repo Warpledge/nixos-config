@@ -74,6 +74,20 @@
   };
 
   #--------------------------------------------------------------------#
+  #-- Maintenance
+  #--------------------------------------------------------------------#
+  #--- Clean Up Old Versions: how often garbage collection runs ("off" never),
+  #--- keeping generations newer than keepDays and the last keepGenerations
+  maintenance.clean = "weekly";
+  maintenance.keepDays = 5;
+  maintenance.keepGenerations = 5;
+  #--- Optimize the Nix Store: hard-links identical files at 04:00
+  maintenance.optimise = "daily";
+  #--- Update Reminder: a notification once the config's packages are this
+  #--- many days old; 0 turns it off
+  maintenance.updateReminderDays = 30;
+
+  #--------------------------------------------------------------------#
   #-- Language & Keyboard
   #--------------------------------------------------------------------#
   #--- setup.sh copies these from the choices made in the NixOS installer

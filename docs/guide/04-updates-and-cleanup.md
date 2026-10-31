@@ -29,9 +29,9 @@ The boot menu keeps the last ten by default, set on Omni Settings' **Boot** page
 
 ## Clean-Up
 
-Old generations and their packages take disk space. **Clean Up Old Versions** deletes the old ones, keeping the newest five plus any made in the last five days, then removes the files nothing uses any more. The dialog estimates how much it frees. Deleted versions leave the boot menu and you can't switch back to them.
+Old generations and their packages take disk space. **Clean Up Old Versions** deletes the old ones, keeping the newest five plus any made in the last five days by default, then removes the files nothing uses any more. The dialog estimates how much it frees. Deleted versions leave the boot menu and you can't switch back to them.
 
-The same clean-up runs on its own every week ([`nh.nix`](../../modules/nixos/nix/nh.nix) sets what it keeps), so you only need the button when space is short.
+The same clean-up runs on its own every week, so you only need the button when space is short. The Maintenance page's **Schedule** card sets how often it runs, what it keeps, how often the store is optimised, and after how many days you get a reminder to update (0 turns the reminder off).
 
 ## Rebuild Now
 
