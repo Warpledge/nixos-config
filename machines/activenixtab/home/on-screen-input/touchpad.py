@@ -213,20 +213,17 @@ def activate(app):
     win.monitor = monitor  # keeps it alive
 
     # Anchoring all edges is not a size: GTK asks for the child's natural size,
-    # which is 0x0, so the surface is asked to be the screen minus the margins.
-    # (Gdk monitors do not change while niri lives, except by rotation.)
-    def resize_to_screen(*_):
-        mon = display.get_monitors()
-        if not mon:
-            return None
-        return mon[0].get_geometry()
-
-    # The virtual device covers the pad area; remade if it resizes (rotation)
+    # which is 0x0. So the pad area carries an explicit size request for the
+    # screen minus the margins, set before mapping and re-checked every second
+    # (the only way it changes while niri lives is rotation).
     def check_size(*_):
         global pad, pad_size
-        geo = resize_to_screen()
-        want = (geo.width, max(1, geo.height - MARGIN_TOP - MARGIN_BOTTOM))
-        area.set_size_request(*want)
+        mon = display.get_monitors()
+        if mon:
+            geo = mon[0].get_geometry()
+            area.set_size_request(
+                geo.width, max(1, geo.height - MARGIN_TOP - MARGIN_BOTTOM)
+            )
         a = area.get_allocation()
         if a.width > 1 and a.height > 1 and (a.width, a.height) != pad_size:
             if pad:
@@ -235,6 +232,7 @@ def activate(app):
             pad = make_pad(a.width, a.height)
         return GLib.SOURCE_CONTINUE
 
+    check_size()
     GLib.timeout_add_seconds(1, check_size)
     # On mapping, the allocation lands before the next tick would notice
     area.connect(
@@ -259,6 +257,7 @@ def activate(app):
             slots.clear()
             win.set_visible(False)
         else:
+            check_size()  # first-frame size, not one tick late
             win.present()
         return GLib.SOURCE_CONTINUE
 

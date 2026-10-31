@@ -98,7 +98,9 @@ when Ky approves it.
   settings; a one-finger swipe up from the bottom edge also runs `osk-toggle`
   (`wm/touch-gestures.py`). Gotchas: wvkbd must be built WITH `wvkbd-uinput.patch` or
   niri binds never see its keys; a GTK4 layer window anchored to all edges still needs
-  an explicit size request (0x0 otherwise); `lib.getExe` as a niri bind's only
+  an explicit size request (0x0 otherwise, and set it before first map); keyd must
+  exclude wvkbd's uinput keyboard (`!name:On-screen keyboard` in its ids) or it eats
+  the PAD key's F13; `lib.getExe` as a niri bind's only
   `action.spawn` item breaks the kdl render — interpolate `"${pkg}/bin/pkg"`.
   `raise-watch.py` (`osk-raise.service`) re-creates both surfaces when another
   overlay opens, since niri stacks the newest layer surface on top
