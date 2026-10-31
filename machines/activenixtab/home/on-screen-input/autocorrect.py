@@ -73,7 +73,7 @@ CONTRACTIONS = {
     ).split()
 }
 CONTRACTION_COUNT = 100_000_000  # how common they rank in swipe
-STROKE_FREQ = 0.06# swipe: score per factor of ten, against a stroke's shape match
+STROKE_FREQ = 0.06  # swipe: score per factor of ten, against a stroke's shape match
 STROKE_END_MISS = 0.3  # swipe: a word not starting or ending where the stroke did
 
 
