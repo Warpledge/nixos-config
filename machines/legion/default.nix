@@ -39,6 +39,9 @@
   };
 
   services = {
+    #--- lavd follows the EPP TLP sets: performance on AC, core packing on battery
+    scx.extraArgs = lib.mkForce ["--autopower"];
+
     #--- TLP Power Management (Legion Slim 5 optimized for server)
     tlp = {
       enable = true;
@@ -102,7 +105,8 @@
     [
       ./hardware/gpu.nix
       ./hardware/hardware-configuration.nix
-      ./hardware/storage.nix
+      # Off until the SK Hynix has a LUKS partition labelled "storage"
+      # ./hardware/storage.nix
       ./hardware/swapfile.nix
 
       ../../modules
@@ -110,6 +114,10 @@
     #--- Disk-unlock lines setup.sh copied from the installer's configuration.nix
     ++ lib.optional (builtins.pathExists ./hardware/boot.nix) ./hardware/boot.nix
     ++ (lib.optional (machine.windowManager == "niri") ./wm/niri.nix);
+
+  #--- CUDA code for the RTX 4070 (Ada) alone, not every GPU generation:
+  #--- llama.cpp's CUDA build (localModels.backend) compiles far faster
+  nixpkgs.config.cudaCapabilities = ["8.9"];
 
   #--- Laptop-specific home-manager modules (the servers live in the main
   #--- user's ~/Documents)

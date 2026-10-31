@@ -13,6 +13,7 @@ Sheet {
     onBack: view.sheet = null
 
     property string category: "chat"
+    property string vision: file.vision && file.vision.length ? file.vision[0] : ""  // "" for none
     readonly property string mid: idField.text.trim()
     readonly property string problem: {
         if (!/^[a-z0-9][a-z0-9.-]*$/.test(mid))
@@ -34,7 +35,10 @@ Sheet {
             view.say(problem)
             return
         }
-        models.setModel(mid, { category, name: nameField.text.trim(), dir: file.dir, match: file.suggest.match })
+        const entry = { category, name: nameField.text.trim(), dir: file.dir, match: file.suggest.match }
+        if (vision)
+            entry.mmproj = vision
+        models.setModel(mid, entry)
         view.say(`${nameField.text.trim()} added; turn it on under Local AI, Models after Apply`)
         view.sheet = null
     }
@@ -49,6 +53,27 @@ Sheet {
         spacing: 6
         Chip { text: "Coding"; accent: ed.category === "code"; onTapped: ed.category = "code" }
         Chip { text: "Chat"; accent: ed.category === "chat"; onTapped: ed.category = "chat" }
+    }
+    Section {
+        visible: !!ed.file.vision && ed.file.vision.length > 0
+        text: "Vision"
+        info: "The folder has a vision projector (mmproj), which lets the model read images. It "
+              + "loads beside the model and takes some VRAM; without it, the model reads text only."
+    }
+    Flow {
+        visible: !!ed.file.vision && ed.file.vision.length > 0
+        Layout.fillWidth: true
+        spacing: 6
+        Chip { text: "Text Only"; accent: ed.vision === ""; onTapped: ed.vision = "" }
+        Repeater {
+            model: ed.file.vision || []
+            Chip {
+                required property string modelData
+                text: modelData
+                accent: ed.vision === modelData
+                onTapped: ed.vision = modelData
+            }
+        }
     }
     Section { text: "Name"; info: "What apps show in their model lists." }
     Field { id: nameField; Layout.fillWidth: true; placeholder: "Display name" }

@@ -132,6 +132,23 @@ def find_file(entry):
     return os.path.join(folder, names[0]) if names else None
 
 
+def find_vision(entry):
+    """The vision projector the entry's `mmproj` match names in its folder, as
+    llama-swap's llama-model script finds it; None without one."""
+    if not entry.get("mmproj"):
+        return None
+    return find_file({"dir": entry.get("dir", ""), "match": entry["mmproj"]})
+
+
+def vision_files(entry):
+    """The vision projectors (mmproj*.gguf) in the entry's folder."""
+    try:
+        return sorted(n for n in os.listdir(os.path.join(MODELS_DIR, entry.get("dir", "")))
+                      if n.lower().startswith("mmproj") and n.lower().endswith(".gguf"))
+    except OSError:
+        return []
+
+
 def size_of(path):
     return sum(os.path.getsize(p) for p in gguf.shards(path) if os.path.exists(p))
 
@@ -189,6 +206,7 @@ def scan(known, knows=None):
         out.append({"path": path, "dir": folder, "file": os.path.basename(path), "bytes": size_of(path),
                     "quant": q.group(0) if q else "", "id": owner, "arch": arch,
                     "supported": knows(arch) if knows else True,
+                    "vision": vision_files({"dir": folder}),
                     "suggest": {"id": mid, "name": name, "match": match}})
     return out
 
@@ -213,9 +231,51 @@ def meminfo():
     return out
 
 
+#--- The machine's localModels.backend (use_backend): "cuda" reads the NVIDIA card
+#--- through nvidia-smi, anything else amdgpu's sysfs
+BACKEND = {"name": "vulkan"}
+
+
+def use_backend(name):
+    BACKEND["name"] = name or "vulkan"
+
+
+def nvidia():
+    """[{pci, vram, vramUsed, name}] from nvidia-smi, in bytes; [] without it.
+    Asking wakes a runtime-suspended card for a moment."""
+    smi = shutil.which("nvidia-smi") or "/run/current-system/sw/bin/nvidia-smi"
+    try:
+        out = subprocess.run([smi, "--query-gpu=pci.device_id,memory.total,memory.used,name",
+                              "--format=csv,noheader,nounits"], capture_output=True, text=True, timeout=10)
+    except (OSError, subprocess.TimeoutExpired):
+        return []
+    cards = []
+    for line in out.stdout.splitlines():
+        parts = [p.strip() for p in line.split(",", 3)]
+        if len(parts) < 4:
+            continue
+        try:
+            ident = int(parts[0], 16)  # device id in the high 16 bits, vendor in the low
+            cards.append({"pci": f"{ident & 0xFFFF:04x}:{ident >> 16:04x}",
+                          "vram": int(parts[1]) * MB, "vramUsed": int(parts[2]) * MB, "name": parts[3]})
+        except ValueError:
+            continue
+    return cards
+
+
 def gpu(profs):
     """The GPU with the most memory: name ids, memory in bytes, discrete or
     unified, and the profile whose pciIds match."""
+    mem = meminfo()
+    if BACKEND["name"] == "cuda":
+        cards = nvidia()
+        if cards:
+            best = max(cards, key=lambda c: c["vram"])
+            profile = next((p for p, v in profs.items() if best["pci"] in (v.get("pciIds") or [])), None)
+            best.update(gtt=0, memory="discrete", profile=profile,
+                        ram=mem.get("MemTotal", 0), ramAvailable=mem.get("MemAvailable", 0))
+            best["others"] = others(best)
+            return best
     best = None
     for dev in glob.glob("/sys/class/drm/card[0-9]*/device"):
         vram = read_int(f"{dev}/mem_info_vram_total")
@@ -227,7 +287,6 @@ def gpu(profs):
                 "gtt": gtt, "device": dev}
         if best is None or vram + gtt > best["vram"] + best["gtt"]:
             best = card
-    mem = meminfo()
     if best is None:
         return {"pci": "", "vram": 0, "vramUsed": 0, "gtt": 0, "memory": "none", "profile": None,
                 "ram": mem.get("MemTotal", 0), "ramAvailable": mem.get("MemAvailable", 0)}
@@ -272,7 +331,16 @@ def others(card):
 
 
 def vram_used():
+    if BACKEND["name"] == "cuda":
+        return max((c["vramUsed"] for c in nvidia()), default=0)
     return max((read_int(p) for p in glob.glob("/sys/class/drm/card[0-9]*/device/mem_info_vram_used")),
+               default=0)
+
+
+def vram_total():
+    if BACKEND["name"] == "cuda":
+        return max((c["vram"] for c in nvidia()), default=0)
+    return max((read_int(p) for p in glob.glob("/sys/class/drm/card[0-9]*/device/mem_info_vram_total")),
                default=0)
 
 
@@ -297,7 +365,7 @@ def placement(m, t):
     batch = t.get("batch", 512)
     # Fitted to llama.cpp's Vulkan buffers on eclipse (Ornith, -ub 2048, 2026-10-30)
     compute = batch * m.embedding * 48 + 128 * MB if on_gpu else 0
-    gpu += kv * share + compute
+    gpu += kv * share + compute + t.get("_vision", 0)  # the vision projector loads on the GPU
     ram += kv * (1 - share) + t.get("cacheRam", 8192) * MB
     return gpu, ram, {"weights": m.weights, "kv": kv, "compute": compute}
 
@@ -517,11 +585,16 @@ def test(server, path, t, entry, profile, profs):
 
 def run_once(server, path, t, entry, profile, profs):
     """One load, test prompt and measurement; TooBig when it runs out of memory."""
-    card_total = max((read_int(p) for p in glob.glob("/sys/class/drm/card[0-9]*/device/mem_info_vram_total")),
-                     default=0)
+    card_total = vram_total()
     ram_total = meminfo().get("MemTotal", 0)
     port = free_port()
     words = [w for a in flags(t, profile, profs) + list(entry.get("args") or []) for w in shlex.split(a)]
+    vision = find_vision(entry)
+    if entry.get("mmproj") and not vision:
+        raise ValueError(f"No {entry['mmproj']} in ~/.lmstudio/models/{entry.get('dir')}: "
+                         "download the vision file in LM Studio")
+    if vision:
+        words = ["--mmproj", vision] + words
     cmd = [server, "-m", path, "--port", str(port), "--host", "127.0.0.1"] + words
     say("$ " + " ".join(shlex.quote(c) for c in cmd[1:]))
     base_vram, base_ram = vram_used(), meminfo().get("MemAvailable", 0)
@@ -850,8 +923,7 @@ def quality(server, path, t, flake):
     common = ["-m", path, "-f", quality_text(flake), "-c", "4096", "--chunks", "2", "-fa", "on"] \
         + perplexity_offload(t)
     out = {}
-    card_total = max((read_int(p) for p in glob.glob("/sys/class/drm/card[0-9]*/device/mem_info_vram_total")),
-                     default=0)
+    card_total = vram_total()
     ram_total = meminfo().get("MemTotal", 0)
     stop = threading.Event()
 

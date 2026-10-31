@@ -160,8 +160,6 @@ SIDE_RAIL = ("user", schema.SIDE_RAIL)
 
 STATE_DIR = os.path.join(os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state"),
                          "omni-settings")
-#--- What's New items the user dismissed, as "domain:dotted.path"
-DISMISSED = os.path.join(STATE_DIR, "whats-new-dismissed.json")
 #--- Which pages and cards are open, kept across launches
 UI_STATE = os.path.join(STATE_DIR, "ui.json")
 #--- The Apps section's pages, merged into one page of cards
@@ -180,14 +178,6 @@ def parse_id(key):
     if domain not in ("machine", "user") or not dotted:
         raise ValueError(f"bad setting key: {key}")
     return domain, tuple(dotted.split("."))
-
-
-def read_dismissed():
-    try:
-        with open(DISMISSED) as f:
-            return set(json.load(f))
-    except (OSError, ValueError):
-        return set()
 
 
 def read_ui():
@@ -451,9 +441,8 @@ def cmd_load(cfg, _args):
     if game_docs:
         nav["docs"].append({"id": "gaming", "title": "Gaming", "items": game_docs})
 
-    dismissed = read_dismissed()
     new = [{"key": new_id(d, p), "value": v} for d, p, v in state.new
-           if (d == "user" or direct) and new_id(d, p) not in dismissed
+           if (d == "user" or direct)
            and any(s.domain == d and s.path == p for s in schema.flat(state.pages))]
     banner = ""
     if not helper():
@@ -503,7 +492,9 @@ def local_models_arg(cfg, args):
     value = args.get("localModels")
     if not isinstance(value, dict):
         value = loaded(cfg).resolved.get("localModels") or {}
-    return {"profile": value.get("profile"), "models": value.get("models") or {}}
+    backend = value.get("backend") or (loaded(cfg).resolved.get("localModels") or {}).get("backend")
+    localmodelstate.use_backend(backend)  # which GPU's memory the page reads
+    return {"profile": value.get("profile"), "models": value.get("models") or {}, "backend": backend}
 
 
 def local_model(cfg, args):
@@ -545,6 +536,8 @@ def cmd_local_models(cfg, args):
                        "flags": localmodelstate.flags(t, profile, profs) + list(entry.get("args") or []),
                        "lastTest": localmodelstate.last_test(mid, t),
                        "arch": arch, "supported": knows(arch) if knows else True,
+                       "mmproj": entry.get("mmproj") or "",
+                       "visionFiles": localmodelstate.vision_files(entry),
                        "file": path and os.path.basename(path),
                        "bytes": path and localmodelstate.size_of(path)})
     return {"gpu": card, "profile": profile,
@@ -562,9 +555,11 @@ def cmd_local_model_estimate(cfg, args):
     profile = lm["profile"]
     card = localmodelstate.gpu(profs)
     t = localmodelstate.effective(entry, profile, profs, lm["models"].get(mid))
+    vision = localmodelstate.find_vision(entry)
+    sized = {**t, "_vision": localmodelstate.size_of(vision) if vision else 0}
     try:
-        out = localmodelstate.estimate(path, t, card, profile, profs)
-        out["presets"] = localmodelstate.presets(path, t, card, profile, profs, entry)
+        out = localmodelstate.estimate(path, sized, card, profile, profs)
+        out["presets"] = localmodelstate.presets(path, sized, card, profile, profs, entry)
         out["lastTest"] = localmodelstate.last_test(mid, t)
         out["quality"] = localmodelstate.last_quality(mid)
     except (OSError, ValueError, KeyError) as e:
@@ -705,15 +700,6 @@ def cmd_save(cfg, args):
         raise PermissionError("only an admin who can edit the files saves without a rebuild")
     backend.write(cfg, state, changes_arg(args), args.get("machine", cfg.machine), state.user_machines)
     return True
-
-
-def cmd_dismiss(_cfg, args):
-    """Hides What's New items (args.keys) until a later setting brings the page back."""
-    keys = read_dismissed() | set(args.get("keys") or [])
-    os.makedirs(STATE_DIR, exist_ok=True)
-    with open(DISMISSED, "w") as f:
-        json.dump(sorted(keys), f)
-    return sorted(keys)
 
 
 def cmd_saveUi(_cfg, args):
@@ -1657,7 +1643,7 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "localModels": cmd_local_models, "localModelEstimate": cmd_local_model_estimate,
             "localModelTest": cmd_local_model_test, "localModelAutoTune": cmd_local_model_auto_tune,
             "localModelQuality": cmd_local_model_quality,
-            "dismiss": cmd_dismiss, "saveUi": cmd_saveUi,
+            "saveUi": cmd_saveUi,
             "stale": cmd_stale, "removeStale": cmd_remove_stale,
             "overview": cmd_overview, "freed": cmd_freed, "boot": cmd_boot,
             "status": cmd_status, "usage": cmd_usage,

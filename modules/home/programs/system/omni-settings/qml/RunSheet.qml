@@ -1,6 +1,7 @@
 // A job's steps, progress and log, from the job service; it keeps running when closed
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Shapes
 import Quickshell
 
 Rectangle {
@@ -15,14 +16,14 @@ Rectangle {
     property bool showLog: false
     color: Theme.bg
 
-    //--- 0 to 1 and back for the building bars; kept here because each progress
-    //--- event rebuilds their rows, which would restart an animation of their own
-    property real bounce: 0
-    SequentialAnimation on bounce {
+    //--- Scroll offset of the building bars' stripes, one stripe period (12 px);
+    //--- kept here because each progress event rebuilds their rows, which would
+    //--- restart an animation of their own
+    property real stripeShift: 0
+    NumberAnimation on stripeShift {
         running: busy.visible
         loops: Animation.Infinite
-        NumberAnimation { from: 0; to: 1; duration: 1100; easing.type: Easing.InOutQuad }
-        NumberAnimation { from: 1; to: 0; duration: 1100; easing.type: Easing.InOutQuad }
+        from: 0; to: 12; duration: 600
     }
 
     readonly property var stepGlyph: ({ waiting: "radio_button_unchecked", running: "progress_activity",
@@ -436,7 +437,7 @@ Rectangle {
                                 }
                             }
                             //--- Bytes when known; nix doesn't say how far a build is,
-                            //--- so a sliding bar shows it's working
+                            //--- so a striped bar shows it's working
                             Rectangle {
                                 Layout.fillWidth: true
                                 implicitHeight: 6
@@ -451,13 +452,30 @@ Rectangle {
                                     color: Theme.primary
                                     Behavior on width { NumberAnimation { duration: 400 } }
                                 }
-                                Rectangle {
+                                Shape {
+                                    id: stripes
                                     visible: !item.sized
-                                    height: parent.height
-                                    radius: 3
-                                    width: parent.width * 0.3
-                                    x: (parent.width - width) * sheet.bounce
-                                    color: Qt.alpha(Theme.primary, 0.7)
+                                    anchors.fill: parent
+                                    preferredRendererType: Shape.CurveRenderer
+                                    ShapePath {
+                                        strokeWidth: -1
+                                        //--- A (6, 6) vector repeats every 12 px along x,
+                                        //--- matching stripeShift's range
+                                        fillGradient: LinearGradient {
+                                            spread: ShapeGradient.RepeatSpread
+                                            x1: sheet.stripeShift; y1: 0
+                                            x2: sheet.stripeShift + 6; y2: 6
+                                            GradientStop { position: 0; color: Qt.alpha(Theme.primary, 0.8) }
+                                            GradientStop { position: 0.5; color: Qt.alpha(Theme.primary, 0.8) }
+                                            GradientStop { position: 0.5; color: Qt.alpha(Theme.primary, 0.4) }
+                                            GradientStop { position: 1; color: Qt.alpha(Theme.primary, 0.4) }
+                                        }
+                                        PathRectangle {
+                                            width: stripes.width
+                                            height: stripes.height
+                                            radius: 3
+                                        }
+                                    }
                                 }
                             }
                         }

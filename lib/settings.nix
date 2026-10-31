@@ -31,6 +31,7 @@
     "maintenance.clean" = ["daily" "weekly" "monthly" "off"];
     "maintenance.optimise" = ["daily" "weekly" "monthly" "off"];
     "localModels.profile" = [null] ++ lib.attrNames (import ./gpu-profiles.nix);
+    "localModels.backend" = ["vulkan" "cuda"];
     #--- GB of RAM an APU's GPU may use: a little under 32, 64, 128 and 256GB
     "localModels.gpuSharedGB" = [null 24 28 48 56 60 96 112 120 124 192 240 248];
   };
@@ -210,6 +211,7 @@
       name = lib.isString;
       dir = lib.isString;
       match = lib.isString;
+      mmproj = lib.isString; # the vision projector's file match in the same folder
       args = v: lib.isList v && lib.all lib.isString v;
       think = lib.isAttrs;
       fast = v: v == null || lib.isAttrs v;

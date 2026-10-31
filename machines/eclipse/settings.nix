@@ -235,16 +235,36 @@
       dir = "unsloth/flint-GGUF";
       match = "flint-UD-Q4_K_XL.gguf";
       name = "flint";
-      context = 65536;
-      gpuLayers = "all";
-      cpuMoe = 25;
+      context = 262144;
       batch = 1024;
+      cache = "q8_0";
+      gpuLayers = "all";
+      cpuMoe = 33;
     };
     gemma-4-12b-it-qat = {
+      batch = 2048;
       category = "chat";
+      context = 262144;
       dir = "unsloth/gemma-4-12B-it-qat-GGUF";
+      gpuLayers = "all";
       match = "gemma-4-12B-it-qat-UD-Q4_K_XL.gguf";
       name = "gemma 4 12B it qat";
+    };
+    gemma-4-26b-a4b = {
+      batch = 2048;
+      context = 262144;
+      cpuMoe = 9;
+      gpuLayers = "all";
+      loadMode = "none";
+    };
+    "ornith-1.5-35b-a3b" = {
+      batch = 2048;
+      cache = "q8_0";
+      cacheRam = 4096;
+      context = 262144;
+      cpuMoe = 24;
+      gpuLayers = "all";
+      loadMode = "none";
     };
   };
 }

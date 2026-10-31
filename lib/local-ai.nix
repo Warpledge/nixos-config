@@ -86,4 +86,9 @@ in {
   code = lib.mapAttrs resolve (catalog.code // added "code");
   chat = lib.mapAttrs resolve (catalog.chat // added "chat");
   inherit (catalog) edit;
+  #--- The llama.cpp build for the machine's backend (llama-swap, Omni Settings)
+  llamaCpp = pkgs:
+    if localModels.backend == "cuda"
+    then pkgs.llama-cpp-cuda
+    else pkgs.llama-cpp-vulkan;
 }

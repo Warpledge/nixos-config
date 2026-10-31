@@ -154,6 +154,10 @@
   cursor = "bibata";
   cursorSize = 24;
 
+  #--- Local AI Models: llama.cpp on the RTX 4070 through CUDA
+  localModels.backend = "cuda";
+  localModels.profile = "rtx-4070-laptop";
+
   #--- Bluetooth
   bluetooth.enable = false;
 
