@@ -19,6 +19,7 @@
     control = "sufficient";
     #--- The IR camera; /dev/videoN numbers can change
     settings.video.device_path = "/dev/v4l/by-path/pci-0000:c4:00.4-usb-0:1:1.2-video-index0";
+    settings.debug.end_report = true;
   };
 
   services.linux-enable-ir-emitter = {
