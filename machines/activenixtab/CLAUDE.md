@@ -131,7 +131,11 @@ when Ky approves it.
   `osk-auto` switches that off; a keyboard a field opened closes 300 ms after it, so moving
   between fields doesn't flicker, and one opened by hand stays. While the folio is attached (`folio-watch.py`, `osk-folio.service`) fields
   don't open it, attaching hides it and its bar button hides, but the gesture still opens it.
-  Both know common contractions, except ones that are real words without the apostrophe.
+  Both know common contractions, except ones that are real words without the apostrophe,
+  and use the word before (symspellpy's word pair list, memory only) to choose between close
+  candidates. Undoing a correction saves the typed word to `~/.local/state/osk-words` (mode
+  600, reread when it changes, delete to reset): autocorrect leaves it alone and swipe can
+  produce it. A password that got corrected and undone would land there too.
   Each has a DMS bar plugin (`oskToggle`, `touchpadToggle`, `autocorrectToggle`) added
   from DMS's bar settings; a one-finger swipe up from the bottom edge also runs `osk-toggle`
   (`wm/touch-gestures.py`). Gotchas: wvkbd must be built WITH `wvkbd-uinput.patch` or
