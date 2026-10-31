@@ -1,0 +1,16 @@
+# wvkbd normally presses keys with the mouse too. This build gets only
+# touch events: the seat's pointer is never listened to.
+--- a/main.c	2026-07-24 14:16:05.000000000 -0700
++++ b/main.c	2026-10-30 16:54:21.927777875 -0700
+@@ -394,10 +394,7 @@
+                          enum wl_seat_capability caps)
+ {
+     if ((caps & WL_SEAT_CAPABILITY_POINTER)) {
+-        if (pointer == NULL) {
+-            pointer = wl_seat_get_pointer(wl_seat);
+-            wl_pointer_add_listener(pointer, &pointer_listener, NULL);
+-        }
++        /* Touch-only build: a mouse never presses a key, so no listener */
+     } else {
+         if (pointer != NULL) {
+             wl_pointer_destroy(pointer);

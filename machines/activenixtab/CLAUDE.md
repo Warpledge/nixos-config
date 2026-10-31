@@ -82,15 +82,22 @@ when Ky approves it.
 - `home/ghostty.nix` — Ghostty with `ghostty-touch.patch` (a tap clicks at the finger,
   a one-finger drag scrolls), built from source since the patched package isn't
   cached, and the DMS colour theme the shared module doesn't load yet
-- `home/on-screen-input/` — for use without the folio: wvkbd (a user service started
-  hidden, coloured by a matugen template, shown and hidden with `osk-toggle`) and an
-  on-screen touchpad panel (`touchpad.py`, `touchpad-toggle`) that feeds a virtual
-  touchpad, so libinput's tap, scroll and drag apply. Each has a DMS bar plugin
-  (`oskToggle`, `touchpadToggle`) added from DMS's bar settings; a one-finger swipe up
-  from the bottom edge also runs `osk-toggle` (`wm/touch-gestures.py`). wvkbd is
-  patched to type through uinput (so niri's binds see its keys) and to leave the pad's
-  width free; `raise-watch.py` (`osk-raise.service`) re-creates both surfaces when
-  another overlay opens, since niri stacks the newest layer surface on top
+- `home/on-screen-input/` — for use without the folio: wvkbd, full width and 360 px
+  tall, translucent (`--alpha`) over niri's blur (a layer rule blurs its namespace),
+  touch-only (no mouse listener), with a PAD key (F13) on both letter layers' bottom
+  rows; a user service started hidden, coloured by a matugen template, shown and
+  hidden with `osk-toggle`. And pad mode: a resident daemon (`touchpad.py`,
+  `on-screen-touchpad.service`) whose window covers the screen minus the keyboard and
+  bar strips and maps finger motion relatively into a virtual touchpad, so libinput's
+  tap, scroll and drag apply; off means no surface at all. `osk-pad-mode` (SIGUSR2)
+  toggles it — the PAD key (niri bind F13) or the bar button. Each has a DMS bar
+  plugin (`oskToggle`, `touchpadToggle`) added from DMS's bar settings; a one-finger
+  swipe up from the bottom edge also runs `osk-toggle` (`wm/touch-gestures.py`).
+  wvkbd is patched to type through uinput (so niri's binds see its keys);
+  `raise-watch.py` (`osk-raise.service`) re-creates both surfaces when another
+  overlay opens, since niri stacks the newest layer surface on top. Gotcha:
+  `lib.getExe` as a niri bind's only `action.spawn` item breaks the kdl render;
+  interpolate `"${pkg}/bin/pkg"`
 - `home/godot-mcp.nix` — the godot-mcp server, built from GitHub at a pinned commit and
   put on PATH; a Godot project's `opencode.json` starts it (`~/godot-mcp-demo` does)
 - `home/unreal-engine.nix` — `unreal-editor` and its desktop entry: Epic's prebuilt

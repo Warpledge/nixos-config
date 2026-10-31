@@ -1,8 +1,10 @@
 #=====================================================================#
-# ON-SCREEN KEYBOARD AND TOUCHPAD
+# ON-SCREEN KEYBOARD AND TOUCHPAD MODE
 #=====================================================================#
-#- For using the Z13 without its folio: wvkbd as the keyboard, and a touchpad
-#- panel that drives a virtual touchpad. Each has a DMS bar button; a swipe
+#- For using the Z13 without its folio: wvkbd as the keyboard (full width,
+#- translucent over niri's blur, touch-only), and a pad mode that turns the
+#- whole screen above the keyboard into one big touchpad. The PAD key on the
+#- keyboard (F13, niri bind) or the DMS bar button toggles pad mode; a swipe
 #- up from the bottom edge (wm/touch-gestures.py) toggles the keyboard.
 {
   config,
@@ -12,24 +14,31 @@
 }: let
   colors = "${config.xdg.configHome}/wvkbd/colors.sh";
 
-  #--- The touchpad sits right of the keyboard, at its height (logical px)
-  padWidth = 480;
-  height = 300;
+  #--- Keyboard strip (logical px): wvkbd's height and the screen it leaves
+  height = 360;
+  #--- The DMS bar strip on top, which the touchpad must never swallow
+  barStrip = 36;
+  #--- Panel opacity (0-255). Under 255 wvkbd's own panel lets the blur through
+  keyAlpha = 217;
 
-  #--- The desktop layout (F keys, number row, Tab, Ctrl…), plus a right margin
+  #--- The desktop layout (F keys, number row, Tab, Ctrl…), plus:
+  #- a PAD key (F13) on the bottom row of both letter layers,
+  #- no pointer listener at all (only touches press keys).
   wvkbd = pkgs.wvkbd.overrideAttrs (old: {
     makeFlags = (old.makeFlags or []) ++ ["LAYOUT=deskintl"];
-    patches = (old.patches or []) ++ [./wvkbd-margin.patch ./wvkbd-uinput.patch];
+    patches =
+      (old.patches or [])
+      ++ [./wvkbd-pad-key.patch ./wvkbd-touch-only.patch];
   });
 
   keyboard = pkgs.writeShellScript "wvkbd-start" ''
     WVKBD_COLORS=""
     [ -r "${colors}" ] && . "${colors}"
-    export WVKBD_MARGIN_RIGHT=${toString padWidth}
     # Type through uinput, so niri's binds, keyd and polkit prompts see the keys
     export WVKBD_UINPUT=1
     # shellcheck disable=SC2086 # one flag per word
     exec ${wvkbd}/bin/wvkbd-deskintl --hidden -H ${toString height} -L ${toString height} \
+      --alpha ${toString keyAlpha} \
       --fn "${config.stylix.fonts.sansSerif.name} ${toString config.stylix.fonts.sizes.popups}" \
       $WVKBD_COLORS
   '';
@@ -38,9 +47,13 @@
     pkill --signal RTMIN -x wvkbd-deskintl
   '';
 
+  pad-mode = pkgs.writeShellScriptBin "osk-pad-mode" ''
+    pkill --signal USR2 -f 'on-screen-touchpad\.py'
+  '';
+
   touchpad = pkgs.stdenv.mkDerivation {
     pname = "on-screen-touchpad";
-    version = "1.0";
+    version = "2.0";
     dontUnpack = true;
     nativeBuildInputs = [pkgs.wrapGAppsHook4 pkgs.gobject-introspection];
     buildInputs = [pkgs.gtk4 pkgs.gtk4-layer-shell];
@@ -50,20 +63,18 @@
       makeWrapper ${pkgs.python3.withPackages (p: [p.evdev p.pygobject3])}/bin/python3 \
         $out/bin/on-screen-touchpad --add-flags $out/share/on-screen-touchpad.py
     '';
-    # gtk4-layer-shell has to load before libwayland
+    # gtk4-layer-shell has to load before libwayland; the margins are the
+    # keyboard strip (bottom) and the bar strip (top) the pad never covers
     preFixup = ''
       gappsWrapperArgs+=(--set LD_PRELOAD ${pkgs.gtk4-layer-shell}/lib/libgtk4-layer-shell.so
-        --set TOUCHPAD_SIZE ${toString padWidth}x${toString height})
+        --set OSK_PAD_BOTTOM ${toString height}
+        --set OSK_PAD_TOP ${toString barStrip})
     '';
     postFixup = ''
       wrapGApp $out/bin/on-screen-touchpad
     '';
     dontWrapGApps = true;
   };
-
-  touchpad-toggle = pkgs.writeShellScriptBin "touchpad-toggle" ''
-    pkill -f 'on-screen-touchpad\.py' || exec ${touchpad}/bin/on-screen-touchpad
-  '';
 
   #--- One DMS bar button per toggle
   button = id: name: icon: command:
@@ -75,7 +86,7 @@
       ${builtins.toJSON {
         inherit id name icon;
         description = "${name} on / off";
-        version = "1.0.0";
+        version = "2.0.0";
         author = "nixos-config";
         type = "widget";
         capabilities = ["dankbar-widget"];
@@ -88,7 +99,7 @@ in {
   #--------------------------------------------------------------------#
   #-- Keyboard
   #--------------------------------------------------------------------#
-  home.packages = [osk-toggle touchpad-toggle];
+  home.packages = [osk-toggle pad-mode];
 
   systemd.user.services.wvkbd = {
     Unit = {
@@ -98,6 +109,21 @@ in {
     };
     Service = {
       ExecStart = "${keyboard}";
+      Restart = "always";
+      RestartSec = 1;
+    };
+    Install.WantedBy = ["graphical-session.target"];
+  };
+
+  #--- The touchpad daemon waits hidden; pad mode maps its window
+  systemd.user.services.on-screen-touchpad = {
+    Unit = {
+      Description = "On-screen touchpad (pad mode daemon)";
+      PartOf = ["graphical-session.target"];
+      After = ["graphical-session.target"];
+    };
+    Service = {
+      ExecStart = "${touchpad}/bin/on-screen-touchpad";
       Restart = "always";
       RestartSec = 1;
     };
@@ -127,11 +153,31 @@ in {
     postHook = "systemctl --user restart wvkbd.service";
   };
 
-  #--- The touchpad panel watches this file itself
+  #--- The touchpad daemon watches this file itself
   matugen.templates.on-screen-touchpad = {
     input = ./touchpad.css.matugen;
     output = "${config.xdg.configHome}/on-screen-touchpad/style.css";
   };
+
+  #--------------------------------------------------------------------#
+  #-- Niri: the PAD key's bind, and blur behind the keyboard
+  #--------------------------------------------------------------------#
+  niri.keybinds.osk-pad-mode = {
+    key = "F13";
+    title = "Touchpad mode on / off";
+    action.spawn = ["${pad-mode}/bin/osk-pad-mode"];
+  };
+
+  #--- The keyboard paints a translucent panel; niri blurs what's under it
+  programs.niri.settings.layer-rules = [
+    {
+      matches = [{namespace = "^wvkbd$";}];
+      background-effect = {
+        blur = true;
+        xray = false;
+      };
+    }
+  ];
 
   #--------------------------------------------------------------------#
   #-- Bar Buttons
@@ -140,6 +186,6 @@ in {
     oskToggle.src =
       button "oskToggle" "On-screen keyboard" "keyboard" (lib.getExe osk-toggle);
     touchpadToggle.src =
-      button "touchpadToggle" "On-screen touchpad" "touch_app" (lib.getExe touchpad-toggle);
+      button "touchpadToggle" "Touchpad mode" "touch_app" (lib.getExe pad-mode);
   };
 }

@@ -1,7 +1,7 @@
-"""Keeps wvkbd and the touchpad panel above other overlay surfaces (DMS's
-launcher, the polkit dialog). niri stacks a layer surface above the ones made
-before it, so when a new overlay surface appears while either is shown, they
-are hidden and shown again to be made anew on top."""
+"""Keeps wvkbd and the touchpad's pad-mode window above other overlay surfaces
+(DMS's launcher, the polkit dialog). niri stacks a layer surface above the ones
+made before it, so when a new overlay surface appears while either is shown,
+they are hidden and shown again to be made anew on top."""
 
 import json
 import subprocess

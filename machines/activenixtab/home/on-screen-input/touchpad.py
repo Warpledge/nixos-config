@@ -1,6 +1,9 @@
-"""On-screen touchpad: a panel in the screen's bottom-right corner whose
-touches drive a virtual touchpad, so libinput gives it the folio's behaviour
-(tap, two-finger tap and scroll, tap-and-drag)."""
+"""On-screen touchpad: the whole screen minus the keyboard strip and the top
+bar acts as one giant touchpad — only while pad mode is on, which the PAD key
+on wvkbd (F13, bound in niri) or the bar button toggles. Finger movement maps
+relatively (the pointer moves by the finger's motion, never jumping to it),
+so libinput gives it the folio's behaviour: tap, two-finger tap and scroll,
+tap-and-drag. Hidden and inert otherwise."""
 
 import os
 import signal
@@ -17,38 +20,16 @@ from gi.repository import Gtk4LayerShell as Layer
 
 STYLE = os.path.expanduser("~/.config/on-screen-touchpad/style.css")
 
-WIDTH, HEIGHT = map(int, os.environ.get("TOUCHPAD_SIZE", "480x300").split("x"))
+# Screen strips the pad never covers: the keyboard (bottom) and the bar (top)
+MARGIN_BOTTOM = int(os.environ.get("OSK_PAD_BOTTOM", "360"))
+MARGIN_TOP = int(os.environ.get("OSK_PAD_TOP", "36"))
 SCALE = 10  # device units per logical px
 # Units per mm, for libinput's speed: a logical px here is ~0.156 mm on the
 # Z13's panel (2560 px at scale 4/3 over ~300 mm), so the pad moves the
 # pointer like a real one of its size
 RES = round(SCALE / 0.156)
-SLOTS = 5
+SLOTS = 2  # a third finger belongs to touch-gestures.py, not to the pad
 
-pad = UInput(
-    {
-        e.EV_KEY: [
-            e.BTN_LEFT,
-            e.BTN_RIGHT,
-            e.BTN_TOUCH,
-            e.BTN_TOOL_FINGER,
-            e.BTN_TOOL_DOUBLETAP,
-            e.BTN_TOOL_TRIPLETAP,
-            e.BTN_TOOL_QUADTAP,
-            e.BTN_TOOL_QUINTTAP,
-        ],
-        e.EV_ABS: [
-            (e.ABS_X, AbsInfo(0, 0, WIDTH * SCALE, 0, 0, RES)),
-            (e.ABS_Y, AbsInfo(0, 0, HEIGHT * SCALE, 0, 0, RES)),
-            (e.ABS_MT_SLOT, AbsInfo(0, 0, SLOTS - 1, 0, 0, 0)),
-            (e.ABS_MT_TRACKING_ID, AbsInfo(0, 0, 65535, 0, 0, 0)),
-            (e.ABS_MT_POSITION_X, AbsInfo(0, 0, WIDTH * SCALE, 0, 0, RES)),
-            (e.ABS_MT_POSITION_Y, AbsInfo(0, 0, HEIGHT * SCALE, 0, 0, RES)),
-        ],
-    },
-    name="On-screen touchpad",
-    input_props=[e.INPUT_PROP_POINTER],
-)
 TOOLS = [
     e.BTN_TOOL_FINGER,
     e.BTN_TOOL_DOUBLETAP,
@@ -57,12 +38,44 @@ TOOLS = [
     e.BTN_TOOL_QUINTTAP,
 ]
 
-slots = {}  # GdkEventSequence -> slot
+
+def make_pad(width, height):
+    """(Re)declare the virtual touchpad at the window's current size."""
+    return UInput(
+        {
+            e.EV_KEY: [
+                e.BTN_LEFT,
+                e.BTN_RIGHT,
+                e.BTN_TOUCH,
+                e.BTN_TOOL_FINGER,
+                e.BTN_TOOL_DOUBLETAP,
+                e.BTN_TOOL_TRIPLETAP,
+                e.BTN_TOOL_QUADTAP,
+                e.BTN_TOOL_QUINTTAP,
+            ],
+            e.EV_ABS: [
+                (e.ABS_X, AbsInfo(0, 0, width * SCALE, 0, 0, RES)),
+                (e.ABS_Y, AbsInfo(0, 0, height * SCALE, 0, 0, RES)),
+                (e.ABS_MT_SLOT, AbsInfo(0, 0, SLOTS - 1, 0, 0, 0)),
+                (e.ABS_MT_TRACKING_ID, AbsInfo(0, 0, 65535, 0, 0, 0)),
+                (e.ABS_MT_POSITION_X, AbsInfo(0, 0, width * SCALE, 0, 0, RES)),
+                (e.ABS_MT_POSITION_Y, AbsInfo(0, 0, height * SCALE, 0, 0, RES)),
+            ],
+        },
+        name="On-screen touchpad",
+        input_props=[e.INPUT_PROP_POINTER],
+    )
+
+
+pad = None
+pad_size = (0, 0)
+slots = {}  # GdkEventSequence -> (slot, anchor x, anchor y, begin x, begin y)
 next_id = 0
+last = None  # where the last gesture ended, in pad units; the pointer stays
 
 
 def clamp(v, top):
-    return max(0, min(top, round(v * SCALE)))
+    return max(0, min(top, round(v)))
 
 
 def send(slot, x, y, down):
@@ -74,10 +87,11 @@ def send(slot, x, y, down):
     if down is False:
         pad.write(e.EV_ABS, e.ABS_MT_TRACKING_ID, -1)
     else:
-        px, py = clamp(x, WIDTH * SCALE), clamp(y, HEIGHT * SCALE)
+        px, py = int(x), int(y)
         pad.write(e.EV_ABS, e.ABS_MT_POSITION_X, px)
         pad.write(e.EV_ABS, e.ABS_MT_POSITION_Y, py)
-        if slot == min(slots.values()):
+        first = [s[0] for s in slots.values()]
+        if first and slot == min(first):
             pad.write(e.EV_ABS, e.ABS_X, px)
             pad.write(e.EV_ABS, e.ABS_Y, py)
     n = len(slots)
@@ -89,8 +103,9 @@ def send(slot, x, y, down):
 
 def on_event(controller, _event):
     # PyGObject hands the signal's GdkEvent over as None; the controller has it
+    global last
     event = controller.get_current_event()
-    if event is None:
+    if event is None or pad is None:
         return False
     kind = event.get_event_type()
     if kind not in (
@@ -102,18 +117,34 @@ def on_event(controller, _event):
         return False
     seq = event.get_event_sequence()
     _, x, y = event.get_position()
+    wx, wy = pad_size
     if kind == Gdk.EventType.TOUCH_BEGIN:
-        free = [s for s in range(SLOTS) if s not in slots.values()]
+        free = [s for s in range(SLOTS) if s not in (v[0] for v in slots.values())]
         if not free:
-            return True
-        slots[seq] = free[0]
-        send(slots[seq], x, y, True)
-    elif seq in slots:
-        if kind == Gdk.EventType.TOUCH_UPDATE:
-            send(slots[seq], x, y, None)
+            return True  # a third finger: leave it to touch-gestures.py
+        if not slots:
+            # The pad picks the pointer up where the last gesture left it
+            ax, ay = last if last else (wx * SCALE / 2, wy * SCALE / 2)
         else:
-            slot = slots.pop(seq)
-            send(slot, x, y, False)
+            # Later fingers keep their start offsets from the first one, so
+            # libinput still sees the two-finger gestures it knows
+            (slot0, ax0, ay0, x0, y0) = next(iter(slots.values()))
+            ax, ay = ax0 + (x - x0) * SCALE, ay0 + (y - y0) * SCALE
+        ax = clamp(ax, wx * SCALE)
+        ay = clamp(ay, wy * SCALE)
+        slots[seq] = (free[0], ax, ay, x, y)
+        send(slots[seq][0], ax, ay, True)
+    elif seq in slots:
+        slot, ax, ay, x0, y0 = slots.pop(seq)
+        px = clamp(ax + (x - x0) * SCALE, wx * SCALE)
+        py = clamp(ay + (y - y0) * SCALE, wy * SCALE)
+        if kind == Gdk.EventType.TOUCH_UPDATE:
+            slots[seq] = (slot, ax, ay, x0, y0)
+            send(slot, px, py, None)
+        else:
+            send(slot, px, py, False)
+            if not slots:
+                last = (px, py)
     return True
 
 
@@ -124,27 +155,43 @@ def activate(app):
     Layer.set_layer(win, Layer.Layer.OVERLAY)
     # Never takes keyboard focus, so typing still goes to the focused window
     Layer.set_keyboard_mode(win, Layer.KeyboardMode.NONE)
-    # In the space wvkbd leaves at its right, not above its exclusive zone
-    for edge in (Layer.Edge.BOTTOM, Layer.Edge.RIGHT):
+    # All edges, with the keyboard and the bar left free
+    for edge in (
+        Layer.Edge.TOP,
+        Layer.Edge.BOTTOM,
+        Layer.Edge.LEFT,
+        Layer.Edge.RIGHT,
+    ):
         Layer.set_anchor(win, edge, True)
+    Layer.set_margin(win, Layer.Edge.BOTTOM, MARGIN_BOTTOM)
+    Layer.set_margin(win, Layer.Edge.TOP, MARGIN_TOP)
     Layer.set_exclusive_zone(win, -1)
-    win.set_default_size(WIDTH, HEIGHT)
 
+    cover = Gtk.Overlay()
     area = Gtk.Box()
     area.add_css_class("touchpad")
-    area.set_size_request(WIDTH, HEIGHT)
+    hint = Gtk.Label(label="touchpad mode · PAD ends it")
+    hint.add_css_class("hint")
+    hint.set_halign(Gtk.Align.START)
+    hint.set_valign(Gtk.Align.START)
+    hint.set_can_target(False)  # touches pass through the hint to the pad
+    cover.set_child(area)
+    cover.add_overlay(hint)
     legacy = Gtk.EventControllerLegacy()
     legacy.connect("event", on_event)
     area.add_controller(legacy)
-    win.set_child(area)
+    win.set_child(cover)
 
     display = Gdk.Display.get_default()
     base = Gtk.CssProvider()
     # Until matugen has written STYLE, the GTK theme's own colours
     base.load_from_string(
         "window { background: transparent; }"
-        " .touchpad { background: alpha(@window_bg_color, 0.92);"
-        " border: 2px solid alpha(@window_fg_color, 0.5); border-radius: 16px; }"
+        " .touchpad { background: alpha(@window_bg_color, 0.12);"
+        " border: 2px solid alpha(@window_fg_color, 0.35); }"
+        " .hint { margin: 12px; padding: 4px 10px; border-radius: 10px;"
+        " background: alpha(@window_bg_color, 0.7);"
+        " color: alpha(@window_fg_color, 0.9); font-weight: bold; }"
     )
     Gtk.StyleContext.add_provider_for_display(
         display, base, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
@@ -165,15 +212,48 @@ def activate(app):
     monitor.connect("changed", load_theme)
     win.monitor = monitor  # keeps it alive
 
+    # The virtual device covers the pad area; remade if it resizes (rotation)
+    def check_size(*_):
+        global pad, pad_size
+        a = area.get_allocation()
+        if a.width > 1 and a.height > 1 and (a.width, a.height) != pad_size:
+            if pad:
+                pad.close()
+            pad_size = (a.width, a.height)
+            pad = make_pad(a.width, a.height)
+        return GLib.SOURCE_CONTINUE
+
+    GLib.timeout_add_seconds(1, check_size)
+    # On mapping, the allocation lands before the next tick would notice
+    area.connect(
+        "map",
+        lambda *_: GLib.idle_add(lambda: (check_size(), False)[1]),
+    )
+
     # SIGUSR1 (from raise-watch.py) remaps the window: a new layer surface,
     # stacked above overlays opened since
     def restack():
-        win.set_visible(False)
-        win.set_visible(True)
+        if win.get_mapped():
+            win.set_visible(False)
+            win.present()
+        return GLib.SOURCE_CONTINUE
+
+    # SIGUSR2 (from osk-pad-mode) switches pad mode; off means no surface at
+    # all, so every touch goes to the windows below untouched
+    def toggle():
+        if win.get_mapped():
+            for (slot, *_rest) in slots.values():
+                send(slot, 0, 0, False)
+            slots.clear()
+            win.set_visible(False)
+        else:
+            win.present()
         return GLib.SOURCE_CONTINUE
 
     GLibUnix.signal_add(GLib.PRIORITY_DEFAULT, signal.SIGUSR1, restack)
-    win.present()
+    GLibUnix.signal_add(GLib.PRIORITY_DEFAULT, signal.SIGUSR2, toggle)
+    # Pad mode starts off: no surface, so the screen is untouched
+    win.set_visible(False)
 
 
 app = Gtk.Application(application_id="local.on-screen-touchpad")
@@ -181,4 +261,5 @@ app.connect("activate", activate)
 try:
     app.run(None)
 finally:
-    pad.close()
+    if pad:
+        pad.close()
