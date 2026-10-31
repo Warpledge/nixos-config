@@ -29,7 +29,7 @@
         custom-helium-translucent = {
           name = "Helium Translucent";
           translucent = true;
-          matches = [{app-id = "^helium$";}];
+          matches = [{app-id = "^helium$";} {app-id = "^chrome-.*-Default$";}];
         };
       };
       claude.mods.ribbon = false;
