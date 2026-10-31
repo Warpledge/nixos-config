@@ -39,6 +39,7 @@
         ./wvkbd-glow.patch
         ./wvkbd-indicators.patch
         ./wvkbd-auto-open.patch
+        ./wvkbd-pad-lit.patch
       ];
   });
 
@@ -62,6 +63,7 @@
     [ -e "${swipeState}" ] && export WVKBD_SWIPE=1
     { [ -e "${folioState}" ] || [ -e "${autoOffState}" ]; } && export WVKBD_IM_BLOCKED=1
     [ -e "${autocorrectState}" ] && export WVKBD_AUTOCORRECT=1
+    [ -e "${config.xdg.stateHome}/osk-pad-on" ] && export WVKBD_PAD=1 # touch-gestures.py
     # Type through uinput, so niri's binds, keyd and polkit prompts see the keys
     export WVKBD_UINPUT=1
     # shellcheck disable=SC2086 # one flag per word

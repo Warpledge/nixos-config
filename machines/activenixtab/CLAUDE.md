@@ -125,7 +125,8 @@ when Ky approves it.
   backspace straight after removes the word. A line follows the finger during a stroke.
   The key preview popup is off (`--no-popup`); a pressed key glows out over its neighbours
   instead (wvkbd-glow.patch). Caps, Fn, autocorrect and swipe keys light while on
-  (wvkbd-indicators.patch); caps comes from the LED niri sets on wvkbd's uinput device, so
+  (wvkbd-indicators.patch), and PAD too (wvkbd-pad-lit.patch, told by `touch-gestures.py`,
+  so that one needs a new login to take effect); caps comes from the LED niri sets on wvkbd's uinput device, so
   it also follows the folio. Text fields open it (`--auto`, wvkbd-auto-open.patch), and
   `osk-auto` switches that off; a keyboard a field opened closes 300 ms after it, so moving
   between fields doesn't flicker, and one opened by hand stays. While the folio is attached (`folio-watch.py`, `osk-folio.service`) fields

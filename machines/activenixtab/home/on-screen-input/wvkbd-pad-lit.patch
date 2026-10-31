@@ -1,0 +1,56 @@
+# Light the PAD key while pad mode is on: SIGRTMIN+5 on, +6 off, from touch-gestures.py.
+--- a/keyboard.h
++++ b/keyboard.h
+@@ -117,6 +117,7 @@
+ 	bool caps_lit;       // caps lock is on, as the compositor reports it
+ 	bool autocorrect_lit; // autocorrect.py is on
+ 	bool swipe_lit;      // swipe mode is on
++	bool pad_lit;        // pad mode is on
+ 	uint8_t compose;
+ 	struct key *last_press;
+ 	struct key *last_swipe;
+--- a/keyboard.c
++++ b/keyboard.c
+@@ -780,7 +780,8 @@
+         return false;
+     return (k->code == KEY_CAPSLOCK && kb->caps_lit) ||
+            (k->code == KEY_F14 && kb->autocorrect_lit) ||
+-           (k->code == KEY_F15 && kb->swipe_lit);
++           (k->code == KEY_F15 && kb->swipe_lit) ||
++           (k->code == KEY_F13 && kb->pad_lit);
+ }
+ 
+ static bool
+--- a/main.c
++++ b/main.c
+@@ -1141,6 +1141,7 @@
+     im_blocked = getenv("WVKBD_IM_BLOCKED") != NULL;
+     keyboard.swipe_lit = swipe_mode;
+     keyboard.autocorrect_lit = getenv("WVKBD_AUTOCORRECT") != NULL;
++    keyboard.pad_lit = getenv("WVKBD_PAD") != NULL;
+     if ((tmp = getenv("WVKBD_HEIGHT")))
+         normal_height = atoi(tmp);
+     if ((tmp = getenv("WVKBD_LANDSCAPE_HEIGHT")))
+@@ -1527,6 +1528,8 @@
+     sigaddset(&signal_mask, SIGRTMIN + 2);
+     sigaddset(&signal_mask, SIGRTMIN + 3);
+     sigaddset(&signal_mask, SIGRTMIN + 4);
++    sigaddset(&signal_mask, SIGRTMIN + 5);
++    sigaddset(&signal_mask, SIGRTMIN + 6);
+     sigaddset(&signal_mask, SIGPIPE);
+     if (sigprocmask(SIG_BLOCK, &signal_mask, NULL) == -1) {
+         die("Failed to disable handled signals: %d\n", errno);
+@@ -1585,7 +1588,12 @@
+                 if (!hidden)
+                     kbd_draw_layout(&keyboard);
+             }
+-            else if (si.ssi_signo == (uint32_t)(SIGRTMIN + 3))
++            else if (si.ssi_signo == (uint32_t)(SIGRTMIN + 5) ||
++                     si.ssi_signo == (uint32_t)(SIGRTMIN + 6)) {
++                keyboard.pad_lit = si.ssi_signo == (uint32_t)(SIGRTMIN + 5);
++                if (!hidden)
++                    kbd_draw_layout(&keyboard);
++            } else if (si.ssi_signo == (uint32_t)(SIGRTMIN + 3))
+                 im_blocked = true;
+             else if (si.ssi_signo == (uint32_t)(SIGRTMIN + 4))
+                 im_blocked = false;

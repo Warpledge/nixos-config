@@ -31,6 +31,9 @@ EDGE_HOLD = 0.4
 # KEYBOARD_STRIP matches `height` in home/on-screen-input/default.nix
 BAR_STRIP = 36
 KEYBOARD_STRIP = 390
+PAD_STATE = os.path.join(
+    os.environ.get("XDG_STATE_HOME", os.path.expanduser("~/.local/state")), "osk-pad-on"
+)
 edge_command = sys.argv[2:]
 
 src = evdev.InputDevice(sys.argv[1])
@@ -157,6 +160,22 @@ def on_pad_flip(*_):
 
 
 signal.signal(signal.SIGUSR2, on_pad_flip)
+
+
+def light_pad_key(on):
+    """The state file is for a keyboard that starts later (home/on-screen-input)."""
+    try:
+        if on:
+            open(PAD_STATE, "w").close()
+        elif os.path.exists(PAD_STATE):
+            os.remove(PAD_STATE)
+        sig = "RTMIN+5" if on else "RTMIN+6"
+        subprocess.run(["pkill", "--signal", sig, "-x", "wvkbd-deskintl"], check=False)
+    except OSError:
+        pass  # only the light is wrong; the pad itself still works
+
+
+light_pad_key(False)
 
 
 screen_cache = (0.0, None)  # (when it was read, (logical output, keyboard shown))
@@ -405,6 +424,7 @@ try:
         if pad_flip:
             pad_flip = False
             pad_on = not pad_on
+            light_pad_key(pad_on)
             if mode == "pad":
                 tp_frame({})
                 mode = "drain" if slots else "idle"
