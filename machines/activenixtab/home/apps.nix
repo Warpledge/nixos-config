@@ -8,16 +8,7 @@
   lib,
   pkgs,
   ...
-}: let
-  #--- nixpkgs' binary wrapper takes each makeWrapperArgs entry as one argument,
-  #--- so its "${gappsWrapperArgs[@]}" and "--prefix PATH : ..." fail the build
-  gearlever = pkgs.gearlever.overrideAttrs (old: {
-    makeWrapperArgs = [];
-    preFixup = ''
-      makeWrapperArgs+=("''${gappsWrapperArgs[@]}" ${lib.concatStringsSep " " (lib.tail old.makeWrapperArgs)})
-    '';
-  });
-in {
+}: {
   #--------------------------------------------------------------------#
   #-- Packages
   #--------------------------------------------------------------------#
