@@ -36,6 +36,7 @@
         ./wvkbd-touch-only.patch
         ./wvkbd-uinput.patch
         ./wvkbd-print-single-char.patch
+        ./wvkbd-multitouch.patch
       ];
   });
 

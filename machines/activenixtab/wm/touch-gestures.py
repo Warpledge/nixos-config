@@ -159,14 +159,39 @@ def on_pad_flip(*_):
 signal.signal(signal.SIGUSR2, on_pad_flip)
 
 
+screen_cache = (0.0, None)  # (when it was read, (logical output, keyboard shown))
+
+
+def screen_state():
+    # Cached briefly so a burst of key taps doesn't wait on niri each time
+    global screen_cache
+    now = time.monotonic()
+    if now - screen_cache[0] > 0.5:
+        try:
+            logical = niri_msg("focused-output")["logical"]
+            shown = any(s["namespace"] == "wvkbd" for s in niri_msg("layers"))
+            screen_cache = (now, (logical, shown))
+        except Exception:
+            screen_cache = (now, None)
+    return screen_cache[1]
+
+
+def on_keyboard(pos):
+    state = screen_state()
+    if not state or not state[1]:
+        return False
+    logical = state[0]
+    y = on_screen(pos, logical["transform"])[1] * logical["height"]
+    return y >= logical["height"] - KEYBOARD_STRIP
+
+
 def in_pad_area(pos):
     # Whether a touch landing here drives the touchpad, and the transform to use
     global tp_t
-    try:
-        logical = niri_msg("focused-output")["logical"]
-        shown = any(s["namespace"] == "wvkbd" for s in niri_msg("layers"))
-    except Exception:
+    state = screen_state()
+    if not state:
         return False  # can't tell where the strips are: leave the screen working
+    logical, shown = state
     tp_t = logical["transform"]
     y = on_screen(pos, tp_t)[1] * logical["height"]
     bottom = logical["height"] - (KEYBOARD_STRIP if shown else 0)
@@ -422,6 +447,11 @@ try:
             fslot, frame_slot = frame_slot, cur
 
             if mode == "idle":
+                if slots and on_keyboard(next(iter(slots.values()))):
+                    # Keys need every finger, at once: no hold and no gesture
+                    mode = "keys"
+                    forward(done, fslot)
+                    continue
                 if slots:
                     mode, hold_start, held = "hold", time.monotonic(), []
                     edge = False
@@ -447,6 +477,10 @@ try:
                     mode = "drain"
                 elif not slots or (moved() and not (edge and up > side)):
                     let_go()
+            elif mode == "keys":
+                forward(done, fslot)
+                if not slots:
+                    mode = "idle"
             elif mode == "pad":
                 if len(slots) >= 3:
                     tp_frame({})

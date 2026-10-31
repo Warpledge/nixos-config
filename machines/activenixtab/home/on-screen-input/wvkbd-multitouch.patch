@@ -1,0 +1,215 @@
+# wvkbd: track every finger, so several keys can be held at once (games). A modifier
+# held by a finger stays down until it lifts; a quick unused tap still latches.
+--- a/keyboard.h
++++ b/keyboard.h
+@@ -111,6 +111,7 @@
+ 	bool shift_space_is_tab;
+ 	bool exclusive;
+ 	uint8_t mods;
++	uint8_t held_mods; // modifiers a finger is still on
+ 	uint8_t compose;
+ 	struct key *last_press;
+ 	struct key *last_swipe;
+@@ -144,6 +145,7 @@
+ size_t kbd_get_layer_index(struct kbd *kb, struct layout *l);
+ void kbd_unpress_key(struct kbd *kb, uint32_t time);
+ void kbd_release_key(struct kbd *kb, uint32_t time);
++void kbd_release_mod(struct kbd *kb, uint32_t code, uint32_t time);
+ void kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y);
+ void kbd_press_key(struct kbd *kb, struct key *k, uint32_t time);
+ void kbd_print_key_stdout(struct kbd *kb, struct key *k);
+--- a/keyboard.c
++++ b/keyboard.c
+@@ -407,6 +407,13 @@
+             }
+         }
+ 
++        /* A modifier a finger is still on stays down for the next key */
++        unlatch_shift = unlatch_shift && !(kb->held_mods & Shift);
++        unlatch_ctrl = unlatch_ctrl && !(kb->held_mods & Ctrl);
++        unlatch_alt = unlatch_alt && !(kb->held_mods & Alt);
++        unlatch_super = unlatch_super && !(kb->held_mods & Super);
++        unlatch_altgr = unlatch_altgr && !(kb->held_mods & AltGr);
++
+         if (unlatch_shift) {
+             if (kb->debug) fprintf(stderr, "unlatch shift");
+             kb->mods ^= Shift;
+@@ -462,6 +469,16 @@
+ }
+ 
+ void
++kbd_release_mod(struct kbd *kb, uint32_t code, uint32_t time)
++{
++    kb->mods ^= code;
++    zwp_virtual_keyboard_v1_key_mods(kb->vkbd, time, code,
++                                     WL_KEYBOARD_KEY_STATE_RELEASED);
++    zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
++    kbd_draw_layout(kb);
++}
++
++void
+ kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y)
+ {
+     struct key *intersect_key;
+--- a/main.c
++++ b/main.c
+@@ -98,6 +98,111 @@
+ static void wl_pointer_axis(void *data, struct wl_pointer *wl_pointer,
+                             uint32_t time, uint32_t axis, wl_fixed_t value);
+ 
++/* One entry per finger on the keyboard, so several keys can be held at once.
++ * kbd_press_key and kbd_unpress_key work on keyboard.last_press, which is set
++ * around each call. */
++#define MAX_FINGERS 10
++#define SLIDE_AFTER_MS 150 /* held this long, sliding presses the next key */
++#define MOD_TAP_MS 300     /* a modifier let go sooner, unused, latches */
++
++static struct finger {
++    bool down;
++    int32_t id;
++    struct key *key; /* the Code or Copy key it holds */
++    struct key *mod; /* the modifier it holds */
++    bool mod_used;
++    uint32_t time;
++} fingers[MAX_FINGERS];
++
++static struct finger *
++finger_find(int32_t id)
++{
++    for (int i = 0; i < MAX_FINGERS; i++)
++        if (fingers[i].down && fingers[i].id == id)
++            return &fingers[i];
++    return NULL;
++}
++
++static void
++finger_press_key(struct finger *f, struct key *k, uint32_t time)
++{
++    keyboard.last_press = NULL;
++    kbd_press_key(&keyboard, k, time);
++    f->key = keyboard.last_press;
++    keyboard.last_press = NULL;
++    if (f->key) {
++        for (int i = 0; i < MAX_FINGERS; i++)
++            fingers[i].mod_used = true;
++    }
++}
++
++static void
++finger_release_key(struct finger *f, uint32_t time)
++{
++    if (!f->key)
++        return;
++    keyboard.last_press = f->key;
++    kbd_release_key(&keyboard, time);
++    f->key = NULL;
++}
++
++static void
++finger_press(int32_t id, struct key *k, uint32_t time)
++{
++    struct finger *f = NULL;
++    for (int i = 0; i < MAX_FINGERS && !f; i++)
++        if (!fingers[i].down)
++            f = &fingers[i];
++    if (!f)
++        return;
++    *f = (struct finger){.down = true, .id = id, .time = time};
++    finger_press_key(f, k, time);
++    /* Pressing a latched modifier turns it off; there's nothing to hold then */
++    if (k->type == Mod && (keyboard.mods & k->code)) {
++        f->mod = k;
++        keyboard.held_mods |= k->code;
++    }
++}
++
++static void
++finger_up(int32_t id, uint32_t time)
++{
++    struct finger *f = finger_find(id);
++    if (!f)
++        return;
++    finger_release_key(f, time);
++    if (f->mod) {
++        uint32_t code = f->mod->code;
++        keyboard.held_mods &= ~code;
++        if ((keyboard.mods & code) &&
++            (f->mod_used || time - f->time >= MOD_TAP_MS)) {
++            /* It worked as a held key, so lifting ends it */
++            kbd_release_mod(&keyboard, code, time);
++        }
++    }
++    f->down = false;
++}
++
++static void
++finger_motion(int32_t id, struct key *k, uint32_t time)
++{
++    struct finger *f = finger_find(id);
++    if (!f || !f->key || f->key == k)
++        return;
++    finger_release_key(f, time);
++    /* A quick drift just ends the press, so taps don't type a neighbour */
++    if (k && k->type == Code && time - f->time >= SLIDE_AFTER_MS)
++        finger_press_key(f, k, time);
++}
++
++static void
++fingers_release_all(uint32_t time)
++{
++    for (int i = 0; i < MAX_FINGERS; i++)
++        if (fingers[i].down)
++            finger_up(fingers[i].id, time);
++}
++
+ static void wl_touch_down(void *data, struct wl_touch *wl_touch,
+                           uint32_t serial, uint32_t time,
+                           struct wl_surface *surface, int32_t id, wl_fixed_t x,
+@@ -266,11 +371,9 @@
+     touch_x = wl_fixed_to_int(x);
+     touch_y = wl_fixed_to_int(y);
+ 
+-    kbd_unpress_key(&keyboard, time);
+-
+     next_key = kbd_get_key(&keyboard, touch_x, touch_y);
+     if (next_key) {
+-        kbd_press_key(&keyboard, next_key, time);
++        finger_press(id, next_key, time);
+     } else if (keyboard.compose) {
+         keyboard.compose = 0;
+         kbd_switch_layout(&keyboard, keyboard.prevlayout,
+@@ -286,7 +389,7 @@
+         return;
+     }
+ 
+-    kbd_release_key(&keyboard, time);
++    finger_up(id, time);
+ }
+ 
+ void
+@@ -302,7 +405,7 @@
+     touch_x = wl_fixed_to_int(x);
+     touch_y = wl_fixed_to_int(y);
+ 
+-    kbd_motion_key(&keyboard, time, touch_x, touch_y);
++    finger_motion(id, kbd_get_key(&keyboard, touch_x, touch_y), time);
+ }
+ 
+ void
+@@ -313,6 +416,7 @@
+ void
+ wl_touch_cancel(void *data, struct wl_touch *wl_touch)
+ {
++    fingers_release_all((uint32_t) (monotime() + keyboard.last_press_offset));
+ }
+ 
+ void
+@@ -744,7 +848,7 @@
+ 
+     // Ensure active keys are released, so they're not repeated infinitely.
+     uint32_t time = (uint32_t) (monotime() + keyboard.last_press_offset);
+-    kbd_unpress_key(&keyboard, time);
++    fingers_release_all(time);
+ 
+     if (wfs_draw_surf) {
+         wp_fractional_scale_v1_destroy(wfs_draw_surf);

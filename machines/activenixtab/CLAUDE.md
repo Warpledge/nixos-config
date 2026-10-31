@@ -96,7 +96,11 @@ when Ky approves it.
   Fn (bottom left, tap on, tap off) flips to the same keyboard with F1-F12 on the numbers,
   Ins, Del, and Home/PgUp/PgDn/End on the arrows; caps locks on a double-tap of shift
   (wvkbd-caps-shift.patch); PAD (a Material Symbols glyph, F13) sits where right Shift
-  would on both layers. A user service starts wvkbd hidden, coloured by a
+  would on both layers; every finger is tracked (wvkbd-multitouch.patch), so keys hold
+  together for games, a finger held 150 ms slides to the next key, and a modifier a finger
+  stays on acts as held while a quick tap still latches; `touch-gestures.py` passes touches
+  on the keyboard straight through, so it adds no delay or three-finger gesture there, and
+  its edge swipe only opens the keyboard. A user service starts wvkbd hidden, coloured by a
   matugen template, shown and hidden with `osk-toggle`. And pad mode, in
   `wm/touch-gestures.py`: touches outside the bar and the shown keyboard go to a virtual
   touchpad, so libinput's tap, scroll and drag apply. It has no window on purpose: a
