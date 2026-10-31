@@ -135,7 +135,11 @@
         terminal = {enable = false;};
       };
       steamGames = {};
-      pi.enable = false;
+      pi.enable = true;
+      gaming.faugus = true;
+      gaming.lutris = true;
+      media.freetube = true;
+      media.ytDlp = true;
     };
   };
 
@@ -278,4 +282,6 @@
   maintenance.keepGenerations = 5;
   maintenance.optimise = "daily";
   maintenance.updateReminderDays = 30;
+  printing.enable = true;
+  docker.enable = true;
 }
