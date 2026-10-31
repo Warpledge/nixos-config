@@ -74,6 +74,9 @@ Sheet {
             if (reply.ok) {
                 ed.fit = reply.data
                 ed.fitError = ""
+                // The last test, while these are the settings it ran with
+                if (!ed.testing)
+                    ed.result = reply.data.lastTest ? reply.data.lastTest.result : null
             } else
                 ed.fitError = reply.error
         })
@@ -87,9 +90,10 @@ Sheet {
             if (!ed)
                 return
             ed.testing = false
-            if (reply.ok)
+            if (reply.ok) {
                 ed.result = reply.data
-            else
+                ed.estimate()  // picks up the saved test's date
+            } else
                 ed.view.ask({ heading: "The test didn't finish", body: reply.error, cancel: false,
                               buttons: [{ label: "OK", value: true }] }, () => {})
         })
@@ -369,7 +373,9 @@ Sheet {
     ListRow {
         visible: ed.models.info && ed.models.info.canTest
         icon: ed.testing ? "progress_activity" : "speed"
-        title: ed.testing ? "Testing…" : ed.result ? `${ed.result.tokensPerSecond} tokens a second` : "Test These Settings"
+        title: ed.testing ? "Testing…" : ed.result ? `${ed.result.tokensPerSecond} tokens a second`
+                                                    + (ed.fit && ed.fit.lastTest ? ` · tested ${ed.fit.lastTest.at}` : "")
+                                                  : "Test These Settings"
         subtitle: ed.testing ? (ed.log.length ? ed.log[ed.log.length - 1] : "Loading the model")
                   : ed.result ? `Reads prompts at ${ed.result.promptPerSecond} tokens a second · VRAM peak `
                                 + `${ed.gb(ed.result.vramPeak)} of ${ed.gb(ed.result.vramTotal)} GB · `

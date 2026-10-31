@@ -125,6 +125,7 @@ ColumnLayout {
             title: modelData.name
             subtitle: (modelData.file ? modelData.file : "Not downloaded")
                       + (modelData.bytes ? ` · ${page.gb(modelData.bytes)}` : "")
+                      + (modelData.lastTest ? ` · ${modelData.lastTest.result.tokensPerSecond} tok/s` : "")
             value: page.contextLabel(modelData.effective.context)
             tag: modelData.added ? "Added Here" : Object.keys(modelData.own).length ? "Tuned Here" : ""
             tone: modelData.file ? "" : "caution"

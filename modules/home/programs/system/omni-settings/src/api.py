@@ -540,6 +540,7 @@ def cmd_local_models(cfg, args):
                        "effective": t, "context": entry.get("context", 32768),
                        "cache": entry.get("cache") or "q8_0",
                        "flags": localmodelstate.flags(t, profile, profs) + list(entry.get("args") or []),
+                       "lastTest": localmodelstate.last_test(mid, t),
                        "file": path and os.path.basename(path),
                        "bytes": path and localmodelstate.size_of(path)})
     return {"gpu": card, "profile": profile,
@@ -560,6 +561,7 @@ def cmd_local_model_estimate(cfg, args):
     try:
         out = localmodelstate.estimate(path, t, card, profile, profs)
         out["presets"] = localmodelstate.presets(path, t, card, profile, profs, entry)
+        out["lastTest"] = localmodelstate.last_test(mid, t)
     except (OSError, ValueError, KeyError) as e:
         raise ValueError(f"Couldn't read {os.path.basename(path)}: {e}") from None
     return out
@@ -570,8 +572,10 @@ def cmd_local_model_test(cfg, args):
     returns what it used and how fast it ran."""
     lm, profs, mid, _, entry, path = local_model(cfg, args)
     t = localmodelstate.effective(entry, lm["profile"], profs, lm["models"].get(mid))
-    return localmodelstate.test(os.environ.get("OMNI_SETTINGS_LLAMA_SERVER"), path, t, entry,
-                                lm["profile"], profs)
+    result = localmodelstate.test(os.environ.get("OMNI_SETTINGS_LLAMA_SERVER"), path, t, entry,
+                                  lm["profile"], profs)
+    localmodelstate.remember(mid, t, result)
+    return result
 
 
 def cmd_firmware(_cfg, args):

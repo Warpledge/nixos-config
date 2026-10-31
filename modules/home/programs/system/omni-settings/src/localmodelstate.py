@@ -21,6 +21,9 @@ import gguf
 import nixfile
 
 MODELS_DIR = os.path.expanduser("~/.lmstudio/models")
+#--- Each model's last test and the tuning it ran with: {id: {tuning, result, at}}
+TESTS = os.path.join(os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state"),
+                     "omni-settings", "local-model-tests.json")
 LLAMA_SWAP = "http://127.0.0.1:8090"
 #--- Kept in step with lib/local-ai.nix and lib/settings.nix
 TUNING = ("context", "cache", "gpuLayers", "cpuMoe", "batch", "cacheRam", "fitTarget", "loadMode")
@@ -364,6 +367,31 @@ def presets(path, t, card, profile, profs, entry):
 #--------------------------------------------------------------------#
 #-- Live test
 #--------------------------------------------------------------------#
+def tests():
+    try:
+        with open(TESTS) as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return {}
+
+
+def last_test(mid, t):
+    """The model's last test when it ran with tuning `t`, else None."""
+    entry = tests().get(mid)
+    return entry if entry and entry.get("tuning") == t else None
+
+
+def remember(mid, t, result):
+    data = tests()
+    data[mid] = {"tuning": t, "result": result, "at": time.strftime("%Y-%m-%d %H:%M")}
+    try:
+        os.makedirs(os.path.dirname(TESTS), exist_ok=True)
+        with open(TESTS, "w") as f:
+            json.dump(data, f)
+    except OSError:
+        pass
+
+
 def post(url, body=None, timeout=10):
     data = json.dumps(body).encode() if body is not None else b""
     req = urllib.request.Request(url, data=data, method="POST",
