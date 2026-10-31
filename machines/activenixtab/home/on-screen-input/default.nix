@@ -40,6 +40,7 @@
         ./wvkbd-indicators.patch
         ./wvkbd-auto-open.patch
         ./wvkbd-pad-lit.patch
+        ./wvkbd-unlatch-glow.patch
       ];
   });
 

@@ -1,0 +1,15 @@
+# A key that unlatches a modifier redraws the whole layout, which keeps any key marked glowing,
+# so mark it released first or its highlight sticks until the next press.
+--- a/keyboard.c
++++ b/keyboard.c
+@@ -466,8 +466,10 @@
+ 
+         if (kb->compose >= 2) {
+             kb->compose = 0;
++            kb->last_press->glowing = false;
+             kbd_switch_layout(kb, kb->last_abc_layout, kb->last_abc_index);
+         } else if (unlatch_shift||unlatch_ctrl||unlatch_alt||unlatch_super||unlatch_altgr||unlatch_tab) {
++            kb->last_press->glowing = false;
+             kbd_draw_layout(kb);
+         } else {
+             kbd_draw_key(kb, kb->last_press, Unpress);
