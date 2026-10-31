@@ -149,9 +149,33 @@ def suggest(path):
     return mid, name, match
 
 
-def scan(known):
+def architectures(server):
+    """A test for whether llama-swap's llama.cpp (`server`'s libllama) knows a
+    model architecture: its names sit in the library as C strings. None when
+    there's no server to ask."""
+    if not server:
+        return None
+    lib = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(server))), "lib", "libllama.so")
+    try:
+        with open(lib, "rb") as f:
+            data = f.read()
+    except OSError:
+        return None
+    # No leading NUL: the linker shares string tails, so "qwen2" can end another name
+    return lambda arch: not arch or f"{arch}\0".encode() in data
+
+
+def arch_of(path):
+    try:
+        return gguf.architecture(path)
+    except (OSError, ValueError, KeyError):
+        return ""
+
+
+def scan(known, knows=None):
     """Every model file under ~/.lmstudio/models: {path, dir, file, bytes, quant,
-    id}. `id` is the model listing it, from `known` ({id: entry}), else null."""
+    id, arch, supported}. `id` is the model listing it, from `known` ({id: entry}),
+    else null; `knows` is architectures()."""
     out = []
     for path in sorted(glob.glob(os.path.join(MODELS_DIR, "*", "*", "*.gguf"))):
         if not gguf.is_model(path):
@@ -160,8 +184,10 @@ def scan(known):
         owner = next((mid for mid, e in known.items() if find_file(e) == path), None)
         q = QUANT.search(os.path.basename(path))
         mid, name, match = suggest(path)
+        arch = arch_of(path)
         out.append({"path": path, "dir": folder, "file": os.path.basename(path), "bytes": size_of(path),
-                    "quant": q.group(0) if q else "", "id": owner,
+                    "quant": q.group(0) if q else "", "id": owner, "arch": arch,
+                    "supported": knows(arch) if knows else True,
                     "suggest": {"id": mid, "name": name, "match": match}})
     return out
 
@@ -416,6 +442,10 @@ def test(server, path, t, entry, profile, profs):
     unloaded first so the GPU is free; llama-swap reloads on the next request."""
     if not server or not os.path.exists(server):
         raise ValueError("llama-server isn't available: turn on llama-swap and rebuild")
+    knows, arch = architectures(server), arch_of(path)
+    if knows and not knows(arch):
+        raise ValueError(f"This llama.cpp build doesn't know the {arch} architecture yet, so "
+                         "llama-swap can't run this model. LM Studio has its own, newer engine.")
     try:
         post(f"{LLAMA_SWAP}/api/models/unload")
         say("Unloaded llama-swap's models")

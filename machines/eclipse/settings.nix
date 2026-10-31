@@ -229,4 +229,5 @@
   maintenance.keepGenerations = 5;
   maintenance.optimise = "daily";
   maintenance.updateReminderDays = 30;
+  localModels.models = {};
 }

@@ -187,6 +187,22 @@ def read(path):
     return model
 
 
+def architecture(path):
+    """general.architecture alone, reading only as far as that key."""
+    with open(path, "rb") as f:
+        r = Reader(f)
+        if f.read(4) != b"GGUF":
+            return ""
+        r.take("I")
+        r.take("Q")
+        for _ in range(r.take("Q")):
+            key = r.string()
+            value = r.value(r.take("I"), key)
+            if key == "general.architecture":
+                return value
+    return ""
+
+
 def is_model(path):
     """False for vision projectors (mmproj) and other files llama-server can't load as a model."""
     name = os.path.basename(path).lower()

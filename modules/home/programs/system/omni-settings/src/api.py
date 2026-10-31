@@ -528,11 +528,13 @@ def cmd_local_models(cfg, args):
     card = localmodelstate.gpu(profs)
     entries = localmodelstate.entries(cfg.flake, lm)
     profile = lm["profile"]
+    knows = localmodelstate.architectures(os.environ.get("OMNI_SETTINGS_LLAMA_SERVER"))
     models = []
     for mid, (category, entry) in entries.items():
         own = lm["models"].get(mid) or {}
         t = localmodelstate.effective(entry, profile, profs, own)
         path = localmodelstate.find_file(entry)
+        arch = localmodelstate.arch_of(path) if path else ""
         models.append({"id": mid, "category": category, "name": entry.get("name", mid),
                        "dir": entry.get("dir", ""), "match": entry.get("match", ""),
                        "added": mid in lm["models"] and "category" in own, "own": own,
@@ -541,6 +543,7 @@ def cmd_local_models(cfg, args):
                        "cache": entry.get("cache") or "q8_0",
                        "flags": localmodelstate.flags(t, profile, profs) + list(entry.get("args") or []),
                        "lastTest": localmodelstate.last_test(mid, t),
+                       "arch": arch, "supported": knows(arch) if knows else True,
                        "file": path and os.path.basename(path),
                        "bytes": path and localmodelstate.size_of(path)})
     return {"gpu": card, "profile": profile,
@@ -548,7 +551,7 @@ def cmd_local_models(cfg, args):
                           "note": v.get("note", "")} for k, v in profs.items()],
             "models": models,
             "files": localmodelstate.scan({**(localmodelstate.catalog(cfg.flake).get("edit") or {}),
-                                           **{m: e for m, (_, e) in entries.items()}}),
+                                           **{m: e for m, (_, e) in entries.items()}}, knows),
             "canTest": bool(os.environ.get("OMNI_SETTINGS_LLAMA_SERVER"))}
 
 

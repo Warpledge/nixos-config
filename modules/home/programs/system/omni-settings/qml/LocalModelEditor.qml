@@ -371,7 +371,15 @@ Sheet {
               + "llama-swap's model first; llama-swap loads it again the next time an app asks."
     }
     ListRow {
-        visible: ed.models.info && ed.models.info.canTest
+        visible: !ed.model.supported
+        icon: "block"
+        tone: "caution"
+        title: `Can't run ${ed.model.arch} models yet`
+        info: "LM Studio has its own, newer engine. llama-swap runs nixpkgs' llama.cpp, which "
+              + "doesn't know this model's architecture until nixpkgs updates it."
+    }
+    ListRow {
+        visible: ed.models.info && ed.models.info.canTest && ed.model.supported
         icon: ed.testing ? "progress_activity" : "speed"
         title: ed.testing ? "Testing…" : ed.result ? `${ed.result.tokensPerSecond} tokens a second`
                                                     + (ed.fit && ed.fit.lastTest ? ` · tested ${ed.fit.lastTest.at}` : "")
