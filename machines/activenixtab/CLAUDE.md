@@ -91,11 +91,12 @@ when Ky approves it.
   cached, and the DMS colour theme the shared module doesn't load yet
 - `home/on-screen-input/` — for use without the folio: wvkbd, full width and 390 px
   tall, translucent (`--alpha`) over niri's blur (a layer rule blurs its namespace),
-  touch-only (no mouse listener). Layout is Ky's (wvkbd-layout.patch): no F-key row
-  (top row = numbers), no Cmp/Caps key, no right Alt/Ctrl/Shift; the bottom-left key
-  flips the whole keyboard to a special layer (F-keys, Ins/Home/End/arrows/PgUp/PgDn,
-  Abc back); caps locks on a double-tap of shift (wvkbd-caps-shift.patch); PAD (F13)
-  sits at both layers' bottom right. A user service starts wvkbd hidden, coloured by a
+  touch-only (no mouse listener). Layout is Ky's (wvkbd-layout.patch): staggered QWERTY,
+  no F-key row (top row = numbers), Esc where Caps was, no Cmp, no right Alt/Ctrl/Shift;
+  Fn (bottom left, tap on, tap off) flips to the same keyboard with F1-F12 on the numbers,
+  Ins, Del, and Home/PgUp/PgDn/End on the arrows; caps locks on a double-tap of shift
+  (wvkbd-caps-shift.patch); PAD (a Material Symbols glyph, F13) sits where right Shift
+  would on both layers. A user service starts wvkbd hidden, coloured by a
   matugen template, shown and hidden with `osk-toggle`. And pad mode, in
   `wm/touch-gestures.py`: touches outside the bar and the shown keyboard go to a virtual
   touchpad, so libinput's tap, scroll and drag apply. It has no window on purpose: a

@@ -46,7 +46,7 @@
     # shellcheck disable=SC2086 # one flag per word
     exec ${wvkbd}/bin/wvkbd-deskintl --hidden -H ${toString height} -L ${toString height} \
       --alpha ${toString keyAlpha} \
-      --fn "${config.stylix.fonts.sansSerif.name} ${toString config.stylix.fonts.sizes.popups}" \
+      --fn "${config.stylix.fonts.sansSerif.name}, Material Symbols Rounded ${toString config.stylix.fonts.sizes.popups}" \
       $WVKBD_COLORS
   '';
 
