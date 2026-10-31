@@ -103,8 +103,8 @@ when Ky approves it.
   would on both layers; every finger is tracked (wvkbd-multitouch.patch), so keys hold
   together for games, a finger held 150 ms slides to the next key, and a modifier a finger
   stays on acts as held while a quick tap still latches; `touch-gestures.py` passes touches
-  on the keyboard straight through, so it adds no delay or three-finger gesture there, and
-  its edge swipe only opens the keyboard. A user service starts wvkbd hidden, coloured by a
+  on the keyboard straight through, so it adds no delay or three-finger gesture there,
+  except a lone touch on the screen's bottom edge, held back so a swipe up can close it. A user service starts wvkbd hidden, coloured by a
   matugen template, shown and hidden with `osk-toggle`. And pad mode, in
   `wm/touch-gestures.py`: touches outside the bar and the shown keyboard go to a virtual
   touchpad, so libinput's tap, scroll and drag apply. It has no window on purpose: a

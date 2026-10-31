@@ -467,8 +467,16 @@ try:
             fslot, frame_slot = frame_slot, cur
 
             if mode == "idle":
-                if slots and on_keyboard(next(iter(slots.values()))):
-                    # Keys need every finger, at once: no hold and no gesture
+                first = next(iter(slots.values()), None)
+                bottom_edge = (
+                    first
+                    and edge_command
+                    and len(slots) == 1
+                    and on_screen(first, transform())[1] > 1 - EDGE
+                )
+                if first and on_keyboard(first) and not bottom_edge:
+                    # Keys need every finger, at once: no hold and no gesture,
+                    # except on the bottom edge, where a swipe up closes it
                     mode = "keys"
                     forward(done, fslot)
                     continue
