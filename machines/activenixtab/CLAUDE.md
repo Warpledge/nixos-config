@@ -113,6 +113,8 @@ when Ky approves it.
   `wm/touch-gestures.py`: touches outside the bar and the shown keyboard go to a virtual
   touchpad, so libinput's tap, scroll and drag apply. It has no window on purpose: a
   surface under the pointer would swallow the clicks and scrolls the pad produces.
+  With fingers on both the keyboard and the pad area, each finger keeps the side it landed
+  on (`mixed_frame`), so keys and pointer work together, without three-finger gestures.
   `osk-pad-mode` (SIGUSR2) toggles it — the PAD key (KEY_F13, which xkb maps to the
   keysym `XF86Tools`, so that's the niri bind; `F13` never fires) or the bar button.
   And autocorrect: `autocorrect.py` reads `wvkbd -o` from a pipe and, on space or

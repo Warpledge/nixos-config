@@ -138,7 +138,7 @@ def rotate(dx, dy, t):
 
 slots = {}  # slot -> [x, y]
 cur = 0
-mode = "idle"  # idle | hold | pass | gesture | drain
+mode = "idle"  # idle | hold | pass | keys | pad | mixed | gesture | drain
 held = []  # frames held back in "hold"
 hold_start = 0.0
 start = {}  # slot -> position when the touch landed
@@ -152,6 +152,9 @@ peak = {}  # slot -> position, every finger down during the hold
 tp_t = "Normal"  # the screen's transform for this pad touch
 tp_fingers = {}  # source slot -> (pad slot, anchor x, anchor y)
 tp_next_id = 0
+routed = {}  # source slot -> "key" or "tp", while fingers are on both sides
+key_sent = {}  # source slot -> position last sent to the screen
+key_next_id = 0
 
 
 def on_pad_flip(*_):
@@ -261,6 +264,37 @@ def tp_frame(live):
     tp.write(e.EV_KEY, e.BTN_TOOL_FINGER, 1 if n == 1 else 0)
     tp.write(e.EV_KEY, e.BTN_TOOL_DOUBLETAP, 1 if n == 2 else 0)
     tp.syn()
+
+
+def mixed_frame():
+    # Pad mode with fingers on both sides: each stays where it landed, keys go to
+    # the screen and the rest to the touchpad, so a game can walk and aim at once
+    global mode, key_next_id
+    for s, pos in slots.items():
+        if s not in routed:
+            to_tp = pad_on and not on_keyboard(pos) and in_pad_area(pos)
+            routed[s] = "tp" if to_tp else "key"
+    for s in [s for s in routed if s not in slots]:
+        del routed[s]
+    tp_frame({s: slots[s] for s, side in routed.items() if side == "tp"})
+    for s in [s for s in key_sent if s not in slots]:
+        del key_sent[s]
+        screen.write(e.EV_ABS, e.ABS_MT_SLOT, s)
+        screen.write(e.EV_ABS, e.ABS_MT_TRACKING_ID, -1)
+    for s, side in routed.items():
+        if side != "key" or key_sent.get(s) == slots[s]:
+            continue
+        screen.write(e.EV_ABS, e.ABS_MT_SLOT, s)
+        if s not in key_sent:
+            screen.write(e.EV_ABS, e.ABS_MT_TRACKING_ID, key_next_id)
+            key_next_id = (key_next_id + 1) % 65535
+        screen.write(e.EV_ABS, e.ABS_MT_POSITION_X, slots[s][0])
+        screen.write(e.EV_ABS, e.ABS_MT_POSITION_Y, slots[s][1])
+        key_sent[s] = list(slots[s])
+    screen.write(e.EV_KEY, e.BTN_TOUCH, 1 if key_sent else 0)
+    screen.syn()
+    if not slots:
+        mode = "idle"
 
 
 def let_go():
@@ -477,6 +511,10 @@ try:
                 if first and on_keyboard(first) and not bottom_edge:
                     # Keys need every finger, at once: no hold and no gesture,
                     # except on the bottom edge, where a swipe up closes it
+                    if pad_on:
+                        mode = "mixed"
+                        mixed_frame()
+                        continue
                     mode = "keys"
                     forward(done, fslot)
                     continue
@@ -509,8 +547,14 @@ try:
                 forward(done, fslot)
                 if not slots:
                     mode = "idle"
+            elif mode == "mixed":
+                mixed_frame()
             elif mode == "pad":
-                if len(slots) >= 3:
+                if any(s not in tp_fingers and on_keyboard(p) for s, p in slots.items()):
+                    routed.update(dict.fromkeys(tp_fingers, "tp"))
+                    mode = "mixed"
+                    mixed_frame()
+                elif len(slots) >= 3:
                     tp_frame({})
                     begin_gesture()
                 else:
