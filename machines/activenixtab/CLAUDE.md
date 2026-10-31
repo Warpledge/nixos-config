@@ -43,7 +43,7 @@ when Ky approves it.
 - **Keyboard:** keyd makes a tap of Meta alone open the launcher (Meta+Space).
 - **Face auth:** Howdy on the IR camera (`/dev/video2`) for sudo, polkit and the DMS
   lock screen, with the password as fallback; `face-auth.nix`. The lock screen scans
-  only after Enter. The login screen stays password-only so the keyring unlocks.
+  only on an empty Enter; a typed password skips the scan. The login screen stays password-only so the keyring unlocks.
 
 ## Where its config lives
 
