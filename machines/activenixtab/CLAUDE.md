@@ -100,7 +100,8 @@ when Ky approves it.
   (`touchpad.py`, `on-screen-touchpad.service`) whose window covers the screen minus
   the keyboard and bar strips and maps finger motion relatively into a virtual
   touchpad, so libinput's tap, scroll and drag apply; off means no surface at all.
-  `osk-pad-mode` (SIGUSR2) toggles it — the PAD key (niri bind F13) or the bar button.
+  `osk-pad-mode` (SIGUSR2) toggles it — the PAD key (KEY_F13, which xkb maps to the
+  keysym `XF86Tools`, so that's the niri bind; `F13` never fires) or the bar button.
   Each has a DMS bar plugin (`oskToggle`, `touchpadToggle`) added from DMS's bar
   settings; a one-finger swipe up from the bottom edge also runs `osk-toggle`
   (`wm/touch-gestures.py`). Gotchas: wvkbd must be built WITH `wvkbd-uinput.patch` or

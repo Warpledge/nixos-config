@@ -172,7 +172,7 @@ in {
   #-- Niri: the PAD key's bind, and blur behind the keyboard
   #--------------------------------------------------------------------#
   niri.keybinds.osk-pad-mode = {
-    key = "F13";
+    key = "XF86Tools"; # xkb's keysym for KEY_F13; a bind on "F13" never fires
     title = "Touchpad mode on / off";
     action.spawn = ["${pad-mode}/bin/osk-pad-mode"];
   };
