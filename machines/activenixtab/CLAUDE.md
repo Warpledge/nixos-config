@@ -38,6 +38,10 @@ when Ky approves it.
   dropped. Its feature reports hold no filter setting, and HID mouse mode (Input
   Mode 0) is smoothed the same, so the filter sits before both in the folio's ITE
   firmware. Reflashing that has no recovery path without Windows.
+- **Tablet-mode switch:** logging in with the folio detached left libinput's touchpads
+  closed, including the virtual ones behind gestures and pad mode, even after attaching the
+  folio. `default.nix` has a libinput quirk that makes it ignore the switch in `Asus WMI
+  hotkeys`, so nothing pauses in tablet mode.
 - **Scroll speed:** Chromium, Electron and Vivaldi scroll far faster per finger movement
   than GTK, so `wm/niri.nix` gives them `scroll-factor = 0.25`. Qt apps are left as is.
 - **Keyboard:** keyd makes a tap of Meta alone open the launcher (Meta+Space).

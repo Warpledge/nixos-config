@@ -17,6 +17,13 @@
   #--- Accelerometer, for auto-rotation (iio-niri in wm/niri.nix)
   hardware.sensor.iio.enable = true;
 
+  #--- Logging in without the folio left every touchpad closed, virtual ones too (CLAUDE.md)
+  environment.etc."libinput/local-overrides.quirks".text = ''
+    [ASUS Z13 tablet mode switch]
+    MatchName=Asus WMI hotkeys
+    ModelTabletModeSwitchUnreliable=1
+  '';
+
   #--- NPU driver
   boot.kernelModules = ["amdxdna"];
 
