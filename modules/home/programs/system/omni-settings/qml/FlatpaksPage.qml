@@ -1,5 +1,6 @@
 // The Flatpaks page: Flatpak's own switch, the apps and runtimes installed,
-// updates and clean-up. An app's switch uninstalls or reinstalls it right away.
+// updates and clean-up, and Flathub search. An app's switch uninstalls or
+// reinstalls it right away, and Install puts a Flathub app in the user's installation.
 import QtQuick
 import QtQuick.Layouts
 
@@ -31,19 +32,21 @@ ColumnLayout {
 
     Component.onCompleted: load()
 
-    function run(action, key) {
+    function run(action, key, extra) {
         if (busy) {
             view.say("Wait for the running Flatpak job to finish")
             return
         }
         busy = key || action
         progress = ""
-        Backend.stream("flatpakRun", { action, key }, line => progress = line, reply => {
+        Backend.stream("flatpakRun", Object.assign({ action, key }, extra || {}), line => progress = line, reply => {
             busy = ""
             if (reply.ok) {
                 view.say(reply.data)
                 if (action === "update")
                     found = []
+                if (action === "flathub")
+                    page.search()
             } else {
                 const [heading, ...rest] = reply.error.split("\n\n")
                 view.ask({ heading, body: rest.join("\n\n"), cancel: false,
@@ -79,6 +82,31 @@ ColumnLayout {
                 : `Its settings and files in ~/.var/app/${app.id} stay, so switching it on brings it back as it was.`,
             buttons: [{ label: "Uninstall", value: true, danger: true }]
         }, () => run("uninstall", app.key))
+    }
+
+    //--- Flathub search: flatpak's local appstream data, so no request per key
+    property var results: null  // flatpakSearch's {results, count}
+    property string searchError: ""
+    function search() {
+        const text = hubField.text.trim()
+        if (text.length < 2) {
+            results = null
+            return
+        }
+        Backend.call("flatpakSearch", { text }, reply => {
+            if (!page || hubField.text.trim() !== text)
+                return  // left, or typed on since
+            results = reply.ok ? reply.data : null
+            searchError = reply.ok ? "" : reply.error
+        })
+    }
+    Timer { id: searchDelay; interval: 300; onTriggered: page.search() }
+
+    function install(r) {
+        view.ask({ heading: `Install ${r.name}?`,
+                   body: `From Flathub, for you alone (${r.id}).`,
+                   buttons: [{ label: "Install", value: true }] },
+                 () => run("flathub", "flathub:" + r.id, { id: r.id, name: r.name }))
     }
 
     function where(ref) { return ref.installation === "system" ? "Everyone" : "Just you" }
@@ -196,9 +224,62 @@ ColumnLayout {
             visible: !!page.fp && page.fp.installed && !page.fp.apps.length && !page.fp.off.length
             icon: "widgets"
             title: "No Flatpak apps yet"
-            info: "Find one on flathub.org, then install it with: flatpak install flathub <its id>"
+            info: "Search Flathub below, or browse flathub.org."
             trailing: "open_in_new"
             onClicked: Qt.openUrlExternally("https://flathub.org")
+        }
+
+        //--- Flathub
+        Section {
+            text: "Get Apps from Flathub"
+            info: "Installs for you alone, straight away. Prefer the app's switch under Default Packages "
+                  + "when the config has one."
+        }
+        Rectangle {
+            Layout.fillWidth: true
+            implicitHeight: 52
+            radius: 14
+            color: Theme.card
+            Field {
+                id: hubField
+                anchors.fill: parent
+                anchors.margins: 8
+                icon: "search"
+                placeholder: "Search Flathub"
+                onTextChanged: searchDelay.restart()
+            }
+        }
+        Text {
+            visible: page.searchError !== ""
+            text: page.searchError
+            color: Theme.error
+            wrapMode: Text.Wrap
+            Layout.fillWidth: true
+            Layout.leftMargin: 6
+        }
+        Repeater {
+            model: page.results ? page.results.results : []
+            ListRow {
+                required property var modelData
+                readonly property bool working: page.busy === "flathub:" + modelData.id
+                icon: working ? "progress_activity" : "widgets"
+                app: [modelData.id + ".desktop", modelData.id]
+                title: modelData.name
+                subtitle: working ? page.progress || "Installing…" : modelData.id
+                info: modelData.description + (modelData.version ? ` (${modelData.version})` : "")
+                value: modelData.installed ? "Installed" : ""
+                tone: modelData.installed ? "success" : ""
+                button: modelData.installed || page.busy ? "" : "Install"
+                onClicked: page.install(modelData)
+            }
+        }
+        Text {
+            visible: !!page.results && (page.results.count === 0 || page.results.count > page.results.results.length)
+            text: !page.results ? "" : page.results.count === 0 ? "Nothing on Flathub matches."
+                : `${page.results.count - page.results.results.length} more: type more of the name.`
+            color: Theme.dim
+            font.pixelSize: 13
+            Layout.leftMargin: 6
         }
 
         //--- Runtimes

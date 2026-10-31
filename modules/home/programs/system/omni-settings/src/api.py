@@ -99,8 +99,8 @@ TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
 #--- The line under each page in the page list that has no description of its own
 NAV_SUBTITLES = {"overview": "Updates, pinned versions, freeing space, versions, crashes",
                  "git": "Changes, commits, pull requests",
-                 "flatpaks": "Apps nixpkgs doesn't have: update them, clean up, and switch each one "
-                             "on or off",
+                 "flatpaks": "Apps nixpkgs doesn't have: get them from Flathub, update them, clean "
+                             "up, and switch each one on or off",
                  "backups": "Back up app data",
                  "disabled": "Packages switched off after an update broke them, and whether they "
                              "build again. Turning one back on waits for Apply.",
@@ -816,12 +816,22 @@ def run_streamed(commands):
 
 def cmd_flatpak_run(_cfg, args):
     """One Flatpak action, its progress on stderr: uninstall, install (an app
-    switched off here), runtime (an app's missing runtime), update, unused or
-    repair. args.key names the app as "<installation>:<id>"."""
+    switched off here), runtime (an app's missing runtime), update, unused,
+    repair or flathub (args.id, from Flathub into the user's installation).
+    args.key names the app as "<installation>:<id>"."""
     lst, action = flatpakstate.listing(), args.get("action")
     apps = {a.key: a for a in lst.apps}
     off = {a.key: a for a in lst.off}
     ref = apps.get(args.get("key")) or off.get(args.get("key"))
+    if action == "flathub":
+        app_id = args.get("id") or ""
+        if not flatpakstate.APP_ID.match(app_id):
+            raise ValueError("that isn't a Flatpak app ID")
+        ok, tail = run_streamed(flatpakstate.install_flathub(app_id))
+        if not ok:
+            raise ValueError(f"Couldn't install {app_id}\n\n" + ("\n".join(tail[-6:]) or "Flatpak didn't say why."))
+        flatpakstate.forget(f"user:{app_id}")
+        return f"{args.get('name') or app_id} installed"
     if action in ("uninstall", "runtime") and args.get("key") not in apps:
         raise ValueError("that app isn't installed")
     if action == "install" and args.get("key") not in off:
@@ -862,6 +872,22 @@ def cmd_flatpak_run(_cfg, args):
     if action == "runtime":
         return f"{ref.name} can start now"
     return {"update": "Flatpaks updated", "repair": "Repair finished"}[action]
+
+
+def cmd_flatpak_search(_cfg, args):
+    """Flathub apps matching args.text: the first 50 and how many in all, each
+    marked when it's installed already."""
+    text = (args.get("text") or "").strip()
+    if len(text) < 2:
+        return {"results": [], "count": 0}
+    try:
+        found = flatpakstate.search(text)
+    except (RuntimeError, subprocess.TimeoutExpired) as e:
+        raise ValueError(str(e))
+    have = {a.id for a in flatpakstate.listing().apps}
+    q = text.lower()
+    found.sort(key=lambda r: (r["name"].lower() != q, not r["name"].lower().startswith(q)))
+    return {"results": [dict(r, installed=r["id"] in have) for r in found[:50]], "count": len(found)}
 
 
 def cmd_flatpak_forget(_cfg, args):
@@ -1462,7 +1488,7 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "compare": cmd_compare, "failedLog": cmd_failed_log, "forgetFailed": cmd_forget_failed,
             "git": cmd_git, "gitSummary": cmd_git_summary, "summaries": cmd_summaries, "setBackup": cmd_set_backup,
             "flatpaks": cmd_flatpaks, "flatpakUpdates": cmd_flatpak_updates, "flatpakRun": cmd_flatpak_run,
-            "flatpakForget": cmd_flatpak_forget, "flatseal": cmd_flatseal,
+            "flatpakForget": cmd_flatpak_forget, "flatseal": cmd_flatseal, "flatpakSearch": cmd_flatpak_search,
             "backups": cmd_backups, "backup": cmd_backup, "upstream": cmd_upstream,
             "disabledPackages": cmd_disabled_packages, "disabledCheck": cmd_disabled_check,
             "people": cmd_people, "checkPerson": cmd_check_person,

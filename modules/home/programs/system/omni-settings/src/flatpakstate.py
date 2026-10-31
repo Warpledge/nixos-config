@@ -9,6 +9,8 @@ import subprocess
 from dataclasses import asdict, dataclass
 
 FLATSEAL = "com.github.tchx84.Flatseal"
+FLATHUB_REPO = "https://dl.flathub.org/repo/flathub.flatpakrepo"
+APP_ID = re.compile(r"^[A-Za-z0-9_-]+(\.[A-Za-z0-9_-]+)+$")
 INSTALLATIONS = ("user", "system")
 COLUMNS = "application,name,version,branch,origin,installation,size,ref,runtime"
 NOISE = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]|[█▉▊▋▌▍▎▏▒░▓]+")
@@ -158,6 +160,28 @@ def uninstall(ref):
 
 def reinstall(ref):
     return [[binary(), "install", f"--{ref.installation}", "-y", "--noninteractive", ref.origin, f"app/{ref.ref}"]]
+
+
+def search(text):
+    """[{id, name, description, version}] on Flathub matching `text`, from the
+    appstream data flatpak keeps locally (refreshed by its updates)."""
+    proc = _flatpak("search", "--columns=application,name,description,version,remotes", text)
+    if proc.returncode != 0:
+        raise RuntimeError(proc.stderr.strip() or "flatpak search failed")
+    out, seen = [], set()
+    for line in proc.stdout.splitlines():
+        cells = line.split("\t") + [""] * 5
+        app, name, description, version, remotes = (c.strip() for c in cells[:5])
+        if APP_ID.match(app) and "flathub" in remotes.split(",") and app not in seen:
+            seen.add(app)
+            out.append({"id": app, "name": name or app, "description": description, "version": version})
+    return out
+
+
+def install_flathub(app_id):
+    """Into the user's installation, adding the user's flathub remote if it's missing."""
+    return [[binary(), "remote-add", "--user", "--if-not-exists", "flathub", FLATHUB_REPO],
+            [binary(), "install", "--user", "-y", "--noninteractive", "flathub", app_id]]
 
 
 def runtime_source(lst, ref):
