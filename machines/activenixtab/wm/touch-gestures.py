@@ -130,9 +130,9 @@ def transform():
 def rotate(dx, dy, t):
     # Panel deltas to screen deltas, as niri turns touch points for the output
     return {
-        "_90": (-dy, dx),
-        "_180": (-dx, -dy),
-        "_270": (dy, -dx),
+        "90": (-dy, dx),
+        "180": (-dx, -dy),
+        "270": (dy, -dx),
     }.get(t, (dx, dy))
 
 
@@ -337,7 +337,7 @@ def begin_gesture():
     mode = "gesture"
     t = transform()
     # Screen width and height in panel units, as turned
-    w, h = (ymax, xmax) if t in ("_90", "_270") else (xmax, ymax)
+    w, h = (ymax, xmax) if t in ("90", "270") else (xmax, ymax)
     fingers = sorted(slots)[:3]
     x0, y0 = start.get(fingers[0], slots[fingers[0]])
     anchor = []
@@ -359,9 +359,9 @@ def on_screen(pos, t):
     # Panel position to where it is on the turned screen, 0-1 on each axis
     nx, ny = pos[0] / xmax, pos[1] / ymax
     return {
-        "_90": (1 - ny, nx),
-        "_180": (1 - nx, 1 - ny),
-        "_270": (ny, 1 - nx),
+        "90": (1 - ny, nx),
+        "180": (1 - nx, 1 - ny),
+        "270": (ny, 1 - nx),
     }.get(t, (nx, ny))
 
 
