@@ -73,7 +73,7 @@ CONTRACTIONS = {
     ).split()
 }
 CONTRACTION_COUNT = 100_000_000  # how common they rank in swipe
-STROKE_FREQ = 0.12 # swipe: score per factor of ten, against a stroke's shape match
+STROKE_FREQ = 0.06# swipe: score per factor of ten, against a stroke's shape match
 STROKE_END_MISS = 0.3  # swipe: a word not starting or ending where the stroke did
 
 
@@ -177,9 +177,13 @@ class Speller:
                 continue
             if not (word[-1] == path[-1] or near(word[-1], path[-1])):
                 continue
-            middle = iter(path[1:-1] if word[0] != path[0] or word[-1] != path[-1] else path)
+            # In order along the stroke, on or beside it: a finger falls short of keys.
             # A stroke crosses a doubled letter once
-            if not all(c in middle for c, _ in itertools.groupby(word[1:-1])):
+            middle = iter(path)
+            if not all(
+                any(k == c or near(k, c) for k in middle)
+                for c, _ in itertools.groupby(word[1:-1])
+            ):
                 continue
             # How far the keys crossed are from the straight lines through the word
             shape = plain_distance(path, stroke_of(word)) / len(path)
@@ -341,6 +345,16 @@ class Corrector:
         if ch == "\b" and swiped:
             # wvkbd's backspace took the space; a word from a stroke goes whole
             self.typist.erase(len(swiped))
+            self.last_key = now
+            return
+        if swiped and ch == " ":
+            self.typist.erase(1)  # the stroke already typed one
+            self.last_key = now
+            return
+        if swiped and ch in DELIMITERS:
+            # "well ." becomes "well. "
+            self.typist.erase(2)
+            self.typist.text(ch + " ")
             self.last_key = now
             return
         if now - self.last_key > PAUSE:
