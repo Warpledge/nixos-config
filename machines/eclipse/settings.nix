@@ -215,4 +215,9 @@
   boot.menu.entries = 10;
   apparmor.enforce = ["evince" "file-roller" "katana-floorboard" "mpv" "obsidian" "prismlauncher" "streamlink" "tonkatsu-box" "tsunagu" "unrar" "yt-dlp"];
   blocklist.allow = [];
+  maintenance.clean = "weekly";
+  maintenance.keepDays = 5;
+  maintenance.keepGenerations = 5;
+  maintenance.optimise = "daily";
+  maintenance.updateReminderDays = 30;
 }
