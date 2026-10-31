@@ -1,18 +1,39 @@
-# wvkbd --auto: act on the input method only at "done", and only close a keyboard a text field
-# opened. SIGRTMIN+3/+4 or WVKBD_IM_BLOCKED stop fields opening it (folio-watch.py).
+# wvkbd --auto: act on the input method only at "done", and close a keyboard a text field opened
+# only after a short delay. SIGRTMIN+3/+4 or WVKBD_IM_BLOCKED stop fields opening it (folio-watch.py).
 --- a/main.c
 +++ b/main.c
-@@ -75,6 +75,9 @@
+@@ -13,6 +13,7 @@
+ #include <sys/mman.h>
+ #include <sys/signalfd.h>
+ #include <poll.h>
++#include <time.h>
+ #include <unistd.h>
+ #include <wayland-client-protocol.h>
+ #include <wayland-client.h>
+@@ -75,6 +76,11 @@
  static int rounding = DEFAULT_ROUNDING;
  static bool hidden = false;
  static bool im_auto = false;
 +static bool im_wanted = false, im_active = false;
 +static bool im_opened = false;  /* shown by a text field, not by hand */
 +static bool im_blocked = false; /* folio-watch.py: don't open on text fields */
++#define IM_CLOSE_DELAY_MS 300
++static int64_t im_close_at = 0; /* when a field-opened keyboard closes; 0 for never */
  static uint32_t custom_width = 0;
  static double width_ratio = 1.0;
  static enum { DOCK_FULL = 0, DOCK_LEFT = 1, DOCK_RIGHT = 2 } dock_mode = DOCK_FULL;
-@@ -724,13 +727,13 @@
+@@ -721,16 +727,24 @@
+         .preferred_scale = wp_fractional_scale_preferred_scale,
+ };
+ 
++static int64_t
++now_ms(void)
++{
++    struct timespec ts;
++    clock_gettime(CLOCK_MONOTONIC, &ts);
++    return (int64_t)ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
++}
++
  void
  im_activate(void *data, struct zwp_input_method_v2 *zwp_input_method_v2)
  {
@@ -28,26 +49,28 @@
  }
  
  void
-@@ -752,6 +755,18 @@
+@@ -752,6 +766,20 @@
  void
  im_done(void *data, struct zwp_input_method_v2 *zwp_input_method_v2)
  {
-+    /* Acting here, not on each event, stops a flicker when focus moves between
-+     * fields. Only a keyboard a text field opened closes with it. */
++    /* Only a keyboard a text field opened closes with it, and after a delay, since
++     * moving between fields deactivates the old one before activating the new one. */
 +    if (im_wanted == im_active)
 +        return;
 +    im_active = im_wanted;
-+    if (im_active && !im_blocked && hidden) {
-+        show();
-+        im_opened = true;
-+    } else if (!im_active && im_opened) {
-+        hide();
-+        im_opened = false;
++    if (im_active) {
++        im_close_at = 0;
++        if (!im_blocked && hidden) {
++            show();
++            im_opened = true;
++        }
++    } else if (im_opened) {
++        im_close_at = now_ms() + IM_CLOSE_DELAY_MS;
 +    }
  }
  
  void
-@@ -1043,6 +1058,7 @@
+@@ -1043,6 +1071,7 @@
  void
  toggle_visibility()
  {
@@ -55,7 +78,7 @@
      if (hidden)
          show();
      else
-@@ -1109,6 +1125,7 @@
+@@ -1109,6 +1138,7 @@
      if ((tmp = getenv("WVKBD_LANDSCAPE_LAYERS")))
          landscape_layer_names_list = estrdup(tmp);
      swipe_mode = getenv("WVKBD_SWIPE") != NULL;
@@ -63,7 +86,7 @@
      keyboard.swipe_lit = swipe_mode;
      keyboard.autocorrect_lit = getenv("WVKBD_AUTOCORRECT") != NULL;
      if ((tmp = getenv("WVKBD_HEIGHT")))
-@@ -1495,6 +1512,8 @@
+@@ -1495,6 +1525,8 @@
      sigaddset(&signal_mask, SIGRTMIN);
      sigaddset(&signal_mask, SIGRTMIN + 1);
      sigaddset(&signal_mask, SIGRTMIN + 2);
@@ -72,7 +95,30 @@
      sigaddset(&signal_mask, SIGPIPE);
      if (sigprocmask(SIG_BLOCK, &signal_mask, NULL) == -1) {
          die("Failed to disable handled signals: %d\n", errno);
-@@ -1540,6 +1559,10 @@
+@@ -1506,8 +1538,21 @@
+     }
+ 
+     while (run_display) {
++        int timeout = -1;
++        if (im_close_at) {
++            int64_t left = im_close_at - now_ms();
++            if (left <= 0) {
++                im_close_at = 0;
++                if (im_opened && !hidden)
++                    hide();
++                im_opened = false;
++            } else {
++                timeout = (int)left;
++            }
++        }
++
+         wl_display_flush(display);
+-        poll(fds, 3, -1);
++        poll(fds, 3, timeout);
+ 
+         if ((fds[LED_FD].revents & POLLIN) && kbd_read_leds(&keyboard) && !hidden)
+             kbd_draw_layout(&keyboard);
+@@ -1540,6 +1585,10 @@
                  if (!hidden)
                      kbd_draw_layout(&keyboard);
              }
