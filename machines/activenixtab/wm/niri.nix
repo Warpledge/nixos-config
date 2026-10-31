@@ -10,6 +10,8 @@
 }: {
   home-manager.users =
     lib.mapAttrs (_: _: {
+      dms.extraSettings.powerMenuActions = ["reboot" "logout" "poweroff" "lock" "restart"];
+
       programs.niri.settings = {
         #--- Monitors - internal panel (2560x1600@180Hz, 13.4")
         # No refresh given: niri picks the highest the panel offers
