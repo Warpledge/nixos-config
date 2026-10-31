@@ -7,10 +7,12 @@
   ...
 }: let
   #--- Writes each user's steamGames setting into Steam's files (gaming/steam-games.nix)
-  steam-games-apply = pkgs.writers.writePython3Bin "steam-games-apply" {
-    libraries = [pkgs.python3Packages.vdf];
-    flakeIgnore = ["E501"];
-  } (builtins.readFile ./steam-games-apply.py);
+  steam-games-apply =
+    pkgs.writers.writePython3Bin "steam-games-apply" {
+      libraries = [pkgs.python3Packages.vdf];
+      flakeIgnore = ["E501"];
+    } (builtins.replaceStrings ["@notifySend@"] ["${pkgs.libnotify}/bin/notify-send"]
+      (builtins.readFile ./steam-games-apply.py));
 in {
   environment.systemPackages = [steam-games-apply];
 
@@ -20,9 +22,15 @@ in {
   programs = {
     steam = {
       enable = true;
-      #--- Steam rewrites its config on exit, so changes made while it ran land here
+      #--- Steam rewrites its config on exit, so changes made while it ran land here;
+      #--- `steam -shutdown` only asks the running client to quit
       package = pkgs.steam.override {
-        extraPreBwrapCmds = "${steam-games-apply}/bin/steam-games-apply || true";
+        extraPreBwrapCmds = ''
+          case " $* " in
+            *" -shutdown "*) ;;
+            *) ${steam-games-apply}/bin/steam-games-apply || true ;;
+          esac
+        '';
       };
       gamescopeSession = {
         enable = true;

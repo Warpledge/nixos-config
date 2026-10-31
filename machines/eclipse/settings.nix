@@ -115,6 +115,7 @@
       gpuOffload = [];
       steamGames = {
         "438130" = {launchOptions = "nix-vn-720p %command%";};
+        "948740" = {launchOptions = "nix-vn-1080p %command%";};
         "1698960" = {launchOptions = "";};
       };
       claude.mods.ribbon = true;

@@ -3,6 +3,7 @@
 // edited in GameEditor.qml as a pending change like any other.
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 
 ColumnLayout {
     id: page
@@ -15,8 +16,36 @@ ColumnLayout {
 
     property var crashCount: ({})  // app id: crashes in the last 30 days
 
+    //--- Games whose applied options Steam hasn't got, since it was open (api.py's steamPending)
+    property var waiting: null  // {running, games: [{id, name}]}
+    property bool restarting: false
+    function checkWaiting() {
+        Backend.call("steamPending", {}, reply => {
+            if (page && reply.ok)
+                page.waiting = reply.data
+        })
+    }
+    Timer { interval: 15000; repeat: true; running: !page.restarting; onTriggered: page.checkWaiting() }
+    function restartSteam() {
+        restarting = true
+        Backend.call("steamShutDown", {}, reply => {
+            if (!page)
+                return
+            restarting = false
+            if (!reply.ok) {
+                view.say(reply.error)
+                return
+            }
+            // The Steam wrapper writes the options before the client starts
+            Quickshell.execDetached(["steam"])
+            view.say("Starting Steam")
+            waiting = null
+        })
+    }
+
     Component.onCompleted: load()
     function load() {
+        checkWaiting()
         Backend.call("steamGames", {}, reply => {
             if (!page)
                 return
@@ -87,6 +116,17 @@ ColumnLayout {
         color: Theme.dim
         font.pixelSize: 14
         Layout.leftMargin: 6
+    }
+    ListRow {
+        visible: page.restarting || (!!page.waiting && page.waiting.running && page.waiting.games.length > 0)
+        icon: page.restarting ? "progress_activity" : "restart_alt"
+        tone: "caution"
+        title: page.restarting ? "Restarting Steam…" : "Waiting for Steam to restart"
+        subtitle: page.waiting ? page.waiting.games.map(g => g.name).join(", ") : ""
+        info: "Steam was open when these were applied, and it rewrites its settings when it quits. "
+              + "They're set in the moment between quitting and starting again."
+        button: page.restarting ? "" : "Restart Steam"
+        onClicked: page.restartSteam()
     }
     Field {
         id: search

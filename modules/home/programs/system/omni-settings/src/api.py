@@ -1262,6 +1262,17 @@ def cmd_launch_options(_cfg, _args):
     return protonstate.launch_options()
 
 
+def cmd_steam_pending(_cfg, _args):
+    """Whether Steam is open and the games whose launch options wait for it to restart."""
+    return steamstate.pending()
+
+
+def cmd_steam_shut_down(_cfg, _args):
+    """Quits Steam and waits for it; the Games page starts it again."""
+    steamstate.shut_down()
+    return True
+
+
 def cmd_upscale_pick(_cfg, _args):
     """A game window picked in niri and its nix-vn or nix-rpgm launch option; None when cancelled."""
     return upscalestate.pick()
@@ -1508,7 +1519,7 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "mcpKeys": cmd_mcp_keys, "setMcpKey": cmd_set_mcp_key,
             "packageNames": cmd_package_names, "packageSearch": cmd_package_search,
             "packagePreviews": cmd_package_previews,
-            "resetApp": cmd_reset_app, "doc": cmd_doc, "docLink": cmd_doc_link, "launchOptions": cmd_launch_options, "upscalePick": cmd_upscale_pick, "protonVersions": cmd_proton_versions, "steamGames": cmd_steam_games,
+            "resetApp": cmd_reset_app, "doc": cmd_doc, "docLink": cmd_doc_link, "launchOptions": cmd_launch_options, "upscalePick": cmd_upscale_pick, "protonVersions": cmd_proton_versions, "steamGames": cmd_steam_games, "steamPending": cmd_steam_pending, "steamShutDown": cmd_steam_shut_down,
             "crashes": cmd_crashes, "crashReport": cmd_crash_report,
             "windowRules": cmd_window_rules, "niriWindows": cmd_niri_windows, "pickWindow": cmd_pick_window,
             "addWindowRule": cmd_add_window_rule, "saveWindowRule": cmd_save_window_rule,

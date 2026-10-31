@@ -12,11 +12,13 @@ import glob
 import json
 import os
 import shutil
+import subprocess
 import sys
 
 import vdf
 
 STEAM_PATH = ("Software", "Valve", "Steam")
+NOTIFY_SEND = "@notifySend@"  # libnotify's, filled in by steam.nix
 
 
 def state_dir():
@@ -123,8 +125,11 @@ def set_field(apps, app, key, value, before):
     return True
 
 
-def apply(root, wanted, applied):
+def apply(root, wanted, applied, write=True):
+    """The app ids whose values in Steam's files differ from the setting,
+    written unless `write` is off."""
     games = set(wanted) | set(applied)
+    touched = set()
     for path in glob.glob(os.path.join(root, "userdata", "*", "config", "localconfig.vdf")):
         data = load(path)
         top = next(iter(data.values()), None)
@@ -134,9 +139,10 @@ def apply(root, wanted, applied):
         changed = False
         for app in sorted(games):
             value = wanted.get(app, {}).get("launchOptions")
-            changed |= set_field(apps, app, "LaunchOptions", value,
-                                 applied.get(app, {}).get("launchOptions"))
-        if changed:
+            if set_field(apps, app, "LaunchOptions", value, applied.get(app, {}).get("launchOptions")):
+                changed = True
+                touched.add(app)
+        if changed and write:
             save(path, data)
 
     path = os.path.join(root, "config", "config.vdf")
@@ -153,6 +159,7 @@ def apply(root, wanted, applied):
                 if entry is not None and before and child(entry, "name") == before:
                     del mapping[app]
                     changed = True
+                    touched.add(app)
                 continue
             if entry is not None and child(entry, "name") == build:
                 continue
@@ -160,14 +167,52 @@ def apply(root, wanted, applied):
                 del mapping[app]
             mapping[app] = vdf.VDFDict([("name", build), ("config", ""), ("priority", "250")])
             changed = True
-        if changed:
+            touched.add(app)
+        if changed and write:
             save(path, data)
+    return touched
+
+
+def game_names(root, apps):
+    """Each app's name from its appmanifest in any library, else its id."""
+    dirs = [os.path.join(root, "steamapps")]
+    try:
+        folders = load(os.path.join(root, "steamapps", "libraryfolders.vdf"))
+        for entry in (next(iter(folders.values()), None) or {}).values():
+            if isinstance(entry, dict) and child(entry, "path"):
+                dirs.append(os.path.join(child(entry, "path"), "steamapps"))
+    except (OSError, SyntaxError, ValueError):
+        pass
+    names = []
+    for app in sorted(apps):
+        name = app
+        for d in dirs:
+            try:
+                state = load(os.path.join(d, f"appmanifest_{app}.acf"))
+                name = child(next(iter(state.values())), "name") or app
+                break
+            except (OSError, SyntaxError, ValueError, StopIteration, AttributeError):
+                continue
+        names.append(name)
+    return names
+
+
+def notify(summary, body):
+    """A desktop notification; nothing when there's no session bus to send it on."""
+    try:
+        subprocess.run([NOTIFY_SEND, "--app-name=Steam", "--icon=steam", summary, body],
+                       stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=10)
+    except (OSError, subprocess.TimeoutExpired):
+        pass
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", default=os.path.expanduser("~/.local/share/Steam"),
                         help="Steam's folder (for testing on a copy)")
+    parser.add_argument("--pending", action="store_true",
+                        help="print the app ids Steam doesn't have yet as JSON; write nothing")
+    parser.add_argument("--quiet", action="store_true", help="no notifications")
     args = parser.parse_args()
     state = state_dir()
     wanted = read_json(os.path.join(state, "steam-games.json"))
@@ -176,11 +221,25 @@ def main():
     # Checked against Steam's files every time, not skipped when wanted == applied:
     # Steam rewrites localconfig.vdf on exit, undoing a write made while it ran
     if wanted is None or not os.path.isdir(args.root):
+        if args.pending:
+            print("[]")
+        return 0
+    root = os.path.realpath(args.root)
+    if args.pending:
+        print(json.dumps(sorted(apply(root, wanted, applied, write=False))))
         return 0
     if steam_running():
-        print("steam-games-apply: Steam is running; the changes are written when it next starts")
+        waiting = apply(root, wanted, applied, write=False)
+        if waiting:
+            print("steam-games-apply: Steam is running; the changes are written when it next starts")
+            if not args.quiet:
+                notify("Waiting for Steam to restart",
+                       f"{', '.join(game_names(root, waiting))}: quit Steam and start it again, or use "
+                       "Restart Steam on Omni Settings' Games page, to set the launch options.")
         return 0
-    apply(os.path.realpath(args.root), wanted, applied)
+    written = apply(root, wanted, applied)
+    if written and not args.quiet:
+        notify("Launch options set in Steam", ", ".join(game_names(root, written)))
     tmp = applied_path + ".tmp"
     with open(tmp, "w") as f:
         json.dump(wanted, f, indent=2, sort_keys=True)
