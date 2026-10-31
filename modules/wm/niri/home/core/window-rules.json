@@ -66,9 +66,6 @@
         "app-id": "kitty"
       },
       {
-        "app-id": "^helium$"
-      },
-      {
         "app-id": "com.mitchellh.ghostty"
       },
       {

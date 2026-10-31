@@ -40,10 +40,7 @@
           on = p: config.programs.${p}.enable;
           tpl = input: output: {inherit input output;};
         in
-          {
-            niri = tpl ./matugen/niri-colors.kdl "${cfg}/niri/dms/colors.kdl";
-            helium = tpl ./matugen/helium.json.matugen "${cfg}/helium-theme/manifest.json";
-          }
+          {niri = tpl ./matugen/niri-colors.kdl "${cfg}/niri/dms/colors.kdl";}
           // lib.optionalAttrs (on "helix") {
             helix = tpl ./matugen/helix.toml "${cfg}/helix/themes/dank.toml";
           }

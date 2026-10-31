@@ -25,7 +25,13 @@
       env = {};
       autostart = {};
       mimeTypes = {};
-      windowRules = {};
+      windowRules = {
+        custom-helium-translucent = {
+          name = "Helium Translucent";
+          translucent = true;
+          matches = [{app-id = "^helium$";}];
+        };
+      };
       claude.mods.ribbon = false;
       claude.mods.skins = false;
       claude.mods.fileTree = false;

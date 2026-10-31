@@ -5,13 +5,38 @@
 #- modules/default.nix: global rules and game-dev skills for the agents.
 {
   config,
+  inputs,
   lib,
+  pkgs,
   ...
 }: let
+  #--- Helium with a matugen theme; hiPrio wins over the shared Helium's bin
+  heliumTheme = "${config.xdg.configHome}/helium-theme";
+  themedHelium = lib.hiPrio (pkgs.symlinkJoin {
+    name = "helium-themed";
+    paths = [inputs.helium.packages.${pkgs.stdenv.hostPlatform.system}.helium];
+    nativeBuildInputs = [pkgs.makeWrapper];
+    # The feature flag repeats modules/home/programs/browsers/helium.nix; keep in sync
+    postBuild = ''
+      wrapProgram $out/bin/helium --add-flag \
+        "--enable-features=WaylandWindowDecorations,SpoofWebGLInfo:renderer/Radeon R9 200 Series%2C or similar/vendor/AMD" \
+        --run 'if [ -r "${heliumTheme}/manifest.json" ]; then set -- "--load-extension=${heliumTheme}" "$@"; fi'
+    '';
+  });
+
   #--- claude.ai skills synced to Claude Code that opencode should load too
   syncedSkills = ["tmodloader"];
   syncedLinks = "${config.home.homeDirectory}/.local/share/opencode-synced-skills";
 in {
+  #--------------------------------------------------------------------#
+  #-- Helium Theme
+  #--------------------------------------------------------------------#
+  home.packages = [themedHelium];
+  matugen.templates.helium = {
+    input = ./helium-theme.json.matugen;
+    output = "${heliumTheme}/manifest.json";
+  };
+
   #--------------------------------------------------------------------#
   #-- Agent Rules and Skills
   #--------------------------------------------------------------------#
