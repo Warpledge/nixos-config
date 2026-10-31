@@ -1,0 +1,180 @@
+# wvkbd: a pressed key glows out over its neighbours, so it shows around the finger.
+--- a/keyboard.h
++++ b/keyboard.h
+@@ -83,6 +83,7 @@
+ 	// actual coordinates on the surface (pixels), will be computed automatically
+ 	// for all keys
+ 	uint32_t x, y, w, h;
++	bool glowing;            // drawn pressed, with a glow over its neighbours
+ };
+ 
+ struct layout {
+--- a/keyboard.c
++++ b/keyboard.c
+@@ -745,6 +745,48 @@
+     }
+ }
+ 
++#define KEY_GLOW_PX 22
++
++static bool
++keys_touch(struct key *a, int x, int y, int w, int h)
++{
++    return (int)a->x < x + w && (int)(a->x + a->w) > x && (int)a->y < y + h &&
++           (int)(a->y + a->h) > y;
++}
++
++/* A key at rest: a latched modifier shows pressed, everything else plain */
++static void
++draw_resting_key(struct kbd *kb, struct key *k)
++{
++    if (k->type == Mod)
++        k->glowing = false;
++    if ((k->type == Mod && kb->mods & k->code) ||
++        (k->type == Compose && kb->compose)) {
++        kbd_draw_key(kb, k, Press);
++    } else if (!k->glowing) {
++        kbd_draw_key(kb, k, None);
++    }
++}
++
++/* Takes a released key's glow off its neighbours; other held keys keep theirs */
++static void
++clear_glow(struct kbd *kb, struct key *k)
++{
++    int x = (int)k->x - KEY_GLOW_PX, y = (int)k->y - KEY_GLOW_PX;
++    int w = k->w + 2 * KEY_GLOW_PX, h = k->h + 2 * KEY_GLOW_PX;
++    x = x < 0 ? 0 : x;
++    y = y < 0 ? 0 : y;
++    drw_fill_rectangle(kb->surf, kb->schemes[0].bg, x, y, w, h, 0);
++    for (struct key *n = kb->layout->keys; n->type != Last; n++) {
++        if (n->type != Pad && n->type != EndRow && keys_touch(n, x, y, w, h))
++            draw_resting_key(kb, n);
++    }
++    for (struct key *n = kb->layout->keys; n->type != Last; n++) {
++        if (n->type != Pad && n->type != EndRow && n->glowing && n->type != Mod)
++            kbd_draw_key(kb, n, Press);
++    }
++}
++
+ void
+ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type)
+ {
+@@ -755,6 +797,12 @@
+                 label);
+     struct clr_scheme *scheme = &kb->schemes[k->scheme];
+ 
++    if (type == Unpress && k->glowing) {
++        k->glowing = false;
++        clear_glow(kb, k);
++        return;
++    }
++
+     switch (type) {
+     case None:
+     case Unpress:
+@@ -764,6 +812,11 @@
+                   KBD_KEY_BORDER, label, scheme->font_description);
+         break;
+     case Press:
++        if (kb->show_highlight) {
++            k->glowing = true;
++            drw_draw_glow(kb->surf, scheme->high, k->x, k->y, k->w, k->h,
++                          KEY_GLOW_PX);
++        }
+         draw_inset(kb->surf, k->x, k->y, k->w, k->h, KBD_KEY_BORDER,
+                    kb->show_highlight ? scheme->high : scheme->fg,
+                    scheme->rounding);
+@@ -825,14 +878,14 @@
+             next_key++;
+             continue;
+         }
+-        if ((next_key->type == Mod && kb->mods & next_key->code) ||
+-            (next_key->type == Compose && kb->compose)) {
+-            kbd_draw_key(kb, next_key, Press);
+-        } else {
+-            kbd_draw_key(kb, next_key, None);
+-        }
++        draw_resting_key(kb, next_key);
+         next_key++;
+     }
++    for (next_key = kb->layout->keys; next_key->type != Last; next_key++) {
++        if (next_key->type != Pad && next_key->type != EndRow &&
++            next_key->glowing && next_key->type != Mod)
++            kbd_draw_key(kb, next_key, Press);
++    }
+ }
+ 
+ void
+--- a/drw.h
++++ b/drw.h
+@@ -50,6 +50,8 @@
+ void drw_over_rectangle(struct drwsurf *ds, Color color, uint32_t x, uint32_t y,
+                         uint32_t w, uint32_t h, int rounding);
+ 
++void drw_draw_glow(struct drwsurf *ds, Color color, int x, int y, int w, int h,
++                   int spread);
+ void drw_draw_line(struct drwsurf *ds, Color color, double x0, double y0,
+                    double x1, double y1, double width);
+ void drw_draw_text(struct drwsurf *ds, Color color, uint32_t x, uint32_t y,
+--- a/drw.c
++++ b/drw.c
+@@ -172,6 +172,34 @@
+ }
+ 
+ void
++drw_draw_glow(struct drwsurf *ds, Color color, int x, int y, int w, int h,
++              int spread)
++{
++    drwsurf_flip(ds);
++    struct drwbuf *d = ds->back_buffer;
++    int left = x - spread < 0 ? 0 : x - spread;
++    int top = y - spread < 0 ? 0 : y - spread;
++    drwsurf_damage(ds, left, top, x + w + spread - left, y + h + spread - top);
++
++    double r = color.bgra[2] / 255.0, g = color.bgra[1] / 255.0;
++    double b = color.bgra[0] / 255.0;
++    cairo_pattern_t *fade = cairo_pattern_create_radial(0, 0, 0, 0, 0, 1);
++    cairo_pattern_add_color_stop_rgba(fade, 0.55, r, g, b, 0.7);
++    cairo_pattern_add_color_stop_rgba(fade, 1.0, r, g, b, 0.0);
++
++    /* An ellipse around the key, fading out over its neighbours */
++    cairo_save(d->cairo);
++    cairo_set_operator(d->cairo, CAIRO_OPERATOR_OVER);
++    cairo_translate(d->cairo, x + w / 2.0, y + h / 2.0);
++    cairo_scale(d->cairo, w / 2.0 + spread, h / 2.0 + spread);
++    cairo_set_source(d->cairo, fade);
++    cairo_arc(d->cairo, 0, 0, 1, 0, 2 * M_PI);
++    cairo_fill(d->cairo);
++    cairo_restore(d->cairo);
++    cairo_pattern_destroy(fade);
++}
++
++void
+ drw_draw_line(struct drwsurf *ds, Color color, double x0, double y0, double x1,
+               double y1, double width)
+ {
+--- a/main.c
++++ b/main.c
+@@ -161,10 +161,8 @@
+     double dx = x - f->trail_x, dy = y - f->trail_y;
+     if (!f->trail_started && dx * dx + dy * dy < TRAIL_START_PX * TRAIL_START_PX)
+         return;
+-    if (!f->trail_started) { /* a stroke, not a press: the key and its preview go */
+-        kbd_clear_last_popup(&keyboard);
+-        kbd_draw_layout(&keyboard);
+-    }
++    if (!f->trail_started) /* a stroke, not a press: the key lets go */
++        kbd_draw_key(&keyboard, f->stroke_first, Unpress);
+     f->trail_started = true;
+     drw_draw_line(keyboard.surf, keyboard.schemes[f->stroke_first->scheme].swipe,
+                   f->trail_x, f->trail_y, x, y, TRAIL_WIDTH_PX);
+@@ -242,7 +240,7 @@
+     if (!f)
+         return;
+     if (f->stroke_first) {
+-        kbd_clear_last_popup(&keyboard);
++        kbd_draw_key(&keyboard, f->stroke_first, Unpress);
+         if (f->stroke_len >= 3 ||
+             (f->stroke_len == 2 && time - f->time >= STROKE_TAP_MS)) {
+             /* \x02 path \x03 for autocorrect.py, which types the word */

@@ -36,6 +36,7 @@
         ./wvkbd-print-single-char.patch
         ./wvkbd-multitouch.patch
         ./wvkbd-swipe.patch
+        ./wvkbd-glow.patch
       ];
   });
 
@@ -55,7 +56,7 @@
     # Type through uinput, so niri's binds, keyd and polkit prompts see the keys
     export WVKBD_UINPUT=1
     # shellcheck disable=SC2086 # one flag per word
-    ${wvkbd}/bin/wvkbd-deskintl -o --hidden -H ${toString height} -L ${toString height} \
+    ${wvkbd}/bin/wvkbd-deskintl -o --no-popup --hidden -H ${toString height} -L ${toString height} \
       --alpha ${toString keyAlpha} \
       --fn "${config.stylix.fonts.sansSerif.name}, Material Symbols Rounded ${toString config.stylix.fonts.sizes.popups}" \
       $WVKBD_COLORS | ${autocorrect}

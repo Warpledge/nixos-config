@@ -123,6 +123,8 @@ when Ky approves it.
   which picks a word by the keys crossed and frequency and types it, with a space first
   when the text ends in a word;
   backspace straight after removes the word. A line follows the finger during a stroke.
+  The key preview popup is off (`--no-popup`); a pressed key glows out over its neighbours
+  instead (wvkbd-glow.patch).
   Both know common contractions, except ones that are real words without the apostrophe.
   Each has a DMS bar plugin (`oskToggle`, `touchpadToggle`, `autocorrectToggle`) added
   from DMS's bar settings; a one-finger swipe up from the bottom edge also runs `osk-toggle`
