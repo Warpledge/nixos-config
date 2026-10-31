@@ -1,0 +1,30 @@
+# Draw symbol and icon labels (Shift, arrows, the Material Symbols keys) larger than letters.
+--- a/drw.c
++++ b/drw.c
+@@ -124,6 +124,8 @@
+     drwsurf_backport(ds);
+ }
+ 
++#define GLYPH_SCALE 1.6
++
+ void
+ drw_draw_text(struct drwsurf *ds, Color color, uint32_t x, uint32_t y,
+               uint32_t w, uint32_t h, uint32_t b, const char *label,
+@@ -135,7 +137,16 @@
+ 
+     cairo_save(d->cairo);
+ 
+-    pango_layout_set_font_description(d->layout, font_description);
++    /* Symbols and Material Symbols start at U+2000, a lead byte of 0xE2 or more */
++    if ((unsigned char)label[0] >= 0xE2) {
++        PangoFontDescription *glyph = pango_font_description_copy(font_description);
++        pango_font_description_set_size(
++            glyph, pango_font_description_get_size(font_description) * GLYPH_SCALE);
++        pango_layout_set_font_description(d->layout, glyph);
++        pango_font_description_free(glyph);
++    } else {
++        pango_layout_set_font_description(d->layout, font_description);
++    }
+ 
+     cairo_set_source_rgba(
+         d->cairo, color.bgra[2] / (double)255, color.bgra[1] / (double)255,
