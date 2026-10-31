@@ -181,6 +181,8 @@ def disabled_rows(flake):
     toggle}], toggle {domain, path, owner} when the row names a settings switch."""
     rows = []
     for i, line in enumerate((_read(os.path.join(flake, DISABLED_DOC)) or "").splitlines()):
+        if line.startswith("## "):
+            break  # later sections (Pinned ahead) hold other tables
         raw = [c.strip() for c in line.strip().strip("|").split("|")]
         name = raw[0].strip("`") if raw else ""
         if not line.startswith("|") or not name or name == "Package" or name.startswith("---"):
