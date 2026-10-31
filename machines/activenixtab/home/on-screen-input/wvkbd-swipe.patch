@@ -1,6 +1,7 @@
 # wvkbd: swipe mode (SIGRTMIN+1, or WVKBD_SWIPE at start). A first finger on a letter sends
 # nothing until it lifts: a tap types the letter, a stroke prints its keys between the
 # bytes 0x02 and 0x03 on stdout, with a line drawn behind the finger.
+# Every key let go prints the byte 0x04, so autocorrect.py knows it can press it.
 --- a/drw.h
 +++ b/drw.h
 @@ -50,6 +50,8 @@
@@ -115,7 +116,7 @@
 +    if (!f->trail_started && dx * dx + dy * dy < TRAIL_START_PX * TRAIL_START_PX)
 +        return;
 +    if (!f->trail_started) /* it's a stroke, not a press: let the key back up */
-+        kbd_draw_key(&keyboard, f->stroke_first, Unpress);
++        kbd_draw_layout(&keyboard);
 +    f->trail_started = true;
 +    drw_draw_line(keyboard.surf, keyboard.schemes[f->stroke_first->scheme].swipe,
 +                  f->trail_x, f->trail_y, x, y, TRAIL_WIDTH_PX);
@@ -126,7 +127,15 @@
  static struct finger *
  finger_find(int32_t id)
  {
-@@ -147,7 +203,7 @@
+@@ -144,10 +200,15 @@
+     keyboard.last_press = f->key;
+     kbd_release_key(&keyboard, time);
+     f->key = NULL;
++    /* The key is up: autocorrect.py may now press it itself */
++    if (keyboard.print) {
++        printf("\x04");
++        fflush(stdout);
++    }
  }
  
  static void
@@ -135,7 +144,7 @@
  {
      struct finger *f = NULL;
      for (int i = 0; i < MAX_FINGERS && !f; i++)
-@@ -155,7 +211,15 @@
+@@ -155,7 +216,15 @@
              f = &fingers[i];
      if (!f)
          return;
@@ -151,7 +160,7 @@
      finger_press_key(f, k, time);
      /* Pressing a latched modifier turns it off; there's nothing to hold then */
      if (k->type == Mod && (keyboard.mods & k->code)) {
-@@ -170,6 +234,26 @@
+@@ -170,6 +239,26 @@
      struct finger *f = finger_find(id);
      if (!f)
          return;
@@ -178,7 +187,7 @@
      finger_release_key(f, time);
      if (f->mod) {
          uint32_t code = f->mod->code;
-@@ -184,9 +268,15 @@
+@@ -184,9 +273,15 @@
  }
  
  static void
@@ -195,7 +204,7 @@
      if (!f || !f->key || f->key == k)
          return;
      finger_release_key(f, time);
-@@ -198,9 +288,12 @@
+@@ -198,9 +293,12 @@
  static void
  fingers_release_all(uint32_t time)
  {
@@ -209,7 +218,7 @@
  }
  
  static void wl_touch_down(void *data, struct wl_touch *wl_touch,
-@@ -373,7 +466,7 @@
+@@ -373,7 +471,7 @@
  
      next_key = kbd_get_key(&keyboard, touch_x, touch_y);
      if (next_key) {
@@ -218,7 +227,7 @@
      } else if (keyboard.compose) {
          keyboard.compose = 0;
          kbd_switch_layout(&keyboard, keyboard.prevlayout,
-@@ -405,7 +498,7 @@
+@@ -405,7 +503,7 @@
      touch_x = wl_fixed_to_int(x);
      touch_y = wl_fixed_to_int(y);
  
@@ -227,7 +236,7 @@
  }
  
  void
-@@ -1009,6 +1102,7 @@
+@@ -1009,6 +1107,7 @@
          layer_names_list = estrdup(tmp);
      if ((tmp = getenv("WVKBD_LANDSCAPE_LAYERS")))
          landscape_layer_names_list = estrdup(tmp);
@@ -235,7 +244,7 @@
      if ((tmp = getenv("WVKBD_HEIGHT")))
          normal_height = atoi(tmp);
      if ((tmp = getenv("WVKBD_LANDSCAPE_HEIGHT")))
-@@ -1388,6 +1482,7 @@
+@@ -1388,6 +1487,7 @@
      sigaddset(&signal_mask, SIGUSR1);
      sigaddset(&signal_mask, SIGUSR2);
      sigaddset(&signal_mask, SIGRTMIN);
@@ -243,7 +252,7 @@
      sigaddset(&signal_mask, SIGPIPE);
      if (sigprocmask(SIG_BLOCK, &signal_mask, NULL) == -1) {
          die("Failed to disable handled signals: %d\n", errno);
-@@ -1420,6 +1515,8 @@
+@@ -1420,6 +1520,8 @@
                  hide();
              else if (si.ssi_signo == SIGUSR2)
                  show();

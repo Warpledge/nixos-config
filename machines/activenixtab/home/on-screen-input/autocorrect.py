@@ -306,7 +306,8 @@ class Corrector:
         self.last_key = 0.0
         self.last_fix = None  # (what was typed, what replaced it)
         self.last_swiped = ""
-        self.auto_space = False  # the last thing typed is a space we added
+        self.after_word = False  # text ends in a word: a stroke needs a space first
+        self.pending = None  # an edit waiting for wvkbd to let go of its key
         self.stroke = None  # the keys of a stroke being read
         self.leave_alone = set()
 
@@ -326,10 +327,22 @@ class Corrector:
         log_stroke(path, word)
         if word:
             word = word.capitalize() if path[0].isupper() else word
-            self.typist.text(word + " ")
-            self.last_swiped = word
+            # The space goes before a word, so punctuation can follow it directly
+            typed = (" " if self.after_word else "") + word
+            self.typist.text(typed)
+            self.last_swiped = typed
+            self.after_word = True
 
     def key(self, ch, now):
+        # wvkbd still holds a key until this marker, and the same key can't be pressed
+        # twice, so anything that retypes or erases waits for it. A new key before the
+        # marker means fast typing: its edit would land in the wrong place, so drop it.
+        if ch == "\x04":
+            pending, self.pending = self.pending, None
+            if pending:
+                pending()
+            return
+        self.pending = None
         if ch == "\x02":
             self.stroke = ""
             return
@@ -344,20 +357,9 @@ class Corrector:
             return
         swiped, self.last_swiped = self.last_swiped, ""
         if ch == "\b" and swiped:
-            # wvkbd's backspace took the space; a word from a stroke goes whole
-            self.typist.erase(len(swiped))
-            self.last_key = now
-            return
-        auto_space, self.auto_space = self.auto_space or bool(swiped), False
-        if auto_space and ch == " ":
-            self.typist.erase(1)  # one is already there
-            self.last_key = now
-            return
-        if auto_space and ch in DELIMITERS:
-            # "well ." becomes "well. ", and another "." stays with it: "well.. "
-            self.typist.erase(2)
-            self.typist.text(ch + " ")
-            self.auto_space = True
+            # wvkbd's backspace took the last letter; a word from a stroke goes whole
+            self.pending = lambda: self.typist.erase(len(swiped) - 1)
+            self.after_word = False
             self.last_key = now
             return
         if now - self.last_key > PAUSE:
@@ -366,15 +368,20 @@ class Corrector:
             self.last_fix = None
         self.last_key = now
         fix, self.last_fix = self.last_fix, None
+        self.after_word = ch.isascii() and ch not in " \n\t\b\x1b"
 
         if ch == "\b":
             if fix and self.on:
                 # wvkbd's backspace already took the delimiter
                 typed, fixed = fix
-                self.typist.erase(len(fixed))
-                self.typist.text(typed)
                 self.leave_alone.add(typed.lower())
                 self.word = typed
+
+                def undo():
+                    self.typist.erase(len(fixed))
+                    self.typist.text(typed)
+
+                self.pending = undo
             elif self.word:
                 self.word = self.word[:-1]
             else:
@@ -383,11 +390,15 @@ class Corrector:
             self.word += ch
         elif ch in DELIMITERS:
             if self.on and self.word:
-                fixed = self.replacement(self.word)
+                typed, fixed = self.word, self.replacement(self.word)
                 if fixed:
-                    self.typist.erase(len(self.word) + 1)
-                    self.typist.text(fixed + ch)
-                    self.last_fix = (self.word, fixed)
+
+                    def replace():
+                        self.typist.erase(len(typed) + 1)
+                        self.typist.text(fixed + ch)
+                        self.last_fix = (typed, fixed)
+
+                    self.pending = replace
             self.word, self.clean = "", True
         elif ch in "\n\t":
             self.word, self.clean = "", True

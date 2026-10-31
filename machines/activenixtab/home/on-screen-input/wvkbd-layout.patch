@@ -2,7 +2,7 @@
 #- no F-key row (top row = numbers); Fn, bottom-left, flips to a layer that is
 #   the same keyboard with a laptop's Fn functions: F1-F12 on the number row,
 #   Ins, Del, and Home/PgUp/PgDn/End on the arrows;
-#- Esc where Caps was (wvkbd-caps-shift.patch does caps), no Cmp (compose still
+#- Esc where Caps was, a small caps key left of Shift (double-tapped Shift too), no Cmp (compose still
 #   works by pressing a letter and sliding), no right Alt/Ctrl/Shift;
 #- the touch_app glyph (KEY_F13, niri-bound, pad mode) sits where right Shift
 #   would; every row sums to the source layout width, 14.5 units.
@@ -51,7 +51,7 @@
    {"a", "A", 1.0, Code, KEY_A, &layouts[ComposeA]},
    {"s", "S", 1.0, Code, KEY_S, &layouts[ComposeS]},
    {"d", "D", 1.0, Code, KEY_D, &layouts[ComposeD]},
-@@ -207,9 +188,8 @@
+@@ -207,10 +188,10 @@
    {"l", "L", 1.0, Code, KEY_L, &layouts[ComposeL]},
    {";", ":", 1.0, Code, KEY_SEMICOLON},
    {"'", "''", 1.0, Code, KEY_APOSTROPHE, &layouts[ComposeBracket]},
@@ -59,10 +59,13 @@
 +  {"Enter", "Enter", 1.75, Code, KEY_ENTER, .scheme = 1},
    {"", "", 0.0, EndRow},
 -
-   {"⇧", "⇫", 2.5, Mod, Shift, .scheme = 1},
+-  {"⇧", "⇫", 2.5, Mod, Shift, .scheme = 1},
++  {"\xee\x8c\x98", "\xee\x8c\x98", 0.75, Code, KEY_CAPSLOCK, .scheme = 1},
++  {"⇧", "⇫", 1.75, Mod, Shift, .scheme = 1},
    {"z", "Z", 1.0, Code, KEY_Z, &layouts[ComposeZ]},
    {"x", "X", 1.0, Code, KEY_X, &layouts[ComposeX]},
-@@ -222,55 +202,93 @@
+   {"c", "C", 1.0, Code, KEY_C, &layouts[ComposeC]},
+@@ -222,55 +203,94 @@
    {".", ">", 1.0, Code, KEY_DOT, &layouts[ComposePunctuation]},
    {"/", "?", 1.0, Code, KEY_SLASH},
    {"↑", "↑", 1.0, Code, KEY_UP, .scheme = 1},
@@ -146,8 +149,10 @@
 +  {"Enter", "Enter", 1.75, Code, KEY_ENTER, .scheme = 1},
    {"", "", 0.0, EndRow},
 -
-   {"⇧", "⇫", 2.5, Mod, Shift, .scheme = 1},
+-  {"⇧", "⇫", 2.5, Mod, Shift, .scheme = 1},
 -  {"", "", 10.0, Pad},
++  {"\xee\x8c\x98", "\xee\x8c\x98", 0.75, Code, KEY_CAPSLOCK, .scheme = 1},
++  {"⇧", "⇫", 1.75, Mod, Shift, .scheme = 1},
 +  {"z", "Z", 1.0, Code, KEY_Z, &layouts[ComposeZ]},
 +  {"x", "X", 1.0, Code, KEY_X, &layouts[ComposeX]},
 +  {"c", "C", 1.0, Code, KEY_C, &layouts[ComposeC]},
