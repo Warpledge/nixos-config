@@ -237,7 +237,7 @@ def back_up(flake, machine, paths):
     pushes. Returns a line for the log, or None when there's no push remote."""
     if push_remote(flake) is None:
         return None
-    paths = [p for p in paths if os.path.isdir(os.path.join(flake, p))]
+    paths = [p for p in paths if os.path.exists(os.path.join(flake, p))]
     if not paths:  # with no paths, add and commit would take the whole tree
         return "Didn't back up: this machine's and user's folders aren't there."
     try:

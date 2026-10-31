@@ -73,7 +73,8 @@ TAB_ICONS = {"main": ("applications-engineering-symbolic",),
 TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
                 ("git", "Git", ("vcs-branch-symbolic", "branch-symbolic", "folder-remote-symbolic")),
                 ("flatpaks", "Flatpaks", ("flatpak-symbolic", "system-software-install-symbolic")),
-                ("backups", "Backups", ("drive-harddisk-symbolic", "document-save-symbolic"))],
+                ("backups", "Backups", ("drive-harddisk-symbolic", "document-save-symbolic")),
+                ("disabled", "Disabled Packages", ("action-unavailable-symbolic", "dialog-warning-symbolic"))],
        "system": [("people", "Users", ("system-users-symbolic", "avatar-default-symbolic"))],
        "packages": [("packages", "Search", ("system-search-symbolic", "edit-find-symbolic"))],
        "niri": [("shell", "Shell", ("view-app-grid-symbolic",)),
@@ -101,6 +102,8 @@ NAV_SUBTITLES = {"overview": "Updates, pinned versions, freeing space, versions,
                  "flatpaks": "Apps nixpkgs doesn't have: update them, clean up, and switch each one "
                              "on or off",
                  "backups": "Back up app data",
+                 "disabled": "Packages switched off after an update broke them, and whether they "
+                             "build again. Turning one back on waits for Apply.",
                  "people": "Who can log in to this computer. Each person picks their own apps by "
                            "opening Omni Settings on their own account.", "packages": "Find packages in nixpkgs",
                  "shell": "DankMaterialShell, the bar, launcher and lock screen niri runs with. "
@@ -307,8 +310,10 @@ def app_card(page, pid, groups):
             "card": pid, "settings": settings, "links": [l for g in groups for l in g["links"]]}
 
 
-def shows(key, wm):
+def shows(key, wm, cfg=None):
     """Whether a TOP page applies to this computer."""
+    if key == "disabled":
+        return bool(cfg and updatestate.disabled_names(cfg.flake))
     if key == "shell":
         return wm == "niri"
     if key == "battery":
@@ -337,7 +342,7 @@ def cmd_load(cfg, _args):
     for tab, _ in TABS:
         items = [{"id": key, "title": title, "icon": list(icons), "custom": True,
                   "subtitle": NAV_SUBTITLES.get(key, "")}
-                 for key, title, icons in TOP[tab] if shows(key, wm)]
+                 for key, title, icons in TOP[tab] if shows(key, wm, cfg)]
         if items:
             nav[tab].append({"id": "", "title": "", "items": items})
     pages, by_section = {}, {key: [] for key, _ in schema.SECTIONS}
@@ -935,6 +940,42 @@ def cmd_upstream(cfg, args):
     return updatestate.run(cfg, force=bool(args.get("force")), cached_only=bool(args.get("cached")))
 
 
+def cmd_disabled_packages(cfg, _args):
+    """docs/nixpkgs/disabled-packages.md's rows, each with Pinned Versions' last
+    check and, when the row names a switch this page may flip, that setting."""
+    state = loaded(cfg)
+    _, direct = access(cfg, state)
+    modules = backend.toggle_modules(cfg.flake)
+    multi = len(state.user_machines) > 1
+    checked = {r["name"]: r for r in updatestate.run(cfg, cached_only=True)["rows"] if r["kind"] == "disabled"}
+    settings = {(s.domain, s.path): s for s in schema.flat(state.pages)}
+    rows = []
+    for r in updatestate.disabled_rows(cfg.flake):
+        t, setting, why = r["toggle"], None, ""
+        if t:
+            s = settings.get((t["domain"], tuple(t["path"])))
+            if s is None or s.kind != "bool":
+                why = "The app doesn't show this switch."
+            elif t["domain"] == "user" and t["owner"] != cfg.user:
+                why = f"It's {t['owner']}'s switch: they turn it back on from their own account."
+            elif t["domain"] == "machine" and t["owner"] != cfg.machine:
+                why = f"It's {t['owner']}'s switch: turn it back on from that computer."
+            elif t["domain"] == "machine" and not direct:
+                why = "Only an admin can turn a computer's switch back on."
+            else:
+                setting = setting_json(cfg, state, s, multi, modules)
+        rows.append(dict(r, check=checked.get(r["name"]), setting=setting, why=why))
+    return {"rows": rows, "doc": updatestate.DISABLED_DOC}
+
+
+def cmd_disabled_check(cfg, args):
+    """Checks one disabled package against nixos-unstable's head now."""
+    name = args.get("name")
+    if name not in updatestate.disabled_names(cfg.flake):
+        raise ValueError(f"{name} isn't in {updatestate.DISABLED_DOC}")
+    return updatestate.check_one(cfg, name)
+
+
 #--------------------------------------------------------------------#
 #-- Backups
 #--------------------------------------------------------------------#
@@ -1423,6 +1464,7 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "flatpaks": cmd_flatpaks, "flatpakUpdates": cmd_flatpak_updates, "flatpakRun": cmd_flatpak_run,
             "flatpakForget": cmd_flatpak_forget, "flatseal": cmd_flatseal,
             "backups": cmd_backups, "backup": cmd_backup, "upstream": cmd_upstream,
+            "disabledPackages": cmd_disabled_packages, "disabledCheck": cmd_disabled_check,
             "people": cmd_people, "checkPerson": cmd_check_person,
             "services": cmd_services, "serviceLog": cmd_service_log, "serviceRestart": cmd_service_restart,
             "ports": cmd_ports,

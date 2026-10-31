@@ -172,14 +172,77 @@ def tagged(_cfg, e):
 #--------------------------------------------------------------------#
 #-- Disabled packages
 #--------------------------------------------------------------------#
+#--- "`audio.reaper = false` in `users/<name>/settings.nix`": a toggle the app can flip back
+TOGGLE = re.compile(r"`([\w.]+)\s*=\s*false`.*?`(users|machines)/([^/`]+)/settings\.nix`")
+
+
+def disabled_rows(flake):
+    """The table in disabled-packages.md: [{name, where, date, rev, reason, line,
+    toggle}], toggle {domain, path, owner} when the row names a settings switch."""
+    rows = []
+    for i, line in enumerate((_read(os.path.join(flake, DISABLED_DOC)) or "").splitlines()):
+        raw = [c.strip() for c in line.strip().strip("|").split("|")]
+        name = raw[0].strip("`") if raw else ""
+        if not line.startswith("|") or not name or name == "Package" or name.startswith("---"):
+            continue
+        raw += [""] * (5 - len(raw))
+        m = TOGGLE.search(raw[1])
+        toggle = m and {"domain": "user" if m.group(2) == "users" else "machine",
+                        "path": m.group(1).split("."), "owner": m.group(3)}
+        rows.append({"name": name, "where": raw[1], "date": raw[2], "rev": raw[3],
+                     "reason": raw[4], "line": i, "toggle": toggle or None})
+    return rows
+
+
 def disabled_names(flake):
     """The first column of the table in disabled-packages.md."""
-    names = []
-    for line in (_read(os.path.join(flake, DISABLED_DOC)) or "").splitlines():
-        cells = [c.strip().strip("`") for c in line.strip().strip("|").split("|")]
-        if line.startswith("|") and cells[0] and cells[0] != "Package" and not cells[0].startswith("---"):
-            names.append(cells[0])
-    return names
+    return [r["name"] for r in disabled_rows(flake)]
+
+
+def prune_disabled(flake, resolved, user):
+    """After a successful rebuild: drops the rows whose switch is on again in
+    `resolved` (lib/settings.nix's result). Returns the names dropped; none when
+    the doc can't be written (a non-admin)."""
+    path = os.path.join(flake, DISABLED_DOC)
+    if not os.access(path, os.W_OK):
+        return []
+    drop = {}
+    for r in disabled_rows(flake):
+        t = r["toggle"]
+        if not t:
+            continue
+        tree = resolved["users"].get(user, {}) if t["domain"] == "user" else resolved
+        if t["domain"] == "user" and t["owner"] != user:
+            continue
+        if backend.dig(tree, t["path"]) is True:
+            drop[r["line"]] = r["name"]
+    if not drop:
+        return []
+    lines = _read(path).splitlines(keepends=True)
+    with open(path, "w") as f:
+        f.writelines(ln for i, ln in enumerate(lines) if i not in drop)
+    return list(drop.values())
+
+
+def unstable_rev():
+    try:
+        return gitstate.github("repos/NixOS/nixpkgs/branches/nixos-unstable")["commit"]["sha"]
+    except (OSError, ValueError, KeyError):
+        return "nixos-unstable"  # unpinned: nix resolves the branch itself
+
+
+def disabled_entry(name, rev):
+    return {"name": name, "repo": "NixOS/nixpkgs", "file": DISABLED_DOC, "rev": rev,
+            "link": f"https://hydra.nixos.org/job/nixpkgs/trunk/{name}.x86_64-linux"}
+
+
+def check_one(cfg, name):
+    """One disabled package's row, checked now."""
+    e = disabled_entry(name, unstable_rev())
+    try:
+        return disabled(cfg, e)
+    except (OSError, ValueError, KeyError, subprocess.TimeoutExpired) as error:
+        return _row("disabled", e, status="error", note=_why(error), link=e["link"])
 
 
 def disabled(_cfg, e):
@@ -216,14 +279,8 @@ def check(cfg):
     jobs += [("input", tagged, e) for e in tagged_inputs(cfg.flake)]
     names = disabled_names(cfg.flake)
     if names:
-        try:
-            rev = gitstate.github("repos/NixOS/nixpkgs/branches/nixos-unstable")["commit"]["sha"]
-        except (OSError, ValueError, KeyError):
-            rev = "nixos-unstable"  # unpinned: nix resolves the branch itself
-        jobs += [("disabled", disabled,
-                  {"name": n, "repo": "NixOS/nixpkgs", "file": DISABLED_DOC, "rev": rev,
-                   "link": f"https://hydra.nixos.org/job/nixpkgs/trunk/{n}.x86_64-linux"})
-                 for n in names]
+        rev = unstable_rev()
+        jobs += [("disabled", disabled, disabled_entry(n, rev)) for n in names]
 
     def one(job):
         kind, fn, e = job

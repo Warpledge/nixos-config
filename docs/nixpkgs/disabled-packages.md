@@ -8,7 +8,7 @@ Packages switched off because they stopped building after a flake update. Add a 
 
 ## Checking whether a fix has landed
 
-`nixm check-updates` (or Pinned Versions on Omni Settings' Maintenance page) runs the free-package check below for every row against nixos-unstable's head, without updating the flake.
+`nixm check-updates` (or Pinned Versions on Omni Settings' Maintenance page) runs the free-package check below for every row against nixos-unstable's head, without updating the flake. Omni Settings' Disabled Packages page checks one row at a time and turns a fixed package's switch back on, when its "Disabled in" cell names one as `` `a.b = false` in `users/<name>/settings.nix` ``; the row goes once that rebuild works.
 
 Run `nixm flake-update` first, so the checks below look at the new nixpkgs revision.
 

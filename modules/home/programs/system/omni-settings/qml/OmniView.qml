@@ -1631,6 +1631,7 @@ Item {
     //--- Custom pages by id
     readonly property var custom: ({ overview: overviewPage, shell: shellPage, git: gitPage,
                                       flatpaks: flatpaksPage, backups: backupsPage,
+                                      disabled: disabledPage,
                                       people: peoplePage,
                                       userpackages: userPackagesPage,
                                       proton: protonPage, protonversions: protonVersionsPage,
@@ -1899,6 +1900,7 @@ Item {
     Component { id: peoplePage; PeoplePage { view: omni } }
     Component { id: backupsPage; BackupsPage { view: omni } }
     Component { id: flatpaksPage; FlatpaksPage { view: omni } }
+    Component { id: disabledPage; DisabledPackagesPage { view: omni } }
     Component { id: overviewPage; OverviewPage { view: omni } }
     Component { id: gitPage; GitPage { view: omni } }
     Component { id: shellPage; ShellPage { view: omni } }
