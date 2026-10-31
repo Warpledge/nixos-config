@@ -235,12 +235,16 @@
       dir = "unsloth/flint-GGUF";
       match = "flint-UD-Q4_K_XL.gguf";
       name = "flint";
+      context = 65536;
+      gpuLayers = "all";
+      cpuMoe = 25;
+      batch = 1024;
     };
     gemma-4-12b-it-qat = {
       category = "chat";
-      name = "gemma 4 12B it qat";
       dir = "unsloth/gemma-4-12B-it-qat-GGUF";
       match = "gemma-4-12B-it-qat-UD-Q4_K_XL.gguf";
+      name = "gemma 4 12B it qat";
     };
   };
 }
