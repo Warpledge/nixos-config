@@ -96,10 +96,10 @@ when Ky approves it.
 - `home/on-screen-input/` — for use without the folio: wvkbd, full width and 390 px
   tall, translucent (`--alpha`) over niri's blur (a layer rule blurs its namespace),
   touch-only (no mouse listener). Layout is Ky's (wvkbd-layout.patch): staggered QWERTY,
-  no F-key row (top row = numbers), Esc where Caps was, no Cmp, no right Alt/Ctrl/Shift;
-  Fn (bottom left, tap on, tap off) flips to the same keyboard with F1-F12 on the numbers,
-  Ins, Del, and Home/PgUp/PgDn/End on the arrows; caps locks on a double-tap of shift
-  (wvkbd-caps-shift.patch); PAD (a Material Symbols glyph, F13) sits where right Shift
+  following the folio's left side: Esc left of 1, Caps left of A, then Ctrl, Fn, Super, Alt;
+  no F-key row, no Cmp, no right Alt/Ctrl/Shift. Fn (tap on, tap off) flips to the same
+  keyboard with F1-F12 on the numbers, ` at top left, Del, and Home/PgUp/PgDn/End on the
+  arrows; PAD (a Material Symbols glyph, F13) sits where right Shift
   would on both layers; every finger is tracked (wvkbd-multitouch.patch), so keys hold
   together for games, a finger held 150 ms slides to the next key, and a modifier a finger
   stays on acts as held while a quick tap still latches; `touch-gestures.py` passes touches

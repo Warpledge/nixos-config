@@ -20,7 +20,6 @@
   keyAlpha = 217;
 
   #--- The desktop layout, rebuilt for Ky (see wvkbd-layout.patch), plus:
-  #- caps locks on a double-tap of shift (wvkbd-caps-shift.patch),
   #- the keys fill the window's height (wvkbd-rows-fill.patch),
   #- no pointer listener at all (only touches press keys),
   #- keys via uinput so niri's binds see the PAD key's F13 (wvkbd-uinput.patch;
@@ -31,7 +30,6 @@
       (old.patches or [])
       ++ [
         ./wvkbd-layout.patch
-        ./wvkbd-caps-shift.patch
         ./wvkbd-rows-fill.patch
         ./wvkbd-touch-only.patch
         ./wvkbd-uinput.patch
