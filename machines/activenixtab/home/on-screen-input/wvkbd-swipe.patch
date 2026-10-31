@@ -1,0 +1,154 @@
+# wvkbd: swipe mode (SIGRTMIN+1, or WVKBD_SWIPE at start). A first finger on a letter sends
+# nothing until it lifts: a tap types the letter, a stroke prints keys on stdout.
+--- a/main.c
++++ b/main.c
+@@ -6,6 +6,7 @@
+ #include "proto/input-method-unstable-v2-protocol.h"
+ #include <errno.h>
+ #include <linux/input-event-codes.h>
++#include <ctype.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+@@ -104,6 +105,8 @@
+ #define MAX_FINGERS 10
+ #define SLIDE_AFTER_MS 150 /* held this long, sliding presses the next key */
+ #define MOD_TAP_MS 300     /* a modifier let go sooner, unused, latches */
++#define STROKE_MAX 63
++#define STROKE_TAP_MS 150  /* two keys crossed this fast is a tap that drifted */
+ 
+ static struct finger {
+     bool down;
+@@ -112,8 +115,40 @@
+     struct key *mod; /* the modifier it holds */
+     bool mod_used;
+     uint32_t time;
++    /* Swipe mode: letters crossed so far, nothing sent until it lifts */
++    char stroke[STROKE_MAX + 1];
++    int stroke_len;
++    struct key *stroke_first, *stroke_last;
+ } fingers[MAX_FINGERS];
+ 
++static bool swipe_mode = false;
++
++static bool
++is_letter(struct key *k)
++{
++    return k && k->type == Code && strlen(k->label) == 1 && isalpha(k->label[0]);
++}
++
++static bool
++stroke_can_start(struct key *k)
++{
++    if (!swipe_mode || !is_letter(k) || (keyboard.mods & (Ctrl | Alt | Super)))
++        return false;
++    for (int i = 0; i < MAX_FINGERS; i++)
++        if (fingers[i].down)
++            return false;
++    return true;
++}
++
++static void
++stroke_add(struct finger *f, struct key *k)
++{
++    if (f->stroke_len < STROKE_MAX)
++        f->stroke[f->stroke_len++] = tolower(k->label[0]);
++    f->stroke_last = k;
++    kbd_draw_key(&keyboard, k, f->stroke_len > 1 ? Swipe : Press);
++}
++
+ static struct finger *
+ finger_find(int32_t id)
+ {
+@@ -155,7 +190,13 @@
+             f = &fingers[i];
+     if (!f)
+         return;
++    bool stroke = stroke_can_start(k);
+     *f = (struct finger){.down = true, .id = id, .time = time};
++    if (stroke) {
++        f->stroke_first = k;
++        stroke_add(f, k);
++        return;
++    }
+     finger_press_key(f, k, time);
+     /* Pressing a latched modifier turns it off; there's nothing to hold then */
+     if (k->type == Mod && (keyboard.mods & k->code)) {
+@@ -170,6 +211,26 @@
+     struct finger *f = finger_find(id);
+     if (!f)
+         return;
++    if (f->stroke_first) {
++        if (f->stroke_len >= 3 ||
++            (f->stroke_len == 2 && time - f->time >= STROKE_TAP_MS)) {
++            /* \x02 path \x03 for autocorrect.py, which types the word */
++            if (keyboard.mods & (Shift | CapsLock))
++                f->stroke[0] = toupper(f->stroke[0]);
++            printf("\x02%.*s\x03", f->stroke_len, f->stroke);
++            fflush(stdout);
++            if ((keyboard.mods & Shift) && !(keyboard.held_mods & Shift))
++                kbd_release_mod(&keyboard, Shift, time);
++            else
++                kbd_draw_layout(&keyboard);
++        } else {
++            kbd_draw_layout(&keyboard);
++            finger_press_key(f, f->stroke_first, time);
++            finger_release_key(f, time);
++        }
++        f->down = false;
++        return;
++    }
+     finger_release_key(f, time);
+     if (f->mod) {
+         uint32_t code = f->mod->code;
+@@ -187,6 +248,11 @@
+ finger_motion(int32_t id, struct key *k, uint32_t time)
+ {
+     struct finger *f = finger_find(id);
++    if (f && f->stroke_first) {
++        if (is_letter(k) && k != f->stroke_last)
++            stroke_add(f, k);
++        return;
++    }
+     if (!f || !f->key || f->key == k)
+         return;
+     finger_release_key(f, time);
+@@ -198,9 +264,12 @@
+ static void
+ fingers_release_all(uint32_t time)
+ {
+-    for (int i = 0; i < MAX_FINGERS; i++)
++    for (int i = 0; i < MAX_FINGERS; i++) {
++        if (fingers[i].down && fingers[i].stroke_first)
++            fingers[i].down = false; /* an unfinished stroke is dropped */
+         if (fingers[i].down)
+             finger_up(fingers[i].id, time);
++    }
+ }
+ 
+ static void wl_touch_down(void *data, struct wl_touch *wl_touch,
+@@ -1009,6 +1078,7 @@
+         layer_names_list = estrdup(tmp);
+     if ((tmp = getenv("WVKBD_LANDSCAPE_LAYERS")))
+         landscape_layer_names_list = estrdup(tmp);
++    swipe_mode = getenv("WVKBD_SWIPE") != NULL;
+     if ((tmp = getenv("WVKBD_HEIGHT")))
+         normal_height = atoi(tmp);
+     if ((tmp = getenv("WVKBD_LANDSCAPE_HEIGHT")))
+@@ -1388,6 +1458,7 @@
+     sigaddset(&signal_mask, SIGUSR1);
+     sigaddset(&signal_mask, SIGUSR2);
+     sigaddset(&signal_mask, SIGRTMIN);
++    sigaddset(&signal_mask, SIGRTMIN + 1);
+     sigaddset(&signal_mask, SIGPIPE);
+     if (sigprocmask(SIG_BLOCK, &signal_mask, NULL) == -1) {
+         die("Failed to disable handled signals: %d\n", errno);
+@@ -1420,6 +1491,8 @@
+                 hide();
+             else if (si.ssi_signo == SIGUSR2)
+                 show();
++            else if (si.ssi_signo == (uint32_t)(SIGRTMIN + 1))
++                swipe_mode = !swipe_mode;
+             else if (si.ssi_signo == SIGRTMIN)
+                 toggle_visibility();
+             else if (si.ssi_signo == SIGPIPE)

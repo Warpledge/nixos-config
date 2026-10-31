@@ -117,8 +117,11 @@ when Ky approves it.
   layout and word frequency); backspace straight after undoes it. It can't see app text
   and skips terminals and KeePassXC, but can't detect password fields. `osk-autocorrect`
   toggles it, off by default, from the key beside space (KEY_F14, niri bind `XF86Launch5`)
-  or the bar button. The swipe key next to it (KEY_F15, `XF86Launch6`) only says swipe
-  isn't built yet.
+  or the bar button. The swipe key next to it (KEY_F15, `XF86Launch6`) runs `osk-swipe`:
+  in swipe mode (wvkbd-swipe.patch) a first finger on a letter sends nothing until it
+  lifts, so a tap types on release and a stroke goes to `autocorrect.py` as `\x02keys\x03`,
+  which picks a word by the keys crossed and frequency and types it plus a space;
+  backspace straight after removes the word.
   Each has a DMS bar plugin (`oskToggle`, `touchpadToggle`, `autocorrectToggle`) added
   from DMS's bar settings; a one-finger swipe up from the bottom edge also runs `osk-toggle`
   (`wm/touch-gestures.py`). Gotchas: wvkbd must be built WITH `wvkbd-uinput.patch` or

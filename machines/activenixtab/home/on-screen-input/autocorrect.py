@@ -1,9 +1,11 @@
-"""Autocorrect for wvkbd. Reads the keys `wvkbd -o` prints on stdin and, on space or
-punctuation, replaces a misspelled word when one correction clearly wins. It only
-knows what was typed on the on-screen keyboard, never the app's text. Off until
-SIGUSR1 (osk-autocorrect) turns it on; the state survives restarts. Words stay in
-memory and are never logged."""
+"""Autocorrect and swipe for wvkbd. Reads the keys `wvkbd -o` prints on stdin and, on
+space or punctuation, replaces a misspelled word when one correction clearly wins. It
+only knows what was typed on the on-screen keyboard, never the app's text. Off until
+SIGUSR1 (osk-autocorrect) turns it on; the state survives restarts. Swipe strokes
+(wvkbd-swipe.patch) arrive as \\x02keys\\x03 and are typed as a word; SIGUSR2 (osk-swipe)
+loads the dictionary ahead of the first one. Words stay in memory and are never logged."""
 
+import functools
 import math
 import os
 import select
@@ -20,13 +22,21 @@ def on_toggle(*_):
     toggled = True
 
 
-# Before the slower imports: SIGUSR1's default action would kill the keyboard
-signal.signal(signal.SIGUSR1, on_toggle)
+swipe_on = False
 
-STATE = os.path.join(
-    os.environ.get("XDG_STATE_HOME", os.path.expanduser("~/.local/state")),
-    "osk-autocorrect-on",
-)
+
+def on_swipe(*_):
+    global swipe_on
+    swipe_on = True
+
+
+# Before the slower imports: these signals' default action would kill the keyboard
+signal.signal(signal.SIGUSR1, on_toggle)
+signal.signal(signal.SIGUSR2, on_swipe)
+
+STATE_DIR = os.environ.get("XDG_STATE_HOME", os.path.expanduser("~/.local/state"))
+STATE = os.path.join(STATE_DIR, "osk-autocorrect-on")
+SWIPE_STATE = os.path.join(STATE_DIR, "osk-swipe-on")  # osk-swipe keeps this one
 PAUSE = 5.0  # seconds without a key after which a word's start can't be trusted
 DELIMITERS = " .,!?;:"
 SKIP_APPS = ("kitty", "ghostty", "foot", "alacritty", "konsole", "keepassxc")
@@ -51,6 +61,7 @@ WEAK_COST = 1.0
 WEAK_MIN_COUNT = 1_000_000
 SHORT_LEN = 4
 SHORT_MIN_COUNT = 100_000_000
+STROKE_FREQ = 0.04  # swipe: score per factor of ten, against a stroke's shape match
 
 
 def near(a, b):
@@ -58,6 +69,37 @@ def near(a, b):
         return False
     (ax, ay), (bx, by) = KEY_POS[a], KEY_POS[b]
     return math.hypot(ax - bx, ay - by) < 1.3
+
+
+def key_at(x, y):
+    row = round(y)
+    if not 0 <= row < len(ROWS):
+        return None
+    letters, offset = ROWS[row]
+    i = math.floor(x - offset)
+    return letters[i] if 0 <= i < len(letters) else None
+
+
+@functools.lru_cache(maxsize=50_000)
+def stroke_of(word):
+    """The keys a straight stroke through a word's letters crosses."""
+    keys = word[0]
+    for a, b in zip(word, word[1:]):
+        (ax, ay), (bx, by) = KEY_POS.get(a, (0, 0)), KEY_POS.get(b, (0, 0))
+        for n in range(1, 21):
+            k = key_at(ax + 0.5 + (bx - ax) * n / 20, ay + (by - ay) * n / 20)
+            if k and k != keys[-1]:
+                keys += k
+    return keys
+
+
+def plain_distance(a, b):
+    row = list(range(len(b) + 1))
+    for i, ca in enumerate(a, 1):
+        previous, row[0] = row[0], i
+        for j, cb in enumerate(b, 1):
+            previous, row[j] = row[j], min(row[j] + 1, row[j - 1] + 1, previous + (ca != cb))
+    return row[-1]
 
 
 def typo_cost(typed, word):
@@ -109,6 +151,27 @@ class Speller:
         while self.hunspell.stdout.readline().strip():
             pass
         return answer[:1] in ("*", "+", "-")
+
+    def decode_stroke(self, path):
+        """The word a swipe across these keys spells, or None. Its first and last
+        letters must be on or beside the stroke's ends, the rest in order between."""
+        best, best_score = None, None
+        for word, count in self.sym.words.items():
+            if len(word) < 2 or len(word) > len(path) + 3:
+                continue
+            if not (word[0] == path[0] or near(word[0], path[0])):
+                continue
+            if not (word[-1] == path[-1] or near(word[-1], path[-1])):
+                continue
+            middle = iter(path[1:-1] if word[0] != path[0] or word[-1] != path[-1] else path)
+            if not all(c in middle for c in word[1:-1]):
+                continue
+            # How far the keys crossed are from the straight lines through the word
+            shape = plain_distance(path, stroke_of(word)) / len(path)
+            score = STROKE_FREQ * math.log10(count) - shape
+            if best_score is None or score > best_score:
+                best, best_score = word, score
+        return best
 
     def correct(self, word):
         """The correction for a lowercase word, or None to leave it alone."""
@@ -205,6 +268,8 @@ class Corrector:
         self.clean = True  # the word's start is known to be the real start
         self.last_key = 0.0
         self.last_fix = None  # (what was typed, what replaced it)
+        self.last_swiped = ""
+        self.stroke = None  # the keys of a stroke being read
         self.leave_alone = set()
 
     def replacement(self, typed):
@@ -217,7 +282,33 @@ class Corrector:
             return None
         return fixed.capitalize() if typed[0].isupper() else fixed
 
+    def swiped(self, path):
+        word = self.speller.decode_stroke(path.lower())
+        self.word, self.clean, self.last_fix = "", True, None
+        if word:
+            word = word.capitalize() if path[0].isupper() else word
+            self.typist.text(word + " ")
+            self.last_swiped = word
+
     def key(self, ch, now):
+        if ch == "\x02":
+            self.stroke = ""
+            return
+        if self.stroke is not None:
+            if ch != "\x03":
+                self.stroke += ch
+                return
+            path, self.stroke = self.stroke, None
+            self.last_key = now
+            if path:
+                self.swiped(path)
+            return
+        swiped, self.last_swiped = self.last_swiped, ""
+        if ch == "\b" and swiped:
+            # wvkbd's backspace took the space; a word from a stroke goes whole
+            self.typist.erase(len(swiped))
+            self.last_key = now
+            return
         if now - self.last_key > PAUSE:
             self.clean = not self.word
             self.word = ""
@@ -261,17 +352,23 @@ def notify(text):
 
 
 def main():
-    global toggled
+    global toggled, swipe_on
     corrector = None
     on = os.path.exists(STATE)
 
     def build():
-        return Corrector(Speller(), Typist())
+        built = Corrector(Speller(), Typist())
+        built.on = on
+        return built
 
-    if on:
+    if on or os.path.exists(SWIPE_STATE):
         corrector = build()
     decode = __import__("codecs").getincrementaldecoder("utf-8")(errors="replace")
     while True:
+        if swipe_on:
+            swipe_on = False
+            if corrector is None:
+                corrector = build()
         if toggled:
             toggled = False
             on = not on
