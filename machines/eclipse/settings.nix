@@ -113,7 +113,10 @@
       mangohud.textColor = "00FF00";
       mangohud.background = 0;
       gpuOffload = [];
-      steamGames = {};
+      steamGames = {
+        "438130" = {launchOptions = "nix-vn-720p %command%";};
+        "1698960" = {launchOptions = "";};
+      };
       claude.mods.ribbon = true;
     };
   };

@@ -46,7 +46,7 @@ def steam_running():
                 argv0 = f.read().split(b"\0", 1)[0]
         except OSError:
             continue
-        if argv0.endswith(b"/ubuntu12_32/steam"):
+        if argv0.endswith((b"/ubuntu12_32/steam", b"/steamrt64/steam")):
             return True
     return False
 
@@ -173,7 +173,9 @@ def main():
     wanted = read_json(os.path.join(state, "steam-games.json"))
     applied_path = os.path.join(state, "steam-games-applied.json")
     applied = read_json(applied_path) or {}
-    if wanted is None or wanted == applied or not os.path.isdir(args.root):
+    # Checked against Steam's files every time, not skipped when wanted == applied:
+    # Steam rewrites localconfig.vdf on exit, undoing a write made while it ran
+    if wanted is None or not os.path.isdir(args.root):
         return 0
     if steam_running():
         print("steam-games-apply: Steam is running; the changes are written when it next starts")
