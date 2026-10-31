@@ -10,4 +10,4 @@ How an app gets its colours (CLAUDE.md rule 5): DMS's theme picker runs matugen,
 - `stylix.nix` for fonts and cursor, `catppuccin.nix` for Plymouth, `fonts.nix`.
 - No module sets the wallpaper: DMS picks it at runtime (`Mod+W`) and `wallpapers/` holds the images.
 
-GTK 4 apps recolour only on restart, except Omni Settings, which reloads `dank-colors.css` itself; Zen, GoofCord and KDE apps also read theirs at start. A template whose `{{ }}` placeholders sit in a `.css` file runs Zed's biome language server out of memory, so those are named `.css.matugen`.
+GTK 4 apps recolour only on restart, except Omni Settings, which reloads `dank-colors.css` itself; Zen, Helium, GoofCord and KDE apps also read theirs at start. A template whose `{{ }}` placeholders sit in a `.css` file runs Zed's biome language server out of memory, so those are named `.css.matugen`.
