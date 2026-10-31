@@ -229,5 +229,12 @@
   maintenance.keepGenerations = 5;
   maintenance.optimise = "daily";
   maintenance.updateReminderDays = 30;
-  localModels.models = {};
+  localModels.models = {
+    flint = {
+      category = "code";
+      name = "flint";
+      dir = "unsloth/flint-GGUF";
+      match = "flint-UD-Q4_K_XL.gguf";
+    };
+  };
 }
