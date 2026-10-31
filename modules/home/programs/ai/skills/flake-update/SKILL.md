@@ -70,6 +70,9 @@ itself (`NIXPKGS_ALLOW_UNFREE=1 nix build --impure --no-link --inputs-from . nix
 plus anything the module adds alongside it (REAPER's SWS and ReaPack extensions),
 instead of asking for `nixm dryrun`. Re-enable what now builds (the `disable-package`
 skill's Re-enabling steps); for what still fails, update the row's revision and reason.
+For each row in its Pinned ahead table, compare nixpkgs' version
+(`nix eval --raw --inputs-from . nixpkgs#<pkg>.version`, before the overlay) with the pin:
+once nixpkgs has it or newer, remove the override and the row.
 
 ## 5. Hand back
 

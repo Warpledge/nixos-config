@@ -12,6 +12,7 @@ import platform
 import pwd
 import re
 import selectors
+import signal
 import shlex
 import shutil
 import socket
@@ -528,11 +529,13 @@ def cmd_local_models(cfg, args):
     card = localmodelstate.gpu(profs)
     entries = localmodelstate.entries(cfg.flake, lm)
     profile = lm["profile"]
+    knows = localmodelstate.architectures(os.environ.get("OMNI_SETTINGS_LLAMA_SERVER"))
     models = []
     for mid, (category, entry) in entries.items():
         own = lm["models"].get(mid) or {}
         t = localmodelstate.effective(entry, profile, profs, own)
         path = localmodelstate.find_file(entry)
+        arch = localmodelstate.arch_of(path) if path else ""
         models.append({"id": mid, "category": category, "name": entry.get("name", mid),
                        "dir": entry.get("dir", ""), "match": entry.get("match", ""),
                        "added": mid in lm["models"] and "category" in own, "own": own,
@@ -541,6 +544,7 @@ def cmd_local_models(cfg, args):
                        "cache": entry.get("cache") or "q8_0",
                        "flags": localmodelstate.flags(t, profile, profs) + list(entry.get("args") or []),
                        "lastTest": localmodelstate.last_test(mid, t),
+                       "arch": arch, "supported": knows(arch) if knows else True,
                        "file": path and os.path.basename(path),
                        "bytes": path and localmodelstate.size_of(path)})
     return {"gpu": card, "profile": profile,
@@ -548,7 +552,7 @@ def cmd_local_models(cfg, args):
                           "note": v.get("note", "")} for k, v in profs.items()],
             "models": models,
             "files": localmodelstate.scan({**(localmodelstate.catalog(cfg.flake).get("edit") or {}),
-                                           **{m: e for m, (_, e) in entries.items()}}),
+                                           **{m: e for m, (_, e) in entries.items()}}, knows),
             "canTest": bool(os.environ.get("OMNI_SETTINGS_LLAMA_SERVER"))}
 
 
@@ -576,6 +580,27 @@ def cmd_local_model_test(cfg, args):
                                   lm["profile"], profs)
     localmodelstate.remember(mid, t, result)
     return result
+
+
+def cmd_local_model_auto_tune(cfg, args):
+    """Searches for the model's best tuning by loading it repeatedly (args.goal
+    "speed" or "context", args.minRate for "context"); progress on stderr. Stop
+    sends SIGTERM, which unwinds so llama-server is stopped too."""
+    signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))
+    lm, profs, mid, _, entry, path = local_model(cfg, args)
+    profile = lm["profile"]
+    base = localmodelstate.effective(entry, profile, profs, lm["models"].get(mid))
+    card = localmodelstate.gpu(profs)
+    localmodelstate.runnable(os.environ.get("OMNI_SETTINGS_LLAMA_SERVER"), path)
+    localmodelstate.unload_swap()
+    try:
+        out = localmodelstate.autotune(os.environ.get("OMNI_SETTINGS_LLAMA_SERVER"), path, entry, base,
+                                       args.get("goal") or "speed", float(args.get("minRate") or 20),
+                                       card, profile, profs)
+    except localmodelstate.TooBig as e:
+        raise ValueError(str(e)) from None
+    localmodelstate.remember(mid, localmodelstate.effective(entry, profile, profs, out["best"]), out["result"])
+    return out
 
 
 def cmd_firmware(_cfg, args):
@@ -1599,7 +1624,7 @@ def cmd_save_window_rule(cfg, args):
 
 COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cmd_save,
             "localModels": cmd_local_models, "localModelEstimate": cmd_local_model_estimate,
-            "localModelTest": cmd_local_model_test,
+            "localModelTest": cmd_local_model_test, "localModelAutoTune": cmd_local_model_auto_tune,
             "dismiss": cmd_dismiss, "saveUi": cmd_saveUi,
             "stale": cmd_stale, "removeStale": cmd_remove_stale,
             "overview": cmd_overview, "freed": cmd_freed, "boot": cmd_boot,

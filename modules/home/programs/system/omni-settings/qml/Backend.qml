@@ -98,7 +98,8 @@ Singleton {
         p.running = true
     }
 
-    //--- As call(), with each line the command prints to stderr given to onLine
+    //--- As call(), with each line the command prints to stderr given to onLine;
+    //--- returns the process, which `running = false` stops
     function stream(cmd, args, onLine, done) {
         const p = streamer.createObject(backend, {
             command: [bin, cmd, JSON.stringify(args || {})],
@@ -106,6 +107,7 @@ Singleton {
             each: onLine
         })
         p.running = true
+        return p
     }
 
     Component {

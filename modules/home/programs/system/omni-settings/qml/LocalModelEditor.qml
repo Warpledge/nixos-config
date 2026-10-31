@@ -22,6 +22,46 @@ Sheet {
     property var log: []
     property var result: null
     property bool testing: false
+    //--- The live view: localModelTest's "@" events (localmodelstate.event)
+    property string stage: ""  // unload, load, prompt, generate, done
+    property var vramSeries: []  // 0 to 1, oldest first
+    property var ramSeries: []
+    property var mem: null  // the last {vram, vramTotal, ram, ramTotal}
+    property int tokens: 0
+    property real rate: 0
+    readonly property int maxTokens: 256  // the test prompt's max_tokens
+    // The graph stretches to fill its width as samples come in, up to 2 minutes
+    readonly property int graphSamples: Math.max(40, vramSeries.length)
+    function takeTestLine(line) {
+        if (line.startsWith("@")) {
+            let e
+            try { e = JSON.parse(line.slice(1)) } catch (err) { return }
+            if (e.event === "stage")
+                stage = e.stage
+            else if (e.event === "mem") {
+                mem = e
+                vramSeries = vramSeries.slice(-239).concat([e.vramTotal ? e.vram / e.vramTotal : 0])
+                ramSeries = ramSeries.slice(-239).concat([e.ramTotal ? e.ram / e.ramTotal : 0])
+            } else if (e.event === "attempt") {
+                if (e.status === "best") {
+                    bestN = e.n
+                    return
+                }
+                const list = attempts.filter(a => a.n !== e.n)
+                list.push(e)
+                attempts = list.sort((a, b) => a.n - b.n)
+                if (e.status === "running") {  // a new load: its own counters
+                    tokens = 0
+                    rate = 0
+                }
+            } else if (e.event === "tokens") {
+                tokens = e.n
+                rate = e.rate
+            }
+            return
+        }
+        log = log.slice(-199).concat([line])
+    }
     readonly property bool unified: models.info && models.info.gpu.memory === "unified"
     readonly property bool moe: !!fit && fit.model.moe
 
@@ -81,12 +121,72 @@ Sheet {
                 ed.fitError = reply.error
         })
     }
-    function runTest() {
+    function resetLive() {
         testing = true
         log = []
         result = null
+        stage = ""
+        vramSeries = []
+        ramSeries = []
+        mem = null
+        tokens = 0
+        rate = 0
+        attempts = []
+        bestN = 0
+    }
+
+    //--- Auto-Tune (api.py's localModelAutoTune): attempts follow as "attempt" events
+    property bool tuning: false
+    property bool stopping: false
+    property var tuneProc: null
+    property string goal: "speed"
+    property int minRate: 20
+    property var attempts: []  // [{n, tuning, status, rate, prompt, vramPeak}]
+    property int bestN: 0
+    function runAutoTune() {
+        resetLive()
+        tuning = true
+        tuneProc = Backend.stream("localModelAutoTune",
+                                  { id: model.id, localModels: merged(), goal, minRate },
+                                  line => ed.takeTestLine(line), reply => {
+            if (!ed)
+                return
+            ed.testing = false
+            ed.tuning = false
+            ed.tuneProc = null
+            if (ed.stopping) {
+                ed.stopping = false
+                ed.view.say("Auto-Tune stopped")
+                return
+            }
+            if (reply.ok) {
+                ed.useTuning(reply.data.best)  // the estimate then shows its saved result
+                ed.view.say(`Auto-Tune picked ${ed.describe(reply.data.best)}; Save to keep it`)
+                if (reply.data.note)
+                    ed.view.say(reply.data.note)
+            } else
+                ed.view.ask({ heading: "Auto-Tune didn't finish", body: reply.error, cancel: false,
+                              buttons: [{ label: "OK", value: true }] }, () => {})
+        })
+    }
+    function stopAutoTune() {
+        if (!tuneProc)
+            return
+        stopping = true
+        tuneProc.running = false  // SIGTERM: the backend stops llama-server on its way out
+    }
+    //--- A tuning in a few words: "20 experts in RAM · 128K · batch 2048"
+    function describe(t) {
+        const where = t.cpuMoe !== undefined ? `${t.cpuMoe} experts in RAM`
+                    : t.gpuLayers === "all" || t.gpuLayers === undefined ? "all on the GPU"
+                    : `${t.gpuLayers} layers on the GPU`
+        return [where, contextLabel(t.context).replace(" tokens", ""), `batch ${t.batch || 512}`].join(" · ")
+    }
+
+    function runTest() {
+        resetLive()
         Backend.stream("localModelTest", { id: model.id, localModels: merged() },
-                       line => ed.log = ed.log.slice(-5).concat([line]), reply => {
+                       line => ed.takeTestLine(line), reply => {
             if (!ed)
                 return
             ed.testing = false
@@ -371,19 +471,286 @@ Sheet {
               + "llama-swap's model first; llama-swap loads it again the next time an app asks."
     }
     ListRow {
-        visible: ed.models.info && ed.models.info.canTest
+        visible: !ed.model.supported
+        icon: "block"
+        tone: "caution"
+        title: `Can't run ${ed.model.arch} models yet`
+        info: "LM Studio has its own, newer engine. llama-swap runs nixpkgs' llama.cpp, which "
+              + "doesn't know this model's architecture until nixpkgs updates it."
+    }
+    ListRow {
+        visible: ed.models.info && ed.models.info.canTest && ed.model.supported
         icon: ed.testing ? "progress_activity" : "speed"
         title: ed.testing ? "Testing…" : ed.result ? `${ed.result.tokensPerSecond} tokens a second`
                                                     + (ed.fit && ed.fit.lastTest ? ` · tested ${ed.fit.lastTest.at}` : "")
                                                   : "Test These Settings"
-        subtitle: ed.testing ? (ed.log.length ? ed.log[ed.log.length - 1] : "Loading the model")
-                  : ed.result ? `Reads prompts at ${ed.result.promptPerSecond} tokens a second · VRAM peak `
-                                + `${ed.gb(ed.result.vramPeak)} of ${ed.gb(ed.result.vramTotal)} GB · `
-                                + `${ed.gb(ed.result.ramUsed)} GB more RAM`
+        subtitle: ed.testing ? ({ unload: "Freeing the GPU", load: "Loading the model", prompt: "Reading the prompt",
+                                  generate: "Writing a reply" })[ed.stage] || "Starting"
+                  : ed.result ? `Prompts ${ed.result.promptPerSecond} tok/s · VRAM peak `
+                                + `${ed.gb(ed.result.vramPeak)} of ${ed.gb(ed.result.vramTotal)} GB`
                   : "Loading takes up to a minute"
         tone: ed.result && ed.result.vramPeak > ed.result.vramTotal * 0.97 ? "caution" : ""
         button: ed.testing ? "" : ed.result ? "Again" : "Test"
         onClicked: ed.runTest()
+    }
+
+    Section {
+        visible: ed.models.info && ed.models.info.canTest && ed.model.supported
+        text: "Auto-Tune"
+        info: "Loads the model again and again, changing one setting at a time, and keeps the "
+              + "best that fits. Takes 3 to 8 minutes; llama-swap's model is unloaded meanwhile."
+    }
+    Choice {
+        visible: ed.models.info && ed.models.info.canTest && ed.model.supported
+        title: "Goal"
+        tip: "Fastest keeps the context set above and finds the quickest split. Most Context finds "
+             + "the longest context that still writes at the speed you pick."
+        current: ed.goal
+        options: [{ value: "speed", label: "Fastest at This Context" }, { value: "context", label: "Most Context" }]
+        onPicked: v => ed.goal = v
+    }
+    Choice {
+        visible: ed.models.info && ed.models.info.canTest && ed.model.supported && ed.goal === "context"
+        title: "At Least"
+        tip: "The slowest replies you'd accept. 20 tokens a second reads comfortably; coding "
+             + "agents feel slow under 15."
+        current: ed.minRate
+        options: [10, 15, 20, 30].map(n => ({ value: n, label: `${n} tokens a second` }))
+        onPicked: v => ed.minRate = v
+    }
+    ListRow {
+        visible: ed.models.info && ed.models.info.canTest && ed.model.supported
+        icon: ed.tuning ? "progress_activity" : "auto_fix_high"
+        title: ed.tuning ? `Auto-Tuning… attempt ${ed.attempts.length || 1}` : "Find the Best Settings"
+        subtitle: ed.tuning ? (ed.attempts.length ? ed.describe(ed.attempts[ed.attempts.length - 1].tuning) : "Freeing the GPU")
+                            : "The winner fills the settings above; Save keeps it"
+        button: ed.tuning ? (ed.stopping ? "" : "Stop") : ed.testing ? "" : "Auto-Tune"
+        onClicked: ed.tuning ? ed.stopAutoTune() : ed.runAutoTune()
+    }
+
+    //--- What the test is doing: its steps, memory as it loads, and the reply's speed
+    Rectangle {
+        id: live
+        visible: ed.testing || ed.log.length > 0 || ed.attempts.length > 0
+        Layout.fillWidth: true
+        implicitHeight: liveCol.implicitHeight + 24
+        radius: 14
+        color: Qt.alpha(Theme.bg, 0.55)
+        border.width: 1
+        border.color: Theme.rule
+        readonly property var steps: [["unload", "Free the GPU", "memory_alt"], ["load", "Load", "download"],
+                                      ["prompt", "Read Prompt", "description"], ["generate", "Write Reply", "edit_note"]]
+        readonly property int at: ed.stage === "done" ? steps.length : steps.findIndex(s => s[0] === ed.stage)
+        ColumnLayout {
+            id: liveCol
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.margins: 12
+            spacing: 12
+
+            //--- Steps: done ones ticked, the current one pulsing
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 4
+                Repeater {
+                    model: live.steps
+                    ColumnLayout {
+                        id: step
+                        required property var modelData
+                        required property int index
+                        readonly property bool done: index < live.at
+                        readonly property bool current: index === live.at && ed.testing
+                        Layout.preferredWidth: (liveCol.width - 12) / live.steps.length
+                        spacing: 4
+                        Rectangle {
+                            Layout.alignment: Qt.AlignHCenter
+                            implicitWidth: 34
+                            implicitHeight: 34
+                            radius: 17
+                            color: step.done ? Theme.primary : step.current ? Qt.alpha(Theme.primary, 0.25) : Theme.cardHover
+                            Icon {
+                                anchors.centerIn: parent
+                                icon: step.done ? "check" : step.modelData[2]
+                                size: 18
+                                color: step.done ? Theme.inkPrimary : step.current ? Theme.primary : Theme.dim
+                            }
+                            SequentialAnimation on opacity {
+                                running: step.current
+                                loops: Animation.Infinite
+                                alwaysRunToEnd: true
+                                NumberAnimation { to: 0.45; duration: 600; easing.type: Easing.InOutQuad }
+                                NumberAnimation { to: 1; duration: 600; easing.type: Easing.InOutQuad }
+                            }
+                        }
+                        Text {
+                            Layout.alignment: Qt.AlignHCenter
+                            text: step.modelData[1]
+                            color: step.done || step.current ? Theme.text : Theme.dim
+                            font.pixelSize: 12
+                        }
+                    }
+                }
+            }
+
+            //--- Memory over the test: VRAM and RAM as shares of each total
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 14
+                Repeater {
+                    model: [["VRAM", Theme.primary, ed.mem ? ed.mem.vram : 0, ed.mem ? ed.mem.vramTotal : 0],
+                            ["RAM", Theme.caution, ed.mem ? ed.mem.ram : 0, ed.mem ? ed.mem.ramTotal : 0]]
+                    RowLayout {
+                        required property var modelData
+                        spacing: 6
+                        Rectangle { implicitWidth: 8; implicitHeight: 8; radius: 4; color: parent.modelData[1] }
+                        Text {
+                            text: `${parent.modelData[0]} ${ed.gb(parent.modelData[2])} of ${ed.gb(parent.modelData[3])} GB`
+                            color: Theme.text
+                            font.pixelSize: 13
+                        }
+                    }
+                }
+                Item { Layout.fillWidth: true }
+            }
+            Rectangle {
+                Layout.fillWidth: true
+                implicitHeight: 90
+                radius: 8
+                color: Theme.cardHover
+                // Lines at a half and at full
+                Rectangle { x: 0; y: parent.height / 2; width: parent.width; height: 1; color: Theme.rule }
+                LineGraph {
+                    anchors.fill: parent
+                    anchors.margins: 4
+                    values: ed.ramSeries
+                    count: ed.graphSamples
+                    color: Theme.caution
+                }
+                LineGraph {
+                    anchors.fill: parent
+                    anchors.margins: 4
+                    values: ed.vramSeries
+                    count: ed.graphSamples
+                    color: Theme.primary
+                }
+            }
+
+            //--- The reply as it's written
+            RowLayout {
+                visible: ed.stage === "generate" || ed.stage === "done"
+                Layout.fillWidth: true
+                spacing: 10
+                Text {
+                    text: (ed.stage === "done" && ed.result ? ed.result.tokensPerSecond : ed.rate).toFixed(1)
+                    color: Theme.primary
+                    font.pixelSize: 28
+                    font.weight: Font.Bold
+                }
+                ColumnLayout {
+                    spacing: 4
+                    Layout.fillWidth: true
+                    Text {
+                        text: `tokens a second · ${ed.stage === "done" ? ed.maxTokens : ed.tokens} of ${ed.maxTokens} written`
+                        color: Theme.dim
+                        font.pixelSize: 13
+                    }
+                    Rectangle {
+                        Layout.fillWidth: true
+                        implicitHeight: 6
+                        radius: 3
+                        color: Theme.cardHover
+                        Rectangle {
+                            width: parent.width * Math.min(1, ed.stage === "done" ? 1 : ed.tokens / ed.maxTokens)
+                            height: parent.height
+                            radius: 3
+                            color: Theme.primary
+                            Behavior on width { NumberAnimation { duration: 240 } }
+                        }
+                    }
+                }
+            }
+
+            //--- Auto-Tune's attempts, the winner marked once it's done
+            Text {
+                visible: ed.attempts.length > 0
+                text: "Attempts"
+                color: Theme.text
+                font.pixelSize: 14
+                TitleTip { tip: "Each load Auto-Tune tried. Too big ran out of VRAM; Tight fit but left "
+                                + "under 0.5 GB free, where speed drops." }
+            }
+            Repeater {
+                model: ed.attempts
+                RowLayout {
+                    required property var modelData
+                    readonly property bool winner: modelData.n === ed.bestN
+                    Layout.fillWidth: true
+                    spacing: 8
+                    Text {
+                        text: `${modelData.n}.`
+                        color: Theme.dim
+                        font.pixelSize: 13
+                        Layout.preferredWidth: 22
+                    }
+                    Text {
+                        text: ed.describe(modelData.tuning)
+                        color: parent.winner ? Theme.primary : Theme.text
+                        font.pixelSize: 13
+                        font.weight: parent.winner ? Font.DemiBold : Font.Normal
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                    }
+                    Text {
+                        text: modelData.status === "running" ? "Testing…"
+                              : modelData.status === "too big" ? "Too big"
+                              : `${modelData.rate} tok/s · ${ed.gb(modelData.vramPeak)} GB`
+                                + (modelData.status === "tight" ? " · Tight" : "")
+                        color: modelData.status === "fits" ? Theme.text
+                               : modelData.status === "running" ? Theme.dim : Theme.caution
+                        font.pixelSize: 13
+                    }
+                    Chip { visible: parent.winner; text: "Best"; accent: true; tappable: false }
+                }
+            }
+
+            //--- llama-server's own output, for when something goes wrong
+            RowLayout {
+                Layout.fillWidth: true
+                Text {
+                    text: "Log"
+                    color: Theme.text
+                    font.pixelSize: 14
+                    TitleTip { tip: "Everything llama-server printed during the test." }
+                }
+                Item { Layout.fillWidth: true }
+                Chevron { open: logReveal.open; lit: logHover.hovered }
+                HoverHandler { id: logHover; cursorShape: Qt.PointingHandCursor }
+                TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: logReveal.open = !logReveal.open }
+            }
+            Reveal {
+                id: logReveal
+                gap: liveCol.spacing
+                ListView {
+                    id: logView
+                    Layout.fillWidth: true
+                    implicitHeight: 220
+                    clip: true
+                    model: logReveal.shown ? ed.log : []
+                    onCountChanged: positionViewAtEnd()
+                    boundsBehavior: Flickable.StopAtBounds
+                    delegate: Text {
+                        required property var modelData
+                        width: logView.width
+                        text: modelData
+                        color: Theme.dim
+                        font.family: "monospace"
+                        font.pixelSize: 11
+                        wrapMode: Text.WrapAnywhere
+                    }
+                }
+            }
+        }
     }
 
     actions: [

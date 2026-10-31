@@ -128,7 +128,8 @@ ColumnLayout {
                       + (modelData.lastTest ? ` · ${modelData.lastTest.result.tokensPerSecond} tok/s` : "")
             value: page.contextLabel(modelData.effective.context)
             tag: modelData.added ? "Added Here" : Object.keys(modelData.own).length ? "Tuned Here" : ""
-            tone: modelData.file ? "" : "caution"
+            tone: modelData.file && modelData.supported ? "" : "caution"
+            alert: modelData.supported ? "" : `llama-swap's llama.cpp can't run ${modelData.arch} models yet`
             chevron: true
             onClicked: page.edit(modelData)
         }
@@ -148,7 +149,9 @@ ColumnLayout {
             icon: "download_done"
             title: modelData.file
             subtitle: `${modelData.dir} · ${page.gb(modelData.bytes)}`
-            button: page.locked ? "" : "Add"
+            alert: modelData.supported ? "" : `llama-swap's llama.cpp can't run ${modelData.arch} models yet`
+            tone: modelData.supported ? "" : "caution"
+            button: page.locked || !modelData.supported ? "" : "Add"
             onClicked: page.add(modelData)
         }
     }
