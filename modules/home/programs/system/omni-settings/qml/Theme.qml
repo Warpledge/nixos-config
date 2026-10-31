@@ -30,10 +30,6 @@ Singleton {
     // Rules and card edges: outline_variant can match the background in some schemes
     readonly property color rule: Qt.alpha(dim, 0.22)
     readonly property color primary: col("primary")
-    // Primary's hue turned a quarter back (mauve to cyan): matugen's secondary and
-    // tertiary can sit next to primary, so this one stays apart from it in any scheme
-    readonly property color away: Qt.hsla((primary.hslHue + 0.75) % 1, primary.hslSaturation,
-                                          primary.hslLightness, 1)
     readonly property color inkPrimary: col("on_primary")
     readonly property color primaryContainer: col("primary_container")
     readonly property color inkContainer: col("on_primary_container")

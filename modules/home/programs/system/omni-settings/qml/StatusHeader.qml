@@ -57,20 +57,17 @@ ColumnLayout {
         const st = status
         const git = view.gitCounts
         if (info && info.wm)
-            out.push({ icon: "view_column", text: info.wm })
+            out.push({ icon: "view_column", text: info.wm, tone: "primary" })
         if (st)
-            out.push({ icon: "memory", text: kernelName(st.kernel) },
+            out.push({ icon: "memory", text: kernelName(st.kernel), tone: "primary" },
                      { icon: "", text: st.release, tone: "info" })
         if (usage)
-            out.push({ icon: "hard_drive", text: `${Fmt.size(usage.diskFree)} free` })
-        // Git as its icon and what's waiting; the branch and the words are in its tip
+            out.push({ icon: "hard_drive", text: `${Fmt.size(usage.diskFree)} free`, tone: "primary" })
+        // Git as its icon, then the collapsed Git page's badges for what's waiting
         if (git && git.branch)
-            out.push({ icon: "fork_right", text: "",
-                       trail: [git.changed ? `±${git.changed}` : "", git.ahead ? `↑${git.ahead}` : "",
-                               git.behind ? `↓${git.behind}` : ""].filter(t => t).join(" "),
-                       tip: [`On ${git.branch}`, git.changed ? `${git.changed} changed` : "",
-                             git.ahead ? `${git.ahead} to push` : "",
-                             git.behind ? `${git.behind} to pull` : ""].filter(t => t).join(" · ") })
+            return out.concat([{ icon: "fork_right", text: "", tip: `On ${git.branch}` }],
+                              view.pageAlerts("git").map(a => ({ icon: a.icon, text: `${a.n}`,
+                                                                 tip: a.tip, tone: "caution" })))
         return out
     }
 
@@ -105,8 +102,8 @@ ColumnLayout {
                             icon: "computer"
                             text: header.status ? header.status.hostname : ""
                             big: true
-                            fill: Qt.alpha(Theme.away, 0.2)
-                            ink: Theme.away
+                            fill: Qt.alpha(Theme.primary, 0.2)
+                            ink: Theme.primary
                             tip: "This computer"
                         }
                         Item { Layout.fillWidth: true }
@@ -206,7 +203,6 @@ ColumnLayout {
                             required property var modelData
                             icon: modelData.icon
                             text: modelData.text
-                            trail: modelData.trail || ""
                             tip: modelData.tip || ""
                             fill: modelData.tone ? Qt.alpha(Theme.toneColor(modelData.tone), 0.16) : Theme.cardHover
                             ink: modelData.tone ? Theme.toneColor(modelData.tone) : Theme.dim
@@ -234,7 +230,6 @@ ColumnLayout {
         id: pill
         property string icon: ""
         property string text: ""
-        property string trail: ""  // in caution after the text
         property bool dot: false
         property bool big: false  // the larger pills in the header's top cards
         property string tip: ""
@@ -275,14 +270,6 @@ ColumnLayout {
                 color: pill.ink
                 font.pixelSize: pill.big ? 13 : 11
                 font.weight: pill.big ? Font.Bold : Font.DemiBold
-            }
-            Text {
-                visible: pill.trail !== ""
-                anchors.verticalCenter: parent.verticalCenter
-                text: pill.trail
-                color: Theme.caution
-                font.pixelSize: 11
-                font.weight: Font.Bold
             }
         }
     }
