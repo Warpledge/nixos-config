@@ -6,6 +6,7 @@
 #   works by pressing a letter and sliding), no right Alt/Ctrl/Shift;
 #- the touch_app glyph (KEY_F13, niri-bound, pad mode) sits where right Shift
 #   would; every row sums to the source layout width, 14.5 units.
+#- beside space: autocorrect (KEY_F14) and swipe (KEY_F15), both niri-bound.
 --- a/layout.deskintl.h
 +++ b/layout.deskintl.h
 @@ -146,22 +146,6 @@
@@ -61,7 +62,7 @@
    {"⇧", "⇫", 2.5, Mod, Shift, .scheme = 1},
    {"z", "Z", 1.0, Code, KEY_Z, &layouts[ComposeZ]},
    {"x", "X", 1.0, Code, KEY_X, &layouts[ComposeX]},
-@@ -222,55 +202,89 @@
+@@ -222,55 +202,93 @@
    {".", ">", 1.0, Code, KEY_DOT, &layouts[ComposePunctuation]},
    {"/", "?", 1.0, Code, KEY_SLASH},
    {"↑", "↑", 1.0, Code, KEY_UP, .scheme = 1},
@@ -73,14 +74,15 @@
 -  {"Ctr", "Ctr", 1.0, Mod, Ctrl, .scheme = 1},
 -  {"Sup", "Sup", 1.0, Mod, Super, .scheme = 1},
 -  {"Alt", "Alt", 1.0, Mod, Alt, .scheme = 1},
--  {"", "", 5.0, Code, KEY_SPACE},
--  {"AGr", "AGr", 1.0, Mod, AltGr, .scheme = 1},
--  {"Ctr", "Ctr", 1.0, Mod, Ctrl, .scheme = 1},
 +  {"Fn", "Fn", 1.5, NextLayer, .scheme = 1},
 +  {"\xee\xab\xa6", "\xee\xab\xa6", 1.0, Mod, Ctrl, .scheme = 1},
 +  {"\xee\xab\xa7", "\xee\xab\xa7", 1.0, Mod, Super, .scheme = 1},
 +  {"\xee\xab\xa8", "\xee\xab\xa8", 1.0, Mod, Alt, .scheme = 1},
-+  {"", "", 7.0, Code, KEY_SPACE},
+   {"", "", 5.0, Code, KEY_SPACE},
+-  {"AGr", "AGr", 1.0, Mod, AltGr, .scheme = 1},
+-  {"Ctr", "Ctr", 1.0, Mod, Ctrl, .scheme = 1},
++  {"\xee\xa3\x8e", "\xee\xa3\x8e", 1.0, Code, KEY_F14, .scheme = 1},
++  {"\xee\xa7\xac", "\xee\xa7\xac", 1.0, Code, KEY_F15, .scheme = 1},
    {"←", "←", 1.0, Code, KEY_LEFT, .scheme = 1},
    {"↓", "↓", 1.0, Code, KEY_DOWN, .scheme = 1},
    {"→", "→", 1.0, Code, KEY_RIGHT, .scheme = 1},
@@ -174,7 +176,9 @@
 +  {"\xee\xab\xa6", "\xee\xab\xa6", 1.0, Mod, Ctrl, .scheme = 1},
 +  {"\xee\xab\xa7", "\xee\xab\xa7", 1.0, Mod, Super, .scheme = 1},
 +  {"\xee\xab\xa8", "\xee\xab\xa8", 1.0, Mod, Alt, .scheme = 1},
-+  {"", "", 7.0, Code, KEY_SPACE},
++  {"", "", 5.0, Code, KEY_SPACE},
++  {"\xee\xa3\x8e", "\xee\xa3\x8e", 1.0, Code, KEY_F14, .scheme = 1},
++  {"\xee\xa7\xac", "\xee\xa7\xac", 1.0, Code, KEY_F15, .scheme = 1},
    {"Home", "Home", 1.0, Code, KEY_HOME, .scheme = 1},
    {"PgDn", "PgDn", 1.0, Code, KEY_PAGEDOWN, .scheme = 1},
    {"End", "End", 1.0, Code, KEY_END, .scheme = 1},

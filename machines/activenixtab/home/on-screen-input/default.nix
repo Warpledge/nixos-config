@@ -141,6 +141,20 @@ in {
     action.spawn = ["${pad-mode}/bin/osk-pad-mode"];
   };
 
+  #--- The keys beside space: KEY_F14 and KEY_F15 are these keysyms in xkb
+  niri.keybinds.osk-autocorrect = {
+    key = "XF86Launch5";
+    title = "Autocorrect on / off";
+    action.spawn = ["${autocorrect-toggle}/bin/osk-autocorrect"];
+  };
+
+  #--- Swipe isn't built yet; the bind keeps its key from reaching apps
+  niri.keybinds.osk-swipe = {
+    key = "XF86Launch6";
+    title = "Swipe typing (not built yet)";
+    action.spawn = ["${pkgs.libnotify}/bin/notify-send" "-t" "1500" "Swipe typing isn't built yet"];
+  };
+
   #--- The keyboard paints a translucent panel; niri blurs what's under it
   programs.niri.settings.layer-rules = [
     {
