@@ -3,6 +3,7 @@
 // service's `person` job)
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 
 ColumnLayout {
     id: page
@@ -136,6 +137,17 @@ ColumnLayout {
             view: page.view
             pageGlyph: "person"
         }
+    }
+
+    //--- The shell's own User Accounts tab sets it through AccountsService. No
+    //--- password change here: passwd leaves the login keyring on the old one
+    ListRow {
+        icon: "account_circle"
+        title: "Profile Picture"
+        info: "Your picture on the lock screen, the login screen and the Control Center."
+        trailing: "open_in_new"
+        Layout.fillWidth: true
+        onClicked: Quickshell.execDetached(["dms", "ipc", "call", "settings", "openWith", "user_accounts"])
     }
 
     //--- Add a person

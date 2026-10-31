@@ -21,7 +21,8 @@ class Link:
     needs: str = ""  # niri, printing or battery: shown only then
 
 
-#--- Left out: Default Apps (mimeapps.list is the config's), Users, Greeter and
+#--- Left out: Default Apps (mimeapps.list is the config's), Users (the Users page
+#--- opens User Accounts for the profile picture itself), Greeter and
 #--- System Updater (Omni Settings and the config own those). Mouse & Touchpad
 #--- and Keyboard write niri/dms/input.kdl, which only niri loads.
 LINKS = [
