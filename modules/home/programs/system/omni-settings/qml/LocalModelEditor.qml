@@ -95,6 +95,21 @@ Sheet {
         result = null
         estimateTimer.restart()
     }
+    //--- An added model's MTP file; its draft length and any hand-written -md go with it
+    function setMtp(file) {
+        const o = Object.assign({}, own)
+        if (file) {
+            o.mtp = file
+        } else {
+            delete o.mtp
+            delete o.draftMax
+        }
+        if (Array.isArray(o.args))
+            o.args = o.args.filter(a => !/^(--spec-type|-md|--spec-draft-model)\b/.test(a))
+        own = o
+        result = null
+        estimateTimer.restart()
+    }
     function set(key, v) {
         const o = Object.assign({}, own)
         if (v === undefined)
@@ -448,6 +463,26 @@ Sheet {
         current: "mmproj" in ed.own ? ed.own.mmproj : ""
         options: [{ value: "", label: "Text Only" }].concat(ed.model.visionFiles.map(f => ({ value: f, label: f })))
         onPicked: v => ed.setVision(v)
+    }
+    Choice {
+        // Added models only, like Vision
+        visible: ed.model.added && ed.model.mtpFiles.length > 0
+        title: "Speculative Decoding"
+        tip: "An MTP file from the model's folder drafts several tokens at a time for the model to "
+             + "check, so replies can come faster. It loads on the GPU beside the model and counts "
+             + "toward the fit above. Test it against Off; it can be slower on small quants."
+        current: "mtp" in ed.own ? ed.own.mtp : ""
+        options: [{ value: "", label: "Off" }].concat(ed.model.mtpFiles.map(f => ({ value: f, label: f })))
+        onPicked: v => ed.setMtp(v)
+    }
+    Choice {
+        visible: "mtp" in ed.own
+        title: "Draft Tokens"
+        tip: "How many tokens the MTP file guesses per step. More helps when its guesses are right "
+             + "most of the time and costs speed when they aren't."
+        current: ed.value("draftMax", 3)
+        options: [1, 2, 3, 4, 5, 6, 8].map(n => ({ value: n, label: String(n) }))
+        onPicked: v => ed.set("draftMax", v)
     }
     Choice {
         title: "Context"

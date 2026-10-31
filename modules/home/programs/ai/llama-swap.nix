@@ -28,10 +28,11 @@
 
   #--- Finds the model's file in its LM Studio folder, so the exact name and case
   #--- of a download don't matter; the first part of a split file sorts first
-  #--- The third argument is the vision projector's match in the same folder, or -
+  #--- The third argument is the vision projector's match in the same folder, or -;
+  #--- the fourth is the MTP file's, loaded as a draft model
   launch = pkgs.writeShellScript "llama-model" ''
-    dir="${config.home.homeDirectory}/.lmstudio/models/$1" match=$2 vision=$3
-    shift 3
+    dir="${config.home.homeDirectory}/.lmstudio/models/$1" match=$2 vision=$3 mtp=$4
+    shift 4
     file=$(find "$dir" -maxdepth 1 -iname "$match" 2>/dev/null | sort | head -n 1)
     if [ -z "$file" ]; then
       echo "No $match in $dir: download it in LM Studio" >&2
@@ -45,10 +46,18 @@
       fi
       set -- --mmproj "$proj" "$@"
     fi
+    if [ "$mtp" != - ]; then
+      draft=$(find "$dir" -maxdepth 1 -iname "$mtp" 2>/dev/null | sort | head -n 1)
+      if [ -z "$draft" ]; then
+        echo "No $mtp in $dir: download the MTP file in LM Studio" >&2
+        exit 1
+      fi
+      set -- -md "$draft" --spec-type draft-mtp "$@"
+    fi
     exec ${lib.getExe' (catalog.llamaCpp pkgs) "llama-server"} -m "$file" "$@"
   '';
   cmd = model: args:
-    lib.concatStringsSep " " ([launch "'${model.dir}'" "'${model.match}'" "'${model.mmproj or "-"}'" "--port \${PORT}"]
+    lib.concatStringsSep " " ([launch "'${model.dir}'" "'${model.match}'" "'${model.mmproj or "-"}'" "'${model.mtp or "-"}'" "--port \${PORT}"]
       ++ args);
 
   #--- A coding or chat model. One slot gets the whole context; a q8_0 cache halves

@@ -203,6 +203,7 @@
     cacheRam = v: lib.isInt v && v >= -1;
     fitTarget = v: lib.isInt v && v >= 0;
     loadMode = v: lib.elem v ["auto" "none" "mmap" "mlock" "mmap+mlock" "dio"];
+    draftMax = v: lib.isInt v && v > 0; # MTP draft tokens per step
   };
   addedFields =
     tuningFields
@@ -212,6 +213,7 @@
       dir = lib.isString;
       match = lib.isString;
       mmproj = lib.isString; # the vision projector's file match in the same folder
+      mtp = lib.isString; # the MTP file's match in the same folder
       args = v: lib.isList v && lib.all lib.isString v;
       think = lib.isAttrs;
       fast = v: v == null || lib.isAttrs v;

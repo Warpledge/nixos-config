@@ -8,6 +8,8 @@ Download models in LM Studio (its Discover tab). They land in `~/.lmstudio/model
 
 If the model's folder also has a vision file (its name starts with `mmproj`), Add offers it: with it, the model can read images. The editor's **Vision** setting turns it on or off later. It loads on the GPU beside the model and counts toward the fit.
 
+If the folder has an MTP file (its name starts with `mtp`), the editor's **Speculative Decoding** setting can attach it: the model drafts several tokens at a time and checks them, which can speed up replies. Each model picks its own, so every quant in the folder can use the same file. **Draft Tokens** sets how many it guesses per step. Test it against Off, since it can be slower on small quants.
+
 The models the config ships with are listed under **Models** whether or not you've downloaded them. One that isn't downloaded shows in yellow.
 
 ## What fits

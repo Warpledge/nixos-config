@@ -204,9 +204,10 @@ def architecture(path):
 
 
 def is_model(path):
-    """False for vision projectors (mmproj) and other files llama-server can't load as a model."""
+    """False for vision projectors (mmproj), MTP heads and other files llama-server can't
+    load as a model."""
     name = os.path.basename(path).lower()
-    if not name.endswith(".gguf") or "mmproj" in name:
+    if not name.endswith(".gguf") or "mmproj" in name or name.startswith("mtp"):
         return False
     m = SHARD.search(name)
     return not m or m.group(1) == "00001"

@@ -538,6 +538,8 @@ def cmd_local_models(cfg, args):
                        "arch": arch, "supported": knows(arch) if knows else True,
                        "mmproj": entry.get("mmproj") or "",
                        "visionFiles": localmodelstate.vision_files(entry),
+                       "mtp": entry.get("mtp") or "",
+                       "mtpFiles": localmodelstate.mtp_files(entry),
                        "file": path and os.path.basename(path),
                        "bytes": path and localmodelstate.size_of(path)})
     return {"gpu": card, "profile": profile,
@@ -556,7 +558,9 @@ def cmd_local_model_estimate(cfg, args):
     card = localmodelstate.gpu(profs)
     t = localmodelstate.effective(entry, profile, profs, lm["models"].get(mid))
     vision = localmodelstate.find_vision(entry)
-    sized = {**t, "_vision": localmodelstate.size_of(vision) if vision else 0}
+    mtp = localmodelstate.find_mtp(entry)
+    sized = {**t, "_vision": localmodelstate.size_of(vision) if vision else 0,
+             "_mtp": localmodelstate.size_of(mtp) if mtp else 0}
     try:
         out = localmodelstate.estimate(path, sized, card, profile, profs)
         out["presets"] = localmodelstate.presets(path, sized, card, profile, profs, entry)
