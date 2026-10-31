@@ -22,6 +22,34 @@ Sheet {
     property var log: []
     property var result: null
     property bool testing: false
+    //--- The live view: localModelTest's "@" events (localmodelstate.event)
+    property string stage: ""  // unload, load, prompt, generate, done
+    property var vramSeries: []  // 0 to 1, oldest first
+    property var ramSeries: []
+    property var mem: null  // the last {vram, vramTotal, ram, ramTotal}
+    property int tokens: 0
+    property real rate: 0
+    readonly property int maxTokens: 256  // the test prompt's max_tokens
+    // The graph stretches to fill its width as samples come in, up to 2 minutes
+    readonly property int graphSamples: Math.max(40, vramSeries.length)
+    function takeTestLine(line) {
+        if (line.startsWith("@")) {
+            let e
+            try { e = JSON.parse(line.slice(1)) } catch (err) { return }
+            if (e.event === "stage")
+                stage = e.stage
+            else if (e.event === "mem") {
+                mem = e
+                vramSeries = vramSeries.slice(-239).concat([e.vramTotal ? e.vram / e.vramTotal : 0])
+                ramSeries = ramSeries.slice(-239).concat([e.ramTotal ? e.ram / e.ramTotal : 0])
+            } else if (e.event === "tokens") {
+                tokens = e.n
+                rate = e.rate
+            }
+            return
+        }
+        log = log.slice(-199).concat([line])
+    }
     readonly property bool unified: models.info && models.info.gpu.memory === "unified"
     readonly property bool moe: !!fit && fit.model.moe
 
@@ -85,8 +113,14 @@ Sheet {
         testing = true
         log = []
         result = null
+        stage = ""
+        vramSeries = []
+        ramSeries = []
+        mem = null
+        tokens = 0
+        rate = 0
         Backend.stream("localModelTest", { id: model.id, localModels: merged() },
-                       line => ed.log = ed.log.slice(-5).concat([line]), reply => {
+                       line => ed.takeTestLine(line), reply => {
             if (!ed)
                 return
             ed.testing = false
@@ -384,14 +418,196 @@ Sheet {
         title: ed.testing ? "Testing…" : ed.result ? `${ed.result.tokensPerSecond} tokens a second`
                                                     + (ed.fit && ed.fit.lastTest ? ` · tested ${ed.fit.lastTest.at}` : "")
                                                   : "Test These Settings"
-        subtitle: ed.testing ? (ed.log.length ? ed.log[ed.log.length - 1] : "Loading the model")
-                  : ed.result ? `Reads prompts at ${ed.result.promptPerSecond} tokens a second · VRAM peak `
-                                + `${ed.gb(ed.result.vramPeak)} of ${ed.gb(ed.result.vramTotal)} GB · `
-                                + `${ed.gb(ed.result.ramUsed)} GB more RAM`
+        subtitle: ed.testing ? ({ unload: "Freeing the GPU", load: "Loading the model", prompt: "Reading the prompt",
+                                  generate: "Writing a reply" })[ed.stage] || "Starting"
+                  : ed.result ? `Prompts ${ed.result.promptPerSecond} tok/s · VRAM peak `
+                                + `${ed.gb(ed.result.vramPeak)} of ${ed.gb(ed.result.vramTotal)} GB`
                   : "Loading takes up to a minute"
         tone: ed.result && ed.result.vramPeak > ed.result.vramTotal * 0.97 ? "caution" : ""
         button: ed.testing ? "" : ed.result ? "Again" : "Test"
         onClicked: ed.runTest()
+    }
+
+    //--- What the test is doing: its steps, memory as it loads, and the reply's speed
+    Rectangle {
+        id: live
+        visible: ed.testing || ed.log.length > 0
+        Layout.fillWidth: true
+        implicitHeight: liveCol.implicitHeight + 24
+        radius: 14
+        color: Qt.alpha(Theme.bg, 0.55)
+        border.width: 1
+        border.color: Theme.rule
+        readonly property var steps: [["unload", "Free the GPU", "memory_alt"], ["load", "Load", "download"],
+                                      ["prompt", "Read Prompt", "description"], ["generate", "Write Reply", "edit_note"]]
+        readonly property int at: ed.stage === "done" ? steps.length : steps.findIndex(s => s[0] === ed.stage)
+        ColumnLayout {
+            id: liveCol
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.margins: 12
+            spacing: 12
+
+            //--- Steps: done ones ticked, the current one pulsing
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 4
+                Repeater {
+                    model: live.steps
+                    ColumnLayout {
+                        id: step
+                        required property var modelData
+                        required property int index
+                        readonly property bool done: index < live.at
+                        readonly property bool current: index === live.at && ed.testing
+                        Layout.preferredWidth: (liveCol.width - 12) / live.steps.length
+                        spacing: 4
+                        Rectangle {
+                            Layout.alignment: Qt.AlignHCenter
+                            implicitWidth: 34
+                            implicitHeight: 34
+                            radius: 17
+                            color: step.done ? Theme.primary : step.current ? Qt.alpha(Theme.primary, 0.25) : Theme.cardHover
+                            Icon {
+                                anchors.centerIn: parent
+                                icon: step.done ? "check" : step.modelData[2]
+                                size: 18
+                                color: step.done ? Theme.inkPrimary : step.current ? Theme.primary : Theme.dim
+                            }
+                            SequentialAnimation on opacity {
+                                running: step.current
+                                loops: Animation.Infinite
+                                alwaysRunToEnd: true
+                                NumberAnimation { to: 0.45; duration: 600; easing.type: Easing.InOutQuad }
+                                NumberAnimation { to: 1; duration: 600; easing.type: Easing.InOutQuad }
+                            }
+                        }
+                        Text {
+                            Layout.alignment: Qt.AlignHCenter
+                            text: step.modelData[1]
+                            color: step.done || step.current ? Theme.text : Theme.dim
+                            font.pixelSize: 12
+                        }
+                    }
+                }
+            }
+
+            //--- Memory over the test: VRAM and RAM as shares of each total
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 14
+                Repeater {
+                    model: [["VRAM", Theme.primary, ed.mem ? ed.mem.vram : 0, ed.mem ? ed.mem.vramTotal : 0],
+                            ["RAM", Theme.caution, ed.mem ? ed.mem.ram : 0, ed.mem ? ed.mem.ramTotal : 0]]
+                    RowLayout {
+                        required property var modelData
+                        spacing: 6
+                        Rectangle { implicitWidth: 8; implicitHeight: 8; radius: 4; color: parent.modelData[1] }
+                        Text {
+                            text: `${parent.modelData[0]} ${ed.gb(parent.modelData[2])} of ${ed.gb(parent.modelData[3])} GB`
+                            color: Theme.text
+                            font.pixelSize: 13
+                        }
+                    }
+                }
+                Item { Layout.fillWidth: true }
+            }
+            Rectangle {
+                Layout.fillWidth: true
+                implicitHeight: 90
+                radius: 8
+                color: Theme.cardHover
+                // Lines at a half and at full
+                Rectangle { x: 0; y: parent.height / 2; width: parent.width; height: 1; color: Theme.rule }
+                LineGraph {
+                    anchors.fill: parent
+                    anchors.margins: 4
+                    values: ed.ramSeries
+                    count: ed.graphSamples
+                    color: Theme.caution
+                }
+                LineGraph {
+                    anchors.fill: parent
+                    anchors.margins: 4
+                    values: ed.vramSeries
+                    count: ed.graphSamples
+                    color: Theme.primary
+                }
+            }
+
+            //--- The reply as it's written
+            RowLayout {
+                visible: ed.stage === "generate" || ed.stage === "done"
+                Layout.fillWidth: true
+                spacing: 10
+                Text {
+                    text: (ed.stage === "done" && ed.result ? ed.result.tokensPerSecond : ed.rate).toFixed(1)
+                    color: Theme.primary
+                    font.pixelSize: 28
+                    font.weight: Font.Bold
+                }
+                ColumnLayout {
+                    spacing: 4
+                    Layout.fillWidth: true
+                    Text {
+                        text: `tokens a second · ${ed.stage === "done" ? ed.maxTokens : ed.tokens} of ${ed.maxTokens} written`
+                        color: Theme.dim
+                        font.pixelSize: 13
+                    }
+                    Rectangle {
+                        Layout.fillWidth: true
+                        implicitHeight: 6
+                        radius: 3
+                        color: Theme.cardHover
+                        Rectangle {
+                            width: parent.width * Math.min(1, ed.stage === "done" ? 1 : ed.tokens / ed.maxTokens)
+                            height: parent.height
+                            radius: 3
+                            color: Theme.primary
+                            Behavior on width { NumberAnimation { duration: 240 } }
+                        }
+                    }
+                }
+            }
+
+            //--- llama-server's own output, for when something goes wrong
+            RowLayout {
+                Layout.fillWidth: true
+                Text {
+                    text: "Log"
+                    color: Theme.text
+                    font.pixelSize: 14
+                    TitleTip { tip: "Everything llama-server printed during the test." }
+                }
+                Item { Layout.fillWidth: true }
+                Chevron { open: logReveal.open; lit: logHover.hovered }
+                HoverHandler { id: logHover; cursorShape: Qt.PointingHandCursor }
+                TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: logReveal.open = !logReveal.open }
+            }
+            Reveal {
+                id: logReveal
+                gap: liveCol.spacing
+                ListView {
+                    id: logView
+                    Layout.fillWidth: true
+                    implicitHeight: 220
+                    clip: true
+                    model: logReveal.shown ? ed.log : []
+                    onCountChanged: positionViewAtEnd()
+                    boundsBehavior: Flickable.StopAtBounds
+                    delegate: Text {
+                        required property var modelData
+                        width: logView.width
+                        text: modelData
+                        color: Theme.dim
+                        font.family: "monospace"
+                        font.pixelSize: 11
+                        wrapMode: Text.WrapAnywhere
+                    }
+                }
+            }
+        }
     }
 
     actions: [

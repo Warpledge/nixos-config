@@ -436,16 +436,58 @@ def say(line):
     print(line, file=sys.stderr, flush=True)
 
 
+def event(kind, **fields):
+    """A progress event for the editor's live view: a stderr line of "@" and JSON."""
+    say("@" + json.dumps({"event": kind, **fields}))
+
+
+def stream_reply(port, deadline):
+    """Sends the test prompt with a streamed reply, emitting a tokens event as
+    tokens arrive; returns llama-server's timings from the last chunk."""
+    body = json.dumps({"messages": [{"role": "user", "content": TEST_PROMPT}], "max_tokens": 256,
+                       "stream": True}).encode()
+    req = urllib.request.Request(f"http://127.0.0.1:{port}/v1/chat/completions", data=body, method="POST",
+                                 headers={"Content-Type": "application/json"})
+    timings, n, first, last_sent = {}, 0, None, 0.0
+    with urllib.request.urlopen(req, timeout=deadline) as r:
+        for raw in r:
+            line = raw.decode(errors="replace").strip()
+            if not line.startswith("data:") or line == "data: [DONE]":
+                continue
+            try:
+                chunk = json.loads(line[5:])
+            except ValueError:
+                continue
+            timings = chunk.get("timings") or timings
+            delta = ((chunk.get("choices") or [{}])[0].get("delta") or {})
+            if delta.get("content") or delta.get("reasoning_content"):
+                n += 1
+                now = time.time()
+                if first is None:
+                    first = now
+                    event("stage", stage="generate")
+                if now - last_sent > 0.25:
+                    rate = (n - 1) / (now - first) if now > first else 0
+                    event("tokens", n=n, rate=round(rate, 1))
+                    last_sent = now
+    return timings
+
+
 def test(server, path, t, entry, profile, profs):
     """Runs llama-server on `path` with tuning `t` and the model's args, measures
     peak VRAM, RAM and speed, then stops it. llama-swap's loaded models are
-    unloaded first so the GPU is free; llama-swap reloads on the next request."""
+    unloaded first so the GPU is free; llama-swap reloads on the next request.
+    Progress goes to stderr as llama-server's log lines and event() lines."""
     if not server or not os.path.exists(server):
         raise ValueError("llama-server isn't available: turn on llama-swap and rebuild")
     knows, arch = architectures(server), arch_of(path)
     if knows and not knows(arch):
         raise ValueError(f"This llama.cpp build doesn't know the {arch} architecture yet, so "
                          "llama-swap can't run this model. LM Studio has its own, newer engine.")
+    card_total = max((read_int(p) for p in glob.glob("/sys/class/drm/card[0-9]*/device/mem_info_vram_total")),
+                     default=0)
+    ram_total = meminfo().get("MemTotal", 0)
+    event("stage", stage="unload")
     try:
         post(f"{LLAMA_SWAP}/api/models/unload")
         say("Unloaded llama-swap's models")
@@ -459,6 +501,7 @@ def test(server, path, t, entry, profile, profs):
     base_vram, base_ram = vram_used(), meminfo().get("MemAvailable", 0)
     peak = {"vram": base_vram, "ram": base_ram}
     buffers, tail = [], []
+    event("stage", stage="load")
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                             stdin=subprocess.DEVNULL, text=True, errors="replace")
 
@@ -469,20 +512,25 @@ def test(server, path, t, entry, profile, profs):
             del tail[:-30]
             if "buffer size" in line:
                 buffers.append(line.split(":", 1)[-1].strip())
-                say(line)
-            elif re.search(r"error|failed|out of memory|offload|fitting", line, re.I):
-                say(line)
+            say(line)
 
     threading.Thread(target=reader, daemon=True).start()
 
-    def sample():
-        peak["vram"] = max(peak["vram"], vram_used())
-        peak["ram"] = min(peak["ram"], meminfo().get("MemAvailable", peak["ram"]))
+    #--- Memory twice a second for the live graph, until the test ends
+    stop = threading.Event()
 
+    def sampler():
+        while not stop.is_set():
+            vram, avail = vram_used(), meminfo().get("MemAvailable", peak["ram"])
+            peak["vram"] = max(peak["vram"], vram)
+            peak["ram"] = min(peak["ram"], avail)
+            event("mem", vram=vram, vramTotal=card_total, ram=ram_total - avail, ramTotal=ram_total)
+            stop.wait(0.5)
+
+    threading.Thread(target=sampler, daemon=True).start()
     try:
         deadline = time.time() + 600
         while True:
-            sample()
             if proc.poll() is not None:
                 raise ValueError("llama-server stopped while loading:\n" + "\n".join(tail[-8:]))
             try:
@@ -495,32 +543,18 @@ def test(server, path, t, entry, profile, profs):
                 raise ValueError("llama-server took over 10 minutes to load")
             time.sleep(0.5)
         say("Loaded; sending a test prompt")
-        done = {}
-
-        def ask():
-            try:
-                done["reply"] = post(f"http://127.0.0.1:{port}/v1/chat/completions",
-                                     {"messages": [{"role": "user", "content": TEST_PROMPT}],
-                                      "max_tokens": 256}, timeout=600)
-            except OSError as e:
-                done["error"] = str(e)
-
-        worker = threading.Thread(target=ask, daemon=True)
-        worker.start()
-        while worker.is_alive():
-            sample()
-            worker.join(0.5)
-        if "error" in done:
-            raise ValueError(f"The test prompt failed: {done['error']}")
-        timings = (done.get("reply") or {}).get("timings") or {}
+        event("stage", stage="prompt")
+        try:
+            timings = stream_reply(port, 600)
+        except OSError as e:
+            raise ValueError(f"The test prompt failed: {e}") from None
     finally:
+        stop.set()
         proc.terminate()
         try:
             proc.wait(10)
         except subprocess.TimeoutExpired:
             proc.kill()
-    card_total = max((read_int(p) for p in glob.glob("/sys/class/drm/card[0-9]*/device/mem_info_vram_total")),
-                     default=0)
     result = {"vramPeak": peak["vram"], "vramBefore": base_vram, "vramTotal": card_total,
               "ramUsed": max(0, base_ram - peak["ram"]),
               "tokensPerSecond": round(timings.get("predicted_per_second", 0), 1),
@@ -528,4 +562,5 @@ def test(server, path, t, entry, profile, profs):
               "promptTokens": timings.get("prompt_n", 0), "buffers": buffers}
     say(f"{result['tokensPerSecond']} tok/s, prompt {result['promptPerSecond']} tok/s, "
         f"VRAM peak {peak['vram'] / GB:.1f} of {card_total / GB:.1f} GB")
+    event("stage", stage="done")
     return result
