@@ -27,7 +27,8 @@ TESTS = os.path.join(os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.
                      "omni-settings", "local-model-tests.json")
 LLAMA_SWAP = "http://127.0.0.1:8090"
 #--- Kept in step with lib/local-ai.nix and lib/settings.nix
-TUNING = ("context", "cache", "gpuLayers", "cpuMoe", "batch", "cacheRam", "fitTarget", "loadMode")
+TUNING = ("context", "cache", "gpuLayers", "cpuMoe", "batch", "cacheRam", "fitTarget", "loadMode",
+          "draftMax")
 ADDED_DEFAULTS = {"context": 32768, "args": [], "think": {}, "fast": None}
 CACHE_BYTES = {"f16": 2.0, "bf16": 2.0, "q8_0": 34 / 32, "q5_1": 24 / 32, "q5_0": 22 / 32,
                "q4_1": 20 / 32, "q4_0": 18 / 32, "iq4_nl": 18 / 32}
@@ -109,7 +110,7 @@ def flags(t, profile, profs):
     if t.get("gpuLayers") not in (None, "auto"):
         out.append(f"-ngl {t['gpuLayers']}")
     for key, flag in (("loadMode", "--load-mode"), ("cpuMoe", "--n-cpu-moe"), ("batch", "-ub"),
-                      ("cacheRam", "--cache-ram")):
+                      ("cacheRam", "--cache-ram"), ("draftMax", "--spec-draft-n-max")):
         if key in t:
             out.append(f"{flag} {t[key]}")
     fit = headroom(t, profile, profs)
@@ -145,6 +146,23 @@ def vision_files(entry):
     try:
         return sorted(n for n in os.listdir(os.path.join(MODELS_DIR, entry.get("dir", "")))
                       if n.lower().startswith("mmproj") and n.lower().endswith(".gguf"))
+    except OSError:
+        return []
+
+
+def find_mtp(entry):
+    """The MTP file the entry's `mtp` match names in its folder, as llama-swap's
+    llama-model script finds it; None without one."""
+    if not entry.get("mtp"):
+        return None
+    return find_file({"dir": entry.get("dir", ""), "match": entry["mtp"]})
+
+
+def mtp_files(entry):
+    """The MTP files (mtp*.gguf) in the entry's folder."""
+    try:
+        return sorted(n for n in os.listdir(os.path.join(MODELS_DIR, entry.get("dir", "")))
+                      if n.lower().startswith("mtp") and n.lower().endswith(".gguf"))
     except OSError:
         return []
 
@@ -207,6 +225,7 @@ def scan(known, knows=None):
                     "quant": q.group(0) if q else "", "id": owner, "arch": arch,
                     "supported": knows(arch) if knows else True,
                     "vision": vision_files({"dir": folder}),
+                    "mtp": mtp_files({"dir": folder}),
                     "suggest": {"id": mid, "name": name, "match": match}})
     return out
 
@@ -365,7 +384,8 @@ def placement(m, t):
     batch = t.get("batch", 512)
     # Fitted to llama.cpp's Vulkan buffers on eclipse (Ornith, -ub 2048, 2026-10-30)
     compute = batch * m.embedding * 48 + 128 * MB if on_gpu else 0
-    gpu += kv * share + compute + t.get("_vision", 0)  # the vision projector loads on the GPU
+    # The vision projector and the MTP head load on the GPU
+    gpu += kv * share + compute + t.get("_vision", 0) + t.get("_mtp", 0)
     ram += kv * (1 - share) + t.get("cacheRam", 8192) * MB
     return gpu, ram, {"weights": m.weights, "kv": kv, "compute": compute}
 
@@ -595,6 +615,12 @@ def run_once(server, path, t, entry, profile, profs):
                          "download the vision file in LM Studio")
     if vision:
         words = ["--mmproj", vision] + words
+    mtp = find_mtp(entry)
+    if entry.get("mtp") and not mtp:
+        raise ValueError(f"No {entry['mtp']} in ~/.lmstudio/models/{entry.get('dir')}: "
+                         "download the MTP file in LM Studio")
+    if mtp:
+        words = ["-md", mtp, "--spec-type", "draft-mtp"] + words
     cmd = [server, "-m", path, "--port", str(port), "--host", "127.0.0.1"] + words
     say("$ " + " ".join(shlex.quote(c) for c in cmd[1:]))
     base_vram, base_ram = vram_used(), meminfo().get("MemAvailable", 0)

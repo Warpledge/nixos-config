@@ -20,7 +20,7 @@
     else profiles.${profile};
 
   #--- Fields a machine may change on any model; kept in step with lib/settings.nix
-  tuningFields = ["context" "cache" "gpuLayers" "cpuMoe" "batch" "cacheRam" "fitTarget" "loadMode"];
+  tuningFields = ["context" "cache" "gpuLayers" "cpuMoe" "batch" "cacheRam" "fitTarget" "loadMode" "draftMax"];
   #--- What a machine-added model starts from
   addedDefaults = {
     context = 32768;
@@ -52,6 +52,7 @@
     ++ lib.optional (t ? cpuMoe) "--n-cpu-moe ${toString t.cpuMoe}"
     ++ lib.optional (t ? batch) "-ub ${toString t.batch}"
     ++ lib.optional (t ? cacheRam) "--cache-ram ${toString t.cacheRam}"
+    ++ lib.optional (t ? draftMax) "--spec-draft-n-max ${toString t.draftMax}"
     ++ lib.optional (fit != null) "--fit-target ${toString fit}";
 
   resolve = id: model: let
@@ -76,7 +77,7 @@
       )
       // lib.getAttrs (lib.filter (f: own ? ${f}) tuningFields) own;
   in
-    removeAttrs model ["tuned" "cpuMoe" "gpuLayers" "batch" "cacheRam" "fitTarget" "loadMode"]
+    removeAttrs model ["tuned" "cpuMoe" "gpuLayers" "batch" "cacheRam" "fitTarget" "loadMode" "draftMax"]
     // {
       context = t.context or model.context;
       args = flags t ++ model.args;

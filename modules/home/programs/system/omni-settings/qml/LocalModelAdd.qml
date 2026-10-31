@@ -14,6 +14,7 @@ Sheet {
 
     property string category: "chat"
     property string vision: file.vision && file.vision.length ? file.vision[0] : ""  // "" for none
+    property string mtp: ""  // "" for none
     readonly property string mid: idField.text.trim()
     readonly property string problem: {
         if (!/^[a-z0-9][a-z0-9.-]*$/.test(mid))
@@ -38,6 +39,8 @@ Sheet {
         const entry = { category, name: nameField.text.trim(), dir: file.dir, match: file.suggest.match }
         if (vision)
             entry.mmproj = vision
+        if (mtp)
+            entry.mtp = mtp
         models.setModel(mid, entry)
         view.say(`${nameField.text.trim()} added; turn it on under Local AI, Models after Apply`)
         view.sheet = null
@@ -72,6 +75,28 @@ Sheet {
                 text: modelData
                 accent: ed.vision === modelData
                 onTapped: ed.vision = modelData
+            }
+        }
+    }
+    Section {
+        visible: !!ed.file.mtp && ed.file.mtp.length > 0
+        text: "Speculative Decoding"
+        info: "The folder has an MTP file, which drafts several tokens at a time for the model to "
+              + "check, so replies can come faster. It loads beside the model and takes some VRAM. "
+              + "Test it against Off in the editor."
+    }
+    Flow {
+        visible: !!ed.file.mtp && ed.file.mtp.length > 0
+        Layout.fillWidth: true
+        spacing: 6
+        Chip { text: "Off"; accent: ed.mtp === ""; onTapped: ed.mtp = "" }
+        Repeater {
+            model: ed.file.mtp || []
+            Chip {
+                required property string modelData
+                text: modelData
+                accent: ed.mtp === modelData
+                onTapped: ed.mtp = modelData
             }
         }
     }

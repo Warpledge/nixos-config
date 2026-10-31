@@ -121,6 +121,7 @@
         "4732690" = {launchOptions = "PROTON_LOG=1 ENABLE_LAYER_MESA_ANTI_LAG=1 nix-performance %command%";};
       };
       claude.mods.ribbon = true;
+      keybinds = {};
     };
   };
 
@@ -280,4 +281,5 @@
       gpuLayers = 49;
     };
   };
+  localModels.backend = "vulkan";
 }
