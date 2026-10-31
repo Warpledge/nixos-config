@@ -1,4 +1,5 @@
-// Launch Options: options to copy for Steam, Heroic and Lutris (api.py's launchOptions)
+// Launch Options: options to copy for Steam, Heroic and Lutris (api.py's launchOptions),
+// and the upscaling option for a picked game window (upscalePick)
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
@@ -23,6 +24,46 @@ ColumnLayout {
         view.say(`Copied ${option}`)
     }
 
+    //--- Upscaling: a game window picked in niri (api.py's upscalePick)
+    property var picked: null
+    property bool picking: false
+    function pick() {
+        picking = true
+        view.say("Click the game's window")
+        Backend.call("upscalePick", {}, reply => {
+            if (!page)
+                return
+            picking = false
+            if (!reply.ok)
+                view.say(reply.error)
+            else if (reply.data)
+                picked = reply.data
+        })
+    }
+
+    //--- The game's launch options with the wrapper swapped in: a nix-vn, nix-rpgm or
+    //--- nix-performance wrapper already there is replaced, else it goes first
+    readonly property var gamesSetting: view.info ? view.info.steamGames : null
+    function staged(game, wrapper) {
+        const all = gamesSetting ? view.valueOf(gamesSetting) || {} : {}
+        const entry = all[game.id] || {}
+        let launch = (entry.launchOptions !== undefined ? entry.launchOptions : game.launch).trim()
+        const old = /(^|\s)nix-(vn|rpgm|performance)[\w-]*(\s+-r\s+\d+x\d+)?(?=\s|$)/
+        if (old.test(launch))
+            launch = launch.replace(old, (m, lead) => lead + wrapper)
+        else if (launch === "")
+            launch = `${wrapper} %command%`
+        else
+            launch = launch.includes("%command%") ? `${wrapper} ${launch}` : `${wrapper} %command% ${launch}`
+        return launch
+    }
+    function stage(game, wrapper) {
+        const all = Object.assign({}, view.valueOf(gamesSetting) || {})
+        all[game.id] = Object.assign({}, all[game.id] || {}, { launchOptions: staged(game, wrapper) })
+        view.change(gamesSetting, all)
+        view.say(`${game.name}: staged for Apply`)
+    }
+
     Text {
         visible: page.error !== ""
         text: page.error
@@ -30,6 +71,43 @@ ColumnLayout {
         wrapMode: Text.Wrap
         Layout.fillWidth: true
         Layout.margins: 6
+    }
+
+    //--- Upscaling
+    Group {
+        title: "Upscale a Game"
+        description: "Start the game windowed with no launch options, then pick its window. The engine and "
+                     + "window size give the nix-vn or nix-rpgm option to run it upscaled with NVL."
+    }
+    ListRow {
+        icon: page.picking ? "progress_activity" : "ads_click"
+        title: page.picked ? page.picked.title : "Pick a Game Window"
+        subtitle: !page.picked ? ""
+            : [page.picked.engine || "Engine not recognised", page.picked.size].join(" · ")
+        info: page.picked ? page.picked.dir : ""
+        caution: page.picked ? page.picked.note : ""
+        alert: page.picked ? page.picked.alert : ""
+        button: page.picking ? "" : page.picked ? "Pick Again" : "Pick"
+        onClicked: page.pick()
+    }
+    OptionRow {
+        visible: !!page.picked && page.picked.wrapper !== ""
+        option: page.picked ? `${page.picked.wrapper} %command%` : ""
+        text: (page.picked ? page.picked.why + " " : "") + "For Steam's launch options."
+    }
+    OptionRow {
+        visible: !!page.picked && page.picked.wrapper !== ""
+        option: page.picked ? page.picked.wrapper : ""
+        text: "For Heroic's or Lutris's wrapper field."
+    }
+    ListRow {
+        visible: !!page.picked && !!page.picked.steam && page.picked.wrapper !== "" && !!page.gamesSetting
+        icon: "sports_esports"
+        title: page.picked && page.picked.steam ? page.picked.steam.name : ""
+        subtitle: page.picked && page.picked.steam ? page.staged(page.picked.steam, page.picked.wrapper) : ""
+        info: "Sets these launch options on the Games page; Steam gets them after Apply, once it's closed."
+        button: "Stage"
+        onClicked: page.stage(page.picked.steam, page.picked.wrapper)
     }
 
     //--- Where they go

@@ -40,6 +40,7 @@ import packagestate  # noqa: E402
 import peoplestate  # noqa: E402
 import resetstate  # noqa: E402
 import protonstate  # noqa: E402
+import upscalestate  # noqa: E402
 import schema  # noqa: E402
 import securitystate  # noqa: E402
 import servicestate  # noqa: E402
@@ -130,7 +131,8 @@ NAV_SUBTITLES = {"overview": "Updates, pinned versions, freeing space, versions,
                                  "Default Packages.",
                  "games": "Your Steam games: build each one's launch options and pick its Proton "
                           "version. Changes wait for Apply, and reach Steam once it's closed.",
-                 "proton": "Launch options for Steam, Heroic and Lutris. Click one to copy it.",
+                 "proton": "Launch options for Steam, Heroic and Lutris. Click one to copy it, or "
+                           "pick a game's window for its upscaling option.",
                  "mangohud": "The in-game overlay: what it shows and where. The test window shows "
                              "changes as you make them; games get them after Apply.",
                  "protonversions": "The Proton and Wine builds each launcher can run games with. Pick "
@@ -1260,6 +1262,11 @@ def cmd_launch_options(_cfg, _args):
     return protonstate.launch_options()
 
 
+def cmd_upscale_pick(_cfg, _args):
+    """A game window picked in niri and its nix-vn or nix-rpgm launch option; None when cancelled."""
+    return upscalestate.pick()
+
+
 def cmd_proton_versions(_cfg, _args):
     return protonstate.versions()
 
@@ -1501,7 +1508,7 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "mcpKeys": cmd_mcp_keys, "setMcpKey": cmd_set_mcp_key,
             "packageNames": cmd_package_names, "packageSearch": cmd_package_search,
             "packagePreviews": cmd_package_previews,
-            "resetApp": cmd_reset_app, "doc": cmd_doc, "docLink": cmd_doc_link, "launchOptions": cmd_launch_options, "protonVersions": cmd_proton_versions, "steamGames": cmd_steam_games,
+            "resetApp": cmd_reset_app, "doc": cmd_doc, "docLink": cmd_doc_link, "launchOptions": cmd_launch_options, "upscalePick": cmd_upscale_pick, "protonVersions": cmd_proton_versions, "steamGames": cmd_steam_games,
             "crashes": cmd_crashes, "crashReport": cmd_crash_report,
             "windowRules": cmd_window_rules, "niriWindows": cmd_niri_windows, "pickWindow": cmd_pick_window,
             "addWindowRule": cmd_add_window_rule, "saveWindowRule": cmd_save_window_rule,
