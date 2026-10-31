@@ -120,10 +120,10 @@ when Ky approves it.
   or the bar button. The swipe key next to it (KEY_F15, `XF86Launch6`) runs `osk-swipe`:
   in swipe mode (wvkbd-swipe.patch) a first finger on a letter sends nothing until it
   lifts, so a tap types on release and a stroke goes to `autocorrect.py` as `\x02keys\x03`,
-  which picks a word by the keys crossed and frequency and types it plus a space;
+  which picks a word by the keys crossed and frequency and types it, with a space first
+  when the text ends in a word;
   backspace straight after removes the word. A line follows the finger during a stroke.
   Both know common contractions, except ones that are real words without the apostrophe.
-  TEMPORARY: strokes are logged to `~/.local/state/osk-swipe-strokes.log` for tuning.
   Each has a DMS bar plugin (`oskToggle`, `touchpadToggle`, `autocorrectToggle`) added
   from DMS's bar settings; a one-finger swipe up from the bottom edge also runs `osk-toggle`
   (`wm/touch-gestures.py`). Gotchas: wvkbd must be built WITH `wvkbd-uinput.patch` or

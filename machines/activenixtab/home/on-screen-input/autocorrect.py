@@ -3,8 +3,7 @@ space or punctuation, replaces a misspelled word when one correction clearly win
 only knows what was typed on the on-screen keyboard, never the app's text. Off until
 SIGUSR1 (osk-autocorrect) turns it on; the state survives restarts. Swipe strokes
 (wvkbd-swipe.patch) arrive as \\x02keys\\x03 and are typed as a word; SIGUSR2 (osk-swipe)
-loads the dictionary ahead of the first one. Typed words stay in memory and are never
-logged; TEMPORARILY, swipe strokes and their words go to STROKE_LOG for tuning."""
+loads the dictionary ahead of the first one. Words stay in memory and are never logged."""
 
 import functools
 import itertools
@@ -39,7 +38,6 @@ signal.signal(signal.SIGUSR2, on_swipe)
 STATE_DIR = os.environ.get("XDG_STATE_HOME", os.path.expanduser("~/.local/state"))
 STATE = os.path.join(STATE_DIR, "osk-autocorrect-on")
 SWIPE_STATE = os.path.join(STATE_DIR, "osk-swipe-on")  # osk-swipe keeps this one
-STROKE_LOG = os.path.join(STATE_DIR, "osk-swipe-strokes.log")  # TEMPORARY
 PAUSE = 5.0  # seconds without a key after which a word's start can't be trusted
 DELIMITERS = " .,!?;:"
 SKIP_APPS = ("kitty", "ghostty", "foot", "alacritty", "konsole", "keepassxc")
@@ -288,13 +286,6 @@ class Typist:
             self.tap(getattr(self.e, f"KEY_{name}"), c.isupper() or c in self.SHIFTED)
 
 
-def log_stroke(path, word):
-    # TEMPORARY, for tuning decode_stroke on real strokes; remove with its file
-    fd = os.open(STROKE_LOG, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o600)
-    with os.fdopen(fd, "a") as log:
-        log.write(f"{path} -> {word}\n")
-
-
 class Corrector:
     def __init__(self, speller, typist, safe=safe_to_correct):
         self.speller = speller
@@ -324,7 +315,6 @@ class Corrector:
     def swiped(self, path):
         word = self.speller.decode_stroke(path.lower())
         self.word, self.clean, self.last_fix = "", True, None
-        log_stroke(path, word)
         if word:
             word = word.capitalize() if path[0].isupper() else word
             # The space goes before a word, so punctuation can follow it directly
