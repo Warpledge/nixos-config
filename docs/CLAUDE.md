@@ -19,7 +19,7 @@ Game notes live under `docs/gaming/` (the `game-troubleshooting` skill indexes t
 
 nixpkgs update notes live under `docs/nixpkgs/`:
 
-- `nixpkgs/disabled-packages.md` — packages switched off because a flake update broke them, with the date, the nixpkgs rev and how to tell a fix has landed. **Add a row whenever an update forces a package off, and remove it on re-enable.** The `disable-package` skill does both.
+- `nixpkgs/disabled-packages.md` — packages pinned ahead of nixpkgs (its Pinned ahead table: drop the override once nixpkgs catches up), and packages switched off because a flake update broke them, with the date, the nixpkgs rev and how to tell a fix has landed. **Add a row whenever an update forces a package off, and remove it on re-enable.** The `disable-package` skill does both.
 
 Window manager notes live under `docs/wm/`:
 
