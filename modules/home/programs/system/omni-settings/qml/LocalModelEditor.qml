@@ -82,6 +82,19 @@ Sheet {
             return fallback
         return key in model.measured ? model.measured[key] : fallback
     }
+    //--- An added model's vision projector; a hand-written --mmproj arg goes with it
+    function setVision(file) {
+        const o = Object.assign({}, own)
+        if (file)
+            o.mmproj = file
+        else
+            delete o.mmproj
+        if (Array.isArray(o.args))
+            o.args = o.args.filter(a => !/^--mmproj\b/.test(a))
+        own = o
+        result = null
+        estimateTimer.restart()
+    }
     function set(key, v) {
         const o = Object.assign({}, own)
         if (v === undefined)
@@ -426,6 +439,16 @@ Sheet {
     //-- Tuning
     //--------------------------------------------------------------------//
     Section { text: "Tuning"; info: "Each value shows what loads now; hover a name for what it does." }
+    Choice {
+        // Added models only: a catalog model's vision file comes from lib/local-models.nix
+        visible: ed.model.added && ed.model.visionFiles.length > 0
+        title: "Vision"
+        tip: "A vision projector (mmproj) from the model's folder lets it read images. It loads on "
+             + "the GPU beside the model, so it counts toward the fit above. Text Only leaves it out."
+        current: "mmproj" in ed.own ? ed.own.mmproj : ""
+        options: [{ value: "", label: "Text Only" }].concat(ed.model.visionFiles.map(f => ({ value: f, label: f })))
+        onPicked: v => ed.setVision(v)
+    }
     Choice {
         title: "Context"
         tip: "How much text the model holds at once: your prompt, files and its reply. More context "

@@ -132,6 +132,23 @@ def find_file(entry):
     return os.path.join(folder, names[0]) if names else None
 
 
+def find_vision(entry):
+    """The vision projector the entry's `mmproj` match names in its folder, as
+    llama-swap's llama-model script finds it; None without one."""
+    if not entry.get("mmproj"):
+        return None
+    return find_file({"dir": entry.get("dir", ""), "match": entry["mmproj"]})
+
+
+def vision_files(entry):
+    """The vision projectors (mmproj*.gguf) in the entry's folder."""
+    try:
+        return sorted(n for n in os.listdir(os.path.join(MODELS_DIR, entry.get("dir", "")))
+                      if n.lower().startswith("mmproj") and n.lower().endswith(".gguf"))
+    except OSError:
+        return []
+
+
 def size_of(path):
     return sum(os.path.getsize(p) for p in gguf.shards(path) if os.path.exists(p))
 
@@ -189,6 +206,7 @@ def scan(known, knows=None):
         out.append({"path": path, "dir": folder, "file": os.path.basename(path), "bytes": size_of(path),
                     "quant": q.group(0) if q else "", "id": owner, "arch": arch,
                     "supported": knows(arch) if knows else True,
+                    "vision": vision_files({"dir": folder}),
                     "suggest": {"id": mid, "name": name, "match": match}})
     return out
 
@@ -347,7 +365,7 @@ def placement(m, t):
     batch = t.get("batch", 512)
     # Fitted to llama.cpp's Vulkan buffers on eclipse (Ornith, -ub 2048, 2026-10-30)
     compute = batch * m.embedding * 48 + 128 * MB if on_gpu else 0
-    gpu += kv * share + compute
+    gpu += kv * share + compute + t.get("_vision", 0)  # the vision projector loads on the GPU
     ram += kv * (1 - share) + t.get("cacheRam", 8192) * MB
     return gpu, ram, {"weights": m.weights, "kv": kv, "compute": compute}
 
@@ -571,6 +589,12 @@ def run_once(server, path, t, entry, profile, profs):
     ram_total = meminfo().get("MemTotal", 0)
     port = free_port()
     words = [w for a in flags(t, profile, profs) + list(entry.get("args") or []) for w in shlex.split(a)]
+    vision = find_vision(entry)
+    if entry.get("mmproj") and not vision:
+        raise ValueError(f"No {entry['mmproj']} in ~/.lmstudio/models/{entry.get('dir')}: "
+                         "download the vision file in LM Studio")
+    if vision:
+        words = ["--mmproj", vision] + words
     cmd = [server, "-m", path, "--port", str(port), "--host", "127.0.0.1"] + words
     say("$ " + " ".join(shlex.quote(c) for c in cmd[1:]))
     base_vram, base_ram = vram_used(), meminfo().get("MemAvailable", 0)

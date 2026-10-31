@@ -6,6 +6,8 @@ llama-swap runs AI models on your own computer and hands them to opencode, Zed a
 
 Download models in LM Studio (its Discover tab). They land in `~/.lmstudio/models`, and the Local Models page lists every file there that no model uses yet under **Downloaded in LM Studio**. Click **Add**, choose whether it's for coding or chat, and give it a name. After Apply, turn it on under Local AI, Models.
 
+If the model's folder also has a vision file (its name starts with `mmproj`), Add offers it: with it, the model can read images. The editor's **Vision** setting turns it on or off later. It loads on the GPU beside the model and counts toward the fit.
+
 The models the config ships with are listed under **Models** whether or not you've downloaded them. One that isn't downloaded shows in yellow.
 
 ## What fits

@@ -211,6 +211,7 @@
       name = lib.isString;
       dir = lib.isString;
       match = lib.isString;
+      mmproj = lib.isString; # the vision projector's file match in the same folder
       args = v: lib.isList v && lib.all lib.isString v;
       think = lib.isAttrs;
       fast = v: v == null || lib.isAttrs v;

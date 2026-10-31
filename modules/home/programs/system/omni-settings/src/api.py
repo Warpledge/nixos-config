@@ -547,6 +547,8 @@ def cmd_local_models(cfg, args):
                        "flags": localmodelstate.flags(t, profile, profs) + list(entry.get("args") or []),
                        "lastTest": localmodelstate.last_test(mid, t),
                        "arch": arch, "supported": knows(arch) if knows else True,
+                       "mmproj": entry.get("mmproj") or "",
+                       "visionFiles": localmodelstate.vision_files(entry),
                        "file": path and os.path.basename(path),
                        "bytes": path and localmodelstate.size_of(path)})
     return {"gpu": card, "profile": profile,
@@ -564,9 +566,11 @@ def cmd_local_model_estimate(cfg, args):
     profile = lm["profile"]
     card = localmodelstate.gpu(profs)
     t = localmodelstate.effective(entry, profile, profs, lm["models"].get(mid))
+    vision = localmodelstate.find_vision(entry)
+    sized = {**t, "_vision": localmodelstate.size_of(vision) if vision else 0}
     try:
-        out = localmodelstate.estimate(path, t, card, profile, profs)
-        out["presets"] = localmodelstate.presets(path, t, card, profile, profs, entry)
+        out = localmodelstate.estimate(path, sized, card, profile, profs)
+        out["presets"] = localmodelstate.presets(path, sized, card, profile, profs, entry)
         out["lastTest"] = localmodelstate.last_test(mid, t)
         out["quality"] = localmodelstate.last_quality(mid)
     except (OSError, ValueError, KeyError) as e:
