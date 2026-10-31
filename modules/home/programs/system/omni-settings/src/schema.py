@@ -171,7 +171,7 @@ PAGES = {
     "Discord": ("apps", "user-available-symbolic", "Discord and showing what you play.", None),
     "AI": ("apps", "applications-science-symbolic", "Coding agents and local model apps.",
            [("", "", ["claude.enable", "claudeDesktop.enable", "opencode.enable",
-                      "opencodeDesktop.enable", "lmstudio.enable"])]),
+                      "opencodeDesktop.enable", "pi.enable", "lmstudio.enable"])]),
     "Claude": ("cloudai", "applications-science-symbolic",
                "Anthropic's Claude, signed in with your Claude account.",
                [("", "", ["claudeDesktop.matugen"]),

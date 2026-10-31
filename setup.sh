@@ -859,6 +859,7 @@ apps=(
   "AI tools|claudeDesktop.matugen|Claude desktop app in your wallpaper's colours"
   "AI tools|opencode.enable|opencode"
   "AI tools|opencodeDesktop.enable|OpenCode desktop app: a window for opencode"
+  "AI tools|pi.enable|Pi: a minimal terminal coding agent"
   "AI tools|lmstudio.enable|LM Studio: run language models locally"
   "AI tools|llamaSwap.enable|llama-swap: llama.cpp server for opencode"
   "AI tools|openWebui.enable|Open WebUI: chat with the local models in the browser"

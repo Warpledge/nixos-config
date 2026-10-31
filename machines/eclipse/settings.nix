@@ -57,6 +57,7 @@
       media.aniCli = false;
       security.keepassxc = false;
       opencodeDesktop.enable = true;
+      pi.enable = true;
       openWebui.enable = false;
       claude.plugins.claudeSecurity = false;
       claude.accountSkills.docx = true;

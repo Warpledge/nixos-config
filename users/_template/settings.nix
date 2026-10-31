@@ -233,6 +233,7 @@
   claudeDesktop.matugen = false; # Claude desktop app in your wallpaper's colours
   opencode.enable = false;
   opencodeDesktop.enable = false; # OpenCode's desktop app: a Claude Desktop-style GUI
+  pi.enable = false; # Pi: a minimal terminal coding agent, on llama-swap's models
   lmstudio.enable = false; # Runs language models locally
   llamaSwap.enable = false; # llama.cpp server on the GPU, opencode's default model
   openWebui.enable = false; # Chat with llama-swap's models in the browser

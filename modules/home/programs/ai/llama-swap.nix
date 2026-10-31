@@ -107,6 +107,45 @@ in {
   };
 
   #--------------------------------------------------------------------#
+  #-- Pi Provider
+  #--------------------------------------------------------------------#
+  #--- The same models as opencode's; Pi reloads the file when /model opens
+  home.file.".pi/agent/models.json" = lib.mkIf (user.pi.enable && codes != {}) {
+    text = builtins.toJSON {
+      "$schema" = "https://pi.dev/schemas/models.schema.json";
+      providers.llama-swap = {
+        name = "llama-swap (local)";
+        baseUrl = "http://127.0.0.1:${toString port}/v1";
+        api = "openai-completions";
+        apiKey = "llama-swap"; # Unused, but Pi lists a provider only with one
+        # llama.cpp's chat templates know no developer role or reasoning_effort
+        compat = {
+          supportsDeveloperRole = false;
+          supportsReasoningEffort = false;
+        };
+        models = lib.concatLists (lib.mapAttrsToList (id: model:
+          [
+            {
+              inherit id;
+              inherit (model) name;
+              reasoning = true;
+              contextWindow = model.context;
+              maxTokens = 32768;
+            }
+          ]
+          ++ lib.optional (model.fast != null) {
+            id = "${id}-instruct";
+            name = "${model.name} (fast)";
+            reasoning = false;
+            contextWindow = model.context;
+            maxTokens = 8192;
+          })
+        codes);
+      };
+    };
+  };
+
+  #--------------------------------------------------------------------#
   #-- OpenCode Provider
   #--------------------------------------------------------------------#
   #--- Every coding model and its fast variant to pick from; the first is the default
