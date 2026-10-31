@@ -42,6 +42,18 @@ Sheet {
                 mem = e
                 vramSeries = vramSeries.slice(-239).concat([e.vramTotal ? e.vram / e.vramTotal : 0])
                 ramSeries = ramSeries.slice(-239).concat([e.ramTotal ? e.ram / e.ramTotal : 0])
+            } else if (e.event === "attempt") {
+                if (e.status === "best") {
+                    bestN = e.n
+                    return
+                }
+                const list = attempts.filter(a => a.n !== e.n)
+                list.push(e)
+                attempts = list.sort((a, b) => a.n - b.n)
+                if (e.status === "running") {  // a new load: its own counters
+                    tokens = 0
+                    rate = 0
+                }
             } else if (e.event === "tokens") {
                 tokens = e.n
                 rate = e.rate
@@ -109,7 +121,7 @@ Sheet {
                 ed.fitError = reply.error
         })
     }
-    function runTest() {
+    function resetLive() {
         testing = true
         log = []
         result = null
@@ -119,6 +131,60 @@ Sheet {
         mem = null
         tokens = 0
         rate = 0
+        attempts = []
+        bestN = 0
+    }
+
+    //--- Auto-Tune (api.py's localModelAutoTune): attempts follow as "attempt" events
+    property bool tuning: false
+    property bool stopping: false
+    property var tuneProc: null
+    property string goal: "speed"
+    property int minRate: 20
+    property var attempts: []  // [{n, tuning, status, rate, prompt, vramPeak}]
+    property int bestN: 0
+    function runAutoTune() {
+        resetLive()
+        tuning = true
+        tuneProc = Backend.stream("localModelAutoTune",
+                                  { id: model.id, localModels: merged(), goal, minRate },
+                                  line => ed.takeTestLine(line), reply => {
+            if (!ed)
+                return
+            ed.testing = false
+            ed.tuning = false
+            ed.tuneProc = null
+            if (ed.stopping) {
+                ed.stopping = false
+                ed.view.say("Auto-Tune stopped")
+                return
+            }
+            if (reply.ok) {
+                ed.useTuning(reply.data.best)  // the estimate then shows its saved result
+                ed.view.say(`Auto-Tune picked ${ed.describe(reply.data.best)}; Save to keep it`)
+                if (reply.data.note)
+                    ed.view.say(reply.data.note)
+            } else
+                ed.view.ask({ heading: "Auto-Tune didn't finish", body: reply.error, cancel: false,
+                              buttons: [{ label: "OK", value: true }] }, () => {})
+        })
+    }
+    function stopAutoTune() {
+        if (!tuneProc)
+            return
+        stopping = true
+        tuneProc.running = false  // SIGTERM: the backend stops llama-server on its way out
+    }
+    //--- A tuning in a few words: "20 experts in RAM · 128K · batch 2048"
+    function describe(t) {
+        const where = t.cpuMoe !== undefined ? `${t.cpuMoe} experts in RAM`
+                    : t.gpuLayers === "all" || t.gpuLayers === undefined ? "all on the GPU"
+                    : `${t.gpuLayers} layers on the GPU`
+        return [where, contextLabel(t.context).replace(" tokens", ""), `batch ${t.batch || 512}`].join(" · ")
+    }
+
+    function runTest() {
+        resetLive()
         Backend.stream("localModelTest", { id: model.id, localModels: merged() },
                        line => ed.takeTestLine(line), reply => {
             if (!ed)
@@ -428,10 +494,44 @@ Sheet {
         onClicked: ed.runTest()
     }
 
+    Section {
+        visible: ed.models.info && ed.models.info.canTest && ed.model.supported
+        text: "Auto-Tune"
+        info: "Loads the model again and again, changing one setting at a time, and keeps the "
+              + "best that fits. Takes 3 to 8 minutes; llama-swap's model is unloaded meanwhile."
+    }
+    Choice {
+        visible: ed.models.info && ed.models.info.canTest && ed.model.supported
+        title: "Goal"
+        tip: "Fastest keeps the context set above and finds the quickest split. Most Context finds "
+             + "the longest context that still writes at the speed you pick."
+        current: ed.goal
+        options: [{ value: "speed", label: "Fastest at This Context" }, { value: "context", label: "Most Context" }]
+        onPicked: v => ed.goal = v
+    }
+    Choice {
+        visible: ed.models.info && ed.models.info.canTest && ed.model.supported && ed.goal === "context"
+        title: "At Least"
+        tip: "The slowest replies you'd accept. 20 tokens a second reads comfortably; coding "
+             + "agents feel slow under 15."
+        current: ed.minRate
+        options: [10, 15, 20, 30].map(n => ({ value: n, label: `${n} tokens a second` }))
+        onPicked: v => ed.minRate = v
+    }
+    ListRow {
+        visible: ed.models.info && ed.models.info.canTest && ed.model.supported
+        icon: ed.tuning ? "progress_activity" : "auto_fix_high"
+        title: ed.tuning ? `Auto-Tuning… attempt ${ed.attempts.length || 1}` : "Find the Best Settings"
+        subtitle: ed.tuning ? (ed.attempts.length ? ed.describe(ed.attempts[ed.attempts.length - 1].tuning) : "Freeing the GPU")
+                            : "The winner fills the settings above; Save keeps it"
+        button: ed.tuning ? (ed.stopping ? "" : "Stop") : ed.testing ? "" : "Auto-Tune"
+        onClicked: ed.tuning ? ed.stopAutoTune() : ed.runAutoTune()
+    }
+
     //--- What the test is doing: its steps, memory as it loads, and the reply's speed
     Rectangle {
         id: live
-        visible: ed.testing || ed.log.length > 0
+        visible: ed.testing || ed.log.length > 0 || ed.attempts.length > 0
         Layout.fillWidth: true
         implicitHeight: liveCol.implicitHeight + 24
         radius: 14
@@ -568,6 +668,49 @@ Sheet {
                             Behavior on width { NumberAnimation { duration: 240 } }
                         }
                     }
+                }
+            }
+
+            //--- Auto-Tune's attempts, the winner marked once it's done
+            Text {
+                visible: ed.attempts.length > 0
+                text: "Attempts"
+                color: Theme.text
+                font.pixelSize: 14
+                TitleTip { tip: "Each load Auto-Tune tried. Too big ran out of VRAM; Tight fit but left "
+                                + "under 0.5 GB free, where speed drops." }
+            }
+            Repeater {
+                model: ed.attempts
+                RowLayout {
+                    required property var modelData
+                    readonly property bool winner: modelData.n === ed.bestN
+                    Layout.fillWidth: true
+                    spacing: 8
+                    Text {
+                        text: `${modelData.n}.`
+                        color: Theme.dim
+                        font.pixelSize: 13
+                        Layout.preferredWidth: 22
+                    }
+                    Text {
+                        text: ed.describe(modelData.tuning)
+                        color: parent.winner ? Theme.primary : Theme.text
+                        font.pixelSize: 13
+                        font.weight: parent.winner ? Font.DemiBold : Font.Normal
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                    }
+                    Text {
+                        text: modelData.status === "running" ? "Testing…"
+                              : modelData.status === "too big" ? "Too big"
+                              : `${modelData.rate} tok/s · ${ed.gb(modelData.vramPeak)} GB`
+                                + (modelData.status === "tight" ? " · Tight" : "")
+                        color: modelData.status === "fits" ? Theme.text
+                               : modelData.status === "running" ? Theme.dim : Theme.caution
+                        font.pixelSize: 13
+                    }
+                    Chip { visible: parent.winner; text: "Best"; accent: true; tappable: false }
                 }
             }
 

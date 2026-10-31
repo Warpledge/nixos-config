@@ -12,6 +12,7 @@ import platform
 import pwd
 import re
 import selectors
+import signal
 import shlex
 import shutil
 import socket
@@ -579,6 +580,27 @@ def cmd_local_model_test(cfg, args):
                                   lm["profile"], profs)
     localmodelstate.remember(mid, t, result)
     return result
+
+
+def cmd_local_model_auto_tune(cfg, args):
+    """Searches for the model's best tuning by loading it repeatedly (args.goal
+    "speed" or "context", args.minRate for "context"); progress on stderr. Stop
+    sends SIGTERM, which unwinds so llama-server is stopped too."""
+    signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))
+    lm, profs, mid, _, entry, path = local_model(cfg, args)
+    profile = lm["profile"]
+    base = localmodelstate.effective(entry, profile, profs, lm["models"].get(mid))
+    card = localmodelstate.gpu(profs)
+    localmodelstate.runnable(os.environ.get("OMNI_SETTINGS_LLAMA_SERVER"), path)
+    localmodelstate.unload_swap()
+    try:
+        out = localmodelstate.autotune(os.environ.get("OMNI_SETTINGS_LLAMA_SERVER"), path, entry, base,
+                                       args.get("goal") or "speed", float(args.get("minRate") or 20),
+                                       card, profile, profs)
+    except localmodelstate.TooBig as e:
+        raise ValueError(str(e)) from None
+    localmodelstate.remember(mid, localmodelstate.effective(entry, profile, profs, out["best"]), out["result"])
+    return out
 
 
 def cmd_firmware(_cfg, args):
@@ -1602,7 +1624,7 @@ def cmd_save_window_rule(cfg, args):
 
 COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cmd_save,
             "localModels": cmd_local_models, "localModelEstimate": cmd_local_model_estimate,
-            "localModelTest": cmd_local_model_test,
+            "localModelTest": cmd_local_model_test, "localModelAutoTune": cmd_local_model_auto_tune,
             "dismiss": cmd_dismiss, "saveUi": cmd_saveUi,
             "stale": cmd_stale, "removeStale": cmd_remove_stale,
             "overview": cmd_overview, "freed": cmd_freed, "boot": cmd_boot,

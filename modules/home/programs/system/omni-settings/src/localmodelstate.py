@@ -473,20 +473,25 @@ def stream_reply(port, deadline):
     return timings
 
 
-def test(server, path, t, entry, profile, profs):
-    """Runs llama-server on `path` with tuning `t` and the model's args, measures
-    peak VRAM, RAM and speed, then stops it. llama-swap's loaded models are
-    unloaded first so the GPU is free; llama-swap reloads on the next request.
-    Progress goes to stderr as llama-server's log lines and event() lines."""
+class TooBig(Exception):
+    """llama-server ran out of memory loading a model."""
+
+
+OOM = re.compile(r"out of memory|failed to allocate|unable to allocate|ErrorOutOfDeviceMemory", re.I)
+
+
+def runnable(server, path):
+    """Raises ValueError when `server` can't run the model in `path`."""
     if not server or not os.path.exists(server):
         raise ValueError("llama-server isn't available: turn on llama-swap and rebuild")
     knows, arch = architectures(server), arch_of(path)
     if knows and not knows(arch):
         raise ValueError(f"This llama.cpp build doesn't know the {arch} architecture yet, so "
                          "llama-swap can't run this model. LM Studio has its own, newer engine.")
-    card_total = max((read_int(p) for p in glob.glob("/sys/class/drm/card[0-9]*/device/mem_info_vram_total")),
-                     default=0)
-    ram_total = meminfo().get("MemTotal", 0)
+
+
+def unload_swap():
+    """Frees the GPU: llama-swap reloads its model the next time an app asks."""
     event("stage", stage="unload")
     try:
         post(f"{LLAMA_SWAP}/api/models/unload")
@@ -494,6 +499,26 @@ def test(server, path, t, entry, profile, profs):
         time.sleep(2)
     except OSError:
         pass
+
+
+def test(server, path, t, entry, profile, profs):
+    """Runs llama-server on `path` with tuning `t` and the model's args, measures
+    peak VRAM, RAM and speed, then stops it. llama-swap's loaded models are
+    unloaded first so the GPU is free. Progress goes to stderr as llama-server's
+    log lines and event() lines."""
+    runnable(server, path)
+    unload_swap()
+    try:
+        return run_once(server, path, t, entry, profile, profs)
+    except TooBig as e:
+        raise ValueError(str(e)) from None
+
+
+def run_once(server, path, t, entry, profile, profs):
+    """One load, test prompt and measurement; TooBig when it runs out of memory."""
+    card_total = max((read_int(p) for p in glob.glob("/sys/class/drm/card[0-9]*/device/mem_info_vram_total")),
+                     default=0)
+    ram_total = meminfo().get("MemTotal", 0)
     port = free_port()
     words = [w for a in flags(t, profile, profs) + list(entry.get("args") or []) for w in shlex.split(a)]
     cmd = [server, "-m", path, "--port", str(port), "--host", "127.0.0.1"] + words
@@ -532,6 +557,9 @@ def test(server, path, t, entry, profile, profs):
         deadline = time.time() + 600
         while True:
             if proc.poll() is not None:
+                time.sleep(0.2)  # the reader thread takes the last lines
+                if any(OOM.search(line) for line in tail):
+                    raise TooBig("Out of memory while loading:\n" + "\n".join(tail[-8:]))
                 raise ValueError("llama-server stopped while loading:\n" + "\n".join(tail[-8:]))
             try:
                 with urllib.request.urlopen(f"http://127.0.0.1:{port}/health", timeout=2) as r:
@@ -564,3 +592,142 @@ def test(server, path, t, entry, profile, profs):
         f"VRAM peak {peak['vram'] / GB:.1f} of {card_total / GB:.1f} GB")
     event("stage", stage="done")
     return result
+
+
+#--------------------------------------------------------------------#
+#-- Auto-Tune
+#--------------------------------------------------------------------#
+MARGIN = 512 * MB  # VRAM a fitting attempt leaves free at its peak
+MAX_ATTEMPTS = 14
+
+
+class Enough(Exception):
+    """MAX_ATTEMPTS reached: the search keeps its best so far."""
+
+
+def autotune(server, path, entry, base, goal, min_rate, card, profile, profs):
+    """Finds tuning by loading the model again and again: the least offload that
+    fits (goal "speed", at base's context), or the largest context still writing
+    min_rate tokens a second (goal "context"), then a bigger batch if it reads
+    prompts faster. Returns {best, result, attempts}; emits an attempt event each."""
+    runnable(server, path)
+    m = gguf.read(path)
+    layers = m.layers - m.mtp_layers
+    unified = card["memory"] == "unified"
+    keep = {k: v for k, v in base.items() if k not in ("gpuLayers", "cpuMoe", "fitTarget")}
+    attempts = []
+
+    def attempt(t):
+        if len(attempts) >= MAX_ATTEMPTS:
+            raise Enough
+        n = len(attempts) + 1
+        event("attempt", n=n, tuning=t, status="running")
+        try:
+            r = run_once(server, path, t, entry, profile, profs)
+            # Over the margin, Vulkan spills into shared memory and slows down
+            status = "fits" if unified or r["vramPeak"] <= r["vramTotal"] - MARGIN else "tight"
+        except TooBig:
+            r, status = None, "too big"
+        a = {"n": n, "tuning": t, "status": status, "result": r}
+        attempts.append(a)
+        event("attempt", n=n, tuning=t, status=status, rate=r and r["tokensPerSecond"],
+              prompt=r and r["promptPerSecond"], vramPeak=r and r["vramPeak"])
+        return a
+
+    def estimate_k(context):
+        guess = auto_offload(m, {**keep, "context": context}, card, profile, profs)
+        if m.experts:
+            return guess.get("cpuMoe", 0)
+        return 0 if guess.get("gpuLayers") == "all" else layers - guess.get("gpuLayers", 0)
+
+    def offload(context, floor=0, bias=0):
+        """The fitting attempt with the least offload at `context`, else None.
+        k counts what leaves the GPU: experts of k layers (MoE) or k layers (dense);
+        `floor` is a k known to be needed (a smaller context's answer) and `bias` how
+        far the estimate was off there."""
+        t0 = {**keep, "context": context}
+        if unified:
+            a = attempt({**t0, "gpuLayers": "all"})
+            return a if a["status"] == "fits" else None
+
+        def tuning(k):
+            if m.experts:
+                return {**t0, "gpuLayers": "all", "cpuMoe": k}
+            return {**t0, "gpuLayers": "all" if k == 0 else layers - k}
+
+        k = max(floor, min(layers, estimate_k(context) + bias))
+        fit, fail = None, floor - 1  # least k that fits, most k that doesn't
+        a = attempt(tuning(k))
+        if a["status"] == "fits":
+            fit, best, step = k, a, 1
+            while fit > floor:  # step down, further each time, until one fails
+                k = max(fail + 1, fit - step)
+                a = attempt(tuning(k))
+                if a["status"] != "fits":
+                    fail = k
+                    break
+                fit, best, step = k, a, step * 2
+        else:
+            fail, step, best = k, 1, None
+            while fail < layers:  # step up until one fits
+                k = min(layers, fail + step)
+                a = attempt(tuning(k))
+                if a["status"] == "fits":
+                    fit, best = k, a
+                    break
+                fail, step = k, step * 2
+            if best is None:
+                return None
+        while fit - fail > 1:  # then halve the gap
+            k = (fit + fail) // 2
+            a = attempt(tuning(k))
+            if a["status"] == "fits":
+                fit, best = k, a
+            else:
+                fail = k
+        return best
+
+    best, note = None, ""
+    try:
+        if goal == "context":
+            sizes = sorted({c for c in contexts(m) if c >= base["context"]} | {base["context"]})
+            floor = bias = 0
+            for c in sizes:
+                a = offload(c, floor, bias)
+                if a is None or a["result"]["tokensPerSecond"] < min_rate:
+                    break
+                best = a
+                k = a["tuning"].get("cpuMoe")
+                if k is None and a["tuning"].get("gpuLayers") not in (None, "all"):
+                    k = layers - a["tuning"]["gpuLayers"]
+                floor = k or 0
+                bias = floor - estimate_k(c)
+            if best is None:
+                raise ValueError(f"At {base['context'] // 1024}K context it can't reach {min_rate} "
+                                 "tokens a second here; lower the context or the speed wanted.")
+        else:
+            best = offload(base["context"])
+            if best is None:
+                raise ValueError("It doesn't fit at this context even with everything in RAM; "
+                                 "lower the context.")
+        #--- A bigger batch reads prompts faster, when it fits and replies don't slow
+        if best["tuning"].get("batch", 512) < 2048:
+            for size in (2048, 1024):
+                a = attempt({**best["tuning"], "batch": size})
+                if a["status"] == "fits":
+                    r, b = a["result"], best["result"]
+                    if r["promptPerSecond"] > b["promptPerSecond"] and \
+                            r["tokensPerSecond"] >= b["tokensPerSecond"] * 0.95:
+                        best = a
+                    break
+    except Enough:
+        note = f"Stopped after {MAX_ATTEMPTS} attempts; this is the best found."
+        if best is None:
+            fitting = [a for a in attempts if a["status"] == "fits"]
+            if not fitting:
+                raise ValueError(f"Nothing fitted in {MAX_ATTEMPTS} attempts.") from None
+            best = max(fitting, key=lambda a: a["result"]["tokensPerSecond"])
+    event("attempt", n=best["n"], tuning=best["tuning"], status="best")
+    return {"best": best["tuning"], "result": best["result"], "note": note,
+            "attempts": [{k: v for k, v in a.items() if k != "result"} | {
+                "rate": a["result"] and a["result"]["tokensPerSecond"]} for a in attempts]}

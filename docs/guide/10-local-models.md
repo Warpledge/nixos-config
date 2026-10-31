@@ -51,6 +51,17 @@ It unloads whatever llama-swap had loaded first, so don't run it while an app is
 
 Close what you don't need before testing, the animated wallpaper included, so the numbers match how you'll use the model.
 
+## Auto-Tune
+
+Auto-Tune does the routine above for you. It loads the model again and again, changing one setting at a time, and keeps the best result that fits. Pick a goal first:
+
+- **Fastest at This Context** keeps the context you set and finds the quickest way to fit it.
+- **Most Context** finds the longest context that still writes at least the speed you pick under **At Least**.
+
+It takes 3 to 8 minutes, one load per attempt, and lists each attempt as it goes: what it tried, how fast it ran and how much VRAM it used, or **Too big** when it ran out of memory. When it's done, the winning settings fill the editor. Click **Save** to keep them, then Apply. **Stop** ends it at any point and changes nothing.
+
+Like Test, it unloads llama-swap's model first, so don't start it while an app is mid-answer.
+
 ## GPU profile
 
 The profile at the top tells the models which tested values to use. The page notices your GPU and offers the matching one. With none, llama.cpp fits each model itself, which works on any GPU.
