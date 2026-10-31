@@ -40,8 +40,8 @@
   #-- Input
   #--------------------------------------------------------------------#
   #--- Tapping Meta alone opens the launcher (Meta+Space)
-  #- !name:On-screen keyboard: wvkbd's uinput keyboard must stay out of keyd,
-  #- or keyd grabs it and the PAD key's F13 never reaches niri's bind.
+  #- !name:On-screen keyboard: kept out of keyd as insurance. (Measured 2026-10-31:
+  #- keyd never grabs uinput devices anyway; niri grabs them itself.)
   services.keyd = {
     enable = true;
     keyboards.default = {

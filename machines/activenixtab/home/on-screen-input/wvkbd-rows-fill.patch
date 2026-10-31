@@ -1,0 +1,18 @@
+# kbd_get_rows() returned EndRow-count + 1, so every layout got one phantom
+# row: kbd_init_layout divided the window height by (rows + 1) and the
+# keyboard never filled its height, leaving a blank band at the bottom
+# (visible on Ky's 5-row layout as ~65 px of dead space under the keys).
+# The guard matters too: wvkbd's compose key-tables have zero rows, and
+# dividing by their row count is a floating-point crash (SIGFPE) without it.
+
+--- a/keyboard.c
++++ b/keyboard.c
+@@ -118,7 +118,7 @@
+         }
+         k++;
+     }
+-    return rows + 1;
++    return rows < 1 ? 1 : rows;
+ }
+ 
+ enum layout_id *
