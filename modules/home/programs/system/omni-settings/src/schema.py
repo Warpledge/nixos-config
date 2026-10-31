@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 import nixfile
 
 #--- Never shown: account plumbing, hardware, and values set once at install
-HIDDEN = {"users", "mainUser", "stateVersion", "flakePath", "gpu", "admin"}
+HIDDEN = {"users", "mainUser", "stateVersion", "flakePath", "gpu", "admin", "localModels"}
 #--- Settings read and written whole: sets of named lists or text, and the
 #--- keybind changes by id (lib/settings.nix checks both)
 KEYBINDS = ("keybinds",)

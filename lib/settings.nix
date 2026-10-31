@@ -30,6 +30,7 @@
     "gpu.type" = [null "amd" "intel" "nvidia" "amd+nvidia" "intel+nvidia"];
     "maintenance.clean" = ["daily" "weekly" "monthly" "off"];
     "maintenance.optimise" = ["daily" "weekly" "monthly" "off"];
+    "localModels.profile" = [null] ++ lib.attrNames (import ./gpu-profiles.nix);
   };
   #--- Lists whose items must come from a known set
   listChoices = {
@@ -187,6 +188,50 @@
         ++ map (k: "`steamGames.${id}.${k}` should be text in quotes")
         (lib.filter (k: g ? ${k} && !(lib.isString g.${k})) ["launchOptions" "proton"]))
       value);
+  #--- A machine's localModels.models (lib/local-ai.nix): tuning for a catalog
+  #--- model, or a whole new one; tuning fields kept in step with local-ai.nix
+  catalog = import ./local-models.nix;
+  tuningFields = {
+    context = v: lib.isInt v && v > 0;
+    cache = v: lib.elem v ["f16" "bf16" "q8_0" "q5_1" "q5_0" "q4_1" "q4_0" "iq4_nl"];
+    gpuLayers = v: lib.isInt v && v >= 0 || lib.elem v ["all" "auto"];
+    cpuMoe = v: lib.isInt v && v >= 0;
+    batch = v: lib.isInt v && v > 0;
+    cacheRam = v: lib.isInt v && v >= -1;
+    fitTarget = v: lib.isInt v && v >= 0;
+    loadMode = v: lib.elem v ["auto" "none" "mmap" "mlock" "mmap+mlock" "dio"];
+  };
+  addedFields =
+    tuningFields
+    // {
+      category = v: lib.elem v ["code" "chat"];
+      name = lib.isString;
+      dir = lib.isString;
+      match = lib.isString;
+      args = v: lib.isList v && lib.all lib.isString v;
+      think = lib.isAttrs;
+      fast = v: v == null || lib.isAttrs v;
+      chat = v: v == null || lib.isAttrs v;
+    };
+  localModelProblems = value:
+    if !(lib.isAttrs value && lib.all lib.isAttrs (lib.attrValues value))
+    then ["`localModels.models` should be a set of sets, e.g. {\"gpt-oss-20b\" = {context = 65536;};}"]
+    else
+      lib.concatLists (lib.mapAttrsToList (id: m: let
+        at = "`localModels.models.${id}`";
+        known = catalog.code ? ${id} || catalog.chat ? ${id};
+        fields =
+          if known
+          then tuningFields
+          else addedFields;
+      in
+        map (k: "${at} can't set ${k} (use ${lib.concatStringsSep ", " (lib.attrNames fields)})")
+        (lib.filter (k: !(fields ? ${k})) (lib.attrNames m))
+        ++ map (k: "`localModels.models.${id}.${k}` has the wrong kind of value")
+        (lib.filter (k: fields ? ${k} && !(fields.${k} m.${k})) (lib.attrNames m))
+        ++ lib.optional (!known && !(m ? category && m ? name && m ? dir && m ? match))
+        "${at} isn't a catalog model, so it needs category, name, dir and match")
+      value);
   userChoices =
     {
       wallpaper = ["carousel" "engine"];
@@ -270,6 +315,8 @@
       then sideRailProblems value
       else if at == ["steamGames"]
       then steamGameProblems value
+      else if at == ["localModels" "models"]
+      then localModelProblems value
       else if lib.elem dotted textSets
       then textSetProblems dotted value
       else if lib.elem dotted grouped
@@ -298,13 +345,14 @@
     if lib.isList value
     then value
     else [];
-  badLists = set:
+  #--- `lists`: listChoices with the machine's own models (forSettings)
+  badLists = lists: set:
     lib.concatLists (lib.mapAttrsToList (path: allowed: let
       wrong = lib.filter (v: !(lib.elem v allowed)) (listAt path set);
     in
       lib.optional (wrong != [])
       "`${path}` has ${builtins.toJSON wrong}; use only ${lib.concatMapStringsSep ", " builtins.toJSON allowed}")
-    listChoices)
+    lists)
     ++ lib.concatMap (path: let
       wrong = lib.filter (v: !(lib.isInt v && v >= 1 && v <= 65535)) (listAt path set);
     in
@@ -412,7 +460,17 @@ in rec {
       ++ lib.optional (mainUser != null && !(listed ? ${mainUser})) "mainUser `${toString mainUser}` is not listed in `users`"
       ++ lib.optional (!lib.isString merged.stateVersion) "set stateVersion (in quotes) to the system.stateVersion line in /etc/nixos/configuration.nix"
       ++ badChoices choices merged
-      ++ badLists merged;
+      ++ badLists lists merged;
+
+    #--- localAi.code and .chat may also pick the models this machine adds
+    added = category:
+      lib.attrNames (lib.filterAttrs (_: m: m.category or null == category) merged.localModels.models);
+    lists =
+      listChoices
+      // {
+        "localAi.code" = lib.unique (listChoices."localAi.code" ++ added "code");
+        "localAi.chat" = lib.unique (listChoices."localAi.chat" ++ added "chat");
+      };
   in
     assert report file machineProblems;
     assert lib.all (user: report (userFile user) (problems userDefaults (readUser user) [])) names;
@@ -420,7 +478,7 @@ in rec {
       final = machine.users.${user};
     in
       report (userFile user) (badChoices userChoices final
-        ++ badLists final
+        ++ badLists lists final
         ++ lib.optional (builtins.match "[0-9A-Fa-f]{6}" final.mangohud.textColor == null)
         "`mangohud.textColor` is ${builtins.toJSON final.mangohud.textColor}; use six hex digits, e.g. \"00FF00\""))
     names;

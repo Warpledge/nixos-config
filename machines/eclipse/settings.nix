@@ -152,6 +152,9 @@
   cursor = "bibata";
   cursorSize = 24;
 
+  #--- Local AI Models
+  localModels.profile = "rx-9070-xt";
+
   #--- Bluetooth
   bluetooth.enable = true;
 

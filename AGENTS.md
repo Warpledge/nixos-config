@@ -306,7 +306,8 @@ lines, `grep -n` that file for the part you need.
 - `settings.nix` fills every setting missing from a settings file with the
   template's value (true/false turned off) and stops eval on a bad one.
 - Default apps are chosen in `default-apps.nix` (`mimeapps.list` is forced),
-  local models in `local-models.nix`.
+  local models in `local-models.nix`; `local-ai.nix` applies a machine's
+  `localModels` (GPU profile from `gpu-profiles.nix`, added models, tuning).
 
 **`modules/home/programs/system/omni-settings/`** (a QML app, DMS panel and
 window, over a Python backend; full notes split across its `CLAUDE.md`,
