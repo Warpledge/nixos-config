@@ -62,6 +62,24 @@ It takes 3 to 8 minutes, one load per attempt, and lists each attempt as it goes
 
 Like Test, it unloads llama-swap's model first, so don't start it while an app is mid-answer.
 
+Set **Context Cache** to **Use a Smaller One if Quality Allows** to also try each smaller context cache that passes the quality check below, within the **Quality Limit** you pick. A smaller cache frees VRAM, so the same model can fit more context or keep more of itself on the GPU. If the model has no check yet, Auto-Tune runs one first.
+
+## Answer quality
+
+Most settings only change where the work happens and how fast, never the answers: experts in RAM, layers on the GPU, prompt batch, prompt cache and context length. Two things do change answers: **Context Cache**, and the quantization of the file you downloaded (Q4, Q8 and so on in its name).
+
+**Check Answer Quality** measures what Half and Quarter Size cost for the model you're editing. llama.cpp reads the same text (about 4,000 tokens of these guides) three times: once at Full to record its predictions, then with each smaller cache. Each smaller cache gets three numbers:
+
+| Number | What it means |
+| --- | --- |
+| Same top token | How often it picks the same next token as Full |
+| KLD | KL divergence: how far its whole spread of likely next tokens moves from Full's. 0 is identical |
+| Perplexity × | How much less sure it is of the text than Full; 1.000 is the same |
+
+The verdict comes from KLD, using common rules of thumb: under 0.01 **No real difference**, up to 0.05 **Slightly different**, up to 0.1 **Noticeably different**, above that **Clearly worse**. Once a check has run, the verdicts also show in the Context Cache dropdown.
+
+If Full itself scores badly on the text (a perplexity over 100, common for chat models reading raw Markdown), the page says so. Every difference looks larger than it is in use, so Auto-Tune won't pick a smaller cache from that check. A check takes about a minute and needs around 3 GB free in your home folder's cache for that time.
+
 ## GPU profile
 
 The profile at the top tells the models which tested values to use. The page notices your GPU and offers the matching one. With none, llama.cpp fits each model itself, which works on any GPU.

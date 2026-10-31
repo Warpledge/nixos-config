@@ -10,6 +10,7 @@ import json
 import os
 import re
 import shlex
+import shutil
 import socket
 import subprocess
 import sys
@@ -598,27 +599,31 @@ def run_once(server, path, t, entry, profile, profs):
 #-- Auto-Tune
 #--------------------------------------------------------------------#
 MARGIN = 512 * MB  # VRAM a fitting attempt leaves free at its peak
-MAX_ATTEMPTS = 14
+MAX_ATTEMPTS = 14  # 24 when several context caches are tried
 
 
 class Enough(Exception):
-    """MAX_ATTEMPTS reached: the search keeps its best so far."""
+    """The attempt limit was reached: the search keeps its best so far."""
 
 
-def autotune(server, path, entry, base, goal, min_rate, card, profile, profs):
+def autotune(server, path, entry, base, goal, min_rate, card, profile, profs, caches=None):
     """Finds tuning by loading the model again and again: the least offload that
     fits (goal "speed", at base's context), or the largest context still writing
     min_rate tokens a second (goal "context"), then a bigger batch if it reads
-    prompts faster. Returns {best, result, attempts}; emits an attempt event each."""
+    prompts faster. `caches` are the context cache types to search with (base's
+    alone by default); the best across them wins. Returns {best, result,
+    attempts}; emits an attempt event each."""
     runnable(server, path)
     m = gguf.read(path)
     layers = m.layers - m.mtp_layers
     unified = card["memory"] == "unified"
-    keep = {k: v for k, v in base.items() if k not in ("gpuLayers", "cpuMoe", "fitTarget")}
+    caches = caches or [base.get("cache", "q8_0")]
+    limit = MAX_ATTEMPTS if len(caches) == 1 else 24
+    keep = {}
     attempts = []
 
     def attempt(t):
-        if len(attempts) >= MAX_ATTEMPTS:
+        if len(attempts) >= limit:
             raise Enough
         n = len(attempts) + 1
         event("attempt", n=n, tuning=t, status="running")
@@ -687,8 +692,12 @@ def autotune(server, path, entry, base, goal, min_rate, card, profile, profs):
                 fail = k
         return best
 
-    best, note = None, ""
-    try:
+    def search(cache):
+        """The goal's best attempt with one context cache, else None."""
+        nonlocal keep
+        keep = {**{k: v for k, v in base.items() if k not in ("gpuLayers", "cpuMoe", "fitTarget")},
+                "cache": cache}
+        best = None
         if goal == "context":
             sizes = sorted({c for c in contexts(m) if c >= base["context"]} | {base["context"]})
             floor = bias = 0
@@ -702,14 +711,35 @@ def autotune(server, path, entry, base, goal, min_rate, card, profile, profs):
                     k = layers - a["tuning"]["gpuLayers"]
                 floor = k or 0
                 bias = floor - estimate_k(c)
-            if best is None:
-                raise ValueError(f"At {base['context'] // 1024}K context it can't reach {min_rate} "
-                                 "tokens a second here; lower the context or the speed wanted.")
         else:
             best = offload(base["context"])
-            if best is None:
-                raise ValueError("It doesn't fit at this context even with everything in RAM; "
-                                 "lower the context.")
+        return best
+
+    #--- The goal's measure of a winner: speed, or context and then speed
+    def score(a):
+        r = a["result"]
+        return r["tokensPerSecond"] if goal != "context" else (a["tuning"]["context"], r["tokensPerSecond"])
+
+    #--- A smaller cache (later in `caches`) costs some quality, so it wins only by more
+    #--- than run-to-run noise: more context, or over 5% faster
+    def clearly_better(a, b):
+        ra, rb = a["result"]["tokensPerSecond"], b["result"]["tokensPerSecond"]
+        if goal == "context" and a["tuning"]["context"] != b["tuning"]["context"]:
+            return a["tuning"]["context"] > b["tuning"]["context"]
+        return ra > rb * 1.05
+
+    best, note = None, ""
+    try:
+        for cache in caches:
+            a = search(cache)
+            if a is not None and (best is None or clearly_better(a, best)):
+                best = a
+        if best is None:
+            if goal == "context":
+                raise ValueError(f"At {base['context'] // 1024}K context it can't reach {min_rate} "
+                                 "tokens a second here; lower the context or the speed wanted.")
+            raise ValueError("It doesn't fit at this context even with everything in RAM; "
+                             "lower the context.")
         #--- A bigger batch reads prompts faster, when it fits and replies don't slow
         if best["tuning"].get("batch", 512) < 2048:
             for size in (2048, 1024):
@@ -721,13 +751,172 @@ def autotune(server, path, entry, base, goal, min_rate, card, profile, profs):
                         best = a
                     break
     except Enough:
-        note = f"Stopped after {MAX_ATTEMPTS} attempts; this is the best found."
-        if best is None:
-            fitting = [a for a in attempts if a["status"] == "fits"]
-            if not fitting:
-                raise ValueError(f"Nothing fitted in {MAX_ATTEMPTS} attempts.") from None
-            best = max(fitting, key=lambda a: a["result"]["tokensPerSecond"])
+        note = f"Stopped after {limit} attempts; this is the best found."
+        fitting = [a for a in attempts if a["status"] == "fits"
+                   and (goal != "context" or a["result"]["tokensPerSecond"] >= min_rate)]
+        if best is None and not fitting:
+            raise ValueError(f"Nothing fitted in {limit} attempts.") from None
+        if fitting:
+            top = max(fitting, key=score)
+            best = top if best is None or score(top) > score(best) else best
     event("attempt", n=best["n"], tuning=best["tuning"], status="best")
     return {"best": best["tuning"], "result": best["result"], "note": note,
             "attempts": [{k: v for k, v in a.items() if k != "result"} | {
                 "rate": a["result"] and a["result"]["tokensPerSecond"]} for a in attempts]}
+
+
+#--------------------------------------------------------------------#
+#-- Quality check
+#--------------------------------------------------------------------#
+#--- Each model's last check: {id: {q8_0, q4_0, basePpl, unreliable, at}}
+QUALITY = os.path.join(os.path.dirname(TESTS), "local-model-quality.json")
+#--- Full precision's predictions, which the compared runs read; ~2 GB, deleted after
+KLD_BASE = os.path.expanduser("~/.cache/omni-settings/kld-base.bin")
+SMALLER = {"f16": ["q8_0", "q4_0"], "bf16": ["q8_0", "q4_0"], "q8_0": ["q4_0"]}
+#--- A Full score over this means the model reads plain text poorly (a chat model on
+#--- raw Markdown), which inflates every difference
+UNREADABLE_PPL = 100
+STATS = {"kld": re.compile(r"Mean\s+KLD:\s+(-?[\d.]+)"),
+         "sameTop": re.compile(r"Same top p:\s+([\d.]+)"),
+         "pplRatio": re.compile(r"Mean PPL\(Q\)/PPL\(base\)\s*:\s+([\d.]+)")}
+FINAL_PPL = re.compile(r"Final estimate: PPL = ([\d.]+)")
+
+
+def verdict(kld):
+    """Rules of thumb for mean KL divergence against full precision."""
+    return ("No real difference" if kld < 0.01 else "Slightly different" if kld < 0.05
+            else "Noticeably different" if kld < 0.1 else "Clearly worse")
+
+
+def quality_text(flake):
+    """The check's text: the repo's README and guides, plain English plus Markdown."""
+    parts = [os.path.join(flake, "README.md")] + sorted(glob.glob(os.path.join(flake, "docs", "guide", "*.md")))
+    out = os.path.join(os.environ.get("XDG_RUNTIME_DIR", "/tmp"), "omni-settings", "quality-text.txt")
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    with open(out, "w") as f:
+        for p in parts:
+            with open(p) as src:
+                f.write(src.read() + "\n\n")
+    return out
+
+
+def perplexity_offload(t):
+    """The offload flags llama-perplexity shares with llama-server, from tuning `t`."""
+    out = []
+    if t.get("gpuLayers") not in (None, "auto"):
+        out += ["-ngl", str(t["gpuLayers"])]
+    for key, flag in (("cpuMoe", "--n-cpu-moe"), ("loadMode", "--load-mode"), ("batch", "-ub")):
+        if key in t:
+            out += [flag, str(t[key])]
+    return out
+
+
+def run_perplexity(binary, args):
+    """Runs llama-perplexity, its lines to stderr; its output, or TooBig/ValueError."""
+    tail, lines = [], []
+    proc = subprocess.Popen([binary] + args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                            stdin=subprocess.DEVNULL, text=True, errors="replace")
+    try:
+        for line in proc.stdout:
+            line = line.rstrip()
+            lines.append(line)
+            tail = (tail + [line])[-8:]
+            say(line)
+        code = proc.wait()
+    finally:
+        if proc.poll() is None:
+            proc.terminate()
+            try:
+                proc.wait(10)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+    if code != 0:
+        if any(OOM.search(line) for line in lines):
+            raise TooBig("Out of memory:\n" + "\n".join(tail))
+        raise ValueError("llama-perplexity failed:\n" + "\n".join(tail))
+    return "\n".join(lines)
+
+
+def quality(server, path, t, flake):
+    """Scores the context cache types against full precision on the same text
+    (llama-perplexity's KL divergence), with the model's offload from tuning `t`."""
+    runnable(server, path)
+    binary = os.path.join(os.path.dirname(os.path.realpath(server)), "llama-perplexity")
+    if not os.path.exists(binary):
+        raise ValueError("llama-perplexity isn't beside llama-server in this llama.cpp build")
+    os.makedirs(os.path.dirname(KLD_BASE), exist_ok=True)
+    if shutil.disk_usage(os.path.dirname(KLD_BASE)).free < 4 * GB:
+        raise ValueError("The check needs about 3 GB free in ~/.cache for a while")
+    common = ["-m", path, "-f", quality_text(flake), "-c", "4096", "--chunks", "2", "-fa", "on"] \
+        + perplexity_offload(t)
+    out = {}
+    card_total = max((read_int(p) for p in glob.glob("/sys/class/drm/card[0-9]*/device/mem_info_vram_total")),
+                     default=0)
+    ram_total = meminfo().get("MemTotal", 0)
+    stop = threading.Event()
+
+    def sampler():  # the editor's memory graph
+        while not stop.is_set():
+            event("mem", vram=vram_used(), vramTotal=card_total,
+                  ram=ram_total - meminfo().get("MemAvailable", 0), ramTotal=ram_total)
+            stop.wait(0.5)
+
+    threading.Thread(target=sampler, daemon=True).start()
+    try:
+        event("stage", stage="base")
+        event("quality", cache="f16", status="running")
+        text = run_perplexity(binary, common + ["-ctk", "f16", "-ctv", "f16", "--kl-divergence-base", KLD_BASE])
+        m = FINAL_PPL.search(text)
+        out["basePpl"] = float(m.group(1)) if m else None
+        out["unreliable"] = bool(out["basePpl"] and out["basePpl"] > UNREADABLE_PPL)
+        event("quality", cache="f16", status="done", ppl=out["basePpl"])
+        for cache in ("q8_0", "q4_0"):
+            event("stage", stage=cache)
+            event("quality", cache=cache, status="running")
+            text = run_perplexity(binary, common + ["-ctk", cache, "-ctv", cache,
+                                                    "--kl-divergence-base", KLD_BASE, "--kl-divergence"])
+            stats = {k: float(r.search(text).group(1)) for k, r in STATS.items() if r.search(text)}
+            if "kld" not in stats:
+                raise ValueError(f"llama-perplexity printed no KL divergence for {cache}")
+            stats["verdict"] = verdict(stats["kld"])
+            out[cache] = stats
+            event("quality", cache=cache, status="done", **stats)
+    finally:
+        stop.set()
+        try:
+            os.remove(KLD_BASE)
+        except OSError:
+            pass
+    event("stage", stage="done")
+    return out
+
+
+def last_quality(mid):
+    try:
+        with open(QUALITY) as f:
+            return json.load(f).get(mid)
+    except (OSError, ValueError):
+        return None
+
+
+def remember_quality(mid, result):
+    try:
+        with open(QUALITY) as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        data = {}
+    data[mid] = {**result, "at": time.strftime("%Y-%m-%d %H:%M")}
+    try:
+        os.makedirs(os.path.dirname(QUALITY), exist_ok=True)
+        with open(QUALITY, "w") as f:
+            json.dump(data, f)
+    except OSError:
+        pass
+
+
+def passing_caches(current, checked, kld_limit):
+    """The current cache plus each smaller one the check passed within kld_limit."""
+    if not checked or checked.get("unreliable"):
+        return [current]
+    return [current] + [c for c in SMALLER.get(current, [])
+                        if c in checked and checked[c]["kld"] <= kld_limit]

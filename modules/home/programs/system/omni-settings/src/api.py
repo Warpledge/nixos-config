@@ -566,6 +566,7 @@ def cmd_local_model_estimate(cfg, args):
         out = localmodelstate.estimate(path, t, card, profile, profs)
         out["presets"] = localmodelstate.presets(path, t, card, profile, profs, entry)
         out["lastTest"] = localmodelstate.last_test(mid, t)
+        out["quality"] = localmodelstate.last_quality(mid)
     except (OSError, ValueError, KeyError) as e:
         raise ValueError(f"Couldn't read {os.path.basename(path)}: {e}") from None
     return out
@@ -589,18 +590,48 @@ def cmd_local_model_auto_tune(cfg, args):
     signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))
     lm, profs, mid, _, entry, path = local_model(cfg, args)
     profile = lm["profile"]
+    server = os.environ.get("OMNI_SETTINGS_LLAMA_SERVER")
     base = localmodelstate.effective(entry, profile, profs, lm["models"].get(mid))
     card = localmodelstate.gpu(profs)
-    localmodelstate.runnable(os.environ.get("OMNI_SETTINGS_LLAMA_SERVER"), path)
+    localmodelstate.runnable(server, path)
     localmodelstate.unload_swap()
+    caches = None
+    #--- args.cache "quality": smaller context caches the quality check passes too,
+    #--- running the check first when this model has none
+    if args.get("cache") == "quality":
+        checked = localmodelstate.last_quality(mid)
+        if not checked:
+            try:
+                checked = localmodelstate.quality(server, path, base, cfg.flake)
+            except localmodelstate.TooBig as e:
+                raise ValueError(str(e)) from None
+            localmodelstate.remember_quality(mid, checked)
+        caches = localmodelstate.passing_caches(base.get("cache", "q8_0"), checked,
+                                                float(args.get("kldLimit") or 0.01))
     try:
-        out = localmodelstate.autotune(os.environ.get("OMNI_SETTINGS_LLAMA_SERVER"), path, entry, base,
-                                       args.get("goal") or "speed", float(args.get("minRate") or 20),
-                                       card, profile, profs)
+        out = localmodelstate.autotune(server, path, entry, base, args.get("goal") or "speed",
+                                       float(args.get("minRate") or 20), card, profile, profs, caches)
     except localmodelstate.TooBig as e:
         raise ValueError(str(e)) from None
     localmodelstate.remember(mid, localmodelstate.effective(entry, profile, profs, out["best"]), out["result"])
     return out
+
+
+def cmd_local_model_quality(cfg, args):
+    """Scores the smaller context caches against full precision (llama-perplexity's
+    KL divergence), progress on stderr; saved per model."""
+    signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))
+    lm, profs, mid, _, entry, path = local_model(cfg, args)
+    t = localmodelstate.effective(entry, lm["profile"], profs, lm["models"].get(mid))
+    server = os.environ.get("OMNI_SETTINGS_LLAMA_SERVER")
+    localmodelstate.runnable(server, path)
+    localmodelstate.unload_swap()
+    try:
+        out = localmodelstate.quality(server, path, t, cfg.flake)
+    except localmodelstate.TooBig as e:
+        raise ValueError(f"{e}\n\nLower Layers on the GPU or raise Experts in RAM, then check again.") from None
+    localmodelstate.remember_quality(mid, out)
+    return localmodelstate.last_quality(mid)
 
 
 def cmd_firmware(_cfg, args):
@@ -1625,6 +1656,7 @@ def cmd_save_window_rule(cfg, args):
 COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cmd_save,
             "localModels": cmd_local_models, "localModelEstimate": cmd_local_model_estimate,
             "localModelTest": cmd_local_model_test, "localModelAutoTune": cmd_local_model_auto_tune,
+            "localModelQuality": cmd_local_model_quality,
             "dismiss": cmd_dismiss, "saveUi": cmd_saveUi,
             "stale": cmd_stale, "removeStale": cmd_remove_stale,
             "overview": cmd_overview, "freed": cmd_freed, "boot": cmd_boot,

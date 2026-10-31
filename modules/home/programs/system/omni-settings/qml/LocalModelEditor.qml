@@ -42,6 +42,10 @@ Sheet {
                 mem = e
                 vramSeries = vramSeries.slice(-239).concat([e.vramTotal ? e.vram / e.vramTotal : 0])
                 ramSeries = ramSeries.slice(-239).concat([e.ramTotal ? e.ram / e.ramTotal : 0])
+            } else if (e.event === "quality") {
+                const q = Object.assign({}, qualityLive)
+                q[e.cache] = e
+                qualityLive = q
             } else if (e.event === "attempt") {
                 if (e.status === "best") {
                     bestN = e.n
@@ -117,6 +121,8 @@ Sheet {
                 // The last test, while these are the settings it ran with
                 if (!ed.testing)
                     ed.result = reply.data.lastTest ? reply.data.lastTest.result : null
+                if (!ed.checking)
+                    ed.quality = reply.data.quality
             } else
                 ed.fitError = reply.error
         })
@@ -133,6 +139,50 @@ Sheet {
         rate = 0
         attempts = []
         bestN = 0
+        qualityLive = ({})
+    }
+
+    //--- The quality check (api.py's localModelQuality): KL divergence of the smaller
+    //--- context caches against full precision, saved per model
+    property var quality: null  // {basePpl, unreliable, q8_0, q4_0, at}
+    property var qualityLive: ({})  // the running check's "quality" events, by cache
+    property bool checking: false
+    property var qualityProc: null
+    property string runKind: ""  // test, tune or quality: picks the live panel's steps
+    property string cacheMode: "keep"  // Auto-Tune: keep, or quality
+    property real kldLimit: 0.01
+    readonly property var cacheNames: ({ f16: "Full", bf16: "Full", q8_0: "Half Size", q4_0: "Quarter Size" })
+    function runQuality() {
+        resetLive()
+        checking = true
+        runKind = "quality"
+        qualityProc = Backend.stream("localModelQuality", { id: model.id, localModels: merged() },
+                                     line => ed.takeTestLine(line), reply => {
+            if (!ed)
+                return
+            ed.testing = false
+            ed.checking = false
+            ed.qualityProc = null
+            if (ed.stopping) {
+                ed.stopping = false
+                ed.view.say("Quality check stopped")
+                return
+            }
+            if (reply.ok)
+                ed.quality = reply.data
+            else
+                ed.view.ask({ heading: "The quality check didn't finish", body: reply.error, cancel: false,
+                              buttons: [{ label: "OK", value: true }] }, () => {})
+        })
+    }
+    function stopQuality() {
+        if (!qualityProc)
+            return
+        stopping = true
+        qualityProc.running = false
+    }
+    function verdictTone(v) {
+        return v === "No real difference" ? "" : v === "Slightly different" ? "" : "caution"
     }
 
     //--- Auto-Tune (api.py's localModelAutoTune): attempts follow as "attempt" events
@@ -146,8 +196,9 @@ Sheet {
     function runAutoTune() {
         resetLive()
         tuning = true
+        runKind = "tune"
         tuneProc = Backend.stream("localModelAutoTune",
-                                  { id: model.id, localModels: merged(), goal, minRate },
+                                  { id: model.id, localModels: merged(), goal, minRate, cache: cacheMode, kldLimit },
                                   line => ed.takeTestLine(line), reply => {
             if (!ed)
                 return
@@ -160,6 +211,8 @@ Sheet {
                 return
             }
             if (reply.ok) {
+                if (ed.cacheMode === "quality" && ed.qualityLive.f16)
+                    ed.quality = null  // a check ran first: the estimate brings its saved result
                 ed.useTuning(reply.data.best)  // the estimate then shows its saved result
                 ed.view.say(`Auto-Tune picked ${ed.describe(reply.data.best)}; Save to keep it`)
                 if (reply.data.note)
@@ -180,11 +233,13 @@ Sheet {
         const where = t.cpuMoe !== undefined ? `${t.cpuMoe} experts in RAM`
                     : t.gpuLayers === "all" || t.gpuLayers === undefined ? "all on the GPU"
                     : `${t.gpuLayers} layers on the GPU`
-        return [where, contextLabel(t.context).replace(" tokens", ""), `batch ${t.batch || 512}`].join(" · ")
+        return [where, contextLabel(t.context).replace(" tokens", ""), `batch ${t.batch || 512}`,
+                t.cache || model.cache].join(" · ")
     }
 
     function runTest() {
         resetLive()
+        runKind = "test"
         Backend.stream("localModelTest", { id: model.id, localModels: merged() },
                        line => ed.takeTestLine(line), reply => {
             if (!ed)
@@ -391,8 +446,14 @@ Sheet {
         tip: "How precisely the context is kept. Half size barely changes answers and doubles the "
              + "context that fits; quarter size can hurt long answers."
         current: ed.value("cache", ed.model.cache)
-        options: [{ value: "f16", label: "Full (f16)" }, { value: "q8_0", label: "Half Size (q8_0)" },
-                  { value: "q4_0", label: "Quarter Size (q4_0)" }]
+        // With a quality check run, each smaller size carries its verdict
+        options: [["f16", "Full (f16)"], ["q8_0", "Half Size (q8_0)"], ["q4_0", "Quarter Size (q4_0)"]].map(o => ({
+            value: o[0],
+            label: o[1] + (ed.quality && ed.quality[o[0]] ? ` · ${ed.quality[o[0]].verdict}` : ""),
+            tip: ed.quality && ed.quality[o[0]]
+                 ? `${ed.quality[o[0]].sameTop.toFixed(1)}% same top token, mean KLD ${ed.quality[o[0]].kld.toFixed(4)}`
+                 : ""
+        }))
         onPicked: v => ed.set("cache", v)
     }
     Choice {
@@ -518,6 +579,26 @@ Sheet {
         options: [10, 15, 20, 30].map(n => ({ value: n, label: `${n} tokens a second` }))
         onPicked: v => ed.minRate = v
     }
+    Choice {
+        visible: ed.models.info && ed.models.info.canTest && ed.model.supported
+        title: "Context Cache"
+        tip: "Use a Smaller One also searches with each smaller context cache the quality check "
+             + "passes. A smaller cache frees VRAM, which buys context or speed. Runs the check first "
+             + "if this model has none."
+        current: ed.cacheMode
+        options: [{ value: "keep", label: "Keep Mine" }, { value: "quality", label: "Use a Smaller One if Quality Allows" }]
+        onPicked: v => ed.cacheMode = v
+    }
+    Choice {
+        visible: ed.models.info && ed.models.info.canTest && ed.model.supported && ed.cacheMode === "quality"
+        title: "Quality Limit"
+        tip: "How far a smaller cache's predictions may drift from Full, as mean KL divergence. "
+             + "Under 0.01 is generally indistinguishable in use; under 0.05 is a small but measurable change."
+        current: ed.kldLimit
+        options: [{ value: 0.01, label: "No Real Difference (KLD ≤ 0.01)" },
+                  { value: 0.05, label: "Slightly Different (KLD ≤ 0.05)" }]
+        onPicked: v => ed.kldLimit = v
+    }
     ListRow {
         visible: ed.models.info && ed.models.info.canTest && ed.model.supported
         icon: ed.tuning ? "progress_activity" : "auto_fix_high"
@@ -526,6 +607,59 @@ Sheet {
                             : "The winner fills the settings above; Save keeps it"
         button: ed.tuning ? (ed.stopping ? "" : "Stop") : ed.testing ? "" : "Auto-Tune"
         onClicked: ed.tuning ? ed.stopAutoTune() : ed.runAutoTune()
+    }
+
+    //--- What the smaller context caches cost in answer quality
+    Section {
+        visible: ed.models.info && ed.models.info.canTest && ed.model.supported
+        text: "Answer Quality"
+        info: "Only Context Cache (and the model file you downloaded) changes answers; offload, batch "
+              + "and context length don't. This scores Half and Quarter Size against Full on the same "
+              + "text with llama.cpp's KL divergence."
+    }
+    ListRow {
+        visible: ed.models.info && ed.models.info.canTest && ed.model.supported
+        icon: ed.checking ? "progress_activity" : "fact_check"
+        title: ed.checking ? `Checking… ${ed.cacheNames[ed.stage === "base" ? "f16" : ed.stage] || ""}`
+                           : "Check Answer Quality"
+        subtitle: ed.checking ? "Three passes over the repo's guides, about a minute"
+                  : ed.quality ? `Checked ${ed.quality.at} · Full scores ${ed.quality.basePpl.toFixed(1)} perplexity`
+                  : "Compares Half and Quarter Size with Full"
+        info: "Runs llama-perplexity three times on the same text (about 4K tokens of the repo's guides) "
+              + "with this model's offload: once at Full to save its predictions, then with each smaller "
+              + "cache to measure how far they drift. Needs about 3 GB free in ~/.cache while it runs."
+        button: ed.checking ? (ed.stopping ? "" : "Stop") : ed.testing ? "" : ed.quality ? "Again" : "Check"
+        onClicked: ed.checking ? ed.stopQuality() : ed.runQuality()
+    }
+    ListRow {
+        visible: !!ed.quality && ed.quality.unreliable && !ed.checking
+        icon: "warning"
+        tone: "caution"
+        title: "The model reads the test text poorly"
+        subtitle: `Full scores ${ed.quality ? ed.quality.basePpl.toFixed(0) : ""} perplexity, so differences look bigger than in use`
+        info: "A model unsure of every next token (a chat model reading raw Markdown) flips its top pick "
+              + "on tiny changes, which inflates KL divergence. Auto-Tune won't pick a smaller cache "
+              + "from these numbers."
+    }
+    Repeater {
+        model: ["q8_0", "q4_0"]
+        ListRow {
+            required property string modelData
+            readonly property var q: ed.checking ? ed.qualityLive[modelData] : ed.quality && ed.quality[modelData]
+            visible: !!q && q.status !== "running"
+            compact: true
+            icon: "compress"
+            title: `${ed.cacheNames[modelData]} (${modelData})`
+            subtitle: q && q.kld !== undefined
+                      ? `${q.sameTop.toFixed(1)}% same top token · KLD ${q.kld.toFixed(4)} · perplexity ×${q.pplRatio.toFixed(3)}`
+                      : ""
+            value: q && q.verdict ? q.verdict : ""
+            tone: q && q.verdict ? ed.verdictTone(q.verdict) : ""
+            info: "Same top token: how often it picks the same next token as Full. KLD (KL divergence): how "
+                  + "far its whole spread of likely tokens moves from Full's; under 0.01 is generally "
+                  + "indistinguishable, 0.01–0.05 slightly different, 0.05–0.1 noticeable, over 0.1 clearly "
+                  + "worse (common rules of thumb). Perplexity ×: how much less sure it is of the text."
+        }
     }
 
     //--- What the test is doing: its steps, memory as it loads, and the reply's speed
@@ -538,8 +672,13 @@ Sheet {
         color: Qt.alpha(Theme.bg, 0.55)
         border.width: 1
         border.color: Theme.rule
-        readonly property var steps: [["unload", "Free the GPU", "memory_alt"], ["load", "Load", "download"],
-                                      ["prompt", "Read Prompt", "description"], ["generate", "Write Reply", "edit_note"]]
+        // A quality check's passes, or a test's steps (Auto-Tune runs one, then the other)
+        readonly property bool checkSteps: ["base", "q8_0", "q4_0"].includes(ed.stage)
+                                           || (ed.stage === "done" && ed.runKind === "quality")
+        readonly property var steps: checkSteps
+            ? [["base", "Full", "target"], ["q8_0", "Half Size", "compress"], ["q4_0", "Quarter Size", "compress"]]
+            : [["unload", "Free the GPU", "memory_alt"], ["load", "Load", "download"],
+               ["prompt", "Read Prompt", "description"], ["generate", "Write Reply", "edit_note"]]
         readonly property int at: ed.stage === "done" ? steps.length : steps.findIndex(s => s[0] === ed.stage)
         ColumnLayout {
             id: liveCol
@@ -638,7 +777,7 @@ Sheet {
 
             //--- The reply as it's written
             RowLayout {
-                visible: ed.stage === "generate" || ed.stage === "done"
+                visible: !live.checkSteps && (ed.stage === "generate" || ed.stage === "done")
                 Layout.fillWidth: true
                 spacing: 10
                 Text {
