@@ -1,0 +1,303 @@
+"""Autocorrect for wvkbd. Reads the keys `wvkbd -o` prints on stdin and, on space or
+punctuation, replaces a misspelled word when one correction clearly wins. It only
+knows what was typed on the on-screen keyboard, never the app's text. Off until
+SIGUSR1 (osk-autocorrect) turns it on; the state survives restarts. Words stay in
+memory and are never logged."""
+
+import math
+import os
+import select
+import signal
+import subprocess
+import sys
+import time
+
+toggled = False
+
+
+def on_toggle(*_):
+    global toggled
+    toggled = True
+
+
+# Before the slower imports: SIGUSR1's default action would kill the keyboard
+signal.signal(signal.SIGUSR1, on_toggle)
+
+STATE = os.path.join(
+    os.environ.get("XDG_STATE_HOME", os.path.expanduser("~/.local/state")),
+    "osk-autocorrect-on",
+)
+PAUSE = 5.0  # seconds without a key after which a word's start can't be trusted
+DELIMITERS = " .,!?;:"
+SKIP_APPS = ("kitty", "ghostty", "foot", "alacritty", "konsole", "keepassxc")
+
+# Letter rows and their left offsets in key widths; keep in sync with
+# wvkbd-layout.patch
+ROWS = (("qwertyuiop", 1.5), ("asdfghjkl", 1.75), ("zxcvbnm", 2.5))
+KEY_POS = {c: (x + i, y) for y, (r, x) in enumerate(ROWS) for i, c in enumerate(r)}
+
+# Edit costs: a touch typo is usually a near miss, so those cost least
+NEAR_KEY = 0.45
+FAR_KEY = 1.0
+SWAP = 0.6
+DOUBLED = 0.4
+GAP = 1.0
+FREQ_WEIGHT = 0.2  # score per factor of ten in how common a word is
+MIN_MARGIN = 0.1  # how far the best candidate must beat the next one
+MAX_COST = 1.65
+COMMON = 200_000  # list count from which an unknown-to-Hunspell word counts as real
+# Unknown tech words and names sit near rare words, so a weak match needs a common one
+WEAK_COST = 1.0
+WEAK_MIN_COUNT = 1_000_000
+SHORT_LEN = 4
+SHORT_MIN_COUNT = 100_000_000
+
+
+def near(a, b):
+    if a not in KEY_POS or b not in KEY_POS:
+        return False
+    (ax, ay), (bx, by) = KEY_POS[a], KEY_POS[b]
+    return math.hypot(ax - bx, ay - by) < 1.3
+
+
+def typo_cost(typed, word):
+    """Weighted edit distance from `word` to what was typed."""
+    rows = [[0.0] * (len(word) + 1) for _ in range(len(typed) + 1)]
+    for i in range(1, len(typed) + 1):
+        rows[i][0] = i * GAP
+    for j in range(1, len(word) + 1):
+        rows[0][j] = j * GAP
+    for i, t in enumerate(typed, 1):
+        for j, w in enumerate(word, 1):
+            sub = 0.0 if t == w else NEAR_KEY if near(t, w) else FAR_KEY
+            extra = GAP
+            # An extra letter that repeats or sits beside its neighbour is a slip
+            if i > 1 and (t == typed[i - 2] or near(t, typed[i - 2])):
+                extra = DOUBLED
+            best = min(rows[i - 1][j - 1] + sub, rows[i - 1][j] + extra, rows[i][j - 1] + GAP)
+            if i > 1 and j > 1 and t == word[j - 2] and typed[i - 2] == w:
+                best = min(best, rows[i - 2][j - 2] + SWAP)
+            rows[i][j] = best
+    return rows[-1][-1]
+
+
+class Speller:
+    def __init__(self):
+        # Slow to load, so only built once autocorrect is first on
+        import importlib.resources
+
+        from symspellpy import SymSpell
+
+        self.sym = SymSpell(max_dictionary_edit_distance=2, prefix_length=7)
+        book = importlib.resources.files("symspellpy") / "frequency_dictionary_en_82_765.txt"
+        self.sym.load_dictionary(str(book), term_index=0, count_index=1)
+        self.hunspell = subprocess.Popen(
+            ["hunspell", "-a", "-d", "en_US"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            text=True,
+            bufsize=1,
+        )
+        self.hunspell.stdout.readline()  # its banner
+
+    def known(self, word):
+        if self.sym.words.get(word, 0) >= COMMON:
+            return True
+        self.hunspell.stdin.write(f"^{word}\n")
+        answer = self.hunspell.stdout.readline()
+        while self.hunspell.stdout.readline().strip():
+            pass
+        return answer[:1] in ("*", "+", "-")
+
+    def correct(self, word):
+        """The correction for a lowercase word, or None to leave it alone."""
+        from symspellpy import Verbosity
+
+        # Two letters are too little to go on: "ok" would become "of"
+        if len(word) < 3 or self.known(word):
+            return None
+        found = self.sym.lookup(word, Verbosity.ALL, max_edit_distance=2)
+        scored = sorted(
+            (typo_cost(word, s.term) - FREQ_WEIGHT * math.log10(s.count), s.term)
+            for s in found
+            if len(s.term) > 1 and self.known(s.term)
+        )
+        if not scored:
+            return None
+        score, best = scored[0]
+        cost, count = typo_cost(word, best), self.sym.words[best]
+        if cost > MAX_COST or (cost > WEAK_COST and count < WEAK_MIN_COUNT):
+            return None
+        if len(word) <= SHORT_LEN and count < SHORT_MIN_COUNT:
+            return None
+        if len(scored) > 1 and scored[1][0] - score < MIN_MARGIN:
+            return None
+        return best
+
+
+def niri(what):
+    import json
+
+    out = subprocess.run(
+        ["niri", "msg", "--json", what], capture_output=True, text=True, timeout=1
+    )
+    return json.loads(out.stdout)
+
+
+def safe_to_correct():
+    """False in terminals and password managers, and over polkit or the lock screen."""
+    try:
+        app = (niri("focused-window") or {}).get("app_id") or ""
+        grabbed = any(s["keyboard_interactivity"] == "Exclusive" for s in niri("layers"))
+    except Exception:
+        return False
+    return bool(app) and not grabbed and not any(s in app.lower() for s in SKIP_APPS)
+
+
+class Typist:
+    """Types through its own uinput keyboard."""
+
+    SHIFTED = {"!": "1", "?": "/", ":": ";"}
+    NAMES = {" ": "SPACE", ".": "DOT", ",": "COMMA", ";": "SEMICOLON", "/": "SLASH", "1": "1"}
+
+    def __init__(self):
+        from evdev import UInput
+        from evdev import ecodes as e
+
+        self.e = e
+        keys = [getattr(e, f"KEY_{c.upper()}") for c in "abcdefghijklmnopqrstuvwxyz"]
+        keys += [getattr(e, f"KEY_{n}") for n in self.NAMES.values()]
+        keys += [e.KEY_BACKSPACE, e.KEY_LEFTSHIFT]
+        self.dev = UInput({e.EV_KEY: keys}, name="On-screen autocorrect")
+        time.sleep(0.3)  # let the compositor pick the device up
+
+    def tap(self, code, shift=False):
+        e = self.e
+        if shift:
+            self.dev.write(e.EV_KEY, e.KEY_LEFTSHIFT, 1)
+        self.dev.write(e.EV_KEY, code, 1)
+        self.dev.syn()
+        self.dev.write(e.EV_KEY, code, 0)
+        if shift:
+            self.dev.write(e.EV_KEY, e.KEY_LEFTSHIFT, 0)
+        self.dev.syn()
+        time.sleep(0.002)
+
+    def erase(self, count):
+        for _ in range(count):
+            self.tap(self.e.KEY_BACKSPACE)
+
+    def text(self, chars):
+        for c in chars:
+            base = self.SHIFTED.get(c, c)
+            name = self.NAMES.get(base, base.upper())
+            self.tap(getattr(self.e, f"KEY_{name}"), c.isupper() or c in self.SHIFTED)
+
+
+class Corrector:
+    def __init__(self, speller, typist, safe=safe_to_correct):
+        self.speller = speller
+        self.typist = typist
+        self.safe = safe
+        self.on = True
+        self.word = ""
+        self.clean = True  # the word's start is known to be the real start
+        self.last_key = 0.0
+        self.last_fix = None  # (what was typed, what replaced it)
+        self.leave_alone = set()
+
+    def replacement(self, typed):
+        if not self.clean or typed.lower() in self.leave_alone:
+            return None
+        if any(c.isupper() for c in typed[1:]):
+            return None  # ALL CAPS, iPhone, McDonald
+        fixed = self.speller.correct(typed.lower())
+        if not fixed or not self.safe():
+            return None
+        return fixed.capitalize() if typed[0].isupper() else fixed
+
+    def key(self, ch, now):
+        if now - self.last_key > PAUSE:
+            self.clean = not self.word
+            self.word = ""
+            self.last_fix = None
+        self.last_key = now
+        fix, self.last_fix = self.last_fix, None
+
+        if ch == "\b":
+            if fix and self.on:
+                # wvkbd's backspace already took the delimiter
+                typed, fixed = fix
+                self.typist.erase(len(fixed))
+                self.typist.text(typed)
+                self.leave_alone.add(typed.lower())
+                self.word = typed
+            elif self.word:
+                self.word = self.word[:-1]
+            else:
+                self.clean = False
+        elif ch.isascii() and ch.isalpha():
+            self.word += ch
+        elif ch in DELIMITERS:
+            if self.on and self.word:
+                fixed = self.replacement(self.word)
+                if fixed:
+                    self.typist.erase(len(self.word) + 1)
+                    self.typist.text(fixed + ch)
+                    self.last_fix = (self.word, fixed)
+            self.word, self.clean = "", True
+        elif ch in "\n\t":
+            self.word, self.clean = "", True
+        else:
+            # An arrow, Fn key, digit or apostrophe: this isn't a plain word any more
+            self.word, self.clean = "", False
+
+
+def notify(text):
+    subprocess.run(
+        ["notify-send", "-t", "1500", "-a", "On-screen keyboard", text], check=False
+    )
+
+
+def main():
+    global toggled
+    corrector = None
+    on = os.path.exists(STATE)
+
+    def build():
+        return Corrector(Speller(), Typist())
+
+    if on:
+        corrector = build()
+    decode = __import__("codecs").getincrementaldecoder("utf-8")(errors="replace")
+    while True:
+        if toggled:
+            toggled = False
+            on = not on
+            if on:
+                open(STATE, "w").close()
+            elif os.path.exists(STATE):
+                os.remove(STATE)
+            if on and corrector is None:
+                corrector = build()
+            if corrector:
+                corrector.on = on
+            notify("Autocorrect on" if on else "Autocorrect off")
+        if not select.select([0], [], [], 0.5)[0]:
+            continue
+        data = os.read(0, 4096)
+        if not data:
+            return
+        if not corrector:
+            continue
+        for ch in decode.decode(data):
+            try:
+                corrector.key(ch, time.monotonic())
+            except Exception as err:
+                # Never the word itself: this reaches the journal
+                print(f"autocorrect: {type(err).__name__}", file=sys.stderr)
+
+
+if __name__ == "__main__":
+    main()

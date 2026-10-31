@@ -1,0 +1,18 @@
+# wvkbd -o: keys like Home print a marker, not their first letter (autocorrect.py)
+--- a/keyboard.c
++++ b/keyboard.c
+@@ -600,6 +600,14 @@
+     }
+ 
+     if (!handled) {
++        /* Home must not print as H: a key naming a function prints a marker */
++        unsigned char c0 = (unsigned char)k->label[0];
++        size_t first = c0 < 0x80 ? 1 : c0 < 0xE0 ? 2 : c0 < 0xF0 ? 3 : 4;
++        if (strlen(k->label) > first) {
++            printf("\x1b");
++            fflush(stdout);
++            return;
++        }
+         if ((kb->mods & Shift) || 
+             ((kb->mods & CapsLock) & (strlen(k->label) == 1 && isalpha(k->label[0]))))
+             kbd_print_first_utf8_char_stdout(k->shift_label);

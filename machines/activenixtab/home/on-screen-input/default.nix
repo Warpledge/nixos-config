@@ -35,8 +35,16 @@
         ./wvkbd-rows-fill.patch
         ./wvkbd-touch-only.patch
         ./wvkbd-uinput.patch
+        ./wvkbd-print-single-char.patch
       ];
   });
+
+  #--- Reads wvkbd's -o output; the dictionary path and tools it calls are set here
+  autocorrect = pkgs.writeShellScript "osk-autocorrect-daemon" ''
+    export DICPATH=${pkgs.hunspellDicts.en_US}/share/hunspell
+    export PATH=${lib.makeBinPath [config.programs.niri.package pkgs.hunspell pkgs.libnotify]}
+    exec ${pkgs.python3.withPackages (p: [p.evdev p.symspellpy])}/bin/python3 ${./autocorrect.py}
+  '';
 
   keyboard = pkgs.writeShellScript "wvkbd-start" ''
     WVKBD_COLORS=""
@@ -44,14 +52,18 @@
     # Type through uinput, so niri's binds, keyd and polkit prompts see the keys
     export WVKBD_UINPUT=1
     # shellcheck disable=SC2086 # one flag per word
-    exec ${wvkbd}/bin/wvkbd-deskintl --hidden -H ${toString height} -L ${toString height} \
+    ${wvkbd}/bin/wvkbd-deskintl -o --hidden -H ${toString height} -L ${toString height} \
       --alpha ${toString keyAlpha} \
       --fn "${config.stylix.fonts.sansSerif.name}, Material Symbols Rounded ${toString config.stylix.fonts.sizes.popups}" \
-      $WVKBD_COLORS
+      $WVKBD_COLORS | ${autocorrect}
   '';
 
   osk-toggle = pkgs.writeShellScriptBin "osk-toggle" ''
     pkill --signal RTMIN -x wvkbd-deskintl
+  '';
+
+  autocorrect-toggle = pkgs.writeShellScriptBin "osk-autocorrect" ''
+    pkill --signal USR1 -f 'autocorrect\.py'
   '';
 
   pad-mode = pkgs.writeShellScriptBin "osk-pad-mode" ''
@@ -81,7 +93,7 @@ in {
   #--------------------------------------------------------------------#
   #-- Keyboard
   #--------------------------------------------------------------------#
-  home.packages = [osk-toggle pad-mode];
+  home.packages = [osk-toggle pad-mode autocorrect-toggle];
 
   systemd.user.services.wvkbd = {
     Unit = {
@@ -148,5 +160,7 @@ in {
       button "oskToggle" "On-screen keyboard" "keyboard" (lib.getExe osk-toggle);
     touchpadToggle.src =
       button "touchpadToggle" "Touchpad mode" "touch_app" (lib.getExe pad-mode);
+    autocorrectToggle.src =
+      button "autocorrectToggle" "Autocorrect" "spellcheck" (lib.getExe autocorrect-toggle);
   };
 }

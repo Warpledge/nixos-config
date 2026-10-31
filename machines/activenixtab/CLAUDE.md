@@ -103,8 +103,14 @@ when Ky approves it.
   surface under the pointer would swallow the clicks and scrolls the pad produces.
   `osk-pad-mode` (SIGUSR2) toggles it — the PAD key (KEY_F13, which xkb maps to the
   keysym `XF86Tools`, so that's the niri bind; `F13` never fires) or the bar button.
-  Each has a DMS bar plugin (`oskToggle`, `touchpadToggle`) added from DMS's bar
-  settings; a one-finger swipe up from the bottom edge also runs `osk-toggle`
+  And autocorrect: `autocorrect.py` reads `wvkbd -o` from a pipe and, on space or
+  punctuation, replaces a misspelled word through its own uinput keyboard when one
+  candidate clearly wins (Hunspell and symspellpy's list, ranked by key distance on Ky's
+  layout and word frequency); backspace straight after undoes it. It can't see app text
+  and skips terminals and KeePassXC, but can't detect password fields. `osk-autocorrect`
+  toggles it, off by default.
+  Each has a DMS bar plugin (`oskToggle`, `touchpadToggle`, `autocorrectToggle`) added
+  from DMS's bar settings; a one-finger swipe up from the bottom edge also runs `osk-toggle`
   (`wm/touch-gestures.py`). Gotchas: wvkbd must be built WITH `wvkbd-uinput.patch` or
   niri binds never see its keys; touch-gestures starts with niri, so a change to it
   needs a new login, not just a rebuild; KEY_F13 is
