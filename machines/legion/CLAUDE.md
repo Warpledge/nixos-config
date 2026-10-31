@@ -13,6 +13,9 @@ lid and power key are ignored, and DMS auto-lock is off under niri.
 ## Where its config lives
 
 - `hardware/gpu.nix` and `wm/niri.nix` — PRIME offload and the WM's GPU variables
+- `default.nix` — `nixpkgs.config.cudaCapabilities = ["8.9"]`, so the CUDA llama.cpp
+  (`localModels.backend = "cuda"` and the `rtx-4070-laptop` profile in `settings.nix`)
+  compiles for the 4070 alone; CUDA reaches the card without `nvidia-offload`
 - `hardware/swapfile.nix`
 - `hardware/storage.nix` — the second NVMe (SK Hynix) as LUKS storage on `/mnt/storage`,
   unlocked after boot from a key file on the encrypted root (crypttab). Not imported yet:

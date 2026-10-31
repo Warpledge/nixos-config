@@ -115,6 +115,10 @@
     ++ lib.optional (builtins.pathExists ./hardware/boot.nix) ./hardware/boot.nix
     ++ (lib.optional (machine.windowManager == "niri") ./wm/niri.nix);
 
+  #--- CUDA code for the RTX 4070 (Ada) alone, not every GPU generation:
+  #--- llama.cpp's CUDA build (localModels.backend) compiles far faster
+  nixpkgs.config.cudaCapabilities = ["8.9"];
+
   #--- Laptop-specific home-manager modules (the servers live in the main
   #--- user's ~/Documents)
   home-manager.users.${machine.mainUser}.imports = [
