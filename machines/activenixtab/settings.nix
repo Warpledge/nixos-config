@@ -201,7 +201,7 @@
       args = [
         "-ctk f16"
         # Images through the mmproj file sitting beside the model
-        "--mmproj '$HOME/.lmstudio/models/unsloth/Qwen3.8-Flash-Next-GGUF/mmproj-F16.gguf'"
+        "--mmproj '/home/kylerj/.lmstudio/models/unsloth/Qwen3.8-Flash-Next-GGUF/mmproj-F16.gguf'"
       ];
       #--- Qwen's thinking sampling at medium effort; the template's default
       #--- (xhigh) overthinks and ran out of a 12K budget on small tasks
@@ -242,7 +242,7 @@
         # MTP drafting: 28 tok/s alone and 29 with two requests, against 19 and 26 without
         "--spec-type draft-mtp"
         "--top-k 0 --min-p 0"
-        "--mmproj '$HOME/.lmstudio/models/unsloth/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-GGUF/mmproj-BF16.gguf'"
+        "--mmproj '/home/kylerj/.lmstudio/models/unsloth/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-GGUF/mmproj-BF16.gguf'"
       ];
       #--- Full reasoning, NVIDIA's sampling
       think = {
