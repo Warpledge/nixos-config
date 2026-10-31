@@ -32,8 +32,6 @@
       claude.mods.savvyProgress = false;
       claude.mods.blastRadius = false;
       claude.mods.replayTheater = false;
-      claude.mods.chatInventory = false;
-      claude.mods.screenShare = false;
       claude.statusLine = true;
       claude.builtins.youShouldKnow = true;
       claude.builtins.agentsMd = true;
