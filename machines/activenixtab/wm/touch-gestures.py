@@ -28,7 +28,7 @@ EDGE = 0.03
 EDGE_RISE = 0.05
 EDGE_HOLD = 0.4
 # Strips pad mode leaves alone (logical px); the keyboard's only while it's shown.
-# BAR_STRIP and KEYBOARD_STRIP match `barStrip` and `height` in on-screen-input
+# KEYBOARD_STRIP matches `height` in home/on-screen-input/default.nix
 BAR_STRIP = 36
 KEYBOARD_STRIP = 390
 edge_command = sys.argv[2:]
