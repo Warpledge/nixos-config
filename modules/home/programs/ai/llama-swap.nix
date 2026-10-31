@@ -1,5 +1,5 @@
 #=====================================================================#
-# LLAMA-SWAP - LOCAL LLM SERVER (LLAMA.CPP, VULKAN)
+# LLAMA-SWAP - LOCAL LLM SERVER (LLAMA.CPP, VULKAN OR CUDA)
 #=====================================================================#
 #- Serves the models picked in localAi (lib/local-ai.nix gives this
 #- machine's models and flags) and makes them opencode's and Zed's defaults.
@@ -36,7 +36,7 @@
       echo "No $match in $dir: download it in LM Studio" >&2
       exit 1
     fi
-    exec ${lib.getExe' pkgs.llama-cpp-vulkan "llama-server"} -m "$file" "$@"
+    exec ${lib.getExe' (catalog.llamaCpp pkgs) "llama-server"} -m "$file" "$@"
   '';
   cmd = model: args: lib.concatStringsSep " " ([launch "'${model.dir}'" "'${model.match}'" "--port \${PORT}"] ++ args);
 

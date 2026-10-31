@@ -107,7 +107,7 @@ Sheet {
             m[model.id] = own
         else
             delete m[model.id]
-        return { profile: models.profileNow, models: m }
+        return { profile: models.profileNow, models: m, backend: models.backendNow }
     }
 
     Timer { id: estimateTimer; interval: 250; onTriggered: ed.estimate() }

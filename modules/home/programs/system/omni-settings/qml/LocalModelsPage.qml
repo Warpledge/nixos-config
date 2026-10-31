@@ -22,7 +22,9 @@ ColumnLayout {
         const v = lm ? view.valueOf(lm.models) : null
         return v && typeof v === "object" && !Array.isArray(v) ? v : {}
     }
-    function pendingValue() { return { profile: profileNow, models: modelsNow } }
+    readonly property var backendNow: lm && lm.backend ? view.valueOf(lm.backend) : "vulkan"
+    onBackendNowChanged: load()
+    function pendingValue() { return { profile: profileNow, models: modelsNow, backend: backendNow } }
     function setModel(id, entry) {
         const out = Object.assign({}, modelsNow)
         if (entry && Object.keys(entry).length)
@@ -82,8 +84,8 @@ ColumnLayout {
         visible: !!page.lm
         view: page.view
         // Shared memory only matters where the GPU shares RAM
-        settings: !page.lm ? [] : page.info && page.info.gpu.memory === "unified" && page.lm.gpuSharedGB
-                  ? [page.lm.profile, page.lm.gpuSharedGB] : [page.lm.profile]
+        settings: !page.lm ? [] : [page.lm.profile].concat(page.lm.backend ? [page.lm.backend] : [],
+                  page.info && page.info.gpu.memory === "unified" && page.lm.gpuSharedGB ? [page.lm.gpuSharedGB] : [])
         locked: page.locked
         Layout.fillWidth: true
     }

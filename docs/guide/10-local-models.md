@@ -84,6 +84,8 @@ If Full itself scores badly on the text (a perplexity over 100, common for chat 
 
 The profile at the top tells the models which tested values to use. The page notices your GPU and offers the matching one. With none, llama.cpp fits each model itself, which works on any GPU.
 
+**GPU Backend** picks how llama.cpp talks to the GPU. Vulkan works on any card and comes from the binary cache. CUDA is NVIDIA's own and usually faster on an NVIDIA card, but the first rebuild after choosing it compiles llama.cpp, which takes a while.
+
 On a chip where the GPU shares the computer's RAM (Ryzen AI Max / Strix Halo), **GPU Shared Memory** sets how much of it the GPU may use. By default that's about half. Leave 4 to 8 GB for the system: 120 on a 128 GB machine, 56 on 64 GB. It takes effect after a restart.
 
 Changes on this page are for this computer only. Another computer keeps its own.

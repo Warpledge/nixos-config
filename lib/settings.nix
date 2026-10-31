@@ -31,6 +31,7 @@
     "maintenance.clean" = ["daily" "weekly" "monthly" "off"];
     "maintenance.optimise" = ["daily" "weekly" "monthly" "off"];
     "localModels.profile" = [null] ++ lib.attrNames (import ./gpu-profiles.nix);
+    "localModels.backend" = ["vulkan" "cuda"];
     #--- GB of RAM an APU's GPU may use: a little under 32, 64, 128 and 256GB
     "localModels.gpuSharedGB" = [null 24 28 48 56 60 96 112 120 124 192 240 248];
   };

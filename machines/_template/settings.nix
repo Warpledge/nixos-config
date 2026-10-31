@@ -69,6 +69,9 @@
   # changes for a lib/local-models.nix model, or a whole model to add.
   localModels.profile = null;
   localModels.models = {};
+  # llama.cpp's GPU backend: "vulkan" (AMD, Intel, NVIDIA) or "cuda" (NVIDIA only,
+  # built from source on the first rebuild)
+  localModels.backend = "vulkan";
   # Unified-memory chips (Strix Halo): GB of RAM the GPU may use, e.g. 120 on
   # a 128GB machine; null keeps the kernel's default (about half the RAM)
   localModels.gpuSharedGB = null;

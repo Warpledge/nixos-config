@@ -17,6 +17,16 @@
     defaults = {};
     note = "Experts that don't fit in VRAM go to RAM; tuned values exist for the catalog models.";
   };
+  #--- 8GB laptop card beside an iGPU that drives the screen, so its VRAM is the model's;
+  #--- run with localModels.backend = "cuda"
+  "rtx-4070-laptop" = {
+    name = "GeForce RTX 4070 Laptop (8GB)";
+    pciIds = []; # Not confirmed yet: fill in from `nvidia-smi --query-gpu=pci.device_id`
+    memory = "discrete";
+    headroomMB = 1024;
+    defaults = {};
+    note = "MoE models keep most experts in RAM at 8GB; Auto-Tune finds the split.";
+  };
   #--- Ryzen AI Max (Radeon 8060S): RAM and VRAM are one pool, so offloading
   #--- experts to RAM gains nothing. Defaults from kyuz0/amd-strix-halo-toolboxes
   "strix-halo" = {

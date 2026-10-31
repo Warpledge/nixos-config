@@ -503,7 +503,9 @@ def local_models_arg(cfg, args):
     value = args.get("localModels")
     if not isinstance(value, dict):
         value = loaded(cfg).resolved.get("localModels") or {}
-    return {"profile": value.get("profile"), "models": value.get("models") or {}}
+    backend = value.get("backend") or (loaded(cfg).resolved.get("localModels") or {}).get("backend")
+    localmodelstate.use_backend(backend)  # which GPU's memory the page reads
+    return {"profile": value.get("profile"), "models": value.get("models") or {}, "backend": backend}
 
 
 def local_model(cfg, args):

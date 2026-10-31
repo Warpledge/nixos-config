@@ -22,6 +22,11 @@
   compatTools = lib.concatMapStringsSep ";" (p: "${lib.getName p} ${lib.getVersion p}") (
     lib.optionals steam.enable steam.extraCompatPackages
   );
+  #--- The machine's llama.cpp build, for the Local Models page's tests
+  localAi = import ../../../../../lib/local-ai.nix {
+    inherit lib;
+    inherit (machine) localModels;
+  };
   #--- The user's default text editor, which the Default Packages pages open modules in
   editor = ((import ../../../../../lib/default-apps.nix {inherit lib;}).forUser user).textEditor;
   #--- Mullvad's split tunnel (nixos/security/mullvad/split-tunnel.nix): the panel runs
@@ -80,7 +85,7 @@
         ${lib.optionalString user.llamaSwap.enable
         # The Local Models page's test: the same build llama-swap runs. The line's
         # backslash stays outside, so an empty string still continues the command
-        "--set OMNI_SETTINGS_LLAMA_SERVER ${lib.getExe' pkgs.llama-cpp-vulkan "llama-server"}"} \
+        "--set OMNI_SETTINGS_LLAMA_SERVER ${lib.getExe' (localAi.llamaCpp pkgs) "llama-server"}"} \
         --prefix PATH : ${lib.makeBinPath [
         alejandra
         pkgs.nix-search-tv
