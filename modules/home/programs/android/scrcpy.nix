@@ -13,4 +13,17 @@
   home.packages = with pkgs; [
     scrcpy
   ];
+
+  #--- Launcher entry
+  # The packaged entry's `\\$SHELL -i -c scrcpy` reaches DMS with the backslash
+  # intact, so the launcher runs a command named "$SHELL" and nothing opens.
+  xdg.desktopEntries.scrcpy = {
+    name = "scrcpy";
+    genericName = "Android Remote Control";
+    comment = "Display and control your Android device";
+    exec = "scrcpy";
+    icon = "scrcpy";
+    terminal = false;
+    categories = ["Utility" "RemoteAccess"];
+  };
 }

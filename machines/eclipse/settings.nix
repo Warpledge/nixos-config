@@ -42,7 +42,7 @@
       env = {};
       autostart = {};
       mimeTypes = {};
-      scrcpy.enable = false;
+      scrcpy.enable = true;
       audio.reaper = false;
       audio.guitarix = false;
       dev.go = false;
@@ -231,40 +231,53 @@
   maintenance.updateReminderDays = 30;
   localModels.models = {
     flint = {
-      category = "code";
-      dir = "unsloth/flint-GGUF";
-      match = "flint-UD-Q4_K_XL.gguf";
-      name = "flint";
-      context = 262144;
       batch = 1024;
       cache = "q8_0";
-      gpuLayers = "all";
+      category = "code";
+      context = 262144;
       cpuMoe = 33;
+      dir = "unsloth/flint-GGUF";
+      gpuLayers = "all";
+      match = "flint-UD-Q4_K_XL.gguf";
+      name = "flint";
     };
     gemma-4-12b-it-qat = {
-      batch = 2048;
       category = "chat";
-      context = 262144;
       dir = "unsloth/gemma-4-12B-it-qat-GGUF";
-      gpuLayers = "all";
       match = "gemma-4-12B-it-qat-UD-Q4_K_XL.gguf";
       name = "gemma 4 12B it qat";
-    };
-    gemma-4-26b-a4b = {
-      batch = 2048;
       context = 262144;
-      cpuMoe = 9;
-      gpuLayers = "all";
-      loadMode = "none";
-    };
-    "ornith-1.5-35b-a3b" = {
       batch = 2048;
       cache = "q8_0";
+      gpuLayers = "all";
+    };
+    gemma-4-26b-a4b = {
+      loadMode = "none";
+      context = 262144;
+      batch = 2048;
+      cache = "q8_0";
+      gpuLayers = "all";
+      cpuMoe = 10;
+    };
+    "ornith-1.5-35b-a3b" = {
+      loadMode = "none";
+      batch = 2048;
       cacheRam = 4096;
       context = 262144;
-      cpuMoe = 24;
+      cache = "q8_0";
       gpuLayers = "all";
-      loadMode = "none";
+      cpuMoe = 22;
+    };
+    "qwen3.8-27b" = {
+      category = "chat";
+      dir = "unsloth/Qwen3.8-27B-GGUF";
+      match = "Qwen3.8-27B-UD-Q4_K_M.gguf";
+      name = "Qwen3.8 27B";
+      context = 131072;
+      cache = "q4_0";
+      batch = 2048;
+      cacheRam = 16384;
+      gpuLayers = 49;
     };
   };
 }
