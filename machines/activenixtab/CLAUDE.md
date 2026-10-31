@@ -41,11 +41,15 @@ when Ky approves it.
 - **Scroll speed:** Chromium, Electron and Vivaldi scroll far faster per finger movement
   than GTK, so `wm/niri.nix` gives them `scroll-factor = 0.25`. Qt apps are left as is.
 - **Keyboard:** keyd makes a tap of Meta alone open the launcher (Meta+Space).
+- **Face auth:** Howdy on the IR camera (`/dev/video2`) for sudo, polkit and the DMS
+  lock screen, with the password as fallback; `face-auth.nix`. The lock screen scans
+  only after Enter. The login screen stays password-only so the keyring unlocks.
 
 ## Where its config lives
 
 - `settings.nix` — machine toggles and Ky's per-machine app overrides (Claude Code and
   Desktop, opencode, KeePassXC, Audacity)
+- `face-auth.nix` — Howdy, the IR emitter and which PAM services use them
 - `default.nix` — the hardware above, asusd, keyd, input-remapper, Tailscale, Waydroid,
   AppImage binfmt
 - `wm/niri.nix` — the monitor, scroll factors, auto-rotation and touchscreen gestures

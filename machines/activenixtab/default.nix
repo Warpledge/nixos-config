@@ -71,6 +71,7 @@
   imports =
     [
       ./hardware/hardware-configuration.nix
+      ./face-auth.nix
 
       ../../modules
     ]
