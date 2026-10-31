@@ -81,7 +81,9 @@ ColumnLayout {
     SettingGroup {
         visible: !!page.lm
         view: page.view
-        settings: page.lm ? [page.lm.profile] : []
+        // Shared memory only matters where the GPU shares RAM
+        settings: !page.lm ? [] : page.info && page.info.gpu.memory === "unified" && page.lm.gpuSharedGB
+                  ? [page.lm.profile, page.lm.gpuSharedGB] : [page.lm.profile]
         locked: page.locked
         Layout.fillWidth: true
     }

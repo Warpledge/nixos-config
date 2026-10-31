@@ -90,7 +90,7 @@ PAGES = {
     "Side Rail": ("siderail", "view-dual-symbolic", "", [("", "", ["sideRail"])]),
     "Games": ("games", "input-gaming-symbolic", "", [("", "", ["steamGames"])]),
     "Local Models": ("localmodels", "applications-engineering-symbolic", "",
-                     [("", "", ["localModels.profile", "localModels.models"])]),
+                     [("", "", ["localModels.profile", "localModels.gpuSharedGB", "localModels.models"])]),
     "System": ("computer", "computer-symbolic",
                "This computer's name, desktop and kernel.",
                [("", "", ["hostName", "windowManager", "kernel"])]),

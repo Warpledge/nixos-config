@@ -28,6 +28,6 @@
       gpuLayers = "all";
       loadMode = "none";
     };
-    note = "Models over half the memory need the GPU's share raised with the ttm.pages_limit kernel parameter.";
+    note = "Models over half the memory need GPU Shared Memory raised (localModels.gpuSharedGB).";
   };
 }
