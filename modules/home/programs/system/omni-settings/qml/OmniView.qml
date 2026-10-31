@@ -1225,16 +1225,31 @@ Item {
                     color: Theme.toneFill("", Theme.card)
                     ColumnLayout {
                         id: whatsNew
+                        // Collapsing keeps the header; kept in ui.json with the open cards
+                        readonly property bool open: !omni.openCards["whatsnew:collapsed"]
                         anchors.fill: parent
                         anchors.margins: 12
                         spacing: 8
-                        Text {
-                            readonly property int n: omni.info ? omni.info.whatsNew.length : 0
-                            text: `${n} new setting${n === 1 ? "" : "s"} your files don't list yet`
-                            color: Theme.text
-                            font.weight: Font.DemiBold
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
+                            Text {
+                                readonly property int n: omni.info ? omni.info.whatsNew.length : 0
+                                text: `${n} new setting${n === 1 ? "" : "s"} your files don't list yet`
+                                color: Theme.text
+                                font.weight: Font.DemiBold
+                                wrapMode: Text.Wrap
+                                Layout.fillWidth: true
+                            }
+                            Chevron { open: whatsNew.open; lit: whatsNewHover.hovered }
+                            HoverHandler { id: whatsNewHover; cursorShape: Qt.PointingHandCursor }
+                            TapHandler {
+                                gesturePolicy: TapHandler.ReleaseWithinBounds
+                                onTapped: omni.setCardOpen("whatsnew:collapsed", whatsNew.open)
+                            }
                         }
                         RowLayout {
+                            visible: whatsNew.open
                             spacing: 8
                             Pill {
                                 text: "Add Them"
@@ -1244,12 +1259,6 @@ Item {
                                         p[n.key] = n.value
                                     omni.pending = p
                                 }
-                            }
-                            Pill {
-                                quiet: true
-                                text: "Dismiss"
-                                onClicked: Backend.call("dismiss", { keys: omni.info.whatsNew.map(n => n.key) },
-                                                        () => omni.reload())
                             }
                         }
                     }
