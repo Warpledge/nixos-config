@@ -127,6 +127,9 @@ accepted silently.
   writing them (a QML `property`, a settings schema, the man page). An interval
   in minutes is not seconds.
 - **Check a package attribute exists**: `nix eval --raw nixpkgs#<attr>.name`.
+- **A package checks for a module first.** `find /nix/store -maxdepth 4 -path
+  '*/modules/programs/<pkg>.nix' | head -1`: a hit means `programs.<pkg>`, not
+  `home.packages`.
 - **Never write a homepage, description or option name from memory.**
   `nix eval --raw nixpkgs#<pkg>.meta.homepage`.
 - **Don't blame upstream in a comment** ("nixpkgs bug") unless you read the
@@ -211,6 +214,10 @@ and the active WM's `modules/wm/<wm>/`.
   `users/<name>/home.nix`, imported when it exists. A feature anyone could turn on:
   `modules/` behind a toggle off in the template, committed apart from the person's
   own folders. Ask when unsure.
+- Never a hostname or username check in `modules/`: it's shared by everyone who
+  installs the repo.
+- A system service also needs its import in `modules/nixos/default.nix` and a
+  name in `setup.sh`'s `services` list.
 - **Forks**: other people run the repo from a fork of `Warpledge/nixos-config`. The
   `upstream` skill merges upstream's changes in and prepares pull requests back. Keep
   warpledge's folders in a fork untouched; the person pushes and opens the PR.
@@ -443,6 +450,8 @@ Every module opens with a banner; copy it byte for byte from a neighbour:
 - Comments and user-facing text (Omni Settings descriptions, template comments,
   README) are plain, short and easy to read. Keep NixOS terms (rebuild,
   generation, flake input, garbage collection) and explain them briefly.
+- `nix fmt` with no argument waits on stdin; use `nix fmt .`. `nixm lint` runs
+  deadnix plus statix.
 
 ## Writing style
 
