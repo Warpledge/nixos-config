@@ -121,6 +121,7 @@
       };
       claude.mods.ribbon = true;
       keybinds = {};
+      localAi.default = null;
     };
   };
 
