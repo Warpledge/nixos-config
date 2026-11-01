@@ -192,6 +192,14 @@ export default Plugin.define({
           return {ok: false, error: String(error)};
         }
       },
+      openSettings: async () => {
+        try {
+          await run("dms", ["ipc", "call", "omniSettings", "toggle"], {timeout: 5000});
+          return {ok: true};
+        } catch (error) {
+          return {ok: false, error: String(error)};
+        }
+      },
     });
 
     const controller = new AbortController();

@@ -45,6 +45,10 @@ const Usage = {
       input: {type: "object", properties: {}, additionalProperties: false},
       output: {type: "object", properties: {}, additionalProperties: true},
     },
+    openSettings: {
+      input: {type: "object", properties: {}, additionalProperties: false},
+      output: {type: "object", properties: {}, additionalProperties: true},
+    },
   },
   events: {
     turn: {schema: {type: "object", properties: {}, additionalProperties: true}},
@@ -104,6 +108,7 @@ function segment(label) {
 
 const paints = new Set();
 const syncers = new Set();
+const badges = new Set();
 let usageState = {five: -1, week: -1, fiveCost: 0, weekCost: 0, at: 0, error: ""};
 
 function paintSettings() {
@@ -124,6 +129,62 @@ function paint() {
     }
     item.update(usageState);
   }
+}
+
+// Material's sync glyph, the one Omni Settings uses on its rebuild rows
+const REBUILD_ICON =
+  '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>';
+
+let repoState = {dirty: 0, unbuilt: false, generation: 0, age: 0, dmsStale: false, plan: "go"};
+
+function paintBadges() {
+  for (const item of [...badges]) {
+    if (!item.root.isConnected) {
+      badges.delete(item);
+      continue;
+    }
+    item.update(repoState);
+  }
+}
+
+function badge(onClick) {
+  const root = document.createElement("button");
+  root.type = "button";
+  root.style.cssText = [
+    "display:none",
+    "align-items:center",
+    "gap:8px",
+    "padding:4px 12px",
+    "border-radius:999px",
+    "font:600 13px/1.2 system-ui,-apple-system,sans-serif",
+    "color:var(--color-v2-state-fg-success)",
+    "background:color-mix(in srgb, var(--color-v2-state-fg-success) 15%, transparent)",
+    "border:1px solid color-mix(in srgb, var(--color-v2-state-fg-success) 35%, transparent)",
+    "cursor:pointer",
+  ].join(";");
+
+  const icon = document.createElement("span");
+  icon.style.cssText = "display:inline-flex;align-items:center";
+  icon.innerHTML = REBUILD_ICON;
+
+  const label = document.createElement("span");
+  root.append(icon, label);
+  root.onclick = onClick;
+
+  const update = (value) => {
+    if (!value.unbuilt) {
+      root.style.display = "none";
+      return;
+    }
+    root.style.display = "inline-flex";
+    label.textContent =
+      value.dirty > 0 ? `Rebuild ready · ${value.dirty} file${value.dirty === 1 ? "" : "s"}` : "Rebuild ready · new commits";
+    root.title = `Open Omni Settings to rebuild; the running build is ${ageLabel(value.age)} old`;
+  };
+
+  badges.add({root, update});
+  update(repoState);
+  return root;
 }
 
 function bar() {
@@ -212,8 +273,10 @@ module.exports = Plugin.define({
       try {
         const value = await usage.state(session ? {directory: session.directory} : {});
         if (stopped) return;
-        setRepo({...value, plan: value.plan ?? "go"});
+        repoState = {...value, plan: value.plan ?? "go"};
+        setRepo(repoState);
         paintSettings();
+        paintBadges();
       } catch {}
     };
 
@@ -244,21 +307,24 @@ module.exports = Plugin.define({
       }
     };
 
+    const openSettings = async () => {
+      try {
+        const result = await usage.openSettings({});
+        if (!result.ok) throw new Error(result.error);
+      } catch (error) {
+        ctx.toast.show({variant: "error", title: "Could not open Omni Settings", description: String(error)});
+      }
+    };
+
     void refreshUsage();
     void refreshState();
     restartTimer();
 
     const unsubscribe = usage.events.on("turn", (event) => {
       const value = event.data;
-      setRepo({...repo(), ...value, plan: repo().plan});
-      if (value.unbuilt) {
-        ctx.toast.show({
-          variant: "success",
-          title: "Changes ready to rebuild",
-          description: `${value.dirty} uncommitted file(s) · running build is ${ageLabel(value.age)} old`,
-          duration: 8000,
-        });
-      }
+      repoState = {...repoState, ...value, plan: repo().plan};
+      setRepo(repoState);
+      paintBadges();
       if (value.dmsStale) {
         ctx.toast.show({
           variant: "default",
@@ -272,6 +338,7 @@ module.exports = Plugin.define({
     });
 
     ctx.add(Slot, {at: "window.bottom", order: 10, render: () => bar()});
+    ctx.add(Slot, {at: "session.header", order: 5, render: () => badge(() => void openSettings())});
 
     ctx.add(TitlebarItem, () => {
       const value = repo();
@@ -280,6 +347,7 @@ module.exports = Plugin.define({
         id: "rebuild",
         label: "Rebuild ready",
         title: `${value.dirty} uncommitted file(s); running build is ${ageLabel(value.age)} old`,
+        run: () => void openSettings(),
       };
     });
 
