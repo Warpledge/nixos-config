@@ -55,11 +55,47 @@ CONTROLS = [
     ("rpad", "mouse", None, "", -197, 262, 80),
     ("start", "button", e.BTN_START, "Start", -390, 480, (45, 24)),
     ("close", "close", None, "✕", -390, 540, (45, 24)),
-    ("edit", "edit", None, "Edit", 390, 600, (45, 24)),
+    ("edit", "settings", None, "Settings", 390, 600, (45, 24)),
 ]
-CONTROLS = [list(c) for c in CONTROLS]  # Edit mode changes x and y
+CONTROLS = [list(c) for c in CONTROLS]  # Moving controls changes x and y
+DEFAULT_POSITIONS = {c[0]: (c[4], c[5]) for c in CONTROLS}
 STATE_DIR = os.environ.get("XDG_STATE_HOME", os.path.expanduser("~/.local/state"))
-LAYOUT_FILE = os.path.join(STATE_DIR, "osk-gamepad-layout.json")  # delete to reset
+LAYOUT_FILE = os.path.join(STATE_DIR, "osk-gamepad-layout.json")
+
+# Labels only: Steam Input and games still see an Xbox pad. Each sits on the button in
+# the same place on that controller, so Switch's A is on the right, not the bottom.
+# PlayStation's face buttons are shapes, drawn by draw_symbol
+STYLES = {
+    "Xbox": {},
+    "PlayStation": {
+        "a": "cross",
+        "b": "circle",
+        "x": "square",
+        "y": "triangle",
+        "lb": "L1",
+        "rb": "R1",
+        "lt": "L2",
+        "rt": "R2",
+        "select": "Share",
+        "start": "Options",
+        "guide": "PS",
+    },
+    "Switch": {
+        "a": "B",
+        "b": "A",
+        "x": "Y",
+        "y": "X",
+        "lb": "L",
+        "rb": "R",
+        "lt": "ZL",
+        "rt": "ZR",
+        "select": "−",
+        "start": "+",
+        "guide": "Home",
+    },
+}
+MENU_ROW = 100  # logical px between the settings menu's rows
+MENU_SIZE = (190, 40)
 STICK_AXES = {"lstick": (e.ABS_X, e.ABS_Y), "rstick": (e.ABS_RX, e.ABS_RY)}
 
 RUNTIME_DIR = os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")
@@ -161,21 +197,64 @@ def center(control):
 
 
 def load_layout():
+    global style
     try:
         with open(LAYOUT_FILE) as f:
             saved = json.load(f)
+        if saved.get("style") in STYLES:
+            style = saved["style"]
         for control in CONTROLS:
             if control[0] in saved:
                 control[4], control[5] = (int(v) for v in saved[control[0]])
-    except (OSError, ValueError, TypeError):
+    except (OSError, ValueError, TypeError, AttributeError):
         pass  # the built-in positions
 
 
 def save_layout():
     temp = f"{LAYOUT_FILE}.tmp"
     with open(temp, "w") as f:
-        json.dump({c[0]: [c[4], c[5]] for c in CONTROLS}, f)
+        json.dump({"style": style, **{c[0]: [c[4], c[5]] for c in CONTROLS}}, f)
     os.replace(temp, LAYOUT_FILE)
+
+
+def reset_positions():
+    for control in CONTROLS:
+        control[4], control[5] = DEFAULT_POSITIONS[control[0]]
+    save_layout()
+
+
+def menu_items():
+    # The same shape as CONTROLS, rows centred on the screen
+    labels = [
+        ("move", "Move controls"),
+        ("style", f"Buttons: {style}"),
+        ("reset", "Tap again to reset" if reset_armed else "Reset positions"),
+        ("back", "Close menu"),
+    ]
+    x = output["width"] // 2
+    top = output["height"] // 2 + MENU_ROW * (len(labels) - 1) // 2
+    return [
+        [name, "menu", None, label, x, top - i * MENU_ROW, MENU_SIZE]
+        for i, (name, label) in enumerate(labels)
+    ]
+
+
+def menu_tap(name):
+    global mode, style, reset_armed
+    if name == "reset" and not reset_armed:
+        reset_armed = True
+        return
+    reset_armed = False
+    if name == "move":
+        mode = "move"
+    elif name == "style":
+        names = list(STYLES)
+        style = names[(names.index(style) + 1) % len(names)]
+        save_layout()
+    elif name == "reset":
+        reset_positions()
+    elif name == "back":
+        mode = "play"
 
 
 def drag_controls():
@@ -241,7 +320,7 @@ def wanted_state():
     keys, axes = set(clicks), {}
     knobs = {}
     hat_x = hat_y = 0
-    for s, pos in () if editing else slots.items():
+    for s, pos in slots.items() if mode == "play" else ():
         owner = owners.get(s)
         if not owner:
             continue
@@ -312,14 +391,17 @@ def click_stick(code):
 
 def finger_down(s):
     x, y = to_px(slots[s])
-    owners[s] = control_at(x, y)
     landed[s] = time.monotonic()
-    if editing and owners[s]:
+    if mode == "menu":
+        owners[s] = next((c for c in menu_items() if hit(c, x, y)), None)
+        return
+    owners[s] = control_at(x, y)
+    if mode == "move" and owners[s]:
         drag_from[s] = center(owners[s])
 
 
 def finger_up(s):
-    global editing
+    global mode
     owner = owners.pop(s, None)
     mouse_at.pop(s, None)
     pos, origin = last_pos.pop(s, None), start.pop(s, None)
@@ -333,12 +415,14 @@ def finger_up(s):
         tap = math.hypot(x - x0, y - y0) < TAP_TRAVEL
     if dragged:
         save_layout()
-    if owner[1] == "close" and (tap or not editing):
+    if owner[1] == "menu":
+        if tap:
+            menu_tap(owner[0])
+    elif owner[1] == "close" and (tap or mode == "play"):
         loop.quit()
-    elif owner[1] == "edit" and tap:
-        editing = not editing
-        owner[3] = "Done" if editing else "Edit"
-    elif tap and held_for < TAP_SECONDS and not editing:
+    elif owner[1] == "settings" and tap:
+        mode = "play" if mode == "move" else "menu"
+    elif tap and held_for < TAP_SECONDS and mode == "play":
         if owner[1] == "stick":
             click_stick(owner[2])
         elif owner[1] == "mouse":
@@ -383,9 +467,9 @@ def on_touch(*_):
                 if s not in start:
                     start[s] = list(pos)
                     finger_down(s)
-            if editing:
+            if mode == "move":
                 drag_controls()
-            else:
+            elif mode == "play":
                 move_mouse()
             emit()
     return GLib.SOURCE_CONTINUE
@@ -451,13 +535,44 @@ def draw_shape(cr, control, active):
     two_tone_stroke(cr)
 
 
+def draw_symbol(cr, name, cx, cy):
+    # PlayStation's face buttons
+    r = 12
+    cr.new_path()
+    if name == "circle":
+        cr.arc(cx, cy, r, 0, 2 * math.pi)
+    elif name == "square":
+        cr.rectangle(cx - r, cy - r, 2 * r, 2 * r)
+    elif name == "triangle":
+        cr.move_to(cx, cy - r)
+        cr.line_to(cx + r, cy + r)
+        cr.line_to(cx - r, cy + r)
+        cr.close_path()
+    else:
+        cr.move_to(cx - r, cy - r)
+        cr.line_to(cx + r, cy + r)
+        cr.move_to(cx + r, cy - r)
+        cr.line_to(cx - r, cy + r)
+    two_tone_stroke(cr)
+
+
+def label_of(control):
+    if control[0] == "edit" and mode == "move":
+        return "Done"
+    return STYLES[style].get(control[0], control[3])
+
+
 def draw_label(cr, control):
     cx, cy = center(control)
+    label = label_of(control)
+    if label in ("cross", "circle", "square", "triangle"):
+        draw_symbol(cr, label, cx, cy)
+        return
     cr.select_font_face(sys.argv[2])
     cr.set_font_size(18)
-    extents = cr.text_extents(control[3])
+    extents = cr.text_extents(label)
     cr.move_to(cx - extents.width / 2 - extents.x_bearing, cy - extents.height / 2 - extents.y_bearing)
-    cr.text_path(control[3])
+    cr.text_path(label)
     paint(cr, colours["edge"], 0.9)
     cr.set_line_width(4)
     cr.stroke_preserve()
@@ -498,6 +613,11 @@ def on_draw(_area, cr, _w, _h):
             draw_knob(cr, control)
         if control[3]:
             draw_label(cr, control)
+    if mode == "menu":
+        for item in menu_items():
+            active = any(owner and owner[0] == item[0] for owner in owners.values())
+            draw_shape(cr, item, active)
+            draw_label(cr, item)
 
 
 def stop(*_):
@@ -539,8 +659,10 @@ xmax = src.absinfo(e.ABS_X).max
 ymax = src.absinfo(e.ABS_Y).max
 output = read_output()
 last_output_read = time.monotonic()
+style = "Xbox"
+reset_armed = False  # the first tap on Reset positions only asks for a second
 load_layout()
-editing = False  # Edit mode: a drag moves a control, and the controller stays quiet
+mode = "play"  # or "menu", or "move", where a drag moves a control; only play sends input
 drag_from = {}  # slot -> the center of the control it's moving, when it landed
 pad = new_controller()
 mouse = new_mouse()
