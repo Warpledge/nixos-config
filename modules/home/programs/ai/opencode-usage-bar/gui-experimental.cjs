@@ -1,23 +1,26 @@
 "use strict";
 //=====================================================================#
-// OPENCODE USAGE BAR - DESKTOP BAR
+// OPENCODE USAGE BAR - DESKTOP PARTS
 //=====================================================================#
 // Runs in every OpenCode Desktop window. The shell renders the
 // window.bottom slot as a full-width strip, where the TUI draws bars in
 // prompt.footer.status. Built with DOM nodes so the file stays plain CJS;
 // colours come from the app's theme variables.
-const {Plugin, Slot} = require("@opencode/plugin/gui");
+const {Plugin, SettingsPage, Slot, TitlebarItem} = require("@opencode/plugin/gui");
+const {createSignal} = require("solid-js");
 
-// Percentages come from the server, against each model's own Go limit
 const REFRESH_MS = 60_000;
+const INTERVALS = [30_000, 60_000, 300_000];
 
 const ACCENT = "var(--color-v2-icon-icon-accent)";
 const WARNING = "var(--color-v2-state-fg-warning)";
 const DANGER = "var(--color-v2-state-fg-danger)";
 const MUTED = "var(--color-v2-text-text-muted)";
 const TRACK = "var(--color-v2-background-bg-layer-02)";
+const BORDER = "var(--color-v2-border-border-muted)";
+const TEXT = "var(--color-v2-text-text-base)";
 
-// Matches rpc.ts. The client only reads its id and method names.
+// Matches rpc.ts. The client only reads ids, method names and events.
 const Usage = {
   id: "usage-bar",
   methods: {
@@ -25,8 +28,27 @@ const Usage = {
       input: {type: "object", properties: {}, additionalProperties: false},
       output: {type: "object", properties: {}, additionalProperties: true},
     },
+    state: {
+      input: {type: "object", properties: {directory: {type: "string"}}, additionalProperties: false},
+      output: {type: "object", properties: {}, additionalProperties: true},
+    },
+    setPlan: {
+      input: {
+        type: "object",
+        properties: {plan: {type: "string"}},
+        required: ["plan"],
+        additionalProperties: false,
+      },
+      output: {type: "object", properties: {}, additionalProperties: true},
+    },
+    restartDms: {
+      input: {type: "object", properties: {}, additionalProperties: false},
+      output: {type: "object", properties: {}, additionalProperties: true},
+    },
   },
-  events: {},
+  events: {
+    turn: {schema: {type: "object", properties: {}, additionalProperties: true}},
+  },
 };
 
 // DeepSeek's peak hours: 01:00-04:00 and 06:00-10:00 UTC, Monday to Friday
@@ -38,6 +60,14 @@ function peakHours(now) {
 
 function tone(ratio) {
   return ratio >= 0.9 ? DANGER : ratio >= 0.7 ? WARNING : ACCENT;
+}
+
+function ageLabel(ms) {
+  if (!ms || ms < 0) return "now";
+  const hours = Math.floor(ms / 3_600_000);
+  if (hours < 1) return `${Math.max(1, Math.floor(ms / 60_000))}m`;
+  if (hours < 48) return `${hours}h`;
+  return `${Math.floor(hours / 24)}d`;
 }
 
 function segment(label) {
@@ -73,7 +103,18 @@ function segment(label) {
 }
 
 const paints = new Set();
-let state = {five: -1, week: -1, fiveCost: 0, weekCost: 0, at: 0, error: ""};
+const syncers = new Set();
+let usageState = {five: -1, week: -1, fiveCost: 0, weekCost: 0, at: 0, error: ""};
+
+function paintSettings() {
+  for (const item of [...syncers]) {
+    if (!item.root.isConnected) {
+      syncers.delete(item);
+      continue;
+    }
+    item.sync();
+  }
+}
 
 function paint() {
   for (const item of [...paints]) {
@@ -81,7 +122,7 @@ function paint() {
       paints.delete(item);
       continue;
     }
-    item.update(state);
+    item.update(usageState);
   }
 }
 
@@ -95,7 +136,7 @@ function bar() {
     "padding:3px 12px",
     "font:11px/1.4 system-ui,-apple-system,sans-serif",
     `color:${MUTED}`,
-    "border-top:1px solid var(--color-v2-border-border-muted)",
+    `border-top:1px solid ${BORDER}`,
     "background:var(--color-v2-background-bg-base)",
   ].join(";");
 
@@ -132,19 +173,26 @@ function bar() {
 
   const item = {root, update};
   paints.add(item);
-  update(state);
+  update(usageState);
   return root;
 }
 
 module.exports = Plugin.define({
   setup(ctx) {
+    const usage = ctx.client.rpc(Usage);
+    const [repo, setRepo] = createSignal({dirty: 0, unbuilt: false, generation: 0, age: 0, dmsStale: false, plan: "go"});
     let stopped = false;
+    let timer;
+    let interval = REFRESH_MS;
 
-    const refresh = async () => {
+    const stored = Number(localStorage.getItem("usage-bar:interval"));
+    if (INTERVALS.includes(stored)) interval = stored;
+
+    const refreshUsage = async () => {
       try {
-        const value = await ctx.client.rpc(Usage).read({});
+        const value = await usage.read({});
         if (stopped) return;
-        state = {
+        usageState = {
           five: value.fivePercent,
           week: value.weekPercent,
           fiveCost: value.fiveCost,
@@ -154,18 +202,179 @@ module.exports = Plugin.define({
         };
       } catch (error) {
         if (stopped) return;
-        state = {five: -1, week: -1, fiveCost: 0, weekCost: 0, at: 0, error: String(error)};
+        usageState = {five: -1, week: -1, fiveCost: 0, weekCost: 0, at: 0, error: String(error)};
       }
       paint();
     };
 
-    void refresh();
-    const timer = setInterval(() => void refresh(), REFRESH_MS);
+    const refreshState = async () => {
+      const session = ctx.sessions.current();
+      try {
+        const value = await usage.state(session ? {directory: session.directory} : {});
+        if (stopped) return;
+        setRepo({...value, plan: value.plan ?? "go"});
+        paintSettings();
+      } catch {}
+    };
+
+    const refreshAll = () => {
+      void refreshUsage();
+      void refreshState();
+    };
+
+    const restartTimer = () => {
+      clearInterval(timer);
+      timer = setInterval(refreshAll, interval);
+    };
+
+    const restartDms = async () => {
+      const notice = ctx.toast.show({variant: "loading", title: "Restarting DMS", persistent: true});
+      try {
+        const result = await usage.restartDms({});
+        notice.dismiss();
+        if (result.ok) {
+          setRepo({...repo(), dmsStale: false});
+          ctx.toast.show({variant: "success", title: "DMS restarted"});
+        } else {
+          ctx.toast.show({variant: "error", title: "DMS restart failed", description: result.error});
+        }
+      } catch (error) {
+        notice.dismiss();
+        ctx.toast.show({variant: "error", title: "DMS restart failed", description: String(error)});
+      }
+    };
+
+    void refreshUsage();
+    void refreshState();
+    restartTimer();
+
+    const unsubscribe = usage.events.on("turn", (event) => {
+      const value = event.data;
+      setRepo({...repo(), ...value, plan: repo().plan});
+      if (value.unbuilt) {
+        ctx.toast.show({
+          variant: "success",
+          title: "Changes ready to rebuild",
+          description: `${value.dirty} uncommitted file(s) · running build is ${ageLabel(value.age)} old`,
+          duration: 8000,
+        });
+      }
+      if (value.dmsStale) {
+        ctx.toast.show({
+          variant: "default",
+          title: "DMS restart needed",
+          description: "DankMaterialShell is still on the previous build",
+          duration: 12_000,
+          actions: [{label: "Restart DMS", run: () => void restartDms()}],
+        });
+      }
+      void refreshUsage();
+    });
+
     ctx.add(Slot, {at: "window.bottom", order: 10, render: () => bar()});
+
+    ctx.add(TitlebarItem, () => {
+      const value = repo();
+      if (!value.unbuilt) return undefined;
+      return {
+        id: "rebuild",
+        label: "Rebuild ready",
+        title: `${value.dirty} uncommitted file(s); running build is ${ageLabel(value.age)} old`,
+      };
+    });
+
+    ctx.add(TitlebarItem, () => {
+      const value = repo();
+      if (!value.dmsStale) return undefined;
+      return {id: "restart-dms", label: "Restart DMS", title: "DMS is running the previous build", run: () => void restartDms()};
+    });
+
+    ctx.add(SettingsPage, {
+      id: "usage-bar",
+      title: "Usage bar",
+      render: () => {
+        const root = document.createElement("div");
+        root.style.cssText = "display:flex;flex-direction:column;gap:14px;padding:4px 0;font:13px system-ui,sans-serif;";
+
+        const heading = document.createElement("div");
+        heading.textContent = "Go plan";
+        heading.style.cssText = "font-weight:600";
+
+        const help = document.createElement("div");
+        help.textContent =
+          "The Console counts each model's cost against that model's own monthly limit. Pick the plan you subscribe to; Go Plus and Go Teams have larger limits.";
+        help.style.cssText = `font-size:12px;line-height:1.5;color:${MUTED}`;
+
+        const plans = document.createElement("div");
+        plans.style.cssText = "display:flex;gap:8px;flex-wrap:wrap";
+
+        const buttons = new Map();
+        for (const [value, label] of [
+          ["go", "Go"],
+          ["go-plus", "Go Plus"],
+          ["go-teams", "Go Teams"],
+        ]) {
+          const button = document.createElement("button");
+          button.textContent = label;
+          button.style.cssText = `font:12px system-ui,sans-serif;padding:6px 10px;border-radius:6px;border:1px solid ${BORDER};background:transparent;color:${TEXT};cursor:pointer`;
+          button.onclick = async () => {
+            try {
+              const result = await usage.setPlan({plan: value});
+              setRepo({...repo(), plan: result.plan});
+              sync();
+              void refreshUsage();
+              ctx.toast.show({variant: "success", title: `Usage plan: ${label}`});
+            } catch (error) {
+              ctx.toast.show({variant: "error", title: "Could not save the plan", description: String(error)});
+            }
+          };
+          buttons.set(value, button);
+          plans.append(button);
+        }
+
+        const sync = () => {
+          for (const [value, button] of buttons) {
+            const active = repo().plan === value;
+            button.style.borderColor = active ? ACCENT : BORDER;
+            button.style.background = active ? TRACK : "transparent";
+            button.setAttribute("aria-pressed", String(active));
+          }
+        };
+        sync();
+        syncers.add({root, sync});
+
+        const intervalRow = document.createElement("label");
+        intervalRow.textContent = "Refresh every ";
+        intervalRow.style.cssText = `display:flex;align-items:center;gap:8px;color:${MUTED}`;
+        const select = document.createElement("select");
+        select.style.cssText = `font:12px system-ui,sans-serif;padding:4px 6px;border-radius:6px;border:1px solid ${BORDER};background:transparent;color:${TEXT}`;
+        for (const [ms, label] of [
+          [30_000, "30 seconds"],
+          [60_000, "1 minute"],
+          [300_000, "5 minutes"],
+        ]) {
+          const option = document.createElement("option");
+          option.value = String(ms);
+          option.textContent = label;
+          select.append(option);
+        }
+        select.value = String(interval);
+        select.onchange = () => {
+          interval = Number(select.value);
+          localStorage.setItem("usage-bar:interval", select.value);
+          restartTimer();
+        };
+        intervalRow.append(select);
+
+        root.append(heading, help, plans, intervalRow);
+        return root;
+      },
+    });
 
     return () => {
       stopped = true;
       clearInterval(timer);
+      unsubscribe();
     };
   },
 });
