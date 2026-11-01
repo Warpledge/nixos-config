@@ -19,8 +19,8 @@ ColumnLayout {
     readonly property bool ready: !!face || error !== ""
     readonly property var setting: view.info.pages["faceauth"]
     readonly property var settings: setting ? setting.groups[0].settings : []
-    readonly property var deviceSetting: find("faceAuth.device")
-    readonly property var thresholdSetting: find("faceAuth.darkThreshold")
+    readonly property var deviceSetting: find("machine:faceAuth.device")
+    readonly property var thresholdSetting: find("machine:faceAuth.darkThreshold")
     readonly property string device: deviceSetting ? (view.valueOf(deviceSetting) || "") : ""
     readonly property int threshold: thresholdSetting ? view.valueOf(thresholdSetting) : 90
     readonly property string framePath: Quickshell.env("XDG_RUNTIME_DIR") + "/omni-settings/ir-preview.jpg"
@@ -98,7 +98,7 @@ ColumnLayout {
         model: page.setting ? page.setting.groups : []
         SettingGroup {
             required property var modelData
-            settings: modelData.settings.filter(s => s.key === "faceAuth.enable")
+            settings: modelData.settings.filter(s => s.key === "machine:faceAuth.enable")
             view: page.view
             locked: modelData.locked
             pageGlyph: "face"
@@ -221,8 +221,8 @@ ColumnLayout {
                 color: Theme.text
                 font.pixelSize: 15
                 TitleTip {
-                    text: "Howdy skips frames darker than this. A change applies after a rebuild. "
-                          + "If every frame is too dark, your camera's IR emitter may be off."
+                    tip: "Howdy skips frames darker than this. A change applies after a rebuild. "
+                         + "If every frame is too dark, your camera's IR emitter may be off."
                 }
             }
             Item {
