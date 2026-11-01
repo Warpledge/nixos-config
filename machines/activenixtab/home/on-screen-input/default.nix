@@ -42,6 +42,7 @@
         ./wvkbd-pad-lit.patch
         ./wvkbd-unlatch-glow.patch
         ./wvkbd-glyph-size.patch
+        ./wvkbd-game-layer.patch
       ];
   });
 
@@ -66,6 +67,7 @@
     { [ -e "${folioState}" ] || [ -e "${autoOffState}" ]; } && export WVKBD_IM_BLOCKED=1
     [ -e "${autocorrectState}" ] && export WVKBD_AUTOCORRECT=1
     [ -e "${config.xdg.stateHome}/osk-pad-on" ] && export WVKBD_PAD=1 # touch-gestures.py
+    export WVKBD_GAME_STATE="${config.xdg.stateHome}/osk-game-on" # touch-gestures.py
     # Type through uinput, so niri's binds, keyd and polkit prompts see the keys
     export WVKBD_UINPUT=1
     # shellcheck disable=SC2086 # one flag per word

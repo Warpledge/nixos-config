@@ -31,9 +31,11 @@ EDGE_HOLD = 0.4
 # KEYBOARD_STRIP matches `height` in home/on-screen-input/default.nix
 BAR_STRIP = 36
 KEYBOARD_STRIP = 390
-PAD_STATE = os.path.join(
-    os.environ.get("XDG_STATE_HOME", os.path.expanduser("~/.local/state")), "osk-pad-on"
-)
+# The game block's width (GAME_WIDTH in wvkbd-game-layer.patch), while GAME_STATE exists
+GAME_STRIP_WIDTH = 640
+STATE_DIR = os.environ.get("XDG_STATE_HOME", os.path.expanduser("~/.local/state"))
+PAD_STATE = os.path.join(STATE_DIR, "osk-pad-on")
+GAME_STATE = os.path.join(STATE_DIR, "osk-game-on")
 edge_command = sys.argv[2:]
 
 src = evdev.InputDevice(sys.argv[1])
@@ -192,7 +194,7 @@ def screen_state():
         try:
             logical = niri_msg("focused-output")["logical"]
             shown = any(s["namespace"] == "wvkbd" for s in niri_msg("layers"))
-            screen_cache = (now, (logical, shown))
+            screen_cache = (now, (logical, shown, os.path.exists(GAME_STATE)))
         except Exception:
             screen_cache = (now, None)
     return screen_cache[1]
@@ -202,9 +204,11 @@ def on_keyboard(pos):
     state = screen_state()
     if not state or not state[1]:
         return False
-    logical = state[0]
-    y = on_screen(pos, logical["transform"])[1] * logical["height"]
-    return y >= logical["height"] - KEYBOARD_STRIP
+    logical, _, game = state
+    x, y = on_screen(pos, logical["transform"])
+    if game and x * logical["width"] >= GAME_STRIP_WIDTH:
+        return False
+    return y * logical["height"] >= logical["height"] - KEYBOARD_STRIP
 
 
 def in_pad_area(pos):
@@ -213,11 +217,10 @@ def in_pad_area(pos):
     state = screen_state()
     if not state:
         return False  # can't tell where the strips are: leave the screen working
-    logical, shown = state
+    logical = state[0]
     tp_t = logical["transform"]
     y = on_screen(pos, tp_t)[1] * logical["height"]
-    bottom = logical["height"] - (KEYBOARD_STRIP if shown else 0)
-    return BAR_STRIP <= y < bottom
+    return y >= BAR_STRIP and not on_keyboard(pos)
 
 
 def tp_offset(dx, dy):

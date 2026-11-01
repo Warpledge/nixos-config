@@ -115,6 +115,10 @@ when Ky approves it.
   surface under the pointer would swallow the clicks and scrolls the pad produces.
   With fingers on both the keyboard and the pad area, each finger keeps the side it landed
   on (`mixed_frame`), so keys and pointer work together, without three-finger gestures.
+  The game key on the Fn layer (wvkbd-game-layer.patch) shrinks the keyboard to a 640 px
+  block at the bottom left, with no exclusive zone, so touches beside it reach the game or
+  the pad; `~/.local/state/osk-game-on` tells `touch-gestures.py`, and it prints nothing
+  to `autocorrect.py` while shown.
   `osk-pad-mode` (SIGUSR2) toggles it — the PAD key (KEY_F13, which xkb maps to the
   keysym `XF86Tools`, so that's the niri bind; `F13` never fires) or the bar button.
   And autocorrect: `autocorrect.py` reads `wvkbd -o` from a pipe and, on space or
