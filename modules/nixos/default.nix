@@ -59,6 +59,8 @@
     ++ lib.optionals machine.mullvad.enable [./security/mullvad]
     #--- ClamAV Antivirus (controlled by machine settings)
     ++ lib.optionals machine.clamav.enable [./security/clamav.nix]
+    #--- Face auth with Howdy (controlled by machine settings)
+    ++ lib.optionals machine.faceAuth.enable [./security/auth/face-auth.nix]
     #--- Docker (controlled by machine settings)
     ++ lib.optionals machine.docker.enable [./services/runtimes/docker.nix]
     #--- Flatpak, with Flatseal (controlled by machine settings)

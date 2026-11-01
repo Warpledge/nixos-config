@@ -452,6 +452,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | **Secrets** | [GNOME Keyring][gnome-keyring] |
 | **Passwords** | [KeePassXC][keepassxc], with the vault file synced between devices by [Syncthing][syncthing] |
 | **Antivirus** | [ClamAV][clamav] (off by default) |
+| **Face Auth** | [Howdy][howdy] for sudo, polkit and the lock screen, with the password as fallback (off by default) |
 | **Remote Access** | [OpenSSH][openssh] with key-only login and no root login, plus [fail2ban][fail2ban], which bans an address for 12 hours after 3 failed attempts (off by default) |
 | **Cleanup** | [BleachBit][bleachbit] clears caches, logs and browser leftovers when run by hand; nothing runs on a schedule |
 
@@ -601,6 +602,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 [cups]: https://openprinting.github.io/cups/
 [avahi]: http://avahi.org
 [clamav]: https://www.clamav.net
+[howdy]: https://github.com/boltgolt/howdy
 [bleachbit]: https://bleachbit.sourceforge.net
 [keepassxc]: https://keepassxc.org/
 [syncthing]: https://syncthing.net/
