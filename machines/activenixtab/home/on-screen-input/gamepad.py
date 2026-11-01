@@ -350,8 +350,13 @@ def load_colours(widget):
         parsed.setdefault("edge", parsed["fill"])  # a file from before "edge" existed
         return parsed
     except (OSError, ValueError, KeyError):
+        # Until a theme change renders the file; the inverse keeps the outline two-tone
         colour = widget.get_color()
-        return dict.fromkeys(("fill", "line", "edge", "active", "text"), colour)
+        edge = Gdk.RGBA()
+        edge.red, edge.green, edge.blue = 1 - colour.red, 1 - colour.green, 1 - colour.blue
+        edge.alpha = 1
+        colours = dict.fromkeys(("line", "active", "text"), colour)
+        return {**colours, "fill": edge, "edge": edge}
 
 
 def paint(cr, colour, alpha):
