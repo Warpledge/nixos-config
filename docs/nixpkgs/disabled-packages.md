@@ -12,7 +12,7 @@ Packages overridden to a newer upstream release than nixpkgs has. Delete the ove
 
 | Package | Override in | Date | Pinned to | nixpkgs had | Why |
 | --- | --- | --- | --- | --- | --- |
-| llama-cpp (and llama-cpp-vulkan) | overlay in `modules/nixos/nix/nixpkgs.nix` | 2026-10-31 | v0.8.0 | 0.7.0 (build 11669) | Flint models (`flint` architecture) need v0.8.0; llama-swap and Omni Settings' Local Models test run it. Builds from source |
+| llama-cpp (and llama-cpp-vulkan) | overlay in `modules/nixos/nix/nixpkgs.nix` | 2026-10-31 | v0.8.0 | 0.7.0 (build 11669) | Flint models (`flint` architecture) need v0.8.0; llama-swap and Omni Settings' model test run it. Builds from source |
 
 Check what nixos-unstable has without updating the flake:
 

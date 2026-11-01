@@ -1,0 +1,11 @@
+{
+  "name": "opencode-usage-bar",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./server.ts",
+    "./tui": "./tui.tsx",
+    "./gui-experimental": "./gui-experimental.cjs",
+    "./rpc": "./rpc.ts"
+  }
+}

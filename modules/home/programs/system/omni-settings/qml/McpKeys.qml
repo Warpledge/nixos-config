@@ -1,4 +1,4 @@
-// API Keys, under MCP Servers on the Claude Tools page: whether each keyed server's
+// API Keys, under MCP Servers on the Tools page: whether each keyed server's
 // owner-only file in ~/.nixos-config-mcp holds a key (api.py's mcpKeys), and a
 // field that writes a new one (setMcpKey, through stdin only). A saved key is
 // never read back or shown.

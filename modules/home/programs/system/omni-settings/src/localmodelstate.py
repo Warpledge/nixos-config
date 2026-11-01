@@ -1,4 +1,4 @@
-"""The Local Models page: the models llama-swap can serve on this machine
+"""The Tuning page: the models llama-swap can serve on this machine
 (lib/local-models.nix plus the machine's localModels block), the .gguf files
 LM Studio downloaded, the GPU, a fit estimate for a model's tuning, presets,
 and a live test that runs llama-server with the tuning before it's applied.

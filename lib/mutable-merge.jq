@@ -11,6 +11,12 @@ def get($p): try getpath($p) catch null;
 def has_path($p):
   try (getpath($p[:-1]) | type == "object" and has($p[-1])) catch false;
 def is_locked($p): any($locked[]; . as $l | $p[:($l | length)] == $l);
+# A dropped leaf leaves its parents behind as {}, which Zed rejects
+def prune_dropped($p; $new):
+  reduce range(($p | length) - 1; 0; -1) as $i (.;
+    if (getpath($p[:$i]) | type == "object" and length == 0)
+      and (($new | has_path($p[:$i])) | not)
+    then delpaths([$p[:$i]]) else . end);
 $old[0] as $o | $new[0] as $n
 # The repo's value when locked, missing here, or never changed in the GUI
 | reduce ($n | leafpaths) as $p (.;
@@ -21,4 +27,4 @@ $old[0] as $o | $new[0] as $n
 | reduce ($o | leafpaths) as $p (.;
     if ((($n | has_path($p)) or is_locked($p)) | not)
       and get($p) == ($o | get($p))
-    then delpaths([$p]) else . end)
+    then delpaths([$p]) | prune_dropped($p; $n) else . end)

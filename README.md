@@ -233,7 +233,7 @@ My two computers:
 <details>
 <summary>Managing it with AI</summary>
 
-Turn the tools on in Omni Settings' **AI** tab: Claude Code and Claude Desktop under Cloud AI, and the model server, opencode and the models themselves under Local AI.
+Turn the tools on in Omni Settings: Claude Code and Claude Desktop under **AI > Claude**, the model server and the models under **AI > Local AI**, and opencode in **Default Packages**. opencode's plugin parts are switches under **AI > OpenCode**.
 
 - **Rules:** `CLAUDE.md` (plus one in several folders) tells Claude Code how the repo is laid out and what not to do, such as rebuilding on its own or committing a secret. `AGENTS.md` is a shorter copy for local models.
 - **Skills:** step-by-step jobs in `modules/home/programs/ai/skills/`, among them adding an app (`add-app`), updating and fixing what an update broke (`flake-update`, `disable-package`), troubleshooting a game (`game-troubleshooting`) and committing after a secret scan (`commit`). Claude Code, opencode and Zed's agent all read them.
@@ -452,6 +452,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | **Secrets** | [GNOME Keyring][gnome-keyring] |
 | **Passwords** | [KeePassXC][keepassxc], with the vault file synced between devices by [Syncthing][syncthing] |
 | **Antivirus** | [ClamAV][clamav] (off by default) |
+| **Face Auth** | [Howdy][howdy] for sudo, polkit and the lock screen, with the password as fallback (off by default) |
 | **Remote Access** | [OpenSSH][openssh] with key-only login and no root login, plus [fail2ban][fail2ban], which bans an address for 12 hours after 3 failed attempts (off by default) |
 | **Cleanup** | [BleachBit][bleachbit] clears caches, logs and browser leftovers when run by hand; nothing runs on a schedule |
 
@@ -601,6 +602,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 [cups]: https://openprinting.github.io/cups/
 [avahi]: http://avahi.org
 [clamav]: https://www.clamav.net
+[howdy]: https://github.com/boltgolt/howdy
 [bleachbit]: https://bleachbit.sourceforge.net
 [keepassxc]: https://keepassxc.org/
 [syncthing]: https://syncthing.net/

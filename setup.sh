@@ -873,6 +873,7 @@ services=(
   "Services|sunshine.enable|Sunshine: stream games to Moonlight on your network"
   "Services|docker.enable|Docker"
   "Services|clamav.enable|ClamAV virus scanner"
+  "Services|faceAuth.enable|Face auth: Howdy for sudo, polkit and the lock screen (needs an IR camera)"
   "Services|suwayomi.enable|Suwayomi manga server"
   "Services|ssh.enable|SSH server (key login only)"
   "Services|bluetooth.enable|Bluetooth"

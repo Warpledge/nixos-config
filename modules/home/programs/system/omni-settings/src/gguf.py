@@ -1,5 +1,5 @@
 """Reads a GGUF model file's header: the metadata and tensor table, not the
-weights, for the Local Models page's fit estimate. Format:
+weights, for the Tuning page's fit estimate. Format:
 https://github.com/ggml-org/ggml/blob/master/docs/gguf.md"""
 
 import os

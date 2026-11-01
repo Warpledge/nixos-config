@@ -147,10 +147,13 @@
   "osdPowerProfileEnabled": true,
   "osdWorkspaceEnabled": true,
   "powerMenuActions": [
-    "reboot",
-    "poweroff",
     "lock",
-    "restart"
+    "logout",
+    "switchuser",
+    "restart",
+    "reboot",
+    "softreboot",
+    "poweroff"
   ],
   "powerMenuDefaultAction": "",
   "powerMenuGridLayout": true,
