@@ -121,7 +121,7 @@
       };
       claude.mods.ribbon = true;
       keybinds = {};
-      localAi.default = null;
+      localAi.default = "ornith-1.5-35b-a3b-apex-mtp-i-mini";
     };
   };
 
