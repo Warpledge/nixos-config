@@ -117,6 +117,11 @@
       #--- V2 copies of the four Claude Code subagents with the same prompts
       agents = ./opencode-agents;
 
+      #--- Usage bars in the footer, from the Console session /connect created
+      settings.plugins = [
+        "${pkgs.copyPathToStore ./opencode-usage-bar}"
+      ];
+
       #--- Context7 indexes JS/Python framework docs; deepwiki and grep provide
       #--- upstream wiki docs and real-world code examples.
       #--- Overrides replace the whole entry, so the full server is restated here.
