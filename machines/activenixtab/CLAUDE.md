@@ -117,7 +117,9 @@ when Ky approves it.
   on (`mixed_frame`), so keys and pointer work together, without three-finger gestures.
   `gamepad.py` (`osk-gamepad`, the gamepad key on the Fn layer, KEY_F16, niri bind
   `XF86Launch7`, or the `gamepadToggle` bar plugin) is a virtual Xbox 360 controller for
-  Steam Input. It holds the touchscreen while open: `touch-gestures.py` lets go on SIGUSR1
+  Steam Input, drawn on a GTK4 layer-shell overlay (colours from `gamepad-colors.json`, a
+  matugen template); positions are the `CONTROLS` table. A virtual Xbox pad has no trackpads,
+  so the right pad drives the right stick and the left pad the D-pad. It holds the touchscreen while open: `touch-gestures.py` lets go on SIGUSR1
   and takes it back once the pid in `$XDG_RUNTIME_DIR/osk-gamepad.pid` is gone.
   `osk-pad-mode` (SIGUSR2) toggles it — the PAD key (KEY_F13, which xkb maps to the
   keysym `XF86Tools`, so that's the niri bind; `F13` never fires) or the bar button.

@@ -13,6 +13,7 @@
   ...
 }: let
   colors = "${config.xdg.configHome}/wvkbd/colors.sh";
+  gamepadColors = "${config.xdg.configHome}/osk-gamepad/colors.json";
 
   #--- Keyboard strip (logical px); KEYBOARD_STRIP in wm/touch-gestures.py matches
   height = 390;
@@ -99,8 +100,21 @@
   gamepad-toggle = pkgs.writeShellScriptBin "osk-gamepad" ''
     pkill -f 'gamepad\.py' && exit 0
     pkill --signal USR1 -x wvkbd-deskintl
-    exec ${pkgs.python3.withPackages (p: [p.evdev])}/bin/python3 -I ${./gamepad.py} \
-      /dev/input/by-path/platform-AMDI0010:00-event
+    # The library must load before libwayland for the overlay to be a layer surface
+    export LD_PRELOAD=${pkgs.gtk4-layer-shell}/lib/libgtk4-layer-shell.so
+    export GI_TYPELIB_PATH=${lib.makeSearchPathOutput "out" "lib/girepository-1.0" (with pkgs; [
+      gtk4
+      gtk4-layer-shell
+      gdk-pixbuf
+      glib
+      gobject-introspection
+      graphene
+      harfbuzz
+      pango
+    ])}
+    exec ${pkgs.python3.withPackages (p: [p.evdev p.pycairo p.pygobject3])}/bin/python3 -I \
+      ${./gamepad.py} /dev/input/by-path/platform-AMDI0010:00-event \
+      "${config.stylix.fonts.sansSerif.name}" "${gamepadColors}"
   '';
 
   #--- Off switch for opening on text fields
@@ -196,6 +210,11 @@ in {
     input = ./wvkbd-colors.sh;
     output = colors;
     postHook = "systemctl --user restart wvkbd.service";
+  };
+
+  matugen.templates.osk-gamepad = {
+    input = ./gamepad-colors.json;
+    output = gamepadColors;
   };
 
   #--------------------------------------------------------------------#
