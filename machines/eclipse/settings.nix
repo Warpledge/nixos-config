@@ -14,7 +14,7 @@
       fileBrowsers.dolphin = false;
       wallpaper = "engine";
       editors.vscodium = false;
-      localAi.chat = ["gemma-4-26b-a4b"];
+      localAi.models = ["ornith-1.5-35b-a3b" "gemma-4-26b-a4b"];
       localAi.edit = "sweep-next-edit-1.5b";
       media.moku = true;
       media.boorusama = true;
@@ -22,7 +22,6 @@
       fileBrowsers.nautilus = true;
       fileBrowsers.yazi = false;
       claudeDesktop.enable = true;
-      localAi.code = ["ornith-1.5-35b-a3b"];
       artcraft.photocraft = false;
       artcraft.lightcraft = false;
       artcraft.vectorcraft = false;
@@ -234,7 +233,6 @@
     flint = {
       batch = 1024;
       cache = "q8_0";
-      category = "code";
       context = 262144;
       cpuMoe = 33;
       dir = "unsloth/flint-GGUF";
@@ -243,7 +241,6 @@
       name = "flint";
     };
     gemma-4-12b-it-qat = {
-      category = "chat";
       dir = "unsloth/gemma-4-12B-it-qat-GGUF";
       match = "gemma-4-12B-it-qat-UD-Q4_K_XL.gguf";
       name = "gemma 4 12B it qat";
@@ -270,7 +267,6 @@
       cpuMoe = 22;
     };
     "qwen3.8-27b" = {
-      category = "chat";
       dir = "unsloth/Qwen3.8-27B-GGUF";
       match = "Qwen3.8-27B-UD-Q4_K_M.gguf";
       name = "Qwen3.8 27B";
