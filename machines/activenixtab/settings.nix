@@ -205,6 +205,8 @@
       japanese.ime = false;
       japanese.vn = false;
       keybinds = {};
+      localAi.models = [];
+      localAi.default = null;
     };
   };
 
