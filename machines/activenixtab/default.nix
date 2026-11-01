@@ -74,6 +74,16 @@
   };
 
   #--------------------------------------------------------------------#
+  #-- AppArmor
+  #--------------------------------------------------------------------#
+  #--- Prism can't write a file while its profile is loaded:
+  #- flags=(attach_disconnected) in modules/nixos/security/apparmor/prismlauncher.nix
+  #- makes linkat of Qt 6.12's unnamed temp files (QSaveFile) fail with ENOENT, so
+  #- meta/index.json, translations and prismlauncher.cfg never save. Off until that
+  #- flag is dropped (Warpledge's file; a fix for all users).
+  security.apparmor.policies.prismlauncher.state = lib.mkForce "disable";
+
+  #--------------------------------------------------------------------#
   #-- Imports
   #--------------------------------------------------------------------#
   imports =
