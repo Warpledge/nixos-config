@@ -409,10 +409,12 @@ def cmd_load(cfg, _args):
     local_models = {s.path[-1]: setting_json(cfg, state, s, multi, modules) for s in schema.flat(state.pages)
                     if s.domain == "machine" and s.path[0] == "localModels"}
     if shows("localmodels", wm, cfg):
-        # First under Local AI, above the server and models it tunes
-        by_section["localai"].insert(0, {"id": "localmodels", "title": "Local Models",
-                                         "icon": ["applications-engineering-symbolic", "cpu-symbolic"],
-                                         "subtitle": NAV_SUBTITLES["localmodels"]})
+        # After the server page, before the models it serves
+        items = by_section["localai"]
+        server = next((i for i, item in enumerate(items) if item["id"] == "page:Server"), -1)
+        items.insert(server + 1, {"id": "localmodels", "title": "Tuning",
+                                  "icon": ["applications-engineering-symbolic", "cpu-symbolic"],
+                                  "subtitle": NAV_SUBTITLES["localmodels"]})
     if startup:
         by_section["personal"].append({"id": "startup", "title": "Startup",
                                        "icon": ["system-run-symbolic"],
@@ -492,7 +494,7 @@ def cmd_mime_apps(_cfg, _args):
 
 
 #--------------------------------------------------------------------#
-#-- Local Models
+#-- Tuning
 #--------------------------------------------------------------------#
 def local_models_arg(cfg, args):
     """The page's localModels value, pending changes included, else this machine's."""

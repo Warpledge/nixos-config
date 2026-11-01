@@ -1,4 +1,4 @@
-// Local Models (Local AI): the machine's localModels setting. Its GPU profile,
+// Tuning (Local AI): the machine's localModels setting. Its GPU profile,
 // each model llama-swap can serve with how it loads here (api.py's
 // localModels), and the files LM Studio downloaded that nothing lists yet.
 // Models are tuned in LocalModelEditor.qml and added in LocalModelAdd.qml,

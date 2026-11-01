@@ -65,8 +65,8 @@ SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
 #--- lays out (TOP_PAGES), the "userpkgs" one the list the Packages tab's
 #--- pages edit (UserPackagesPage.qml), "keybinds" the Keybinds page's set,
 #--- "windowrules" the Window Rules page's, "siderail" the Side Rail page's,
-#--- "games" the Games page's and "localmodels" the Local Models page's, which
-#--- the AI tab lists first under Local AI (api.py's nav).
+#--- "games" the Games page's and "localmodels" the Tuning page's, which
+#--- the AI tab lists after Server (api.py's nav).
 #--- "top" pages: the custom page (its id in api.py and OmniView.qml) each one's settings show on
 TOP_PAGES = {"Flatpaks": "flatpaks", "Users": "people", "Battery": "battery", "MangoHud": "mangohud",
              "AppArmor": "apparmor", "Maintenance": "overview"}
@@ -91,7 +91,7 @@ PAGES = {
     "Window Rules": ("windowrules", "focus-windows-symbolic", "", [("", "", ["windowRules"])]),
     "Side Rail": ("siderail", "view-dual-symbolic", "", [("", "", ["sideRail"])]),
     "Games": ("games", "input-gaming-symbolic", "", [("", "", ["steamGames"])]),
-    "Local Models": ("localmodels", "applications-engineering-symbolic", "",
+    "Tuning": ("localmodels", "applications-engineering-symbolic", "",
                      [("", "", ["localModels.profile", "localModels.backend", "localModels.gpuSharedGB",
                                 "localModels.models"])]),
     "System": ("computer", "computer-symbolic",
