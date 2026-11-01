@@ -39,14 +39,14 @@ HIT_SLACK = 1.2  # how far outside a control a landing finger still counts
 # Held by the sides: each thumb pivots at the edge, 400 px up, and the controls follow
 # its arc, with triggers at the top of the reach and menu buttons at the far end
 CONTROLS = [
-    ("lt", "trigger", e.ABS_Z, "LT", 70, 760, (55, 24)),
-    ("lb", "button", e.BTN_TL, "LB", 190, 700, (55, 24)),
-    ("lstick", "stick", e.BTN_THUMBL, "", 208, 497, 70),
-    ("dpad", "hat", None, "", 197, 262, 65),
-    ("select", "button", e.BTN_SELECT, "Select", 390, 400, (45, 24)),
-    ("guide", "button", e.BTN_MODE, "Guide", 390, 460, (45, 24)),
-    ("rt", "trigger", e.ABS_RZ, "RT", -70, 760, (55, 24)),
-    ("rb", "button", e.BTN_TR, "RB", -190, 700, (55, 24)),
+    ("lt", "trigger", e.ABS_Z, "LT", 70, 650, (55, 24)),
+    ("lb", "button", e.BTN_TL, "LB", 190, 650, (55, 24)),
+    ("dpad", "hat", None, "", 208, 497, 92),
+    ("lstick", "stick", e.BTN_THUMBL, "", 328, 370, 70),
+    ("select", "button", e.BTN_SELECT, "Select", 390, 480, (45, 24)),
+    ("guide", "button", e.BTN_MODE, "Guide", 390, 540, (45, 24)),
+    ("rt", "trigger", e.ABS_RZ, "RT", -70, 650, (55, 24)),
+    ("rb", "button", e.BTN_TR, "RB", -190, 650, (55, 24)),
     ("y", "button", e.BTN_Y, "Y", -208, 559, 30),
     ("x", "button", e.BTN_X, "X", -270, 497, 30),
     ("b", "button", e.BTN_B, "B", -146, 497, 30),
