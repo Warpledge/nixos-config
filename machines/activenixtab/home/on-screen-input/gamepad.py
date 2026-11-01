@@ -516,8 +516,25 @@ def finger_up(s):
             click_mouse()
 
 
+def watch_output():
+    # On a timer, not on touches: the screen can turn with nothing touching it
+    global output
+    try:
+        before = output
+        now = read_output()
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return GLib.SOURCE_CONTINUE
+    if now != before:
+        was = shape()
+        output = now
+        if shape() != was:
+            apply_layout()
+        area.queue_draw()
+    return GLib.SOURCE_CONTINUE
+
+
 def on_touch(*_):
-    global cur, output, last_output_read
+    global cur
     try:
         events = list(src.read())
     except BlockingIOError:
@@ -543,15 +560,6 @@ def on_touch(*_):
             if cur in slots:
                 slots[cur][1] = ev.value
         elif ev.type == e.EV_SYN and ev.code == e.SYN_REPORT:
-            if time.monotonic() - last_output_read > 1:
-                last_output_read = time.monotonic()
-                try:
-                    before = shape()
-                    output = read_output()  # the screen may have turned
-                    if shape() != before:
-                        apply_layout()
-                except (OSError, ValueError, subprocess.SubprocessError):
-                    pass
             for s, pos in slots.items():
                 last_pos[s] = list(pos)
                 if s not in start:
@@ -751,7 +759,6 @@ src = evdev.InputDevice(sys.argv[1])
 xmax = src.absinfo(e.ABS_X).max
 ymax = src.absinfo(e.ABS_Y).max
 output = read_output()
-last_output_read = time.monotonic()
 settings = {"style": "Xbox", "opacity": "Solid", "stick": "Medium", "mouse": "Medium"}
 layouts = {}  # "landscape" or "portrait" -> control name -> [x, y, size]
 pinch = None  # two fingers resizing a control in Move controls
@@ -779,6 +786,7 @@ take_screen(src)
 GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, stop)
 GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, stop)
 GLib.io_add_watch(src.fd, GLib.PRIORITY_HIGH, GLib.IO_IN, on_touch)
+GLib.timeout_add(1000, watch_output)
 try:
     loop.run()
 finally:
