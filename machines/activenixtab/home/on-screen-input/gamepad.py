@@ -55,7 +55,11 @@ CONTROLS = [
     ("rpad", "mouse", None, "", -197, 262, 80),
     ("start", "button", e.BTN_START, "Start", -390, 480, (45, 24)),
     ("close", "close", None, "✕", -390, 540, (45, 24)),
+    ("edit", "edit", None, "Edit", 390, 600, (45, 24)),
 ]
+CONTROLS = [list(c) for c in CONTROLS]  # Edit mode changes x and y
+STATE_DIR = os.environ.get("XDG_STATE_HOME", os.path.expanduser("~/.local/state"))
+LAYOUT_FILE = os.path.join(STATE_DIR, "osk-gamepad-layout.json")  # delete to reset
 STICK_AXES = {"lstick": (e.ABS_X, e.ABS_Y), "rstick": (e.ABS_RX, e.ABS_RY)}
 
 RUNTIME_DIR = os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")
@@ -156,6 +160,38 @@ def center(control):
     return x, output["height"] - control[5]
 
 
+def load_layout():
+    try:
+        with open(LAYOUT_FILE) as f:
+            saved = json.load(f)
+        for control in CONTROLS:
+            if control[0] in saved:
+                control[4], control[5] = (int(v) for v in saved[control[0]])
+    except (OSError, ValueError, TypeError):
+        pass  # the built-in positions
+
+
+def save_layout():
+    temp = f"{LAYOUT_FILE}.tmp"
+    with open(temp, "w") as f:
+        json.dump({c[0]: [c[4], c[5]] for c in CONTROLS}, f)
+    os.replace(temp, LAYOUT_FILE)
+
+
+def drag_controls():
+    # Measured from where the finger landed, so a control doesn't jump to it
+    for s, control in owners.items():
+        if not control or s not in drag_from or s not in slots:
+            continue
+        x, y = to_px(slots[s])
+        x0, y0 = to_px(start[s])
+        cx = min(max(drag_from[s][0] + x - x0, 0), output["width"])
+        cy = min(max(drag_from[s][1] + y - y0, 0), output["height"])
+        # Counted from the nearer side, so it stays put when the screen turns
+        control[4] = round(cx if cx < output["width"] / 2 else cx - output["width"])
+        control[5] = round(output["height"] - cy)
+
+
 def hit(control, x, y):
     cx, cy = center(control)
     size = control[6]
@@ -205,7 +241,7 @@ def wanted_state():
     keys, axes = set(clicks), {}
     knobs = {}
     hat_x = hat_y = 0
-    for s, pos in slots.items():
+    for s, pos in () if editing else slots.items():
         owner = owners.get(s)
         if not owner:
             continue
@@ -223,7 +259,7 @@ def wanted_state():
             cx, cy = center(owner)
             hx, hy = hat_value(x - cx, y - cy, owner[6])
             hat_x, hat_y = hat_x or hx, hat_y or hy
-        else:
+        elif kind in ("button", "trigger"):
             # A finger on a button can slide to the next one, as on real ABXY
             now = control_at(x, y, ("button", "trigger"))
             if now:
@@ -278,21 +314,35 @@ def finger_down(s):
     x, y = to_px(slots[s])
     owners[s] = control_at(x, y)
     landed[s] = time.monotonic()
+    if editing and owners[s]:
+        drag_from[s] = center(owners[s])
 
 
 def finger_up(s):
+    global editing
     owner = owners.pop(s, None)
     mouse_at.pop(s, None)
     pos, origin = last_pos.pop(s, None), start.pop(s, None)
     held_for = time.monotonic() - landed.pop(s, 0)
+    dragged = drag_from.pop(s, None) is not None
     if not owner:
         return
-    if owner[1] == "close":
-        loop.quit()
-    elif owner[1] in ("stick", "mouse") and pos and origin and held_for < TAP_SECONDS:
+    tap = False
+    if pos and origin:
         x, y, x0, y0 = *to_px(pos), *to_px(origin)
-        if math.hypot(x - x0, y - y0) < TAP_TRAVEL:
-            click_stick(owner[2]) if owner[1] == "stick" else click_mouse()
+        tap = math.hypot(x - x0, y - y0) < TAP_TRAVEL
+    if dragged:
+        save_layout()
+    if owner[1] == "close" and (tap or not editing):
+        loop.quit()
+    elif owner[1] == "edit" and tap:
+        editing = not editing
+        owner[3] = "Done" if editing else "Edit"
+    elif tap and held_for < TAP_SECONDS and not editing:
+        if owner[1] == "stick":
+            click_stick(owner[2])
+        elif owner[1] == "mouse":
+            click_mouse()
 
 
 def on_touch(*_):
@@ -333,7 +383,10 @@ def on_touch(*_):
                 if s not in start:
                     start[s] = list(pos)
                     finger_down(s)
-            move_mouse()
+            if editing:
+                drag_controls()
+            else:
+                move_mouse()
             emit()
     return GLib.SOURCE_CONTINUE
 
@@ -486,6 +539,9 @@ xmax = src.absinfo(e.ABS_X).max
 ymax = src.absinfo(e.ABS_Y).max
 output = read_output()
 last_output_read = time.monotonic()
+load_layout()
+editing = False  # Edit mode: a drag moves a control, and the controller stays quiet
+drag_from = {}  # slot -> the center of the control it's moving, when it landed
 pad = new_controller()
 mouse = new_mouse()
 mouse_at = {}  # slot -> last x, y and the fractions of a pointer step left over
