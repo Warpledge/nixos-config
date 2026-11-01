@@ -23,6 +23,8 @@
       #--- blocks below still apply, through home-manager*.json and OPENCODE_*
       mutableSettings = true;
       settings.share = "disabled"; # No /share uploads to opencode.ai
+      #--- nix owns the binary, so a self-update only fights the store
+      settings.update = "disable";
       #--- cli.json, which OpenCode 2 reads instead of the ignored tui.json
       #--- Object form keeps the mode the old hand-written cli.json had
       cli.theme = {
@@ -90,6 +92,30 @@
           extensions = [".nix"];
         };
       };
+
+      #--- Keeps more exact detail beside the summary, so a compaction doesn't
+      #--- cost the todo list and the file quoted a few turns ago
+      settings.compaction.keep.tokens = 24000;
+
+      #--- Every rebuild rewrites these, and nothing in the repo reacts to them
+      settings.watcher.ignore = [
+        "result"
+        "result-*"
+        ".git/**"
+        "**/__pycache__/**"
+        "**/.ruff_cache/**"
+      ];
+
+      #--- todo backs the AGENTS.md todo rule; background_compaction writes the
+      #--- summary before it's due, so a long task doesn't stall to make it
+      settings.experimental = {
+        todo = true;
+        background_compaction = true;
+      };
+
+      #--- ~/.claude/agents is not one of OpenCode's agent folders, so these are
+      #--- V2 copies of the four Claude Code subagents with the same prompts
+      agents = ./opencode-agents;
 
       #--- Context7 indexes JS/Python framework docs; deepwiki and grep provide
       #--- upstream wiki docs and real-world code examples.
