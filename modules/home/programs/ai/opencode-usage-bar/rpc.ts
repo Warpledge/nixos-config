@@ -15,11 +15,13 @@ export const UsageRpc = Rpc.define({
       output: {
         type: "object",
         properties: {
-          fiveHourCost: {type: "number"},
+          fivePercent: {type: "number"},
+          weekPercent: {type: "number"},
+          fiveCost: {type: "number"},
           weekCost: {type: "number"},
           fetchedAt: {type: "number"},
         },
-        required: ["fiveHourCost", "weekCost", "fetchedAt"],
+        required: ["fivePercent", "weekPercent", "fiveCost", "weekCost", "fetchedAt"],
         additionalProperties: false,
       },
     },

@@ -8,9 +8,7 @@
 // colours come from the app's theme variables.
 const {Plugin, Slot} = require("@opencode/plugin/gui");
 
-// Go plan caps: 5-hour 20% and week 50% of the $60 monthly allowance
-const FIVE_CAP = 12;
-const WEEK_CAP = 30;
+// Percentages come from the server, against each model's own Go limit
 const REFRESH_MS = 60_000;
 
 const ACCENT = "var(--color-v2-icon-icon-accent)";
@@ -42,7 +40,7 @@ function tone(ratio) {
   return ratio >= 0.9 ? DANGER : ratio >= 0.7 ? WARNING : ACCENT;
 }
 
-function segment(label, cap) {
+function segment(label) {
   const root = document.createElement("div");
   root.style.cssText = "display:flex;align-items:center;gap:6px;";
 
@@ -62,20 +60,20 @@ function segment(label, cap) {
 
   root.append(name, track, percent);
 
-  const update = (spend) => {
-    const ratio = Math.max(0, Math.min(1, spend / cap));
+  const update = (value, cost) => {
+    const ratio = Math.max(0, Math.min(1, value / 100));
     fill.style.width = `${Math.round(ratio * 100)}%`;
     fill.style.background = tone(ratio);
-    percent.textContent = `${Math.round(ratio * 100)}%`;
+    percent.textContent = `${Math.round(value)}%`;
     percent.style.color = ratio >= 0.7 ? tone(ratio) : MUTED;
-    root.title = `$${spend.toFixed(2)} of $${cap}`;
+    root.title = `${value.toFixed(1)}% of the ${label} limit · $${cost.toFixed(2)}`;
   };
 
   return {root, update};
 }
 
 const paints = new Set();
-let state = {five: -1, week: -1, at: 0, error: ""};
+let state = {five: -1, week: -1, fiveCost: 0, weekCost: 0, at: 0, error: ""};
 
 function paint() {
   for (const item of [...paints]) {
@@ -101,8 +99,8 @@ function bar() {
     "background:var(--color-v2-background-bg-base)",
   ].join(";");
 
-  const five = segment("5H", FIVE_CAP);
-  const week = segment("WK", WEEK_CAP);
+  const five = segment("5H");
+  const week = segment("WK");
   const note = document.createElement("span");
   note.style.cssText = "margin-left:auto";
   root.append(five.root, week.root, note);
@@ -124,8 +122,8 @@ function bar() {
       note.title = "";
       return;
     }
-    five.update(value.five);
-    week.update(value.week);
+    five.update(value.five, value.fiveCost);
+    week.update(value.week, value.weekCost);
     const peak = peakHours(new Date());
     note.textContent = peak ? "PEAK" : "OFF-PEAK";
     note.style.color = peak ? WARNING : MUTED;
@@ -146,10 +144,17 @@ module.exports = Plugin.define({
       try {
         const value = await ctx.client.rpc(Usage).read({});
         if (stopped) return;
-        state = {five: value.fiveHourCost, week: value.weekCost, at: value.fetchedAt, error: ""};
+        state = {
+          five: value.fivePercent,
+          week: value.weekPercent,
+          fiveCost: value.fiveCost,
+          weekCost: value.weekCost,
+          at: value.fetchedAt,
+          error: "",
+        };
       } catch (error) {
         if (stopped) return;
-        state = {five: -1, week: -1, at: 0, error: String(error)};
+        state = {five: -1, week: -1, fiveCost: 0, weekCost: 0, at: 0, error: String(error)};
       }
       paint();
     };

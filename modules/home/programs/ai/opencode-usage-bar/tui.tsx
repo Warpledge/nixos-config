@@ -4,9 +4,7 @@
 import {Plugin} from "@opencode/plugin/tui";
 import {UsageRpc} from "./rpc";
 
-// Go plan caps: 5-hour 20% and week 50% of the $60 monthly allowance
-const FIVE_CAP = 12;
-const WEEK_CAP = 30;
+// Percentages come from the server, against each model's own Go limit
 const WIDTH = 8;
 const REFRESH_MS = 60_000;
 
@@ -42,8 +40,8 @@ export default Plugin.define({
         const reading = await context.client.rpc(UsageRpc).read({});
         if (stopped) return;
         setState((draft) => {
-          draft.five = reading.fiveHourCost;
-          draft.week = reading.weekCost;
+          draft.five = reading.fivePercent;
+          draft.week = reading.weekPercent;
           draft.at = reading.fetchedAt;
           draft.error = "";
         });
@@ -64,15 +62,15 @@ export default Plugin.define({
     const tone = (ratio: number) =>
       ratio >= 0.9 ? context.theme.text.error : ratio >= 0.7 ? context.theme.text.base : context.theme.text.muted;
 
-    const segment = (label: string, spend: number, cap: number) => {
-      const ratio = cap > 0 ? spend / cap : 0;
+    const segment = (label: string, percent: number) => {
+      const ratio = Math.max(0, Math.min(1, percent / 100));
       const {filled, empty} = bar(ratio);
       return (
         <box flexDirection="row" gap={1}>
           <text fg={context.theme.text.muted}>{label}</text>
           <text fg={tone(ratio)}>{filled}</text>
           <text fg={context.theme.text.muted}>{empty}</text>
-          <text fg={tone(ratio)}>{`${Math.round(ratio * 100)}%`}</text>
+          <text fg={tone(ratio)}>{`${Math.round(percent)}%`}</text>
         </box>
       );
     };
@@ -85,8 +83,8 @@ export default Plugin.define({
       const peak = peakHours(new Date());
       return (
         <box flexDirection="row" gap={2}>
-          {segment("5H", reading.five, FIVE_CAP)}
-          {segment("WK", reading.week, WEEK_CAP)}
+          {segment("5H", reading.five)}
+          {segment("WK", reading.week)}
           {isPeakModel(model) ? (
             <text fg={peak ? context.theme.text.error : context.theme.text.muted}>{peak ? "PEAK" : "OFF-PEAK"}</text>
           ) : null}
