@@ -22,7 +22,7 @@
   compatTools = lib.concatMapStringsSep ";" (p: "${lib.getName p} ${lib.getVersion p}") (
     lib.optionals steam.enable steam.extraCompatPackages
   );
-  #--- The machine's llama.cpp build, for the Local Models page's tests
+  #--- The machine's llama.cpp build, for the Tuning page's tests
   localAi = import ../../../../../lib/local-ai.nix {
     inherit lib;
     inherit (machine) localModels;
@@ -83,7 +83,7 @@
         --set OMNI_SETTINGS_COMPAT_TOOLS ${lib.escapeShellArg compatTools} \
         --set OMNI_SETTINGS_APPARMOR_INCLUDES ${pkgs.apparmor-profiles}/etc/apparmor.d \
         ${lib.optionalString user.llamaSwap.enable
-        # The Local Models page's test: the same build llama-swap runs. The line's
+        # The Tuning page's test: the same build llama-swap runs. The line's
         # backslash stays outside, so an empty string still continues the command
         "--set OMNI_SETTINGS_LLAMA_SERVER ${lib.getExe' (localAi.llamaCpp pkgs) "llama-server"}"} \
         --prefix PATH : ${lib.makeBinPath [

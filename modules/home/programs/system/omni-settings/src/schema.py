@@ -51,11 +51,12 @@ MOVES = {  # setting -> (page, group on that page)
 }
 
 #--- Sidebar sections, top to bottom; under niri, Desktop is on the Niri tab, and
-#--- the AI, Network and Security sections are always on their own tabs (api.py's
-#--- SECTION_TAB), untitled since each is its tab's only one
+#--- the OpenCode, Claude and Local AI sections share the AI tab (api.py's
+#--- SECTION_TAB), with Network and Security on tabs of their own, untitled since
+#--- each is its tab's only one
 SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
             ("personal", "Personal"), ("apps", "Default Packages"),
-            ("cloudai", "Cloud AI"), ("localai", "Local AI"),
+            ("opencode", "OpenCode"), ("cloudai", "Claude"), ("localai", "Local AI"),
             ("network", ""), ("security", "")]
 
 #--- Each page's sidebar section, icon and blurb, and for the curated ones
@@ -64,7 +65,8 @@ SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
 #--- lays out (TOP_PAGES), the "userpkgs" one the list the Packages tab's
 #--- pages edit (UserPackagesPage.qml), "keybinds" the Keybinds page's set,
 #--- "windowrules" the Window Rules page's, "siderail" the Side Rail page's,
-#--- "games" the Games page's and "localmodels" the Local Models page's.
+#--- "games" the Games page's and "localmodels" the Tuning page's, which
+#--- the AI tab lists after Server (api.py's nav).
 #--- "top" pages: the custom page (its id in api.py and OmniView.qml) each one's settings show on
 TOP_PAGES = {"Flatpaks": "flatpaks", "Users": "people", "Battery": "battery", "MangoHud": "mangohud",
              "AppArmor": "apparmor", "Face Auth": "faceauth", "Maintenance": "overview"}
@@ -89,7 +91,7 @@ PAGES = {
     "Window Rules": ("windowrules", "focus-windows-symbolic", "", [("", "", ["windowRules"])]),
     "Side Rail": ("siderail", "view-dual-symbolic", "", [("", "", ["sideRail"])]),
     "Games": ("games", "input-gaming-symbolic", "", [("", "", ["steamGames"])]),
-    "Local Models": ("localmodels", "applications-engineering-symbolic", "",
+    "Tuning": ("localmodels", "applications-engineering-symbolic", "",
                      [("", "", ["localModels.profile", "localModels.backend", "localModels.gpuSharedGB",
                                 "localModels.models"])]),
     "System": ("computer", "computer-symbolic",
@@ -189,44 +191,49 @@ PAGES = {
                               "claude.mods.fileTree", "claude.mods.savvyProgress",
                               "claude.mods.blastRadius", "claude.mods.replayTheater",
                               "claude.statusLine", "claude.builtins.youShouldKnow"])]),
-    "Claude Tools": ("cloudai", "application-x-addon-symbolic",
-                     "Plugins, MCP servers and claude.ai connectors Claude Code loads.",
-                     [("Plugins", "", [f"claude.plugins.{n}" for n in (
-                         "claudeMdManagement", "skillCreator", "claudeCodeSetup", "claudeSecurity")]),
-                      ("MCP Servers", "Shared with OpenCode.", [f"claude.mcp.{n}" for n in (
-                          "nixos", "context7", "github", "deepwiki", "grep")]),
-                      ("claude.ai Connectors", "One turned off is blocked by name.", [f"claude.connectors.{n}" for n in (
-                           "gmail", "googleCalendar", "googleDrive", "claudeDocs")])]),
-    "Claude Skills": ("cloudai", "view-list-symbolic",
-                      "What Claude sees of each skill and subagent, and the model it runs on.",
-                      [("Repo Skills", "", [f"claude.skills.{n}" for n in (
-                          "addApp", "androidDebloatRedo", "apparmorCheck", "commit", "disablePackage",
-                          "flakeUpdate", "freetubeSync", "gameTroubleshooting", "handoff", "mokuBump",
-                          "onboard", "prReview", "rpgmSetup", "todo", "upstream", "vnSetup")]),
-                       ("Subagents", "", [f"claude.agents.{n}" for n in (
-                           "buildTriager", "docsDriftAuditor", "proseReviewer", "publicRepoAuditor")]),
-                       ("Account Skills", "Synced from your claude.ai account.",
-                        [f"claude.accountSkills.{n}" for n in (
-                            "builtInBrowser", "chromeBrowser", "computerUse", "deepResearch", "docs",
-                            "docx", "googleWorkspace", "importMemory", "mcpBuilder", "morning", "pdf",
-                            "pptx", "xlsx")])]),
-    "Tools": ("localai", "utilities-terminal-symbolic",
-              "The local model server and its chat page.",
-              [("", "", ["llamaSwap.enable", "openWebui.enable"])]),
+    "Tools": ("cloudai", "application-x-addon-symbolic",
+              "Plugins, MCP servers and claude.ai connectors Claude Code loads.",
+              [("Plugins", "", [f"claude.plugins.{n}" for n in (
+                  "claudeMdManagement", "skillCreator", "claudeCodeSetup", "claudeSecurity")]),
+               ("MCP Servers", "Shared with OpenCode.", [f"claude.mcp.{n}" for n in (
+                   "nixos", "context7", "github", "deepwiki", "grep")]),
+               ("claude.ai Connectors", "One turned off is blocked by name.", [f"claude.connectors.{n}" for n in (
+                    "gmail", "googleCalendar", "googleDrive", "claudeDocs")])]),
+    "Skills": ("cloudai", "view-list-symbolic",
+               "What Claude sees of each skill and subagent, and the model it runs on.",
+               [("Repo Skills", "", [f"claude.skills.{n}" for n in (
+                   "addApp", "androidDebloatRedo", "apparmorCheck", "commit", "disablePackage",
+                   "flakeUpdate", "freetubeSync", "gameTroubleshooting", "handoff", "mokuBump",
+                   "onboard", "prReview", "rpgmSetup", "todo", "upstream", "vnSetup")]),
+                ("Subagents", "", [f"claude.agents.{n}" for n in (
+                    "buildTriager", "docsDriftAuditor", "proseReviewer", "publicRepoAuditor")]),
+                ("Account Skills", "Synced from your claude.ai account.",
+                 [f"claude.accountSkills.{n}" for n in (
+                     "builtInBrowser", "chromeBrowser", "computerUse", "deepResearch", "docs",
+                     "docx", "googleWorkspace", "importMemory", "mcpBuilder", "morning", "pdf",
+                     "pptx", "xlsx")])]),
+    "Plugins": ("opencode", "application-x-addon-symbolic",
+                "OpenCode's plugin: usage bars and the desktop app's rebuild badge.",
+                [("", "", ["opencode.plugins.usageBar", "opencode.plugins.desktopBar",
+                           "opencode.plugins.rebuildBadge"])]),
+    "Server": ("localai", "utilities-terminal-symbolic",
+               "The local model server and its chat page.",
+               [("", "", ["llamaSwap.enable", "openWebui.enable"])]),
     "Models": ("localai", "applications-engineering-symbolic",
-               "The models llama-swap runs on this computer, one at a time.",
-               [("Models", "Every app that uses llama-swap lists the ones turned on.",
-                 ["localAi.default", "localAi.models"]),
+               "The models opencode, Zed, Pi and Open WebUI can use, one at a time.",
+               [("Models", "The ones opencode, Zed, Pi and Open WebUI can use.",
+                 ["localAi.models"]),
+                ("Default", "The model the apps start with.", ["localAi.default"]),
                 ("Inline Suggestions", "Zed's suggestions as you type, on the CPU.", ["localAi.edit"])]),
 }
 
 #--- (page, group) shown closed until its heading is clicked, and its heading's icon
 COLLAPSED = {("Claude", "Mods"): "brush",
-             ("Claude Tools", "Plugins"): "extension", ("Claude Tools", "MCP Servers"): "hub",
-             ("Claude Tools", "claude.ai Connectors"): "cable",
-             ("Claude Skills", "Repo Skills"): "construction",
-             ("Claude Skills", "Subagents"): "smart_toy",
-             ("Claude Skills", "Account Skills"): "cloud"}
+             ("Tools", "Plugins"): "extension", ("Tools", "MCP Servers"): "hub",
+             ("Tools", "claude.ai Connectors"): "cable",
+             ("Skills", "Repo Skills"): "construction",
+             ("Skills", "Subagents"): "smart_toy",
+             ("Skills", "Account Skills"): "cloud"}
 #--- COLLAPSED groups of switches shown as on/off chips instead of rows
 CHIPS = {("Claude", "Mods")}
 
@@ -240,22 +247,10 @@ SWITCH_LISTS = {"localAi.models", "localAi.edit"}
 
 #--- Text shown above a page's groups, with descriptions.json's ** and !! marks
 PAGE_INTROS = {
-    "Models": "Download a model in **LM Studio** (turn it on under Tools) before turning it on "
-              "here: open its **Discover** tab, search for the repo, pick the named file from the "
-              "download options and download it. llama-swap finds it in ~/.lmstudio/models, so it "
-              "doesn't need loading in LM Studio.\n\n"
-              "Code\n"
-              "1. **Ornith 1.5 35B A3B**: ornith-ai/Ornith-1.5-35B-A3B-GGUF, the Q4_K_M file "
-              "(~23 GB)\n"
-              "2. **Qwen3.6 35B A3B (Q4)**: unsloth/Qwen3.6-35B-A3B-GGUF, the UD-Q4_K_XL file "
-              "(~21 GB)\n\n"
-              "Chat\n"
-              "3. **gpt-oss 20B**: ggml-org/gpt-oss-20b-GGUF (~13 GB)\n"
-              "4. **Gemma 4 26B A4B**: unsloth/gemma-4-26B-A4B-it-qat-GGUF, the UD-Q4_K_XL file "
-              "(~14 GB)\n\n"
-              "Inline Suggestions\n"
-              "5. **Sweep Next-Edit 1.5B**: sweepai/sweep-next-edit-1.5B\n"
-              "6. **Qwen2.5 Coder 1.5B**: ggml-org/Qwen2.5-Coder-1.5B-Q8_0-GGUF\n\n"
+    "Models": "Download a model in **LM Studio** (turn it on under Server) before turning it on "
+              "here: open its **Discover** tab, search for it, pick the file from the download "
+              "options and download it. llama-swap finds it in ~/.lmstudio/models, so it doesn't "
+              "need loading in LM Studio.\n\n"
               "!!Without the file, an app gets an error the first time it uses the model.!!",
 }
 FALLBACK_ICON = "applications-system-symbolic"

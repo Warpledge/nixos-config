@@ -1,10 +1,10 @@
 # Local AI Models
 
-llama-swap runs AI models on your own computer and hands them to opencode, Zed, Pi and Open WebUI. Omni Settings' Local Models page (AI tab) sets how each model loads on your GPU, shows whether it fits, and tests it. It shows once llama-swap is turned on (Local AI, Tools).
+llama-swap runs AI models on your own computer and hands them to opencode, Zed, Pi and Open WebUI. Omni Settings' Tuning page (AI tab, Local AI) sets how each model loads on your GPU, shows whether it fits, and tests it. It shows once llama-swap is turned on (Local AI, Server).
 
 ## Getting a model
 
-Download models in LM Studio (its Discover tab). They land in `~/.lmstudio/models`, and the Local Models page lists every file there that no model uses yet under **Downloaded in LM Studio**. Click **Add** and give it a name. After Apply, turn it on under Local AI, Models.
+Download models in LM Studio (its Discover tab). They land in `~/.lmstudio/models`, and the Tuning page lists every file there that no model uses yet under **Downloaded in LM Studio**. Click **Add** and give it a name. After Apply, turn it on under Local AI, Models.
 
 If the model's folder also has a vision file (its name starts with `mmproj`), Add offers it: with it, the model can read images. The editor's **Vision** setting turns it on or off later. It loads on the GPU beside the model and counts toward the fit.
 

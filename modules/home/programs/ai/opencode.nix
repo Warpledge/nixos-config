@@ -7,7 +7,23 @@
   pkgs,
   user,
   ...
-}: {
+}: let
+  parts = user.opencode.plugins;
+  flag = on:
+    if on
+    then "1"
+    else "0";
+  #--- The plugin's parts read their switch from the file, so one turned off draws
+  #--- nothing; the server part reads the sign-in either way
+  plugin = pkgs.runCommandLocal "opencode-usage-bar" {} ''
+    cp -r ${./opencode-usage-bar} $out
+    chmod -R u+w $out
+    substituteInPlace $out/tui.tsx --replace-fail __TUI__ ${flag parts.usageBar}
+    substituteInPlace $out/gui-experimental.cjs \
+      --replace-fail __DESKTOP_BAR__ ${flag parts.desktopBar} \
+      --replace-fail __REBUILD_BADGE__ ${flag parts.rebuildBadge}
+  '';
+in {
   config = lib.mkIf user.opencode.enable {
     #--- It reads the skills from ~/.agents/skills (agent-skills.nix); without this
     #--- it also lists the same ones from Claude Code's ~/.claude/skills
@@ -31,6 +47,9 @@
         name = "dank"; # written by DMS's matugen (theme/matugen.nix)
         mode = "system";
       };
+      #--- OpenCode sounds each event itself, so a DMS popup would add a second
+      #--- sound. Sound stays on through cli.json; only the popup is dropped
+      cli.attention.notifications = false;
       #--- Ask before touching paths outside the project (v1's default; v2 allows),
       #--- except /tmp, where local models keep scratch notes. The last match wins
       settings.permissions = [
@@ -116,6 +135,11 @@
       #--- ~/.claude/agents is not one of OpenCode's agent folders, so these are
       #--- V2 copies of the four Claude Code subagents with the same prompts
       agents = ./opencode-agents;
+
+      #--- Usage bars in the footer, from the Console session /connect created,
+      #--- and the desktop app's rebuild badge
+      settings.plugins =
+        lib.optional (parts.usageBar || parts.desktopBar || parts.rebuildBadge) "${plugin}";
 
       #--- Context7 indexes JS/Python framework docs; deepwiki and grep provide
       #--- upstream wiki docs and real-world code examples.

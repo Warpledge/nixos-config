@@ -14,7 +14,7 @@
       fileBrowsers.dolphin = false;
       wallpaper = "carousel";
       editors.vscodium = false;
-      localAi.models = [];
+      localAi.models = ["gemma-4-26b-a4b" "ornith-1.5-35b-a3b" "qwen3.6-35b-a3b-q4" "flint" "gemma-4-12b-it-qat" "ornith-1.5-35b-a3b-apex-mtp-i-mini" "qwen3.8-27b" "qwen3.8-27b-q2" "qwen3.8-27b-q3"];
       localAi.edit = null;
       media.moku = true;
       media.boorusama = true;

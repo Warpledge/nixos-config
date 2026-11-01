@@ -37,7 +37,7 @@
         };
       })
       #--- llama.cpp ahead of nixpkgs, for model architectures 0.7.0 lacks (Flint);
-      #--- llama-swap and Omni Settings' Local Models test run it. Drop once nixpkgs
+      #--- llama-swap and Omni Settings' model test run it. Drop once nixpkgs
       #--- ships 0.8.0 (docs/nixpkgs/disabled-packages.md, Pinned ahead). --version
       #--- keeps 0.7.0's build number, which nixpkgs sets in a let binding
       (_: prev: {

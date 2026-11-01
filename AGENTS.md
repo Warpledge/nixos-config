@@ -61,8 +61,9 @@ Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
    placeholders run Zed's biome out of memory.
 6. **Commits** use Conventional Commits, `type(scope): subject` plus a bullet body;
    load the `commit` skill. Commit without asking; never push, amend or rebase.
-   Commits are authored by the person at the keyboard (their own git identity);
-   never pass `--author` or `-c user.name`.
+   Commits are authored by the person at the keyboard: `user.git.name` and
+   `user.git.email` in `users/<name>/settings.nix`. Never `--author` or
+   `-c user.name`, and never warpledge's identity on someone else's account.
    **Commit once, when the task is finished and checked**, not after each edit,
    and don't end a task that changed files without committing. Run every step
    of the `commit` skill, `scan.sh` included.
@@ -82,12 +83,13 @@ Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
    Additions worth having go at the end as optional suggestions; add only what the
    user picks.
 9. **Ask before writing new docs** (a new `.md`, a new doc section, a comment over
-   two lines) with a question prompt saying what it covers and where it goes;
+   a line or two) with a question prompt saying what it covers and where it goes;
    the user allows or declines. Always propose docs for critical
    infrastructure someone needs to understand to change it safely. Keeping
    existing docs accurate needs no approval.
-10. **No memory files.** If something is worth remembering, propose the line for
-    CLAUDE.md or this file and let the user decide.
+10. **Ask before saving a memory, and let the user pick where.** Private or
+    sensitive notes go to local memory; anything publishable that helps the
+    config goes in CLAUDE.md, a skill or `docs/`. Never write one unasked.
 11. **`rm` takes literal absolute paths**, one deletion per command, never `$VAR`.
 12. **Do not make any changes until you have 95% confidence in what you need to build.** Ask me follow-up questions until you reach that confidence. For work across several files or modules, write out the plan and get it approved before editing.
 
@@ -109,6 +111,26 @@ todo list at the start, and don't write your summary before step 3.
    shared module that needs `machines/` or `users/warpledge/` fails there.
 3. Load the `commit` skill and run every step, `scan.sh` included.
 4. Reply with what changed and the commit hash.
+
+## Commands
+
+```bash
+nix flake check                    # Evaluate every output, no build
+nix build .#nixosConfigurations.$(hostname).config.system.build.toplevel --no-link
+alejandra <file>                   # One file; `alejandra .` reformats the whole tree
+nix fmt .                          # Same formatter; a bare `nix fmt` waits on stdin
+nixm lint                          # deadnix --no-lambda-arg + statix check, non-blocking
+nix flake update <name>            # Bump one input; all of them are /flake-update
+run <pkg> [args]                   # zsh: nix run nixpkgs#<pkg>, nothing installed
+nixm                               # fzf menu of every subcommand; alias `n`
+```
+
+- `nixm boot` instead of `nixm rebuild` when an update bumps glibc, systemd, niri or
+  xwayland-satellite: a live switch froze the desktop (2026-10). `nixm rollback` is
+  the user's too.
+- `nixm upgrade` is `nixm rebuild --update`; `nixm flake-update` bumps every input.
+- Never run `nixm`, `nixos-rebuild` or `./setup.sh` yourself. They need sudo and
+  activate the system; hand them back.
 
 ## Verify, don't guess
 
@@ -139,6 +161,34 @@ accepted silently.
   shared module reaches every machine.
 - **Never say a fix "should work".** Report the command you ran and its result.
 
+## Looking things up
+
+| Need | Use |
+| --- | --- |
+| Package metadata | `nix eval --raw nixpkgs#<pkg>.meta.homepage` |
+| nixpkgs packages, NixOS and home-manager options | the `nixos` MCP tool |
+| Library, SDK or API docs | `context7` |
+| Upstream releases, tags, issues, files | `gh` read-only: `gh release list -R <owner>/<repo>` |
+| How an upstream repo works (DMS, niri-flake, stylix, Tsunagu) | `deepwiki` |
+| How other public flakes configure something | the `grep` MCP tool (grep.app) |
+| An app's own config syntax | `nix-shell -p <pkg> --run 'man <name>'` |
+
+- **Stop once you have the answer.** A package's man page settles its config
+  syntax; skip the derivation. Don't guess doc URLs: after two failed fetches, read
+  a local source.
+- **Dump once, grep after** when you need several parts of one document.
+
+## Troubleshooting
+
+- `infinite recursion` → a circular import, a self-referencing conditional, or a
+  router reading `user` from module args in `imports` instead of taking it as its
+  first argument.
+- A message naming `machines/<name>/settings.nix` or `users/<name>/settings.nix`
+  → `lib/settings.nix` rejected that setting; it lists each one it accepts.
+- `attribute missing` → a module reads a setting the `_template` files don't define.
+- Slow or hung → `df -h`, then `nix build --offline`.
+- Rollback is the user's: `nixm rollback`, or a generation from the bootloader.
+
 ## Stop looping
 
 You have got stuck repeating the same step until the user stopped you. Follow
@@ -168,9 +218,9 @@ this, in thinking and in tool calls alike:
 
 ## Context budget
 
-128K tokens, about 10K of it taken by tool definitions in opencode (27K before
-it turned the GitHub MCP off on 2026-10-23; that server's schemas were ~17.7K). Long tasks get compacted and whatever only
-lived in context is lost.
+128K tokens, about 10K of it taken by tool definitions in opencode; the GitHub MCP
+stays off for that reason. Long tasks get compacted and whatever only lived in
+context is lost.
 
 - **After a compaction**, read the todo list (see **Starting a task**) and run
   `git status --short && git diff --stat && git log --oneline -3`. Re-read only
@@ -205,6 +255,7 @@ and the active WM's `modules/wm/<wm>/`.
 | One user's change on one machine | `users.<name>` block in `machines/<machine>/settings.nix` |
 | Monitors, bars, GPU env for one machine | `machines/<name>/wm/<wm>.nix`, never a shared module |
 | WM behaviour for everyone | `modules/wm/<wm>/home/` |
+| matugen templates, DMS theme, GTK/Qt, Stylix | `modules/theme/` |
 | Something only one machine will want | `machines/<name>/`, never `modules/` |
 | Something only one person will want | `users/<name>/home.nix` (a home-manager module) |
 
@@ -214,6 +265,16 @@ and the active WM's `modules/wm/<wm>/`.
   `users/<name>/home.nix`, imported when it exists. A feature anyone could turn on:
   `modules/` behind a toggle off in the template, committed apart from the person's
   own folders. Ask when unsure.
+- `machines/<name>/` also holds `hardware/` (`gpu.nix`,
+  `hardware-configuration.nix`). `machines/_template/` and `users/_template/` are
+  what `setup.sh` copies; the template `hardware-configuration.nix` throws until
+  replaced. `setup.sh` also has `add-user`, `build` and `share` (moves the clone to
+  `/etc/nixos-config`).
+- Both `system.stateVersion` and every user's `home.stateVersion` come from the
+  machine's `stateVersion` (`25.11` on eclipse, `26.05` on legion). DO NOT CHANGE
+  either.
+- `modules/wm/dms-mutable.nix` is the settings merge DMS's module imports;
+  `modules/wm/dms-polkit/` is the polkit dialog patch it imports.
 - Never a hostname or username check in `modules/`: it's shared by everyone who
   installs the repo.
 - A system service also needs its import in `modules/nixos/default.nix` and a
@@ -383,7 +444,7 @@ window, over a Python backend; full notes split across its `CLAUDE.md`,
   the repo or the store. Omni Settings' API Keys block writes them, through the
   backend's stdin only.
 - A new skill or subagent also needs its `claude.skills`/`claude.agents` and model
-  lines in `users/_template/settings.nix`, a row on Omni Settings' Claude Skills
+  lines in `users/_template/settings.nix`, a row on Omni Settings' Skills
   page (`schema.py`) and a `descriptions.json` title.
 - `~/.claude/settings.json` stays writable: `claude.nix` merges its settings in
   with `lib/mutable-merge.jq`, never through `programs.claude-code.settings`.
@@ -411,11 +472,13 @@ The loaded skill descriptions say when to use each one. Two aren't loaded here:
 only when the user runs `/flake-update`.
 
 - `<skill-dir>` is `modules/home/programs/ai/skills/<name>`.
+- `commit`, `freetube-sync` and `apparmor-check` run forked: they can't see this
+  chat, so pass what changed and why as the argument, and expect questions back.
 - A step that hands work to a subagent is yours to do: for
-  `public-repo-auditor` (only when the user asks), read `git diff --cached` for personal data, private
-  paths, hostnames and tokens; for `prose-reviewer`, cut words from what you
-  wrote; for `docs-drift-auditor`, grep the docs for the paths and names you
-  changed; for `build-triager`, run
+  `public-repo-auditor` (only when the user asks), read `git diff --cached` for
+  personal data, private paths, hostnames and tokens; for `prose-reviewer`, cut
+  words from what you wrote; for `docs-drift-auditor`, grep the docs for the paths
+  and names you changed; for `build-triager`, run
   `nix build .#nixosConfigurations.$(hostname).config.system.build.toplevel --no-link 2>&1 | tail -n 40`.
 
 ## Formatting
@@ -455,7 +518,8 @@ For replies, `README.md`, `docs/` and commit messages.
 - Avoid: delve, robust, seamless, leverage, crucial, ensure, comprehensive,
   streamline, utilize, enhance.
 - No em dashes in `README.md` or `docs/` prose. Never add a `---` line to
-  `README.md`.
+  `README.md`: Zed's preview pairs them like front-matter. Check with
+  `nix run nixpkgs#pulldown-cmark -- < README.md`.
 - A reply naming packages or upstream projects ends with **Sources** links.
 
 ## Keeping this file current
