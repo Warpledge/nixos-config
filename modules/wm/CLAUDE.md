@@ -20,7 +20,7 @@ DMS runs as a systemd user service (`systemd.enable`, `niri.enableSpawn = false`
 
 **XDG portals** (Niri): `niri/session.nix` strips `GDK_BACKEND` from `xdg-desktop-portal-gnome`, and `niri/home/core/portals.nix` adds the gtk backend back. Read `docs/wm/niri-xdg-portals.md` before touching either, and never "fix" a portal by dropping the X11 fallback from `variables.nix`.
 
-**Login:** Niri starts from the DMS greeter (greetd, through the `dux-greeter` input, set up in `niri/session.nix`).
+**Login:** Niri starts from the DMS greeter (greetd, through the `dux-greeter` input, set up in `niri/session.nix`). That file writes `/etc/greetd/niri_overrides.kdl` with the Stylix cursor and includes the desktop's DMS `outputs.kdl`/`input.kdl`, copied at greetd start, so the login screen uses the same monitors, refresh rates and input settings.
 
 Per-machine WM overrides exist where needed, each applied to every user on the machine:
 - `machines/legion/wm/niri.nix` — hybrid-GPU env, Solaar autostart, the internal panel's outputs, DMS auto-lock off
