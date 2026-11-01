@@ -441,7 +441,7 @@ window, over a Python backend; full notes split across its `CLAUDE.md`,
   the repo or the store. Omni Settings' API Keys block writes them, through the
   backend's stdin only.
 - A new skill or subagent also needs its `claude.skills`/`claude.agents` and model
-  lines in `users/_template/settings.nix`, a row on Omni Settings' Claude Skills
+  lines in `users/_template/settings.nix`, a row on Omni Settings' Skills
   page (`schema.py`) and a `descriptions.json` title.
 - `~/.claude/settings.json` stays writable: `claude.nix` merges its settings in
   with `lib/mutable-merge.jq`, never through `programs.claude-code.settings`.

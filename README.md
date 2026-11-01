@@ -233,7 +233,7 @@ My two computers:
 <details>
 <summary>Managing it with AI</summary>
 
-Turn the tools on in Omni Settings' **AI** tab: Claude Code and Claude Desktop under Cloud AI, and the model server, opencode and the models themselves under Local AI.
+Turn the tools on in Omni Settings: Claude Code and Claude Desktop under **AI > Claude**, the model server and the models under **AI > Local AI**, and opencode in **Default Packages**. opencode's plugin parts are switches under **AI > OpenCode**.
 
 - **Rules:** `CLAUDE.md` (plus one in several folders) tells Claude Code how the repo is laid out and what not to do, such as rebuilding on its own or committing a secret. `AGENTS.md` is a shorter copy for local models.
 - **Skills:** step-by-step jobs in `modules/home/programs/ai/skills/`, among them adding an app (`add-app`), updating and fixing what an update broke (`flake-update`, `disable-package`), troubleshooting a game (`game-troubleshooting`) and committing after a secret scan (`commit`). Claude Code, opencode and Zed's agent all read them.

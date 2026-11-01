@@ -8,6 +8,8 @@
 // colours come from the app's theme variables.
 const {Plugin, SettingsPage, Slot, TitlebarItem} = require("@opencode/plugin/gui");
 const {createSignal} = require("solid-js");
+// Nix fills these in from the switches under Omni Settings' AI, OpenCode
+const FEATURES = {desktopBar: "__DESKTOP_BAR__" === "1", rebuildBadge: "__REBUILD_BADGE__" === "1"};
 
 const REFRESH_MS = 60_000;
 const INTERVALS = [30_000, 60_000, 300_000];
@@ -285,7 +287,7 @@ module.exports = Plugin.define({
     };
 
     const refreshAll = () => {
-      void refreshUsage();
+      if (FEATURES.desktopBar) void refreshUsage();
       void refreshState();
     };
 
@@ -333,7 +335,7 @@ module.exports = Plugin.define({
       setTimeout(() => void refreshState(), 5000);
     };
 
-    void refreshUsage();
+    if (FEATURES.desktopBar) void refreshUsage();
     void refreshState();
     restartTimer();
 
@@ -342,7 +344,7 @@ module.exports = Plugin.define({
       repoState = {...repoState, ...value, plan: repo().plan};
       setRepo(repoState);
       paintBadges();
-      if (value.dmsStale) {
+      if (FEATURES.rebuildBadge && value.dmsStale) {
         ctx.toast.show({
           variant: "default",
           title: "DMS restart needed",
@@ -351,28 +353,32 @@ module.exports = Plugin.define({
           actions: [{label: "Restart DMS", run: () => void restartDms()}],
         });
       }
-      void refreshUsage();
+      if (FEATURES.desktopBar) void refreshUsage();
     });
 
-    ctx.add(Slot, {at: "window.bottom", order: 10, render: () => bar()});
-    ctx.add(Slot, {at: "session.header", order: 5, render: () => badge(() => void rebuild())});
+    if (FEATURES.desktopBar)
+      ctx.add(Slot, {at: "window.bottom", order: 10, render: () => bar()});
 
-    ctx.add(TitlebarItem, () => {
-      const value = repo();
-      if (!value.unbuilt) return undefined;
-      return {
-        id: "rebuild",
-        label: "Rebuild ready",
-        title: `${value.dirty} uncommitted file(s); running build is ${ageLabel(value.age)} old`,
-        run: () => void rebuild(),
-      };
-    });
+    if (FEATURES.rebuildBadge) {
+      ctx.add(Slot, {at: "session.header", order: 5, render: () => badge(() => void rebuild())});
 
-    ctx.add(TitlebarItem, () => {
-      const value = repo();
-      if (!value.dmsStale) return undefined;
-      return {id: "restart-dms", label: "Restart DMS", title: "DMS is running the previous build", run: () => void restartDms()};
-    });
+      ctx.add(TitlebarItem, () => {
+        const value = repo();
+        if (!value.unbuilt) return undefined;
+        return {
+          id: "rebuild",
+          label: "Rebuild ready",
+          title: `${value.dirty} uncommitted file(s); running build is ${ageLabel(value.age)} old`,
+          run: () => void rebuild(),
+        };
+      });
+
+      ctx.add(TitlebarItem, () => {
+        const value = repo();
+        if (!value.dmsStale) return undefined;
+        return {id: "restart-dms", label: "Restart DMS", title: "DMS is running the previous build", run: () => void restartDms()};
+      });
+    }
 
     ctx.add(SettingsPage, {
       id: "usage-bar",

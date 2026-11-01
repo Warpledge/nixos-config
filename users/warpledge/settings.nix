@@ -214,7 +214,14 @@
     enable = true;
     matugen = true;
   };
-  opencode = {enable = true;};
+  opencode = {
+    enable = true;
+    plugins = {
+      usageBar = true;
+      desktopBar = true;
+      rebuildBadge = true;
+    };
+  };
   opencodeDesktop = {enable = true;};
   lmstudio = {enable = true;};
   llamaSwap = {enable = true;};

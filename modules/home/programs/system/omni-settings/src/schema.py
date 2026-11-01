@@ -51,11 +51,12 @@ MOVES = {  # setting -> (page, group on that page)
 }
 
 #--- Sidebar sections, top to bottom; under niri, Desktop is on the Niri tab, and
-#--- the AI, Network and Security sections are always on their own tabs (api.py's
-#--- SECTION_TAB), untitled since each is its tab's only one
+#--- the OpenCode, Claude and Local AI sections share the AI tab (api.py's
+#--- SECTION_TAB), with Network and Security on tabs of their own, untitled since
+#--- each is its tab's only one
 SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
             ("personal", "Personal"), ("apps", "Default Packages"),
-            ("cloudai", "Cloud AI"), ("localai", "Local AI"),
+            ("opencode", "OpenCode"), ("cloudai", "Claude"), ("localai", "Local AI"),
             ("network", ""), ("security", "")]
 
 #--- Each page's sidebar section, icon and blurb, and for the curated ones
@@ -64,7 +65,8 @@ SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
 #--- lays out (TOP_PAGES), the "userpkgs" one the list the Packages tab's
 #--- pages edit (UserPackagesPage.qml), "keybinds" the Keybinds page's set,
 #--- "windowrules" the Window Rules page's, "siderail" the Side Rail page's,
-#--- "games" the Games page's and "localmodels" the Local Models page's.
+#--- "games" the Games page's and "localmodels" the Local Models page's, which
+#--- the AI tab lists first under Local AI (api.py's nav).
 #--- "top" pages: the custom page (its id in api.py and OmniView.qml) each one's settings show on
 TOP_PAGES = {"Flatpaks": "flatpaks", "Users": "people", "Battery": "battery", "MangoHud": "mangohud",
              "AppArmor": "apparmor", "Maintenance": "overview"}
@@ -187,30 +189,34 @@ PAGES = {
                               "claude.mods.fileTree", "claude.mods.savvyProgress",
                               "claude.mods.blastRadius", "claude.mods.replayTheater",
                               "claude.statusLine", "claude.builtins.youShouldKnow"])]),
-    "Claude Tools": ("cloudai", "application-x-addon-symbolic",
-                     "Plugins, MCP servers and claude.ai connectors Claude Code loads.",
-                     [("Plugins", "", [f"claude.plugins.{n}" for n in (
-                         "claudeMdManagement", "skillCreator", "claudeCodeSetup", "claudeSecurity")]),
-                      ("MCP Servers", "Shared with OpenCode.", [f"claude.mcp.{n}" for n in (
-                          "nixos", "context7", "github", "deepwiki", "grep")]),
-                      ("claude.ai Connectors", "One turned off is blocked by name.", [f"claude.connectors.{n}" for n in (
-                           "gmail", "googleCalendar", "googleDrive", "claudeDocs")])]),
-    "Claude Skills": ("cloudai", "view-list-symbolic",
-                      "What Claude sees of each skill and subagent, and the model it runs on.",
-                      [("Repo Skills", "", [f"claude.skills.{n}" for n in (
-                          "addApp", "androidDebloatRedo", "apparmorCheck", "commit", "disablePackage",
-                          "flakeUpdate", "freetubeSync", "gameTroubleshooting", "handoff", "mokuBump",
-                          "onboard", "prReview", "rpgmSetup", "todo", "upstream", "vnSetup")]),
-                       ("Subagents", "", [f"claude.agents.{n}" for n in (
-                           "buildTriager", "docsDriftAuditor", "proseReviewer", "publicRepoAuditor")]),
-                       ("Account Skills", "Synced from your claude.ai account.",
-                        [f"claude.accountSkills.{n}" for n in (
-                            "builtInBrowser", "chromeBrowser", "computerUse", "deepResearch", "docs",
-                            "docx", "googleWorkspace", "importMemory", "mcpBuilder", "morning", "pdf",
-                            "pptx", "xlsx")])]),
-    "Tools": ("localai", "utilities-terminal-symbolic",
-              "The local model server and its chat page.",
-              [("", "", ["llamaSwap.enable", "openWebui.enable"])]),
+    "Tools": ("cloudai", "application-x-addon-symbolic",
+              "Plugins, MCP servers and claude.ai connectors Claude Code loads.",
+              [("Plugins", "", [f"claude.plugins.{n}" for n in (
+                  "claudeMdManagement", "skillCreator", "claudeCodeSetup", "claudeSecurity")]),
+               ("MCP Servers", "Shared with OpenCode.", [f"claude.mcp.{n}" for n in (
+                   "nixos", "context7", "github", "deepwiki", "grep")]),
+               ("claude.ai Connectors", "One turned off is blocked by name.", [f"claude.connectors.{n}" for n in (
+                    "gmail", "googleCalendar", "googleDrive", "claudeDocs")])]),
+    "Skills": ("cloudai", "view-list-symbolic",
+               "What Claude sees of each skill and subagent, and the model it runs on.",
+               [("Repo Skills", "", [f"claude.skills.{n}" for n in (
+                   "addApp", "androidDebloatRedo", "apparmorCheck", "commit", "disablePackage",
+                   "flakeUpdate", "freetubeSync", "gameTroubleshooting", "handoff", "mokuBump",
+                   "onboard", "prReview", "rpgmSetup", "todo", "upstream", "vnSetup")]),
+                ("Subagents", "", [f"claude.agents.{n}" for n in (
+                    "buildTriager", "docsDriftAuditor", "proseReviewer", "publicRepoAuditor")]),
+                ("Account Skills", "Synced from your claude.ai account.",
+                 [f"claude.accountSkills.{n}" for n in (
+                     "builtInBrowser", "chromeBrowser", "computerUse", "deepResearch", "docs",
+                     "docx", "googleWorkspace", "importMemory", "mcpBuilder", "morning", "pdf",
+                     "pptx", "xlsx")])]),
+    "Plugins": ("opencode", "application-x-addon-symbolic",
+                "OpenCode's plugin: usage bars and the desktop app's rebuild badge.",
+                [("", "", ["opencode.plugins.usageBar", "opencode.plugins.desktopBar",
+                           "opencode.plugins.rebuildBadge"])]),
+    "Server": ("localai", "utilities-terminal-symbolic",
+               "The local model server and its chat page.",
+               [("", "", ["llamaSwap.enable", "openWebui.enable"])]),
     "Models": ("localai", "applications-engineering-symbolic",
                "The models llama-swap runs on this computer, one at a time.",
                [("Models", "Every app that uses llama-swap lists the ones turned on.",
@@ -220,11 +226,11 @@ PAGES = {
 
 #--- (page, group) shown closed until its heading is clicked, and its heading's icon
 COLLAPSED = {("Claude", "Mods"): "brush",
-             ("Claude Tools", "Plugins"): "extension", ("Claude Tools", "MCP Servers"): "hub",
-             ("Claude Tools", "claude.ai Connectors"): "cable",
-             ("Claude Skills", "Repo Skills"): "construction",
-             ("Claude Skills", "Subagents"): "smart_toy",
-             ("Claude Skills", "Account Skills"): "cloud"}
+             ("Tools", "Plugins"): "extension", ("Tools", "MCP Servers"): "hub",
+             ("Tools", "claude.ai Connectors"): "cable",
+             ("Skills", "Repo Skills"): "construction",
+             ("Skills", "Subagents"): "smart_toy",
+             ("Skills", "Account Skills"): "cloud"}
 #--- COLLAPSED groups of switches shown as on/off chips instead of rows
 CHIPS = {("Claude", "Mods")}
 
@@ -238,7 +244,7 @@ SWITCH_LISTS = {"localAi.models", "localAi.edit"}
 
 #--- Text shown above a page's groups, with descriptions.json's ** and !! marks
 PAGE_INTROS = {
-    "Models": "Download a model in **LM Studio** (turn it on under Tools) before turning it on "
+    "Models": "Download a model in **LM Studio** (turn it on under Server) before turning it on "
               "here: open its **Discover** tab, search for the repo, pick the named file from the "
               "download options and download it. llama-swap finds it in ~/.lmstudio/models, so it "
               "doesn't need loading in LM Studio.\n\n"

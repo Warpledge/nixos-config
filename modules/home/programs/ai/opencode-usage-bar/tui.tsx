@@ -4,6 +4,9 @@
 import {Plugin} from "@opencode/plugin/tui";
 import {UsageRpc} from "./rpc";
 
+// Nix fills these in from the switches under Omni Settings' AI, OpenCode
+const TUI = "__TUI__" === "1";
+
 // Percentages come from the server, against each model's own Go limit
 const WIDTH = 8;
 const REFRESH_MS = 60_000;
@@ -30,6 +33,9 @@ function bar(ratio: number) {
 export default Plugin.define({
   id: "usage-bar-tui",
   async setup(context) {
+    //--- Off under AI, OpenCode: no slot, so the footer stays as it was
+    if (!TUI) return () => {};
+
     const [state, setState] = context.storage.memory("usage-bar", {
       initial: {five: -1, week: -1, at: 0, error: ""},
     });

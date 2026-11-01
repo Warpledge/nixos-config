@@ -96,7 +96,7 @@ TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
                   ("protonversions", "Proton Versions",
                    ("system-software-install-symbolic", "input-gaming-symbolic")),
                   ("mangohud", "MangoHud", ("utilities-system-monitor-symbolic",))],
-       "ai": [("localmodels", "Local Models", ("applications-engineering-symbolic", "cpu-symbolic"))],
+       "ai": [],
        "docs": []}
 
 #--- The line under each page in the page list that has no description of its own
@@ -150,8 +150,8 @@ QUICK = ["display_config", "keybinds", "mouse_touchpad", "theme", "wallpaper", "
 HISTORY = 8  # versions the Overview lists
 
 #--- Each section's tab; one not listed goes on System
-SECTION_TAB = {"computer": "system", "personal": "system", "cloudai": "ai", "localai": "ai",
-               "apps": "packages", "network": "network", "security": "security"}
+SECTION_TAB = {"computer": "system", "personal": "system", "opencode": "ai", "cloudai": "ai",
+               "localai": "ai", "apps": "packages", "network": "network", "security": "security"}
 
 USER_PACKAGES = ("user", ("userPackages",))
 KEYBINDS = ("user", schema.KEYBINDS)
@@ -408,6 +408,11 @@ def cmd_load(cfg, _args):
                         if (s.domain, s.path) == ("user", ("gpuOffload",))), None)
     local_models = {s.path[-1]: setting_json(cfg, state, s, multi, modules) for s in schema.flat(state.pages)
                     if s.domain == "machine" and s.path[0] == "localModels"}
+    if shows("localmodels", wm, cfg):
+        # First under Local AI, above the server and models it tunes
+        by_section["localai"].insert(0, {"id": "localmodels", "title": "Local Models",
+                                         "icon": ["applications-engineering-symbolic", "cpu-symbolic"],
+                                         "subtitle": NAV_SUBTITLES["localmodels"]})
     if startup:
         by_section["personal"].append({"id": "startup", "title": "Startup",
                                        "icon": ["system-run-symbolic"],

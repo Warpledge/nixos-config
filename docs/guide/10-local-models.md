@@ -1,6 +1,6 @@
 # Local AI Models
 
-llama-swap runs AI models on your own computer and hands them to opencode, Zed, Pi and Open WebUI. Omni Settings' Local Models page (AI tab) sets how each model loads on your GPU, shows whether it fits, and tests it. It shows once llama-swap is turned on (Local AI, Tools).
+llama-swap runs AI models on your own computer and hands them to opencode, Zed, Pi and Open WebUI. Omni Settings' Local Models page (AI tab, Local AI) sets how each model loads on your GPU, shows whether it fits, and tests it. It shows once llama-swap is turned on (Local AI, Server).
 
 ## Getting a model
 
