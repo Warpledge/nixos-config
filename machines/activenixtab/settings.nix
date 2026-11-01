@@ -246,7 +246,7 @@
   #--- The 8060S profile and 120 GiB of GTT replace the ttm kernelParams
   #--- this file's machine used to set by hand (modules: gpu-shared-memory)
   localModels.profile = "strix-halo";
-  localModels.gpuSharedGB = 120;
+  localModels.gpuSharedGB = 96;
   #--- Ky's two models, from LM Studio's folders; measured in ../local-ai-models.md.
   #--- Upstream serve() puts "-c ctx -np 1 -fa on -ctk/-ctv <cache> --no-webui"
   #--- first, so args below re-set the later-parsed flags (-ctk, -np) and carry
@@ -278,7 +278,9 @@
     };
     qwen3_8-flash-next = {
       args = ["-ctk f16" "--mmproj '/home/kylerj/.lmstudio/models/unsloth/Qwen3.8-Flash-Next-GGUF/mmproj-F16.gguf'"];
+      batch = 4096;
       category = "code";
+      context = 262144;
       dir = "unsloth/Qwen3.8-Flash-Next-GGUF";
       fast = {
         chat_template_kwargs = {reasoning_effort = "medium";};
@@ -289,6 +291,7 @@
         top_k = 20;
         top_p = 0.95;
       };
+      gpuLayers = "all";
       match = "Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-*.gguf";
       name = "Qwen3.8 Flash Next";
       think = {
@@ -300,9 +303,8 @@
         top_k = 20;
         top_p = 0.95;
       };
-      context = 262144;
-      gpuLayers = "all";
-      batch = 4096;
+      mtp = "mtp-Qwen3.8-Flash-Next-Q8_0.gguf";
+      draftMax = 4;
     };
   };
 
