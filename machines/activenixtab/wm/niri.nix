@@ -10,7 +10,7 @@
 }: {
   home-manager.users =
     lib.mapAttrs (_: _: {
-      dms.extraSettings.powerMenuActions = ["reboot" "logout" "poweroff" "lock" "restart"];
+      dms.extraSettings.powerMenuActions = ["lock" "logout" "switchuser" "restart" "reboot" "softreboot" "poweroff"];
 
       programs.niri.settings = {
         #--- Monitors - internal panel (2560x1600@180Hz, 13.4")
