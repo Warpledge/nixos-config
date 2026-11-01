@@ -7,6 +7,11 @@ export const UsageRpc = Rpc.define({
   id: "usage-bar",
   methods: {
     read: {
+      input: {
+        type: "object",
+        properties: {},
+        additionalProperties: false,
+      },
       output: {
         type: "object",
         properties: {
@@ -19,4 +24,5 @@ export const UsageRpc = Rpc.define({
       },
     },
   },
+  events: {},
 });

@@ -7,7 +7,7 @@
 import {Plugin} from "@opencode/plugin";
 import {UsageRpc} from "./rpc";
 
-const CONSOLE = "https://opencode.ai";
+const CONSOLE = "https://console.opencode.ai";
 const CACHE_MS = 30_000;
 
 type Reading = {

@@ -39,7 +39,7 @@ export default Plugin.define({
     let stopped = false;
     const refresh = async () => {
       try {
-        const reading = await context.client.rpc(UsageRpc).read();
+        const reading = await context.client.rpc(UsageRpc).read({});
         if (stopped) return;
         setState((draft) => {
           draft.five = reading.fiveHourCost;
