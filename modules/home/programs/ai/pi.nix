@@ -42,9 +42,9 @@
   declared = {
     "settings.json" =
       {theme = "dank";}
-      // lib.optionalAttrs (user.llamaSwap.enable && user.localAi.code != []) {
+      // lib.optionalAttrs (user.llamaSwap.enable && user.localAi.models != []) {
         defaultProvider = "llama-swap";
-        defaultModel = lib.head user.localAi.code;
+        defaultModel = user.localAi.default;
       };
     "mcp.json".mcpServers = servers;
   };

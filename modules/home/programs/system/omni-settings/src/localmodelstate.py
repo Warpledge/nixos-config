@@ -58,17 +58,12 @@ def profiles(flake):
 #-- What the build does
 #--------------------------------------------------------------------#
 def entries(flake, local_models):
-    """{id: (category, entry)} for the catalog's code and chat models plus the
-    machine's added ones, before tuning."""
-    cat = catalog(flake)
-    out = {}
-    for category in ("code", "chat"):
-        for mid, entry in (cat.get(category) or {}).items():
-            out[mid] = (category, entry)
+    """{id: entry} for the catalog's models plus the machine's added ones, before
+    tuning. An old file's `category` is ignored."""
+    out = dict(catalog(flake).get("models") or {})
     for mid, own in ((local_models or {}).get("models") or {}).items():
-        if mid not in out and own.get("category") in ("code", "chat"):
-            entry = {**ADDED_DEFAULTS, **{k: v for k, v in own.items() if k != "category"}}
-            out[mid] = (own["category"], entry)
+        if mid not in out and "dir" in own:
+            out[mid] = {**ADDED_DEFAULTS, **{k: v for k, v in own.items() if k != "category"}}
     return out
 
 

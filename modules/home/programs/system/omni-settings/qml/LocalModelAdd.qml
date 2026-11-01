@@ -12,7 +12,6 @@ Sheet {
     info: `Add a model · ${view.info.machine} · waits for Apply`
     onBack: view.sheet = null
 
-    property string category: "chat"
     property string vision: file.vision && file.vision.length ? file.vision[0] : ""  // "" for none
     property string mtp: ""  // "" for none
     readonly property string mid: idField.text.trim()
@@ -36,7 +35,7 @@ Sheet {
             view.say(problem)
             return
         }
-        const entry = { category, name: nameField.text.trim(), dir: file.dir, match: file.suggest.match }
+        const entry = { name: nameField.text.trim(), dir: file.dir, match: file.suggest.match }
         if (vision)
             entry.mmproj = vision
         if (mtp)
@@ -46,17 +45,6 @@ Sheet {
         view.sheet = null
     }
 
-    Section {
-        text: "Used For"
-        info: "Coding models show in opencode and Zed's agent panel; chat models in Open WebUI "
-              + "and llama-swap's Playground."
-    }
-    Flow {
-        Layout.fillWidth: true
-        spacing: 6
-        Chip { text: "Coding"; accent: ed.category === "code"; onTapped: ed.category = "code" }
-        Chip { text: "Chat"; accent: ed.category === "chat"; onTapped: ed.category = "chat" }
-    }
     Section {
         visible: !!ed.file.vision && ed.file.vision.length > 0
         text: "Vision"

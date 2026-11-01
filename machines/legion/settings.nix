@@ -62,8 +62,7 @@
       fileBrowsers.nautilus = true;
       fileBrowsers.yazi = false;
       discord.goofcord = false;
-      localAi.code = [];
-      localAi.chat = [];
+      localAi.models = [];
       localAi.edit = null;
       openWebui.enable = false;
       claudeDesktop.enable = true;

@@ -19,6 +19,13 @@
 
   machineDefaults = allOff (removeAttrs (import ../machines/_template/settings.nix) ["users"]);
   userDefaults = allOff (import ../users/_template/settings.nix);
+  #--- Older files' localAi.code and .chat still pass; resolveUser folds them
+  acceptedUserKeys = lib.recursiveUpdate userDefaults {
+    localAi = {
+      code = [];
+      chat = [];
+    };
+  };
 
   #--- Settings that take one of a few values
   choices = {
@@ -38,9 +45,8 @@
   #--- Lists whose items must come from a known set
   listChoices = {
     "blocklist.extra" = ["fakenews" "gambling" "porn" "social"];
-    #--- localAi.code and .chat: models lib/local-models.nix lists
-    "localAi.code" = lib.attrNames (import ./local-models.nix).code;
-    "localAi.chat" = lib.attrNames (import ./local-models.nix).chat;
+    #--- localAi.models: models lib/local-models.nix lists
+    "localAi.models" = lib.attrNames (import ./local-models.nix).models;
     #--- MangoHud.conf's display items (gaming/default.nix)
     "mangohud.show" = [
       "fps"
@@ -225,7 +231,7 @@
     else
       lib.concatLists (lib.mapAttrsToList (id: m: let
         at = "`localModels.models.${id}`";
-        known = catalog.code ? ${id} || catalog.chat ? ${id};
+        known = catalog.models ? ${id};
         fields =
           if known
           then tuningFields
@@ -235,8 +241,8 @@
         (lib.filter (k: !(fields ? ${k})) (lib.attrNames m))
         ++ map (k: "`localModels.models.${id}.${k}` has the wrong kind of value")
         (lib.filter (k: fields ? ${k} && !(fields.${k} m.${k})) (lib.attrNames m))
-        ++ lib.optional (!known && !(m ? category && m ? name && m ? dir && m ? match))
-        "${at} isn't a catalog model, so it needs category, name, dir and match")
+        ++ lib.optional (!known && !(m ? name && m ? dir && m ? match))
+        "${at} isn't a catalog model, so it needs name, dir and match")
       value);
   userChoices =
     {
@@ -248,6 +254,8 @@
     (import ./default-apps.nix {inherit lib;}).apps
     #--- localAi.edit: none, or a model lib/local-models.nix lists
     // {"localAi.edit" = [null] ++ lib.attrNames (import ./local-models.nix).edit;}
+    #--- localAi.default: forSettings narrows this to the models turned on
+    // {"localAi.default" = [null] ++ lib.attrNames (import ./local-models.nix).models;}
     #--- Claude Code; null leaves the setting to Claude Code
     // {
       "claude.model" = [null "opus" "sonnet" "haiku" "fable"];
@@ -432,7 +440,23 @@ in rec {
     in
       merged
       // lib.genAttrs (grouped ++ textSets ++ ["keybinds" "windowRules" "sideRail" "steamGames"]) (key: listed.${user}.${key} or own.${key} or userDefaults.${key})
-      // {name = user;};
+      // {
+        name = user;
+        localAi = let
+          # A `models` set anywhere wins, so a model switched off in Omni stays off
+          models =
+            listed.${user}.localAi.models
+            or own.localAi.models
+            or (lib.unique ((merged.localAi.code or []) ++ (merged.localAi.chat or [])));
+        in {
+          inherit models;
+          inherit (merged.localAi) edit;
+          default =
+            if merged.localAi.default == null && models != []
+            then lib.head models
+            else merged.localAi.default;
+        };
+      };
 
     merged = lib.recursiveUpdate machineDefaults (removeAttrs own ["users"]);
     mainUser =
@@ -461,29 +485,26 @@ in rec {
       problems machineDefaults (removeAttrs own ["users"]) []
       ++ lib.optional (names == []) "`users` is empty; list at least one, e.g. users = {alice = {};};"
       ++ map (user: "`users.${user}`: there is no ${userFile user} (run ./setup.sh add-user)") missing
-      ++ lib.concatMap (user: map (line: "in `users.${user}`: ${line}") (problems userDefaults listed.${user} [])) names
+      ++ lib.concatMap (user: map (line: "in `users.${user}`: ${line}") (problems acceptedUserKeys listed.${user} [])) names
       ++ lib.optional (mainUser == null && names != []) "several users are listed, so set mainUser to the one who owns this config"
       ++ lib.optional (mainUser != null && !(listed ? ${mainUser})) "mainUser `${toString mainUser}` is not listed in `users`"
       ++ lib.optional (!lib.isString merged.stateVersion) "set stateVersion (in quotes) to the system.stateVersion line in /etc/nixos/configuration.nix"
       ++ badChoices choices merged
       ++ badLists lists merged;
 
-    #--- localAi.code and .chat may also pick the models this machine adds
-    added = category:
-      lib.attrNames (lib.filterAttrs (_: m: m.category or null == category) merged.localModels.models);
+    #--- localAi.models may also pick the models this machine adds
     lists =
       listChoices
       // {
-        "localAi.code" = lib.unique (listChoices."localAi.code" ++ added "code");
-        "localAi.chat" = lib.unique (listChoices."localAi.chat" ++ added "chat");
+        "localAi.models" = lib.unique (listChoices."localAi.models" ++ lib.attrNames merged.localModels.models);
       };
   in
     assert report file machineProblems;
-    assert lib.all (user: report (userFile user) (problems userDefaults (readUser user) [])) names;
+    assert lib.all (user: report (userFile user) (problems acceptedUserKeys (readUser user) [])) names;
     assert lib.all (user: let
       final = machine.users.${user};
     in
-      report (userFile user) (badChoices userChoices final
+      report (userFile user) (badChoices (userChoices // {"localAi.default" = [null] ++ final.localAi.models;}) final
         ++ badLists lists final
         ++ lib.optional (builtins.match "[0-9A-Fa-f]{6}" final.mangohud.textColor == null)
         "`mangohud.textColor` is ${builtins.toJSON final.mangohud.textColor}; use six hex digits, e.g. \"00FF00\""))

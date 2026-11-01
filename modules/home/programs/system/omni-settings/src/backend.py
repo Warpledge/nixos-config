@@ -193,10 +193,17 @@ def stale_settings(cfg, everyone=False):
     out = []
     for user in users:
         path = os.path.join(cfg.flake, "users", user, "settings.nix")
-        if os.path.exists(path):
-            out += [("user", user, p) for p, _ in leaf_paths(read_tree(path)) if not known(user_t, p)]
+        own = read_tree(path) if os.path.exists(path) else {}
         block = dig(machine, ["users", user]) or {}
-        out += [("override", user, p) for p, _ in leaf_paths(block) if not known(user_t, p)]
+        # localAi.code and .chat still count until localAi.models replaces them
+        has_models = any(dig(t, ["localAi", "models"]) is not None for t in (own, block))
+        gone = [p for t in (own, block) for p, _ in leaf_paths(t) if not known(user_t, p)]
+
+        def stale(p):
+            return p in gone and (has_models or tuple(p) not in (("localAi", "code"), ("localAi", "chat")))
+
+        out += [("user", user, p) for p, _ in leaf_paths(own) if stale(p)]
+        out += [("override", user, p) for p, _ in leaf_paths(block) if stale(p)]
     machine_own = {k: v for k, v in machine.items() if k != "users"}
     return out + [("machine", None, p) for p, _ in leaf_paths(machine_own) if not known(machine_t, p)]
 

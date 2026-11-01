@@ -11,14 +11,14 @@
     inherit lib;
     inherit (machine) localModels;
   };
-  #--- Every coding model turned on; the first is the default
-  codeIds = lib.optionals user.llamaSwap.enable user.localAi.code;
-  codeId = lib.head codeIds;
-  code =
-    if codeIds != []
-    then models.code.${codeId}
+  #--- Every model turned on, and the default among them
+  modelIds = lib.optionals user.llamaSwap.enable user.localAi.models;
+  defaultId = user.localAi.default;
+  defaultModel =
+    if modelIds != []
+    then models.models.${defaultId}
     else null;
-  hasFast = code != null && code.fast != null;
+  hasFast = defaultModel != null && defaultModel.fast != null;
   editId = user.localAi.edit;
   edit =
     if user.llamaSwap.enable && editId != null
@@ -339,18 +339,18 @@ in {
               write_file.always_deny = secrets;
             };
           }
-          // lib.optionalAttrs (code != null) {
+          // lib.optionalAttrs (defaultModel != null) {
             default_model = {
               provider = "llama-swap";
-              model = codeId;
+              model = defaultId;
             };
             # Thread titles: thinking there only delays the first reply
             thread_summary_model = {
               provider = "llama-swap";
               model =
                 if hasFast
-                then "${codeId}-instruct"
-                else codeId;
+                then "${defaultId}-instruct"
+                else defaultId;
             };
             #--- Fewer tool schemas in the local model's context
             default_profile = "local";
@@ -397,11 +397,11 @@ in {
           };
         };
         #--- Local models served by ai/llama-swap.nix (same port and model ids)
-        language_models = lib.optionalAttrs (code != null) {
+        language_models = lib.optionalAttrs (defaultModel != null) {
           openai_compatible.llama-swap = {
             api_url = "http://127.0.0.1:8090/v1";
             available_models = lib.concatMap (id: let
-              model = models.code.${id};
+              model = models.models.${id};
             in
               [
                 {
@@ -415,7 +415,7 @@ in {
                 display_name = "${model.name} (fast)";
                 max_tokens = model.context;
               })
-            codeIds;
+            modelIds;
           };
         };
 
