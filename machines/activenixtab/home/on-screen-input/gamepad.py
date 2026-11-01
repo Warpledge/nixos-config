@@ -343,14 +343,29 @@ def load_colours(widget):
     try:
         with open(sys.argv[3]) as f:
             found = json.load(f)
-        return {k: Gdk.RGBA() if not (c := Gdk.RGBA()).parse(v) else c for k, v in found.items()}
-    except (OSError, ValueError):
+        parsed = {}
+        for name, value in found.items():
+            parsed[name] = Gdk.RGBA()
+            parsed[name].parse(value)
+        parsed.setdefault("edge", parsed["fill"])  # a file from before "edge" existed
+        return parsed
+    except (OSError, ValueError, KeyError):
         colour = widget.get_color()
-        return {"fill": colour, "line": colour, "active": colour, "text": colour}
+        return dict.fromkeys(("fill", "line", "edge", "active", "text"), colour)
 
 
 def paint(cr, colour, alpha):
     cr.set_source_rgba(colour.red, colour.green, colour.blue, alpha)
+
+
+def two_tone_stroke(cr, alpha=0.9):
+    # A light line and a dark one together, so one always shows against the game
+    paint(cr, colours["edge"], alpha)
+    cr.set_line_width(5)
+    cr.stroke_preserve()
+    paint(cr, colours["line"], alpha)
+    cr.set_line_width(2)
+    cr.stroke()
 
 
 def control_active(control, keys, axes):
@@ -375,9 +390,7 @@ def draw_shape(cr, control, active):
         cr.arc(cx, cy, size, 0, 2 * math.pi)
     paint(cr, colours["active"] if active else colours["fill"], 0.55 if active else 0.25)
     cr.fill_preserve()
-    paint(cr, colours["line"], 0.7)
-    cr.set_line_width(2)
-    cr.stroke()
+    two_tone_stroke(cr)
 
 
 def draw_label(cr, control):
@@ -386,21 +399,23 @@ def draw_label(cr, control):
     cr.set_font_size(18)
     extents = cr.text_extents(control[3])
     cr.move_to(cx - extents.width / 2 - extents.x_bearing, cy - extents.height / 2 - extents.y_bearing)
-    paint(cr, colours["text"], 0.9)
-    cr.show_text(control[3])
+    cr.text_path(control[3])
+    paint(cr, colours["edge"], 0.9)
+    cr.set_line_width(4)
+    cr.stroke_preserve()
+    paint(cr, colours["text"], 1)
+    cr.fill()
 
 
 def draw_hat(cr, control):
     # Lines between the eight directions' four main arms
     cx, cy = center(control)
     r = control[6]
-    paint(cr, colours["line"], 0.5)
-    cr.set_line_width(2)
     for a in range(4):
         angle = math.pi / 4 + a * math.pi / 2
         cr.move_to(cx + math.cos(angle) * r * HAT_DEAD_ZONE, cy + math.sin(angle) * r * HAT_DEAD_ZONE)
         cr.line_to(cx + math.cos(angle) * r, cy + math.sin(angle) * r)
-        cr.stroke()
+        two_tone_stroke(cr, 0.7)
 
 
 def draw_knob(cr, control):
@@ -409,8 +424,9 @@ def draw_knob(cr, control):
     kx, ky = knob_at.get(control[0], (0, 0))
     cr.new_path()
     cr.arc(cx + kx * r * 0.5, cy + ky * r * 0.5, r * 0.45, 0, 2 * math.pi)
-    paint(cr, colours["line"], 0.5)
-    cr.fill()
+    paint(cr, colours["line"], 0.35)
+    cr.fill_preserve()
+    two_tone_stroke(cr, 0.7)
 
 
 def on_draw(_area, cr, _w, _h):
