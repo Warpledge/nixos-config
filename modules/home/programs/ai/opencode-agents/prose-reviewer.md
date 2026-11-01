@@ -1,7 +1,6 @@
 ---
 description: Read-only reviewer that applies this repo's Writing Style rules to changed prose (README.md, docs/, CLAUDE.md, AGENTS.md, commit messages) and proposes cut-only edits. Use after writing or editing any of those, as the cut-only revision pass the add-app workflow requires, and when the user asks to tighten docs.
 mode: subagent
-model: opencode-go/deepseek-v4.1-flash
 permissions:
   - action: edit
     resource: "*"

@@ -1,7 +1,6 @@
 ---
 description: Read-only reviewer that checks a diff in this public NixOS repo for anything that must not be published. Use only when the user asks for an audit or whether something is safe to push; commits don't run it on their own.
 mode: subagent
-model: opencode-go/deepseek-v4.1-flash
 permissions:
   - action: edit
     resource: "*"
