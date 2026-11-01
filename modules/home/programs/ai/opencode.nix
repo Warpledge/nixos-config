@@ -20,7 +20,8 @@
       enable = true;
       enableMcpIntegration = true;
       settings.share = "disabled"; # No /share uploads to opencode.ai
-      tui.theme = "dank"; # written by DMS's matugen (theme/matugen.nix)
+      #--- cli.json, which OpenCode 2 reads instead of the ignored tui.json
+      cli.theme = "dank"; # written by DMS's matugen (theme/matugen.nix)
       #--- Ask before touching paths outside the project (v1's default; v2 allows),
       #--- except /tmp, where local models keep scratch notes. The last match wins
       settings.permissions = [
@@ -34,7 +35,54 @@
           resource = "/tmp/*";
           effect = "allow";
         }
+        #--- AGENTS.md rules 1 and 6: a rebuild, a push, an amend or sudo is the
+        #--- user's own step, so these stay blocked whatever a model decides
+        {
+          action = "shell";
+          resource = "nixm rebuild *";
+          effect = "deny";
+        }
+        {
+          action = "shell";
+          resource = "nixm boot *";
+          effect = "deny";
+        }
+        {
+          action = "shell";
+          resource = "nixos-rebuild *";
+          effect = "deny";
+        }
+        {
+          action = "shell";
+          resource = "git push *";
+          effect = "deny";
+        }
+        {
+          action = "shell";
+          resource = "git commit --amend *";
+          effect = "deny";
+        }
+        {
+          action = "shell";
+          resource = "git rebase *";
+          effect = "deny";
+        }
+        {
+          action = "shell";
+          resource = "sudo *";
+          effect = "deny";
+        }
       ];
+
+      #--- Formats each file a write or edit touches; the built-in nixfmt would
+      #--- restyle the repo, and it runs before custom entries when it's installed
+      settings.formatter = {
+        nixfmt.disabled = true;
+        alejandra = {
+          command = [(lib.getExe pkgs.alejandra) "$FILE"];
+          extensions = [".nix"];
+        };
+      };
 
       #--- Context7 indexes JS/Python framework docs; deepwiki and grep provide
       #--- upstream wiki docs and real-world code examples.
