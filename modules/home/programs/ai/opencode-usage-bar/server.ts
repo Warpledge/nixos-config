@@ -3,6 +3,8 @@
 //=====================================================================#
 import {execFile} from "node:child_process";
 import {lstat, readlink, realpath} from "node:fs/promises";
+import {createConnection} from "node:net";
+import {join} from "node:path";
 import {promisify} from "node:util";
 import {Plugin} from "@opencode/plugin";
 import {LIMITS, PLAN_CAP, PLANS, type Plan} from "./limits";
@@ -32,6 +34,36 @@ type State = {
   dmsStale: boolean;
   plan: Plan;
 };
+
+// A rebuild through the app's own job service, so pkexec asks for the password
+// and the Omni Settings panel shows the running job.
+function startJob(kind: string, args: Record<string, unknown>): Promise<{ok: boolean; error?: string}> {
+  const runtime = process.env.XDG_RUNTIME_DIR ?? `/run/user/${process.getuid?.() ?? 1000}`;
+  return new Promise((resolve) => {
+    const socket = createConnection(join(runtime, "omni-settings", "jobs.sock"));
+    let settled = false;
+    let buffer = "";
+    const finish = (result: {ok: boolean; error?: string}) => {
+      if (settled) return;
+      settled = true;
+      socket.destroy();
+      resolve(result);
+    };
+    socket.setTimeout(8000, () => finish({ok: false, error: "the Omni Settings job service did not answer"}));
+    socket.on("error", (error) => finish({ok: false, error: String(error)}));
+    socket.on("data", (chunk) => {
+      buffer += chunk.toString();
+      if (!buffer.includes("\n")) return;
+      try {
+        const reply = JSON.parse(buffer.split("\n")[0]) as {ok?: boolean; error?: string};
+        finish(reply.ok ? {ok: true} : {ok: false, error: reply.error ?? "the job did not start"});
+      } catch (error) {
+        finish({ok: false, error: String(error)});
+      }
+    });
+    socket.write(`${JSON.stringify({id: 1, cmd: "start", args: {kind, ...args}})}\n`);
+  });
+}
 
 // Monday 00:00 UTC, the plan's calendar week
 function weekStart(now: Date) {
@@ -194,12 +226,13 @@ export default Plugin.define({
       },
       openSettings: async () => {
         try {
-          await run("dms", ["ipc", "call", "omniSettings", "toggle"], {timeout: 5000});
+          await run("dms", ["ipc", "call", "omniSettings", "show"], {timeout: 5000});
           return {ok: true};
         } catch (error) {
           return {ok: false, error: String(error)};
         }
       },
+      rebuild: async () => startJob("rebuild", {mode: "switch"}),
     });
 
     const controller = new AbortController();

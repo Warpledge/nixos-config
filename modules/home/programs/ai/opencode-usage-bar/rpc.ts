@@ -75,6 +75,15 @@ export const UsageRpc = Rpc.define({
         additionalProperties: false,
       },
     },
+    rebuild: {
+      input: none,
+      output: {
+        type: "object",
+        properties: {ok: {type: "boolean"}, error: {type: "string"}},
+        required: ["ok"],
+        additionalProperties: false,
+      },
+    },
   },
   events: {
     turn: {

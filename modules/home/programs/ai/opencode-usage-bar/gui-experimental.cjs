@@ -49,6 +49,10 @@ const Usage = {
       input: {type: "object", properties: {}, additionalProperties: false},
       output: {type: "object", properties: {}, additionalProperties: true},
     },
+    rebuild: {
+      input: {type: "object", properties: {}, additionalProperties: false},
+      output: {type: "object", properties: {}, additionalProperties: true},
+    },
   },
   events: {
     turn: {schema: {type: "object", properties: {}, additionalProperties: true}},
@@ -316,6 +320,19 @@ module.exports = Plugin.define({
       }
     };
 
+    const rebuild = async () => {
+      try {
+        const result = await usage.rebuild({});
+        if (!result.ok) {
+          ctx.toast.show({variant: "error", title: "Rebuild did not start", description: result.error});
+        }
+      } catch (error) {
+        ctx.toast.show({variant: "error", title: "Rebuild did not start", description: String(error)});
+      }
+      await openSettings();
+      setTimeout(() => void refreshState(), 5000);
+    };
+
     void refreshUsage();
     void refreshState();
     restartTimer();
@@ -338,7 +355,7 @@ module.exports = Plugin.define({
     });
 
     ctx.add(Slot, {at: "window.bottom", order: 10, render: () => bar()});
-    ctx.add(Slot, {at: "session.header", order: 5, render: () => badge(() => void openSettings())});
+    ctx.add(Slot, {at: "session.header", order: 5, render: () => badge(() => void rebuild())});
 
     ctx.add(TitlebarItem, () => {
       const value = repo();
@@ -347,7 +364,7 @@ module.exports = Plugin.define({
         id: "rebuild",
         label: "Rebuild ready",
         title: `${value.dirty} uncommitted file(s); running build is ${ageLabel(value.age)} old`,
-        run: () => void openSettings(),
+        run: () => void rebuild(),
       };
     });
 
