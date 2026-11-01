@@ -170,6 +170,15 @@
   # Background scanner, definition updates and the ClamTK window
   clamav.enable = false;
 
+  #--- Face Auth
+  # Howdy for sudo, polkit and the lock screen; the password still works.
+  # A photo can fool it. Run sudo howdy add after the rebuild.
+  faceAuth.enable = false;
+  # The IR camera, from ls /dev/v4l/by-path; null uses /dev/video2
+  faceAuth.device = null;
+  # Howdy skips frames darker than this percent; IR frames are mostly dark
+  faceAuth.darkThreshold = 90;
+
   #--- AppArmor
   # Profiles that block instead of only logging (see docs/security/apparmor.md).
   # Known names: the policies in nixos/security/apparmor/, e.g. mpv, evince

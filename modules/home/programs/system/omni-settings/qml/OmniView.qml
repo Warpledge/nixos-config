@@ -1651,10 +1651,12 @@ Item {
                                       firmware: firmwarePage, battery: batteryPage, dgpu: dgpuPage,
                                       scheduler: schedulerPage,
                                       nettools: networkToolsPage, apparmor: appArmorPage,
+                                      faceauth: faceAuthPage,
                                       localmodels: localModelsPage })
     Component { id: localModelsPage; LocalModelsPage { view: omni } }
     Component { id: networkToolsPage; NetworkToolsPage { view: omni } }
     Component { id: appArmorPage; AppArmorPage { view: omni } }
+    Component { id: faceAuthPage; FaceAuthPage { view: omni } }
     Component { id: firmwarePage; FirmwarePage { view: omni } }
     Component { id: batteryPage; BatteryPage { view: omni } }
     Component { id: dgpuPage; DgpuPage { view: omni } }

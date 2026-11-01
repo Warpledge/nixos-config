@@ -345,6 +345,9 @@ lines, `grep -n` that file for the part you need.
   never by templating its `settings.json`.
 - Audit tooling is `lynis` and `sbomnix`/`vulnxscan`. **Never `vulnix`**: its NVD
   feeds are retired.
+- `machine.faceAuth` (`security/auth/face-auth.nix`): a face match grants root
+  through sudo and polkit. `omni-face-auth` runs as root and only acts on the
+  `PKEXEC_UID` caller's own faces; polkit's helper sandbox is opened to video devices.
 - AppArmor profiles (`security/apparmor/`, one module per app) start in
   `complain` mode (`state = apparmorState "<name>"`; the machine's
   `apparmor.enforce` lists the enforced ones), attach by store-path glob

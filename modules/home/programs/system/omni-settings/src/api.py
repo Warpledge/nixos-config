@@ -41,6 +41,7 @@ import nixfile  # noqa: E402
 import packagestate  # noqa: E402
 import peoplestate  # noqa: E402
 import resetstate  # noqa: E402
+import facestate  # noqa: E402
 import protonstate  # noqa: E402
 import upscalestate  # noqa: E402
 import schema  # noqa: E402
@@ -86,7 +87,8 @@ TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
                 ("siderail", "Side Rail", ("view-dual-symbolic", "sidebar-show-symbolic")),
                 ("keybinds", "Keybinds", ("input-keyboard-symbolic", "preferences-desktop-keyboard-symbolic"))],
        "network": [("nettools", "Tools", ("network-workgroup-symbolic", "utilities-terminal-symbolic"))],
-       "security": [("apparmor", "AppArmor", ("security-high-symbolic", "channel-secure-symbolic"))],
+       "security": [("apparmor", "AppArmor", ("security-high-symbolic", "channel-secure-symbolic")),
+                    ("faceauth", "Face Auth", ("camera-web-symbolic",))],
        "hardware": [("firmware", "Firmware", ("software-update-available-symbolic", "application-x-firmware")),
                     ("battery", "Battery", ("battery-symbolic", "battery-full-symbolic")),
                     ("dgpu", "Run on dGPU", ("video-display-symbolic", "computer-symbolic")),
@@ -659,6 +661,10 @@ def cmd_firmware_summary(_cfg, _args):
 
 def cmd_battery(_cfg, _args):
     return hardwarestate.battery()
+
+
+def cmd_face_auth(_cfg, _args):
+    return facestate.state()
 
 
 def cmd_scheduler(_cfg, _args):
@@ -1684,7 +1690,8 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "appIcon": cmd_app_icon, "pickIconFile": cmd_pick_icon_file, "siteIcon": cmd_site_icon,
             "mimeApps": cmd_mime_apps, "splitCommand": cmd_split_command,
             "firmware": cmd_firmware, "firmwareSummary": cmd_firmware_summary, "battery": cmd_battery,
-            "mangohudTest": cmd_mangohud_test, "mangohudPreview": cmd_mangohud_preview, "scheduler": cmd_scheduler}
+            "mangohudTest": cmd_mangohud_test, "mangohudPreview": cmd_mangohud_preview, "scheduler": cmd_scheduler,
+            "faceAuth": cmd_face_auth}
 
 
 def run(cfg, cmd, args):

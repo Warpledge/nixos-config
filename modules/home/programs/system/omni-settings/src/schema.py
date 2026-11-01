@@ -69,7 +69,7 @@ SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
 #--- the AI tab lists after Server (api.py's nav).
 #--- "top" pages: the custom page (its id in api.py and OmniView.qml) each one's settings show on
 TOP_PAGES = {"Flatpaks": "flatpaks", "Users": "people", "Battery": "battery", "MangoHud": "mangohud",
-             "AppArmor": "apparmor", "Maintenance": "overview"}
+             "AppArmor": "apparmor", "Face Auth": "faceauth", "Maintenance": "overview"}
 
 PAGES = {
     "Flatpaks": ("top", "system-software-install-symbolic", "", [("", "", ["flatpak.enable"])]),
@@ -130,6 +130,8 @@ PAGES = {
     "Antivirus": ("security", "security-medium-symbolic",
                   "Scanning files for viruses.",
                   [("", "", ["clamav.enable"])]),
+    "Face Auth": ("top", "camera-web-symbolic", "",
+                  [("", "", ["faceAuth.enable", "faceAuth.device", "faceAuth.darkThreshold"])]),
     "Services": ("computer", "network-server-symbolic",
                  "Background services for everyone here.",
                  [("Sharing & Streaming", "", ["syncthing.enable", "suwayomi.enable"]),
