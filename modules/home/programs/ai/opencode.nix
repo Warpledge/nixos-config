@@ -19,8 +19,18 @@
     programs.opencode = {
       enable = true;
       enableMcpIntegration = true;
+      #--- Leaves opencode.json and cli.json writable, so TUI changes stick; the
+      #--- blocks below still apply, through home-manager*.json and OPENCODE_*
+      mutableSettings = true;
       settings.share = "disabled"; # No /share uploads to opencode.ai
-      tui.theme = "dank"; # written by DMS's matugen (theme/matugen.nix)
+      #--- nix owns the binary, so a self-update only fights the store
+      settings.update = "disable";
+      #--- cli.json, which OpenCode 2 reads instead of the ignored tui.json
+      #--- Object form keeps the mode the old hand-written cli.json had
+      cli.theme = {
+        name = "dank"; # written by DMS's matugen (theme/matugen.nix)
+        mode = "system";
+      };
       #--- Ask before touching paths outside the project (v1's default; v2 allows),
       #--- except /tmp, where local models keep scratch notes. The last match wins
       settings.permissions = [
@@ -34,7 +44,78 @@
           resource = "/tmp/*";
           effect = "allow";
         }
+        #--- AGENTS.md rules 1 and 6: a rebuild, a push, an amend or sudo is the
+        #--- user's own step, so these stay blocked whatever a model decides
+        {
+          action = "shell";
+          resource = "nixm rebuild *";
+          effect = "deny";
+        }
+        {
+          action = "shell";
+          resource = "nixm boot *";
+          effect = "deny";
+        }
+        {
+          action = "shell";
+          resource = "nixos-rebuild *";
+          effect = "deny";
+        }
+        {
+          action = "shell";
+          resource = "git push *";
+          effect = "deny";
+        }
+        {
+          action = "shell";
+          resource = "git commit --amend *";
+          effect = "deny";
+        }
+        {
+          action = "shell";
+          resource = "git rebase *";
+          effect = "deny";
+        }
+        {
+          action = "shell";
+          resource = "sudo *";
+          effect = "deny";
+        }
       ];
+
+      #--- Formats each file a write or edit touches; the built-in nixfmt would
+      #--- restyle the repo, and it runs before custom entries when it's installed
+      settings.formatter = {
+        nixfmt.disabled = true;
+        alejandra = {
+          command = [(lib.getExe pkgs.alejandra) "$FILE"];
+          extensions = [".nix"];
+        };
+      };
+
+      #--- Keeps more exact detail beside the summary, so a compaction doesn't
+      #--- cost the todo list and the file quoted a few turns ago
+      settings.compaction.keep.tokens = 24000;
+
+      #--- Every rebuild rewrites these, and nothing in the repo reacts to them
+      settings.watcher.ignore = [
+        "result"
+        "result-*"
+        ".git/**"
+        "**/__pycache__/**"
+        "**/.ruff_cache/**"
+      ];
+
+      #--- todo backs the AGENTS.md todo rule; background_compaction writes the
+      #--- summary before it's due, so a long task doesn't stall to make it
+      settings.experimental = {
+        todo = true;
+        background_compaction = true;
+      };
+
+      #--- ~/.claude/agents is not one of OpenCode's agent folders, so these are
+      #--- V2 copies of the four Claude Code subagents with the same prompts
+      agents = ./opencode-agents;
 
       #--- Context7 indexes JS/Python framework docs; deepwiki and grep provide
       #--- upstream wiki docs and real-world code examples.
