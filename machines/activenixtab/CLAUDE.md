@@ -119,8 +119,9 @@ when Ky approves it.
   `XF86Launch7`, or the `gamepadToggle` bar plugin) is a virtual Xbox 360 controller for
   Steam Input, drawn on a GTK4 layer-shell overlay (colours from `gamepad-colors.json`, a
   matugen template); default positions are the `CONTROLS` table; its Settings button opens a menu to
-  drag them, change the button labels (Xbox, PlayStation, Switch; labels only, Steam still
-  sees an Xbox pad) or reset positions, saved in `~/.local/state/osk-gamepad-layout.json`. A virtual Xbox pad has no trackpads,
+  drag and pinch them, change the button labels (Xbox, PlayStation, Switch; labels only, Steam
+  still sees an Xbox pad), opacity, stick travel and mouse speed, or reset the current screen
+  shape, saved in `~/.local/state/osk-gamepad-layout.json` (one layout per shape). A virtual Xbox pad has no trackpads,
   so the right pad is a separate real mouse, which Steam Input can't remap. It holds the touchscreen while open: `touch-gestures.py` lets go on SIGUSR1
   and takes it back once the pid in `$XDG_RUNTIME_DIR/osk-gamepad.pid` is gone.
   `osk-pad-mode` (SIGUSR2) toggles it — the PAD key (KEY_F13, which xkb maps to the

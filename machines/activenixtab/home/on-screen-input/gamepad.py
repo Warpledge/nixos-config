@@ -26,8 +26,11 @@ import evdev  # noqa: E402
 from evdev import AbsInfo, UInput  # noqa: E402
 from evdev import ecodes as e  # noqa: E402
 
-STICK_TRAVEL = 60  # logical px of finger travel for a full stick
-MOUSE_SPEED = 1.5  # pointer movement per logical px on the right pad
+# The settings menu's steps; the first of each is the default
+OPACITY = {"Solid": 1.0, "Medium": 0.7, "Faint": 0.45}
+STICK_TRAVEL = {"Medium": 60, "Short": 40, "Long": 90}  # logical px for a full stick
+MOUSE_SPEED = {"Medium": 1.5, "Slow": 1.0, "Fast": 2.5}  # pointer px per px on the pad
+SIZE_LIMITS = (20, 160)  # a control's radius, or half of a pill's width and height
 HAT_DEAD_ZONE = 0.25  # share of the D-pad's radius that presses nothing
 TAP_SECONDS = 0.2  # a stick touch this short, barely moving, clicks it (L3/R3)
 TAP_TRAVEL = 15
@@ -58,7 +61,7 @@ CONTROLS = [
     ("edit", "settings", None, "Settings", 390, 600, (45, 24)),
 ]
 CONTROLS = [list(c) for c in CONTROLS]  # Moving controls changes x and y
-DEFAULT_POSITIONS = {c[0]: (c[4], c[5]) for c in CONTROLS}
+DEFAULTS = {c[0]: (c[4], c[5], c[6]) for c in CONTROLS}
 STATE_DIR = os.environ.get("XDG_STATE_HOME", os.path.expanduser("~/.local/state"))
 LAYOUT_FILE = os.path.join(STATE_DIR, "osk-gamepad-layout.json")
 
@@ -94,7 +97,7 @@ STYLES = {
         "guide": "Home",
     },
 }
-MENU_ROW = 100  # logical px between the settings menu's rows
+MENU_ROW = 90  # logical px between the settings menu's rows
 MENU_SIZE = (190, 40)
 STICK_AXES = {"lstick": (e.ABS_X, e.ABS_Y), "rstick": (e.ABS_RX, e.ABS_RY)}
 
@@ -143,8 +146,8 @@ def move_mouse():
             continue
         x, y = to_px(pos)
         px, py, rx, ry = mouse_at.get(s, (x, y, 0.0, 0.0))
-        rx += (x - px) * MOUSE_SPEED
-        ry += (y - py) * MOUSE_SPEED
+        rx += (x - px) * MOUSE_SPEED[settings["mouse"]]
+        ry += (y - py) * MOUSE_SPEED[settings["mouse"]]
         if round(rx) or round(ry):
             mouse.write(e.EV_REL, e.REL_X, round(rx))
             mouse.write(e.EV_REL, e.REL_Y, round(ry))
@@ -196,30 +199,62 @@ def center(control):
     return x, output["height"] - control[5]
 
 
+def shape():
+    return "landscape" if output["width"] >= output["height"] else "portrait"
+
+
+def apply_layout():
+    # This shape's saved positions and sizes over the defaults
+    saved = layouts.get(shape(), {})
+    for control in CONTROLS:
+        control[4], control[5], control[6] = DEFAULTS[control[0]]
+        entry = saved.get(control[0])
+        if entry:
+            control[4], control[5] = int(entry[0]), int(entry[1])
+            if len(entry) > 2:
+                size = entry[2]
+                control[6] = tuple(size) if isinstance(size, list) else size
+
+
 def load_layout():
-    global style
     try:
         with open(LAYOUT_FILE) as f:
             saved = json.load(f)
-        if saved.get("style") in STYLES:
-            style = saved["style"]
-        for control in CONTROLS:
-            if control[0] in saved:
-                control[4], control[5] = (int(v) for v in saved[control[0]])
+        for name, steps in (
+            ("style", STYLES),
+            ("opacity", OPACITY),
+            ("stick", STICK_TRAVEL),
+            ("mouse", MOUSE_SPEED),
+        ):
+            if saved.get(name) in steps:
+                settings[name] = saved[name]
+        if "landscape" in saved or "portrait" in saved:
+            layouts.update({k: saved[k] for k in ("landscape", "portrait") if k in saved})
+        else:
+            # A file from before each shape had its own layout
+            layouts["landscape"] = {c[0]: saved[c[0]] for c in CONTROLS if c[0] in saved}
     except (OSError, ValueError, TypeError, AttributeError):
         pass  # the built-in positions
+    apply_layout()
 
 
 def save_layout():
+    layouts[shape()] = {c[0]: [c[4], c[5], c[6]] for c in CONTROLS}
     temp = f"{LAYOUT_FILE}.tmp"
     with open(temp, "w") as f:
-        json.dump({"style": style, **{c[0]: [c[4], c[5]] for c in CONTROLS}}, f)
+        json.dump({**settings, **layouts}, f)
     os.replace(temp, LAYOUT_FILE)
 
 
 def reset_positions():
-    for control in CONTROLS:
-        control[4], control[5] = DEFAULT_POSITIONS[control[0]]
+    layouts.pop(shape(), None)
+    apply_layout()
+    save_layout()
+
+
+def next_step(name, steps):
+    names = list(steps)
+    settings[name] = names[(names.index(settings[name]) + 1) % len(names)]
     save_layout()
 
 
@@ -227,7 +262,10 @@ def menu_items():
     # The same shape as CONTROLS, rows centred on the screen
     labels = [
         ("move", "Move controls"),
-        ("style", f"Buttons: {style}"),
+        ("style", f"Buttons: {settings['style']}"),
+        ("opacity", f"Opacity: {settings['opacity']}"),
+        ("stick", f"Stick travel: {settings['stick']}"),
+        ("mouse", f"Mouse speed: {settings['mouse']}"),
         ("reset", "Tap again to reset" if reset_armed else "Reset positions"),
         ("back", "Close menu"),
     ]
@@ -240,7 +278,7 @@ def menu_items():
 
 
 def menu_tap(name):
-    global mode, style, reset_armed
+    global mode, reset_armed
     if name == "reset" and not reset_armed:
         reset_armed = True
         return
@@ -248,16 +286,38 @@ def menu_tap(name):
     if name == "move":
         mode = "move"
     elif name == "style":
-        names = list(STYLES)
-        style = names[(names.index(style) + 1) % len(names)]
-        save_layout()
+        next_step("style", STYLES)
+    elif name == "opacity":
+        next_step("opacity", OPACITY)
+    elif name == "stick":
+        next_step("stick", STICK_TRAVEL)
+    elif name == "mouse":
+        next_step("mouse", MOUSE_SPEED)
     elif name == "reset":
         reset_positions()
     elif name == "back":
         mode = "play"
 
 
+def scaled(size, factor):
+    def one(v):
+        return round(min(max(v * factor, SIZE_LIMITS[0]), SIZE_LIMITS[1]))
+
+    return tuple(one(v) for v in size) if isinstance(size, tuple) else one(size)
+
+
+def finger_gap(a, b):
+    ax, ay = to_px(slots[a])
+    bx, by = to_px(slots[b])
+    return math.hypot(ax - bx, ay - by)
+
+
 def drag_controls():
+    if pinch and pinch["a"] in slots and pinch["b"] in slots:
+        # Measured from the pinch's start, so limits don't lose the fingers' place
+        factor = finger_gap(pinch["a"], pinch["b"]) / max(pinch["gap"], 1)
+        pinch["control"][6] = scaled(pinch["size"], factor)
+        return
     # Measured from where the finger landed, so a control doesn't jump to it
     for s, control in owners.items():
         if not control or s not in drag_from or s not in slots:
@@ -329,8 +389,8 @@ def wanted_state():
         kind = owner[1]
         if kind == "stick":
             ax, ay = STICK_AXES[owner[0]]
-            axes[ax] = axis(x - x0, STICK_TRAVEL)
-            axes[ay] = axis(y - y0, STICK_TRAVEL)
+            axes[ax] = axis(x - x0, STICK_TRAVEL[settings["stick"]])
+            axes[ay] = axis(y - y0, STICK_TRAVEL[settings["stick"]])
             knobs[owner[0]] = (axes[ax] / 32767, axes[ay] / 32767)
         elif kind == "mouse":
             continue
@@ -390,10 +450,24 @@ def click_stick(code):
 
 
 def finger_down(s):
+    global pinch
     x, y = to_px(slots[s])
     landed[s] = time.monotonic()
     if mode == "menu":
         owners[s] = next((c for c in menu_items() if hit(c, x, y)), None)
+        return
+    if mode == "move" and drag_from and not pinch:
+        # A second finger anywhere pinches the control the first is holding: most are
+        # too small to put two fingers on
+        holder = next(iter(drag_from))
+        owners[s] = owners[holder]
+        pinch = {
+            "control": owners[holder],
+            "a": holder,
+            "b": s,
+            "gap": finger_gap(holder, s),
+            "size": owners[holder][6],
+        }
         return
     owners[s] = control_at(x, y)
     if mode == "move" and owners[s]:
@@ -401,9 +475,22 @@ def finger_down(s):
 
 
 def finger_up(s):
-    global mode
+    global mode, pinch
     owner = owners.pop(s, None)
     mouse_at.pop(s, None)
+    if pinch and s in (pinch["a"], pinch["b"]):
+        # The finger left carries on dragging from where it is now
+        other = pinch["b"] if s == pinch["a"] else pinch["a"]
+        drag_from.pop(s, None)
+        if other in slots:
+            start[other] = list(slots[other])
+            drag_from[other] = center(pinch["control"])
+        pinch = None
+        last_pos.pop(s, None)
+        start.pop(s, None)
+        landed.pop(s, None)
+        save_layout()
+        return
     pos, origin = last_pos.pop(s, None), start.pop(s, None)
     held_for = time.monotonic() - landed.pop(s, 0)
     dragged = drag_from.pop(s, None) is not None
@@ -459,7 +546,10 @@ def on_touch(*_):
             if time.monotonic() - last_output_read > 1:
                 last_output_read = time.monotonic()
                 try:
+                    before = shape()
                     output = read_output()  # the screen may have turned
+                    if shape() != before:
+                        apply_layout()
                 except (OSError, ValueError, subprocess.SubprocessError):
                     pass
             for s, pos in slots.items():
@@ -559,7 +649,7 @@ def draw_symbol(cr, name, cx, cy):
 def label_of(control):
     if control[0] == "edit" and mode == "move":
         return "Done"
-    return STYLES[style].get(control[0], control[3])
+    return STYLES[settings["style"]].get(control[0], control[3])
 
 
 def draw_label(cr, control):
@@ -605,6 +695,7 @@ def draw_knob(cr, control):
 def on_draw(_area, cr, _w, _h):
     cr.set_operator(cairo.OPERATOR_OVER)
     keys, axes = sent_keys, sent_axes
+    cr.push_group()
     for control in CONTROLS:
         draw_shape(cr, control, control_active(control, keys, axes))
         if control[1] == "hat":
@@ -613,6 +704,8 @@ def on_draw(_area, cr, _w, _h):
             draw_knob(cr, control)
         if control[3]:
             draw_label(cr, control)
+    cr.pop_group_to_source()
+    cr.paint_with_alpha(OPACITY[settings["opacity"]])
     if mode == "menu":
         for item in menu_items():
             active = any(owner and owner[0] == item[0] for owner in owners.values())
@@ -659,7 +752,9 @@ xmax = src.absinfo(e.ABS_X).max
 ymax = src.absinfo(e.ABS_Y).max
 output = read_output()
 last_output_read = time.monotonic()
-style = "Xbox"
+settings = {"style": "Xbox", "opacity": "Solid", "stick": "Medium", "mouse": "Medium"}
+layouts = {}  # "landscape" or "portrait" -> control name -> [x, y, size]
+pinch = None  # two fingers resizing a control in Move controls
 reset_armed = False  # the first tap on Reset positions only asks for a second
 load_layout()
 mode = "play"  # or "menu", or "move", where a drag moves a control; only play sends input
