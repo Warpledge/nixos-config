@@ -14,7 +14,7 @@
       fileBrowsers.dolphin = false;
       wallpaper = "carousel";
       editors.vscodium = false;
-      localAi.chat = [];
+      localAi.models = [];
       localAi.edit = null;
       media.moku = true;
       media.boorusama = true;
@@ -22,7 +22,6 @@
       fileBrowsers.nautilus = true;
       fileBrowsers.yazi = false;
       claudeDesktop.enable = true;
-      localAi.code = [];
       artcraft.photocraft = false;
       artcraft.lightcraft = false;
       artcraft.vectorcraft = false;
@@ -234,7 +233,6 @@
     flint = {
       batch = 1024;
       cache = "q8_0";
-      category = "code";
       context = 262144;
       cpuMoe = 33;
       dir = "unsloth/flint-GGUF";
@@ -245,7 +243,6 @@
     gemma-4-12b-it-qat = {
       batch = 2048;
       cache = "q8_0";
-      category = "chat";
       context = 262144;
       dir = "unsloth/gemma-4-12B-it-qat-GGUF";
       gpuLayers = "all";
@@ -270,7 +267,6 @@
       loadMode = "none";
     };
     "ornith-1.5-35b-a3b-apex-mtp-i-mini" = {
-      category = "chat";
       dir = "mudler/Ornith-1.5-35B-A3B-APEX-MTP-GGUF";
       match = "Ornith-1.5-35B-A3B-APEX-MTP-I-Mini.gguf";
       name = "Ornith 1.5 35B A3B APEX MTP I Mini";
@@ -286,7 +282,6 @@
       batch = 2048;
       cache = "q4_0";
       cacheRam = 16384;
-      category = "chat";
       context = 131072;
       dir = "unsloth/Qwen3.8-27B-GGUF";
       gpuLayers = 49;
@@ -296,7 +291,6 @@
     "qwen3.8-27b-q2" = {
       cache = "q4_0";
       cacheRam = 16384;
-      category = "chat";
       context = 131072;
       dir = "unsloth/Qwen3.8-27B-GGUF";
       gpuLayers = "all";
@@ -308,7 +302,6 @@
     "qwen3.8-27b-q3" = {
       cache = "q4_0";
       cacheRam = 16384;
-      category = "chat";
       context = 32768;
       dir = "unsloth/Qwen3.8-27B-GGUF";
       gpuLayers = "all";

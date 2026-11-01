@@ -271,15 +271,17 @@ def setting_json(cfg, state, s, multi, modules):
            "defaultShown": shown(s, s.default)}
     if s.kind == "choice":
         out["choices"] = [{"value": c, "label": choice_label(s, c)} for c in s.choices]
+        if s.path == ("localAi", "default"):
+            added = (state.resolved.get("localModels") or {}).get("models") or {}
+            out["choices"] += [{"value": m, "label": m} for m in added if m not in s.choices]
     if s.kind == "pick":
         out["data"] = s.data
     if s.kind == "list":
         out["options"] = s.options
         # Models this machine adds (localModels.models) can be picked here too
-        if s.path in (("localAi", "code"), ("localAi", "chat")):
+        if s.path == ("localAi", "models"):
             added = (state.resolved.get("localModels") or {}).get("models") or {}
-            out["options"] = s.options + [m for m, e in added.items()
-                                          if e.get("category") == s.path[1] and m not in s.options]
+            out["options"] = s.options + [m for m in added if m not in s.options]
         out["ports"] = s.ports
     if ".".join(s.path) in schema.SWITCH_LISTS:
         out["switchList"] = True
@@ -498,18 +500,17 @@ def local_models_arg(cfg, args):
 
 
 def local_model(cfg, args):
-    """(local models setting, profiles, id, category, entry, file) for args.id."""
+    """(local models setting, profiles, id, entry, file) for args.id."""
     lm = local_models_arg(cfg, args)
     profs = localmodelstate.profiles(cfg.flake)
-    found = localmodelstate.entries(cfg.flake, lm).get(args.get("id"))
-    if not found:
+    entry = localmodelstate.entries(cfg.flake, lm).get(args.get("id"))
+    if not entry:
         raise ValueError(f"no model {args.get('id')}")
-    category, entry = found
     path = localmodelstate.find_file(entry)
     if not path:
         raise ValueError(f"{entry.get('name', args.get('id'))} isn't downloaded: no "
                          f"{entry.get('match')} in ~/.lmstudio/models/{entry.get('dir')}")
-    return lm, profs, args["id"], category, entry, path
+    return lm, profs, args["id"], entry, path
 
 
 def cmd_local_models(cfg, args):
@@ -522,14 +523,14 @@ def cmd_local_models(cfg, args):
     profile = lm["profile"]
     knows = localmodelstate.architectures(os.environ.get("OMNI_SETTINGS_LLAMA_SERVER"))
     models = []
-    for mid, (category, entry) in entries.items():
+    for mid, entry in entries.items():
         own = lm["models"].get(mid) or {}
         t = localmodelstate.effective(entry, profile, profs, own)
         path = localmodelstate.find_file(entry)
         arch = localmodelstate.arch_of(path) if path else ""
-        models.append({"id": mid, "category": category, "name": entry.get("name", mid),
+        models.append({"id": mid, "name": entry.get("name", mid),
                        "dir": entry.get("dir", ""), "match": entry.get("match", ""),
-                       "added": mid in lm["models"] and "category" in own, "own": own,
+                       "added": mid in lm["models"] and "dir" in own, "own": own,
                        "measured": localmodelstate.measured(entry, profile, profs),
                        "effective": t, "context": entry.get("context", 32768),
                        "cache": entry.get("cache") or "q8_0",
@@ -553,7 +554,7 @@ def cmd_local_models(cfg, args):
 
 def cmd_local_model_estimate(cfg, args):
     """How a model's tuning fits (args.id, args.localModels), and the presets."""
-    lm, profs, mid, _, entry, path = local_model(cfg, args)
+    lm, profs, mid, entry, path = local_model(cfg, args)
     profile = lm["profile"]
     card = localmodelstate.gpu(profs)
     t = localmodelstate.effective(entry, profile, profs, lm["models"].get(mid))
@@ -574,7 +575,7 @@ def cmd_local_model_estimate(cfg, args):
 def cmd_local_model_test(cfg, args):
     """Loads the model with its tuning in llama-server, progress on stderr, and
     returns what it used and how fast it ran."""
-    lm, profs, mid, _, entry, path = local_model(cfg, args)
+    lm, profs, mid, entry, path = local_model(cfg, args)
     t = localmodelstate.effective(entry, lm["profile"], profs, lm["models"].get(mid))
     result = localmodelstate.test(os.environ.get("OMNI_SETTINGS_LLAMA_SERVER"), path, t, entry,
                                   lm["profile"], profs)
@@ -587,7 +588,7 @@ def cmd_local_model_auto_tune(cfg, args):
     "speed" or "context", args.minRate for "context"); progress on stderr. Stop
     sends SIGTERM, which unwinds so llama-server is stopped too."""
     signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))
-    lm, profs, mid, _, entry, path = local_model(cfg, args)
+    lm, profs, mid, entry, path = local_model(cfg, args)
     profile = lm["profile"]
     server = os.environ.get("OMNI_SETTINGS_LLAMA_SERVER")
     base = localmodelstate.effective(entry, profile, profs, lm["models"].get(mid))
@@ -620,7 +621,7 @@ def cmd_local_model_quality(cfg, args):
     """Scores the smaller context caches against full precision (llama-perplexity's
     KL divergence), progress on stderr; saved per model."""
     signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))
-    lm, profs, mid, _, entry, path = local_model(cfg, args)
+    lm, profs, mid, entry, path = local_model(cfg, args)
     t = localmodelstate.effective(entry, lm["profile"], profs, lm["models"].get(mid))
     server = os.environ.get("OMNI_SETTINGS_LLAMA_SERVER")
     localmodelstate.runnable(server, path)

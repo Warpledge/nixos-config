@@ -29,10 +29,10 @@
     fast = null;
   };
 
-  #--- Models the machine adds, by category ("code" or "chat")
-  added = category:
+  #--- Models the machine adds; an old file's `category` is ignored
+  added =
     lib.mapAttrs (_: model: addedDefaults // removeAttrs model ["category"])
-    (lib.filterAttrs (id: model: !(catalog.code ? ${id} || catalog.chat ? ${id}) && model.category == category) models);
+    (lib.filterAttrs (id: _: !(catalog.models ? ${id})) models);
 
   #--- llama-server flags for one model's final tuning
   flags = t: let
@@ -84,8 +84,7 @@
     }
     // lib.optionalAttrs (t ? cache) {inherit (t) cache;};
 in {
-  code = lib.mapAttrs resolve (catalog.code // added "code");
-  chat = lib.mapAttrs resolve (catalog.chat // added "chat");
+  models = lib.mapAttrs resolve (catalog.models // added);
   inherit (catalog) edit;
   #--- The llama.cpp build for the machine's backend (llama-swap, Omni Settings)
   llamaCpp = pkgs:

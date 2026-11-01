@@ -123,7 +123,7 @@ ColumnLayout {
         model: page.info ? page.info.models : []
         ListRow {
             required property var modelData
-            icon: modelData.category === "code" ? "code" : "chat"
+            icon: "smart_toy"
             title: modelData.name
             subtitle: (modelData.file ? modelData.file : "Not downloaded")
                       + (modelData.bytes ? ` · ${page.gb(modelData.bytes)}` : "")
