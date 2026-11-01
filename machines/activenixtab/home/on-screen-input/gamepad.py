@@ -1,8 +1,8 @@
 """A touchscreen gamepad: a virtual Xbox 360 controller that Steam Input can remap, drawn on
 a see-through overlay that takes no input. While it runs it holds the touchscreen, so
 touches reach it and not the game; touch-gestures.py lets go on SIGUSR1 and takes the
-screen back once this process is gone. A virtual Xbox pad has no trackpads, so the right
-pad drives the right stick and the left pad the D-pad.
+screen back once this process is gone. The right pad is a real mouse beside the
+controller, which Steam Input can't remap: a virtual Xbox pad has no trackpads.
 Usage: gamepad <touchscreen event device> <font name> <colours file>"""
 
 import json
@@ -27,7 +27,7 @@ from evdev import AbsInfo, UInput  # noqa: E402
 from evdev import ecodes as e  # noqa: E402
 
 STICK_TRAVEL = 60  # logical px of finger travel for a full stick
-PAD_TRAVEL = 90  # the same for the right pad
+MOUSE_SPEED = 1.5  # pointer movement per logical px on the right pad
 HAT_DEAD_ZONE = 0.25  # share of the D-pad's radius that presses nothing
 TAP_SECONDS = 0.2  # a stick touch this short, barely moving, clicks it (L3/R3)
 TAP_TRAVEL = 15
@@ -36,24 +36,25 @@ HIT_SLACK = 1.2  # how far outside a control a landing finger still counts
 
 # name, kind, code, label, x, y, radius or (half-width, half-height), in logical px.
 # x counts from the left edge, or from the right if negative; y up from the bottom
+# Held by the sides: each thumb pivots at the edge, 400 px up, and the controls follow
+# its arc, with triggers at the top of the reach and menu buttons at the far end
 CONTROLS = [
-    ("lt", "trigger", e.ABS_Z, "LT", 65, 440, (55, 24)),
-    ("lb", "button", e.BTN_TL, "LB", 185, 440, (55, 24)),
-    ("select", "button", e.BTN_SELECT, "Select", 300, 440, (45, 24)),
-    ("guide", "button", e.BTN_MODE, "Guide", 395, 440, (45, 24)),
-    ("lstick", "stick", e.BTN_THUMBL, "", 95, 300, 70),
-    ("dpad", "hat", None, "", 290, 270, 65),
-    ("lpad", "hat", None, "", 110, 105, 80),
-    ("rt", "trigger", e.ABS_RZ, "RT", -65, 440, (55, 24)),
-    ("rb", "button", e.BTN_TR, "RB", -185, 440, (55, 24)),
-    ("start", "button", e.BTN_START, "Start", -300, 440, (45, 24)),
-    ("close", "close", None, "✕", -395, 440, (45, 24)),
-    ("y", "button", e.BTN_Y, "Y", -105, 352, 30),
-    ("x", "button", e.BTN_X, "X", -167, 290, 30),
-    ("b", "button", e.BTN_B, "B", -43, 290, 30),
-    ("a", "button", e.BTN_A, "A", -105, 228, 30),
-    ("rstick", "stick", e.BTN_THUMBR, "", -290, 250, 70),
-    ("rpad", "pad", None, "", -110, 100, 80),
+    ("lt", "trigger", e.ABS_Z, "LT", 70, 760, (55, 24)),
+    ("lb", "button", e.BTN_TL, "LB", 190, 700, (55, 24)),
+    ("lstick", "stick", e.BTN_THUMBL, "", 208, 497, 70),
+    ("dpad", "hat", None, "", 197, 262, 65),
+    ("select", "button", e.BTN_SELECT, "Select", 390, 400, (45, 24)),
+    ("guide", "button", e.BTN_MODE, "Guide", 390, 460, (45, 24)),
+    ("rt", "trigger", e.ABS_RZ, "RT", -70, 760, (55, 24)),
+    ("rb", "button", e.BTN_TR, "RB", -190, 700, (55, 24)),
+    ("y", "button", e.BTN_Y, "Y", -208, 559, 30),
+    ("x", "button", e.BTN_X, "X", -270, 497, 30),
+    ("b", "button", e.BTN_B, "B", -146, 497, 30),
+    ("a", "button", e.BTN_A, "A", -208, 435, 30),
+    ("rstick", "stick", e.BTN_THUMBR, "", -328, 370, 70),
+    ("rpad", "mouse", None, "", -197, 262, 80),
+    ("start", "button", e.BTN_START, "Start", -390, 480, (45, 24)),
+    ("close", "close", None, "✕", -390, 540, (45, 24)),
 ]
 STICK_AXES = {"lstick": (e.ABS_X, e.ABS_Y), "rstick": (e.ABS_RX, e.ABS_RY)}
 
@@ -85,6 +86,44 @@ def new_controller():
         version=0x110,
         bustype=e.BUS_USB,
     )
+
+
+def new_mouse():
+    return UInput(
+        {e.EV_KEY: [e.BTN_LEFT, e.BTN_RIGHT], e.EV_REL: [e.REL_X, e.REL_Y]},
+        name="On-screen gamepad mouse",
+    )
+
+
+def move_mouse():
+    moved = False
+    for s, pos in slots.items():
+        owner = owners.get(s)
+        if not owner or owner[1] != "mouse":
+            continue
+        x, y = to_px(pos)
+        px, py, rx, ry = mouse_at.get(s, (x, y, 0.0, 0.0))
+        rx += (x - px) * MOUSE_SPEED
+        ry += (y - py) * MOUSE_SPEED
+        if round(rx) or round(ry):
+            mouse.write(e.EV_REL, e.REL_X, round(rx))
+            mouse.write(e.EV_REL, e.REL_Y, round(ry))
+            rx, ry, moved = rx - round(rx), ry - round(ry), True
+        mouse_at[s] = (x, y, rx, ry)
+    if moved:
+        mouse.syn()
+
+
+def click_mouse():
+    mouse.write(e.EV_KEY, e.BTN_LEFT, 1)
+    mouse.syn()
+
+    def done():
+        mouse.write(e.EV_KEY, e.BTN_LEFT, 0)
+        mouse.syn()
+        return GLib.SOURCE_REMOVE
+
+    GLib.timeout_add(int(CLICK_SECONDS * 1000), done)
 
 
 def read_output():
@@ -178,9 +217,8 @@ def wanted_state():
             axes[ax] = axis(x - x0, STICK_TRAVEL)
             axes[ay] = axis(y - y0, STICK_TRAVEL)
             knobs[owner[0]] = (axes[ax] / 32767, axes[ay] / 32767)
-        elif kind == "pad":
-            axes[e.ABS_RX] = axis(x - x0, PAD_TRAVEL)
-            axes[e.ABS_RY] = axis(y - y0, PAD_TRAVEL)
+        elif kind == "mouse":
+            continue
         elif kind == "hat":
             cx, cy = center(owner)
             hx, hy = hat_value(x - cx, y - cy, owner[6])
@@ -244,16 +282,17 @@ def finger_down(s):
 
 def finger_up(s):
     owner = owners.pop(s, None)
+    mouse_at.pop(s, None)
     pos, origin = last_pos.pop(s, None), start.pop(s, None)
     held_for = time.monotonic() - landed.pop(s, 0)
     if not owner:
         return
     if owner[1] == "close":
         loop.quit()
-    elif owner[1] == "stick" and pos and origin and held_for < TAP_SECONDS:
+    elif owner[1] in ("stick", "mouse") and pos and origin and held_for < TAP_SECONDS:
         x, y, x0, y0 = *to_px(pos), *to_px(origin)
         if math.hypot(x - x0, y - y0) < TAP_TRAVEL:
-            click_stick(owner[2])
+            click_stick(owner[2]) if owner[1] == "stick" else click_mouse()
 
 
 def on_touch(*_):
@@ -294,6 +333,7 @@ def on_touch(*_):
                 if s not in start:
                     start[s] = list(pos)
                     finger_down(s)
+            move_mouse()
             emit()
     return GLib.SOURCE_CONTINUE
 
@@ -426,6 +466,8 @@ ymax = src.absinfo(e.ABS_Y).max
 output = read_output()
 last_output_read = time.monotonic()
 pad = new_controller()
+mouse = new_mouse()
+mouse_at = {}  # slot -> last x, y and the fractions of a pointer step left over
 slots = {}  # slot -> [x, y]
 slot_pos = {}  # slot -> its last position, down or not
 start = {}  # slot -> position when the touch landed
@@ -453,6 +495,7 @@ finally:
         pad.write(e.EV_ABS, code, 0)
     pad.syn()
     pad.close()
+    mouse.close()
     try:
         src.ungrab()
     except OSError:
