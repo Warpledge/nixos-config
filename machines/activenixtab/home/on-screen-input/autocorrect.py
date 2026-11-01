@@ -42,6 +42,7 @@ SWIPE_STATE = os.path.join(STATE_DIR, "osk-swipe-on")  # osk-swipe keeps this on
 WORDS = os.path.join(STATE_DIR, "osk-words")
 PAUSE = 5.0  # seconds without a key after which a word's start can't be trusted
 DELIMITERS = " .,!?;:"
+# BUILT_IN in skip-menu.py matches; that menu edits SKIP_FILE
 SKIP_APPS = ("kitty", "ghostty", "foot", "alacritty", "konsole", "keepassxc")
 SKIP_FILE = os.path.join(
     os.environ.get("XDG_CONFIG_HOME", os.path.expanduser("~/.config")), "osk-autocorrect-skip"

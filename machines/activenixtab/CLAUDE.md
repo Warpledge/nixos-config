@@ -130,7 +130,8 @@ when Ky approves it.
   punctuation, replaces a misspelled word through its own uinput keyboard when one
   candidate clearly wins (Hunspell and symspellpy's list, ranked by key distance on Ky's
   layout and word frequency); backspace straight after undoes it. It can't see app text
-  and skips terminals, KeePassXC and any app id listed in `~/.config/osk-autocorrect-skip`. It
+  and skips terminals, KeePassXC and any app id listed in `~/.config/osk-autocorrect-skip`, which the
+  Fn layer's key (KEY_F17, niri bind `XF86Launch8`, `osk-skip-menu`, `skip-menu.py`) edits. It
   stays out of password and PIN fields only when the app reports them (wvkbd-private-fields.patch). `osk-autocorrect`
   toggles it, off by default, from the key beside space (KEY_F14, niri bind `XF86Launch5`)
   or the bar button. The swipe key next to it (KEY_F15, `XF86Launch6`) runs `osk-swipe`:

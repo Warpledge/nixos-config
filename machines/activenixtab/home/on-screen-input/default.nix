@@ -97,11 +97,8 @@
     pkill --signal RTMIN+1 -x wvkbd-deskintl
   '';
 
-  #--- Opens or closes the touchscreen gamepad; the path matches wm/niri.nix
-  gamepad-toggle = pkgs.writeShellScriptBin "osk-gamepad" ''
-    pkill -f 'gamepad\.py' && exit 0
-    pkill --signal USR1 -x wvkbd-deskintl
-    # The library must load before libwayland for the overlay to be a layer surface
+  #--- The library must load before libwayland for a window to be a layer surface
+  layerShellEnv = ''
     export LD_PRELOAD=${pkgs.gtk4-layer-shell}/lib/libgtk4-layer-shell.so
     export GI_TYPELIB_PATH=${lib.makeSearchPathOutput "out" "lib/girepository-1.0" (with pkgs; [
       gtk4
@@ -113,9 +110,23 @@
       harfbuzz
       pango
     ])}
+  '';
+
+  #--- Opens or closes the touchscreen gamepad; the path matches wm/niri.nix
+  gamepad-toggle = pkgs.writeShellScriptBin "osk-gamepad" ''
+    pkill -f 'gamepad\.py' && exit 0
+    pkill --signal USR1 -x wvkbd-deskintl
+    ${layerShellEnv}
     exec ${pkgs.python3.withPackages (p: [p.evdev p.pycairo p.pygobject3])}/bin/python3 -I \
       ${./gamepad.py} /dev/input/by-path/platform-AMDI0010:00-event \
       "${config.stylix.fonts.sansSerif.name}" "${gamepadColors}"
+  '';
+
+  #--- Opens or closes autocorrect's skip list menu
+  skip-menu = pkgs.writeShellScriptBin "osk-skip-menu" ''
+    pkill -f 'skip-menu\.py' && exit 0
+    ${layerShellEnv}
+    exec ${pkgs.python3.withPackages (p: [p.pycairo p.pygobject3])}/bin/python3 -I ${./skip-menu.py}
   '';
 
   #--- Off switch for opening on text fields
@@ -158,7 +169,7 @@ in {
   #--------------------------------------------------------------------#
   #-- Keyboard
   #--------------------------------------------------------------------#
-  home.packages = [osk-toggle pad-mode autocorrect-toggle swipe-toggle auto-toggle gamepad-toggle];
+  home.packages = [osk-toggle pad-mode autocorrect-toggle swipe-toggle auto-toggle gamepad-toggle skip-menu];
 
   systemd.user.services.wvkbd = {
     Unit = {
@@ -245,6 +256,13 @@ in {
     key = "XF86Launch7";
     title = "Touchscreen gamepad on / off";
     action.spawn = ["${gamepad-toggle}/bin/osk-gamepad"];
+  };
+
+  #--- The skip list key on the Fn layer: KEY_F17 is this keysym in xkb
+  niri.keybinds.osk-skip-menu = {
+    key = "XF86Launch8";
+    title = "Autocorrect skip list";
+    action.spawn = ["${skip-menu}/bin/osk-skip-menu"];
   };
 
   #--- The keyboard paints a translucent panel; niri blurs what's under it

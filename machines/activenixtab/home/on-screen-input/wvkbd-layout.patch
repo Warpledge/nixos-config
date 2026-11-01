@@ -179,7 +179,7 @@
 +  {"\xee\xab\xa7", "\xee\xab\xa7", 1.0, Mod, Super, .scheme = 1},
 +  {"\xee\xab\xa8", "\xee\xab\xa8", 1.0, Mod, Alt, .scheme = 1},
 +  {"", "", 5.0, Code, KEY_SPACE},
-+  {"\xee\xa3\x8e", "\xee\xa3\x8e", 1.0, Code, KEY_F14, .scheme = 1},
++  {"\xee\x9d\x85", "\xee\x9d\x85", 1.0, Code, KEY_F17, .scheme = 1},
 +  {"\xee\xa8\xa8", "\xee\xa8\xa8", 1.0, Code, KEY_F16, .scheme = 1},
    {"Home", "Home", 1.0, Code, KEY_HOME, .scheme = 1},
    {"PgDn", "PgDn", 1.0, Code, KEY_PAGEDOWN, .scheme = 1},
