@@ -31,6 +31,7 @@
   #--- comes from localModels.gpuSharedGB in settings.nix
   boot.kernelParams = [
     "amd_pstate=active"
+    "amdgpu.dcdebugmask=0x410" # PSR, Panel Replay off: testing post-resume lag, freeze
   ];
 
   #--- MT7925 Wi-Fi drops with PCIe power saving on some kernels
