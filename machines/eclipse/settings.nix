@@ -12,10 +12,10 @@
     warpledge = {
       gaming.retroshelf = false;
       fileBrowsers.dolphin = false;
-      wallpaper = "engine";
+      wallpaper = "carousel";
       editors.vscodium = false;
-      localAi.models = ["ornith-1.5-35b-a3b" "gemma-4-26b-a4b"];
-      localAi.edit = "sweep-next-edit-1.5b";
+      localAi.models = [];
+      localAi.edit = null;
       media.moku = true;
       media.boorusama = true;
       defaultApps.fileManager = "duxFiles";
@@ -241,40 +241,73 @@
       name = "flint";
     };
     gemma-4-12b-it-qat = {
+      batch = 2048;
+      cache = "q8_0";
+      context = 262144;
       dir = "unsloth/gemma-4-12B-it-qat-GGUF";
+      gpuLayers = "all";
       match = "gemma-4-12B-it-qat-UD-Q4_K_XL.gguf";
       name = "gemma 4 12B it qat";
-      context = 262144;
-      batch = 2048;
-      cache = "q8_0";
-      gpuLayers = "all";
     };
     gemma-4-26b-a4b = {
-      loadMode = "none";
-      context = 262144;
       batch = 2048;
       cache = "q8_0";
+      context = 262144;
+      cpuMoe = 10;
+      gpuLayers = "all";
+      loadMode = "none";
+    };
+    "ornith-1.5-35b-a3b" = {
+      batch = 2048;
+      cache = "q8_0";
+      cacheRam = 4096;
+      context = 262144;
+      cpuMoe = 22;
+      gpuLayers = "all";
+      loadMode = "none";
+    };
+    "ornith-1.5-35b-a3b-apex-mtp-i-mini" = {
+      dir = "mudler/Ornith-1.5-35B-A3B-APEX-MTP-GGUF";
+      match = "Ornith-1.5-35B-A3B-APEX-MTP-I-Mini.gguf";
+      name = "Ornith 1.5 35B A3B APEX MTP I Mini";
+      mmproj = "mmproj.gguf";
+      context = 131072;
+      cache = "f16";
+      batch = 4096;
+      cacheRam = 16384;
       gpuLayers = "all";
       cpuMoe = 10;
     };
-    "ornith-1.5-35b-a3b" = {
-      loadMode = "none";
-      batch = 2048;
-      cacheRam = 4096;
-      context = 262144;
-      cache = "q8_0";
-      gpuLayers = "all";
-      cpuMoe = 22;
-    };
     "qwen3.8-27b" = {
+      batch = 2048;
+      cache = "q4_0";
+      cacheRam = 16384;
+      context = 131072;
       dir = "unsloth/Qwen3.8-27B-GGUF";
+      gpuLayers = 49;
       match = "Qwen3.8-27B-UD-Q4_K_M.gguf";
       name = "Qwen3.8 27B";
-      context = 131072;
+    };
+    "qwen3.8-27b-q2" = {
       cache = "q4_0";
-      batch = 2048;
       cacheRam = 16384;
-      gpuLayers = 49;
+      context = 131072;
+      dir = "unsloth/Qwen3.8-27B-GGUF";
+      gpuLayers = "all";
+      match = "Qwen3.8-27B-UD-Q2_K_XL.gguf";
+      mmproj = "mmproj-F16.gguf";
+      mtp = "mtp-Qwen3.8-27B-Q4_0.gguf";
+      name = "Qwen3.8 27B Q2";
+    };
+    "qwen3.8-27b-q3" = {
+      cache = "q4_0";
+      cacheRam = 16384;
+      context = 32768;
+      dir = "unsloth/Qwen3.8-27B-GGUF";
+      gpuLayers = "all";
+      match = "Qwen3.8-27B-UD-Q3_K_XL.gguf";
+      mtp = "mtp-Qwen3.8-27B-Q4_0.gguf";
+      name = "Qwen3.8 27B Q3";
     };
   };
   localModels.backend = "vulkan";
