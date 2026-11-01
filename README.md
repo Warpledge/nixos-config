@@ -239,7 +239,7 @@ Turn the tools on in Omni Settings' **AI** tab: Claude Code and Claude Desktop u
 - **Skills:** step-by-step jobs in `modules/home/programs/ai/skills/`, among them adding an app (`add-app`), updating and fixing what an update broke (`flake-update`, `disable-package`), troubleshooting a game (`game-troubleshooting`) and committing after a secret scan (`commit`). Claude Code, opencode and Zed's agent all read them.
 - **Mods:** `claude.mods.ribbon` adds [Ribbon][ribbon], a band above Claude Code's prompt with the usage left and whether the prompt cache is warm or cold, and `claude.statusLine` a status line with the context used. Others, each behind its own `claude.mods.*` toggle: [Skins][claude-skins] (with a matugen skin that follows the wallpaper), [File Tree][claude-filetree], [Savvy Progress][savvy-progress], and Anthropic's [Blast Radius and Replay Theater][claude-playground].
 - **Lookups:** MCP servers search nixpkgs and NixOS options, library docs and GitHub, so answers come from current sources rather than the model's memory (`ai/mcp.nix`).
-- **Local models:** [llama-swap][llama-swap] serves the coding and chat models you pick to opencode, Zed and Open WebUI, with no cloud account.
+- **Local models:** [llama-swap][llama-swap] serves the models you pick to opencode, Zed, Pi and Open WebUI, with no cloud account.
 
 </details>
 

@@ -16,15 +16,16 @@
     inherit lib;
     inherit (machine) localModels;
   };
-  #--- The coding and chat models turned on, by ID; the first coding one is the default
-  codes = lib.genAttrs user.localAi.code (id: catalog.code.${id});
-  chats = lib.genAttrs user.localAi.chat (id: catalog.chat.${id});
+  #--- The models turned on, by ID; every harness lists all of them
+  enabled = lib.genAttrs user.localAi.models (id: catalog.models.${id});
   edit =
     if user.localAi.edit == null
     then null
     else catalog.edit.${user.localAi.edit};
-  defaultId = lib.head user.localAi.code;
-  defaultFast = codes.${defaultId}.fast != null;
+  defaultId = user.localAi.default;
+  defaultFast = enabled.${defaultId}.fast != null;
+  #--- At most half the context, so a 32K model doesn't reserve it all for output
+  outputLimit = limit: model: lib.min limit (model.context / 2);
 
   #--- Finds the model's file in its LM Studio folder, so the exact name and case
   #--- of a download don't matter; the first part of a split file sorts first
@@ -82,7 +83,7 @@
     # Lists the -instruct and -chat aliases in /v1/models, so Open WebUI shows them
     includeAliasesInList = true;
     models =
-      lib.concatMapAttrs serve (codes // chats)
+      lib.concatMapAttrs serve enabled
       // lib.optionalAttrs (edit != null) {
         ${user.localAi.edit} = {
           ttl = 600;
@@ -98,12 +99,12 @@
         };
       };
     groups =
-      #--- The coding and chat models don't fit the GPU together: one at a time
-      lib.optionalAttrs (codes // chats != {}) {
+      #--- The models don't fit the GPU together: one at a time
+      lib.optionalAttrs (enabled != {}) {
         gpu = {
           swap = true;
           exclusive = false;
-          members = lib.attrNames (codes // chats);
+          members = lib.attrNames enabled;
         };
       }
       #--- Stays loaded beside them
@@ -134,7 +135,7 @@ in {
   #-- Pi Provider
   #--------------------------------------------------------------------#
   #--- The same models as opencode's; Pi reloads the file when /model opens
-  home.file.".pi/agent/models.json" = lib.mkIf (user.pi.enable && codes != {}) {
+  home.file.".pi/agent/models.json" = lib.mkIf (user.pi.enable && enabled != {}) {
     text = builtins.toJSON {
       "$schema" = "https://pi.dev/schemas/models.schema.json";
       providers.llama-swap = {
@@ -154,7 +155,7 @@ in {
               inherit (model) name;
               reasoning = true;
               contextWindow = model.context;
-              maxTokens = 32768;
+              maxTokens = outputLimit 32768 model;
             }
           ]
           ++ lib.optional (model.fast != null) {
@@ -162,9 +163,9 @@ in {
             name = "${model.name} (fast)";
             reasoning = false;
             contextWindow = model.context;
-            maxTokens = 8192;
+            maxTokens = outputLimit 8192 model;
           })
-        codes);
+        enabled);
       };
     };
   };
@@ -172,8 +173,8 @@ in {
   #--------------------------------------------------------------------#
   #-- OpenCode Provider
   #--------------------------------------------------------------------#
-  #--- Every coding model and its fast variant to pick from; the first is the default
-  programs.opencode.settings = lib.mkIf (user.opencode.enable && codes != {}) {
+  #--- Every model turned on and its fast variant to pick from
+  programs.opencode.settings = lib.mkIf (user.opencode.enable && enabled != {}) {
     model = "llama-swap/${defaultId}";
     # Session titles and summaries: thinking there only delays the first reply
     small_model = "llama-swap/${defaultId}${lib.optionalString defaultFast "-instruct"}";
@@ -188,7 +189,7 @@ in {
             limit = {
               inherit (model) context;
               # Qwen's recommended output length; thinking tokens count against it
-              output = 32768;
+              output = outputLimit 32768 model;
             };
           };
         }
@@ -197,11 +198,11 @@ in {
             name = "${model.name} (fast)";
             limit = {
               inherit (model) context;
-              output = 8192;
+              output = outputLimit 8192 model;
             };
           };
         })
-      codes;
+      enabled;
     };
   };
 }

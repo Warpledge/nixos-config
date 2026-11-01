@@ -10,7 +10,7 @@
 #- Omni Settings' labels and download notes are in its descriptions.json.
 {
   #--------------------------------------------------------------------#
-  #-- Coding Models
+  #-- Models
   #--------------------------------------------------------------------#
   #--- `args` start the server; `think`, `fast` and the optional `chat` are request
   #--- parameters llama-swap forces on <name> and its <name>-instruct and <name>-chat
@@ -19,7 +19,7 @@
   #--- cacheRam, fitTarget, and context or cache in place of the model's own
   #--- loadMode "none": experts in RAM read into memory, not paged in from the file
   #--- `cache`, optional: the KV cache type in place of q8_0
-  code = {
+  models = {
     #--- MoE, 3B active; 10 of its 40 layers keep a KV cache, so 128K is ~1.4GB
     "qwen3.6-35b-a3b-q4" = {
       name = "Qwen3.6 35B A3B (Q4)";
@@ -100,13 +100,6 @@
         presence_penalty = 1.5;
       };
     };
-  };
-
-  #--------------------------------------------------------------------#
-  #-- Chat Models
-  #--------------------------------------------------------------------#
-  #--- Same fields as the coding models; 32K is plenty for a conversation
-  chat = {
     #--- MoE, 3.6B active, MXFP4 weights (~13GB); reasoning can't be turned off
     "gpt-oss-20b" = {
       name = "gpt-oss 20B";

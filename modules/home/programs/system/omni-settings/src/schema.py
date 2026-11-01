@@ -213,8 +213,8 @@ PAGES = {
               [("", "", ["llamaSwap.enable", "openWebui.enable"])]),
     "Models": ("localai", "applications-engineering-symbolic",
                "The models llama-swap runs on this computer, one at a time.",
-               [("Code", "For opencode and Zed's agent panel.", ["localAi.code"]),
-                ("Chat", "For Open WebUI and llama-swap's Playground.", ["localAi.chat"]),
+               [("Models", "Every app that uses llama-swap lists the ones turned on.",
+                 ["localAi.default", "localAi.models"]),
                 ("Inline Suggestions", "Zed's suggestions as you type, on the CPU.", ["localAi.edit"])]),
 }
 
@@ -234,7 +234,7 @@ PAIRS = {("claude", "skills"): ("claude", "skillModels"),
          ("claude", "agents"): ("claude", "agentModels")}
 
 #--- List and none-or-one settings shown as one switch per model, straight in their group
-SWITCH_LISTS = {"localAi.code", "localAi.chat", "localAi.edit"}
+SWITCH_LISTS = {"localAi.models", "localAi.edit"}
 
 #--- Text shown above a page's groups, with descriptions.json's ** and !! marks
 PAGE_INTROS = {

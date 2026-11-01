@@ -237,12 +237,12 @@
   lmstudio.enable = false; # Runs language models locally
   llamaSwap.enable = false; # llama.cpp server on the GPU, opencode's default model
   openWebui.enable = false; # Chat with llama-swap's models in the browser
-  # Models llama-swap serves, from the names in lib/local-models.nix. Each app
-  # lists the ones turned on; the first coding model is opencode's and Zed's default
+  # Models llama-swap serves, from the names in lib/local-models.nix. Every app
+  # lists the ones turned on
   localAi = {
-    code = []; # Coding models
+    models = []; # Models turned on
+    default = null; # The apps' default model; null is the first one turned on
     edit = null; # Zed's inline suggestions
-    chat = []; # Chat models
   };
 
   #--- Claude Code Settings
