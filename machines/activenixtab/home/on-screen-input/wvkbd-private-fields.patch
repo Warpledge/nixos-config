@@ -1,0 +1,59 @@
+# Tell autocorrect.py when a password or PIN field has focus, for apps that report it, and
+# start no swipe strokes there.
+--- a/main.c
++++ b/main.c
+@@ -79,6 +79,7 @@
+ static bool im_wanted = false, im_active = false;
+ static bool im_opened = false;  /* shown by a text field, not by hand */
+ static bool im_blocked = false; /* folio-watch.py: don't open on text fields */
++static bool im_private_wanted = false, im_private = false; /* a password or PIN field */
+ #define IM_CLOSE_DELAY_MS 300
+ static int64_t im_close_at = 0; /* when a field-opened keyboard closes; 0 for never */
+ static uint32_t custom_width = 0;
+@@ -142,7 +143,7 @@
+ static bool
+ stroke_can_start(struct key *k)
+ {
+-    if (!swipe_mode || !is_letter(k) || (keyboard.mods & (Ctrl | Alt | Super)))
++    if (!swipe_mode || im_private || !is_letter(k) || (keyboard.mods & (Ctrl | Alt | Super)))
+         return false;
+     for (int i = 0; i < MAX_FINGERS; i++)
+         if (fingers[i].down)
+@@ -739,12 +740,14 @@
+ im_activate(void *data, struct zwp_input_method_v2 *zwp_input_method_v2)
+ {
+     im_wanted = true;
++    im_private_wanted = false; /* until this field's content type says otherwise */
+ }
+ 
+ void
+ im_deactivate(void *data, struct zwp_input_method_v2 *zwp_input_method_v2)
+ {
+     im_wanted = false;
++    im_private_wanted = false;
+ }
+ 
+ void
+@@ -761,11 +764,22 @@
+ void im_content_type(void *data, struct zwp_input_method_v2 *zwp_input_method_v2,
+                      uint32_t hint, uint32_t purpose)
+ {
++    /* text-input-v3: password and pin purposes, hidden_text and sensitive_data hints */
++    im_private_wanted = purpose == 8 || purpose == 9 || (hint & (0x40 | 0x80));
+ }
+ 
+ void
+ im_done(void *data, struct zwp_input_method_v2 *zwp_input_method_v2)
+ {
++    if (im_private_wanted != im_private) {
++        im_private = im_private_wanted;
++        /* autocorrect.py stays out of it: \x05 entering, \x06 leaving */
++        if (keyboard.print) {
++            printf(im_private ? "\x05" : "\x06");
++            fflush(stdout);
++        }
++    }
++
+     /* Only a keyboard a text field opened closes with it, and after a delay, since
+      * moving between fields deactivates the old one before activating the new one. */
+     if (im_wanted == im_active)

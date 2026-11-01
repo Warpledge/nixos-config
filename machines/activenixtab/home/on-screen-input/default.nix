@@ -43,6 +43,7 @@
         ./wvkbd-pad-lit.patch
         ./wvkbd-unlatch-glow.patch
         ./wvkbd-glyph-size.patch
+        ./wvkbd-private-fields.patch
       ];
   });
 

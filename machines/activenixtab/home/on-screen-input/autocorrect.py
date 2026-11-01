@@ -43,6 +43,9 @@ WORDS = os.path.join(STATE_DIR, "osk-words")
 PAUSE = 5.0  # seconds without a key after which a word's start can't be trusted
 DELIMITERS = " .,!?;:"
 SKIP_APPS = ("kitty", "ghostty", "foot", "alacritty", "konsole", "keepassxc")
+SKIP_FILE = os.path.join(
+    os.environ.get("XDG_CONFIG_HOME", os.path.expanduser("~/.config")), "osk-autocorrect-skip"
+)
 
 # Letter rows and their left offsets in key widths; keep in sync with
 # wvkbd-layout.patch
@@ -277,6 +280,15 @@ def niri(what):
     return json.loads(out.stdout)
 
 
+def own_skip_list():
+    """App ids to skip, one per line, read each time so edits apply at once."""
+    try:
+        with open(SKIP_FILE) as f:
+            return tuple(line.strip().lower() for line in f if line.strip())
+    except OSError:
+        return ()
+
+
 def safe_to_correct():
     """False in terminals and password managers, and over polkit or the lock screen."""
     try:
@@ -284,7 +296,8 @@ def safe_to_correct():
         grabbed = any(s["keyboard_interactivity"] == "Exclusive" for s in niri("layers"))
     except Exception:
         return False
-    return bool(app) and not grabbed and not any(s in app.lower() for s in SKIP_APPS)
+    skipped = SKIP_APPS + own_skip_list()
+    return bool(app) and not grabbed and not any(s in app.lower() for s in skipped)
 
 
 class Typist:
@@ -350,6 +363,7 @@ class Corrector:
         self.pending = None  # an edit waiting for wvkbd to let go of its key
         self.stroke = None  # the keys of a stroke being read
         self.previous = None  # the word before this one, if it's the same sentence
+        self.private = False  # a password or PIN field has focus
         self.before_swipe = None  # self.previous before the last stroke's word
 
     def replacement(self, typed):
@@ -375,6 +389,15 @@ class Corrector:
             self.after_word = True
 
     def key(self, ch, now):
+        # A password or PIN field, when the app reports one: nothing is read or kept
+        if ch in "\x05\x06":
+            self.private = ch == "\x05"
+            self.word, self.clean, self.previous = "", ch == "\x06", None
+            self.last_fix, self.last_swiped, self.pending = None, "", None
+            self.after_word = False
+            return
+        if self.private:
+            return
         # wvkbd still holds a key until this marker, and the same key can't be pressed
         # twice, so anything that retypes or erases waits for it. A new key before the
         # marker means fast typing: its edit would land in the wrong place, so drop it.
