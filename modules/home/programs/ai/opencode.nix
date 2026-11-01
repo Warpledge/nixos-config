@@ -19,9 +19,16 @@
     programs.opencode = {
       enable = true;
       enableMcpIntegration = true;
+      #--- Leaves opencode.json and cli.json writable, so TUI changes stick; the
+      #--- blocks below still apply, through home-manager*.json and OPENCODE_*
+      mutableSettings = true;
       settings.share = "disabled"; # No /share uploads to opencode.ai
       #--- cli.json, which OpenCode 2 reads instead of the ignored tui.json
-      cli.theme = "dank"; # written by DMS's matugen (theme/matugen.nix)
+      #--- Object form keeps the mode the old hand-written cli.json had
+      cli.theme = {
+        name = "dank"; # written by DMS's matugen (theme/matugen.nix)
+        mode = "system";
+      };
       #--- Ask before touching paths outside the project (v1's default; v2 allows),
       #--- except /tmp, where local models keep scratch notes. The last match wins
       settings.permissions = [
