@@ -147,7 +147,7 @@
       };
       steamGames = {
         "3008130" = {
-          launchOptions = "PROTON_FSR4_UPGRADE=1 ENABLE_LAYER_MESA_ANTI_LAG=1 PROTON_NO_FSYNC=1 PROTON_NO_ESYNC=1 STEAMDECK=1 SteamOS=1 gamemoderun nix-gamescope -w 2560 -h 1600 -r 180 -F fsr --mangoapp --force-grab-cursor -- %command%";
+          launchOptions = "PROTON_NO_FSYNC=1 PROTON_NO_ESYNC=1 PROTON_FSR4_UPGRADE=1 PROTON_FSR4_INDICATOR=1 PROTON_FSR3_UPGRADE=1 MANGOHUD=1 STEAMDECK=1 SteamOS=1 %command%";
           proton = "Proton-CachyOS Latest";
         };
       };
