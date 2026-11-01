@@ -26,34 +26,34 @@ import evdev  # noqa: E402
 from evdev import AbsInfo, UInput  # noqa: E402
 from evdev import ecodes as e  # noqa: E402
 
-STICK_TRAVEL = 90  # logical px of finger travel for a full stick
-PAD_TRAVEL = 140  # the same for the right pad
+STICK_TRAVEL = 60  # logical px of finger travel for a full stick
+PAD_TRAVEL = 90  # the same for the right pad
 HAT_DEAD_ZONE = 0.25  # share of the D-pad's radius that presses nothing
 TAP_SECONDS = 0.2  # a stick touch this short, barely moving, clicks it (L3/R3)
 TAP_TRAVEL = 15
 CLICK_SECONDS = 0.08
 HIT_SLACK = 1.2  # how far outside a control a landing finger still counts
-UI_SCALE = 1 / 1200  # sizes below are px at 1200 px on the screen's short side
 
-# name, kind, code, label, x and y (share of the screen), radius or half-width and height
+# name, kind, code, label, x, y, radius or (half-width, half-height), in logical px.
+# x counts from the left edge, or from the right if negative; y up from the bottom
 CONTROLS = [
-    ("lt", "trigger", e.ABS_Z, "LT", 0.08, 0.07, (130, 50)),
-    ("lb", "button", e.BTN_TL, "LB", 0.08, 0.17, (130, 50)),
-    ("rt", "trigger", e.ABS_RZ, "RT", 0.92, 0.07, (130, 50)),
-    ("rb", "button", e.BTN_TR, "RB", 0.92, 0.17, (130, 50)),
-    ("select", "button", e.BTN_SELECT, "Select", 0.39, 0.07, (70, 40)),
-    ("guide", "button", e.BTN_MODE, "Guide", 0.5, 0.07, (70, 40)),
-    ("start", "button", e.BTN_START, "Start", 0.61, 0.07, (70, 40)),
-    ("close", "close", None, "✕", 0.5, 0.17, 40),
-    ("lstick", "stick", e.BTN_THUMBL, "", 0.1, 0.42, 130),
-    ("dpad", "hat", None, "", 0.27, 0.62, 120),
-    ("lpad", "hat", None, "", 0.1, 0.78, 150),
-    ("rstick", "stick", e.BTN_THUMBR, "", 0.73, 0.62, 130),
-    ("rpad", "pad", None, "", 0.9, 0.78, 150),
-    ("y", "button", e.BTN_Y, "Y", 0.9, 0.3, 58),
-    ("x", "button", e.BTN_X, "X", 0.84, 0.42, 58),
-    ("b", "button", e.BTN_B, "B", 0.96, 0.42, 58),
-    ("a", "button", e.BTN_A, "A", 0.9, 0.54, 58),
+    ("lt", "trigger", e.ABS_Z, "LT", 65, 440, (55, 24)),
+    ("lb", "button", e.BTN_TL, "LB", 185, 440, (55, 24)),
+    ("select", "button", e.BTN_SELECT, "Select", 300, 440, (45, 24)),
+    ("guide", "button", e.BTN_MODE, "Guide", 395, 440, (45, 24)),
+    ("lstick", "stick", e.BTN_THUMBL, "", 95, 300, 70),
+    ("dpad", "hat", None, "", 290, 270, 65),
+    ("lpad", "hat", None, "", 110, 105, 80),
+    ("rt", "trigger", e.ABS_RZ, "RT", -65, 440, (55, 24)),
+    ("rb", "button", e.BTN_TR, "RB", -185, 440, (55, 24)),
+    ("start", "button", e.BTN_START, "Start", -300, 440, (45, 24)),
+    ("close", "close", None, "✕", -395, 440, (45, 24)),
+    ("y", "button", e.BTN_Y, "Y", -105, 352, 30),
+    ("x", "button", e.BTN_X, "X", -167, 290, 30),
+    ("b", "button", e.BTN_B, "B", -43, 290, 30),
+    ("a", "button", e.BTN_A, "A", -105, 228, 30),
+    ("rstick", "stick", e.BTN_THUMBR, "", -290, 250, 70),
+    ("rpad", "pad", None, "", -110, 100, 80),
 ]
 STICK_AXES = {"lstick": (e.ABS_X, e.ABS_Y), "rstick": (e.ABS_RX, e.ABS_RY)}
 
@@ -112,21 +112,17 @@ def to_px(pos):
     return x * output["width"], y * output["height"]
 
 
-def scale():
-    return min(output["width"], output["height"]) * UI_SCALE
-
-
 def center(control):
-    return control[4] * output["width"], control[5] * output["height"]
+    x = control[4] if control[4] >= 0 else output["width"] + control[4]
+    return x, output["height"] - control[5]
 
 
 def hit(control, x, y):
     cx, cy = center(control)
     size = control[6]
-    s = scale() * HIT_SLACK
     if isinstance(size, tuple):
-        return abs(x - cx) <= size[0] * s and abs(y - cy) <= size[1] * s
-    return math.hypot(x - cx, y - cy) <= size * s
+        return abs(x - cx) <= size[0] * HIT_SLACK and abs(y - cy) <= size[1] * HIT_SLACK
+    return math.hypot(x - cx, y - cy) <= size * HIT_SLACK
 
 
 def control_at(x, y, kinds=None):
@@ -154,7 +150,7 @@ def take_screen(device):
 
 
 def axis(travel, full):
-    return max(-32767, min(32767, round(travel / (full * scale()) * 32767)))
+    return max(-32767, min(32767, round(travel / full * 32767)))
 
 
 def hat_value(dx, dy, radius):
@@ -187,7 +183,7 @@ def wanted_state():
             axes[e.ABS_RY] = axis(y - y0, PAD_TRAVEL)
         elif kind == "hat":
             cx, cy = center(owner)
-            hx, hy = hat_value(x - cx, y - cy, owner[6] * scale())
+            hx, hy = hat_value(x - cx, y - cy, owner[6])
             hat_x, hat_y = hat_x or hx, hat_y or hy
         else:
             # A finger on a button can slide to the next one, as on real ABXY
@@ -327,17 +323,16 @@ def control_active(control, keys, axes):
 
 def draw_shape(cr, control, active):
     cx, cy = center(control)
-    s = scale()
     size = control[6]
     if isinstance(size, tuple):
-        w, h = size[0] * s, size[1] * s
+        w, h = size
         cr.new_path()
         cr.arc(cx - w + h, cy, h, math.pi / 2, 3 * math.pi / 2)
         cr.arc(cx + w - h, cy, h, 3 * math.pi / 2, math.pi / 2)
         cr.close_path()
     else:
         cr.new_path()
-        cr.arc(cx, cy, size * s, 0, 2 * math.pi)
+        cr.arc(cx, cy, size, 0, 2 * math.pi)
     paint(cr, colours["active"] if active else colours["fill"], 0.55 if active else 0.25)
     cr.fill_preserve()
     paint(cr, colours["line"], 0.7)
@@ -348,7 +343,7 @@ def draw_shape(cr, control, active):
 def draw_label(cr, control):
     cx, cy = center(control)
     cr.select_font_face(sys.argv[2])
-    cr.set_font_size(30 * scale())
+    cr.set_font_size(18)
     extents = cr.text_extents(control[3])
     cr.move_to(cx - extents.width / 2 - extents.x_bearing, cy - extents.height / 2 - extents.y_bearing)
     paint(cr, colours["text"], 0.9)
@@ -358,7 +353,7 @@ def draw_label(cr, control):
 def draw_hat(cr, control):
     # Lines between the eight directions' four main arms
     cx, cy = center(control)
-    r = control[6] * scale()
+    r = control[6]
     paint(cr, colours["line"], 0.5)
     cr.set_line_width(2)
     for a in range(4):
@@ -370,7 +365,7 @@ def draw_hat(cr, control):
 
 def draw_knob(cr, control):
     cx, cy = center(control)
-    r = control[6] * scale()
+    r = control[6]
     kx, ky = knob_at.get(control[0], (0, 0))
     cr.new_path()
     cr.arc(cx + kx * r * 0.5, cy + ky * r * 0.5, r * 0.45, 0, 2 * math.pi)
