@@ -31,6 +31,9 @@
         name = "dank"; # written by DMS's matugen (theme/matugen.nix)
         mode = "system";
       };
+      #--- OpenCode sounds each event itself, so a DMS popup would add a second
+      #--- sound. Sound stays on through cli.json; only the popup is dropped
+      cli.attention.notifications = false;
       #--- Ask before touching paths outside the project (v1's default; v2 allows),
       #--- except /tmp, where local models keep scratch notes. The last match wins
       settings.permissions = [
