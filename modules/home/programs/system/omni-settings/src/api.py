@@ -548,7 +548,7 @@ def cmd_local_models(cfg, args):
                           "note": v.get("note", "")} for k, v in profs.items()],
             "models": models,
             "files": localmodelstate.scan({**(localmodelstate.catalog(cfg.flake).get("edit") or {}),
-                                           **{m: e for m, (_, e) in entries.items()}}, knows),
+                                           **entries}, knows),
             "canTest": bool(os.environ.get("OMNI_SETTINGS_LLAMA_SERVER"))}
 
 
