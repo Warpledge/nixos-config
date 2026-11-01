@@ -27,9 +27,14 @@
       mimeTypes = {};
       windowRules = {
         custom-helium-translucent = {
+          matches = [{app-id = "^helium$";} {app-id = "^chrome-.*-Default$";}];
           name = "Helium Translucent";
           translucent = true;
-          matches = [{app-id = "^helium$";} {app-id = "^chrome-.*-Default$";}];
+        };
+        custom-obsidian = {
+          matches = [{app-id = "^md\\.obsidian\\.Obsidian$";}];
+          name = "Obsidian";
+          translucent = true;
         };
       };
       claude.mods.ribbon = false;
