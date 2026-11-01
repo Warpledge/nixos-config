@@ -212,6 +212,9 @@
       keybinds = {};
       localAi.models = [];
       localAi.default = null;
+      opencode.plugins.usageBar = true;
+      opencode.plugins.desktopBar = true;
+      opencode.plugins.rebuildBadge = true;
     };
   };
 
@@ -349,4 +352,6 @@
   clamav.enable = false;
   suwayomi.enable = false;
   sunshine.enable = false;
+  faceAuth.enable = false;
+  faceAuth.darkThreshold = 90;
 }
