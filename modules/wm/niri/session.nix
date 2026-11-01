@@ -58,6 +58,9 @@ in {
   #--- on the OLED). Its launcher includes this file. The DMS fragments are
   #--- copied into /var/lib/dms-greeter at greetd start, like the theme.
   systemd.services.greetd.environment.XCURSOR_PATH = cursorIcons;
+  #--- PAM's XCURSOR_PATH points at the system profile, which has no theme
+  #--- beyond hicolor; Stylix installs the cursor only in user profiles.
+  environment.systemPackages = [config.stylix.cursor.package];
   environment.etc."greetd/niri_overrides.kdl".text = ''
     cursor {
         xcursor-theme "${config.stylix.cursor.name}"
