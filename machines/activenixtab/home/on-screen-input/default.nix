@@ -42,7 +42,6 @@
         ./wvkbd-pad-lit.patch
         ./wvkbd-unlatch-glow.patch
         ./wvkbd-glyph-size.patch
-        ./wvkbd-game-layer.patch
       ];
   });
 
@@ -67,7 +66,6 @@
     { [ -e "${folioState}" ] || [ -e "${autoOffState}" ]; } && export WVKBD_IM_BLOCKED=1
     [ -e "${autocorrectState}" ] && export WVKBD_AUTOCORRECT=1
     [ -e "${config.xdg.stateHome}/osk-pad-on" ] && export WVKBD_PAD=1 # touch-gestures.py
-    export WVKBD_GAME_STATE="${config.xdg.stateHome}/osk-game-on" # touch-gestures.py
     # Type through uinput, so niri's binds, keyd and polkit prompts see the keys
     export WVKBD_UINPUT=1
     # shellcheck disable=SC2086 # one flag per word
@@ -95,6 +93,14 @@
       pkill --signal USR2 -f 'autocorrect\.py'
     fi
     pkill --signal RTMIN+1 -x wvkbd-deskintl
+  '';
+
+  #--- Opens or closes the touchscreen gamepad; the path matches wm/niri.nix
+  gamepad-toggle = pkgs.writeShellScriptBin "osk-gamepad" ''
+    pkill -f 'gamepad\.py' && exit 0
+    pkill --signal USR1 -x wvkbd-deskintl
+    exec ${pkgs.python3.withPackages (p: [p.evdev])}/bin/python3 -I ${./gamepad.py} \
+      /dev/input/by-path/platform-AMDI0010:00-event
   '';
 
   #--- Off switch for opening on text fields
@@ -137,7 +143,7 @@ in {
   #--------------------------------------------------------------------#
   #-- Keyboard
   #--------------------------------------------------------------------#
-  home.packages = [osk-toggle pad-mode autocorrect-toggle swipe-toggle auto-toggle];
+  home.packages = [osk-toggle pad-mode autocorrect-toggle swipe-toggle auto-toggle gamepad-toggle];
 
   systemd.user.services.wvkbd = {
     Unit = {
@@ -214,6 +220,13 @@ in {
     action.spawn = ["${swipe-toggle}/bin/osk-swipe"];
   };
 
+  #--- The gamepad key on the Fn layer: KEY_F16 is this keysym in xkb
+  niri.keybinds.osk-gamepad = {
+    key = "XF86Launch7";
+    title = "Touchscreen gamepad on / off";
+    action.spawn = ["${gamepad-toggle}/bin/osk-gamepad"];
+  };
+
   #--- The keyboard paints a translucent panel; niri blurs what's under it
   programs.niri.settings.layer-rules = [
     {
@@ -236,5 +249,7 @@ in {
       button "touchpadToggle" "Touchpad mode" "touch_app" (lib.getExe pad-mode) "";
     autocorrectToggle.src =
       button "autocorrectToggle" "Autocorrect" "spellcheck" (lib.getExe autocorrect-toggle) "";
+    gamepadToggle.src =
+      button "gamepadToggle" "Touchscreen gamepad" "sports_esports" (lib.getExe gamepad-toggle) "";
   };
 }

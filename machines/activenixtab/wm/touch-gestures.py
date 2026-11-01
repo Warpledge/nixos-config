@@ -31,11 +31,9 @@ EDGE_HOLD = 0.4
 # KEYBOARD_STRIP matches `height` in home/on-screen-input/default.nix
 BAR_STRIP = 36
 KEYBOARD_STRIP = 390
-# The game block's width (GAME_WIDTH in wvkbd-game-layer.patch), while GAME_STATE exists
-GAME_STRIP_WIDTH = 640
-STATE_DIR = os.environ.get("XDG_STATE_HOME", os.path.expanduser("~/.local/state"))
-PAD_STATE = os.path.join(STATE_DIR, "osk-pad-on")
-GAME_STATE = os.path.join(STATE_DIR, "osk-game-on")
+PAD_STATE = os.path.join(
+    os.environ.get("XDG_STATE_HOME", os.path.expanduser("~/.local/state")), "osk-pad-on"
+)
 edge_command = sys.argv[2:]
 
 src = evdev.InputDevice(sys.argv[1])
@@ -166,6 +164,56 @@ def on_pad_flip(*_):
 
 signal.signal(signal.SIGUSR2, on_pad_flip)
 
+GAMEPAD_PID = os.path.join(
+    os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}"), "osk-gamepad.pid"
+)
+gamepad_pid = None  # the gamepad holding the touchscreen (home/on-screen-input)
+gamepad_asked = False  # set by SIGUSR1, acted on between frames
+
+
+def on_gamepad(*_):
+    global gamepad_asked
+    gamepad_asked = True
+
+
+signal.signal(signal.SIGUSR1, on_gamepad)
+
+
+def pause_for_gamepad():
+    # Lift whatever's down, then let go so the gamepad can take the touchscreen
+    global mode, gamepad_pid, pad_on, held
+    try:
+        with open(GAMEPAD_PID) as pid:
+            gamepad_pid = int(pid.read())
+    except (OSError, ValueError):
+        return
+    if mode == "gesture":
+        pad_frame(lift=True)
+    if tp_fingers:
+        tp_frame({})
+    lift_screen(list(slots))
+    slots.clear()
+    start.clear()
+    routed.clear()
+    key_sent.clear()
+    held = []
+    mode = "idle"
+    if pad_on:
+        pad_on = False
+        light_pad_key(False)
+    src.ungrab()
+
+
+def resume_after_gamepad():
+    global gamepad_pid, cur, frame, frame_slot
+    if os.path.exists(f"/proc/{gamepad_pid}"):
+        return False
+    gamepad_pid = None
+    src.grab()
+    cur = frame_slot = src.absinfo(e.ABS_MT_SLOT).value
+    frame = []
+    return True
+
 
 def light_pad_key(on):
     """The state file is for a keyboard that starts later (home/on-screen-input)."""
@@ -194,7 +242,7 @@ def screen_state():
         try:
             logical = niri_msg("focused-output")["logical"]
             shown = any(s["namespace"] == "wvkbd" for s in niri_msg("layers"))
-            screen_cache = (now, (logical, shown, os.path.exists(GAME_STATE)))
+            screen_cache = (now, (logical, shown))
         except Exception:
             screen_cache = (now, None)
     return screen_cache[1]
@@ -204,11 +252,9 @@ def on_keyboard(pos):
     state = screen_state()
     if not state or not state[1]:
         return False
-    logical, _, game = state
-    x, y = on_screen(pos, logical["transform"])
-    if game and x * logical["width"] >= GAME_STRIP_WIDTH:
-        return False
-    return y * logical["height"] >= logical["height"] - KEYBOARD_STRIP
+    logical = state[0]
+    y = on_screen(pos, logical["transform"])[1] * logical["height"]
+    return y >= logical["height"] - KEYBOARD_STRIP
 
 
 def in_pad_area(pos):
@@ -217,10 +263,11 @@ def in_pad_area(pos):
     state = screen_state()
     if not state:
         return False  # can't tell where the strips are: leave the screen working
-    logical = state[0]
+    logical, shown = state
     tp_t = logical["transform"]
     y = on_screen(pos, tp_t)[1] * logical["height"]
-    return y >= BAR_STRIP and not on_keyboard(pos)
+    bottom = logical["height"] - (KEYBOARD_STRIP if shown else 0)
+    return BAR_STRIP <= y < bottom
 
 
 def tp_offset(dx, dy):
@@ -458,6 +505,15 @@ frame_slot = cur
 try:
     while True:
         touchpad_switch()
+        if gamepad_asked:
+            gamepad_asked = False
+            if gamepad_pid is None:
+                pause_for_gamepad()
+        if gamepad_pid is not None:
+            if not resume_after_gamepad():
+                pad_flip = False
+                time.sleep(0.2)
+            continue
         if pad_flip:
             pad_flip = False
             pad_on = not pad_on
