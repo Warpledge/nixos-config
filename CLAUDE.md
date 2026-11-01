@@ -35,7 +35,7 @@ When something fails repeatedly, the user has to re-explain, or a tool limitatio
 11. **`rm` takes literal paths.** Write the absolute path, never `$VAR` (`rm /run/user/1000/a`, not `rm $XDG_RUNTIME_DIR/a`), and run each deletion as its own command, never chained onto a read-only check or hidden in a script.
 12. **Do not make any changes until you have 95% confidence in what you need to build.** Ask me follow-up questions until you reach that confidence. For work across several files or modules, enter plan mode first and get the plan approved.
 
-`AGENTS.md` is the local AI's standalone, condensed copy of this file (same rule numbers, plus guidance for a smaller model). When a rule, path, workflow or gotcha changes here or in a folder's `CLAUDE.md` (condensed under its **Folder rules**), update it in the same commit; the two never contradict.
+`AGENTS.md` is the standalone copy for opencode, Zed's agent and Pi (same rule numbers, plus guidance the smaller models need), and every folder's `CLAUDE.md` is symlinked as `AGENTS.md` so opencode loads it on read. When a rule, path, workflow or gotcha changes here or in a folder's `CLAUDE.md` (condensed under AGENTS.md's **Folder rules**), update it in the same commit; the files never contradict.
 
 Only `.claude/settings.json` is tracked; before committing a change to it, and in any CLAUDE.md audit, do the **maintenance check** in `modules/home/programs/ai/CLAUDE.md`. The post-edit hook (alejandra plus repo checks) runs on `Write|Edit` only, so edit tracked files with Edit or Write, not `sed` or a heredoc.
 
@@ -134,6 +134,7 @@ Most tasks have a skill whose description says when to use it (`add-app`, `freet
 
 - **Add an app:** `add-app`. An app not in nixpkgs is an AppImage wrap or a patched `.deb`/tarball before a Flatpak, the last resort.
 - **Add a system service:** the toggle goes in `machines/_template/settings.nix` (off) and the machine's `settings.nix`, the module in `modules/nixos/services/<category>/<name>.nix`, the import (`lib.optionals machine.<name>.enable [...]`) in `modules/nixos/default.nix`, and an entry in `setup.sh`'s `services` list.
+- **A QML, plugin or app change:** run it before committing. A passing build proves it packages, not that the page renders or the button fires.
 - **Update flake inputs:** point the user at the user-only `/flake-update [input…]` skill (`nixm upgrade` minus the rebuild).
 - **New computer, reinstall or person:** `./setup.sh` / `./setup.sh add-user`, run by the person; never here (sudo, `nixos-rebuild`).
 - **Bring Hyprland back:** restore from the `hyprland-backup` branch, re-add `"hyprland"` to `windowManager` in `lib/settings.nix`, set it in the machine's `settings.nix`.
@@ -195,8 +196,10 @@ Comment only what the code doesn't make obvious, for someone reading the file co
 | An app's own config syntax | `nix-shell -p <pkg> --run 'man <name>'` |
 
 - **Check for a home-manager module before `home.packages`:** `find /nix/store -maxdepth 4 -path '*/modules/programs/<pkg>.nix' | head -1`; if it returns a path, use `programs.<pkg>`.
-- **Filter at the source.** Man pages, store listings and long files go through `grep`/`sed`, never whole into the conversation. Don't `cat` a folder `CLAUDE.md`: Claude Code loads it when you read a file there. Need several sections of one document? Dump it once to a file and grep that.
+- **Filter at the source.** Man pages, store listings and long files go through `grep`/`sed`, never whole into the conversation. Don't `cat` a folder `CLAUDE.md`: Claude Code and opencode load it when you read a file there. Need several sections of one document? Dump it once to a file and grep that.
 - **Stop once you have the answer.** A package's man page is authoritative for its config syntax; skip the nixpkgs derivation. Don't guess doc URLs: after two failed fetches, use a local source.
+- **A plugin's RPC or an SDK's shape comes from its installed types**, not memory: read the `.d.ts` under `node_modules/@opencode-ai/sdk/` for `input`, `output` and `events`, and `curl` an endpoint before coding against it.
+- **Name the file and line that proves an interface before writing against it.** If it does not exist, ask.
 
 ## Reference Notes (`docs/`)
 
