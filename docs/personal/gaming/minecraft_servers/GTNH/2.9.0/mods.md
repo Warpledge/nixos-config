@@ -1,8 +1,10 @@
 # GTNH 2.9.0 Added Mods
 
-The hand-added mods, checked against the 2.9.0 pack on 2026-11-01. Descriptions of what
-each mod does are in the [2.8.4 write-ups](../2.8.4/mods.md); this page records which
-build to use and what changed.
+The hand-added mods, checked against the 2.9.0 pack and against each mod's releases on
+2026-11-01. Descriptions of what each mod does are in the
+[2.8.4 write-ups](../2.8.4/mods.md); this page records which build to use and what
+changed. Every mod below was looked up on GitHub, Modrinth or CurseForge: the only one
+with a newer 1.7.10 build than the 2.8.4 jar is Euphoria Patcher.
 
 `Side`: **B** goes on client and server, **C** is client only.
 
@@ -28,14 +30,14 @@ Do not add these: the pack carries its own copy.
 | EZStorage | 1.8.2 | B | builds against GTNHLib 0.11.52, NEI 2.8.158 |
 | Programmable Hatches | 0.2.1p2-beta | B | builds against GTNHLib 0.11.54, NEI 2.8.171 |
 | NH-Utilities | 1.7.0 | B | commit "Fit 29x" |
-| ModernKeyBinding | 2.1.0 | C | no GT API use |
-| MineMenu | 1.2.0 | C | unchanged since 2.8.4 |
-| Spark | 1.10.19 | C | 2.9 no longer ships it |
-| BetterSprinting | 1.1.3 | B | no GT API use |
-| deconfigintegration | 1.0.2 | B | no GT API use |
-| FPS Reducer | 1.10.3 | C | no GT API use |
-| Trash Slot | 1.0.31 | B | no GT API use |
-| ElytraMining | 1.2.0.1 | B | last release 2023, no GT API use |
+| ModernKeyBinding | 2.1.0 | C | latest Forge 1.7.10 on Modrinth |
+| MineMenu | 1.2.0.B44 | C | latest on Modrinth, 2025-12-07 |
+| Spark | 1.10.19 | C | latest 1.7.10; the `1.10.35` in the old notes was wrong |
+| BetterSprinting | 1.1.3 | B | latest for 1.7.10; 2.3.0 is 1.12.2 |
+| deconfigintegration | 1.0.2 | B | no public release page found |
+| FPS Reducer | 1.10.3 | C | latest, 2023-09-06 |
+| Trash Slot | 1.0.31 | B | latest 1.7.10 on CurseForge |
+| ElytraMining | 1.2.0.1 | B | latest, 2023, no GT API use |
 
 ## Left out until their author ships a 2.9 build
 
@@ -57,7 +59,14 @@ Install them, and pull any one that crashes or misbehaves on the first launch.
   the pack ships 2.2.43, newer than the build names.
 - **Dynamic Surroundings 1.0.7.7** and **Sound-Physics 1.1.1**: mix into rendering and
   audio, which moved to Celeritas.
-- **Euphoria Patcher 1.8.6**: shader support changed with the renderer.
+- **Euphoria Patcher**: update to `1.10.5-r5.9.3` (2026-09-15), the latest Forge 1.7.10
+  build. It has to match the Complementary version the shader pack uses. Shader support
+  changed with the renderer.
+
+## Quest data
+
+- **Twist-Stuff**: the repo has a "2.9 Update" commit from 2026-08-27. Copy the 2.9
+  quest set into BetterQuesting, not the 2.8.4 one from the old instance.
 
 ## Found in the instance but missing from the 2.8.4 notes
 
