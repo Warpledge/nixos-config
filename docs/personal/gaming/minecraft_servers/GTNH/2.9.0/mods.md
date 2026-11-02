@@ -78,6 +78,22 @@ StructureLib, GTSWN needs AE2, the other two only GregTech. The four Miao mods o
 GTNL in role (steam tiers, singularity tech, large storage) but share no IDs or
 recipes, and the server boots with both installed.
 
+Three more joined them later on 2026-11-02, also client and server:
+
+| Mod | Build | Side | Note |
+| --- | --- | --- | --- |
+| TenkeiTech | 1.1.0 | B | AE automation: Better ME Requester, ME Super Pattern Buffer and proxy, auto template input buses, pattern circuit writer, wireless ME network core; needs `ae2fc` and ServerUtilities |
+| ThinkTech | 0.3.1 | B | chemistry and materials: briquettes, methane clathrate, catalysts, computing chips, explosives (PETN, HMX, HNIW), separation control cores |
+| Fission-Evolved | 0.1.1 | B | nine custom fuel rods, an IV multiblock fission reactor and a UMV-tier generator; rewrites TST and GTNL endgame fuel recipes when both are installed, by design |
+
+TenkeiTech and Programmable Hatches meet in the same workflow but are not duplicates:
+Programmable Hatches sets a machine's virtual circuit through a Programming Cover and
+the Programming Circuit item, for any GT bus, while TenkeiTech writes circuit numbers into
+AE patterns in bulk and gives its own template buses a virtual circuit slot. Fission
+Evolved's baseline is 2.9.0-beta-2, the oldest of the three, so its endgame machines are
+the least tested. TenkeiTech has AE2 and client mixins; ThinkTech and Fission Evolved have
+none.
+
 ## Left out until their author ships a 2.9 build
 
 - **AE2Things 1.2.14**: built against 2.8.4's AE2 `rv3-beta-695`, `AE2FluidCraft 1.4.120`
