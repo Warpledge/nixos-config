@@ -22,6 +22,11 @@ Do not add these: the pack carries its own copy.
 | Mod | 2.9 build | Side | Evidence |
 | --- | --- | --- | --- |
 | GT: Not Leisure (GTNL) | 0.2.7-rc2.1 | B | README: 2.9.0 needs `0.2.7+` |
+
+**GTNL needs two jars the pack does not ship:** `gtnllib-1.1.1.jar` and
+`bqapi-1.1.3.jar` (GTNLLib >= 1.1, BetterQuestingAPI >= 1.1.3). Without GTNLLib the
+game stops before the main menu with `NoClassDefFoundError: com/gtnllib/mod/ModList`.
+The RC was built against GTNLLib 1.1.1; 1.1.3 exists but is newer than the build.
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
 | Twist Space Technology | 0.8.0-RC2.9 | B | release tag, 2026-10-27 |
 | 123Technology | 2.2.0.1 | B | built against `2.9.0-RC-2` |
