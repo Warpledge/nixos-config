@@ -177,7 +177,7 @@ files.
 
 ## Added Mod Configs
 
-These three files appear once the mod is installed. Start from the 2.8.4 values, then
+These files appear once the mod is installed. Start from the 2.8.4 values, then
 check the new version's file for added keys.
 
 - **GTNL**: 0.2.7 splits its config through GTNHLib into
@@ -191,3 +191,22 @@ check the new version's file for added keys.
 - **EZNuclear**: `config/EZNuclear.cfg` → `B:DEExplosion=false`, `B:IC2Explosion=false` [true]
 - **NH-Utilities**: `config/NHUtilities/NHUtilities.cfg` → the table in
   [2.8.4 mods.md](../2.8.4/mods.md#nh-utilities--qol-utilities).
+- **YesSteveModel Unofficial**: `config/ysmu.cfg`, left at the values the mod writes on
+  first launch. It also creates `config/ysmu/`: `custom/` for added models, `builtin/`
+  for the ones unpacked from the jar (`default`, `misc`, `wine_fox`), plus `auth/`,
+  `cache/` and `export/`. Both sides need the folder: the server keeps its models in
+  `custom/` and syncs them to each player who joins (`/ysm sync` resyncs, `/ysm reload`
+  rebuilds the cache, OP only), and a client model can be uploaded up to
+  `MaxModelUploadMb=64`. `debug { * }` stays off for normal play.
+
+  A model dropped into `custom/` is picked up by `/ysmclient load` without a restart;
+  that is the command behind the log line `Local model load complete: registered=24,
+  skipped=0, failed=0` (first launch, 2026-11-02). Five warnings name `lance` animations
+  of the builtin `default` model as unreachable on 1.7.10; that content ships in the jar
+  and is harmless.
+
+  The model GUI is **Alt+Y**: `PlayerModelScreenKey` checks `KEY_LMENU` (56) or
+  `KEY_RMENU` (184) itself, and Controls only lists the Y part, so Y alone does nothing.
+  `general { DisclaimerShow=true }` puts a disclaimer screen in front of the GUI the
+  first time. Alt+P opens the extra player render config, Z the animation roulette and L
+  its lock; those three have no modifier.

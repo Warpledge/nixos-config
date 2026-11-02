@@ -20,7 +20,8 @@ backup; the new one is a separate folder.
 The same folder is unpacked on eclipse, with the mods and configs below copied over, for
 testing before it goes to the laptop:
 
-- `start.sh` in the server folder runs the server with 8G heap and a crash-restart loop.
+- `start.sh` in the server folder runs the server with 6G heap and a crash-restart loop.
+  The laptop module raises it to 12G.
 - `~/.local/bin/gtnh` is a local copy of the laptop launcher: `gtnh` starts or attaches
   the tmux session, `gtnh log`, `gtnh stop`, `gtnh status`.
 - The client connects to `localhost:25566`.
@@ -43,6 +44,7 @@ From [mods.md](./mods.md), the **B** rows:
   123Technology `OTHTechnology-2.2.0.1-git.3+2b1a0b5fbd.jar` (PR #269), EZMiner 6.2,
   EZNuclear 1.1.1, EZStorage 1.8.2, NH-Utilities 1.7.0, Programmable Hatches 0.2.1p2-beta
 - ElytraMining 1.2.0.1, Trash Slot 1.0.31, SharedProspecting 2.0.4
+- YesSteveModel Unofficial 1.9, with its models in `config/ysmu/custom/`
 - The EZStorage script `scripts/simplestorage_gregified.zs` must be on the server too, or
   the recipes differ from the client.
 

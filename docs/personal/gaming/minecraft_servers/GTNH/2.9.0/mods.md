@@ -22,6 +22,20 @@ Do not add these: the pack carries its own copy.
 | Mod | 2.9 build | Side | Evidence |
 | --- | --- | --- | --- |
 | GT: Not Leisure (GTNL) | 0.2.7-rc2.1 | B | README: 2.9.0 needs `0.2.7+` |
+| GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
+| Twist Space Technology | 0.8.0-RC2.9 PR build | B | release crashes on 2.9.0 stable; use PR #1386 |
+| 123Technology | 2.2.0.1 PR build | B | release crashes on 2.9.0 stable; use PR #269 |
+| EZMiner | 6.2 | B | built against `2.9.0-beta-3` |
+| EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
+| EZStorage | 1.8.2 | B | builds against GTNHLib 0.11.52, NEI 2.8.158 |
+| Programmable Hatches | 0.2.1p2-beta | B | builds against GTNHLib 0.11.54, NEI 2.8.171 |
+| NH-Utilities | 1.7.0 | B | commit "Fit 29x" |
+| YesSteveModel Unofficial | 1.9 | B | wiki lists 2.9.0-beta-1 to RC-2; loads on stable, 2026-11-02 |
+| MineMenu | 1.2.0.B44 | C | latest on Modrinth, 2025-12-07 |
+| Spark | 1.10.19 | C | latest 1.7.10; the `1.10.35` in the old notes was wrong |
+| FPS Reducer | 1.10.3 | C | latest, 2023-09-06 |
+| Trash Slot | 1.0.31 | B | latest 1.7.10 on CurseForge |
+| ElytraMining | 1.2.0.1 | B | latest, 2023, no GT API use |
 
 **GTNL needs two jars the pack does not ship:** `gtnllib-1.1.3.jar` and
 `bqapi-1.1.3.jar` (GTNLLib >= 1.1, BetterQuestingAPI >= 1.1.3). Without GTNLLib the
@@ -40,30 +54,18 @@ published jars crash during init; their stable compatibility is on an open PR:
 
 Twist's tracker has the matching startup-crash report (#1390, from 2026-11-01). Swap both
 back to their release jars once those PRs merge.
-| GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
-| Twist Space Technology | 0.8.0-RC2.9 PR build | B | release crashes on 2.9.0 stable; use PR #1386 |
-| 123Technology | 2.2.0.1 PR build | B | release crashes on 2.9.0 stable; use PR #269 |
-| EZMiner | 6.2 | B | built against `2.9.0-beta-3` |
-| EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
-| EZStorage | 1.8.2 | B | builds against GTNHLib 0.11.52, NEI 2.8.158 |
-| Programmable Hatches | 0.2.1p2-beta | B | builds against GTNHLib 0.11.54, NEI 2.8.171 |
-| NH-Utilities | 1.7.0 | B | commit "Fit 29x" |
-| YesSteveModel Unofficial | 1.9 | B | wiki lists 2.9.0-beta-1 to RC-2; stable untested |
-| MineMenu | 1.2.0.B44 | C | latest on Modrinth, 2025-12-07 |
-| Spark | 1.10.19 | C | latest 1.7.10; the `1.10.35` in the old notes was wrong |
-| FPS Reducer | 1.10.3 | C | latest, 2023-09-06 |
-| Trash Slot | 1.0.31 | B | latest 1.7.10 on CurseForge |
-| ElytraMining | 1.2.0.1 | B | latest, 2023, no GT API use |
 
 ## Left out until their author ships a 2.9 build
 
 - **AE2Things 1.2.14**: built against 2.8.4's AE2 `rv3-beta-695`, `AE2FluidCraft 1.4.120`
   and `ae2stuff`, which 2.9 removed. AE2 was unified for items, fluids, gasses and
   essentia, so the mod's internals do not match the pack.
+- **LagGoggles 4.17.0**: in the 2.8.4 instance only; not copied to 2.9.0. It was built
+  against FalsePatternLib 1.10.7, the pack ships 1.12.2, so a launch is still the proof.
 - **BoxPlusPlus 2.1.2**: last release 2025-12-10, built against Galaxy Space 1.1.121.
   It sits on GT multiblock internals, which 2.9 rewrote across more than fifty machines.
 
-Check these two again after their next release; neither has a 2.9 branch.
+Check these again after their next release; none has a 2.9 build.
 
 ## Installed, still unproven on 2.9
 
@@ -72,7 +74,6 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
 - **SharedProspecting 2.0.4**: built against VisualProspecting 1.5.11 and GTNHLib 0.9.0.
   Its six late mixins still match VP 1.5.42 as shipped in 2.9 (checked 2026-11-01); the
   team sync itself can only be proven on the server.
-- **LagGoggles 4.17.0**: built against FalsePatternLib 1.10.7, pack has 1.12.2.
 - **Distant Horizons `upstream-preview8-rple-biomes`** (2026-10-18): the 2.8.4 jar was
   `alpha18`; this is the newest build and the first from the 2.9 period. Enable
   Aggressive Chunk Loading under Video Settings, Performance, to stop transparent
