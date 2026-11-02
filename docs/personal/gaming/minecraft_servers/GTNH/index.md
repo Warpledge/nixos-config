@@ -1,17 +1,13 @@
 # GTNH Notes
 
-Instance: `GT_New_Horizons_2.8.4_Modified` (Prism Launcher)
-Path: `~/.local/share/PrismLauncher/instances/GT_New_Horizons_2.8.4_Modified/.minecraft/`
+Notes for GregTech: New Horizons, kept per major pack version. 2.9.0 is the current
+set. 2.8.4 is kept as written for reference: it has no world carrying into 2.9.
 
-> **Claude:** Keep these files up to date whenever the modpack changes: config edits, mods added/removed. Update the relevant sub-file without being asked.
+| Version | Status | Instance |
+| --- | --- | --- |
+| [2.9.0](./2.9.0/index.md) | Current, new world | `GT_New_Horizons_2.9.0_Java_17-26` |
+| [2.8.4](./2.8.4/index.md) | Archive, old world kept as a backup | `GT_New_Horizons_2.8.4_Modified` |
 
----
-
-## Sub-Notes
-
-- [java-and-launch.md](./java-and-launch.md) — Java runtime, JVM args, lwjgl3ify, Wayland fix, JourneyMap swap
-- [config-tweaks.md](./config-tweaks.md) — All config file changes (QoL, difficulty, balance)
-- [server.md](./server.md) — Server setup, server.properties, server-side mod list
-- [mods.md](./mods.md) — Detailed write-ups for every manually added mod
-- [shaders.md](./shaders.md) — Euphoria Patches shader config, block material IDs
-- [performance.md](./performance.md) — WAILA NS lag profiling, LagGoggles, Spark
+2.9.0 changed world generation, crops, AE2, the GT multiblock internals and the
+renderer, so the mod list and several config files differ between the two sets. Use
+the 2.9.0 notes for anything running now.
