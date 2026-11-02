@@ -12,10 +12,10 @@
 #-   gtnh stop   — Send /stop to the running server
 #-   gtnh status — Show whether the server session is running
 #-
-#- Server path: ~/Documents/Minecraft_Servers/GT_New_Horizons_2.8.4_Server_Modified
+#- Server path: ~/Documents/Minecraft_Servers/GT_New_Horizons_2.9.0_Server_Modified
 #- Session name: gtnh
 {pkgs, ...}: let
-  serverDir = "$HOME/Documents/Minecraft_Servers/GT_New_Horizons_2.8.4_Server_Modified";
+  serverDir = "$HOME/Documents/Minecraft_Servers/GT_New_Horizons_2.9.0_Server_Modified";
   sessionName = "gtnh";
 
   startScript = pkgs.writeShellScript "gtnh-start" ''

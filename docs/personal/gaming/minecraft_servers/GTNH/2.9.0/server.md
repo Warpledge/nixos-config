@@ -9,12 +9,24 @@ backup; the new one is a separate folder.
 1. Download the 2.9.0 **Java 17-26** server zip from
    [the version history page](https://www.gtnewhorizons.com/version-history/) and unpack
    it to `~/Documents/Minecraft_Servers/GT_New_Horizons_2.9.0_Server_Modified`.
-2. Copy the server-side mods from [mods.md](./mods.md): every row marked **B** that is in
-   the carry list, plus the untested ones once they pass on the client. Leave out
-   **C**-only rows, and leave out AE2Things and BoxPlusPlus.
-3. `machines/legion/minecraft-servers/gtnh-server.nix` needs its `serverDir` and header
-   comment changed to the new folder. The Java path (`jdk25`), the JVM args and the tmux
-   crash loop stay as they are.
+2. Copy the server-side mods from [mods.md](./mods.md): every row marked **B**, using the
+   Twist and 123Technology PR builds. Leave out **C**-only rows.
+3. `machines/legion/minecraft-servers/gtnh-server.nix` now points its `serverDir` and
+   header comment at that folder. The Java path (`jdk25`), the JVM args and the tmux
+   crash loop are unchanged.
+
+## Local test on the desktop
+
+The same folder is unpacked on eclipse, with the mods and configs below copied over, for
+testing before it goes to the laptop:
+
+- `start.sh` in the server folder runs the server with 8G heap and a crash-restart loop.
+- `~/.local/bin/gtnh` is a local copy of the laptop launcher: `gtnh` starts or attaches
+  the tmux session, `gtnh log`, `gtnh stop`, `gtnh status`.
+- The client connects to `localhost:25566`.
+
+This local copy exists only for testing; the laptop gets the `gtnh` command from
+`machines/legion/minecraft-servers/gtnh-server.nix` after the next rebuild.
 
 ## server.properties
 
@@ -26,14 +38,24 @@ backup; the new one is a separate folder.
 
 From [mods.md](./mods.md), the **B** rows:
 
-- GTNL 0.2.7-rc2.1, GTNHRates 1.12.0-2.9, Twist Space Technology 0.8.0-RC2.9,
-  123Technology 2.2.0.1, EZMiner 6.2, EZNuclear 1.1.1, EZStorage 1.8.2,
-  NH-Utilities 1.7.0, Programmable Hatches 0.2.1p2-beta
-- ElytraMining 1.2.0.1, BetterSprinting 1.1.3, deconfigintegration 1.0.2, Trash Slot 1.0.31
-- SharedProspecting 2.0.4, LagGoggles 4.17.0 and Waystones 1.0.12 once tested
+- GTNL 0.2.7-rc2.1 with GTNLLib 1.1.3 and BetterQuestingAPI 1.1.3, GTNHRates 1.12.0-2.9,
+  Twist Space `TwistSpaceTechnology-0.8.0-RC2.9-git.3+11bf6e8f2d.jar` (PR #1386),
+  123Technology `OTHTechnology-2.2.0.1-git.3+2b1a0b5fbd.jar` (PR #269), EZMiner 6.2,
+  EZNuclear 1.1.1, EZStorage 1.8.2, NH-Utilities 1.7.0, Programmable Hatches 0.2.1p2-beta
+- ElytraMining 1.2.0.1, Trash Slot 1.0.31, SharedProspecting 2.0.4
+- The EZStorage script `scripts/simplestorage_gregified.zs` must be on the server too, or
+  the recipes differ from the client.
+
+BetterSprinting and deconfigintegration are dropped (see mods.md). LagGoggles and
+Waystones are not installed anywhere yet.
 
 2.9.0 supplies its own lwjgl3ify, GTNHLib, FalsePatternLib and Extreme Sound Muffler
 Legacy, so do not copy the 2.8.4 versions of those to the server.
+
+The configs copied with the mods are `config/GTNotLeisure/` (without `client.cfg`),
+`123Technology.cfg`, `elytra_mining.cfg`, `EZNuclear.cfg`, `ezstorage.cfg`,
+`gtnhrates.cfg`, `programmablehatches.cfg`, `proghatches.mixin.properties`,
+`TwistSpaceTechnology.cfg`, `visualprospecting.cfg` and `NHUtilities/`.
 
 ## ServerUtilities
 
