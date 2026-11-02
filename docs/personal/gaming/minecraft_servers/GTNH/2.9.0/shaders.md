@@ -26,12 +26,14 @@ hand. Complementary Reimagined 5.7 is not compatible with 2.9; the GTNH wiki giv
    patched variant into `shaderpacks/` on first launch.
 3. Neon Horizons v1.2 (`Neon.Horizons.v1.2.zip`) from
    <https://github.com/S4mpsa/NeonHorizons/releases> into `resourcepacks/`.
-4. The NeonTech config zip, unzipped into `shaderpacks/`.
+4. The NeonTech config zip (`NeonTech Shader v1.1.zip`), unzipped into `shaderpacks/`.
+   It holds a single settings file, `ComplementaryUnbound_r5.8.1 + EuphoriaPatches_1.9.3.txt`,
+   which must carry the patched pack's exact name.
 5. Enable Neon Horizons under Resource Packs, and the patched Unbound pack under Video
    Settings, Shader Packs.
 
-The NeonTech config zip itself is not in the repo; its download link comes from the
-guide and still needs recording here.
+The settings file names the patched pack, so install the tested pair. With newer
+versions the file has to be renamed and its values copied by hand.
 
 ## Settings
 
