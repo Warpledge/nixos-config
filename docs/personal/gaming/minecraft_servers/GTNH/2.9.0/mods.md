@@ -55,8 +55,12 @@ Install them, and pull any one that crashes or misbehaves on the first launch.
 
 - **SharedProspecting 2.0.4**: built against GTNHLib 0.9.0, pack has 0.11.54.
 - **LagGoggles 4.17.0**: built against FalsePatternLib 1.10.7, pack has 1.12.2.
-- **Distant Horizons preview8** (`upstream-preview8-rple-biomes`): needs Angelica 2.1.12+;
-  the pack ships 2.2.43, newer than the build names.
+- **Distant Horizons**: the 2.8.4 jar was `alpha18`. Since then: alpha19, alpha20, then
+  upstream preview 1 to 8; the latest is `upstream-preview8-rple-biomes` (2026-10-18).
+  The README still pairs `alpha18` with Angelica 2.1.16 as the tested GTNH setup, and
+  warns that a DH update can need a matching core build; 2.9 ships Angelica 2.2.43.
+  Known issues are unchanged: memory creep, unstable server side, and LODs that need a
+  render-distance toggle to refresh.
 - **Dynamic Surroundings 1.0.7.7** and **Sound-Physics 1.1.1**: mix into rendering and
   audio, which moved to Celeritas.
 - **Euphoria Patcher**: update to `1.10.5-r5.9.3` (2026-09-15), the latest Forge 1.7.10
