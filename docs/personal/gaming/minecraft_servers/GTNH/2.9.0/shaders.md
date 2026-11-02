@@ -45,11 +45,11 @@ versions the file has to be renamed and its values copied by hand.
 - **Distant Horizons** (see [mods.md](./mods.md)): enable Aggressive Chunk Loading under
   Video Settings → Performance to stop transparent chunks.
 - **Better Foliage** (Kynake's fork, 1.2.4, `BetterFoliage-LegacyEdition-1.2.4.jar`,
-  client only): `separateAo=false` in the NeonTech settings file stops black foliage.
-  Do not edit the shader zip for it: Euphoria verifies the source pack's hash and refuses
-  to patch an edited file, which is what produces its error shader. If the key is ignored
-  there, set it in the generated patched folder's `shaders/shaders.properties` instead,
-  since that copy is not hash-checked.
+  client only): `separateAo = false` in the generated patched folder's
+  `shaders/shaders.properties` stops black foliage. Do not edit the source zip: Euphoria
+  verifies its hash and refuses to patch an edited file. The Euphoria settings `.txt`
+  does not carry base shader options, so putting the key there is dropped when the game
+  rewrites it. A repatch can regenerate the folder, so the edit may need reapplying.
 
 ## Known issues
 
