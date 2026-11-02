@@ -13,16 +13,15 @@ same.
 - [mods.md](./mods.md): which hand-added mods carry over, which have a 2.9 build, and which are out
 - [config-tweaks.md](./config-tweaks.md): every config edit, with 2.9 paths and defaults
 - [java-and-launch.md](./java-and-launch.md): Java, Prism's JVM args, lwjgl3ify
+- [shaders.md](./shaders.md): the NeonTech setup, Complementary Unbound with Euphoria Patches and Neon Horizons
 - [server.md](./server.md): the laptop server build and what changes in its NixOS module
 
 ## Not written yet
 
-Shaders and performance profiling still live in the 2.8.4 set and have not been
-retested against 2.9. The renderer changed (Angelica 2.2.43, Celeritas instead of
-Sodium 0.2), so treat [shaders.md](../2.8.4/shaders.md) as a starting point only. Do
-not copy the old shader pack: Complementary r5.7.1 with Euphoria 1.8.6 is two Euphoria
-versions behind, and the hand-edited `block.properties` and `terrainIPBR.glsl` have to
-be reapplied to whatever pack is installed under 2.9.
+Performance profiling still lives in the 2.8.4 set and has not been retested against
+2.9. The renderer changed (Angelica 2.2.43, Celeritas instead of Sodium 0.2), so treat
+[performance.md](../2.8.4/performance.md) as a starting point only. Distant Horizons
+notes are in [mods.md](./mods.md).
 
 ## Sources
 
