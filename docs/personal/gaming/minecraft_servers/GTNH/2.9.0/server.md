@@ -45,11 +45,13 @@ From [mods.md](./mods.md), the **B** rows:
   EZNuclear 1.1.1, EZStorage 1.8.2, NH-Utilities 1.7.0, Programmable Hatches 0.2.1p2-beta
 - ElytraMining 1.2.0.1, Trash Slot 1.0.31, SharedProspecting 2.0.4
 - YesSteveModel Unofficial 1.9, with its models in `config/ysmu/custom/`
+- Waystones-X 1.0.16, MIAOKATZE Core 0.2.0, GT-Miao-Blueprint 0.3.0,
+  GT-Steam-Reborn 2.1.1, GT-Interesting-Thing 2.1.0, GT-Simple-Wireless-Network 2.1.0
 - The EZStorage script `scripts/simplestorage_gregified.zs` must be on the server too, or
   the recipes differ from the client.
 
-BetterSprinting and deconfigintegration are dropped (see mods.md). LagGoggles and
-Waystones are not installed anywhere yet.
+BetterSprinting and deconfigintegration are dropped (see mods.md). LagGoggles is still
+not installed.
 
 2.9.0 supplies its own lwjgl3ify, GTNHLib, FalsePatternLib and Extreme Sound Muffler
 Legacy, so do not copy the 2.8.4 versions of those to the server.
@@ -57,7 +59,8 @@ Legacy, so do not copy the 2.8.4 versions of those to the server.
 The configs copied with the mods are `config/GTNotLeisure/` (without `client.cfg`),
 `123Technology.cfg`, `elytra_mining.cfg`, `EZNuclear.cfg`, `ezstorage.cfg`,
 `gtnhrates.cfg`, `programmablehatches.cfg`, `proghatches.mixin.properties`,
-`TwistSpaceTechnology.cfg`, `visualprospecting.cfg` and `NHUtilities/`.
+`TwistSpaceTechnology.cfg`, `visualprospecting.cfg`, `NHUtilities/`, `waystones.cfg`
+(`xpBaseCost=-1`) and the `gtit/`, `gtmb/`, `gtsr/` and `gtswn/` folders.
 
 ## ServerUtilities
 

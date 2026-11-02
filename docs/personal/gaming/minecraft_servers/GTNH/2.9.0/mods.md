@@ -57,6 +57,27 @@ commits past that PR's head. `TwistSpaceTechnology-0.8.0.jar` replaced the PR bu
 both sides and the server loads it. Swap 123Technology back to its release once PR #269
 merges.
 
+## Installed on 2.9.0 only
+
+These are not carried from 2.8.4; they went in on top of 2.9.0 on 2026-11-02, client and
+server, and the server boots with all of them next to GTNL.
+
+| Mod | Build | Side | Note |
+| --- | --- | --- | --- |
+| Waystones-X | 1.0.16 | B | [JackOfNoneTrades fork](https://github.com/JackOfNoneTrades/WaystonesFork) of BlayTheNinth's mod; `config/waystones.cfg` sets `xpBaseCost=-1` |
+| MIAOKATZE Core | 0.2.0 | B | required by the four Miao mods below, on both sides |
+| GT-Miao-Blueprint | 0.3.0 | B | Neko Blueprint Hologram Projector: blueprint, cut and demolition modes |
+| GT-Steam-Reborn | 2.1.1 | B | steam industry, hubs and nodes, singularity tech, the Prosperity dimension, portable weapons, a BQ line |
+| GT-Interesting-Thing | 2.1.0 | B | float cores, rings, Neko dimensional pocket, infinity storage, coins and trading |
+| GT-Simple-Wireless-Network | 2.1.0 | B | wireless EU link nodes, monitors, ME quantum terminal |
+
+All but Waystones come from [MIAOKATZE](https://github.com/MIAOKATZE) and are tagged
+"for GTNH 2.9.0 stable". Their `en_US.lang` files are complete, so the in-game text is
+English; the READMEs are Chinese. GT-Miao-Blueprint needs Applied Energistics and
+StructureLib, GTSWN needs AE2, the other two only GregTech. The four Miao mods overlap
+GTNL in role (steam tiers, singularity tech, large storage) but share no IDs or
+recipes, and the server boots with both installed.
+
 ## Left out until their author ships a 2.9 build
 
 - **AE2Things 1.2.14**: built against 2.8.4's AE2 `rv3-beta-695`, `AE2FluidCraft 1.4.120`
