@@ -44,8 +44,10 @@ versions the file has to be renamed and its values copied by hand.
 
 - **Distant Horizons** (see [mods.md](./mods.md)): enable Aggressive Chunk Loading under
   Video Settings → Performance to stop transparent chunks.
-- **Better Foliage** (Kynake's fork, 1.2.4): set `separateAo=false` in the
-  `shader.properties` inside the shaderpack to stop black foliage.
+- **Better Foliage** (Kynake's fork, 1.2.4, `BetterFoliage-LegacyEdition-1.2.4.jar`,
+  client only): `separateAo = false` in the base pack's `shaders/shaders.properties`,
+  which stops black foliage. A shaderpack update replaces that zip, so the edit has to
+  be redone and the pack repatched.
 
 ## Known issues
 
