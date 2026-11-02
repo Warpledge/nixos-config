@@ -10,7 +10,7 @@ backup; the new one is a separate folder.
    [the version history page](https://www.gtnewhorizons.com/version-history/) and unpack
    it to `~/Documents/Minecraft_Servers/GT_New_Horizons_2.9.0_Server_Modified`.
 2. Copy the server-side mods from [mods.md](./mods.md): every row marked **B**, using the
-   Twist and 123Technology PR builds. Leave out **C**-only rows.
+   123Technology's PR build; Twist uses its 0.8.0 release. Leave out **C**-only rows.
 3. `machines/legion/minecraft-servers/gtnh-server.nix` now points its `serverDir` and
    header comment at that folder. The Java path (`jdk25`), the JVM args and the tmux
    crash loop are unchanged.
@@ -40,7 +40,7 @@ This local copy exists only for testing; the laptop gets the `gtnh` command from
 From [mods.md](./mods.md), the **B** rows:
 
 - GTNL 0.2.7-rc2.1 with GTNLLib 1.1.3 and BetterQuestingAPI 1.1.3, GTNHRates 1.12.0-2.9,
-  Twist Space `TwistSpaceTechnology-0.8.0-RC2.9-git.3+11bf6e8f2d.jar` (PR #1386),
+  Twist Space `TwistSpaceTechnology-0.8.0.jar` (release 2026-11-02),
   123Technology `OTHTechnology-2.2.0.1-git.3+2b1a0b5fbd.jar` (PR #269), EZMiner 6.2,
   EZNuclear 1.1.1, EZStorage 1.8.2, NH-Utilities 1.7.0, Programmable Hatches 0.2.1p2-beta
 - ElytraMining 1.2.0.1, Trash Slot 1.0.31, SharedProspecting 2.0.4

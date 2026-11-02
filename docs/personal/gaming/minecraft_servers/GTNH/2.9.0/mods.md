@@ -23,7 +23,7 @@ Do not add these: the pack carries its own copy.
 | --- | --- | --- | --- |
 | GT: Not Leisure (GTNL) | 0.2.7-rc2.1 | B | README: 2.9.0 needs `0.2.7+` |
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
-| Twist Space Technology | 0.8.0-RC2.9 PR build | B | release crashes on 2.9.0 stable; use PR #1386 |
+| Twist Space Technology | 0.8.0 | B | release 2026-11-02 includes the 2.9 fix (PR #1386) |
 | 123Technology | 2.2.0.1 PR build | B | release crashes on 2.9.0 stable; use PR #269 |
 | EZMiner | 6.2 | B | built against `2.9.0-beta-3` |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
@@ -44,16 +44,18 @@ GTNLLib 1.1.1 also fails at launch on Angelica 2.2.43: its font-batch `@ModifyAr
 0 targets, so the font renderer cannot load. 1.1.3 changes that mixin and is the build
 to use.
 
-**Both late-game addons need their unreleased PR builds for 2.9.0 stable.** The
-published jars crash during init; their stable compatibility is on an open PR:
+**123Technology still needs its unreleased PR build for 2.9.0 stable.** The published jar
+crashes during init; its stable compatibility is on an open PR:
 
 | Mod | Jar to use | Source |
 | --- | --- | --- |
-| Twist Space | `TwistSpaceTechnology-0.8.0-RC2.9-git.3+11bf6e8f2d.jar` | [PR #1386](https://github.com/Nxer/Twist-Space-Technology-Mod/pull/1386) |
 | 123Technology | `OTHTechnology-2.2.0.1-git.3+2b1a0b5fbd.jar` | [PR #269](https://github.com/CallmeSHaobe/123Technology/pull/269) |
 
-Twist's tracker has the matching startup-crash report (#1390, from 2026-11-01). Swap both
-back to their release jars once those PRs merge.
+Twist's tracker had the matching startup-crash report (#1390, from 2026-11-01), and the
+0.8.0 release caught up on 2026-11-02: its changelog lists PR #1386 and its tag sits 11
+commits past that PR's head. `TwistSpaceTechnology-0.8.0.jar` replaced the PR build on
+both sides and the server loads it. Swap 123Technology back to its release once PR #269
+merges.
 
 ## Left out until their author ships a 2.9 build
 
