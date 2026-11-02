@@ -48,6 +48,7 @@ back to their release jars once those PRs merge.
 | EZStorage | 1.8.2 | B | builds against GTNHLib 0.11.52, NEI 2.8.158 |
 | Programmable Hatches | 0.2.1p2-beta | B | builds against GTNHLib 0.11.54, NEI 2.8.171 |
 | NH-Utilities | 1.7.0 | B | commit "Fit 29x" |
+| YesSteveModel Unofficial | 1.9 | B | wiki lists 2.9.0-beta-1 to RC-2; stable untested |
 | MineMenu | 1.2.0.B44 | C | latest on Modrinth, 2025-12-07 |
 | Spark | 1.10.19 | C | latest 1.7.10; the `1.10.35` in the old notes was wrong |
 | FPS Reducer | 1.10.3 | C | latest, 2023-09-06 |
