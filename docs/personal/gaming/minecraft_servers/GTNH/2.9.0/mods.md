@@ -65,8 +65,11 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
 - **Distant Horizons `upstream-preview8-rple-biomes`** (2026-10-18): the 2.8.4 jar was
   `alpha18`; this is the newest build and the first from the 2.9 period. Enable
   Aggressive Chunk Loading under Video Settings, Performance, to stop transparent
-  chunks. Known issues are unchanged: memory creep, unstable server side, and LODs that
-  need a render-distance toggle to refresh.
+  chunks. DH 3.3.5 has no Quality Preset or CPU Load keys; the old values map to
+  `lodChunkRenderDistanceRadius=128`, `numberOfThreads=4`,
+  `threadRunTimeRatio="0.5"` and `enableCloudRendering=false`. Known issues are
+  unchanged: memory creep, unstable server side, and LODs that need a render-distance
+  toggle to refresh.
 - **Dynamic Surroundings 1.0.9.0** (2026-09-30): mist475's 1.7.10 fork, newer than the
   1.0.7.7 in the old notes; adds Seasonal Horizons compatibility.
 - **Sound-Physics 1.1.1** (2026-06-27): the 1.7.10 mixin edition.
@@ -85,6 +88,18 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   longer has that class, the failed transform poisons the class cache, and Avaritia then
   aborts pre-init with `NoClassDefFoundError`. Removed; each mod's own config file is
   enough.
+
+## Runtime notes from the first successful launch
+
+- **ModernKeyBinding vs Controlling**: both redirect the keybind save path at priority
+  1000, so Controlling's is skipped and ModernKeyBinding's applies. Keybinds saved fine;
+  if a modifier ever fails to persist, separate these two.
+- **Programmable Hatches**: three optional compat mixins have no target in 2.9
+  (`GuiInterfaceTerminalX`, `GregtechWailaDataProvider`,
+  `FluidPatternTerminalRecipeTransferHandler`). Its own hatches load; only those
+  cross-mod hooks are inactive.
+- **NH-Utilities** logs `lang files not found` at startup; that is its own translation
+  file, harmless.
 
 ## Overlap with 2.9 changes
 
