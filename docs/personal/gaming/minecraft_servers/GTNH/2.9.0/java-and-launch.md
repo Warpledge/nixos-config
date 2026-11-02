@@ -28,6 +28,14 @@ unchanged by 2.9.
   variables), and 2.9 launches without it. If lwjgl3ify reports SDL failing to find a
   video driver, add it back.
 
+## Renderer
+
+`config/angelica-modules.cfg` has `S:renderBackend=OPENGL` at the moment. The
+experimental `SDL_GPU` path (Vulkan) runs the game, but it cannot draw BetterCrashes'
+startup error screen, so a mod init failure looks like a frozen loading screen. It was
+not the cause of any startup failure. Switch it back in Video Settings once the pack is
+settled.
+
 ## JourneyMap
 
 2.9.0 ships `journeymap-1.7.10-5.2.23-fairplay.jar`. The unlimited swap still works, but

@@ -16,6 +16,14 @@ same.
 - [shaders.md](./shaders.md): the NeonTech setup, Complementary Unbound with Euphoria Patches and Neon Horizons
 - [server.md](./server.md): the laptop server build and what changes in its NixOS module
 
+## Startup crashes in 2.9
+
+Forge 1.7.10's log4j crashes while printing a mod's init failure. The report then shows
+`NoClassDefFoundError: net/minecraft/inventory/ISidedInventory`, names Forge as the
+suspect, and hides the real error. The culprit is the mod marked `UCHE` in the mod list
+inside the same crash report. Twist and 123Technology both did this on 2.9.0 stable until
+their PR builds (see [mods.md](./mods.md)).
+
 ## Not written yet
 
 Performance profiling still lives in the 2.8.4 set and has not been retested against
