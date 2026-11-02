@@ -37,7 +37,6 @@ to use.
 | EZStorage | 1.8.2 | B | builds against GTNHLib 0.11.52, NEI 2.8.158 |
 | Programmable Hatches | 0.2.1p2-beta | B | builds against GTNHLib 0.11.54, NEI 2.8.171 |
 | NH-Utilities | 1.7.0 | B | commit "Fit 29x" |
-| ModernKeyBinding | 2.1.0 | C | latest Forge 1.7.10 on Modrinth |
 | MineMenu | 1.2.0.B44 | C | latest on Modrinth, 2025-12-07 |
 | Spark | 1.10.19 | C | latest 1.7.10; the `1.10.35` in the old notes was wrong |
 | FPS Reducer | 1.10.3 | C | latest, 2023-09-06 |
@@ -91,15 +90,17 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
 
 ## Runtime notes from the first successful launch
 
-- **ModernKeyBinding vs Controlling**: both redirect the keybind save path at priority
-  1000, so Controlling's is skipped and ModernKeyBinding's applies. Keybinds saved fine;
-  if a modifier ever fails to persist, separate these two.
 - **Programmable Hatches**: three optional compat mixins have no target in 2.9
   (`GuiInterfaceTerminalX`, `GregtechWailaDataProvider`,
   `FluidPatternTerminalRecipeTransferHandler`). Its own hatches load; only those
   cross-mod hooks are inactive.
 - **NH-Utilities** logs `lang files not found` at startup; that is its own translation
   file, harmless.
+
+- **ModernKeyBinding 2.1.0**: 2.9's Controlling 2.1.10 ships built-in key combo support
+  and throws `IllegalStateException: Controlling now ships built-in key combo support and
+  is incompatible with ModernKeybinding (mkb)` from `Controlling.init`. Removed; use
+  Controlling's own combo support.
 
 ## Overlap with 2.9 changes
 
