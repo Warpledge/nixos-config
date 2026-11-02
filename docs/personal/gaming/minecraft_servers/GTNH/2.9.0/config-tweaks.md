@@ -4,6 +4,11 @@ Paths are relative to `.minecraft`. Defaults below were read from the 2.9.0 inst
 2026-11-01, not carried over from the 2.8.4 notes. Files for hand-added mods do not
 exist until those mods are installed.
 
+The list is complete for what was actually edited: hashing the 2.8.4 instance's
+`config/` against the pack's own 2.8.4 tree found 69 differing files out of 8,497, and
+the rest were mod-version noise. Apply them in small groups and launch between groups;
+do not copy the whole 2.8.4 `config/` folder.
+
 ## HUD
 
 ### InGameInfoXML: `config/InGameInfoXML/InGameInfo.xml`
@@ -144,6 +149,30 @@ The config lives at `.minecraft/serverutilities/serverutilities.cfg`, not under
 `config/`. The client keeps its own copy for singleplayer and LAN worlds, and the server
 build needs the same edits; `server/ranks.txt` is server-side only. Values are in
 [server.md](./server.md#serverutilities).
+
+## Undocumented edits found in the 2.8.4 instance
+
+These were applied by hand in 2.8.4 but never written down. Found by diffing the
+instance's `config/` against the pack's own 2.8.4 tree; every key below still exists in
+2.9.0 with the old default.
+
+- **Waila**: `config/Waila.cfg` → `I:waila.cfg.alpha=0` [80], `B:waila.cfg.liquid=false`
+  [true], `I:waila.cfg.scale=79` [100], `I:waila.cfg.posx=4999` [10000],
+  `I:waila.cfg.posy=0` [10000]. Transparent background, smaller and moved from the top
+  right.
+- **Botania**: `config/Botania.cfg` → `D:flowerParticles.frequency=0.0` [0.75],
+  `B:shaders.enabled=false` [true], `D:worldgen.flower.tallChance=0.0` [0.05]. Particle
+  and shader cost off.
+- **Forestry**: `config/forestry/common.cfg` → `B:disable.butterfly=true` [false].
+- **BetterQuesting**: `config/betterquesting.cfg` → `S:Theme=betterquesting:shadow_ui_1`
+  [light], `B:"View mode"=true` [false]. `B:"Lock tray"=true` is already 2.9's default.
+- **Default Server List**: `config/defaultserverlist.cfg` → `B:useURL=false` [true].
+- **InGameInfoXML**: `config/InGameInfoXML.cfg` → `S:topleft=2 22` [2 50], which moves
+  the custom HUD up to match the layout.
+
+The rest of the hash differences were mod-version noise: new keys added by updates
+during 2.8.4's life, configs rewritten by the game, and BetterQuesting's own quest-line
+files.
 
 ## Added Mod Configs
 
