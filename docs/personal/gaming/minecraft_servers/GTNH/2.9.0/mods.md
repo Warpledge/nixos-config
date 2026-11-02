@@ -49,23 +49,24 @@ Do not add these: the pack carries its own copy.
 
 Check these two again after their next release; neither has a 2.9 branch.
 
-## In, but untested on 2.9
+## Installed, still unproven on 2.9
 
-Install them, and pull any one that crashes or misbehaves on the first launch.
+These are in the 2.9 instance but have no explicit 2.9 release, so a launch is the proof.
 
-- **SharedProspecting 2.0.4**: built against GTNHLib 0.9.0, pack has 0.11.54.
+- **SharedProspecting 2.0.4**: built against VisualProspecting 1.5.11 and GTNHLib 0.9.0.
+  Its six late mixins still match VP 1.5.42 as shipped in 2.9 (checked 2026-11-01); the
+  team sync itself can only be proven on the server.
 - **LagGoggles 4.17.0**: built against FalsePatternLib 1.10.7, pack has 1.12.2.
-- **Distant Horizons**: the 2.8.4 jar was `alpha18`. Since then: alpha19, alpha20, then
-  upstream preview 1 to 8; the latest is `upstream-preview8-rple-biomes` (2026-10-18).
-  The README still pairs `alpha18` with Angelica 2.1.16 as the tested GTNH setup, and
-  warns that a DH update can need a matching core build; 2.9 ships Angelica 2.2.43.
-  Known issues are unchanged: memory creep, unstable server side, and LODs that need a
-  render-distance toggle to refresh.
-- **Dynamic Surroundings 1.0.7.7** and **Sound-Physics 1.1.1**: mix into rendering and
-  audio, which moved to Celeritas.
-- **Euphoria Patcher**: update to `1.10.5-r5.9.3` (2026-09-15), the latest Forge 1.7.10
-  build. It has to match the Complementary version the shader pack uses. Shader support
-  changed with the renderer.
+- **Distant Horizons `upstream-preview8-rple-biomes`** (2026-10-18): the 2.8.4 jar was
+  `alpha18`; this is the newest build and the first from the 2.9 period. Enable
+  Aggressive Chunk Loading under Video Settings, Performance, to stop transparent
+  chunks. Known issues are unchanged: memory creep, unstable server side, and LODs that
+  need a render-distance toggle to refresh.
+- **Dynamic Surroundings 1.0.9.0** (2026-09-30): mist475's 1.7.10 fork, newer than the
+  1.0.7.7 in the old notes; adds Seasonal Horizons compatibility.
+- **Sound-Physics 1.1.1** (2026-06-27): the 1.7.10 mixin edition.
+- **Euphoria Patcher 1.9.3** is installed to match the NeonTech settings. 1.10.5 exists,
+  but moving to it means copying the NeonTech values by hand.
 
 ## Overlap with 2.9 changes
 

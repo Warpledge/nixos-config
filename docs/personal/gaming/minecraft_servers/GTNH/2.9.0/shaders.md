@@ -44,12 +44,10 @@ versions the file has to be renamed and its values copied by hand.
 
 - **Distant Horizons** (see [mods.md](./mods.md)): enable Aggressive Chunk Loading under
   Video Settings → Performance to stop transparent chunks.
-- **Better Foliage** (Kynake's fork, 1.2.4, `BetterFoliage-LegacyEdition-1.2.4.jar`,
-  client only): `separateAo = false` in the generated patched folder's
-  `shaders/shaders.properties` stops black foliage. Do not edit the source zip: Euphoria
-  verifies its hash and refuses to patch an edited file. The Euphoria settings `.txt`
-  does not carry base shader options, so putting the key there is dropped when the game
-  rewrites it. A repatch can regenerate the folder, so the edit may need reapplying.
+- **Better Foliage** was tried at 1.2.4 and removed. `separateAo = false` did fix the
+  black foliage, but the mod was too buggy under 2.9, so that key is back at its default
+  `true`. If it is reinstalled, set it in the generated patched folder's
+  `shaders/shaders.properties`; the source zip is hash-checked by Euphoria.
 
 ## Known issues
 
