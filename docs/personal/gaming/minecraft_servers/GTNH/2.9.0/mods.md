@@ -94,6 +94,26 @@ Evolved's baseline is 2.9.0-beta-2, the oldest of the three, so its endgame mach
 the least tested. TenkeiTech has AE2 and client mixins; ThinkTech and Fission Evolved have
 none.
 
+Six client-side additions on 2026-11-02:
+
+| Mod | Build | Side | Note |
+| --- | --- | --- | --- |
+| World Tooltips | 1.2.3 | C | floating tooltip over dropped items; no lang files, it shows the game's own item names |
+| Better Line Break | 1.0.1 | C | replaces Minecraft's line wrapping; no text of its own |
+| PICO-8 GTNH | 0.4.1 | B | playable PICO-8 cartridges on a machine block; needs `modularui2` and `gtnhlib` (in the pack) |
+| MyCTMLib | 1.4.4-290 | C | connected-texture support for resource packs |
+| OmniOcular Unofficial | 1.6.0 | B | WAILA add-on showing machine internals; see the scripts note below |
+| Fancy Block Particles | 2.4.1 | C | 3D digging particles; `config/FBP/Particle.properties` sets `fancyRain=false` and `fancySnow=false` to avoid the Twilight Forest crash |
+
+OmniOcular's labels come from XML scripts, and the Chinese pack the wiki links
+([CCYF78/GTNH_OmniOcular](https://github.com/CCYF78/GTNH_OmniOcular)) is fully translated
+into English in `config/OmniOcular/`, on both sides: all quoted Chinese strings, display
+names and script output, 194 display names plus 111 single-quoted literals. The GT script
+is named `GregTech5U.xml` so the mod does not drop its own older copy beside it. Two
+Chinese leftovers are harmless: comments inside the XML, and `GregTech6.xml`, which only
+fires for GregorianTech 6 blocks that GTNH does not have. A pack update will not refresh
+these files, so new Chinese strings would need translating again.
+
 ## Left out until their author ships a 2.9 build
 
 - **AE2Things 1.2.14**: built against 2.8.4's AE2 `rv3-beta-695`, `AE2FluidCraft 1.4.120`
