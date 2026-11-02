@@ -120,6 +120,14 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   bus rework, which deprecated Super Buses and let regular input buses carry more than
   16 slots. Its 0.2.1 build targets 2.9, so it stays a choice rather than a conflict.
 
+## Scripts
+
+- **`scripts/simplestorage_gregified.zs`**: carried from 2.8.4. It removes EZStorage's
+  default recipes and rebuilds them from GT materials. Every block and item id it uses
+  (`storage_core`, `storage_box`, `condensed_storage_box`, `hyper_storage_box`,
+  `crafting_box`, `input_port`, `portable_storage_terminal`) still exists in EZStorage
+  1.8.2.
+
 ## Quest data
 
 - **Twist-Stuff**: the repo has a "2.9 Update" commit from 2026-08-27. Copy the 2.9
