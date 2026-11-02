@@ -33,7 +33,7 @@ Do not add these: the pack carries its own copy.
 | ModernKeyBinding | 2.1.0 | C | latest Forge 1.7.10 on Modrinth |
 | MineMenu | 1.2.0.B44 | C | latest on Modrinth, 2025-12-07 |
 | Spark | 1.10.19 | C | latest 1.7.10; the `1.10.35` in the old notes was wrong |
-| BetterSprinting | 1.1.3 | B | latest for 1.7.10; 2.3.0 is 1.12.2 |
+| BetterSprinting | 2.3.0 | B | latest 1.7.10 build; 1.1.3 was five years older |
 | deconfigintegration | 1.0.2 | B | no public release page found |
 | FPS Reducer | 1.10.3 | C | latest, 2023-09-06 |
 | Trash Slot | 1.0.31 | B | latest 1.7.10 on CurseForge |
