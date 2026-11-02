@@ -209,4 +209,23 @@ check the new version's file for added keys.
   `KEY_RMENU` (184) itself, and Controls only lists the Y part, so Y alone does nothing.
   `general { DisclaimerShow=true }` puts a disclaimer screen in front of the GUI the
   first time. Alt+P opens the extra player render config, Z the animation roulette and L
-  its lock; those three have no modifier.
+  its lock; those three have no modifier. In that config screen, drag the green square to
+  move the HUD preview, the blue square to scale it, right-drag to rotate, Alt+R to reset;
+  the values land in `extra_player_render` in `ysmu.cfg`.
+
+  Models come from
+  [Elaina69/Yes-Steve-Model-Repo](https://github.com/Elaina69/Yes-Steve-Model-Repo)
+  (state 2026-08-18: 906 `.ysm` files and 208 zips of the older folder format). The
+  scanner walks `custom/` recursively, so the repo's franchise folders stay and each zip
+  is unpacked to `<Franchise>/<zip name>/`. The full set is too much for the client:
+  969 models need more than 12G at world load (it froze at 670/900 with 12G and went
+  through with 18G). 117 of the `.ysm` are unreadable on 1.9 (`Failed to load OpenYSM
+  binary model`), 23 were byte-identical copies, and 5 collided with a zip folder of the
+  same name, where the `.ysm` wins.
+
+  The kept set is 86 models (70 `.ysm`, 16 folder models), the ones starred in the model
+  GUI; the server's `custom/` mirrors it. Stars are stored in the player's NBT as
+  `ysmu_StarModels`, a hex-encoded path under `config/ysmu/custom`, not in a config file.
+  `/ysm reload` on the kept set takes seconds and 320-390 s on the full one, blocking the
+  server while it runs. The index keeps only the entries a run re-recorded, so a start
+  following a cached one rescans; at this size that is a few seconds.
