@@ -161,8 +161,9 @@ instance's `config/` against the pack's own 2.8.4 tree; every key below still ex
   `I:waila.cfg.posy=0` [10000]. Transparent background, smaller and moved from the top
   right.
 - **Botania**: `config/Botania.cfg` → `D:flowerParticles.frequency=0.0` [0.75],
-  `B:shaders.enabled=false` [true], `D:worldgen.flower.tallChance=0.0` [0.05]. Particle
-  and shader cost off.
+  `D:worldgen.flower.tallChance=0.0` [0.05]. Particle and worldgen cost off. The
+  `B:shaders.enabled=false` from 2.8.4 was a workaround for the old renderer and is left
+  at its default on 2.9; turn it off only if Botania's effects misbehave under Celeritas.
 - **Forestry**: `config/forestry/common.cfg` → `B:disable.butterfly=true` [false].
 - **BetterQuesting**: `config/betterquesting.cfg` → `S:Theme=betterquesting:shadow_ui_1`
   [light], `B:"View mode"=true` [false]. `B:"Lock tray"=true` is already 2.9's default.

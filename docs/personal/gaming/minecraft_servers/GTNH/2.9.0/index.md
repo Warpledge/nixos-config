@@ -19,7 +19,10 @@ same.
 
 Shaders and performance profiling still live in the 2.8.4 set and have not been
 retested against 2.9. The renderer changed (Angelica 2.2.43, Celeritas instead of
-Sodium 0.2), so treat [shaders.md](../2.8.4/shaders.md) as a starting point only.
+Sodium 0.2), so treat [shaders.md](../2.8.4/shaders.md) as a starting point only. Do
+not copy the old shader pack: Complementary r5.7.1 with Euphoria 1.8.6 is two Euphoria
+versions behind, and the hand-edited `block.properties` and `terrainIPBR.glsl` have to
+be reapplied to whatever pack is installed under 2.9.
 
 ## Sources
 
