@@ -38,7 +38,6 @@ The RC was built against GTNLLib 1.1.1; 1.1.3 exists but is newer than the build
 | ModernKeyBinding | 2.1.0 | C | latest Forge 1.7.10 on Modrinth |
 | MineMenu | 1.2.0.B44 | C | latest on Modrinth, 2025-12-07 |
 | Spark | 1.10.19 | C | latest 1.7.10; the `1.10.35` in the old notes was wrong |
-| deconfigintegration | 1.0.2 | B | no public release page found |
 | FPS Reducer | 1.10.3 | C | latest, 2023-09-06 |
 | Trash Slot | 1.0.31 | B | latest 1.7.10 on CurseForge |
 | ElytraMining | 1.2.0.1 | B | latest, 2023, no GT API use |
@@ -78,6 +77,12 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   insertion point under 2.9 and aborts the launch with "Could not find insertion point".
   Removed. The old 1.1.3 jar uses the same `ClientPlayerAPI` insertion approach, so it is
   not worth retrying.
+
+- **deconfigintegration 1.0.2**: its late mixins still declare Draconic Evolution's
+  `IConfigurableItem` interface on IC2 and Avaritia classes. 2.9's Draconic Evolution no
+  longer has that class, the failed transform poisons the class cache, and Avaritia then
+  aborts pre-init with `NoClassDefFoundError`. Removed; each mod's own config file is
+  enough.
 
 ## Overlap with 2.9 changes
 
