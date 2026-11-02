@@ -63,6 +63,25 @@ Install them, and pull any one that crashes or misbehaves on the first launch.
   build. It has to match the Complementary version the shader pack uses. Shader support
   changed with the renderer.
 
+## Overlap with 2.9 changes
+
+- **Dropped because the pack ships them**: Extreme Sound Muffler Legacy and
+  FalsePatternLib. A second copy of either is a duplicate mod id; the old
+  FalsePatternLib 1.10.7 would also shadow the 1.12.2 that LagGoggles and other
+  FalsePattern mods load against.
+- **Functionally overlapped, not in conflict**: Waystones against the ServerUtilities
+  `/warp` commands this setup enables, and Spark against the pack's Opis. Keep or drop
+  by preference; neither fights the other.
+- **Replaced by 2.9 itself**: GTNL 0.2.7 has no Integrated Ore Factory mixin (the
+  `enableIntegratedOreFactoryChange` option is gone from its config), and 2.9 gave the
+  real IOF uncapped parallels that scale with EU/t.
+- **Retargeted, not broken**: GTNHRates' `ic2CropsYield` key now multiplies CropsNH
+  drops through `mixins/late/CropsNH.java`. The setting name is stale; the value still
+  does its job.
+- **Partly redundant**: Programmable Hatches' large buffer hatches overlap with 2.9's
+  bus rework, which deprecated Super Buses and let regular input buses carry more than
+  16 slots. Its 0.2.1 build targets 2.9, so it stays a choice rather than a conflict.
+
 ## Quest data
 
 - **Twist-Stuff**: the repo has a "2.9 Update" commit from 2026-08-27. Copy the 2.9

@@ -150,10 +150,14 @@ build needs the same edits; `server/ranks.txt` is server-side only. Values are i
 These three files appear once the mod is installed. Start from the 2.8.4 values, then
 check the new version's file for added keys.
 
-- **GTNL**: `config/GTNotLeisure/GTNotLeisure.cfg` → `B:enableStickItem=false` [true]
+- **GTNL**: 0.2.7 splits its config through GTNHLib into
+  `config/GTNotLeisure/{general,item,machine,recipe,re_avaritia,client}.cfg`, so the old
+  single `GTNotLeisure.cfg` is not there. The stick setting is `enableStickItem=false`
+  [true] in `item.cfg`. The Integrated Ore Factory option from 0.2.4 no longer exists.
 - **GTNHRates**: `config/gtnhrates.cfg` → the table in
   [2.8.4 mods.md](../2.8.4/mods.md#gtnhrates--rates--qol-overhaul-replaces-gtnh-cutcorners). Keep
   `enableNEIBookmarksContents=false` [true]: the bookmark NPE was never confirmed fixed.
+  `ic2CropsYield` now multiplies CropsNH drops; keep it at `4.0`.
 - **EZNuclear**: `config/EZNuclear.cfg` → `B:DEExplosion=false`, `B:IC2Explosion=false` [true]
 - **NH-Utilities**: `config/NHUtilities/NHUtilities.cfg` → the table in
   [2.8.4 mods.md](../2.8.4/mods.md#nh-utilities--qol-utilities).
