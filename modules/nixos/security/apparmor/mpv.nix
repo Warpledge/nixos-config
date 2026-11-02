@@ -10,7 +10,7 @@
       abi <abi/4.0>,
       include <tunables/global>
 
-      profile mpv /nix/store/*-mpv-*/bin/{mpv,umpv} flags=(attach_disconnected) {
+      profile mpv /nix/store/*-mpv-*/bin/{mpv,umpv} {
         include <abstractions/nix-desktop-app>
         include <abstractions/nix-fhs-env>
         include <abstractions/nix-mpv>

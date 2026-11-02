@@ -1,9 +1,12 @@
 # AGENTS.md
 
-Rules for local models working in this repo (opencode, and Zed's agent, which reads
-this file too). Claude Code reads `CLAUDE.md`; this file is the condensed version
-of it for a smaller model, kept in sync with it. Everything you need for most tasks
-is here. For the rest, `grep -n` CLAUDE.md for the section; don't read it whole.
+Rules for opencode, Zed's agent and Pi. Claude Code reads `CLAUDE.md`; this file is
+the condensed version, kept in sync with it, and covers most tasks. For the rest,
+`grep -n` CLAUDE.md for the section; don't read the root file whole.
+
+Every folder with a `CLAUDE.md` also has an `AGENTS.md` symlink to it. opencode
+loads that folder's rules when you read a file there, so the full spec arrives with
+the file you are about to change. Edit the `CLAUDE.md`, never the symlink.
 
 NixOS flake by warpledge for their machines **eclipse** (desktop) and **legion**
 (laptop), and for anyone else who installs it with `setup.sh`. Nixpkgs unstable,
@@ -32,6 +35,10 @@ to their hardware or apps.
 When something fails repeatedly, when the user has to re-explain, or when a workaround is found for a platform/tool limitation, add a one-line bullet here. Keep each bullet under 15 words. No explanations. Only add things that will save time in future sessions.
 
 - Scratch QML check files: don't name them `shell.qml`; the Bash hook blocks it.
+- Folder `AGENTS.md` is a symlink to `CLAUDE.md`: edit that, never the link.
+- A plugin RPC needs `input` and `events`; V2 fails at load without them.
+- The Console API is `console.opencode.ai`; `opencode.ai/api` serves the app.
+- Usage divides by each model's monthly limit, not the plan's cap.
 
 ## Rules
 
@@ -99,18 +106,23 @@ Any task with more than two steps, a read-only audit included, starts with a tod
 list made with the `todowrite` tool (or a file in `/tmp` without it), one item per
 step, not per file. Tick items off as you go; after a compaction, it's where you
 pick up. Read the files a step needs together, several `read` calls in one turn.
+The first read in a folder loads its `AGENTS.md`, so open the file you mean to
+change before editing it.
 
 ## Finishing a task
 
-A task that changed files isn't done until all four steps are. Put them on your
-todo list at the start, and don't write your summary before step 3.
+A task that changed files isn't done until all five steps are. Put them on your
+todo list at the start, and don't write your summary before step 4.
 
 1. `alejandra <file>` on each `.nix` file you changed.
 2. `nix flake check 2>&1 | tail -n 30` (skip for JSON, Markdown or comment-only
    changes). Its `stranger` check builds a machine on template defaults, so a
    shared module that needs `machines/` or `users/warpledge/` fails there.
 3. Load the `commit` skill and run every step, `scan.sh` included.
-4. Reply with what changed and the commit hash.
+4. A QML, plugin or app change: run it and look. Build its package and start it
+   the way the folder's `CLAUDE.md` says. `nix flake check` and the build prove it
+   packages, not that the page renders or the button fires once.
+5. Reply with what changed and the commit hash.
 
 ## Commands
 
@@ -159,6 +171,16 @@ accepted silently.
 - **Think through what the change does at runtime**, not only whether it builds:
   spawning a terminal app (yazi, btop) without a terminal opens nothing; a file in a
   shared module reaches every machine.
+- **A plugin's shape comes from its installed types, not memory.** Read the `.d.ts`
+  under `node_modules/@opencode-ai/sdk/` for the method input, its events map and
+  the config fields. V2 throws at load when one is missing.
+- **Curl an endpoint before coding against it.** A host the docs still name can
+  serve the app's own index page: check the status, the content type and the first
+  bytes, not the example in the guide.
+- **A number taken from a web page keeps the date you read it.** Quote the table,
+  as `limits.ts` does with "read 2026-11-01".
+- **Name the file and line that proves an interface before writing against it.**
+  If you cannot, read it. If it does not exist, ask.
 - **Never say a fix "should work".** Report the command you ran and its result.
 
 ## Looking things up
@@ -172,6 +194,9 @@ accepted silently.
 | How an upstream repo works (DMS, niri-flake, stylix, Tsunagu) | `deepwiki` |
 | How other public flakes configure something | the `grep` MCP tool (grep.app) |
 | An app's own config syntax | `nix-shell -p <pkg> --run 'man <name>'` |
+| A plugin's RPC methods, events or config fields | the installed `.d.ts` under `node_modules/@opencode-ai/sdk/` |
+| What an endpoint actually returns | `curl -sI <url>`, then `curl -s <url> \| head -c 300` |
+| A folder's own rules | the `AGENTS.md` there, which loads when you read in it |
 
 - **Stop once you have the answer.** A package's man page settles its config
   syntax; skip the derivation. Don't guess doc URLs: after two failed fetches, read
@@ -218,9 +243,9 @@ this, in thinking and in tool calls alike:
 
 ## Context budget
 
-128K tokens, about 10K of it taken by tool definitions in opencode; the GitHub MCP
-stays off for that reason. Long tasks get compacted and whatever only lived in
-context is lost.
+The local models have 128K, about 10K of it taken by tool definitions in opencode;
+the GitHub MCP stays off for that reason. Claude and Flash have 1M, so for them the
+budget only bites after a compaction, which still loses what lived only in context.
 
 - **After a compaction**, read the todo list (see **Starting a task**) and run
   `git status --short && git diff --stat && git log --oneline -3`. Re-read only
@@ -228,9 +253,9 @@ context is lost.
 - **After a compaction, the summary is not a source.** Before quoting a value, a
   default or a `file:line` in your answer, re-read that line (`grep -n`) and quote
   what the file says. A file the summary names may not exist: check it.
-- **Never read a large file whole.** `README.md` and `CLAUDE.md` (~40 KB each):
-  `grep -n` the lines, then read that range with offset and limit. Same for any
-  file over ~300 lines.
+- **Never read a large file whole on a 128K window.** `README.md` is 40 KB and
+  `CLAUDE.md` 23 KB: `grep -n` first, then read that range with offset and limit.
+  On 1M, read the file whole; six greped ranges cost more turns than the file.
 - **Read each file once**, and only what the task touches. Two or three sibling
   modules are enough to learn a pattern.
 - **Trim output at the source**: `| tail -n 30`, `| grep`. Never print a store
@@ -290,8 +315,53 @@ and the active WM's `modules/wm/<wm>/`.
   Every setting exists after `lib/settings.nix`, so read `user.media.mpv`, no
   `or false`.
 - Settings files stay plain data: no `let`, functions or interpolation.
-- Several folders have their own `CLAUDE.md`, which isn't loaded for you. Their
-  hard rules are condensed under **Folder rules** below.
+- Several folders have their own `CLAUDE.md`, symlinked as `AGENTS.md` so opencode
+  loads it when you read there. **Folder rules** below is the reminder; the folder's
+  file is the spec and wins on a conflict.
+
+## Playbooks
+
+Each one names the files that must change together. A missed step is silent: the
+build passes and the setting or page does nothing.
+
+**A new setting**
+
+1. `users/_template/settings.nix` (or `machines/_template/`), default off, with a
+   one-line comment.
+2. `lib/settings.nix` when it is a choice or a list with known values.
+3. The machine's or person's `settings.nix`.
+4. Omni Settings: `src/schema.py` (`PAGES`, or `HIDDEN` when it stays on its
+   template page), `src/descriptions.json` (`title`, `summary`, `text`),
+   `setup.sh`'s `apps`/`services` list, and the README row for a package.
+5. `nix flake check`; its `stranger` check proves the template default works alone.
+
+**An Omni Settings page**
+
+1. Read the folder's `CLAUDE.md`, `src/CLAUDE.md` and `qml/CLAUDE.md` first.
+2. `src/api.py`: `TABS`, `TOP`, `SECTION_TAB`, `shows`, then the nav entry.
+3. `src/schema.py`: `PAGES`, `PAGE_TITLES`, `MOVES`, `PAIRS`, `HIDDEN`.
+4. The page `.qml` and its entry in `OmniView.qml`; `NAV_SUBTITLES` and
+   `PAGE_INTROS`.
+5. `src/descriptions.json` for every row.
+6. Build the package and start `bin/omni-settings` without a rebuild, then look.
+7. Update `src/CLAUDE.md` in the same commit.
+
+**A plugin or RPC change**
+
+1. Read the SDK's `types.gen.d.ts` for `input`, `output` and `events`; V2 fails
+   at load without `input` and `events`.
+2. Query `console.opencode.ai`, and `curl` it before wiring the code.
+3. Load the plugin in a session, not only `nix build`, then try the button.
+4. Update `programs/ai/CLAUDE.md` in the same commit.
+
+**A NixOS module**
+
+1. Read `modules/nixos/CLAUDE.md`.
+2. Place it per **Where things go**; hardware stays in `machines/<name>/`.
+3. Import it with `lib.optionals machine.<name>.enable [./path.nix]` in the
+   router; do not also wrap the body in `lib.mkIf`.
+4. `alejandra <file>`, then `nix flake check`.
+5. A system service also needs `setup.sh`'s `services` list.
 
 ## Gotchas
 
@@ -311,8 +381,19 @@ and the active WM's `modules/wm/<wm>/`.
 
 ## Folder rules
 
-Condensed from each folder's `CLAUDE.md`. Before a change that goes past these
-lines, `grep -n` that file for the part you need.
+Condensed from each folder's `CLAUDE.md`. That file also loads in full as the
+folder's `AGENTS.md` on your first read there, and wins on a conflict. These lines
+are the reminder for before you read.
+
+| About to edit | The folder's rules are in |
+| --- | --- |
+| Omni Settings page or backend | `modules/home/programs/system/omni-settings/CLAUDE.md`, `src/CLAUDE.md`, `qml/CLAUDE.md` |
+| A skill, subagent, MCP entry or opencode setting | `modules/home/programs/ai/CLAUDE.md` |
+| A NixOS module | `modules/nixos/CLAUDE.md` |
+| A home-manager module | `modules/home/CLAUDE.md` |
+| `lib/`: settings, default apps, mutable-merge | `lib/CLAUDE.md` |
+| App colours, matugen templates, Stylix | `modules/theme/CLAUDE.md` |
+| A note under `docs/` | `docs/CLAUDE.md` |
 
 **`modules/wm/`** (also `machines/*/wm/` and `modules/home/variables.nix`)
 
@@ -526,3 +607,5 @@ For replies, `README.md`, `docs/` and commit messages.
 
 CLAUDE.md is the source. When it changes a rule, a path or a gotcha listed here,
 this file changes in the same commit. Don't add anything here that contradicts it.
+A folder's `AGENTS.md` is a symlink to its `CLAUDE.md`: never replace one with a
+copy, and never edit the link.

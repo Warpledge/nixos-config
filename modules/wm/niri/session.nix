@@ -4,12 +4,15 @@
 {
   pkgs,
   lib,
+  config,
   inputs,
   machine,
   ...
 }: let
   # niri-flake's git build, for 10-bit output (docs/todo/niri-10-bit.md)
   niri = inputs.niri.packages.${pkgs.stdenv.hostPlatform.system}.niri-unstable;
+  configHome = "/home/${machine.mainUser}";
+  cursorIcons = "${config.stylix.cursor.package}/share/icons";
 in {
   imports = [inputs.dux-greeter.nixosModules.default];
 
@@ -39,8 +42,35 @@ in {
   programs.dms-greeter = {
     enable = true;
     compositor.name = "niri";
-    configHome = "/home/${machine.mainUser}";
+    inherit configHome;
+
+    #--- DMS writes these from the desktop's monitor, input and cursor
+    #--- settings; the greeter's niri config includes the copies (below).
+    configFiles = [
+      "${configHome}/.config/niri/dms/outputs.kdl"
+      "${configHome}/.config/niri/dms/input.kdl"
+      "${configHome}/.config/niri/dms/cursor.kdl"
+    ];
   };
+
+  #--- dux-greeter's built-in niri config has no cursor or outputs, so it
+  #--- loads the "default" cursor and each monitor's preferred mode (60 Hz
+  #--- on the OLED). Its launcher includes this file. The DMS fragments are
+  #--- copied into /var/lib/dms-greeter at greetd start, like the theme.
+  systemd.services.greetd.environment.XCURSOR_PATH = cursorIcons;
+  #--- PAM's XCURSOR_PATH points at the system profile, which has no theme
+  #--- beyond hicolor; Stylix installs the cursor only in user profiles.
+  environment.systemPackages = [config.stylix.cursor.package];
+  environment.etc."greetd/niri_overrides.kdl".text = ''
+    cursor {
+        xcursor-theme "${config.stylix.cursor.name}"
+        xcursor-size ${toString config.stylix.cursor.size}
+    }
+
+    include optional=true "/var/lib/dms-greeter/cursor.kdl"
+    include optional=true "/var/lib/dms-greeter/outputs.kdl"
+    include optional=true "/var/lib/dms-greeter/input.kdl"
+  '';
 
   #--- The module's preStart chowns `*`, which skips dotfiles, so dirs left by an
   #--- older greeter install (different uid) lock the greeter out of its own cache

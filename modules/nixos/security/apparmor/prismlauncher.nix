@@ -11,7 +11,7 @@
       abi <abi/4.0>,
       include <tunables/global>
 
-      profile prismlauncher /nix/store/*-prismlauncher-*/bin/prismlauncher flags=(attach_disconnected) {
+      profile prismlauncher /nix/store/*-prismlauncher-*/bin/prismlauncher {
         include <abstractions/nix-desktop-app>
         include <abstractions/nix-network>
 

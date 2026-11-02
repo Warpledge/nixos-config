@@ -10,7 +10,7 @@
       abi <abi/4.0>,
       include <tunables/global>
 
-      profile streamlink /nix/store/*-streamlink-*/bin/{streamlink,.streamlink-wrapped} flags=(attach_disconnected) {
+      profile streamlink /nix/store/*-streamlink-*/bin/{streamlink,.streamlink-wrapped} {
         include <abstractions/nix-desktop-app>
         include <abstractions/nix-fhs-env>
         include <abstractions/nix-mpv>

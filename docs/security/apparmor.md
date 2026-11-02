@@ -57,6 +57,11 @@ Legitimate accesses become rules in that app's module; anything reaching into
   `abstractions/nix-mpv`.
 - **Obsidian's vault path is hardcoded** (`~/Documents/obsidian-notes`); a new vault
   elsewhere needs a rule.
+- **`flags=(attach_disconnected)` breaks file saves.** With it a profile loses
+  `PATH_MEDIATE_DELETED`, so linking an `O_TMPFILE` file into place fails with `ENOENT`:
+  Qt's `QSaveFile` cannot commit, and Prism Launcher stayed empty because it could not
+  write `meta/index.json` or its own config. Complain mode does not help, and no rule
+  grants it back, so the three profiles that carried it lost the flag.
 
 ## Why some things are left out
 
