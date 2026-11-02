@@ -38,7 +38,6 @@ The RC was built against GTNLLib 1.1.1; 1.1.3 exists but is newer than the build
 | ModernKeyBinding | 2.1.0 | C | latest Forge 1.7.10 on Modrinth |
 | MineMenu | 1.2.0.B44 | C | latest on Modrinth, 2025-12-07 |
 | Spark | 1.10.19 | C | latest 1.7.10; the `1.10.35` in the old notes was wrong |
-| BetterSprinting | 2.3.0 | B | latest 1.7.10 build; 1.1.3 was five years older |
 | deconfigintegration | 1.0.2 | B | no public release page found |
 | FPS Reducer | 1.10.3 | C | latest, 2023-09-06 |
 | Trash Slot | 1.0.31 | B | latest 1.7.10 on CurseForge |
@@ -72,6 +71,13 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
 - **Sound-Physics 1.1.1** (2026-06-27): the 1.7.10 mixin edition.
 - **Euphoria Patcher 1.9.3** is installed to match the NeonTech settings. 1.10.5 exists,
   but moving to it means copying the NeonTech values by hand.
+
+## Dropped after testing
+
+- **BetterSprinting**: 2.3.0's coremod cannot find its `EntityPlayerSP.onLivingUpdate`
+  insertion point under 2.9 and aborts the launch with "Could not find insertion point".
+  Removed. The old 1.1.3 jar uses the same `ClientPlayerAPI` insertion approach, so it is
+  not worth retrying.
 
 ## Overlap with 2.9 changes
 
