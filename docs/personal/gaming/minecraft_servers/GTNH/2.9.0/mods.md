@@ -144,11 +144,14 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
 - **Distant Horizons `upstream-preview8-rple-biomes`** (2026-10-18): the 2.8.4 jar was
   `alpha18`; this is the newest build and the first from the 2.9 period. Enable
   Aggressive Chunk Loading under Video Settings, Performance, to stop transparent
-  chunks. DH 3.3.5 has no Quality Preset or CPU Load keys; the old values map to
-  `lodChunkRenderDistanceRadius=128`, `numberOfThreads=4`,
-  `threadRunTimeRatio="0.5"` and `enableCloudRendering=false`. Known issues are
-  unchanged: memory creep, unstable server side, and LODs that need a render-distance
-  toggle to refresh.
+  chunks. `config/DistantHorizons.toml` has `lodChunkRenderDistanceRadius=128`,
+  `numberOfThreads=4`, `threadRunTimeRatio="0.5"`, `enableCaveCulling=true` with a
+  height of 60 and `enableCloudRendering=false`; the client generator is
+  `PRE_EXISTING_ONLY` because the server now builds the LODs. The server runs the same
+  jar with `chunkGeneratorMode="INTERNAL_SERVER"`, `generatorPlan="SURFACE_THEN_CHUNKS"`,
+  `pauseIfMovingQuickly=false`, four threads at a 0.5 ratio, a 128 chunk generation
+  distance and no bandwidth limit on the LAN. Known issues are unchanged: memory creep,
+  unstable server side, and LODs that need a render-distance toggle to refresh.
 - **Dynamic Surroundings 1.0.9.0** (2026-09-30): mist475's 1.7.10 fork, newer than the
   1.0.7.7 in the old notes; adds Seasonal Horizons compatibility.
 - **Sound-Physics 1.1.1** (2026-06-27): the 1.7.10 mixin edition.

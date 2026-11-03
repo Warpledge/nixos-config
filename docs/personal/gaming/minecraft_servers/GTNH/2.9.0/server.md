@@ -45,6 +45,8 @@ From [mods.md](./mods.md), the **B** rows:
   EZNuclear 1.1.1, EZStorage 1.8.2, NH-Utilities 1.7.0, Programmable Hatches 0.2.1p2-beta
 - ElytraMining 1.2.0.1, Trash Slot 1.0.31, SharedProspecting 2.0.4
 - YesSteveModel Unofficial 1.9, with its models in `config/ysmu/custom/`
+- Distant Horizons `upstream-preview8-rple-biomes`, so the server builds and syncs the
+  LODs the client shows (see mods.md for the generation settings)
 - Waystones-X 1.0.16, MIAOKATZE Core 0.2.0, GT-Miao-Blueprint 0.3.0,
   GT-Steam-Reborn 2.1.1, GT-Interesting-Thing 2.1.0, GT-Simple-Wireless-Network 2.1.0
 - The EZStorage script `scripts/simplestorage_gregified.zs` must be on the server too, or
