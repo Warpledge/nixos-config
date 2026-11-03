@@ -1,6 +1,6 @@
 # Mods — TerraFirmaGreg-Modern
 
-Manually added or removed mods only. Base pack mods are not listed here.
+Manually added, removed or overridden mods only. Base pack mods are not listed here.
 
 ---
 
@@ -12,6 +12,10 @@ Manually added or removed mods only. Base pack mods are not listed here.
 - **Version:**
 - **Why:** Reason for adding
 -->
+
+### No Chat Reports (base pack override)
+- **Version:** 1.20.1-v2.2.2 (downgraded from 2.2.3)
+- **Why:** 2.2.3 crashed at the pause screen with `NCRCore.getProvider()` null; 2.2.2 is what the 0.12.5/0.13.7 instance ran.
 
 ### Tom's Performant Storage
 - **Version:** 0.1.0+1.20.1
