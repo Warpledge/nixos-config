@@ -157,13 +157,16 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
 - **Sound-Physics 1.1.1** (2026-06-27): the 1.7.10 mixin edition.
 - **Euphoria Patcher 1.9.3** is installed to match the NeonTech settings. 1.10.5 exists,
   but moving to it means copying the NeonTech values by hand.
+- **BetterSprinting 1.1.3**: 2.3.0's coremod fails on 2.9 at the
+  `EntityPlayerSP.onLivingUpdate` insertion point. 1.1.3 hooks through PlayerAPI 1.5.0
+  instead, which the pack ships, and was installed on both sides on 2026-11-03 to test.
+  It gives sprint toggle, sneak toggle and fly boost, not step assist.
 
 ## Dropped after testing
 
-- **BetterSprinting**: 2.3.0's coremod cannot find its `EntityPlayerSP.onLivingUpdate`
+- **BetterSprinting 2.3.0**: its coremod cannot find its `EntityPlayerSP.onLivingUpdate`
   insertion point under 2.9 and aborts the launch with "Could not find insertion point".
-  Removed. The old 1.1.3 jar uses the same `ClientPlayerAPI` insertion approach, so it is
-  not worth retrying.
+  The 1.1.3 jar is installed instead (see above).
 
 - **deconfigintegration 1.0.2**: its late mixins still declare Draconic Evolution's
   `IConfigurableItem` interface on IC2 and Avaritia classes. 2.9's Draconic Evolution no
