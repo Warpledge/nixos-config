@@ -78,32 +78,37 @@ StructureLib, GTSWN needs AE2, the other two only GregTech. The four Miao mods o
 GTNL in role (steam tiers, singularity tech, large storage) but share no IDs or
 recipes, and the server boots with both installed.
 
-Three more joined them later on 2026-11-02, also client and server:
+Two more joined them later on 2026-11-02, also client and server:
 
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
 | TenkeiTech | 1.1.0 | B | AE automation: Better ME Requester, ME Super Pattern Buffer and proxy, auto template input buses, pattern circuit writer, wireless ME network core; needs `ae2fc` and ServerUtilities |
 | ThinkTech | 0.3.1 | B | chemistry and materials: briquettes, methane clathrate, catalysts, computing chips, explosives (PETN, HMX, HNIW), separation control cores |
-| Fission-Evolved | 0.1.1 | B | nine custom fuel rods, an IV multiblock fission reactor and a UMV-tier generator; rewrites TST and GTNL endgame fuel recipes when both are installed, by design |
 
 TenkeiTech and Programmable Hatches meet in the same workflow but are not duplicates:
 Programmable Hatches sets a machine's virtual circuit through a Programming Cover and
 the Programming Circuit item, for any GT bus, while TenkeiTech writes circuit numbers into
-AE patterns in bulk and gives its own template buses a virtual circuit slot. Fission
-Evolved's baseline is 2.9.0-beta-2, the oldest of the three, so its endgame machines are
-the least tested. TenkeiTech has AE2 and client mixins; ThinkTech and Fission Evolved have
-none.
+AE patterns in bulk and gives its own template buses a virtual circuit slot. TenkeiTech
+has AE2 and client mixins; ThinkTech has none.
 
-Six client-side additions on 2026-11-02:
+Five client-side additions on 2026-11-02:
 
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
 | World Tooltips | 1.2.3 | C | floating tooltip over dropped items; no lang files, it shows the game's own item names |
 | Better Line Break | 1.0.1 | C | replaces Minecraft's line wrapping; no text of its own |
-| PICO-8 GTNH | 0.4.1 | B | playable PICO-8 cartridges on a machine block; needs `modularui2` and `gtnhlib` (in the pack) |
 | MyCTMLib | 1.4.4-290 | C | connected-texture support for resource packs |
 | OmniOcular Unofficial | 1.6.0 | B | WAILA add-on showing machine internals; see the scripts note below |
 | Fancy Block Particles | 2.4.1 | C | 3D digging particles; `config/FBP/Particle.properties` sets `fancyRain=false` and `fancySnow=false` to avoid the Twilight Forest crash |
+
+Both PICO-8 GTNH 0.4.1 and Fission-Evolved 0.1.1 are parked. With either installed
+alongside the five client mods the client fails before the main menu at GregTech's
+post-init, and without them the same set boots. The report hides the real error behind
+`Class bytes is null for net.minecraft.item.ItemBlock`, the same masked failure the pack
+shows when a mod's init exception cannot be logged, so the mod names are the only signal.
+The server's copies were removed too, so the two mod lists match. PICO-8 has no mixins and
+finishes its own init; Fission's baseline is 2.9.0-beta-2, the oldest of the group. Both are
+worth retrying after a report upstream and before the next pack update.
 
 OmniOcular's labels come from XML scripts, and the Chinese pack the wiki links
 ([CCYF78/GTNH_OmniOcular](https://github.com/CCYF78/GTNH_OmniOcular)) is fully translated
