@@ -91,7 +91,7 @@ the Programming Circuit item, for any GT bus, while TenkeiTech writes circuit nu
 AE patterns in bulk and gives its own template buses a virtual circuit slot. TenkeiTech
 has AE2 and client mixins; ThinkTech has none.
 
-Five client-side additions on 2026-11-02:
+Four client-side additions on 2026-11-02:
 
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
@@ -99,10 +99,13 @@ Five client-side additions on 2026-11-02:
 | Better Line Break | 1.0.1 | C | replaces Minecraft's line wrapping; no text of its own |
 | MyCTMLib | 1.4.4-290 | C | connected-texture support for resource packs |
 | OmniOcular Unofficial | 1.6.0 | B | WAILA add-on showing machine internals; see the scripts note below |
-| Fancy Block Particles | 2.4.1 | C | 3D digging particles; `config/FBP/Particle.properties` sets `fancyRain=false` and `fancySnow=false` to avoid the Twilight Forest crash |
+
+Fancy Block Particles 2.4.1 was removed after its 3D block particles rendered as
+screen-filling shards under Angelica and the shader pack; its `config/FBP/` folder is gone
+too, so the Twilight Forest workaround went with it.
 
 Both PICO-8 GTNH 0.4.1 and Fission-Evolved 0.1.1 are parked. With either installed
-alongside the five client mods the client fails before the main menu at GregTech's
+alongside the other client mods the client fails before the main menu at GregTech's
 post-init, and without them the same set boots. The report hides the real error behind
 `Class bytes is null for net.minecraft.item.ItemBlock`, the same masked failure the pack
 shows when a mod's init exception cannot be logged, so the mod names are the only signal.
