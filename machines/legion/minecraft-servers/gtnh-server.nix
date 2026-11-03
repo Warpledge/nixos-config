@@ -41,6 +41,7 @@
               -XX:+AlwaysPreTouch \
               -XX:+PerfDisableSharedMem \
               -XX:+UseTransparentHugePages \
+              -XX:+UseCompactObjectHeaders \
               -Dfml.readTimeout=180 \
               -Dfml.loginTimeout=60 \
               @java9args.txt \

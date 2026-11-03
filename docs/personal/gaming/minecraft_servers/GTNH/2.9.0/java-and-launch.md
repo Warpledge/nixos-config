@@ -4,17 +4,27 @@
 
 - The instance points at OpenJDK 25 (`/nix/store/6mjvrmphia72izv1qpm04j5fkvpqjbhy-openjdk-25.0.4.1+1/bin/java`,
   `JavaVersion=25.0.4.1`).
-- 2.9.0 ships as a Java 17-26 pack. The wiki says Java 25 from 2.8 and Java 26 from
-  2.9, so 25 is inside the supported range; the server module already uses `jdk25`.
+- 2.9.0 ships as a Java 17-26 pack. The [Installing and Migrating](https://wiki.gtnewhorizons.com/wiki/Installing_and_Migrating)
+  page (read 2026-11-02) recommends Prism with **Java 25+** over everything else,
+  calling 25 the most optimized and least memory-hungry runtime for GTNH, and notes that
+  25 needs 2.8+ and 26 needs 2.9+.
+- The same page suggests `-XX:+UseCompactObjectHeaders` on Java 25+. The instance sets it
+  through `OverrideJavaArgs=true` and `JvmArgs=-XX:+UseCompactObjectHeaders`; the pack's
+  own args come from the lwjgl3ify launchargs patch, not from that field.
+- The local server used to run the profile's `java`, which was 21 because jdk21 shadowed
+  jdk25 in `environment.systemPackages`. `modules/nixos/gaming/tools/java.nix` now marks
+  jdk21 `lowPrio`, so the next rebuild makes `java` 25; until then `start.sh` pins the
+  JDK 25 path (override with `GTNH_JAVA=...`) and passes the same flag. The laptop module
+  already used `pkgs.jdk25` and now passes it too.
 
 ## JVM args
 
-The 2.9 instance has `OverrideJavaArgs=false`, so it uses Prism's global set in
-`prismlauncher.cfg`: the Aikar-style G1 flags and `MaxMemAlloc`/`MinMemAlloc` of 12288 MB.
-Nothing per-instance to maintain.
+The 2.9 instance has `OverrideJavaArgs=true` only to add `-XX:+UseCompactObjectHeaders`.
+Everything else still comes from Prism's global set in `prismlauncher.cfg`: the
+Aikar-style G1 flags and `MaxMemAlloc`/`MinMemAlloc` of 12288 MB.
 
-The server's own args live in `machines/legion/minecraft-servers/gtnh-server.nix` and are
-unchanged by 2.9.
+The server's own args live in `machines/legion/minecraft-servers/gtnh-server.nix`; the only
+2.9 change there is `-XX:+UseCompactObjectHeaders`.
 
 ## lwjgl3ify
 

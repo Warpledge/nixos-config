@@ -11,11 +11,13 @@
   #--------------------------------------------------------------------#
   programs.java = {
     enable = true;
-    package = pkgs.jdk25; # Java 25 — required for GTNH 2.8.x
+    package = pkgs.jdk25; # Java 25 — GTNH 2.9's recommended runtime
     binfmt = lib.mkForce false; # Disable binfmt support (security concern)
   };
 
+  # lowPrio so jdk25 owns `java`; jdk21 stays installed for Prism Launcher
+  # and the 1.20.1 instances that ask for it by path.
   environment.systemPackages = [
-    pkgs.jdk21 # Java 21 — for Prism Launcher / modded 1.20.1
+    (lib.lowPrio pkgs.jdk21)
   ];
 }
