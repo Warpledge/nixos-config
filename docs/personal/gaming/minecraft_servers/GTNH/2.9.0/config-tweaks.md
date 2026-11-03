@@ -229,3 +229,21 @@ check the new version's file for added keys.
   `/ysm reload` on the kept set takes seconds and 320-390 s on the full one, blocking the
   server while it runs. The index keeps only the entries a run re-recorded, so a start
   following a cached one rescans; at this size that is a few seconds.
+
+## Balance edits (2026-11-03)
+
+Applied to the client and server copies.
+
+| Mod | File | Change |
+| --- | --- | --- |
+| 123Technology | `123Technology.cfg` | Overpowered integrated-factory recipes off, output multiplier 1.5 to 1.0, NHU egg-machine compat off. The file repeats each category under a pinyin and a Chinese name; both copies were changed. |
+| GTIT | `gtit/gifts.json` | Starter gift `randomRewards` emptied and `randomCount` set to 0, so no rings at first login. The legacy `gift_config.json` was cleared too. Already-claimed gifts keep their snapshot. |
+| GTNL | `GTNotLeisure/` | Vein Mining Pickaxe `maxAmount=1` and `maxRange=1`, so it no longer chains; `enableSomethingRecipe=false`; `enableVoidMinerTweak=false`; `enableSaturationHeal=false`. `enableRecipeOutputChance` stays on. |
+| GTNHRates | `gtnhrates.cfg` | Every multiplier halved from the mod defaults: ores 2.0, coal 8.0, energy 2.0, tools 4.0, bees, crops, pump, resin and IC2 crops 2.0, sapling chance 1.0. `gtSimpleMinersEnergyDiscount` stays 1.0. |
+| EZMiner | `EZMiner/EZMiner.cfg` | Chain radius 3 and 64 blocks, block swap 3 and 64, the same 64-block `max_blocks` as FTB Ultimine (its `FTBUltimineServerConfig.java`). Tree felling stays at radius 64 and 16384 blocks for the tall GT++ trees. |
+| GTSWN | `gtswn/gtswn_network.cfg` | `UplinkLossEU=0.1`, so wireless power uploads lose 10 percent against the 15 percent downlink. |
+| GTSR | `gtsr/gtsr.cfg` | `singularityDestroyBlocks=false`, so worldgen singularities cannot eat builds. |
+
+Left alone on purpose: Twist's Blood Hatch infinite drain, Waystones' free
+teleports, 123Technology's Alien Fishery (a late-game goal), and the GTIT AE
+trade presets (not selected).
