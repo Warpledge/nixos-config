@@ -88,6 +88,7 @@ Manually added or removed mods only. Base pack mods are not listed here.
 ### Yes Steve Model
 - **Version:** 2.6.5-forge+mc1.20.1
 - **Why:** Custom player model support
+- **Note:** Needs `~/.ysm` read and mmap in the Prism AppArmor profile.
 
 ### BlueMap
 - **Version:** 5.12-mc1.20-6
