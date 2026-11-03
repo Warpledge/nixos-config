@@ -77,7 +77,8 @@ English; the READMEs are Chinese. GT-Miao-Blueprint needs Applied Energistics an
 StructureLib, GTSWN needs AE2, the other two only GregTech. The four Miao mods overlap
 GTNL in role (steam tiers, singularity tech, large storage) but share no IDs or
 recipes, and the server boots with both installed. Since 2026-11-03 the GTIT starter gift
-no longer gives rings, and 123Technology's overpowered recipes are off; the values are in
+gives one guaranteed Ring of Skywalk instead of two random rings, and 123Technology's
+overpowered recipes are off; the values are in
 [config-tweaks.md](./config-tweaks.md#balance-edits-2026-11-03).
 
 One more joined them later on 2026-11-02, client and server:
