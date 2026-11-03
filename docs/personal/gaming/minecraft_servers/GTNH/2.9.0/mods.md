@@ -212,8 +212,14 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
 
 ## Quest data
 
-- **Twist-Stuff**: the repo has a "2.9 Update" commit from 2026-08-27. Copy the 2.9
-  quest set into BetterQuesting, not the 2.8.4 one from the old instance.
+- **Twist-Stuff**: installed from the 2.9 set in
+  [AdityaVG13/Twist-Stuff](https://github.com/AdityaVG13/Twist-Stuff) (last commit
+  2026-08-27). The `TwistSpaceTechnology` folders sit in the server and client
+  `config/betterquesting/DefaultQuests/{QuestLines,Quests}`, and its line is inserted
+  after "Mass Processing" in `QuestLinesOrder.txt`. The repo's order file omits the
+  123Technology line, so only the Twist line was added. New worlds pick it up from
+  `DefaultQuests`; existing worlds need `bq_admin default load`. It is a community
+  questbook: Twist 0.8.0 ships no BetterQuesting data of its own.
 
 ## Found in the instance but missing from the 2.8.4 notes
 
