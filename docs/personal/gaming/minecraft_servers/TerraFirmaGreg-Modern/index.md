@@ -1,7 +1,8 @@
 # TerraFirmaGreg-Modern Notes
 
-Version: `0.13.7` client (Prism, 2026-10-23); server `0.12.5`
+Version: `0.13.17` client (Prism, 2026-11-03); server `0.12.5`
 Instance: `TerraFirmaGreg-Modern` (Prism Launcher)
+Old instance: `TerraFirmaGreg-Modern-OLD` (0.13.7, kept for reference)
 Path: `~/.local/share/PrismLauncher/instances/TerraFirmaGreg-Modern/minecraft/`
 Loader: Forge 1.20.1
 
