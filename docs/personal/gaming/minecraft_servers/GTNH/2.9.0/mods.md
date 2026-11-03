@@ -162,6 +162,13 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   `EntityPlayerSP.onLivingUpdate` insertion point. 1.1.3 hooks through PlayerAPI 1.5.0
   instead, which the pack ships, and was installed on both sides on 2026-11-03 to test.
   It gives sprint toggle, sneak toggle and fly boost, not step assist.
+- **Advanced Memory Card 1.2.0-1.7.10-GTNH** (2026-11-02): AE2 memory card with bulk
+  configuration copy and P2P tunnel management. Declares no dependencies beyond AE2, and
+  the copy volume defaults to 2048 blocks.
+- **WTCT 1.0.63-rc1** (2026-10-11): ME combined work terminal, 63-slot extended buses,
+  pattern auto-upload, wireless transceiver and upgrade cards. Built against 2.9.0-RC-1
+  and AE2 `rv3-beta-1073`; the pack runs `rv3-beta-1095`, so the launch is the test. It
+  ships `en_US.lang`.
 
 ## Dropped after testing
 
