@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PreToolUse (Bash): enforce CLAUDE.md rule 11 and keep tracked-file edits on
+# PreToolUse (Bash): enforce CLAUDE.md rule 9 and keep tracked-file edits on
 # Edit/Write, where post-edit.sh formats and checks them.
 cmd=$(jq -r '.tool_input.command // empty')
 deny() {
@@ -9,7 +9,7 @@ deny() {
 #--- rm with a variable, or chained onto other commands
 if grep -qE '(^|[;&|(]|\$\()[[:space:]]*(sudo[[:space:]]+)?rm[[:space:]]' <<<"$cmd" &&
   { [[ $cmd == *$'\n'* ]] || grep -qE '[$`;|]|&&' <<<"$cmd"; }; then
-  deny "CLAUDE.md rule 11: rm takes literal absolute paths, no \$VAR, and runs as its own command, not chained or in a script."
+  deny "CLAUDE.md rule 9: rm takes literal absolute paths, no \$VAR, and runs as its own command, not chained or in a script."
 fi
 #--- In-place writes to a file git tracks
 repo=${CLAUDE_PROJECT_DIR:-$PWD}
