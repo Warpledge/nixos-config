@@ -72,10 +72,13 @@ Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
    through the `commit` skill (forked: pass what changed and why), authored by the
    person at the keyboard (`user.git.name`/`user.git.email` in
    `users/<name>/settings.nix`), never `--author` or `-c user.name`, never
-   warpledge's identity on someone else's account. Commit each finished unit of
-   work: a long task can land as several logical commits, but don't commit
-   half-finished edits, and don't end a task with a checked change uncommitted. Run
-   the skill's steps, `scan.sh` included. Never push, amend or rebase. Changed
+   warpledge's identity on someone else's account. Commit one coherent unit of
+   work, normally one commit per task or feature: its fixes, tweaks and docs go in
+   it. Split only for unrelated changes or a fix that stands alone. Don't commit
+   each edit or each file, and don't batch unrelated work into one commit. Since
+   you can't amend, commit when the unit is finished and checked, and don't end a
+   task with a checked change uncommitted. Run the skill's steps, `scan.sh`
+   included. Never push, amend or rebase. Changed
    `machines/*/settings.nix` and `users/*/settings.nix` ride along in the commit
    being made, unmentioned (or a `chore(<machine>): save settings from Omni
    Settings` one alone when nothing else changed); never leave them uncommitted.
