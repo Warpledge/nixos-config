@@ -127,6 +127,10 @@ Manually added or removed mods only. Base pack mods are not listed here.
 - **Why:** Reason for removal
 -->
 
+### Chunky
+- **Version:** 1.3.146
+- **Why:** Distant Horizons 3.3.3 crashed on world generation with `ChunkyProvider.get`; the TFG optional mods page also says DH cannot build LODs while Chunky is installed. Jar moved to `/tmp/opencode/tfg-removed/`.
+
 ### Waystones
 - **Version:** 14.1.20
 - **Why:** Replaced by Via Romana for fast travel. Jar moved to `/tmp/opencode/tfg-removed/`.

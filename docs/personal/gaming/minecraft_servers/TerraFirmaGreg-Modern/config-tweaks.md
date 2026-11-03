@@ -60,7 +60,7 @@ Server-side only; not applied to the client instance.
 
 ## `config/DistantHorizons.toml`
 
-Not re-applied to the 0.13.17 instance: DH moved from 3.0.2-b to 3.3.3 and the mod changed substantially. The keys still exist, but the values below are from the older version. The 0.13.17 pack config already has `distantGeneratorMode = "INTERNAL_SERVER"` and `enableAdaptiveTransferSpeed = true`; `noiseIntensity` and the cave-block list were left at the pack defaults pending testing.
+Not re-applied to the 0.13.17 instance: DH moved from 3.0.2-b to 3.3.3 and the mod changed substantially. The keys still exist, but the values below are from the older version. The 0.13.17 pack config already has `distantGeneratorMode = "INTERNAL_SERVER"` and `enableAdaptiveTransferSpeed = true`; `noiseIntensity` and the cave-block list were left at the pack defaults pending testing. Chunky was removed on 2026-11-03: DH 3.3.3 crashed during worldgen with `ChunkyProvider.get`.
 
 ### Noise intensity
 - **Changed:** `noiseIntensity = "0.05"` → `"5.0"`
