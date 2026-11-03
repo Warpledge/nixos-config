@@ -2,6 +2,8 @@
 
 Config file changes made to the base pack. Organized by file.
 
+Client configs were re-applied to the fresh 0.13.17 instance on 2026-11-03. The Distant Horizons tweaks were not re-applied; see that section.
+
 ---
 
 <!-- Template:
@@ -26,10 +28,13 @@ Config file changes made to the base pack. Organized by file.
 ### Max chain range
 - **Changed:** `maxChainRange = 32` → `128`
 - **Why:** Default 32 blocks too short for zipline setups over long distances.
+- **Re-applied:** 2026-11-03 on the 0.13.17 instance; the 0.13.7 pack update had reset it to 32. Reconnectible Chains 2.2.5 still reads `maxChainRange` (limit 512) and adds `showRangeWarningHud`, which keeps its default.
 
 ---
 
-## `config/waystones-common.toml`
+## `config/waystones-common.toml` (removed with Waystones)
+
+Waystones was replaced by Via Romana on 2026-11-03; this config is no longer used. Values kept for reference.
 
 ### Cooldowns
 - **Changed:** `warpStoneCooldown = 30` → `10`, `inventoryButtonCooldown = 300` → `10`
@@ -43,13 +48,19 @@ Config file changes made to the base pack. Organized by file.
 
 ## `defaultconfigs/ftbranks/ranks.snbt` + `Aevum/serverconfig/ftbranks/ranks.snbt`
 
+Server-side only; not applied to the client instance.
+
 ### Simplified to two ranks
 - **Changed:** Removed `member`, `vip`, `moderator` ranks and all `command.*: false` denials from `novice`
 - **Why:** Server is private (2 players). The `novice` rank's explicit command denials were blocking op-level players from using commands like `/chunky` even with `command: true` in the admin rank. FTB Ranks wildcard doesn't reliably override explicit node denials from always-active ranks.
 - **Result:** `novice` (everyone) has no command restrictions and generous chunk limits. `admin` (ops) gets `command: true` with nothing blocking it.
 - **Note:** Both files must be kept in sync — server overwrites `Aevum/serverconfig/` on shutdown, `defaultconfigs/` is the persistent source of truth for new worlds.
 
+---
+
 ## `config/DistantHorizons.toml`
+
+Not re-applied to the 0.13.17 instance: DH moved from 3.0.2-b to 3.3.3 and the mod changed substantially. The keys still exist, but the values below are from the older version. The 0.13.17 pack config already has `distantGeneratorMode = "INTERNAL_SERVER"` and `enableAdaptiveTransferSpeed = true`; `noiseIntensity` and the cave-block list were left at the pack defaults pending testing. Chunky was removed on 2026-11-03: DH 3.3.3 crashed during worldgen with `ChunkyProvider.get`.
 
 ### Noise intensity
 - **Changed:** `noiseIntensity = "0.05"` → `"5.0"`
@@ -73,6 +84,8 @@ Config file changes made to the base pack. Organized by file.
 ---
 
 ## `defaultconfigs/ftbessentials-server.snbt`
+
+Server-side only; not applied to the client instance.
 
 ### Teleport commands enabled with warmup
 - **Changed:** Enabled `/home`, `/back`, `/tpa`, `/spawn`, `/warp` (all were `enabled: false`)

@@ -8,6 +8,9 @@
   nixpkgs = {
     config = {
       allowBroken = true; # Allow broken packages (for development/edge cases)
+      #--- `allowBroken` skips only nixpkgs' automatic `meta.broken`; a package
+      #--- flagged by hand in `meta.problems` needs a handler of its own
+      problems.handlers."gtk+".broken = "warn"; # ir-lv2's GUI is gtk2
       allowUnsupportedSystem = true;
       allowUnfree = true; # Allow unfree packages (proprietary software)
       permittedInsecurePackages = [

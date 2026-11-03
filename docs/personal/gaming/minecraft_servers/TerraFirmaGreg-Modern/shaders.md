@@ -4,6 +4,8 @@
 
 ## Eclipse Shader (Unstable)
 
+**Restored:** 2026-11-03 to the fresh 0.13.17 instance, with the `block.properties` fix below already present.
+
 **Location:** `~/.local/share/PrismLauncher/instances/TerraFirmaGreg-Modern/minecraft/shaderpacks/Eclipse-Shader-Unstable/`
 
 Load as the **extracted folder**, not the zip: the zip cannot be edited, and Iris will use whichever is selected in shader settings.

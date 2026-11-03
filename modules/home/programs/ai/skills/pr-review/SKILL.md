@@ -65,5 +65,5 @@ The diff, not the PR description, is the source. For each PR check:
 
 Lead with one line per PR: merge-ready, merge after a named fix, or not yet. Then per
 PR: what it does in a sentence, **Bugs** (concrete input → wrong result), **Smaller
-issues**, **Your call** (rule 8 preferences), and what was built or skipped. Don't
+issues**, **Your call** (the user's preferences), and what was built or skipped. Don't
 comment on GitHub, approve, merge or push; those stay with the user.

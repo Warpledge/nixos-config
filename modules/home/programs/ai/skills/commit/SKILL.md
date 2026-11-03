@@ -23,8 +23,9 @@ keyboard, never another person's. Push and history rewrites (amend, rebase, forc
 
 1. **See the work**: `git status --short` and `git diff --stat`. Untracked files the flake
    needs are part of it; build artifacts and the Katana runtime files at the root are not.
-2. **Group** by what someone would revert as a unit: one commit per separate thing added,
-   changed or fixed, not one per file and not everything at once.
+2. **Group** by what someone would revert as a unit: normally one commit per task or
+   feature, with its fixes and docs; a standalone fix gets its own. Not one per file,
+   per edit or per fix, and not everything at once.
    - **Merge**: a feature with its own follow-up fixes and its docs (CLAUDE.md, README,
      `docs/`); several small tweaks in one area made for the same reason (a batch of
      window rules, three related binds); a change and the test or check that came with it.

@@ -166,7 +166,7 @@
 
       #--- Animation Configuration
       animations = {
-        window-resize.custom-shader = ''
+        window-resize.custom-shader.text = ''
           vec4 resize_color(vec3 coords_curr_geo, vec3 size_curr_geo) {
             vec3 coords_next_geo = niri_curr_geo_to_next_geo * coords_curr_geo;
 
@@ -210,7 +210,7 @@
             duration-ms = 250;
             curve = "ease-out-expo";
           };
-          custom-shader = ''
+          custom-shader.text = ''
             vec4 open_color(vec3 coords_geo, vec3 size_geo) {
               vec3 coords_tex = niri_geo_to_tex * coords_geo;
               vec4 color = texture2D(niri_tex, coords_tex.st);
@@ -233,7 +233,7 @@
             duration-ms = 150;
             curve = "linear";
           };
-          custom-shader = ''
+          custom-shader.text = ''
             vec4 close_color(vec3 coords_geo, vec3 size_geo) {
               // Simulate an accelerated fall: square the (linear) progress.
               float progress = niri_clamped_progress * niri_clamped_progress;

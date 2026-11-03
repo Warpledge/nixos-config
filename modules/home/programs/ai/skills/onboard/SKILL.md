@@ -63,7 +63,7 @@ locations and real names; offer Claude Code's local memory for anything private.
 
 ## 5. Write
 
-Ask before adding sections beyond these (CLAUDE.md rule 9). Keep each file short:
+Ask before adding sections beyond these (CLAUDE.md rule 7). Keep each file short:
 facts Claude needs for this computer or person, each quirk pointing at the file that
 handles it. Follow **Writing Style** in the root `CLAUDE.md`.
 

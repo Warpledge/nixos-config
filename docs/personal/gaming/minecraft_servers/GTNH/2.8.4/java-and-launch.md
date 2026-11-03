@@ -11,6 +11,7 @@
 ## lwjgl3ify
 
 - **Config:** `B:rawMouseInput=false` in `config/lwjgl3ify.cfg` (default: `true`)
+- **Desktop entry:** `B:linuxCreateAppDesktopEntry=false` in `config/lwjgl3ify.cfg` (default: `true`). On first launch it writes `~/.local/share/applications/com.gtnewhorizons.Lwjgl3ifyMinecraft.desktop`, which the Prism Launcher AppArmor profile denies, and it turns the refusal into a launch failure (`Could not follow linuxCreateAppDesktopEntry logic`). The file only sets the Wayland app-id, and SDL runs on X11 here.
 - **SDL/Wayland fix:** On NixOS/Wayland, lwjgl3ify's bundled SDL can't find Wayland and crashes on launch. Fix: add `SDL_VIDEODRIVER=x11` as a global environment variable in Prism Settings → Environment Variables. This forces SDL to use XWayland (DISPLAY=:0).
 
 ## JourneyMap — Swap Fairplay for Unlimited

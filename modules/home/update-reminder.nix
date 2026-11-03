@@ -21,7 +21,9 @@
       lock="${machine.flakePath}/flake.lock"
       stamp="${config.xdg.stateHome}/omni-settings/update-reminded"
 
-      modified=$(jq -r '.nodes.nixpkgs.locked.lastModified // empty' "$lock" 2>/dev/null || true)
+      # The lock has other nodes named nixpkgs; only the root input counts
+      modified=$(jq -r '(.nodes[.root // "root"].inputs.nixpkgs) as $key
+        | .nodes[$key].locked.lastModified // empty' "$lock" 2>/dev/null || true)
       [[ -n $modified ]] || exit 0
       age=$((($(date +%s) - modified) / 86400))
       ((age >= ${toString days})) || exit 0
