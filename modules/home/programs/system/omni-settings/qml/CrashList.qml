@@ -1,6 +1,5 @@
-// Crashes from systemd-coredump (api.py's crashes), each with a button that
-// copies a report for troubleshooting. Shared by the Maintenance page
-// (OverviewPage.qml) and, for one game's crashes, GameEditor.qml.
+// One game's crashes from systemd-coredump (api.py's crashes), each with a button
+// that copies a report for troubleshooting. Shown in GameEditor.qml.
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
@@ -10,7 +9,6 @@ ColumnLayout {
     required property var view
     property string app: ""  // one Steam game's crashes only
     property string launch: ""  // that game's launch options as edited, for the report
-    property bool quiet: false  // no row of its own saying nothing crashed
     property var crashes: null
     property string error: ""
     readonly property bool ready: !!crashes || error !== ""
@@ -41,10 +39,9 @@ ColumnLayout {
     }
 
     ListRow {
-        visible: list.error !== "" || (!list.quiet && !!list.crashes && !list.crashes.length)
+        visible: list.error !== "" || (!!list.crashes && !list.crashes.length)
         icon: "check_circle"
-        title: list.error ? "Couldn't read the crashes" : list.app ? "No crashes in the last 30 days"
-                                                                   : "Nothing crashed in the last 30 days"
+        title: list.error ? "Couldn't read the crashes" : "No crashes in the last 30 days"
         alert: list.error
     }
     Repeater {
