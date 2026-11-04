@@ -245,7 +245,7 @@
   # lists the ones turned on
   localAi = {
     models = []; # Models turned on
-    default = null; # The apps' default model; null is the first one turned on
+    default = null; # The apps' default model; null or one turned off is the first one on
     edit = null; # Zed's inline suggestions
   };
 

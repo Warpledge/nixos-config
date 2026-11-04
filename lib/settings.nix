@@ -254,7 +254,7 @@
     (import ./default-apps.nix {inherit lib;}).apps
     #--- localAi.edit: none, or a model lib/local-models.nix lists
     // {"localAi.edit" = [null] ++ lib.attrNames (import ./local-models.nix).edit;}
-    #--- localAi.default: forSettings narrows this to the models turned on
+    #--- localAi.default: forSettings adds the machine's own; one turned off falls back
     // {"localAi.default" = [null] ++ lib.attrNames (import ./local-models.nix).models;}
     #--- Claude Code; null leaves the setting to Claude Code
     // {
@@ -451,10 +451,13 @@ in rec {
         in {
           inherit models;
           inherit (merged.localAi) edit;
+          # A default switched off in Omni moves to the first model on
           default =
-            if merged.localAi.default == null && models != []
+            if lib.elem merged.localAi.default models
+            then merged.localAi.default
+            else if models != []
             then lib.head models
-            else merged.localAi.default;
+            else null;
         };
       };
 
@@ -505,6 +508,13 @@ in rec {
       final = machine.users.${user};
     in
       report (userFile user) (badChoices (userChoices // {"localAi.default" = [null] ++ final.localAi.models;}) final
+        # What the files say, since `final` has already fallen back: only a name no
+        # model has is an error
+        ++ map (id: "`localAi.default` is ${builtins.toJSON id}; no model has that name")
+        (lib.filter (id: !(lib.elem id ([null] ++ lists."localAi.models"))) [
+          (readUser user).localAi.default or null
+          listed.${user}.localAi.default or null
+        ])
         ++ badLists lists final
         ++ lib.optional (builtins.match "[0-9A-Fa-f]{6}" final.mangohud.textColor == null)
         "`mangohud.textColor` is ${builtins.toJSON final.mangohud.textColor}; use six hex digits, e.g. \"00FF00\""))

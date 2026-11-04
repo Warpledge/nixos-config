@@ -274,8 +274,10 @@ def setting_json(cfg, state, s, multi, modules):
     if s.kind == "choice":
         out["choices"] = [{"value": c, "label": choice_label(s, c)} for c in s.choices]
         if s.path == ("localAi", "default"):
-            added = (state.resolved.get("localModels") or {}).get("models") or {}
-            out["choices"] += [{"value": m, "label": m} for m in added if m not in s.choices]
+            # None, or a model turned on; the machine's added ones aren't in s.choices
+            on = backend.dig(state.resolved["users"][cfg.user], ("localAi", "models")) or []
+            out["choices"] = [{"value": None, "label": choice_label(s, None)}] \
+                + [{"value": m, "label": choice_label(s, m) if m in s.choices else m} for m in on]
     if s.kind == "pick":
         out["data"] = s.data
     if s.kind == "list":
