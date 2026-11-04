@@ -240,7 +240,7 @@ Applied to the client and server copies.
 | GTIT | `gtit/gifts.json` | Starter gift gives one guaranteed Ring of Skywalk for step assist; the random ring pool is empty (`randomRewards` `[]`, `randomCount` 0). The legacy `gift_config.json` was updated too. Already-claimed gifts keep their snapshot; `/gtit gift claimreset <player>` issues the new gift on the next login. |
 | GTNL | `GTNotLeisure/` | Vein Mining Pickaxe `maxAmount=1` and `maxRange=1`, so it no longer chains; `enableSomethingRecipe=false`; `enableVoidMinerTweak=false`; `enableSaturationHeal=false`. `enableRecipeOutputChance` stays on. |
 | GTNHRates | `gtnhrates.cfg` | Every multiplier halved from the mod defaults: ores 2.0, coal 8.0, energy 2.0, tools 4.0, bees, crops, pump, resin and IC2 crops 2.0, sapling chance 1.0. `gtSimpleMinersEnergyDiscount` stays 1.0. |
-| EZMiner | `EZMiner/EZMiner.cfg` | Chain limit 64 blocks at radius 8, block swap limit 64 at radius 8, the same 64-block `max_blocks` as FTB Ultimine (its `FTBUltimineServerConfig.java`). Tree felling stays at radius 64 and 16384 blocks for the tall GT++ trees. |
+| EZMiner | `EZMiner/EZMiner_Server.cfg` | Server limits: chain 64 blocks at radius 8, block swap 64 at radius 8 (the same 64-block `max_blocks` as FTB Ultimine), tree felling 8 blocks and 256 blocks, preview 64 blocks. `addExhaustion=0.0` removes the hunger cost. Client preferences live in `config/EZMiner/EZMiner.cfg`. |
 | GTSWN | `gtswn/gtswn_network.cfg` | `UplinkLossEU=0.1`, so wireless power uploads lose 10 percent against the 15 percent downlink. |
 | GTSR | `gtsr/gtsr.cfg` | `singularityDestroyBlocks=false`, so worldgen singularities cannot eat builds. |
 
