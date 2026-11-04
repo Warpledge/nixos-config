@@ -43,8 +43,8 @@
         substituteInPlace $switcher \
           --replace-fail 'const baseList = CompositorService.workspacesForScreen(' \
             'const shownList = CompositorService.workspacesForScreen(' \
-          --replace-fail 'if (CompositorService.ephemeralWorkspaces)' \
-            'const baseList = shownList.filter(ws => !String(ws?.name ?? "").startsWith("side-rail-")); if (CompositorService.ephemeralWorkspaces)'
+          --replace-fail 'const slots = slotList(baseList);' \
+            'const baseList = shownList.filter(ws => !String(ws?.name ?? "").startsWith("side-rail-")); const slots = slotList(baseList);'
       '';
   });
 }

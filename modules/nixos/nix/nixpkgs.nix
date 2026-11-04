@@ -39,6 +39,15 @@
           });
         };
       })
+      #--- opencode 2.2.5's node_modules hash is stale; drop once NixOS/nixpkgs#582675
+      #--- lands. opencode-desktop inherits node_modules from this package
+      (_: prev: {
+        opencode = prev.opencode.overrideAttrs (old: {
+          node_modules = old.node_modules.overrideAttrs {
+            outputHash = "sha256-prx9dX7kUvs/E3zopkaPk5LXh3xJAy5sZeum/W8L7cA=";
+          };
+        });
+      })
       #--- Python mcp 2 fallout; drop once nixpkgs fixes it
       (_: prev: {
         pythonPackagesExtensions =
