@@ -141,13 +141,13 @@
       #--- Column Stacking
       (section "Columns" {
         # Pull the neighbouring window into this column, or push this one out of it
-        stack-left = bind "Mod+BracketLeft" "Stack / unstack left" {
+        stack-left = bind "Mod+Page_Up" "Stack / unstack left" {
           consume-or-expel-window-left = {};
         };
-        stack-right = bind "Mod+BracketRight" "Stack / unstack right" {
+        stack-right = bind "Mod+Page_Down" "Stack / unstack right" {
           consume-or-expel-window-right = {};
         };
-        tabbed-column = bind "Mod+Backslash" "Tabbed column on / off" {
+        tabbed-column = bind "Mod+Home" "Tabbed column on / off" {
           toggle-column-tabbed-display = {};
         };
       })

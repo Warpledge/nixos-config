@@ -67,9 +67,9 @@ pgrep -a gamescope | grep -- '-F '   # shows -w/-h and the filter as chosen
 ```
 
 The picture should fill the screen height, centred. Cropped or wrongly stretched means
-the resolution is wrong: measure again. Super+I cycles NVL, Anime4K, MMPX, sharp bilinear and linear,
-naming each in a notification; Super+H, Super+F and Super+G belong to niri, so gamescope
-never sees them.
+the resolution is wrong: measure again. `Super+\` cycles NVL, Anime4K, MMPX, sharp
+bilinear and linear, naming each in a notification; `Super+[` and `Super+]` adjust FSR
+sharpness. Super+H, Super+F and Super+G belong to niri, so gamescope never sees them.
 
 ## 5. Record it
 
