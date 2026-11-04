@@ -219,7 +219,8 @@
 
   #--- AI Tools
   claude.enable = false; # Claude Code (needs an Anthropic account)
-  claude.mods.ribbon = false; # Band above Claude Code's prompt: usage left, prompt cache
+  claude.mods.usageBand = false; # Band above Claude Code's prompt: usage, prompt cache
+  claude.mods.rebuildPrompt = false; # Rebuild and Restart DMS buttons on that band
   claude.mods.skins = false; # Skins: cards, tool rows and a wallpaper-coloured skin
   claude.mods.fileTree = false; # File tree sidebar (needs /tui fullscreen in a terminal)
   claude.mods.savvyProgress = false; # Progress bar and a live panel of subagents

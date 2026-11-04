@@ -170,7 +170,8 @@
   #--- AI Tools
   claude = {
     enable = true;
-    mods.ribbon = true;
+    mods.usageBand = true;
+    mods.rebuildPrompt = true;
     mods.skins = true;
     mods.fileTree = true;
     mods.savvyProgress = true;

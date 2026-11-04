@@ -4,11 +4,24 @@
 {
   config,
   lib,
+  machine,
   pkgs,
   user,
   ...
 }: let
   c = user.claude;
+  #--- The band's store copy, with the repo a rebuild builds and its prompts' switch
+  usageBand = pkgs.runCommandLocal "claude-usage-band" {} ''
+    cp -r ${./mods/usage-band} $out
+    chmod -R u+w $out
+    substituteInPlace $out/hooks/register.tsx \
+      --replace-fail __FLAKE_PATH__ ${lib.escapeShellArg machine.flakePath} \
+      --replace-fail __REBUILD_PROMPT__ ${
+      if c.mods.rebuildPrompt
+      then "1"
+      else "0"
+    }
+  '';
   #--- Anthropic's sample mods (Blast Radius, Replay Theater) share one repo
   playground = pkgs.fetchFromGitHub {
     owner = "anthropics";
@@ -162,13 +175,8 @@ in {
     #--------------------------------------------------------------------#
     #--- Mods, each behind claude.mods.<name>. Linked whole, not through
     #--- programs.claude-code.plugins: its per-file links fail the hooks path check
-    home.file.".claude/skills/ribbon" = lib.mkIf c.mods.ribbon {
-      source = pkgs.fetchFromGitHub {
-        owner = "robonuggets";
-        repo = "ribbon";
-        rev = "eecb8f9e384e8ae0ebbafb85f5c6490e8d561f72";
-        hash = "sha256-uSdT7j5ogCkuaIl7JYl8DQRXONEQGL8424cpie+KTK8=";
-      };
+    home.file.".claude/skills/usage-band" = lib.mkIf c.mods.usageBand {
+      source = usageBand;
     };
     #--- The patch adds the matugen skin and drops the daily update check
     home.file.".claude/skills/skins" = lib.mkIf c.mods.skins {
@@ -183,12 +191,20 @@ in {
         patches = [./mods/skins-matugen.patch];
       };
     };
-    matugen.templates = lib.mkIf c.mods.skins {
-      claude-skins = {
-        input = ../../../theme/matugen/claude-skins.json;
-        output = "${config.xdg.configHome}/claude-skins/matugen.json";
-      };
-    };
+    matugen.templates = lib.mkMerge [
+      (lib.mkIf c.mods.skins {
+        claude-skins = {
+          input = ../../../theme/matugen/claude-skins.json;
+          output = "${config.xdg.configHome}/claude-skins/matugen.json";
+        };
+      })
+      (lib.mkIf c.mods.usageBand {
+        claude-usage-band = {
+          input = ../../../theme/matugen/claude-usage-band.json;
+          output = "${config.xdg.configHome}/claude-usage-band/matugen.json";
+        };
+      })
+    ];
     home.file.".claude/skills/filetree" = lib.mkIf c.mods.fileTree {
       source = pkgs.fetchFromGitHub {
         owner = "data-goblin";

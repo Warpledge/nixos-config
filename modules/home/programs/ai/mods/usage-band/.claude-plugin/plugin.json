@@ -1,0 +1,7 @@
+{
+  "name": "usage-band",
+  "version": "0.1.0",
+  "description": "A band above the prompt: 5-hour and 7-day usage, prompt cache warm or cold in the matugen theme, and buttons to rebuild or restart DMS.",
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}
