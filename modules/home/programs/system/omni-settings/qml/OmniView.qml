@@ -69,6 +69,7 @@ Item {
     //--- Services running now, for the page list; Running Now updates it too
     property int servicesRunning: -1
     onInfoChanged: {
+        answerRebuild()
         if (info && servicesRunning < 0)
             Backend.call("services", {}, reply => {
                 if (reply.ok)
@@ -459,6 +460,17 @@ Item {
                       { label: "Rebuild Now", value: "switch" }]
         }, mode => startJob("rebuild", { mode }))
     }
+
+    //--- The panel's rebuild IPC call; canStart() needs info, so it waits for the load
+    property bool rebuildWanted: false
+    signal rebuildAnswered()
+    function answerRebuild() {
+        if (!rebuildWanted || !info)
+            return
+        rebuildAnswered()
+        rebuild()
+    }
+    onRebuildWantedChanged: answerRebuild()
 
     //--- A collapsed page's status in its title tip: {text, alert}, or null
     function pageSummary(pid, model) {

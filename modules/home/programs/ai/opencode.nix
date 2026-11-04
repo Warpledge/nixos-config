@@ -4,6 +4,7 @@
 {
   config,
   lib,
+  machine,
   pkgs,
   user,
   ...
@@ -19,6 +20,9 @@
     cp -r ${./opencode-usage-bar} $out
     chmod -R u+w $out
     substituteInPlace $out/tui.tsx --replace-fail __TUI__ ${flag parts.usageBar}
+    substituteInPlace $out/server.ts \
+      --replace-fail __FLAKE_PATH__ ${lib.escapeShellArg machine.flakePath} \
+      --replace-fail __REBUILD_BADGE__ ${flag parts.rebuildBadge}
     substituteInPlace $out/gui-experimental.cjs \
       --replace-fail __DESKTOP_BAR__ ${flag parts.desktopBar} \
       --replace-fail __REBUILD_BADGE__ ${flag parts.rebuildBadge}
@@ -64,7 +68,7 @@ in {
           effect = "allow";
         }
         #--- AGENTS.md rules 1 and 6: a rebuild, a push, an amend or sudo is the
-        #--- user's own step, so these stay blocked whatever a model decides
+        #--- user's own step. These catch the usual spellings; they're no sandbox
         {
           action = "shell";
           resource = "nixm rebuild *";
@@ -98,6 +102,26 @@ in {
         {
           action = "shell";
           resource = "sudo *";
+          effect = "deny";
+        }
+        {
+          action = "shell";
+          resource = "git -C * push *";
+          effect = "deny";
+        }
+        {
+          action = "shell";
+          resource = "git commit * --amend *";
+          effect = "deny";
+        }
+        {
+          action = "shell";
+          resource = "nh os *";
+          effect = "deny";
+        }
+        {
+          action = "shell";
+          resource = "./setup.sh *";
           effect = "deny";
         }
       ];
