@@ -156,12 +156,15 @@ release; all of them passed in-game testing on 2026-11-05.
 Vintage Resourcify lists `forgelin-legacy` as required. It has the same `forgelin` mod id
 as the pack's `forgelin-2.0.3-GTNH.jar`, so it was left out and runs on the pack's copy.
 
-Right Proper GUI Scale 2.1.1 was tried and removed the same day.
+Right Proper GUI Scale 2.1.1 is also on the client. It keeps the scale as a decimal in
+`options.txt` (`guiScale:3.5`, between vanilla's 3 and 4) and applies a change when the
+settings screen closes, so it can look like nothing happened. `/guiscale` sets it in game.
 
 Neo ECO AE Extension 7.3.6 is on the client only, on trial since 2026-11-05: three
-tiered AE2 multiblock systems for storage, crafting and computation. 7.3.7 appeared on
-Modrinth that day and was gone from its listing hours later, so 7.3.6 is the build in use.
-Not on the server, so try it in singleplayer. Check its recipes in NEI for balance,
+tiered AE2 multiblock systems for storage, crafting and computation, an optional upgrade
+path rather than a replacement for normal AE2. 7.3.7 appeared on Modrinth that day and was
+gone from its listing hours later, so 7.3.6 is the build in use. Not on the server, so
+try it in singleplayer. Its recipes looked in line with GTNH in NEI. Still to check:
 autocrafting through GT machines alongside WTCT, and what a world loses when it's removed.
 
 ## Left out until their author ships a 2.9 build
