@@ -160,12 +160,13 @@ Right Proper GUI Scale 2.1.1 is also on the client. It keeps the scale as a deci
 `options.txt` (`guiScale:3.5`, between vanilla's 3 and 4) and applies a change when the
 settings screen closes, so it can look like nothing happened. `/guiscale` sets it in game.
 
-Neo ECO AE Extension 7.3.6 is on the client only, on trial since 2026-11-05: three
+Neo ECO AE Extension 7.3.6 is on client and server, on trial since 2026-11-05: three
 tiered AE2 multiblock systems for storage, crafting and computation, an optional upgrade
 path rather than a replacement for normal AE2. 7.3.7 appeared on Modrinth that day and was
-gone from its listing hours later, so 7.3.6 is the build in use. Not on the server, so
-try it in singleplayer. Its recipes looked in line with GTNH in NEI. Still to check:
-autocrafting through GT machines alongside WTCT, and what a world loses when it's removed.
+gone from its listing hours later, so 7.3.6 is the build in use, and both sides must match.
+Its recipes looked in line with GTNH in NEI. Still to check: autocrafting through GT
+machines alongside WTCT, and what a world loses when it's removed. The world from before it
+went on the server is `~/Documents/Minecraft_Servers/World-Backups/World3-before-neoecoae-2026-11-05.tar.gz`.
 
 ## Left out until their author ships a 2.9 build
 

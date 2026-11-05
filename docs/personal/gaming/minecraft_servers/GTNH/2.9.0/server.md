@@ -62,8 +62,8 @@ From [mods.md](./mods.md), the **B** rows:
   the recipes differ from the client.
 
 BetterSprinting 2.3.0 and deconfigintegration are dropped (see mods.md). LagGoggles is
-still not installed. Neo ECO AE Extension is on the client only, so its machines don't
-exist on the server. `JourneyMapServer1.0.5_MC1.7.10.jar` is also in `mods/`, server only.
+still not installed. Neo ECO AE Extension 7.3.6 is also on the server, on trial.
+`JourneyMapServer1.0.5_MC1.7.10.jar` is in `mods/` too, server only.
 
 2.9.0 supplies its own lwjgl3ify, GTNHLib, FalsePatternLib and Extreme Sound Muffler
 Legacy, so do not copy the 2.8.4 versions of those to the server.
