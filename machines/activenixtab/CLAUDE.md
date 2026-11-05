@@ -175,9 +175,13 @@ when Ky approves it.
   start) on Steam's install in `~/.local/share/valheim-server/game`, with world
   `NewAsgard2026` seeded once from Steam Cloud into `worlds/` and owned by the server
   after that. UDP 2456-2458, `-public 0` so friends add the IP themselves; the
-  password sits in `~/.local/share/valheim-server/env`, never the repo.
-  `valheim-server-inhibit` holds off idle and lid sleep only while the server runs.
-  Gotchas: a vanilla server cannot read the world, which is a modded save (world
-  version -1); a paid mod with a licence check, OdinShipPlus, refuses to run and
-  stops the server, which is why the profile runs the free OdinShip instead.
+  password sits in `~/.local/share/valheim-server/env`, never the repo. The
+  "Valheim Server" desktop entry runs `valheim-console` in Ghostty: it starts the
+  service, follows `logs/server.log` (`-logfile -` plus systemd's append), and closes
+  the window to stop it, so nothing starts at boot. A polkit rule lets that one unit
+  start and stop without a prompt, and `valheim-server-inhibit` holds off idle and lid
+  sleep only while the server runs. Gotchas: a vanilla server cannot read the world,
+  which is a modded save (world version -1); a paid mod with a licence check,
+  OdinShipPlus, refuses to run and stops the server, which is why the profile runs the
+  free OdinShip instead.
 - `INSTALL.md` — reinstalling from scratch (run `./setup.sh` and choose “Reinstall activenixtab”; the script will detect the existing machine folder and reapply the exact configuration)
