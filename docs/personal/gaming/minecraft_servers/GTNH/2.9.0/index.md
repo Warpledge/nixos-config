@@ -13,7 +13,11 @@ created under 2.9.
 - [config-tweaks.md](./config-tweaks.md): every config edit, with 2.9 paths and defaults
 - [java-and-launch.md](./java-and-launch.md): Java, Prism's JVM args, lwjgl3ify
 - [shaders.md](./shaders.md): the NeonTech setup, Complementary Unbound with Euphoria Patches and Neon Horizons
-- [server.md](./server.md): the laptop server build and what changes in its NixOS module
+- [server.md](./server.md): the desktop and laptop servers, their mods and the current world
+
+The translation agent and data patches for the hand-added mods are outside this repo, in
+`~/Documents/Minecraft_Servers/GTNH-Translation/`; see
+[java-and-launch.md](./java-and-launch.md#jvm-args).
 
 ## Startup crashes in 2.9
 

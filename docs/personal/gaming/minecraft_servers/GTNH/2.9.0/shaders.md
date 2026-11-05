@@ -49,6 +49,14 @@ versions the file has to be renamed and its values copied by hand.
   Euphoria regenerates that folder. The patch file and originals are in the instance's
   `.minecraft/eclipse-tuning/`.
 
+## What's active
+
+As of 2026-11-05, `config/shaders.properties` selects
+`ComplementaryUnbound_r5.8.1 + EuphoriaPatches_1.9.3`, and the resource packs are
+`Shadow.UI.v5.47.zip` and `Neon.Horizons.v1.2.zip`. Also in `shaderpacks/`, not selected:
+`Eclipse-Shader-GTNH`, `Eclipse-GTNH-CompRef` and `photon_v1.4-gtnh`, with their source
+zips. The patches behind those edits are in `.minecraft/eclipse-tuning/`.
+
 ## Extra mods
 
 - **Distant Horizons** (see [mods.md](./mods.md)): enable Aggressive Chunk Loading under

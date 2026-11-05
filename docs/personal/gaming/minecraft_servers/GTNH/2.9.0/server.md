@@ -15,25 +15,31 @@ backup; the new one is a separate folder.
    header comment at that folder. The Java path (`jdk25`), the JVM args and the tmux
    crash loop are unchanged.
 
-## Local test on the desktop
+## Local server on the desktop
 
-The same folder is unpacked on eclipse, with the mods and configs below copied over, for
-testing before it goes to the laptop:
+The same folder is unpacked on eclipse, with the mods and configs below copied over, and
+this is the copy in use (checked 2026-11-05):
 
-- `start.sh` in the server folder runs the server with 6G heap and a crash-restart loop.
-  The laptop module raises it to 12G.
+- The Omni Server app runs it as `gtnh-2-9-0`
+  (`~/.config/omni-server/servers/gtnh-2-9-0.json`): Java 25, 6144 MB heap, the G1 preset
+  and the translation agent from [java-and-launch.md](./java-and-launch.md#jvm-args).
+- `start.sh` in the server folder is the older way to run it, with 6G heap, the same agent
+  and a crash-restart loop. The laptop module uses 12G.
 - `~/.local/bin/gtnh` is a local copy of the laptop launcher: `gtnh` starts or attaches
-  the tmux session, `gtnh log`, `gtnh stop`, `gtnh status`.
+  the tmux session, `gtnh log`, `gtnh stop`, `gtnh status`. It only sees that tmux session,
+  so it won't report a server started from Omni Server.
 - The client connects to `localhost:25566`.
 
-This local copy exists only for testing; the laptop gets the `gtnh` command from
-`machines/legion/minecraft-servers/gtnh-server.nix` after the next rebuild.
+The laptop gets the `gtnh` command from
+`machines/legion/minecraft-servers/gtnh-server.nix` after the next rebuild. Its copy hasn't
+been checked against this list, so compare its `mods/` and configs before playing there.
 
 ## server.properties
 
 - `server-port=25566`
 - `view-distance=10`
 - `max-tick-time=0`: stops the watchdog killing the server during heavy worldgen
+- `level-name=World3`: the current world. The earlier `World` folder is still beside it.
 
 ## Mods the server needs on top of the pack
 
@@ -56,7 +62,8 @@ From [mods.md](./mods.md), the **B** rows:
   the recipes differ from the client.
 
 BetterSprinting 2.3.0 and deconfigintegration are dropped (see mods.md). LagGoggles is
-still not installed.
+still not installed. Neo ECO AE Extension is on the client only, so its machines don't
+exist on the server. `JourneyMapServer1.0.5_MC1.7.10.jar` is also in `mods/`, server only.
 
 2.9.0 supplies its own lwjgl3ify, GTNHLib, FalsePatternLib and Extreme Sound Muffler
 Legacy, so do not copy the 2.8.4 versions of those to the server.

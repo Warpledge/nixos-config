@@ -18,12 +18,21 @@
 
 ## JVM args
 
-The 2.9 instance has `OverrideJavaArgs=true` only to add `-XX:+UseCompactObjectHeaders`.
+The 2.9 instance has `OverrideJavaArgs=true` to add `-XX:+UseCompactObjectHeaders` and the
+translation agent, `-javaagent:` pointing at `.minecraft/gtnh-translation-agent.jar`.
 Everything else still comes from Prism's global set in `prismlauncher.cfg`: the
 Aikar-style G1 flags and `MaxMemAlloc`/`MinMemAlloc` of 12288 MB.
 
-The server's own args live in `machines/legion/minecraft-servers/gtnh-server.nix`; the only
-2.9 change there is `-XX:+UseCompactObjectHeaders`.
+The agent translates hard-coded Chinese strings in the hand-added mods. Its source, build
+and the matching quest and lore data patches are in
+`~/Documents/Minecraft_Servers/GTNH-Translation/`, with the steps in its `translations.md`.
+It isn't in this repo. Updating one of those mods can bring back untranslated text. The
+client's copy sits in `.minecraft/` because the Prism Launcher AppArmor profile denies
+reading it from `~/Documents`, and the JVM then exits without writing a log.
+
+The laptop's args live in `machines/legion/minecraft-servers/gtnh-server.nix`; the only
+2.9 change there is `-XX:+UseCompactObjectHeaders`, and it doesn't load the agent yet. The
+desktop's are in [server.md](./server.md#local-server-on-the-desktop).
 
 ## lwjgl3ify
 
