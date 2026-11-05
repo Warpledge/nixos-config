@@ -78,7 +78,7 @@ English; the READMEs are Chinese. GT-Miao-Blueprint needs Applied Energistics an
 StructureLib, GTSWN needs AE2, the other two only GregTech. The four Miao mods overlap
 GTNL in role (steam tiers, singularity tech, large storage) but share no IDs or
 recipes, and the server boots with both installed. Since 2026-11-04 the GTIT starter gift
-gives no rings, because Footwork covers step assist, and since 2026-11-03 123Technology's
+gives no rings, because Omni Tweaks covers step assist, and since 2026-11-03 123Technology's
 overpowered recipes are off; the values are in
 [config-tweaks.md](./config-tweaks.md#balance-edits-2026-11-03).
 
@@ -128,15 +128,16 @@ One mod written for this setup on 2026-11-04, client and server:
 
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
-| Footwork | 0.1.0 | B | step height 1.0 (0.5 while sneaking) and better ladder and vine climbing |
+| Omni Tweaks | 0.2.0 | B | QoL backports from modern Minecraft, so far step height 1.0 (0.5 while sneaking) and better ladder and vine climbing |
 
 It reimplements the wanted features of Keep Stepping and Better Climbing, neither of which
 has a 1.7.10 build; no code comes from them. Its climbing mixin hooks
 `EntityLivingBase.moveEntityWithHeading` and only acts on the client's own player. Holding
 jump in a climbable climbs up, and looking down 45° or more descends instead of climbing
-when walking into a ladder. Toggles and speeds are in `config/footwork.cfg`. It passed
-in-game testing on 2026-11-04. The source is in `~/Projects/footwork`, a local git repo
-built with GTNH's ExampleMod starter; the jar is `build/libs/footwork-0.1.0.jar`.
+when walking into a ladder. Toggles and speeds are in `config/omnitweaks.cfg`. These
+features passed in-game testing on 2026-11-04, under the mod's first name, Footwork. The
+source is in `~/Projects/omni-tweaks`, a local git repo built with GTNH's ExampleMod
+starter; the jar is `build/libs/omnitweaks-0.2.0.jar`.
 
 ## Left out until their author ships a 2.9 build
 
