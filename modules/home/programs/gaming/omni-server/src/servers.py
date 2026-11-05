@@ -214,11 +214,10 @@ def add(folder, name=None):
 
 def remove(server_id):
     """Forget a server: its folder isn't touched, only this app's files about it."""
-    status = status_of(load(server_id))
-    if status["active"]:
+    cfg = load(server_id)
+    if status_of(cfg)["active"]:
         raise ServerError("Stop the server first")
-    subprocess.run(["systemctl", "--user", "disable", f"omni-server@{server_id}.service"],
-                   capture_output=True, check=False)
+    set_boot(cfg, False)
     shutil.rmtree(f"{UNITS}/omni-server@{server_id}.service.d", ignore_errors=True)
     os.unlink(path(server_id))
     shutil.rmtree(state_dir(server_id), ignore_errors=True)
@@ -448,7 +447,15 @@ def kill(cfg):
 
 
 def set_boot(cfg, on):
-    code, out = systemctl("enable" if on else "disable", unit(cfg["id"]))
+    """Start at boot: this instance's link in default.target.wants, made by hand because
+    the template has no [Install], and `add-wants` would pin default.target to the store."""
+    link = f"{UNITS}/default.target.wants/{unit(cfg['id'])}"
+    if on and not os.path.islink(link):
+        os.makedirs(os.path.dirname(link), exist_ok=True)
+        os.symlink(f"{UNITS}/omni-server@.service", link)
+    elif not on and os.path.islink(link):
+        os.unlink(link)
+    code, out = systemctl("daemon-reload")
     if code:
         raise ServerError(out)
 

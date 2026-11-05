@@ -136,7 +136,7 @@ in {
       StandardOutput = "append:%S/omni-server/%i/console.log";
       StandardError = "inherit";
     };
-    Install.WantedBy = ["default.target"];
+    # No Install section: home-manager would try to start the bare template (CLAUDE.md)
   };
 
   config.systemd.user.services."omni-server-monitor@" = {
