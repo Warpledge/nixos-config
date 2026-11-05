@@ -77,8 +77,8 @@ All but Waystones come from [MIAOKATZE](https://github.com/MIAOKATZE) and are ta
 English; the READMEs are Chinese. GT-Miao-Blueprint needs Applied Energistics and
 StructureLib, GTSWN needs AE2, the other two only GregTech. The four Miao mods overlap
 GTNL in role (steam tiers, singularity tech, large storage) but share no IDs or
-recipes, and the server boots with both installed. Since 2026-11-03 the GTIT starter gift
-gives one guaranteed Ring of Skywalk instead of two random rings, and 123Technology's
+recipes, and the server boots with both installed. Since 2026-11-04 the GTIT starter gift
+gives no rings, because Footwork covers step assist, and since 2026-11-03 123Technology's
 overpowered recipes are off; the values are in
 [config-tweaks.md](./config-tweaks.md#balance-edits-2026-11-03).
 
