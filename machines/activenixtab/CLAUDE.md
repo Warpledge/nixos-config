@@ -175,7 +175,9 @@ when Ky approves it.
   start) on Steam's install in `~/.local/share/valheim-server/game`, with world
   `NewAsgard2026` seeded once from Steam Cloud into `worlds/` and owned by the server
   after that. UDP 2456-2458, `-public 0` so friends add the IP themselves; the
-  password sits in `~/.local/share/valheim-server/env`, never the repo. The
+  password sits in `~/.local/share/valheim-server/env`, never the repo. Admins are
+  SteamID64s in `worlds/adminlist.txt`, beside the save and read at server start, so
+  Ky's own ID stays out of git. The
   "Valheim Server" desktop entry runs `valheim-console` in Ghostty: it starts the
   service, follows `logs/server.log` (`-logfile -` plus systemd's append), and closes
   the window to stop it, so nothing starts at boot. A polkit rule lets that one unit
