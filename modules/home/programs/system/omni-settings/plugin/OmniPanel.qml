@@ -14,6 +14,8 @@ Item {
     // What PluginService hands a daemon
     property string pluginId
     property var pluginService
+    // Set by the rebuild IPC call until the view, which may still be loading, answers
+    property bool rebuildAsked: false
 
     function toggle(screen) {
         if (slideout.isVisible)
@@ -66,7 +68,9 @@ Item {
             OmniView {
                 edge: 6
                 focus: true
+                rebuildWanted: root.rebuildAsked
                 onCloseRequested: slideout.hide()
+                onRebuildAnswered: root.rebuildAsked = false
             }
         }
 
@@ -114,6 +118,13 @@ Item {
         function hide(): string {
             slideout.hide()
             return "CLOSED"
+        }
+
+        //--- Opens the panel on its Rebuild dialog (the OpenCode desktop badge)
+        function rebuild(): string {
+            root.rebuildAsked = true
+            root.show()
+            return "OPENED"
         }
     }
 }

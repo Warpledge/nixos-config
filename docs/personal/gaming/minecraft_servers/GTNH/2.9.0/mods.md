@@ -1,10 +1,10 @@
 # GTNH 2.9.0 Added Mods
 
 The hand-added mods, checked against the 2.9.0 pack and against each mod's releases on
-2026-11-01. Descriptions of what each mod does are in the
-[2.8.4 write-ups](../2.8.4/mods.md); this page records which build to use and what
-changed. Every mod below was looked up on GitHub, Modrinth or CurseForge: the only one
-with a newer 1.7.10 build than the 2.8.4 jar is Euphoria Patcher.
+2026-11-01. This page records which build to use and what changed; the longer write-ups
+of what the carried-over mods do are in `2.8.4/mods.md` in git history (see
+[the GTNH index](../index.md)). Every mod below was looked up on GitHub, Modrinth or
+CurseForge.
 
 `Side`: **B** goes on client and server, **C** is client only.
 
@@ -32,7 +32,7 @@ Do not add these: the pack carries its own copy.
 | NH-Utilities | 1.7.0 | B | commit "Fit 29x" |
 | YesSteveModel Unofficial | 1.9 | B | wiki lists 2.9.0-beta-1 to RC-2; loads on stable, 2026-11-02 |
 | MineMenu | 1.2.0.B44 | C | latest on Modrinth, 2025-12-07 |
-| Spark | 1.10.19 | C | latest 1.7.10; the `1.10.35` in the old notes was wrong |
+| Spark | 1.10.19 | C | latest 1.7.10 |
 | FPS Reducer | 1.10.3 | C | latest, 2023-09-06 |
 | Trash Slot | 1.0.31 | B | latest 1.7.10 on CurseForge |
 | ElytraMining | 1.2.0.1 | B | latest, 2023, no GT API use |
@@ -55,7 +55,8 @@ Twist's tracker had the matching startup-crash report (#1390, from 2026-11-01), 
 0.8.0 release caught up on 2026-11-02: its changelog lists PR #1386 and its tag sits 11
 commits past that PR's head. `TwistSpaceTechnology-0.8.0.jar` replaced the PR build on
 both sides and the server loads it. Swap 123Technology back to its release once PR #269
-merges.
+merges. On a Twist update, reset `GregTech.lang` and `TwistSpaceTechnology.cfg` to avoid
+config conflicts.
 
 ## Installed on 2.9.0 only
 
@@ -76,8 +77,8 @@ All but Waystones come from [MIAOKATZE](https://github.com/MIAOKATZE) and are ta
 English; the READMEs are Chinese. GT-Miao-Blueprint needs Applied Energistics and
 StructureLib, GTSWN needs AE2, the other two only GregTech. The four Miao mods overlap
 GTNL in role (steam tiers, singularity tech, large storage) but share no IDs or
-recipes, and the server boots with both installed. Since 2026-11-03 the GTIT starter gift
-gives one guaranteed Ring of Skywalk instead of two random rings, and 123Technology's
+recipes, and the server boots with both installed. Since 2026-11-04 the GTIT starter gift
+gives no rings, because Omni Tweaks covers step assist, and since 2026-11-03 123Technology's
 overpowered recipes are off; the values are in
 [config-tweaks.md](./config-tweaks.md#balance-edits-2026-11-03).
 
@@ -123,6 +124,50 @@ Chinese leftovers are harmless: comments inside the XML, and `GregTech6.xml`, wh
 fires for GregorianTech 6 blocks that GTNH does not have. A pack update will not refresh
 these files, so new Chinese strings would need translating again.
 
+One mod written for this setup on 2026-11-04, client and server:
+
+| Mod | Build | Side | Note |
+| --- | --- | --- | --- |
+| Omni Tweaks | 0.2.0 | B | QoL backports from modern Minecraft, so far step height 1.0 (0.5 while sneaking) and better ladder and vine climbing |
+
+It reimplements the wanted features of Keep Stepping and Better Climbing, neither of which
+has a 1.7.10 build; no code comes from them. Its climbing mixin hooks
+`EntityLivingBase.moveEntityWithHeading` and only acts on the client's own player. Holding
+jump in a climbable climbs up, and looking down 45° or more descends instead of climbing
+when walking into a ladder. Toggles and speeds are in `config/omnitweaks.cfg`. These
+features passed in-game testing on 2026-11-04, under the mod's first name, Footwork. The
+source is in `~/Projects/omni-tweaks`, a local git repo built with GTNH's ExampleMod
+starter; the jar is `build/libs/omnitweaks-0.2.0.jar`.
+
+## Added on 2026-11-05
+
+Latest 1.7.10 Forge builds from Modrinth, hashes checked. None has an explicit 2.9
+release; all of them passed in-game testing on 2026-11-05.
+
+| Mod | Build | Side | Note |
+| --- | --- | --- | --- |
+| World Preview NH | 1.0.3 | C | biome and height preview on Create New World |
+| Vintage Pick Up Notifier | 1.0.0 | C | item pickup notices |
+| Vintage Resourcify, with AngelLib 1.0.0 | 1.0.6 | C | in-game resource and shader pack browser |
+| Better Search | 1.6.2 | C | typo-tolerant search, with NEI and AE2 hooks |
+| Effortless Building Gadgets | 0.10.1 | B | shape building through a crafted gadget; `B:consumesEnergy=false` on both sides, so it needs no power |
+| Shoulder Surfing Reloaded | 2.4.1 | C | over-the-shoulder camera; a 2023 build that patches vanilla code, so suspect it first after a pack update |
+
+Vintage Resourcify lists `forgelin-legacy` as required. It has the same `forgelin` mod id
+as the pack's `forgelin-2.0.3-GTNH.jar`, so it was left out and runs on the pack's copy.
+
+Right Proper GUI Scale 2.1.1 is also on the client. It keeps the scale as a decimal in
+`options.txt` (`guiScale:3.5`, between vanilla's 3 and 4) and applies a change when the
+settings screen closes, so it can look like nothing happened. `/guiscale` sets it in game.
+
+Neo ECO AE Extension 7.3.6 is on client and server, on trial since 2026-11-05: three
+tiered AE2 multiblock systems for storage, crafting and computation, an optional upgrade
+path rather than a replacement for normal AE2. 7.3.7 appeared on Modrinth that day and was
+gone from its listing hours later, so 7.3.6 is the build in use, and both sides must match.
+Its recipes looked in line with GTNH in NEI. Still to check: autocrafting through GT
+machines alongside WTCT, and what a world loses when it's removed. The world from before it
+went on the server is `~/Documents/Minecraft_Servers/World-Backups/World3-before-neoecoae-2026-11-05.tar.gz`.
+
 ## Left out until their author ships a 2.9 build
 
 - **AE2Things 1.2.14**: built against 2.8.4's AE2 `rv3-beta-695`, `AE2FluidCraft 1.4.120`
@@ -151,10 +196,11 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   `PRE_EXISTING_ONLY` because the server now builds the LODs. The server runs the same
   jar with `chunkGeneratorMode="INTERNAL_SERVER"`, `generatorPlan="SURFACE_THEN_CHUNKS"`,
   `pauseIfMovingQuickly=false`, four threads at a 0.5 ratio, a 128 chunk generation
-  distance and no bandwidth limit on the LAN. Known issues are unchanged: memory creep,
-  unstable server side, and LODs that need a render-distance toggle to refresh.
+  distance and no bandwidth limit on the LAN. The 2.8.4 setup also picked Quality Preset
+  High and CPU Load Balanced in the mod's settings. Known issues are unchanged: memory
+  creep, unstable server side, and LODs that need a render-distance toggle to refresh.
 - **Dynamic Surroundings 1.0.9.0** (2026-09-30): mist475's 1.7.10 fork, newer than the
-  1.0.7.7 in the old notes; adds Seasonal Horizons compatibility.
+  2.8.4 jar's 1.0.7.7; adds Seasonal Horizons compatibility.
 - **Sound-Physics 1.1.1** (2026-06-27): the 1.7.10 mixin edition.
 - **Euphoria Patcher 1.9.3** is installed to match the NeonTech settings. 1.10.5 exists,
   but moving to it means copying the NeonTech values by hand.
@@ -162,6 +208,13 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   `EntityPlayerSP.onLivingUpdate` insertion point. 1.1.3 hooks through PlayerAPI 1.5.0
   instead, which the pack ships, and was installed on both sides on 2026-11-03 to test.
   It gives sprint toggle, sneak toggle and fly boost, not step assist.
+- **Advanced Memory Card 1.2.0-1.7.10-GTNH** (2026-11-02): AE2 memory card with bulk
+  configuration copy and P2P tunnel management. Declares no dependencies beyond AE2, and
+  the copy volume defaults to 2048 blocks.
+- **WTCT 1.0.63-rc1** (2026-10-11): ME combined work terminal, 63-slot extended buses,
+  pattern auto-upload, wireless transceiver and upgrade cards. Built against 2.9.0-RC-1
+  and AE2 `rv3-beta-1073`; the pack runs `rv3-beta-1095`, so the launch is the test. It
+  ships `en_US.lang`.
 
 ## Dropped after testing
 
@@ -227,16 +280,7 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   `DefaultQuests`; existing worlds need `bq_admin default load`. It is a community
   questbook: Twist 0.8.0 ships no BetterQuesting data of its own.
 
-## Found in the instance but missing from the 2.8.4 notes
-
-Both were installed by hand and neither appeared in `mods.md`:
-
-- **Waystones 1.0.12**: the `xpBaseCost=-1` tweak in `config-tweaks.md` belongs to it.
-  Not shipped by 2.9, so keep it if the teleport network is wanted.
-- **Euphoria Patcher**: shader patch layer, covered only in `shaders.md`.
-
 ## Mod configs
 
 The per-mod settings for GTNL, GTNHRates, EZNuclear and NH-Utilities are in
-[config-tweaks.md](./config-tweaks.md#added-mod-configs). They have to be re-created in
-the 2.9 instance because the mods start with their defaults.
+[config-tweaks.md](./config-tweaks.md#added-mod-configs).

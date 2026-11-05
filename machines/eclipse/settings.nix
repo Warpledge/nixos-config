@@ -120,7 +120,8 @@
         "4256180" = {launchOptions = "nix-vn-768p %command%";};
         "4732690" = {launchOptions = "PROTON_LOG=1 ENABLE_LAYER_MESA_ANTI_LAG=1 nix-performance %command%";};
       };
-      claude.mods.ribbon = true;
+      claude.mods.usageBand = true;
+      claude.mods.rebuildPrompt = true;
       keybinds = {};
       localAi.default = "ornith-1.5-35b-a3b-apex-mtp-i-mini";
     };

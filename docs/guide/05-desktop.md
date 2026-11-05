@@ -27,8 +27,8 @@ Workspaces stack vertically, one row of columns each. `Mod+1` to `Mod+9` jump to
 | `Mod+Alt+1` / `2` / `3` | Column width 1/3, 1/2, 2/3 |
 | `Mod+Shift+Left` / `Right` | Move the column |
 | `Mod+Shift+1` to `9` | Send the window to a workspace |
-| `Mod+BracketLeft` / `Right` | Stack the window into the next column, or out of it |
-| `Mod+Backslash` | Tabbed column on or off |
+| `Mod+Page_Up` / `Page_Down` | Stack the window into the next column, or out of it |
+| `Mod+Home` | Tabbed column on or off |
 | `Mod+Alt+Left` / `Right` | Focus the next monitor (add `Shift` to move the window) |
 | `Mod+V` | Clipboard history |
 | `Mod+N` | Notepad |

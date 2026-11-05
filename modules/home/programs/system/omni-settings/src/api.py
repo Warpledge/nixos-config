@@ -24,7 +24,6 @@ sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 
 import backend  # noqa: E402
 import backupstate  # noqa: E402
-import bootstate  # noqa: E402
 import changelog  # noqa: E402
 import closure  # noqa: E402
 import crashstate  # noqa: E402
@@ -102,7 +101,7 @@ TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
        "docs": []}
 
 #--- The line under each page in the page list that has no description of its own
-NAV_SUBTITLES = {"overview": "Updates, pinned versions, freeing space, versions, crashes",
+NAV_SUBTITLES = {"overview": "Updates, pinned versions, freeing space, versions",
                  "git": "Changes, commits, pull requests",
                  "flatpaks": "Apps nixpkgs doesn't have: get them from Flathub, update them, clean "
                              "up, and switch each one on or off",
@@ -274,8 +273,10 @@ def setting_json(cfg, state, s, multi, modules):
     if s.kind == "choice":
         out["choices"] = [{"value": c, "label": choice_label(s, c)} for c in s.choices]
         if s.path == ("localAi", "default"):
-            added = (state.resolved.get("localModels") or {}).get("models") or {}
-            out["choices"] += [{"value": m, "label": m} for m in added if m not in s.choices]
+            # None, or a model turned on; the machine's added ones aren't in s.choices
+            on = backend.dig(state.resolved["users"][cfg.user], ("localAi", "models")) or []
+            out["choices"] = [{"value": None, "label": choice_label(s, None)}] \
+                + [{"value": m, "label": choice_label(s, m) if m in s.choices else m} for m in on]
     if s.kind == "pick":
         out["data"] = s.data
     if s.kind == "list":
@@ -808,12 +809,6 @@ def cmd_usage(_cfg, _args):
             "uptime": int(uptime)}
 
 
-def cmd_boot(_cfg, _args):
-    """The last startup's stages, its slowest units and the chain it waited on; slow,
-    so asked for apart."""
-    return bootstate.summary()
-
-
 def cmd_check_updates(cfg, _args):
     """The newest version of each flake input, locked into a separate file the
     update job takes as args.lock; flake.lock stays as it is."""
@@ -924,7 +919,7 @@ def cmd_summaries(cfg, _args):
     return {"updates": None if up["checked"] is None else {
                 "upstream": sum(r["status"] == "update" and r["kind"] != "disabled" for r in rows),
                 "fixed": sum(r["status"] == "update" and r["kind"] == "disabled" for r in rows)},
-            "crashes": len(crashstate.crashes()), "backups": backups,
+            "backups": backups,
             "updateDue": age if remind and age >= remind else 0}
 
 
@@ -1663,7 +1658,7 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "localModelQuality": cmd_local_model_quality,
             "saveUi": cmd_saveUi,
             "stale": cmd_stale, "removeStale": cmd_remove_stale,
-            "overview": cmd_overview, "freed": cmd_freed, "boot": cmd_boot,
+            "overview": cmd_overview, "freed": cmd_freed,
             "status": cmd_status, "usage": cmd_usage,
             "checkUpdates": cmd_check_updates, "changelog": cmd_changelog,
             "compare": cmd_compare, "failedLog": cmd_failed_log, "forgetFailed": cmd_forget_failed,

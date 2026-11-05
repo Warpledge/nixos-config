@@ -1,0 +1,26 @@
+{
+  "id": "distant-horizons",
+  "name": "Distant Horizons",
+  "description": "Generate far terrain ahead of time, for Minecraft 1.20.1 and later on any loader.",
+  "match": {"jars": ["DistantHorizons-*.jar"], "minecraft": {"min": "1.20.1"}},
+  "suggests": [{"name": "Distant Horizons", "url": "https://modrinth.com/mod/distanthorizons"}],
+  "panels": [
+    {
+      "id": "pregen",
+      "type": "form",
+      "title": "Pregen",
+      "description": "Progress goes to the server console.",
+      "status": "dh pregen status",
+      "fields": [
+        {"id": "dimension", "type": "dimension", "label": "Dimension", "default": "minecraft:overworld"},
+        {"id": "x", "type": "int", "label": "X", "default": "0"},
+        {"id": "z", "type": "int", "label": "Z", "default": "0"},
+        {"id": "radius", "type": "int", "label": "Radius in chunks", "default": "256", "min": 32}
+      ],
+      "actions": [
+        {"label": "Start", "command": "dh pregen start {dimension} {x} {z} {radius}", "confirm": true},
+        {"label": "Stop", "command": "dh pregen stop"}
+      ]
+    }
+  ]
+}

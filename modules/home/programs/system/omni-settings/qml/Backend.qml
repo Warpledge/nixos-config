@@ -1,4 +1,5 @@
-// omni-settings-backend (src/api.py): one process per command, its JSON reply to `done`
+// The backend (src/api.py): one process per command, its JSON reply to `done`.
+// Omni Server builds this same file in (gaming/omni-server/)
 pragma Singleton
 import QtQuick
 import Quickshell
@@ -70,12 +71,12 @@ Singleton {
             backend.waiting = {}
             for (const id in lost)
                 if (lost[id])
-                    lost[id]({ ok: false, error: "omni-settings-backend stopped" })
+                    lost[id]({ ok: false, error: "The backend stopped" })
             const held = backend.held
             backend.held = []
             for (const q of held)
                 if (q[2])
-                    q[2]({ ok: false, error: "omni-settings-backend didn't start" })
+                    q[2]({ ok: false, error: "The backend didn't start" })
         }
     }
 
@@ -129,7 +130,7 @@ Singleton {
                     try {
                         reply = JSON.parse(text)
                     } catch (e) {
-                        reply = { ok: false, error: "omni-settings-backend gave no answer\n\n" + sproc.last.join("\n") }
+                        reply = { ok: false, error: "The backend gave no answer\n\n" + sproc.last.join("\n") }
                     }
                     if (sproc.done)
                         sproc.done(reply)
@@ -150,7 +151,7 @@ Singleton {
                     try {
                         reply = JSON.parse(text)
                     } catch (e) {
-                        reply = { ok: false, error: err.text.trim() || "omni-settings-backend gave no answer" }
+                        reply = { ok: false, error: err.text.trim() || "The backend gave no answer" }
                     }
                     if (proc.done)
                         proc.done(reply)

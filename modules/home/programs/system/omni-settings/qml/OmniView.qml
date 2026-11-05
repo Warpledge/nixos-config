@@ -54,7 +54,7 @@ Item {
             Backend.call("summaries", {}, reply => { if (reply.ok) omni.summaries = reply.data })
         }
     }
-    //--- api.py's `summaries`: cached update counts, crashes and backups, every minute
+    //--- api.py's `summaries`: cached update counts and backups, every minute
     property var summaries: null
     //--- Tabs with a page that has something waiting get a dot
     readonly property var tabAlerts: {
@@ -69,6 +69,7 @@ Item {
     //--- Services running now, for the page list; Running Now updates it too
     property int servicesRunning: -1
     onInfoChanged: {
+        answerRebuild()
         if (info && servicesRunning < 0)
             Backend.call("services", {}, reply => {
                 if (reply.ok)
@@ -460,6 +461,17 @@ Item {
         }, mode => startJob("rebuild", { mode }))
     }
 
+    //--- The panel's rebuild IPC call; canStart() needs info, so it waits for the load
+    property bool rebuildWanted: false
+    signal rebuildAnswered()
+    function answerRebuild() {
+        if (!rebuildWanted || !info)
+            return
+        rebuildAnswered()
+        rebuild()
+    }
+    onRebuildWantedChanged: answerRebuild()
+
     //--- A collapsed page's status in its title tip: {text, alert}, or null
     function pageSummary(pid, model) {
         const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`
@@ -467,14 +479,13 @@ Item {
             const c = gitCounts
             return { text: `${c.branch ? c.branch + " · " : ""}${gitTag}`, alert: !!(c.changed || c.ahead || c.behind) }
         }
-        // An update due (maintenance.updateReminderDays), Pinned Versions' cached check, then crashes
+        // An update due (maintenance.updateReminderDays), then Pinned Versions' cached check
         if (pid === "overview" && summaries) {
             const u = summaries.updates
             const due = summaries.updateDue ? [`packages ${summaries.updateDue} days old`] : []
             const parts = due.concat(u ? [u.upstream ? `${plural(u.upstream, "update")} upstream` : "",
                                u.fixed ? `${plural(u.fixed, "disabled package")} fixed` : ""].filter(p => p) : [])
-            const all = parts.concat(summaries.crashes ? [`${plural(summaries.crashes, "crash")} in 30 days`] : [])
-            return all.length ? { text: all.join(" · "), alert: parts.length > 0 } : null
+            return parts.length ? { text: parts.join(" · "), alert: true } : null
         }
         if (pid === "backups" && summaries && summaries.backups.length) {
             const last = Math.max(...summaries.backups.map(b => b.last || 0))

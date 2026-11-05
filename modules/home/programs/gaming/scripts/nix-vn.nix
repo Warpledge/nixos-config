@@ -3,7 +3,7 @@
 #=====================================================================#
 #- `nix-vn -r 1280x720 %command%` runs the game in gamescope (nix-gamescope)
 #- at its own resolution and upscales it to the monitor with the NVL CNN
-#- (`-F nvl`, patched in nixos/gaming/tools/gamescope). Super+H cycles
+#- (`-F nvl`, patched in nixos/gaming/tools/gamescope). Super+\ cycles
 #- NVL, Anime4K, MMPX, sharp bilinear and linear.
 #- Presets fix the resolution, e.g. `nix-vn-720p %command%`. The vn-setup
 #- skill finds a game's resolution and picks one.

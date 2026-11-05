@@ -3,8 +3,6 @@
 //=====================================================================#
 import {execFile} from "node:child_process";
 import {lstat, readlink, realpath} from "node:fs/promises";
-import {createConnection} from "node:net";
-import {join} from "node:path";
 import {promisify} from "node:util";
 import {Plugin} from "@opencode/plugin";
 import {LIMITS, PLAN_CAP, PLANS, type Plan} from "./limits";
@@ -15,6 +13,11 @@ const CACHE_MS = 30_000;
 const SYSTEM = "/nix/var/nix/profiles/system";
 const FIVE_SHARE = 0.2;
 const WEEK_SHARE = 0.5;
+// The models DeepSeek's peak hours apply to; kept in step with tui.tsx
+const DEEPSEEK = new Set(["deepseek-v4.1-flash", "deepseek-v4-pro"]);
+// Nix fills these in: the repo a rebuild builds, and the switch under Omni Settings' AI
+const FLAKE = "__FLAKE_PATH__";
+const BADGE = "__REBUILD_BADGE__" === "1";
 
 const run = promisify(execFile);
 
@@ -23,6 +26,7 @@ type Reading = {
   weekPercent: number;
   fiveCost: number;
   weekCost: number;
+  deepseek: boolean;
   at: number;
 };
 
@@ -34,36 +38,6 @@ type State = {
   dmsStale: boolean;
   plan: Plan;
 };
-
-// A rebuild through the app's own job service, so pkexec asks for the password
-// and the Omni Settings panel shows the running job.
-function startJob(kind: string, args: Record<string, unknown>): Promise<{ok: boolean; error?: string}> {
-  const runtime = process.env.XDG_RUNTIME_DIR ?? `/run/user/${process.getuid?.() ?? 1000}`;
-  return new Promise((resolve) => {
-    const socket = createConnection(join(runtime, "omni-settings", "jobs.sock"));
-    let settled = false;
-    let buffer = "";
-    const finish = (result: {ok: boolean; error?: string}) => {
-      if (settled) return;
-      settled = true;
-      socket.destroy();
-      resolve(result);
-    };
-    socket.setTimeout(8000, () => finish({ok: false, error: "the Omni Settings job service did not answer"}));
-    socket.on("error", (error) => finish({ok: false, error: String(error)}));
-    socket.on("data", (chunk) => {
-      buffer += chunk.toString();
-      if (!buffer.includes("\n")) return;
-      try {
-        const reply = JSON.parse(buffer.split("\n")[0]) as {ok?: boolean; error?: string};
-        finish(reply.ok ? {ok: true} : {ok: false, error: reply.error ?? "the job did not start"});
-      } catch (error) {
-        finish({ok: false, error: String(error)});
-      }
-    });
-    socket.write(`${JSON.stringify({id: 1, cmd: "start", args: {kind, ...args}})}\n`);
-  });
-}
 
 // Monday 00:00 UTC, the plan's calendar week
 function weekStart(now: Date) {
@@ -116,9 +90,9 @@ export default Plugin.define({
     const stored = await ctx.storage.get("plan");
     let plan: Plan = isPlan(stored) ? stored : "go";
 
-    const snapshot = async (directory: string): Promise<State> => {
-      const status = await git(directory, ["status", "--porcelain"]);
-      const head = await git(directory, ["log", "-1", "--format=%ct"]);
+    const snapshot = async (): Promise<State> => {
+      const status = await git(FLAKE, ["status", "--porcelain"]);
+      const head = await git(FLAKE, ["log", "-1", "--format=%ct"]);
       const dirty = status ? status.split("\n").filter(Boolean).length : 0;
       const committed = head ? Number(head.trim()) * 1000 : 0;
       let generation = 0;
@@ -161,13 +135,15 @@ export default Plugin.define({
         };
         let fraction = 0;
         let cost = 0;
+        let deepseek = false;
         for (const item of body.items ?? []) {
           const dollars = Number(item.totalCostMicroCents ?? 0) / 1e8;
           const limit = limits[item.model] ?? PLAN_CAP[plan];
           cost += dollars;
+          if (dollars > 0 && DEEPSEEK.has(item.model)) deepseek = true;
           if (Number.isFinite(limit) && limit > 0) fraction += dollars / limit;
         }
-        return {fraction, cost};
+        return {fraction, cost, deepseek};
       };
 
       const now = new Date();
@@ -180,6 +156,7 @@ export default Plugin.define({
         weekPercent: (week.fraction / WEEK_SHARE) * 100,
         fiveCost: five.cost,
         weekCost: week.cost,
+        deepseek: five.deepseek,
         at: now.getTime(),
       };
     };
@@ -200,14 +177,11 @@ export default Plugin.define({
           weekPercent: reading.weekPercent,
           fiveCost: reading.fiveCost,
           weekCost: reading.weekCost,
+          deepseek: reading.deepseek,
           fetchedAt: reading.at,
         };
       },
-      state: async (raw) => {
-        const input = raw as {directory?: string};
-        const directory = input.directory?.trim() || ctx.location.directory;
-        return snapshot(directory);
-      },
+      state: async () => snapshot(),
       setPlan: async (raw) => {
         const input = raw as {plan?: unknown};
         if (!isPlan(input.plan)) throw new Error(`unknown plan: ${String(input.plan)}`);
@@ -224,28 +198,27 @@ export default Plugin.define({
           return {ok: false, error: String(error)};
         }
       },
-      openSettings: async () => {
+      // Omni Settings' own Rebuild dialog picks the mode and checks nothing is pending
+      askRebuild: async () => {
         try {
-          await run("dms", ["ipc", "call", "omniSettings", "show"], {timeout: 5000});
+          await run("dms", ["ipc", "call", "omniSettings", "rebuild"], {timeout: 5000});
           return {ok: true};
         } catch (error) {
           return {ok: false, error: String(error)};
         }
       },
-      rebuild: async () => startJob("rebuild", {mode: "switch"}),
     });
 
     const controller = new AbortController();
     void (async () => {
+      if (!BADGE) return;
       try {
-        for await (const event of ctx.event.subscribe({
+        for await (const _ of ctx.event.subscribe({
           types: ["session.execution.succeeded"],
           signal: controller.signal,
         })) {
-          const directory = (event as {location?: {directory?: string}}).location?.directory ?? ctx.location.directory;
-          const state = await snapshot(directory);
+          const state = await snapshot();
           await registration.events.emit("turn", {
-            directory,
             dirty: state.dirty,
             unbuilt: state.unbuilt,
             generation: state.generation,

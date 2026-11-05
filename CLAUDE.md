@@ -37,7 +37,7 @@ When something fails repeatedly, the user has to re-explain, or a tool limitatio
 
 Only `.claude/settings.json` is tracked; before committing a change to it, and in any CLAUDE.md audit, do the **maintenance check** in `modules/home/programs/ai/CLAUDE.md`. The post-edit hook (alejandra plus repo checks) runs on `Write|Edit` only, so edit tracked files with Edit or Write, not `sed` or a heredoc.
 
-Several folders carry their own `CLAUDE.md` (`lib/`, `modules/nixos/`, `modules/home/`, `modules/wm/`, `modules/theme/`, `docs/`, `modules/home/programs/ai/`, `programs/system/omni-settings/`, `programs/media/freetube/`). Claude Code loads one when it reads a file in that folder; the pointers below say when to read one first.
+Several folders carry their own `CLAUDE.md` (`lib/`, `modules/nixos/`, `modules/home/`, `modules/wm/`, `modules/theme/`, `docs/`, `modules/home/programs/ai/`, `programs/system/omni-settings/`, `programs/gaming/omni-server/`, `programs/media/freetube/`). Claude Code loads one when it reads a file in that folder; the pointers below say when to read one first.
 
 ## Commands
 

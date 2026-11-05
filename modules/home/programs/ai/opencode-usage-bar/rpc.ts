@@ -17,18 +17,15 @@ export const UsageRpc = Rpc.define({
           weekPercent: {type: "number"},
           fiveCost: {type: "number"},
           weekCost: {type: "number"},
+          deepseek: {type: "boolean"},
           fetchedAt: {type: "number"},
         },
-        required: ["fivePercent", "weekPercent", "fiveCost", "weekCost", "fetchedAt"],
+        required: ["fivePercent", "weekPercent", "fiveCost", "weekCost", "deepseek", "fetchedAt"],
         additionalProperties: false,
       },
     },
     state: {
-      input: {
-        type: "object",
-        properties: {directory: {type: "string"}},
-        additionalProperties: false,
-      },
+      input: none,
       output: {
         type: "object",
         properties: {
@@ -66,16 +63,7 @@ export const UsageRpc = Rpc.define({
         additionalProperties: false,
       },
     },
-    openSettings: {
-      input: none,
-      output: {
-        type: "object",
-        properties: {ok: {type: "boolean"}, error: {type: "string"}},
-        required: ["ok"],
-        additionalProperties: false,
-      },
-    },
-    rebuild: {
+    askRebuild: {
       input: none,
       output: {
         type: "object",
@@ -90,14 +78,13 @@ export const UsageRpc = Rpc.define({
       schema: {
         type: "object",
         properties: {
-          directory: {type: "string"},
           dirty: {type: "number"},
           unbuilt: {type: "boolean"},
           generation: {type: "number"},
           age: {type: "number"},
           dmsStale: {type: "boolean"},
         },
-        required: ["directory", "dirty", "unbuilt", "generation", "age", "dmsStale"],
+        required: ["dirty", "unbuilt", "generation", "age", "dmsStale"],
         additionalProperties: false,
       },
     },

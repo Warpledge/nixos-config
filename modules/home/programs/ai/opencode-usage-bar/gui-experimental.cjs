@@ -31,7 +31,7 @@ const Usage = {
       output: {type: "object", properties: {}, additionalProperties: true},
     },
     state: {
-      input: {type: "object", properties: {directory: {type: "string"}}, additionalProperties: false},
+      input: {type: "object", properties: {}, additionalProperties: false},
       output: {type: "object", properties: {}, additionalProperties: true},
     },
     setPlan: {
@@ -47,11 +47,7 @@ const Usage = {
       input: {type: "object", properties: {}, additionalProperties: false},
       output: {type: "object", properties: {}, additionalProperties: true},
     },
-    openSettings: {
-      input: {type: "object", properties: {}, additionalProperties: false},
-      output: {type: "object", properties: {}, additionalProperties: true},
-    },
-    rebuild: {
+    askRebuild: {
       input: {type: "object", properties: {}, additionalProperties: false},
       output: {type: "object", properties: {}, additionalProperties: true},
     },
@@ -115,7 +111,7 @@ function segment(label) {
 const paints = new Set();
 const syncers = new Set();
 const badges = new Set();
-let usageState = {five: -1, week: -1, fiveCost: 0, weekCost: 0, at: 0, error: ""};
+let usageState = {five: -1, week: -1, fiveCost: 0, weekCost: 0, deepseek: false, at: 0, error: ""};
 
 function paintSettings() {
   for (const item of [...syncers]) {
@@ -185,7 +181,7 @@ function badge(onClick) {
     root.style.display = "inline-flex";
     label.textContent =
       value.dirty > 0 ? `Rebuild ready · ${value.dirty} file${value.dirty === 1 ? "" : "s"}` : "Rebuild ready · new commits";
-    root.title = `Open Omni Settings to rebuild; the running build is ${ageLabel(value.age)} old`;
+    root.title = `Choose how to rebuild in Omni Settings; the running build is ${ageLabel(value.age)} old`;
   };
 
   badges.add({root, update});
@@ -232,8 +228,9 @@ function bar() {
     }
     five.update(value.five, value.fiveCost);
     week.update(value.week, value.weekCost);
+    // The rates only matter with DeepSeek in the last 5 hours; the TUI goes by the picked model
     const peak = peakHours(new Date());
-    note.textContent = peak ? "PEAK" : "OFF-PEAK";
+    note.textContent = !value.deepseek ? "" : peak ? "PEAK" : "OFF-PEAK";
     note.style.color = peak ? WARNING : MUTED;
     note.title = peak ? "DeepSeek peak rates apply" : "DeepSeek off-peak rates apply";
   };
@@ -251,6 +248,7 @@ module.exports = Plugin.define({
     let stopped = false;
     let timer;
     let interval = REFRESH_MS;
+    let warnedDms = false; // One toast per stale build, not one per turn
 
     const stored = Number(localStorage.getItem("usage-bar:interval"));
     if (INTERVALS.includes(stored)) interval = stored;
@@ -264,20 +262,20 @@ module.exports = Plugin.define({
           week: value.weekPercent,
           fiveCost: value.fiveCost,
           weekCost: value.weekCost,
+          deepseek: value.deepseek,
           at: value.fetchedAt,
           error: "",
         };
       } catch (error) {
         if (stopped) return;
-        usageState = {five: -1, week: -1, fiveCost: 0, weekCost: 0, at: 0, error: String(error)};
+        usageState = {five: -1, week: -1, fiveCost: 0, weekCost: 0, deepseek: false, at: 0, error: String(error)};
       }
       paint();
     };
 
     const refreshState = async () => {
-      const session = ctx.sessions.current();
       try {
-        const value = await usage.state(session ? {directory: session.directory} : {});
+        const value = await usage.state({});
         if (stopped) return;
         repoState = {...value, plan: value.plan ?? "go"};
         setRepo(repoState);
@@ -288,7 +286,7 @@ module.exports = Plugin.define({
 
     const refreshAll = () => {
       if (FEATURES.desktopBar) void refreshUsage();
-      void refreshState();
+      if (FEATURES.rebuildBadge) void refreshState();
     };
 
     const restartTimer = () => {
@@ -302,6 +300,7 @@ module.exports = Plugin.define({
         const result = await usage.restartDms({});
         notice.dismiss();
         if (result.ok) {
+          warnedDms = false;
           setRepo({...repo(), dmsStale: false});
           ctx.toast.show({variant: "success", title: "DMS restarted"});
         } else {
@@ -313,26 +312,13 @@ module.exports = Plugin.define({
       }
     };
 
-    const openSettings = async () => {
+    const rebuild = async () => {
       try {
-        const result = await usage.openSettings({});
+        const result = await usage.askRebuild({});
         if (!result.ok) throw new Error(result.error);
       } catch (error) {
         ctx.toast.show({variant: "error", title: "Could not open Omni Settings", description: String(error)});
       }
-    };
-
-    const rebuild = async () => {
-      try {
-        const result = await usage.rebuild({});
-        if (!result.ok) {
-          ctx.toast.show({variant: "error", title: "Rebuild did not start", description: result.error});
-        }
-      } catch (error) {
-        ctx.toast.show({variant: "error", title: "Rebuild did not start", description: String(error)});
-      }
-      await openSettings();
-      setTimeout(() => void refreshState(), 5000);
     };
 
     if (FEATURES.desktopBar) void refreshUsage();
@@ -344,7 +330,9 @@ module.exports = Plugin.define({
       repoState = {...repoState, ...value, plan: repo().plan};
       setRepo(repoState);
       paintBadges();
-      if (FEATURES.rebuildBadge && value.dmsStale) {
+      if (!value.dmsStale) warnedDms = false;
+      if (FEATURES.rebuildBadge && value.dmsStale && !warnedDms) {
+        warnedDms = true;
         ctx.toast.show({
           variant: "default",
           title: "DMS restart needed",

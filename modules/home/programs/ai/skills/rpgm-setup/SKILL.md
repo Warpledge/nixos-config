@@ -75,9 +75,9 @@ nix shell nixpkgs#xwininfo -c xwininfo -root -tree -display "$D" | grep -v 'has 
 The game's titled window shows its real size, with no Wine frame inside gamescope.
 **Black screen with sound** means that window is bigger than gamescope's `-w/-h` and
 sits off its edge (Hat World: `640x480+-48+-17` on 544x416). Switch to the preset that
-matches the window and restart the game. Super+H cycles NVL, Anime4K, MMPX, sharp bilinear and linear
-with a notification;
-Super+G grabs the keyboard if Super+H doesn't reach gamescope.
+matches the window and restart the game. `Super+\` cycles NVL, Anime4K, MMPX, sharp
+bilinear and linear with a notification; `Super+[` and `Super+]` adjust FSR sharpness.
+Super+H, Super+F and Super+G belong to niri, so gamescope never sees them.
 
 ## 5. Record it
 

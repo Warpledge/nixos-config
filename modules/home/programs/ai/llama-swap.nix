@@ -176,7 +176,7 @@ in {
   #--- Every model turned on and its fast variant to pick from
   programs.opencode.settings = lib.mkIf (user.opencode.enable && enabled != {}) {
     model = "llama-swap/${defaultId}";
-    # Session titles and summaries: thinking there only delays the first reply
+    # OpenCode's title agent: thinking there only delays the first reply
     small_model = "llama-swap/${defaultId}${lib.optionalString defaultFast "-instruct"}";
     provider.llama-swap = {
       npm = "@ai-sdk/openai-compatible";

@@ -8,10 +8,10 @@ ColumnLayout {
     id: page
     required property var view
     property var ov: null
-    property var boot: null  // systemd-analyze's last startup, asked for apart
-    property bool bootOpen: false  // whether the startup's details are shown
-    property bool crashesOpen: false
     property bool versionsOpen: false  // whether the older generations are listed
+    readonly property bool scheduleOpen: !!view.openCards["overview:schedule"]
+    readonly property var scheduleGroups: ov && view.info.pages["overview"]
+        ? view.info.pages["overview"].groups : []
     readonly property var versions: ov ? ov.generations : []
     readonly property var current: versions.find(g => g.running) || versions[0] || null
     readonly property var older: versions.filter(g => !!current && g.number !== current.number)
@@ -41,18 +41,8 @@ ColumnLayout {
         })
     }
 
-    Component.onCompleted: {
-        load()
-        loadBoot()
-    }
+    Component.onCompleted: load()
 
-    //--- The startup chart takes a call of its own, so the rest shows meanwhile
-    function loadBoot() {
-        Backend.call("boot", {}, reply => {
-            if (page && reply.ok)
-                page.boot = reply.data
-        })
-    }
     Connections {
         target: Jobs
         function onEnded(job) {
@@ -224,6 +214,7 @@ ColumnLayout {
 
     //--- The page's key numbers; each opens or starts what it's about
     GridLayout {
+        id: tiles
         visible: !!page.ov
         Layout.fillWidth: true
         Layout.bottomMargin: 4
@@ -247,6 +238,7 @@ ColumnLayout {
             onTapped: page.collect()
         }
         Tile {
+            Layout.columnSpan: tiles.columns
             label: "Sources"
             value: page.checking ? "Checking…" : !page.updates ? "Not checked"
                 : page.updates.changes.length ? `${page.updates.changes.length} newer` : "Up to date"
@@ -255,15 +247,6 @@ ColumnLayout {
             sub: page.ov ? `Locked ${Fmt.ago(page.ov.updated)}` : ""
             tappable: page.admin && !page.checking
             onTapped: page.check()
-        }
-        Tile {
-            readonly property int n: crashList.crashes ? crashList.crashes.length : 0
-            label: "Crashes"
-            value: crashList.crashes ? (n ? String(n) : "None") : "–"
-            ink: n ? Theme.error : Theme.text
-            sub: "Last 30 days"
-            tappable: n > 0
-            onTapped: page.crashesOpen = true
         }
     }
 
@@ -400,17 +383,30 @@ ColumnLayout {
         onClicked: page.optimise()
     }
 
-    //--- The machine's maintenance.* schedule, a setting like any other
-    Repeater {
-        model: page.ov && page.view.info.pages["overview"] ? page.view.info.pages["overview"].groups : []
-        SettingGroup {
-            required property var modelData
-            settings: modelData.settings
-            title: modelData.title
-            info: modelData.description
-            view: page.view
-            locked: !page.view.info.direct
-            pageGlyph: "schedule"
+    //--- The machine's maintenance.* schedule, settings like any other, shut until wanted
+    ListRow {
+        visible: page.scheduleGroups.length > 0
+        icon: "schedule"
+        title: "Schedule"
+        info: page.scheduleGroups.length ? page.scheduleGroups[0].description : ""
+        expandable: true
+        expanded: page.scheduleOpen
+        onClicked: page.view.setCardOpen("overview:schedule", !page.scheduleOpen)
+    }
+    Reveal {
+        id: scheduleList
+        open: page.scheduleOpen && page.scheduleGroups.length > 0
+        gap: page.spacing
+        spacing: page.spacing
+        Repeater {
+            model: scheduleList.shown ? page.scheduleGroups : []
+            SettingGroup {
+                required property var modelData
+                settings: modelData.settings
+                view: page.view
+                locked: !page.view.info.direct
+                pageGlyph: "schedule"
+            }
         }
     }
 
@@ -516,175 +512,6 @@ ColumnLayout {
                 }
             }
         }
-    }
-
-    //--- How the last startup went, from systemd-analyze; the row keeps it to
-    //--- the total until the details are wanted
-    Section { visible: !!page.boot && page.boot.stages.total > 0; text: "Startup" }
-    ListRow {
-        visible: !!page.boot && page.boot.stages.total > 0
-        icon: "timer"
-        title: "Last Startup"
-        info: !page.boot ? ""
-            : page.boot.graphical ? `From power on to ${page.boot.graphical.target}`
-            : "From power on"
-        value: page.boot ? Fmt.duration(page.boot.stages.total) : ""
-        expandable: true
-        expanded: page.bootOpen
-        onClicked: page.bootOpen = !page.bootOpen
-    }
-    Reveal {
-        open: page.bootOpen && !!page.boot && page.boot.stages.total > 0
-        gap: page.spacing
-        Rectangle {
-            Layout.fillWidth: true
-            implicitHeight: bootColumn.implicitHeight + 28
-            radius: 16
-            color: Theme.card
-            ColumnLayout {
-                id: bootColumn
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.margins: 14
-                spacing: 10
-                Text {
-                    Layout.fillWidth: true
-                    text: !page.boot ? ""
-                        : page.boot.graphical
-                            ? `The desktop was up ${Fmt.duration(page.boot.graphical.seconds)} into `
-                              + "userspace."
-                            : "From power on to the desktop."
-                    color: Theme.dim
-                    font.pixelSize: 13
-                    wrapMode: Text.Wrap
-                }
-                Flow {
-                    Layout.fillWidth: true
-                    spacing: 6
-                    Repeater {
-                        model: ["firmware", "loader", "kernel", "initrd", "userspace"]
-                        delegate: Chip {
-                            required property string modelData
-                            visible: !!page.boot && !!page.boot.stages[modelData]
-                            tappable: false
-                            text: page.boot ? `${modelData} ${Fmt.duration(page.boot.stages[modelData])}` : ""
-                        }
-                    }
-                }
-                Text {
-                    Layout.fillWidth: true
-                    Layout.topMargin: 2
-                    text: "The slowest units to start:"
-                    color: Theme.dim
-                    font.pixelSize: 13
-                }
-                Repeater {
-                    model: page.boot ? page.boot.blame.units : []
-                    delegate: ColumnLayout {
-                        id: blameRow
-                        required property var modelData
-                        readonly property var units: page.boot.blame.units
-                        readonly property real share: units.length
-                            ? modelData.seconds / Math.max(units[0].seconds, 0.001) : 0
-                        Layout.fillWidth: true
-                        spacing: 4
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: 10
-                            Text {
-                                Layout.fillWidth: true
-                                text: blameRow.modelData.unit
-                                color: Theme.text
-                                font.pixelSize: 13
-                                elide: Text.ElideRight
-                            }
-                            Text {
-                                text: Fmt.duration(blameRow.modelData.seconds)
-                                color: Theme.dim
-                                font.pixelSize: 13
-                            }
-                        }
-                        Rectangle {
-                            Layout.fillWidth: true
-                            implicitHeight: 6
-                            radius: 3
-                            color: Theme.line
-                            Rectangle {
-                                width: parent.width * blameRow.share
-                                height: parent.height
-                                radius: 3
-                                color: Theme.primary
-                            }
-                        }
-                    }
-                }
-                Text {
-                    visible: !!page.boot && page.boot.blame.devices !== null
-                    Layout.fillWidth: true
-                    text: page.boot && page.boot.blame.devices !== null
-                        ? `Device units took up to ${Fmt.duration(page.boot.blame.devices)}; one wait `
-                          + "shows up under many device names." : ""
-                    color: Theme.dim
-                    font.pixelSize: 13
-                    wrapMode: Text.Wrap
-                }
-                Text {
-                    visible: page.boot && page.boot.chain.length > 0
-                    Layout.fillWidth: true
-                    Layout.topMargin: 2
-                    text: "The chain the desktop waited on, each indent waiting for the one above:"
-                    color: Theme.dim
-                    font.pixelSize: 13
-                    wrapMode: Text.Wrap
-                }
-                Repeater {
-                    model: page.boot ? page.boot.chain : []
-                    delegate: RowLayout {
-                        required property var modelData
-                        Layout.fillWidth: true
-                        Layout.leftMargin: Math.min(modelData.depth, 4) * 14
-                        spacing: 10
-                        Text {
-                            Layout.fillWidth: true
-                            text: modelData.unit
-                            color: Theme.text
-                            font.pixelSize: 13
-                            elide: Text.ElideRight
-                        }
-                        Text {
-                            visible: modelData.took !== null
-                            text: modelData.took !== null ? `+${Fmt.duration(modelData.took)}` : ""
-                            color: Theme.dim
-                            font.pixelSize: 13
-                        }
-                        Text {
-                            text: `@${Fmt.duration(modelData.at)}`
-                            color: Theme.dim
-                            font.pixelSize: 13
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    //--- Programs that crashed lately (CrashList.qml), kept to a count until opened
-    Section { text: "Crashes" }
-    ListRow {
-        icon: "bug_report"
-        title: "Last 30 Days"
-        info: "Programs that crashed, from systemd-coredump, games first. A game's report also holds "
-              + "its launch options and the end of its Proton log, when PROTON_LOG=1 made one."
-        value: !crashList.crashes ? "" : crashList.crashes.length ? `${crashList.crashes.length}` : "None"
-        expandable: !!crashList.crashes && crashList.crashes.length > 0
-        expanded: page.crashesOpen
-        onClicked: page.crashesOpen = !page.crashesOpen
-    }
-    Reveal {
-        open: page.crashesOpen && !!crashList.crashes && crashList.crashes.length > 0
-        gap: page.spacing
-        CrashList { id: crashList; view: page.view; quiet: true; Layout.fillWidth: true }
     }
 
     //--------------------------------------------------------------------//

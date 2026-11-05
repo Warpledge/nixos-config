@@ -69,10 +69,10 @@ index 489cf79..7901cb0 100644
  	"  Super + N                      toggle nearest neighbour filtering\n"
  	"  Super + U                      toggle FSR upscaling\n"
  	"  Super + Y                      toggle NIS upscaling\n"
--	"  Super + H                      cycle Anime4K and linear\n"
-+	"  Super + H                      cycle NVL, Anime4K and linear\n"
- 	"  Super + I                      increase FSR sharpness by 1\n"
- 	"  Super + O                      decrease FSR sharpness by 1\n"
+-	"  Super + \\                      cycle Anime4K and linear\n"
++	"  Super + \\                      cycle NVL, Anime4K and linear\n"
+ 	"  Super + [                      decrease FSR sharpness by 1\n"
+ 	"  Super + ]                      increase FSR sharpness by 1\n"
  	"  Super + S                      take a screenshot\n"
 @@ -319,7 +320,7 @@ GamescopeUpscaleFilter g_wantedUpscaleFilter = GamescopeUpscaleFilter::LINEAR;
  void CycleArtUpscaleFilter()

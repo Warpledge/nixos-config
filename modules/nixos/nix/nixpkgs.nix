@@ -39,20 +39,13 @@
           });
         };
       })
-      #--- llama.cpp ahead of nixpkgs, for model architectures 0.7.0 lacks (Flint);
-      #--- llama-swap and Omni Settings' model test run it. Drop once nixpkgs
-      #--- ships 0.8.0 (docs/nixpkgs/disabled-packages.md, Pinned ahead). --version
-      #--- keeps 0.7.0's build number, which nixpkgs sets in a let binding
+      #--- opencode 2.2.5's node_modules hash is stale; drop once NixOS/nixpkgs#582675
+      #--- lands. opencode-desktop inherits node_modules from this package
       (_: prev: {
-        llama-cpp = prev.llama-cpp.overrideAttrs (_: {
-          version = "0.8.0";
-          src = prev.fetchFromGitHub {
-            owner = "ggml-org";
-            repo = "llama.cpp";
-            tag = "v0.8.0";
-            hash = "sha256-WQAtD8Hos6fEtgPQId7nZiLGyP4asAMKJYEXZid1nqc=";
+        opencode = prev.opencode.overrideAttrs (old: {
+          node_modules = old.node_modules.overrideAttrs {
+            outputHash = "sha256-prx9dX7kUvs/E3zopkaPk5LXh3xJAy5sZeum/W8L7cA=";
           };
-          npmDepsHash = "sha256-XLtEZsSFdk+2SyfXzBp8HQ2e27PQPpDCn1YjePU1/9w=";
         });
       })
       #--- Python mcp 2 fallout; drop once nixpkgs fixes it

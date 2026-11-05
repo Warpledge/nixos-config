@@ -186,6 +186,7 @@
     tmodloader = false; # tml-prelaunch runtime patch, .NET 8 and Mono
 
     # Tools
+    omniServer = false; # Runs modded Minecraft servers, with stats and a console
     r2modman = false; # Thunderstore mod manager
     satisfactoryModManager = false; # Satisfactory mod manager
     pathOfBuilding = false; # Path of Exile build planner (Rusty PoB)
@@ -219,7 +220,8 @@
 
   #--- AI Tools
   claude.enable = false; # Claude Code (needs an Anthropic account)
-  claude.mods.ribbon = false; # Band above Claude Code's prompt: usage left, prompt cache
+  claude.mods.usageBand = false; # Band above Claude Code's prompt: usage, prompt cache
+  claude.mods.rebuildPrompt = false; # Rebuild and Restart DMS buttons on that band
   claude.mods.skins = false; # Skins: cards, tool rows and a wallpaper-coloured skin
   claude.mods.fileTree = false; # File tree sidebar (needs /tui fullscreen in a terminal)
   claude.mods.savvyProgress = false; # Progress bar and a live panel of subagents
@@ -245,7 +247,7 @@
   # lists the ones turned on
   localAi = {
     models = []; # Models turned on
-    default = null; # The apps' default model; null is the first one turned on
+    default = null; # The apps' default model; null or one turned off is the first one on
     edit = null; # Zed's inline suggestions
   };
 

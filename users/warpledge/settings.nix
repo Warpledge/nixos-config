@@ -153,6 +153,7 @@
     tmodloader = true; # tml-prelaunch runtime patch, .NET 8 and Mono
 
     # Tools
+    omniServer = true; # Runs modded Minecraft servers, with stats and a console
     r2modman = true; # Thunderstore mod manager
     satisfactoryModManager = true; # Satisfactory mod manager
     pathOfBuilding = true; # Path of Exile build planner (Rusty PoB)
@@ -170,7 +171,8 @@
   #--- AI Tools
   claude = {
     enable = true;
-    mods.ribbon = true;
+    mods.usageBand = true;
+    mods.rebuildPrompt = true;
     mods.skins = true;
     mods.fileTree = true;
     mods.savvyProgress = true;

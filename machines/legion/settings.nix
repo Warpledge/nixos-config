@@ -32,8 +32,8 @@
       discord.arrpc.enable = true;
       lmstudio.enable = false;
       llamaSwap.enable = false;
-      opencode.enable = false;
-      scrcpy.enable = true;
+      opencode.enable = true;
+      scrcpy.enable = false;
       audio.reaper = false;
       audio.guitarix = false;
       audio.tone3000 = false;
@@ -58,7 +58,7 @@
       discord.vesktop = true;
       userPackages = {};
       keybinds = {};
-      androidDev.enable = true;
+      androidDev.enable = false;
       fileBrowsers.nautilus = true;
       fileBrowsers.yazi = false;
       discord.goofcord = false;
@@ -121,7 +121,17 @@
       dev.node = false;
       dev.rust = false;
       fileBrowsers.duxFiles = false;
-      opencodeDesktop.enable = false;
+      opencodeDesktop.enable = true;
+      mangohud.show = ["fps"];
+      mangohud.position = "top-right";
+      mangohud.fontSize = 16;
+      mangohud.textColor = "00FF00";
+      mangohud.background = 0;
+      pi.enable = false;
+      localAi.default = null;
+      gpuOffload = [];
+      steamGames = {};
+      sideRail = {};
     };
   };
 
@@ -213,4 +223,14 @@
   smb.enable = false;
   boot.menu.timeout = 5;
   boot.menu.entries = 10;
+  localModels.models = {};
+  maintenance.clean = "weekly";
+  maintenance.keepDays = 5;
+  maintenance.keepGenerations = 5;
+  maintenance.optimise = "daily";
+  maintenance.updateReminderDays = 30;
+  blocklist.allow = [];
+  faceAuth.enable = false;
+  faceAuth.darkThreshold = 90;
+  apparmor.enforce = [];
 }

@@ -26,16 +26,29 @@ diff --git a/src/Backends/SDLBackend.cpp b/src/Backends/SDLBackend.cpp
 index 58af150..32bbfca 100644
 --- a/src/Backends/SDLBackend.cpp
 +++ b/src/Backends/SDLBackend.cpp
-@@ -781,6 +781,9 @@ namespace gamescope
- 								g_wantedUpscaleFilter = (g_wantedUpscaleFilter == GamescopeUpscaleFilter::NIS) ? 
+@@ -748,3 +748,3 @@ namespace gamescope
+ 						uint32_t key = SDLScancodeToLinuxKey( event.key.keysym.scancode );
+-						const uint32_t shortcutKeys[] = {KEY_F, KEY_N, KEY_B, KEY_U, KEY_Y, KEY_I, KEY_O, KEY_S, KEY_G};
++						const uint32_t shortcutKeys[] = {KEY_F, KEY_N, KEY_B, KEY_U, KEY_Y, KEY_BACKSLASH, KEY_LEFTBRACE, KEY_RIGHTBRACE, KEY_S, KEY_G};
+ 						const bool isShortcutKey = std::find(std::begin(shortcutKeys), std::end(shortcutKeys), key) != std::end(shortcutKeys);
+@@ -783,8 +783,11 @@ namespace gamescope
  									GamescopeUpscaleFilter::LINEAR : GamescopeUpscaleFilter::NIS;
  								break;
-+							case KEY_H:
+-							case KEY_I:
+-								g_upscaleFilterSharpness = std::min(20, g_upscaleFilterSharpness + 1);
+-								break;
+-							case KEY_O:
+-								g_upscaleFilterSharpness = std::max(0, g_upscaleFilterSharpness - 1);
+-								break;
++							case KEY_BACKSLASH:
 +								CycleArtUpscaleFilter();
 +								break;
- 							case KEY_I:
- 								g_upscaleFilterSharpness = std::min(20, g_upscaleFilterSharpness + 1);
- 								break;
++							case KEY_LEFTBRACE:
++								g_upscaleFilterSharpness = std::max(0, g_upscaleFilterSharpness - 1);
++								break;
++							case KEY_RIGHTBRACE:
++								g_upscaleFilterSharpness = std::min(20, g_upscaleFilterSharpness + 1);
++								break;
 diff --git a/src/Backends/WaylandBackend.cpp b/src/Backends/WaylandBackend.cpp
 index d53c2c4..601278e 100644
 --- a/src/Backends/WaylandBackend.cpp
@@ -48,25 +61,36 @@ index d53c2c4..601278e 100644
              bNeedsFullComposite |= pFrameInfo->blurLayer0;
              bNeedsFullComposite |= bNeedsCompositeFromFilter;
              bNeedsFullComposite |= g_bColorSliderInUse;
-@@ -2990,6 +2991,7 @@ namespace gamescope
+@@ -2990,7 +2991,8 @@ namespace gamescope
              case KEY_B:
              case KEY_U:
              case KEY_Y:
-+            case KEY_H:
-             case KEY_I:
-             case KEY_O:
+-            case KEY_I:
+-            case KEY_O:
++            case KEY_BACKSLASH:
++            case KEY_LEFTBRACE:
++            case KEY_RIGHTBRACE:
              case KEY_S:
-@@ -3053,6 +3055,10 @@ namespace gamescope
-                     GamescopeUpscaleFilter::LINEAR : GamescopeUpscaleFilter::NIS;
-                 break;
-
-+            case KEY_H:
+                 return true;
+@@ -3056,7 +3057,11 @@ namespace gamescope
+-            case KEY_I:
+-                g_upscaleFilterSharpness = std::min( 20, g_upscaleFilterSharpness + 1 );
+-                break;
+-
+-            case KEY_O:
+-                g_upscaleFilterSharpness = std::max( 0, g_upscaleFilterSharpness - 1 );
+-                break;
++            case KEY_BACKSLASH:
 +                CycleArtUpscaleFilter();
 +                break;
 +
-             case KEY_I:
-                 g_upscaleFilterSharpness = std::min( 20, g_upscaleFilterSharpness + 1 );
-                 break;
++            case KEY_LEFTBRACE:
++                g_upscaleFilterSharpness = std::max( 0, g_upscaleFilterSharpness - 1 );
++                break;
++
++            case KEY_RIGHTBRACE:
++                g_upscaleFilterSharpness = std::min( 20, g_upscaleFilterSharpness + 1 );
++                break;
 diff --git a/src/commit.cpp b/src/commit.cpp
 index c9d0001..a516a5c 100644
 --- a/src/commit.cpp
@@ -102,9 +126,11 @@ index 6a0fdb1..489cf79 100644
  	"  Super + N                      toggle nearest neighbour filtering\n"
  	"  Super + U                      toggle FSR upscaling\n"
  	"  Super + Y                      toggle NIS upscaling\n"
-+	"  Super + H                      cycle Anime4K and linear\n"
- 	"  Super + I                      increase FSR sharpness by 1\n"
- 	"  Super + O                      decrease FSR sharpness by 1\n"
+-	"  Super + I                      increase FSR sharpness by 1\n"
+-	"  Super + O                      decrease FSR sharpness by 1\n"
++	"  Super + \\                      cycle Anime4K and linear\n"
++	"  Super + [                      decrease FSR sharpness by 1\n"
++	"  Super + ]                      increase FSR sharpness by 1\n"
  	"  Super + S                      take a screenshot\n"
 @@ -313,6 +315,59 @@ bool g_bGrabbed = false;
  float g_mouseSensitivity = 1.0;
@@ -189,7 +215,7 @@ index b2a169f..edac77c 100644
      return bYcbcr ? GamescopeUpscaleFilter::LINEAR : GamescopeUpscaleFilter::FSR;
  }
  
-+// Super+H: cycles the art upscalers from the -F one (the first otherwise), then linear.
++// Super+Backslash: cycles the art upscalers from the -F one (the first otherwise), then linear.
 +void CycleArtUpscaleFilter();
 +
  static constexpr bool DoesHardwareSupportUpscaleFilter( GamescopeUpscaleFilter eFilter )

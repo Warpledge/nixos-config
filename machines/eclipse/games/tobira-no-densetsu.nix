@@ -2,7 +2,7 @@
 # TOBIRA NO DENSETSU
 #=====================================================================#
 #- RPG Maker 2000 game (English patch) run on native EasyRPG in gamescope
-#- at 320x240, starting on sharp bilinear (Super+H cycles the others). The
+#- at 320x240, starting on sharp bilinear (Super+\ cycles the others). The
 #- game folder is kept outside the repo.
 {pkgs, ...}: let
   gameDir = "/mnt/games/Visual Novels/+RPGM/Tobira no Densetsu English/Tobiden";

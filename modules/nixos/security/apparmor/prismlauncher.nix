@@ -17,7 +17,7 @@
 
         # Instances, mods, downloaded Java runtimes and extracted natives
         owner @{HOME}/.local/share/PrismLauncher{,/**} rwlkmix,
-        owner @{HOME}/.ysm/ r, # Yes Steve Model extracts libysm-core here
+        owner @{HOME}/.ysm/ rw, # Yes Steve Model extracts libysm-core here
         owner @{HOME}/.ysm/** rwm,
         owner /tmp/** m,
         owner @{HOME}/.java{,/**} rwk,

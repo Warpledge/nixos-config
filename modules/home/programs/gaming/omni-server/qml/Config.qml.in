@@ -1,0 +1,7 @@
+// What default.nix fills in at build time
+pragma Singleton
+import Quickshell
+
+Singleton {
+    readonly property string backend: "@backend@"
+}

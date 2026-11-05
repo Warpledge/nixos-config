@@ -207,7 +207,7 @@ def launch_options():
                        + [{"option": f"{n} %command%", "text": f"A game made for {r}."}
                           for n, r in presets("nix-vn")],
                        "description": "nix-vn runs the game in gamescope at its own resolution and "
-                                      "upscales it to the monitor with NVL; Super+H cycles the filters. "
+                                      "upscales it to the monitor with NVL; Super+\\ cycles the filters. "
                                       "Pick the game's resolution, not the monitor's."})
     if shutil.which("nix-rpgm"):
         groups.append({"title": "RPG Maker", "options":
