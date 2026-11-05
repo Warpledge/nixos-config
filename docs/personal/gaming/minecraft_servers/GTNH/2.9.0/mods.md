@@ -124,6 +124,20 @@ Chinese leftovers are harmless: comments inside the XML, and `GregTech6.xml`, wh
 fires for GregorianTech 6 blocks that GTNH does not have. A pack update will not refresh
 these files, so new Chinese strings would need translating again.
 
+One mod written for this setup on 2026-11-04, client and server:
+
+| Mod | Build | Side | Note |
+| --- | --- | --- | --- |
+| Footwork | 0.1.0 | B | step height 1.0 (0.5 while sneaking) and better ladder and vine climbing |
+
+It reimplements the wanted features of Keep Stepping and Better Climbing, neither of which
+has a 1.7.10 build; no code comes from them. Its climbing mixin hooks
+`EntityLivingBase.moveEntityWithHeading` and only acts on the client's own player. Holding
+jump in a climbable climbs up, and looking down 45° or more descends instead of climbing
+when walking into a ladder. Toggles and speeds are in `config/footwork.cfg`. It passed
+in-game testing on 2026-11-04. The source is in `~/Projects/footwork`, a local git repo
+built with GTNH's ExampleMod starter; the jar is `build/libs/footwork-0.1.0.jar`.
+
 ## Left out until their author ships a 2.9 build
 
 - **AE2Things 1.2.14**: built against 2.8.4's AE2 `rv3-beta-695`, `AE2FluidCraft 1.4.120`
