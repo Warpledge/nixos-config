@@ -39,6 +39,15 @@ versions the file has to be renamed and its values copied by hand.
 
 - Coloured lighting: Euphoria Patches → Popular → Colored Lighting → `Screen-space`.
 - Emission strength: Materials → labPBR/seuspbr Materials → Custom Emission Intensity.
+- Anti-aliasing (2026-11-04): Temporal Filtering on, Temporal Smoothing High, Temporal
+  Jitter Low. With filtering off, Distant Horizons terrain shimmers badly; Full jitter
+  stops that but makes edges vibrate while standing still.
+- Distant Horizons jitter patch (2026-11-04): keeps Full jitter on distant terrain only.
+  It adds `TAAJitterLod` to `lib/antialiasing/jitter.glsl`, the same function without the
+  `TAA_JITTER` scaling, and calls it for both `TAAJitter` uses in
+  `program/dh_terrain.glsl`. It lives in the generated patched folder, so redo it if
+  Euphoria regenerates that folder. The patch file and originals are in the instance's
+  `.minecraft/eclipse-tuning/`.
 
 ## Extra mods
 
