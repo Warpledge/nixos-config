@@ -193,6 +193,11 @@ These files appear once the mod is installed. Check a new version's file for add
   [true]: the bookmark NPE was never confirmed fixed. `ic2CropsYield` now multiplies
   CropsNH drops.
 - **EZNuclear**: `config/EZNuclear.cfg` → `B:DEExplosion=false`, `B:IC2Explosion=false` [true]
+- **BetterSprinting**: `config/BetterSprinting.cfg` → sprinting in all directions needs
+  `B:enableAllDirs=true` in both copies, the client's `client` section [true] and the
+  server's `server` section [false]; a server left at `false` overrides the client.
+- **Effortless Building Gadgets**: `config/effortless.cfg` → `B:consumesEnergy=false`
+  [true] on both sides. The config isn't synced, so a side left at `true` still checks power.
 - **NH-Utilities**: `config/NHUtilities/NHUtilities.cfg` →
   `accelerateGregTechMachineDiscount=0.25` [0.8], so GT machines get 25% of the
   acceleration effect, and `enableNumberMultiplierTexture=true` [false]. Left at their

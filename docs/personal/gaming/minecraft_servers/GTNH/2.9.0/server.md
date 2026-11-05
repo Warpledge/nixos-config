@@ -51,7 +51,7 @@ From [mods.md](./mods.md), the **B** rows:
   GT-Steam-Reborn 2.1.1, GT-Interesting-Thing 2.1.0, GT-Simple-Wireless-Network 2.1.0
 - ThinkTech 0.3.1, OmniOcular Unofficial 1.6.0, BetterSprinting 1.1.3,
   Advanced Memory Card 1.2.0-1.7.10-GTNH, WTCT 1.0.63-rc1, Omni Tweaks 0.2.0,
-  Effortless Building Gadgets 0.10.1 (on trial)
+  Effortless Building Gadgets 0.10.1
 - The EZStorage script `scripts/simplestorage_gregified.zs` must be on the server too, or
   the recipes differ from the client.
 
