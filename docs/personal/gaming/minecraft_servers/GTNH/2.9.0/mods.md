@@ -139,6 +139,52 @@ features passed in-game testing on 2026-11-04, under the mod's first name, Footw
 source is in `~/Projects/omni-tweaks`, a local git repo built with GTNH's ExampleMod
 starter; the jar is `build/libs/omnitweaks-0.2.0.jar`.
 
+## On trial since 2026-11-05
+
+Latest 1.7.10 Forge builds from Modrinth, hashes checked. None has an explicit 2.9
+release. Move each one to the lists above, or remove it, once its checks pass or fail.
+
+| Mod | Build | Side | Status |
+| --- | --- | --- | --- |
+| World Preview NH | 1.0.3 | C | not tested in game |
+| Right Proper GUI Scale | 2.1.1 | C | not tested in game |
+| Vintage Pick Up Notifier | 1.0.0 | C | not tested in game |
+| Vintage Resourcify, with AngelLib 1.0.0 | 1.0.6 | C | not tested in game |
+| Better Search | 1.6.2 | C | not tested in game |
+| Effortless Building Gadgets | 0.10.1 | B | not tested in game |
+| Shoulder Surfing Reloaded | 2.4.1 | C | not tested in game |
+
+Vintage Resourcify lists `forgelin-legacy` as required. It has the same `forgelin` mod id
+as the pack's `forgelin-2.0.3-GTNH.jar`, so it was left out and the pack's copy is the one
+in use. If Resourcify fails on Kotlin, that swap is the first thing to look at.
+
+Checks:
+
+- **World Preview NH**: the preview opens from Create New World, biomes and heightmap
+  draw, it copes with the pack's world types (RWG), and a test world matches its preview.
+- **Right Proper GUI Scale**: the slider appears (Angelica replaces the video settings
+  screen, so it may not), and NEI, GT machine GUIs, ModularUI windows, the quest book and
+  JourneyMap all stay usable at a few scales.
+- **Vintage Pick Up Notifier**: pickups show on the server as well as in singleplayer, its
+  list doesn't overlap the custom HUD's potion timers at the bottom right, and an EZMiner
+  batch doesn't flood it or stutter.
+- **Vintage Resourcify**: its button appears on the resource and shader pack screens,
+  search loads over HTTPS on Java 25, a test pack installs and loads, and the NeonTech
+  shader settings are untouched.
+- **Better Search**: a typo finds the item in NEI, NEI's `@mod` and `$oredict` prefixes
+  still work, typing doesn't lag with the full item list, and AE2 terminal search behaves.
+- **Effortless Building Gadgets**: the recipe shows in NEI and is reasonable, the gadget
+  can be charged (it takes RF or HE, not EU; `B:consumesEnergy=false` in
+  `config/effortless.cfg` turns the cost off), Left Alt opens its menu without clashing with
+  YesSteveModel's Alt+Y and Alt+P, each shape previews correctly under the shader pack,
+  blocks come from the inventory and undo returns them, it respects another player's
+  claim, and it works on the server. Try GT casings, and expect machines with tile entities
+  to be refused.
+- **Shoulder Surfing Reloaded**: this build is from 2023 and patches vanilla code with its
+  own coremod. Check the third-person camera and crosshair aim, block and entity targeting,
+  the shader pack and Distant Horizons from that camera, YesSteveModel's player model, and
+  key clashes.
+
 ## Left out until their author ships a 2.9 build
 
 - **AE2Things 1.2.14**: built against 2.8.4's AE2 `rv3-beta-695`, `AE2FluidCraft 1.4.120`
