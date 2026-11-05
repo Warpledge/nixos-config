@@ -170,4 +170,14 @@ when Ky approves it.
 - `home/unreal-engine.nix` — `unreal-editor` and its desktop entry: Epic's prebuilt
   5.8.4 editor in `~/Games/UnrealEngine/` (extracted by hand, not in git), run in
   Steam's FHS environment plus nss/nspr
+- `valheim-server.nix` — `valheim-server.service` hosts Ky's Gale profile ("Doobie
+  Canoe With Friends", re-copied from `~/.local/share/com.kesomannen.gale/` on every
+  start) on Steam's install in `~/.local/share/valheim-server/game`, with world
+  `NewAsgard2026` seeded once from Steam Cloud into `worlds/` and owned by the server
+  after that. UDP 2456-2458, `-public 0` so friends add the IP themselves; the
+  password sits in `~/.local/share/valheim-server/env`, never the repo.
+  `valheim-server-inhibit` holds off idle and lid sleep only while the server runs.
+  Gotchas: a vanilla server cannot read the world, which is a modded save (world
+  version -1); a paid mod with a licence check, OdinShipPlus, refuses to run and
+  stops the server, which is why the profile runs the free OdinShip instead.
 - `INSTALL.md` — reinstalling from scratch (run `./setup.sh` and choose “Reinstall activenixtab”; the script will detect the existing machine folder and reapply the exact configuration)

@@ -37,7 +37,7 @@
           translucent = true;
         };
       };
-      claude.mods.ribbon = false;
+      claude.mods.usageBand = false;
       claude.mods.skins = false;
       claude.mods.fileTree = false;
       claude.mods.savvyProgress = false;
