@@ -7,6 +7,7 @@
 {
   pkgs,
   lib,
+  machine,
   ...
 }: let
   omni = ../../system/omni-settings/qml;
@@ -81,6 +82,17 @@
       runHook postInstall
     '';
   };
+
+  #--- Servers skip Mullvad's tunnel while "omni-server" is in `mullvad.splitTunnel`; the
+  #--- cgroup test skips the helper under no_new_privs (see modules/nixos/CLAUDE.md)
+  excluded = lib.elem "omni-server" machine.mullvad.splitTunnel;
+  start = pkgs.writeShellScript "omni-server-start" ''
+    if ${lib.boolToString excluded} && [ -x /run/wrappers/bin/mullvad-exclude ] &&
+      [[ $(</proc/self/cgroup) != *":net_cls:/mullvad-exclusions"* ]]; then
+      exec /run/wrappers/bin/mullvad-exclude ${omni-server}/bin/omni-server-run run "$@"
+    fi
+    exec ${omni-server}/bin/omni-server-run run "$@"
+  '';
 in {
   options.omni-server.package = lib.mkOption {
     type = lib.types.package;
@@ -125,7 +137,7 @@ in {
     };
     Service = {
       ExecStartPre = "${omni-server}/bin/omni-server-run prestart %i";
-      ExecStart = "${omni-server}/bin/omni-server-run run %i";
+      ExecStart = "${start} %i";
       # Sends `stop` and waits, so a logout or shutdown saves the world
       ExecStop = "${omni-server}/bin/omni-server-run stop %i";
       TimeoutStopSec = 300;

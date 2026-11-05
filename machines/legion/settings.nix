@@ -189,7 +189,7 @@
   #--- Mullvad VPN
   mullvad.enable = true;
   # Apps always routed around the VPN (see nixos/security/mullvad/)
-  mullvad.splitTunnel = ["steam" "heroic" "prismlauncher" "opencode" "claude" "spotify" "freetube" "ferdium" "omni-settings" "protonplus" "nix-daemon" "claude-desktop" "lm-studio"];
+  mullvad.splitTunnel = ["steam" "heroic" "prismlauncher" "opencode" "claude" "spotify" "freetube" "ferdium" "omni-settings" "protonplus" "nix-daemon" "claude-desktop" "lm-studio" "omni-server"];
 
   #--- SSH Server
   # Key-only openssh + fail2ban. Add a public key to ssh.authorizedKeys in
