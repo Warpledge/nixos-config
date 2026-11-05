@@ -158,6 +158,11 @@ as the pack's `forgelin-2.0.3-GTNH.jar`, so it was left out and runs on the pack
 
 Right Proper GUI Scale 2.1.1 was tried and removed the same day.
 
+Neo ECO AE Extension 7.3.7 is on the client only, on trial since 2026-11-05: three
+tiered AE2 multiblock systems for storage, crafting and computation. Not on the server, so
+try it in singleplayer. Check its recipes in NEI for balance, autocrafting through GT
+machines alongside WTCT, and what a world loses when it's removed.
+
 ## Left out until their author ships a 2.9 build
 
 - **AE2Things 1.2.14**: built against 2.8.4's AE2 `rv3-beta-695`, `AE2FluidCraft 1.4.120`
