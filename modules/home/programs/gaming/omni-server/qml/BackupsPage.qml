@@ -5,7 +5,7 @@ import QtQuick.Layouts
 Flickable {
     id: page
     property var app
-    property var info: ({ backups: [], serverUtilities: false, setAside: [] })
+    property var info: ({ backups: [], liveBackup: "", setAside: [] })
     property string progress: ""
     property bool busy: false
     readonly property real total: info.backups.reduce((sum, b) => sum + b.size, 0)
@@ -32,8 +32,8 @@ Flickable {
     }
     function backUp() {
         longJob("backup_create", {}, reply => {
-            //--- ServerUtilities writes the zip itself, a little after it's asked
-            if (reply.via === "serverutilities")
+            //--- The mod writes the zip itself, a little after it's asked
+            if (reply.via === "addon")
                 later.restart()
         })
     }
@@ -63,7 +63,7 @@ Flickable {
             Text {
                 Layout.fillWidth: true
                 text: `${page.info.backups.length} backup${page.info.backups.length === 1 ? "" : "s"}, ${Fmt.size(page.total)}`
-                    + (page.info.serverUtilities ? ", made with ServerUtilities while running" : "")
+                    + (page.info.liveBackup ? `, made with ${page.info.liveBackup} while running` : "")
                 color: Theme.dim
                 font.pixelSize: 13
             }

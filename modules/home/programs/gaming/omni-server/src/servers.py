@@ -13,7 +13,9 @@ import socket
 import subprocess
 import tempfile
 import time
+import zipfile
 
+import addons
 import properties
 
 HOME = os.path.expanduser("~")
@@ -64,9 +66,27 @@ def path(server_id):
 def load(server_id):
     try:
         with open(path(server_id), encoding="utf-8") as f:
-            return json.load(f)
+            return migrate(json.load(f))
     except OSError as e:
         raise ServerError(f"No server called {server_id}") from e
+
+
+def migrate(cfg):
+    """Fill in a config written before add-ons. Everything matching goes on, so a server
+    keeps what core used to do for it."""
+    if "addons" in cfg and "minecraft" in cfg:
+        return cfg
+    if cfg.get("kind") == "gtnh":
+        cfg["kind"] = "forge"
+    cfg.setdefault("minecraft", detect(cfg["dir"])["minecraft"])
+    if "addons" not in cfg:
+        cfg["addons"] = []
+        for addon in addons.available():
+            if addons.matches(addon, cfg):
+                addons.switch(cfg, addon, True)
+        cfg["addonsSeen"] = list(cfg["addons"])
+    save(cfg)
+    return cfg
 
 
 def save(cfg):
@@ -120,11 +140,35 @@ def level_dir(cfg):
 #--------------------------------------------------------------------#
 
 
+def minecraft_version(folder):
+    """The folder's Minecraft version, or "" when nothing in it says."""
+    root = glob.escape(folder)
+    for file in glob.glob(f"{root}/minecraft_server.*.jar"):
+        return os.path.basename(file)[len("minecraft_server."):-len(".jar")]
+    for file in glob.glob(f"{root}/forge-*.jar"):
+        if m := re.match(r"forge-(\d+\.\d+(?:\.\d+)?)-", os.path.basename(file)):
+            return m[1]
+    for project in ("minecraft/server", "fabricmc/intermediary"):
+        for found in sorted(glob.glob(f"{root}/libraries/net/{project}/*/")):
+            name = os.path.basename(found.rstrip("/"))
+            #--- Newer Forge names this folder <version>-<date>
+            return name.split("-")[0]
+    for file in sorted(glob.glob(f"{root}/*.jar")):
+        try:
+            with zipfile.ZipFile(file) as z:
+                return str(json.loads(z.read("version.json"))["id"]).split(" ")[0]
+        except (OSError, ValueError, KeyError, zipfile.BadZipFile):
+            continue
+    return ""
+
+
 def detect(folder):
-    """How this folder starts: kind, label, launch arguments and a suggested Java."""
-    if os.path.exists(f"{folder}/java9args.txt") and os.path.exists(f"{folder}/lwjgl3ify-forgePatches.jar"):
-        return {"kind": "gtnh", "label": "GregTech: New Horizons", "java": "25",
-                "launch": "@java9args.txt -jar lwjgl3ify-forgePatches.jar nogui", "tps": "forge tps"}
+    """How this folder starts: kind, label, launch arguments, Minecraft version and a
+    suggested Java."""
+    return addons.detected(folder) or {**launch_target(folder), "minecraft": minecraft_version(folder)}
+
+
+def launch_target(folder):
     for project, kind, tps in (("net/minecraftforge/forge", "forge", "forge tps"),
                                ("net/neoforged/neoforge", "neoforge", "neoforge tps")):
         args = sorted(glob.glob(f"{folder}/libraries/{project}/*/unix_args.txt"))
@@ -147,10 +191,6 @@ def detect(folder):
     return {"kind": "custom", "label": "Custom", "java": "21", "launch": "", "tps": ""}
 
 
-def has_serverutilities(folder):
-    return bool(glob.glob(f"{folder}/mods/ServerUtilities-*.jar"))
-
-
 def default_heap_mb():
     try:
         with open("/proc/meminfo", encoding="ascii") as f:
@@ -160,7 +200,7 @@ def default_heap_mb():
     return max(2048, min(12288, total // 4 // 1024 * 1024))
 
 
-def seed_quick(found, folder):
+def seed_quick(found):
     """The quick commands a new server starts with."""
     quick = [
         {"name": "Save", "icon": "save", "pinned": True, "confirm": False,
@@ -168,9 +208,6 @@ def seed_quick(found, folder):
         {"name": "Broadcast", "icon": "campaign", "pinned": True, "confirm": False,
          "steps": [{"command": "say {message}", "delay": 0}]},
     ]
-    if has_serverutilities(folder):
-        quick.append({"name": "Backup", "icon": "archive", "pinned": True, "confirm": False,
-                      "steps": [{"command": "backup start", "delay": 0}]})
     quick.append({"name": "Restart in 1 min", "icon": "schedule", "pinned": True, "confirm": True,
                   "steps": [{"command": "say Server restarts in 1 minute", "delay": 0},
                             {"command": "@restart", "delay": 60}]})
@@ -205,7 +242,8 @@ def add(folder, name=None):
         "id": server_id, "name": name, "dir": folder, "kind": found["kind"], "label": found["label"],
         "java": found["java"], "heapMb": default_heap_mb(), "preset": "g1", "extraFlags": "",
         "launch": found["launch"], "command": "", "tps": found["tps"], "restartOnCrash": True,
-        "quick": seed_quick(found, folder), "schedule": dict(DEFAULT_SCHEDULE), "dimNames": {},
+        "quick": seed_quick(found), "schedule": dict(DEFAULT_SCHEDULE), "dimNames": {},
+        "minecraft": found["minecraft"], "addons": [], "addonsSeen": [],
     }
     os.makedirs(state_dir(server_id), exist_ok=True)
     save(cfg)
@@ -255,7 +293,7 @@ def launch_argv(cfg):
         argv += G1_FLAGS
         if java_major(cfg) >= 24:
             argv.append("-XX:+UseCompactObjectHeaders")
-    if cfg.get("kind") in ("gtnh", "forge", "neoforge"):
+    if cfg.get("kind") in ("forge", "neoforge"):
         argv += FML_FLAGS
     argv += shlex.split(cfg.get("extraFlags", ""))
     argv += shlex.split(cfg["launch"])

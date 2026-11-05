@@ -18,6 +18,7 @@ Item {
     property var stats: null
     property var pending: ({})
     property var quick: []
+    property var addonSuggestions: []
     property var schedule: ({})
     property real dimThreshold: 1  // ms; kept here as the Dashboard is rebuilt on each tab
     property var watcher: null
@@ -40,7 +41,8 @@ Item {
         { id: "settings", icon: "tune", title: "Settings" },
         { id: "backups", icon: "archive", title: "Backups" },
         { id: "mods", icon: "extension", title: "Mods" },
-        { id: "schedule", icon: "event_repeat", title: "Schedule" }
+        { id: "schedule", icon: "event_repeat", title: "Schedule" },
+        { id: "addons", icon: "widgets", title: "Add-ons" }
     ]
 
     //--------------------------------------------------------------------//
@@ -74,6 +76,7 @@ Item {
         if (currentId)
             call("server_get", {}, reply => {
                 app.quick = reply.quick
+                app.addonSuggestions = reply.addonSuggestions
                 app.schedule = reply.schedule
                 app.dimThreshold = reply.dimThreshold
             })
@@ -512,7 +515,7 @@ Item {
                 function show() {
                     setSource(({ dash: "DashboardPage.qml", console: "ConsolePage.qml", players: "PlayersPage.qml",
                                  settings: "ServerSettingsPage.qml", backups: "BackupsPage.qml", mods: "ModsPage.qml",
-                                 schedule: "SchedulePage.qml" })[app.tab], { app })
+                                 schedule: "SchedulePage.qml", addons: "AddonsPage.qml" })[app.tab], { app })
                 }
                 Component.onCompleted: show()
                 Connections {

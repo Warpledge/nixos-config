@@ -94,6 +94,14 @@ Flickable {
         spacing: 10
 
         Banner {
+            visible: !!page.app && page.app.addonSuggestions.length > 0
+            tone: "info"
+            icon: "widgets"
+            text: page.app ? `Add-ons fit this server: ${page.app.addonSuggestions.join(", ")}` : ""
+            action: "Review"
+            onActed: page.app.tab = "addons"
+        }
+        Banner {
             visible: !!page.s && page.s.statsVia === "stdin"
             text: "TPS updates every 30 s through the console. Turn on live stats to poll it silently over RCON."
             action: "Turn on"
@@ -191,7 +199,7 @@ Flickable {
 
                 Card {
                     title: "Dimensions"
-                    info: "Tick time and TPS per dimension, worst first. Tap a name to rename it. GTNH's names are learned at the first clean stop."
+                    info: "Tick time and TPS per dimension, worst first. Tap a name to rename it. On 1.7.10, names are learned at the first clean stop."
                     headerExtras: [
                         Chip {
                             visible: !!page.s && page.s.lagWarnings > 0

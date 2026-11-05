@@ -1,5 +1,5 @@
-"""World backups, as zips in the server's `backups/` folder, the folder ServerUtilities
-uses, with one top-level folder named after the world. Restoring moves the current
+"""World backups, as zips in the server's `backups/` folder, the folder mods like
+ServerUtilities use, with one top-level folder named after the world. Restoring moves the current
 world aside rather than deleting it."""
 
 import glob
@@ -9,6 +9,7 @@ import sys
 import time
 import zipfile
 
+import addons
 import servers
 
 SAVE_WAIT = 60
@@ -26,7 +27,7 @@ def listing(cfg):
     moved = glob.glob(f"{servers.level_dir(cfg)}.before-restore-*")
     return {
         "backups": sorted(found, key=lambda b: -b["time"]),
-        "serverUtilities": servers.has_serverutilities(cfg["dir"]),
+        "liveBackup": (addons.live_backup(cfg) or {}).get("label", ""),
         "setAside": [os.path.basename(m) for m in sorted(moved)],
     }
 
@@ -58,7 +59,7 @@ def wait_for_save(cfg, since):
 
 
 def create(cfg):
-    """Zip the world. On a running server without ServerUtilities, saving pauses around it."""
+    """Zip the world. On a running server with no add-on's backup, saving pauses around it."""
     world = servers.level_dir(cfg)
     if not os.path.isdir(world):
         raise servers.ServerError(f"There's no world at {world} yet")
@@ -66,9 +67,10 @@ def create(cfg):
     live = status["active"]
     if status["state"] == "outside":
         raise servers.ServerError("This server is running outside Omni Server")
-    if live and servers.has_serverutilities(cfg["dir"]):
-        servers.send(cfg, "backup start")
-        return {"via": "serverutilities"}
+    backup = addons.live_backup(cfg)
+    if live and backup:
+        servers.send(cfg, backup["command"])
+        return {"via": "addon"}
     os.makedirs(folder(cfg), exist_ok=True)
     target = f"{folder(cfg)}/{time.strftime('%Y-%m-%d-%H-%M-%S')}.zip"
     partial = f"{target}.part"

@@ -27,6 +27,7 @@ Rectangle {
             spacing: 6
             Text {
                 text: card.title
+                textFormat: Text.PlainText
                 color: Theme.text
                 font.pixelSize: 14
                 font.weight: Font.Bold

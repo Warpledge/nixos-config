@@ -51,6 +51,8 @@
       install -Dm644 -t $share *.py
       # Python can't cache bytecode in the store, so each call would recompile
       ${pkgs.python3}/bin/python3 -m compileall -q --invalidation-mode unchecked-hash $share
+      cp -r ${./addons} $share/addons
+      chmod -R u+w $share/addons
       install -Dm644 -t $share/qml ${./qml}/*.qml
       ${lib.concatMapStringsSep "\n" (n: "install -Dm644 -t $share/qml ${omni}/${n}.qml") shared}
       substitute ${./qml/Config.qml.in} $share/qml/Config.qml \

@@ -400,6 +400,20 @@ class Monitor:
                 self.start_run(req.get("name", ""), req.get("steps", []))
             elif req.get("cmd") == "cancel":
                 self.runs = [r for r in self.runs if r["id"] != req.get("id")]
+            elif req.get("cmd") == "query":
+                self.publish(self.query(str(req.get("command", ""))), [client])
+
+    def query(self, text):
+        """A read-only command's reply. It shares the poll's connection and thread, as two
+        packets must never overlap (`src/rcon.py`)."""
+        if not self.state["ready"] or not self.connect_rcon():
+            return {"type": "reply", "ok": False}
+        try:
+            return {"type": "reply", "ok": True, "text": self.rcon.command(text)}
+        except (OSError, rcon.RconError):
+            self.rcon.close()
+            self.rcon, self.rcon_retry = None, time.time() + 10
+            return {"type": "reply", "ok": False}
 
     def flush(self):
         now = time.time()

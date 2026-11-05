@@ -148,6 +148,14 @@ Flickable {
                         }
                     }
                     Row_ {
+                        label: "Minecraft version"
+                        info: "Add-ons check this. It's read from the server's folder; set it here if that found nothing."
+                        TextBox {
+                            saved: page.startup.minecraft || ""
+                            onCommit: value => page.setStartup("minecraft", value)
+                        }
+                    }
+                    Row_ {
                         label: "Launch target"
                         info: page.data_ ? `Detected: ${page.data_.detected.label}, ${page.data_.detected.launch || "none"}` : ""
                         TextBox {

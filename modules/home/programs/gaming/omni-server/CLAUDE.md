@@ -16,8 +16,32 @@ Linger (`modules/nixos/system/user/user.nix`, on for anyone with the toggle) kee
 
 Each server's config is `~/.config/omni-server/servers/<id>.json`; nothing about a server goes in the repo. The only files the app writes in a server's folder are `eula.txt`, `server.properties`, the whitelist, op and ban JSON, `mods/` renames and added jars, and `backups/`.
 
+## Add-ons
+
+An add-on is a folder holding an `addon.json`: built in (`addons/`, installed beside the backend) or imported (`~/.config/omni-server/addons/<id>/`, which wins on an id clash). They're data only and never download anything. `src/addons.py` reads and checks them; a bad one is listed with its problems and stops nothing. `cfg["addons"]` holds a server's switched-on ids, and one stops counting once its `match` fails. GTNH's launch details, ServerUtilities backups and pregen live in `addons/gtnh/`, so core stays generic; a config from before add-ons is filled in by `servers.migrate`.
+
+| Key | What it does |
+| --- | --- |
+| `id`, `name`, `description` | Required, except `description` |
+| `match` | `files` in the server's folder and `jars` (globs in `mods/` and `mods/*/`), both all-of, plus `minecraft` `min`/`max`. Needs `files` or `jars` |
+| `suggests` | `{name, url}`, `https://` only: shown as a Get mod button while the add-on's unmet |
+| `panels` | `form` or `table` (below), each with `id`, `title`, `description` and its own `requires`, shaped like `match` |
+| `quickCommands` | Copied into `cfg["quick"]` tagged `addon: <id>` when turned on, skipping names already there, and removed when turned off |
+| `backup` | `{label, command, requires}`: replaces the core zip while the server runs |
+| `settings` | `{key, value, why}`: recommended `server.properties` values, each with an Apply button |
+| `detect` | Built-in add-ons only, since a launch target can load code into the JVM: `{files, kind, label, minecraft, java, launch, tps}` |
+| `configHints`, `logPatterns` | Accepted, unused so far |
+
+A `form` has `fields` (`{id, type, label, default}`; type `int` with `min`/`max`, `choice` with `options`, `dimension`, or `text`, a single word; `suggest` lists the dimensions the last poll named), `actions` (`{label, command, confirm}` with `{id}` placeholders) and a read-only `status` command, read every 5 s. A `table` has a read-only `command`, a `rows` regex run across the whole reply with named groups, `columns` (`{key, title}`) and `sort`, a numeric column to sort by, largest first.
+
+- `status` and table commands are the only ones sent over RCON, as only RCON returns a reply. They go through the monitor (`"cmd": "query"`), on the connection and thread its poll uses, so write them to be read-only. On plain 1.7.10 RCON isn't on the main thread (below), so keep such commands to add-ons for packs that fix that. Everything else goes through stdin.
+- Fields are checked in `addons.check_value` before filling a command, because a space would shift the command's arguments.
+- Add-on text renders as `Text.PlainText`, as an imported add-on's author wrote it.
+- The Opis commands return junk over RCON (checked 2026-11-04, Opis 1.4.12): `opis_ent` and `opis_te` give Java object names and `opis_chunk` times with no location. Only `opis_nent` is usable, as `name : count` with no line breaks, and a name starting with a digit would merge with the count before it.
+
 ## Gotchas
 
+- **The monitor runs old code until the server's next start.** Its unit is also `keep-old`, so after a rebuild a running server's monitor doesn't know a new request, and the window (new code) waits `QUERY_WAIT` for it, then says so.
 - **`omni-server@.service` has no `Install` section.** With `WantedBy`, home-manager's switch tries to start the bare template and the rebuild fails with "missing the instance name". `systemctl add-wants` isn't the way around it either: it also links `default.target` to a store path in `~/.config/systemd/user/`.
 - **The monitor is ordered `Before` the server, not `After`.** A stop runs in reverse order, so `After` stops the monitor first and it misses the shutdown lines that name the dimensions.
 - **Never send two RCON packets at once.** 1.7.10 reads one packet per socket read and drops the connection otherwise; `src/rcon.py` only sends its closing request after a full-sized reply packet. Long replies come back split at 4096 bytes with nothing marking the end.

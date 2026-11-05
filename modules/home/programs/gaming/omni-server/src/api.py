@@ -12,6 +12,7 @@ import subprocess
 import sys
 import time
 
+import addons
 import backups
 import history
 import logparse
@@ -22,6 +23,7 @@ import servers
 
 COMMANDS = {}
 WATCH_STATUS = 2
+QUERY_WAIT = 12
 QUICK_ICONS = ("bolt", "save", "campaign", "archive", "schedule", "speed", "group", "light_mode",
                "cloud_off", "restart_alt", "terminal", "star", "shield", "swords", "park", "bedtime")
 
@@ -203,6 +205,33 @@ def monitor_request(cfg, message):
     sock.close()
 
 
+def monitor_query(cfg, text):
+    """A read-only command's reply through the monitor's RCON connection; None with RCON off."""
+    sock = connect_monitor(cfg["id"])
+    if not sock:
+        raise servers.ServerError("The server isn't running")
+    deadline = time.time() + QUERY_WAIT
+    pending = b""
+    try:
+        sock.sendall((json.dumps({"cmd": "query", "command": text}) + "\n").encode())
+        #--- Console lines arrive here too, so only the deadline ends the wait
+        while time.time() < deadline:
+            if not select.select([sock], [], [], deadline - time.time())[0]:
+                break
+            chunk = sock.recv(1 << 20)
+            if not chunk:
+                break
+            *lines, pending = (pending + chunk).split(b"\n")
+            for line in lines:
+                message = json.loads(line)
+                if message.get("type") == "reply":
+                    return message["text"] if message["ok"] else None
+    finally:
+        sock.close()
+    raise servers.ServerError("The monitor didn't answer. If the app was just updated, "
+                              "the monitor picks that up at the server's next start.")
+
+
 #--------------------------------------------------------------------#
 #-- Quick commands
 #--------------------------------------------------------------------#
@@ -221,6 +250,8 @@ def quick_save(args):
             raise servers.ServerError("Each quick command needs a name and a command")
         quick.append({"name": name, "icon": item.get("icon") if item.get("icon") in QUICK_ICONS else "bolt",
                       "pinned": bool(item.get("pinned")), "confirm": bool(item.get("confirm")), "steps": steps})
+        if item.get("addon"):
+            quick[-1]["addon"] = str(item["addon"])
     cfg["quick"] = quick
     servers.save(cfg)
     return {"quick": quick}
@@ -275,7 +306,7 @@ def settings_get(args):
         "pending": sorted(k for k in pending if not properties.HIDDEN.match(k)),
         "rcon": {**values, **pending}.get("enable-rcon") == "true",
         "eula": servers.eula_accepted(cfg),
-        "startup": {k: cfg.get(k) for k in ("java", "heapMb", "preset", "extraFlags", "launch", "command", "restartOnCrash")},
+        "startup": {k: cfg.get(k) for k in ("java", "heapMb", "preset", "extraFlags", "launch", "command", "restartOnCrash", "minecraft")},
         "boot": servers.status_of(cfg)["boot"],
         "javas": sorted(servers.javas(), key=int),
         "memoryMb": memory_mb(),
@@ -317,7 +348,7 @@ def eula_accept(args):
 def startup_set(args):
     cfg = require(args)
     changes = args.get("changes") or {}
-    allowed = {"java", "heapMb", "preset", "extraFlags", "launch", "command", "restartOnCrash"}
+    allowed = {"java", "heapMb", "preset", "extraFlags", "launch", "command", "restartOnCrash", "minecraft"}
     if set(changes) - allowed:
         raise servers.ServerError(f"Can't set {sorted(set(changes) - allowed)}")
     if "heapMb" in changes:
@@ -330,6 +361,10 @@ def startup_set(args):
         if not (java in servers.javas() or (java.startswith("/") and os.access(java, os.X_OK))):
             raise servers.ServerError(f"No Java at {java}")
         changes["java"] = java
+    if "minecraft" in changes:
+        changes["minecraft"] = str(changes["minecraft"]).strip()
+        if changes["minecraft"] and not addons.version_key(changes["minecraft"]):
+            raise servers.ServerError("Minecraft version must look like 1.20.1")
     for key in ("extraFlags", "launch", "command"):
         if key in changes and "\n" in str(changes[key]):
             raise servers.ServerError(f"{key} can't hold a line break")
@@ -466,7 +501,104 @@ def schedule_set(args):
 def server_get(args):
     cfg = require(args)
     return {"quick": cfg.get("quick", []), "schedule": cfg.get("schedule") or dict(servers.DEFAULT_SCHEDULE),
-            "dimThreshold": cfg.get("dimThreshold", 1), "server": summary(cfg)}
+            "dimThreshold": cfg.get("dimThreshold", 1), "server": summary(cfg),
+            "addonSuggestions": [a["name"] for a in addons.available() if addons.matches(a, cfg)
+                                 and a["id"] not in cfg.get("addons", [])
+                                 and a["id"] not in cfg.get("addonsSeen", [])]}
+
+
+#--------------------------------------------------------------------#
+#-- Add-ons
+#--------------------------------------------------------------------#
+
+
+def addon_view(addon, cfg):
+    needs = addon.get("problems") or addons.unmet(addon["match"], cfg["dir"], cfg.get("minecraft"))
+    on = not needs and addon["id"] in cfg.get("addons", [])
+    panels = []
+    for panel in addon.get("panels", []) if on else []:
+        missing = addons.unmet(panel.get("requires"), cfg["dir"], cfg.get("minecraft"))
+        panels.append({**panel, "needs": missing})
+    current = properties.read(servers.props_file(cfg))
+    settings = [{**s, "current": current.get(s["key"], "")} for s in addon.get("settings", [])] if on else []
+    return {"id": addon["id"], "name": addon["name"], "description": addon.get("description", ""),
+            "local": addon.get("local", False), "problems": addon.get("problems", []),
+            "needs": needs, "on": on, "suggests": addon.get("suggests", []), "panels": panels,
+            "settings": settings}
+
+
+@command
+def addons_get(args):
+    cfg = require(args)
+    return {"addons": [addon_view(a, cfg) for a in addons.available()]}
+
+
+@command
+def addons_seen(args):
+    """The Add-ons tab was opened, so what matches now stops being suggested."""
+    cfg = require(args)
+    cfg["addonsSeen"] = [a["id"] for a in addons.available() if addons.matches(a, cfg)]
+    servers.save(cfg)
+    return {}
+
+
+@command
+def addon_set(args):
+    cfg = require(args)
+    addon = addons.find(args.get("addon"))
+    on = bool(args.get("on"))
+    if on and not addons.matches(addon, cfg):
+        needs = addons.unmet(addon["match"], cfg["dir"], cfg.get("minecraft"))
+        raise servers.ServerError(f"{addon['name']} needs {', '.join(needs)}")
+    addons.switch(cfg, addon, on)
+    servers.save(cfg)
+    return {"quick": cfg["quick"]}
+
+
+@command
+def addon_pick(_args):
+    try:
+        res = subprocess.run(["zenity", "--file-selection", "--directory", "--title=Choose an add-on folder"],
+                             capture_output=True, text=True, check=False)
+    except OSError as e:
+        raise servers.ServerError(f"Couldn't open the file picker: {e}") from e
+    folder = res.stdout.strip() if res.returncode == 0 else ""
+    if not folder:
+        return {"dir": ""}
+    manifest = addons.read(folder)
+    return {"dir": folder, "name": manifest["name"], "problems": manifest.get("problems", []),
+            "commands": addons.commands_of(manifest) if not manifest.get("problems") else []}
+
+
+@command
+def addon_import(args):
+    return {"name": addons.import_folder(args.get("dir", ""))["name"]}
+
+
+@command
+def addon_query(args):
+    """A panel's status or table command. `console` sends it there instead, for a server
+    with RCON off: the reply shows in the console, not on the panel."""
+    cfg = require(args)
+    panel = addons.panel_of(cfg, args.get("addon"), args.get("panel"))
+    text = panel.get("status") or panel.get("command")
+    if not text:
+        raise servers.ServerError("This panel has nothing to read")
+    if args.get("console"):
+        servers.send(cfg, text)
+        return {}
+    reply = monitor_query(cfg, text)
+    if reply is None:
+        return {"rcon": False}
+    return {"rcon": True, "text": reply, "rows": addons.parse_rows(panel, reply) if panel.get("rows") else []}
+
+
+@command
+def addon_action(args):
+    cfg = require(args)
+    panel = addons.panel_of(cfg, args.get("addon"), args.get("panel"))
+    servers.send(cfg, addons.filled_command(panel, args.get("action"), args.get("values") or {}))
+    return {}
 
 
 #--------------------------------------------------------------------#
@@ -520,7 +652,7 @@ def run(cmd, args):
         return {"ok": False, "error": f"Unknown command: {cmd}"}
     try:
         return {"ok": True, **fn(args)}
-    except servers.ServerError as e:
+    except (servers.ServerError, addons.AddonError) as e:
         return {"ok": False, "error": str(e)}
     except (OSError, ValueError, KeyError, TypeError) as e:
         return {"ok": False, "error": f"{type(e).__name__}: {e}"}

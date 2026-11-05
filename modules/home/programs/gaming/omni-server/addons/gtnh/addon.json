@@ -1,0 +1,54 @@
+{
+  "id": "gtnh",
+  "name": "GTNH",
+  "description": "GregTech: New Horizons: launch details, ServerUtilities backups, Distant Horizons pregen and Opis entity counts.",
+  "match": {"files": ["java9args.txt", "lwjgl3ify-forgePatches.jar"]},
+  "detect": {
+    "files": ["java9args.txt", "lwjgl3ify-forgePatches.jar"],
+    "kind": "forge",
+    "label": "GregTech: New Horizons",
+    "minecraft": "1.7.10",
+    "java": "25",
+    "launch": "@java9args.txt -jar lwjgl3ify-forgePatches.jar nogui",
+    "tps": "forge tps"
+  },
+  "backup": {
+    "label": "ServerUtilities",
+    "command": "backup start",
+    "requires": {"jars": ["ServerUtilities-*.jar"]}
+  },
+  "quickCommands": [
+    {"name": "Backup", "icon": "archive", "pinned": true, "steps": [{"command": "backup start", "delay": 0}]}
+  ],
+  "panels": [
+    {
+      "id": "pregen",
+      "type": "form",
+      "title": "Distant Horizons pregen",
+      "description": "Progress goes to the server console.",
+      "requires": {"jars": ["DistantHorizons-*.jar"]},
+      "status": "dh pregen status",
+      "fields": [
+        {"id": "dimension", "type": "dimension", "label": "Dimension id", "default": "0", "suggest": true},
+        {"id": "x", "type": "int", "label": "X", "default": "0"},
+        {"id": "z", "type": "int", "label": "Z", "default": "0"},
+        {"id": "radius", "type": "int", "label": "Radius in chunks", "default": "256", "min": 1}
+      ],
+      "actions": [
+        {"label": "Start", "command": "dh pregen start {dimension} {x} {z} {radius}", "confirm": true},
+        {"label": "Stop", "command": "dh pregen stop"}
+      ]
+    },
+    {
+      "id": "entities",
+      "type": "table",
+      "title": "Entity counts",
+      "description": "Every loaded entity by type, from Opis. Timings per entity are only in the in-game /opis.",
+      "requires": {"jars": ["Opis-*.jar"]},
+      "command": "opis_nent",
+      "rows": "(?P<name>.+?) : (?P<count>\\d+)",
+      "sort": "count",
+      "columns": [{"key": "name", "title": "Entity"}, {"key": "count", "title": "Loaded"}]
+    }
+  ]
+}
