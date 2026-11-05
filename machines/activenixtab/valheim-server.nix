@@ -34,7 +34,8 @@
       rsync -a --delete "${galeProfile}/BepInEx/plugins/" "${base}/game/BepInEx/plugins/"
       rsync -a --delete "${galeProfile}/BepInEx/patchers/" "${base}/game/BepInEx/patchers/"
       rsync -a "${galeProfile}/BepInEx/core/" "${base}/game/BepInEx/core/"
-      rsync -a "${galeProfile}/BepInEx/config/" "${base}/game/BepInEx/config/"
+      #--- Only new mods get a .cfg; the server's own configs stay as they are
+      rsync -a --ignore-existing "${galeProfile}/BepInEx/config/" "${base}/game/BepInEx/config/"
       rsync -a "${galeProfile}/doorstop_libs/" "${base}/game/doorstop_libs/"
       install -m 644 "${galeProfile}/doorstop_config.ini" "${base}/game/doorstop_config.ini"
 

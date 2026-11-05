@@ -171,13 +171,14 @@ when Ky approves it.
   5.8.4 editor in `~/Games/UnrealEngine/` (extracted by hand, not in git), run in
   Steam's FHS environment plus nss/nspr
 - `valheim-server.nix` — `valheim-server.service` hosts Ky's Gale profile ("Doobie
-  Canoe With Friends", re-copied from `~/.local/share/com.kesomannen.gale/` on every
-  start) on Steam's install in `~/.local/share/valheim-server/game`, with world
-  `NewAsgard2026` seeded once from Steam Cloud into `worlds/` and owned by the server
-  after that. UDP 2456-2458, `-public 0` so friends add the IP themselves; the
-  password sits in `~/.local/share/valheim-server/env`, never the repo. Admins are
-  SteamID64s in `worlds/adminlist.txt`, beside the save and read at server start, so
-  Ky's own ID stays out of git. The
+  Canoe With Friends") on Steam's install in `~/.local/share/valheim-server/game`,
+  re-copied on every start: plugins and patchers follow the profile, while configs are
+  seeded only for mods that have none yet, so the server's own `BepInEx/config` wins
+  from then on. World `NewAsgard2026` is seeded once from Steam Cloud into `worlds/`
+  and owned by the server after that. UDP 2456-2458, `-public 0` so friends add the IP
+  themselves; the password sits in `~/.local/share/valheim-server/env`, never the repo.
+  Admins are SteamID64s in `worlds/adminlist.txt`, beside the save and read at server
+  start, so Ky's own ID stays out of git. The
   "Valheim Server" desktop entry runs `valheim-console` in Ghostty: it starts the
   service, follows `logs/server.log` (`-logfile -` plus systemd's append), and closes
   the window to stop it, so nothing starts at boot. A polkit rule lets that one unit
