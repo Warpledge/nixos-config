@@ -62,5 +62,5 @@
   #--- The first is opencode's and Zed's default
   localAi.code = ["qwen3_8-flash-next" "nemotron-3_5-super-vl"];
   localAi.chat = [];
-  openWebui.enable = true; # Chats with llama-swap on 127.0.0.1:8090
+  openWebui.enable = false; # Off until open-webui.nix drops the mcp2 patch (0.12.5 no longer needs it)
 }

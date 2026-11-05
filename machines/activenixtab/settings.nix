@@ -220,6 +220,8 @@
       opencode.plugins.usageBar = true;
       opencode.plugins.desktopBar = true;
       opencode.plugins.rebuildBadge = true;
+      gaming.omniServer = false;
+      claude.mods.rebuildPrompt = false;
     };
   };
 
