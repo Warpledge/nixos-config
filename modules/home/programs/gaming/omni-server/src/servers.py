@@ -26,7 +26,7 @@ ID = re.compile(r"^[a-z0-9][a-z0-9-]{0,63}$")
 PLAYER = re.compile(r"^[A-Za-z0-9_]{1,16}$")
 RCON_FIRST_PORT = 25575
 
-#--- The G1 tuning machines/legion/minecraft-servers/ uses; Java 24+ adds compact headers
+#--- G1 tuning common on modded servers; Java 24+ adds compact headers
 G1_FLAGS = [
     "-XX:+UseG1GC", "-XX:+ParallelRefProcEnabled", "-XX:MaxGCPauseMillis=200",
     "-XX:+UnlockExperimentalVMOptions", "-XX:+DisableExplicitGC", "-XX:G1NewSizePercent=30",
