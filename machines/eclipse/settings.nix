@@ -225,7 +225,7 @@
   smb.enable = false;
   boot.menu.timeout = 5;
   boot.menu.entries = 10;
-  apparmor.enforce = ["evince" "file-roller" "katana-floorboard" "mpv" "obsidian" "prismlauncher" "streamlink" "tonkatsu-box" "tsunagu" "unrar" "yt-dlp"];
+  apparmor.enforce = ["evince" "file-roller" "katana-floorboard" "mpv" "obsidian" "streamlink" "tonkatsu-box" "tsunagu" "unrar" "yt-dlp"];
   blocklist.allow = [];
   maintenance.clean = "weekly";
   maintenance.keepDays = 5;
