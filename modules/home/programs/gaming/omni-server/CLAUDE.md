@@ -14,7 +14,7 @@ Three user unit templates in `default.nix`, instanced by server id:
 
 Linger (`modules/nixos/system/user/user.nix`, on for anyone with the toggle) keeps servers up through logout and makes Start at boot work. Start at boot is the instance's symlink in `~/.config/systemd/user/default.target.wants/` (`servers.set_boot`), and Restart on crash is a drop-in in `~/.config/systemd/user/omni-server@<id>.service.d/`.
 
-Each server's config is `~/.config/omni-server/servers/<id>.json`; nothing about a server goes in the repo. The only files the app writes in a server's folder are `eula.txt`, `server.properties`, the whitelist, op and ban JSON, `mods/*` renames and `backups/`.
+Each server's config is `~/.config/omni-server/servers/<id>.json`; nothing about a server goes in the repo. The only files the app writes in a server's folder are `eula.txt`, `server.properties`, the whitelist, op and ban JSON, `mods/` renames and added jars, and `backups/`.
 
 ## Gotchas
 

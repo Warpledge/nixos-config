@@ -24,6 +24,30 @@ ColumnLayout {
                 page.loading = false
             })
     }
+    function addMods() {
+        app.call("mods_pick", {}, picked => {
+            if (picked.files.length)
+                app.call("mods_add", { files: picked.files }, reply => {
+                    page.refresh()
+                    page.reportAdded(reply)
+                })
+        })
+    }
+    //--- Quiet for a plain add on a stopped server, where the list shows the result
+    function reportAdded(reply) {
+        const lines = []
+        const count = reply.added.length
+        if (count && !canChange)
+            lines.push(`Added ${count} mod${count > 1 ? "s" : ""}. They load at the next start.`)
+        else if (count && (reply.skipped.length || reply.clashes.length))
+            lines.push(`Added ${count} mod${count > 1 ? "s" : ""}.`)
+        for (const clash of reply.clashes)
+            lines.push(`${clash.file} looks like another version of ${clash.existing}. Two versions usually crash the server, so turn one off.`)
+        for (const skip of reply.skipped)
+            lines.push(`${skip.file} ${skip.why}.`)
+        if (lines.length)
+            app.ask({ heading: "Adding mods", body: lines.join("\n\n"), buttons: [{ label: "OK", value: 1 }], cancel: false }, () => {})
+    }
     onAppChanged: refresh()
     Connections {
         target: page.app
@@ -76,6 +100,12 @@ ColumnLayout {
             options: [{ value: "all", label: "All" }, { value: "on", label: "On" }, { value: "off", label: "Off" }]
             current: page.which
             onPicked: value => page.which = value
+        }
+        OutlineButton {
+            filled: true
+            text: "Add mods"
+            tip: "Copy mod jars into this server's mods folder"
+            onClicked: page.addMods()
         }
     }
     Banner {

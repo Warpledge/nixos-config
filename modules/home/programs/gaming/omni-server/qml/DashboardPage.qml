@@ -43,7 +43,38 @@ Flickable {
         if (graph)
             app.call("series", { field: graph, range }, reply => { page.big = reply.points })
     }
-    onAppChanged: refresh()
+    //--- Updated row by row: new stats arrive each second, and swapping the whole model
+    //--- would throw the list back to its top
+    ListModel { id: dimRows }
+    function syncDims() {
+        const limit = app ? app.dimThreshold : 1
+        const shown = (s ? s.dims : []).filter(d => d.ms >= limit)
+        shown.forEach((d, i) => {
+            const row = { dim: d.id, name: d.name, ms: d.ms, tps: d.tps }
+            if (i < dimRows.count)
+                dimRows.set(i, row)
+            else
+                dimRows.append(row)
+        })
+        if (dimRows.count > shown.length)
+            dimRows.remove(shown.length, dimRows.count - shown.length)
+    }
+    onSChanged: syncDims()
+    function lagTip() {
+        if (!s || !s.lagWarnings)
+            return ""
+        const count = `${s.lagWarnings} since the server started.`
+        const events = s.lagEvents || []
+        if (!events.length)
+            return `${count} Details start with the next server start.`
+        const last = events[events.length - 1]
+        return `${count} Last: ${last.time}, ${last.behindMs} ms behind, skipped ${last.ticks} ticks.`
+    }
+
+    onAppChanged: {
+        refresh()
+        syncDims()
+    }
     onGraphChanged: refresh()
     onRangeChanged: refresh()
     Timer { interval: 15000; running: true; repeat: true; onTriggered: page.refresh() }
@@ -54,6 +85,7 @@ Flickable {
             page.big = []
             page.refresh()
         }
+        function onDimThresholdChanged() { page.syncDims() }
     }
 
     ColumnLayout {
@@ -163,32 +195,55 @@ Flickable {
                     headerExtras: [
                         Chip {
                             visible: !!page.s && page.s.lagWarnings > 0
-                            tappable: false
                             tone: "caution"
                             text: page.s ? `${page.s.lagWarnings} lag warning${page.s.lagWarnings > 1 ? "s" : ""}` : ""
+                            tip: page.lagTip()
+                            onTapped: page.app.openSheet("LagSheet.qml", sheet => { sheet.app = page.app })
                         },
                         Chip {
                             visible: !!page.s && page.s.dims.length > 0
                             tappable: false
-                            text: page.s ? `${page.s.dims.length} loaded` : ""
+                            text: page.s ? `${dimRows.count} of ${page.s.dims.length}` : ""
+                        },
+                        Segmented {
+                            options: [{ value: 0, label: "All" }, { value: 0.1, label: "0.1" }, { value: 1, label: "1" },
+                                      { value: 5, label: "5" }, { value: 10, label: "10 ms" }]
+                            current: page.app ? page.app.dimThreshold : 1
+                            onPicked: value => {
+                                page.app.dimThreshold = value
+                                page.app.call("dim_filter", { threshold: value })
+                            }
                         }
                     ]
                     Text {
-                        visible: !page.s || page.s.dims.length === 0
-                        text: !page.s ? "Shows once the server is running." : "Waiting for the first reading."
+                        visible: dimRows.count === 0
+                        text: !page.s ? "Shows once the server is running."
+                            : page.s.dims.length === 0 ? "Waiting for the first reading."
+                            : `No dimension is at ${page.app.dimThreshold} ms or more.`
                         color: Theme.dim
                         font.pixelSize: 13
                     }
-                    Repeater {
-                        model: page.s ? page.s.dims.slice(0, page.wide ? 12 : 8) : []
-                        RowLayout {
+                    ListView {
+                        id: dimList
+                        readonly property int rowHeight: 26
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: Math.min(count, 12) * rowHeight
+                        visible: count > 0
+                        clip: true
+                        boundsBehavior: Flickable.StopAtBounds
+                        model: dimRows
+                        delegate: RowLayout {
                             id: dimRow
-                            required property var modelData
-                            Layout.fillWidth: true
+                            required property string dim
+                            required property string name
+                            required property real ms
+                            required property real tps
+                            width: dimList.width
+                            height: dimList.rowHeight
                             spacing: 8
                             Text {
                                 Layout.preferredWidth: 130
-                                text: dimRow.modelData.name
+                                text: dimRow.name
                                 textFormat: Text.PlainText
                                 color: Theme.text
                                 font.pixelSize: 13
@@ -196,9 +251,9 @@ Flickable {
                                 HoverHandler { cursorShape: Qt.PointingHandCursor }
                                 TapHandler {
                                     gesturePolicy: TapHandler.ReleaseWithinBounds
-                                    onTapped: page.app.askText(`Name for dimension ${dimRow.modelData.id}`,
-                                                               [{ key: "name", label: "Name", value: dimRow.modelData.name }],
-                                                               a => page.app.call("dim_rename", { dim: dimRow.modelData.id, name: a.name }))
+                                    onTapped: page.app.askText(`Name for dimension ${dimRow.dim}`,
+                                                               [{ key: "name", label: "Name", value: dimRow.name }],
+                                                               a => page.app.call("dim_rename", { dim: dimRow.dim, name: a.name }))
                                 }
                             }
                             Rectangle {
@@ -209,22 +264,22 @@ Flickable {
                                 Rectangle {
                                     height: parent.height
                                     radius: 3
-                                    width: parent.width * Math.min(1, dimRow.modelData.ms / 50)
-                                    color: Theme.loadColor(dimRow.modelData.ms / 50)
+                                    width: parent.width * Math.min(1, dimRow.ms / 50)
+                                    color: Theme.loadColor(dimRow.ms / 50)
                                 }
                             }
                             Text {
                                 Layout.preferredWidth: 58
                                 horizontalAlignment: Text.AlignRight
-                                text: `${dimRow.modelData.ms.toFixed(dimRow.modelData.ms < 10 ? 2 : 1)} ms`
+                                text: `${dimRow.ms.toFixed(dimRow.ms < 10 ? 2 : 1)} ms`
                                 color: Theme.dim
                                 font.pixelSize: 12
                             }
                             Text {
                                 Layout.preferredWidth: 34
                                 horizontalAlignment: Text.AlignRight
-                                text: dimRow.modelData.tps.toFixed(1)
-                                color: page.tpsColor(dimRow.modelData.tps)
+                                text: dimRow.tps.toFixed(1)
+                                color: page.tpsColor(dimRow.tps)
                                 font.pixelSize: 12
                             }
                         }

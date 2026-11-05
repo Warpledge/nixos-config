@@ -6,6 +6,8 @@ import glob
 import json
 import os
 import re
+import shutil
+import tempfile
 import zipfile
 
 import servers
@@ -73,6 +75,41 @@ def listing(cfg):
     with open(cache_file, "w", encoding="utf-8") as f:
         json.dump(fresh, f)
     return sorted(mods, key=lambda m: m["name"].lower())
+
+
+def add(cfg, files):
+    """Copy jars into mods/. Safe while the server runs, which reads them at its next
+    start. Returns what was added, skipped and what may clash with an installed mod."""
+    root = f"{cfg['dir']}/mods"
+    os.makedirs(root, exist_ok=True)
+    installed = {m["name"].lower(): m["file"] for m in listing(cfg) if m["on"]}
+    added, skipped, clashes = [], [], []
+    for file in files:
+        name = os.path.basename(file)
+        target = f"{root}/{name}"
+        if not name.endswith(".jar") or not zipfile.is_zipfile(file):
+            skipped.append({"file": name, "why": "isn't a mod jar"})
+        elif os.path.exists(target) or os.path.exists(f"{target}.disabled"):
+            skipped.append({"file": name, "why": "is already in the mods folder"})
+        else:
+            #--- A temp name no loader reads, so a failed copy never looks like a mod
+            fd, tmp = tempfile.mkstemp(dir=root, prefix=".adding-")
+            os.close(fd)
+            try:
+                shutil.copyfile(file, tmp)
+                os.chmod(tmp, 0o644)
+                os.replace(tmp, target)
+            except OSError as e:
+                os.unlink(tmp)
+                skipped.append({"file": name, "why": f"couldn't be copied: {e.strerror}"})
+                continue
+            added.append(name)
+            title = about_jar(target).get("name", "").lower()
+            if title and title in installed:
+                clashes.append({"file": name, "existing": installed[title]})
+            elif title:
+                installed[title] = name
+    return {"added": added, "skipped": skipped, "clashes": clashes}
 
 
 def toggle(cfg, file, on):

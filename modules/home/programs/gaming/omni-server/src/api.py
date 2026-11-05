@@ -295,6 +295,14 @@ def properties_set(args):
 
 
 @command
+def dim_filter(args):
+    cfg = require(args)
+    cfg["dimThreshold"] = max(0.0, float(args.get("threshold", 1)))
+    servers.save(cfg)
+    return {}
+
+
+@command
 def rcon_set(args):
     return {"held": servers.enable_rcon(require(args), bool(args.get("on")))}
 
@@ -414,6 +422,22 @@ def mods_get(args):
 
 
 @command
+def mods_pick(_args):
+    try:
+        res = subprocess.run(["zenity", "--file-selection", "--multiple", "--separator=\n",
+                              "--file-filter=Mods (*.jar) | *.jar", "--title=Choose mods to add"],
+                             capture_output=True, text=True, check=False)
+    except OSError as e:
+        raise servers.ServerError(f"Couldn't open the file picker: {e}") from e
+    return {"files": res.stdout.splitlines() if res.returncode == 0 else []}
+
+
+@command
+def mods_add(args):
+    return mods.add(require(args), args.get("files") or [])
+
+
+@command
 def mod_toggle(args):
     mods.toggle(require(args), args.get("file"), bool(args.get("on")))
     return {}
@@ -442,7 +466,7 @@ def schedule_set(args):
 def server_get(args):
     cfg = require(args)
     return {"quick": cfg.get("quick", []), "schedule": cfg.get("schedule") or dict(servers.DEFAULT_SCHEDULE),
-            "server": summary(cfg)}
+            "dimThreshold": cfg.get("dimThreshold", 1), "server": summary(cfg)}
 
 
 #--------------------------------------------------------------------#

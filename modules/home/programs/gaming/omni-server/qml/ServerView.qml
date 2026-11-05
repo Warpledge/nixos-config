@@ -19,6 +19,7 @@ Item {
     property var pending: ({})
     property var quick: []
     property var schedule: ({})
+    property real dimThreshold: 1  // ms; kept here as the Dashboard is rebuilt on each tab
     property var watcher: null
     readonly property string state_: status.state || "stopped"
     readonly property bool running: state_ === "running" || state_ === "starting" || state_ === "stopping"
@@ -74,6 +75,7 @@ Item {
             call("server_get", {}, reply => {
                 app.quick = reply.quick
                 app.schedule = reply.schedule
+                app.dimThreshold = reply.dimThreshold
             })
     }
 

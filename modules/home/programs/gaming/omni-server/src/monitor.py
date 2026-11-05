@@ -26,6 +26,7 @@ POLL_STDIN = 30  # slower: each poll writes to the server's log
 SAMPLE = 5
 HEAP = 15
 RING = 2000
+LAG_KEPT = 50
 HELLO_LINES = 1000
 MAX_READ = 4 << 20
 HEAP_LINE = re.compile(r"total(?: reserved)? (\d+)K,(?: committed \d+K,)? used (\d+)K")
@@ -66,7 +67,7 @@ class Monitor:
             "cpu": None, "cores": None, "rss": None, "heapUsed": None, "heapMax": None,
             "tps": None, "mspt": None, "dims": [], "players": [],
             "maxPlayers": int(self.values.get("max-players", 0) or 0), "lagWarnings": 0,
-            "lastCrash": "", "rcon": False, "statsVia": "", "runs": [], "nextRestart": 0,
+            "lagEvents": [], "lastCrash": "", "rcon": False, "statsVia": "", "runs": [], "nextRestart": 0,
         }
 
     #--------------------------------------------------------------------#
@@ -105,6 +106,9 @@ class Monitor:
             self.state["players"] = [p for p in self.state["players"] if p != event["name"]]
         elif kind == "lag":
             self.state["lagWarnings"] += 1
+            if "behindMs" in event:
+                detail = {k: event[k] for k in ("time", "behindMs", "ticks")}
+                self.state["lagEvents"] = [*self.state["lagEvents"], detail][-LAG_KEPT:]
         elif kind == "crash":
             self.state["lastCrash"] = event["path"]
         elif kind == "saving":

@@ -20,6 +20,9 @@ DONE = re.compile(r"^Done \([\d.,]+s\)!")
 CRASH = re.compile(r"crash report has been saved to: (?P<path>\S+)", re.IGNORECASE)
 SAVING = re.compile(r"^Saving chunks for level '[^']*'/(?P<name>.+)$")
 LAG = "Can't keep up!"
+#--- 1.7.10: "Running 2208ms behind, skipping 44 tick(s)"
+#--- Later versions: "Running 2208ms or 44 ticks behind"
+LAG_DETAIL = re.compile(r"Running (?P<ms>\d+)ms (?:behind, skipping|or) (?P<ticks>\d+) tick")
 STOPPING = re.compile(r"^Stopping (the )?server")
 
 TPS = re.compile(
@@ -65,6 +68,8 @@ def parse_line(raw):
             event["kind"] = "stopping"
     if LAG in text:
         event["kind"] = "lag"
+        if m := LAG_DETAIL.search(text):
+            event.update(behindMs=int(m["ms"]), ticks=int(m["ticks"]))
     elif m := CRASH.search(text):
         event.update(kind="crash", path=m["path"])
     return event
