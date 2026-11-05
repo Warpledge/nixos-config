@@ -51,6 +51,7 @@ Card {
                 required property var modelData
                 required property int index
                 Layout.fillWidth: index === 0
+                Layout.preferredWidth: index === 0 ? -1 : 70
                 text: modelData.title || modelData.key
                 textFormat: Text.PlainText
                 color: Theme.dim
@@ -58,12 +59,20 @@ Card {
             }
         }
     }
-    Repeater {
+    ListView {
+        id: rowList
+        readonly property int rowHeight: 24
+        Layout.fillWidth: true
+        Layout.preferredHeight: Math.min(count, 10) * rowHeight
+        visible: count > 0
+        clip: true
+        boundsBehavior: Flickable.StopAtBounds
         model: panel.rows
-        RowLayout {
+        delegate: RowLayout {
             id: tableRow
             required property var modelData
-            Layout.fillWidth: true
+            width: rowList.width
+            height: rowList.rowHeight
             spacing: 10
             Repeater {
                 model: panel.columns
@@ -71,6 +80,7 @@ Card {
                     required property var modelData
                     required property int index
                     Layout.fillWidth: index === 0
+                    Layout.preferredWidth: index === 0 ? -1 : 70
                     text: tableRow.modelData[modelData.key] ?? ""
                     textFormat: Text.PlainText
                     color: Theme.text
