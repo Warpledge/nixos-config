@@ -11,11 +11,10 @@
 - The same page suggests `-XX:+UseCompactObjectHeaders` on Java 25+. The instance sets it
   through `OverrideJavaArgs=true` and `JvmArgs=-XX:+UseCompactObjectHeaders`; the pack's
   own args come from the lwjgl3ify launchargs patch, not from that field.
-- The local server used to run the profile's `java`, which was 21 because jdk21 shadowed
-  jdk25 in `environment.systemPackages`. `modules/nixos/gaming/tools/java.nix` now marks
-  jdk21 `lowPrio`, so the next rebuild makes `java` 25; until then `start.sh` pins the
-  JDK 25 path (override with `GTNH_JAVA=...`) and passes the same flag. The laptop module
-  already used `pkgs.jdk25` and now passes it too.
+- `modules/nixos/gaming/tools/java.nix` marks jdk21 `lowPrio`, so the profile's `java` is
+  25 (25.0.5, checked 2026-11-04). The local server's `start.sh` doesn't use it: it pins
+  the same 25.0.4.1 store path as the instance (override with `GTNH_JAVA=...`) and passes
+  the same flag. The laptop module uses `pkgs.jdk25` and passes it too.
 
 ## JVM args
 
@@ -28,6 +27,7 @@ The server's own args live in `machines/legion/minecraft-servers/gtnh-server.nix
 
 ## lwjgl3ify
 
+- **Mouse:** `B:rawMouseInput=false` in `config/lwjgl3ify.cfg` [true].
 - **Desktop entry:** `B:linuxCreateAppDesktopEntry=false` in `config/lwjgl3ify.cfg` [true].
   On first launch it writes `~/.local/share/applications/com.gtnewhorizons.Lwjgl3ifyMinecraft.desktop`,
   which the Prism Launcher AppArmor profile denies, and lwjgl3ify turns the refusal into a
@@ -48,7 +48,11 @@ settled.
 
 ## JourneyMap
 
-2.9.0 ships `journeymap-1.7.10-5.2.23-fairplay.jar`. The unlimited swap still works, but
-the replacement has to be the same JourneyMap version, so get `5.2.23-unlimited` rather
-than reusing the old `5.2.10` jar. The swap steps are in
-[the 2.8.4 note](../2.8.4/java-and-launch.md#journeymap--swap-fairplay-for-unlimited).
+2.9.0 ships `journeymap-1.7.10-5.2.23-fairplay.jar`, and the instance still runs it
+(checked 2026-11-04): the 2.8.4 swap to the unlimited build has not been redone. To redo
+it, in `.minecraft/mods/`:
+
+1. Delete `journeymap-1.7.10-5.2.23-fairplay.jar`.
+2. Add `5.2.23-unlimited`. It has to be the same JourneyMap version, so don't reuse the
+   old `5.2.10` jar.
+3. Delete `defaultserverlist-1.7.4.jar`, which only adds a pre-populated server list.

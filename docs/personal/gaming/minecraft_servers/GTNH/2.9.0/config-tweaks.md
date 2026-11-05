@@ -1,23 +1,28 @@
 # GTNH 2.9.0 Config Tweaks (QoL / Difficulty)
 
 Paths are relative to `.minecraft`. Defaults below were read from the 2.9.0 instance on
-2026-11-01, not carried over from the 2.8.4 notes. Files for hand-added mods do not
-exist until those mods are installed.
+2026-11-01. Files for hand-added mods do not exist until those mods are installed.
 
 The list is complete for what was actually edited: hashing the 2.8.4 instance's
 `config/` against the pack's own 2.8.4 tree found 69 differing files out of 8,497, and
-the rest were mod-version noise. Apply them in small groups and launch between groups;
-do not copy the whole 2.8.4 `config/` folder.
+the rest were mod-version noise. Apply them in small groups and launch between groups.
 
 ## HUD
 
 ### InGameInfoXML: `config/InGameInfoXML/InGameInfo.xml`
 
-2.9.0 ships InGameInfoXML 2.9.8 with its own default `InGameInfo.xml`, so the custom
-layout has to be copied over it again. The layout and what it removes and adds are
-described in [the 2.8.4 note](../2.8.4/config-tweaks.md#hud). Copy the file from the
-2.8.4 instance, then check that the Thaumcraft and Blood Magic sections still resolve
-against 2.9.
+2.9.0 ships InGameInfoXML 2.9.8 with its own default `InGameInfo.xml`, and the custom
+layout replaces it. This instance holds the only copy now that the 2.8.4 instance is
+gone; check that its Thaumcraft and Blood Magic sections still resolve against 2.9.
+
+- **Removed:** dimension and chunks line, temperature, light levels, entity count, chunk
+  coordinates, storm countdown, FPS, facing direction, X/Y/Z
+- **Top left:** username with ping icon; year, day and time; biome and humidity; moon
+  phase as a fraction; biome-aware weather; chunk center, slime chunk and GT ore chunk
+  indicators; Thaumcraft warp (total plus perm, sticky and temp) and Blood Magic LP, both
+  color coded; up to 3 nearby players with distance
+- **Middle left:** equipped item and armor durability, color coded by condition
+- **Bottom right:** active potion effects with timers, up to 9 slots
 
 ## GregTech
 
@@ -53,16 +58,16 @@ All seven default to `true`, set to `false`:
 
 ### Special Mobs: `config/SpecialMobs.cfg`
 
-Same keys and defaults as 2.8.4. Each appears once per mob section; the section headings
-are the ones named in [the 2.8.4 list](../2.8.4/config-tweaks.md#mobs--difficulty).
+Same keys and defaults as 2.8.4. Each appears once per mob section, so edit the one in
+the named section.
 
 Disabled variants, each default `1` set to `0`:
 
-- creeper: `dirt`, `gravel`, `gravity`, `fire`, `lightning`
-- skeleton: `fire`
-- spider: `poison`
-- zombie: `fire`, `plague`
-- pigzombie: `plague`
+- `creeper_rates`: `dirt`, `gravel`, `gravity`, `fire`, `lightning`
+- `skeleton_rates`: `fire`
+- `spider_rates`: `poison`
+- `zombie_rates`: `fire`, `plague`
+- `pigzombie_rates`: `plague`
 
 Also `B:enderman_griefing=false` (default: `true`).
 
@@ -98,7 +103,7 @@ sections:
 
 ### Hunger Overhaul: `config/HungerOverhaul/HungerOverhaul.cfg`
 
-- `S:hungerLossRatePercentage=25` (2.9 default: `100`, not the `133.33` in the 2.8.4 note)
+- `S:hungerLossRatePercentage=25` (2.9 default: `100`)
 - `S:foodHungerDivider=2.0` is already the default, nothing to change
 - `B:useHOFoodValues=false` [true]
 - Low-stat debuffs, all `true` by default, set to `false`: `B:addLowHealthNausea`,
@@ -165,7 +170,7 @@ instance's `config/` against the pack's own 2.8.4 tree; every key below still ex
   `B:shaders.enabled=false` from 2.8.4 was a workaround for the old renderer and is left
   at its default on 2.9; turn it off only if Botania's effects misbehave under Celeritas.
 - **Forestry**: `config/forestry/common.cfg` → `B:disable.butterfly=true` [false].
-- **BetterQuesting**: `config/betterquesting.cfg` → `S:Theme=betterquesting:shadow_ui_1`
+- **BetterQuesting**: `config/betterquesting.cfg` → `S:Theme=betterquesting:shadow_ui_2`
   [light], `B:"View mode"=true` [false]. `B:"Lock tray"=true` is already 2.9's default.
 - **Default Server List**: `config/defaultserverlist.cfg` → `B:useURL=false` [true].
 - **InGameInfoXML**: `config/InGameInfoXML.cfg` → `S:topleft=2 22` [2 50], which moves
@@ -177,20 +182,24 @@ files.
 
 ## Added Mod Configs
 
-These files appear once the mod is installed. Start from the 2.8.4 values, then
-check the new version's file for added keys.
+These files appear once the mod is installed. Check a new version's file for added keys.
 
 - **GTNL**: 0.2.7 splits its config through GTNHLib into
   `config/GTNotLeisure/{general,item,machine,recipe,re_avaritia,client}.cfg`, so the old
   single `GTNotLeisure.cfg` is not there. The stick setting is `enableStickItem=false`
   [true] in `item.cfg`. The Integrated Ore Factory option from 0.2.4 no longer exists.
-- **GTNHRates**: `config/gtnhrates.cfg` → the table in
-  [2.8.4 mods.md](../2.8.4/mods.md#gtnhrates--rates--qol-overhaul-replaces-gtnh-cutcorners). Keep
-  `enableNEIBookmarksContents=false` [true]: the bookmark NPE was never confirmed fixed.
-  `ic2CropsYield` now multiplies CropsNH drops; keep it at `4.0`.
+- **GTNHRates**: `config/gtnhrates.cfg` → the multipliers are in
+  [Balance edits](#balance-edits-2026-11-03). Keep `enableNEIBookmarksContents=false`
+  [true]: the bookmark NPE was never confirmed fixed. `ic2CropsYield` now multiplies
+  CropsNH drops.
 - **EZNuclear**: `config/EZNuclear.cfg` → `B:DEExplosion=false`, `B:IC2Explosion=false` [true]
-- **NH-Utilities**: `config/NHUtilities/NHUtilities.cfg` → the table in
-  [2.8.4 mods.md](../2.8.4/mods.md#nh-utilities--qol-utilities).
+- **NH-Utilities**: `config/NHUtilities/NHUtilities.cfg` →
+  `accelerateGregTechMachineDiscount=0.25` [0.8], so GT machines get 25% of the
+  acceleration effect, and `enableNumberMultiplierTexture=true` [false]. Left at their
+  defaults: `enableTimeAcceleratorBoost=false` (keeps the maximum at 128x),
+  `enableSimpleTimeVialRecipe=false`, `limitOneTimeVial=true`,
+  `enableAlwaysDisplayRecipeOwner=true`. `enableTimeVial` stays `true`: turning it off
+  crashed on load in 1.6.4, and that hasn't been retested on 1.7.0.
 - **YesSteveModel Unofficial**: `config/ysmu.cfg`, left at the values the mod writes on
   first launch. It also creates `config/ysmu/`: `custom/` for added models, `builtin/`
   for the ones unpacked from the jar (`default`, `misc`, `wine_fox`), plus `auth/`,

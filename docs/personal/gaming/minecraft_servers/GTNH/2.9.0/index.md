@@ -5,8 +5,7 @@ Path: `~/.local/share/PrismLauncher/instances/GT_New_Horizons_2.9.0_Java_17-26/.
 
 2.9.0 released 2026-10-31. This set covers a new world, not a migration from 2.8.4:
 existing saves keep 2.8 world generation, so the new terrain only exists in a world
-created under 2.9. The 2.8.4 notes are at `../2.8.4/` for anything that is still the
-same.
+created under 2.9.
 
 ## Sub-Notes
 
@@ -24,12 +23,25 @@ suspect, and hides the real error. The culprit is the mod marked `UCHE` in the m
 inside the same crash report. Twist and 123Technology both did this on 2.9.0 stable until
 their PR builds (see [mods.md](./mods.md)).
 
-## Not written yet
+## Performance
 
-Performance profiling still lives in the 2.8.4 set and has not been retested against
-2.9. The renderer changed (Angelica 2.2.43, Celeritas instead of Sodium 0.2), so treat
-[performance.md](../2.8.4/performance.md) as a starting point only. Distant Horizons
-notes are in [mods.md](./mods.md).
+Carried from 2.8.4 and not retested on 2.9, where the renderer changed (Angelica 2.2.43,
+Celeritas instead of Sodium 0.2). Distant Horizons notes are in [mods.md](./mods.md).
+
+`wailaAverageNS=true` in `config/GregTech/Client.cfg` makes WAILA show a GT machine's CPU
+time per tick, out of a 50,000,000 ns budget:
+
+| Average | Reading |
+| --- | --- |
+| Under 10,000 ns | Normal |
+| 10,000 to 50,000 ns | Slightly heavy |
+| 50,000 to 500,000 ns | Laggy, investigate |
+| Over 500,000 ns | Significant, fix first |
+
+Multiblocks run higher than single blocks because of structure validation, so a high
+value on an idle machine is structure-check overhead. Heavy I/O (AE2 interfaces, sorting,
+void excess) tends to spike. For the whole game, run `/spark profiler` in the client;
+Spark is not on the server, and LagGoggles is not installed on 2.9.
 
 ## Sources
 

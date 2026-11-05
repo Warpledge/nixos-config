@@ -9,7 +9,7 @@ backup; the new one is a separate folder.
 1. Download the 2.9.0 **Java 17-26** server zip from
    [the version history page](https://www.gtnewhorizons.com/version-history/) and unpack
    it to `~/Documents/Minecraft_Servers/GT_New_Horizons_2.9.0_Server_Modified`.
-2. Copy the server-side mods from [mods.md](./mods.md): every row marked **B**, using the
+2. Copy the server-side mods from [mods.md](./mods.md): every row marked **B**, using
    123Technology's PR build; Twist uses its 0.8.0 release. Leave out **C**-only rows.
 3. `machines/legion/minecraft-servers/gtnh-server.nix` now points its `serverDir` and
    header comment at that folder. The Java path (`jdk25`), the JVM args and the tmux
@@ -32,7 +32,7 @@ This local copy exists only for testing; the laptop gets the `gtnh` command from
 ## server.properties
 
 - `server-port=25566`
-- `view-distance=8`
+- `view-distance=10`
 - `max-tick-time=0`: stops the watchdog killing the server during heavy worldgen
 
 ## Mods the server needs on top of the pack
@@ -49,11 +49,13 @@ From [mods.md](./mods.md), the **B** rows:
   LODs the client shows (see mods.md for the generation settings)
 - Waystones-X 1.0.16, MIAOKATZE Core 0.2.0, GT-Miao-Blueprint 0.3.0,
   GT-Steam-Reborn 2.1.1, GT-Interesting-Thing 2.1.0, GT-Simple-Wireless-Network 2.1.0
+- ThinkTech 0.3.1, OmniOcular Unofficial 1.6.0, BetterSprinting 1.1.3,
+  Advanced Memory Card 1.2.0-1.7.10-GTNH, WTCT 1.0.63-rc1
 - The EZStorage script `scripts/simplestorage_gregified.zs` must be on the server too, or
   the recipes differ from the client.
 
-BetterSprinting and deconfigintegration are dropped (see mods.md). LagGoggles is still
-not installed.
+BetterSprinting 2.3.0 and deconfigintegration are dropped (see mods.md). LagGoggles is
+still not installed.
 
 2.9.0 supplies its own lwjgl3ify, GTNHLib, FalsePatternLib and Extreme Sound Muffler
 Legacy, so do not copy the 2.8.4 versions of those to the server.
@@ -92,5 +94,5 @@ warmup keys at all.
 
 Generate a fresh world on the server and copy it nowhere. 2.9's terrain, ore mix and
 CropsNH data only exist in worlds created under 2.9, and an old world keeps its 2.8
-generation. If the old 2.8.4 world is ever wanted, its server folder and the 2.8.4
-instance are both still intact.
+generation. The old 2.8.4 world is only in the laptop's server folder named at the top
+of this page; the 2.8.4 client instance is gone from the desktop (checked 2026-11-04).

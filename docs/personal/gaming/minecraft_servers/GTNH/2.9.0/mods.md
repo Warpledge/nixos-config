@@ -1,10 +1,10 @@
 # GTNH 2.9.0 Added Mods
 
 The hand-added mods, checked against the 2.9.0 pack and against each mod's releases on
-2026-11-01. Descriptions of what each mod does are in the
-[2.8.4 write-ups](../2.8.4/mods.md); this page records which build to use and what
-changed. Every mod below was looked up on GitHub, Modrinth or CurseForge: the only one
-with a newer 1.7.10 build than the 2.8.4 jar is Euphoria Patcher.
+2026-11-01. This page records which build to use and what changed; the longer write-ups
+of what the carried-over mods do are in `2.8.4/mods.md` in git history (see
+[the GTNH index](../index.md)). Every mod below was looked up on GitHub, Modrinth or
+CurseForge.
 
 `Side`: **B** goes on client and server, **C** is client only.
 
@@ -32,7 +32,7 @@ Do not add these: the pack carries its own copy.
 | NH-Utilities | 1.7.0 | B | commit "Fit 29x" |
 | YesSteveModel Unofficial | 1.9 | B | wiki lists 2.9.0-beta-1 to RC-2; loads on stable, 2026-11-02 |
 | MineMenu | 1.2.0.B44 | C | latest on Modrinth, 2025-12-07 |
-| Spark | 1.10.19 | C | latest 1.7.10; the `1.10.35` in the old notes was wrong |
+| Spark | 1.10.19 | C | latest 1.7.10 |
 | FPS Reducer | 1.10.3 | C | latest, 2023-09-06 |
 | Trash Slot | 1.0.31 | B | latest 1.7.10 on CurseForge |
 | ElytraMining | 1.2.0.1 | B | latest, 2023, no GT API use |
@@ -55,7 +55,8 @@ Twist's tracker had the matching startup-crash report (#1390, from 2026-11-01), 
 0.8.0 release caught up on 2026-11-02: its changelog lists PR #1386 and its tag sits 11
 commits past that PR's head. `TwistSpaceTechnology-0.8.0.jar` replaced the PR build on
 both sides and the server loads it. Swap 123Technology back to its release once PR #269
-merges.
+merges. On a Twist update, reset `GregTech.lang` and `TwistSpaceTechnology.cfg` to avoid
+config conflicts.
 
 ## Installed on 2.9.0 only
 
@@ -151,10 +152,11 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   `PRE_EXISTING_ONLY` because the server now builds the LODs. The server runs the same
   jar with `chunkGeneratorMode="INTERNAL_SERVER"`, `generatorPlan="SURFACE_THEN_CHUNKS"`,
   `pauseIfMovingQuickly=false`, four threads at a 0.5 ratio, a 128 chunk generation
-  distance and no bandwidth limit on the LAN. Known issues are unchanged: memory creep,
-  unstable server side, and LODs that need a render-distance toggle to refresh.
+  distance and no bandwidth limit on the LAN. The 2.8.4 setup also picked Quality Preset
+  High and CPU Load Balanced in the mod's settings. Known issues are unchanged: memory
+  creep, unstable server side, and LODs that need a render-distance toggle to refresh.
 - **Dynamic Surroundings 1.0.9.0** (2026-09-30): mist475's 1.7.10 fork, newer than the
-  1.0.7.7 in the old notes; adds Seasonal Horizons compatibility.
+  2.8.4 jar's 1.0.7.7; adds Seasonal Horizons compatibility.
 - **Sound-Physics 1.1.1** (2026-06-27): the 1.7.10 mixin edition.
 - **Euphoria Patcher 1.9.3** is installed to match the NeonTech settings. 1.10.5 exists,
   but moving to it means copying the NeonTech values by hand.
@@ -234,16 +236,7 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   `DefaultQuests`; existing worlds need `bq_admin default load`. It is a community
   questbook: Twist 0.8.0 ships no BetterQuesting data of its own.
 
-## Found in the instance but missing from the 2.8.4 notes
-
-Both were installed by hand and neither appeared in `mods.md`:
-
-- **Waystones 1.0.12**: the `xpBaseCost=-1` tweak in `config-tweaks.md` belongs to it.
-  Not shipped by 2.9, so keep it if the teleport network is wanted.
-- **Euphoria Patcher**: shader patch layer, covered only in `shaders.md`.
-
 ## Mod configs
 
 The per-mod settings for GTNL, GTNHRates, EZNuclear and NH-Utilities are in
-[config-tweaks.md](./config-tweaks.md#added-mod-configs). They have to be re-created in
-the 2.9 instance because the mods start with their defaults.
+[config-tweaks.md](./config-tweaks.md#added-mod-configs).
