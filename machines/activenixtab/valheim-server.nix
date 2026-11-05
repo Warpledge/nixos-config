@@ -121,6 +121,9 @@ in {
     description = "Valheim dedicated server (modded: Doobie Canoe With Friends)";
     wants = ["network-online.target" "valheim-server-inhibit.service"];
     after = ["network-online.target" "valheim-server-inhibit.service"];
+    #--- A rebuild leaves a running server alone; new scripts apply the next
+    #--- time the console window starts it
+    restartIfChanged = false;
     serviceConfig = {
       User = user;
       WorkingDirectory = "${base}/game";
@@ -140,6 +143,8 @@ in {
     description = "Hold off idle and lid sleep while the Valheim server runs";
     partOf = ["valheim-server.service"];
     unitConfig.StopWhenUnneeded = true;
+    #--- No restart on rebuild, so the sleep lock never blinks
+    restartIfChanged = false;
     serviceConfig = {
       Type = "simple";
       ExecStart = "${config.systemd.package}/bin/systemd-inhibit --what=idle:sleep:handle-lid-switch --who=valheim-server --why=ValheimServerRunning --mode=block ${pkgs.coreutils}/bin/sleep infinity";
