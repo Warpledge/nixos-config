@@ -314,6 +314,7 @@ first.
 | About to edit | The folder's rules are in |
 | --- | --- |
 | Omni Settings page or backend | `modules/home/programs/system/omni-settings/CLAUDE.md`, `src/CLAUDE.md`, `qml/CLAUDE.md` |
+| Omni Server, or an Omni Settings QML file it shares | `modules/home/programs/gaming/omni-server/CLAUDE.md` |
 | A skill, subagent, MCP entry or opencode setting | `modules/home/programs/ai/CLAUDE.md` |
 | A NixOS module | `modules/nixos/CLAUDE.md` |
 | A home-manager module | `modules/home/CLAUDE.md` |

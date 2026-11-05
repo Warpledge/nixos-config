@@ -840,6 +840,7 @@ apps=(
   "Gaming|gaming.feedback|feedBack guitar rhythm game"
   "Gaming|gaming.rocksmith|Rocksmith 2014 (set up for a BOSS Katana as the input)"
   "Gaming|gaming.tmodloader|tModLoader: runtime patch, .NET 8 and Mono"
+  "Gaming|gaming.omniServer|Omni Server: run modded Minecraft servers"
   "Gaming|gaming.r2modman|r2modman mod manager"
   "Gaming|gaming.satisfactoryModManager|Satisfactory Mod Manager"
   "Gaming|gaming.pathOfBuilding|Path of Building: Path of Exile planner"

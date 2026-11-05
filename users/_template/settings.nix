@@ -186,6 +186,7 @@
     tmodloader = false; # tml-prelaunch runtime patch, .NET 8 and Mono
 
     # Tools
+    omniServer = false; # Runs modded Minecraft servers, with stats and a console
     r2modman = false; # Thunderstore mod manager
     satisfactoryModManager = false; # Satisfactory mod manager
     pathOfBuilding = false; # Path of Exile build planner (Rusty PoB)

@@ -142,6 +142,7 @@ user: {
     ++ lib.optionals user.gaming.rocksmith [./games/rocksmith.nix]
     ++ lib.optionals user.gaming.tmodloader [./scripts/tml-prelaunch.nix]
     #--- Tools
+    ++ lib.optionals user.gaming.omniServer [./omni-server]
     ++ lib.optionals user.gaming.r2modman [./tools/r2modman.nix]
     ++ lib.optionals user.gaming.satisfactoryModManager [./tools/satisfactory-mod-manager.nix]
     ++ lib.optionals user.gaming.pathOfBuilding [./tools/path-of-building.nix]

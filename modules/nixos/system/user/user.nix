@@ -15,6 +15,8 @@
     lib.mapAttrs (name: user: {
       isNormalUser = true; # Non-root user account
       description = "${name} account";
+      #--- Omni Server's user services keep running after logout and can start at boot
+      linger = lib.mkIf user.gaming.omniServer true;
       extraGroups =
         [
           "networkmanager" # Manage network connections
