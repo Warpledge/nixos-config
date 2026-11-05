@@ -24,24 +24,24 @@
     name = "valheim-server-prepare";
     runtimeInputs = [pkgs.coreutils pkgs.rsync];
     text = ''
-      mkdir -p ${base}/game ${base}/worlds ${base}/logs
+      mkdir -p "${base}/game/BepInEx" "${base}/worlds" "${base}/logs"
 
       #--- Steam's files, leaving the ones the mod profile supplies
       rsync -a --delete --exclude=/BepInEx --exclude=/doorstop_libs \
-        --exclude=/doorstop_config.ini ${steamDs}/ ${base}/game/
+        --exclude=/doorstop_config.ini "${steamDs}/" "${base}/game/"
 
       #--- The mod set follows Ky's Gale profile, so client and server match
-      rsync -a --delete ${galeProfile}/BepInEx/plugins/ ${base}/game/BepInEx/plugins/
-      rsync -a --delete ${galeProfile}/BepInEx/patchers/ ${base}/game/BepInEx/patchers/
-      rsync -a ${galeProfile}/BepInEx/core/ ${base}/game/BepInEx/core/
-      rsync -a ${galeProfile}/BepInEx/config/ ${base}/game/BepInEx/config/
-      rsync -a ${galeProfile}/doorstop_libs/ ${base}/game/doorstop_libs/
-      install -m 644 ${galeProfile}/doorstop_config.ini ${base}/game/doorstop_config.ini
+      rsync -a --delete "${galeProfile}/BepInEx/plugins/" "${base}/game/BepInEx/plugins/"
+      rsync -a --delete "${galeProfile}/BepInEx/patchers/" "${base}/game/BepInEx/patchers/"
+      rsync -a "${galeProfile}/BepInEx/core/" "${base}/game/BepInEx/core/"
+      rsync -a "${galeProfile}/BepInEx/config/" "${base}/game/BepInEx/config/"
+      rsync -a "${galeProfile}/doorstop_libs/" "${base}/game/doorstop_libs/"
+      install -m 644 "${galeProfile}/doorstop_config.ini" "${base}/game/doorstop_config.ini"
 
       #--- Seed the world once; resyncing would overwrite progress
-      if [ ! -d ${base}/worlds/worlds_local/${world} ]; then
-        mkdir -p ${base}/worlds/worlds_local
-        rsync -a ${cloudWorlds}/${world} ${base}/worlds/worlds_local/
+      if [ ! -d "${base}/worlds/worlds_local/${world}" ]; then
+        mkdir -p "${base}/worlds/worlds_local"
+        rsync -a "${cloudWorlds}/${world}" "${base}/worlds/worlds_local/"
       fi
     '';
   };
@@ -71,14 +71,6 @@
     runtimeInputs = [pkgs.coreutils pkgs.systemd];
     text = ''
       started=0
-      if ! systemctl is-active --quiet valheim-server.service; then
-        started=1
-        systemctl start valheim-server.service
-        echo
-        echo "The Doobie Canoe is starting. Friends add this machine's IP and 2456."
-        echo "Close this window to stop the server."
-        echo
-      fi
       stop() {
         if [ "$started" = 1 ]; then
           systemctl --no-block stop valheim-server.service
@@ -86,6 +78,19 @@
       }
       trap stop EXIT
       trap 'exit 0' HUP INT TERM
+      if systemctl is-active --quiet valheim-server.service; then
+        echo "The Doobie Canoe is already running; this window only follows it."
+      else
+        started=1
+        if systemctl start valheim-server.service; then
+          echo
+          echo "The Doobie Canoe is starting. Friends add this machine's IP and 2456."
+          echo "Close this window to stop the server."
+        else
+          echo "The server failed to start; its log follows."
+        fi
+        echo
+      fi
       tail -n 100 -F ${log}
     '';
   };
