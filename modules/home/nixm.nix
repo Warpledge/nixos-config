@@ -11,8 +11,18 @@
   lib,
   pkgs,
   machine,
+  user,
   ...
 }: let
+  backupRoot = import ../../lib/backup-folder.nix {
+    inherit lib user;
+    home = config.home.homeDirectory;
+  };
+  #--- What `nixm backup` runs; one app failing doesn't stop the other
+  backupRuns =
+    lib.optional (!lib.elem "freetube" user.backups.skip) "ft_backup || status=1"
+    ++ lib.optional (!lib.elem "zen" user.backups.skip) "zen_backup || status=1";
+
   #--- Menu colours follow the Stylix base16 scheme
   c = config.lib.stylix.colors;
   rgb = n: "${c."${n}-rgb-r"};${c."${n}-rgb-g"};${c."${n}-rgb-b"}";
@@ -146,9 +156,20 @@
         done
       }
 
+      #--- These are personal data and the flake can be a public repo
+      function backup_root_ok() {
+        case "$BACKUP_ROOT/" in
+          "$FLAKE_PATH"/*)
+            echo "backups.folder is inside the config repo: $BACKUP_ROOT" >&2
+            return 1
+            ;;
+        esac
+      }
+
       #--- Filenames inside match FreeTube's own Export, so its Import
       #--- accepts them unchanged.
       function ft_backup() {
+        backup_root_ok || return 1
         ft_closed || return 1
         FT_DEST="$FT_BACKUP_DIR/$STAMP"
         mkdir -p "$FT_DEST"
@@ -170,6 +191,7 @@
       #--- copied first and the export is read from the copy.
       function zen_backup() {
         local src="$ZEN_PROFILE/places.sqlite" dest="$ZEN_BACKUP_DIR/$STAMP" tmp count
+        backup_root_ok || return 1
         if [[ ! -f "$src" ]]; then
           echo "No Zen profile at $ZEN_PROFILE" >&2
           return 1
@@ -362,9 +384,10 @@
 
       #--- Kept outside the repo: subscriptions, bookmarks and history are
       #--- personal data and this flake is public. Per-host folders, since
-      #--- ~/SyncBackups is synced and each host prunes only its own runs.
-      FT_BACKUP_DIR="$HOME/SyncBackups/$HOSTNAME/FreeTube"
-      ZEN_BACKUP_DIR="$HOME/SyncBackups/$HOSTNAME/Zen"
+      #--- the folder may be synced and each host prunes only its own runs.
+      BACKUP_ROOT=${lib.escapeShellArg backupRoot}
+      FT_BACKUP_DIR="$BACKUP_ROOT/$HOSTNAME/FreeTube"
+      ZEN_BACKUP_DIR="$BACKUP_ROOT/$HOSTNAME/Zen"
       ZEN_PROFILE="$HOME/.zen/default"
       BACKUP_KEEP=10
       STAMP=$(date +%Y-%m-%d_%H-%M-%S)
@@ -427,12 +450,13 @@
 
         # --- Backup ---
         #--- One dated folder per app per run, sharing the same stamp.
-        #--- One app failing (FreeTube still open) does not stop the other.
         backup)
           status=0
-          ft_backup || status=1
-          echo ""
-          zen_backup || status=1
+          ${
+        if backupRuns == []
+        then ''echo "Every app is in backups.skip"''
+        else lib.concatStringsSep "\n          echo \"\"\n          " backupRuns
+      }
           exit $status
           ;;
         freetube-backup)
@@ -748,11 +772,11 @@
           echo "  flatpak-update    - Update Flatpaks"
           echo "  flatpak-list      - List installed Flatpaks"
           echo ""
-          echo "Backup (dated folders under ~/SyncBackups/<host>, 10 most recent kept):"
-          echo "  backup            - Both of the below"
+          echo "Backup (dated folders under $BACKUP_ROOT/<host>, 10 most recent kept):"
+          echo "  backup            - The below, less any in backups.skip"
           echo "  freetube-backup   - FreeTube subscriptions, playlists and history"
-          echo "                      to ~/SyncBackups/<host>/FreeTube (FreeTube must be closed)"
-          echo "  zen-backup        - Zen bookmarks as bookmarks.html to ~/SyncBackups/<host>/Zen"
+          echo "                      to <host>/FreeTube (FreeTube must be closed)"
+          echo "  zen-backup        - Zen bookmarks as bookmarks.html to <host>/Zen"
           echo ""
           echo "Tools:"
           echo "  vulkan            - Vulkan capabilities"

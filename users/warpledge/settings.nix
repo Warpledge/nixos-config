@@ -157,7 +157,7 @@
     r2modman = true; # Thunderstore mod manager
     satisfactoryModManager = true; # Satisfactory mod manager
     pathOfBuilding = true; # Path of Exile build planner (Rusty PoB)
-    ludusavi = true; # Daily game save backups to ~/SyncBackups/<host>/Ludusavi
+    ludusavi = true; # Daily game save backups to <backups.folder>/<host>/Ludusavi
 
     # Local (~/.local/opt bundles, kept out of git)
     granblueRelinkMods = false; # GBFR mods: RelinkModOrganizer + Reloaded-II

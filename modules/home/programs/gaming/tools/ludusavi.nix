@@ -1,14 +1,21 @@
 #=====================================================================#
 # LUDUSAVI - GAME SAVE BACKUPS
 #=====================================================================#
-#- Daily backup of game saves to ~/SyncBackups/<hostname>/Ludusavi, which
-#- Syncthing carries. Settings are declared here, so GUI changes don't persist.
+#- Daily backup of game saves to <backups.folder>/<hostname>/Ludusavi, which
+#- Syncthing carries while that's ~/SyncBackups. Settings are declared here,
+#- so GUI changes don't persist.
 {
   config,
+  lib,
   machine,
+  user,
   ...
 }: let
-  backups = "${config.home.homeDirectory}/SyncBackups/${machine.hostName}/Ludusavi";
+  root = import ../../../../../lib/backup-folder.nix {
+    inherit lib user;
+    home = config.home.homeDirectory;
+  };
+  backups = "${root}/${machine.hostName}/Ludusavi";
 in {
   #--------------------------------------------------------------------#
   #-- Ludusavi Service

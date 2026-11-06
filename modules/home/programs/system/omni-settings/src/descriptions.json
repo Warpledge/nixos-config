@@ -131,7 +131,7 @@
   "gaming.omniServer": {"summary": "Run modded Minecraft servers", "icon": ["dns"], "text": "**Omni Server** runs a server folder in the background, with live TPS, players, chat and a console, plus editors for its settings, whitelist, backups and mods."},
   "gaming.r2modman": {"summary": "Mods for Thunderstore games", "text": "**r2modman** installs and manages mods from **Thunderstore**, for games such as Risk of Rain 2."},
   "gaming.pathOfBuilding": {"summary": "Path of Exile build planner", "icon": ["rusty-path-of-building-1.desktop"], "text": "**Path of Building** for both Path of Exile games, through **Rusty PoB**."},
-  "gaming.ludusavi": {"summary": "Daily backups of game saves", "icon": ["com.mtkennerly.ludusavi.desktop"], "text": "**Ludusavi** backs up your game saves every day to ~/SyncBackups/<computer>/Ludusavi."},
+  "gaming.ludusavi": {"summary": "Daily backups of game saves", "icon": ["com.mtkennerly.ludusavi.desktop"], "text": "**Ludusavi** backs up your game saves every day to <computer>/Ludusavi in your backup folder, set on the Backups page."},
   "gaming.retroshelf": {"summary": "Tidies ES-DE libraries", "icon": ["retroshelf.desktop"], "text": "**RetroShelf** helps prune an ES-DE / RetroDECK roms folder, fills in metadata and artwork, renames files and imports games. New versions come with each flake update."},
   "gaming.granblueRelinkMods": {"summary": "Granblue Relink mod tools", "note": "!!Installed by hand outside the repo!!", "icon": ["Reloaded-II - Granblue Fantasy Relink.desktop"], "text": "**RelinkModOrganizer** for data mods and **Reloaded-II** for code mods, for Granblue Fantasy: Relink."},
 

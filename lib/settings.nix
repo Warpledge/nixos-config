@@ -44,6 +44,8 @@
   };
   #--- Lists whose items must come from a known set
   listChoices = {
+    #--- backups.skip: the names in Omni Settings' backupstate.KINDS
+    "backups.skip" = ["freetube" "zen"];
     "blocklist.extra" = ["fakenews" "gambling" "porn" "social"];
     #--- localAi.models: models lib/local-models.nix lists
     "localAi.models" = lib.attrNames (import ./local-models.nix).models;
@@ -331,6 +333,10 @@
       then steamGameProblems value
       else if at == ["localModels" "models"]
       then localModelProblems value
+      else if at == ["backups" "folder"]
+      then
+        lib.optional (!(lib.isString value && builtins.match "(/|~/).*" value != null))
+        "${name} should be a folder in quotes starting with / or ~/"
       else if lib.elem dotted textSets
       then textSetProblems dotted value
       else if lib.elem dotted grouped

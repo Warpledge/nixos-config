@@ -11,7 +11,11 @@ Maintenance → **Backups** saves the app data that's hardest to rebuild by hand
 - **FreeTube**: subscriptions, playlists and history. Close FreeTube first.
 - **Zen**: bookmarks, as a `bookmarks.html` any browser can import
 
-**Back Up Everything** runs both. Each run goes in a dated folder under `~/SyncBackups`, which the folder button opens.
+**Back Up Everything** runs the ones marked **Included**. Each run goes in a dated folder under `~/SyncBackups`, which the folder button opens.
+
+**Change** picks another folder, which also moves Ludusavi's game saves if you have it on. It takes effect after a rebuild. Existing backups stay in the old folder, and Syncthing only follows if you point it at the new one.
+
+Open an app's row to see its runs, from every computer sharing the folder, with their files and sizes. **Restore** copies a file or a whole run to a new folder in `/tmp`, gone after a reboot, and shows how to import it in the app. It never writes over your live data.
 
 ## Syncthing
 

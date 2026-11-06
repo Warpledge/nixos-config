@@ -151,6 +151,8 @@ PAGES = {
                      "Apps for links, text, the terminal and folders.",
                      [("", "", ["defaultApps.browser", "defaultApps.textEditor",
                                 "defaultApps.terminal", "defaultApps.fileManager"])]),
+    "Backup Settings": ("backupsettings", "document-save-symbolic", "",
+                        [("", "", ["backups.folder", "backups.skip"])]),
     "Startup": ("startup", "system-run-symbolic",
                 "Variables every program sees, and autostart.",
                 [("", "", ["env", "autostart"])]),

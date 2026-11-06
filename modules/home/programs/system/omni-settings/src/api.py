@@ -364,7 +364,7 @@ def cmd_load(cfg, _args):
     shell = {}
     for page in state.pages:
         if page.section in ("userpkgs", "keybinds", "windowrules", "siderail", "startup", "filetypes",
-                            "dgpu", "games", "localmodels"):
+                            "dgpu", "games", "localmodels", "backupsettings"):
             continue
         pid = schema.TOP_PAGES[page.title] if page.section == "top" else f"page:{page.title}"
         groups = []
@@ -405,6 +405,8 @@ def cmd_load(cfg, _args):
                if (s.domain, s.path) in (("user", ("env",)), ("user", ("autostart",)))]
     mime_types = next((s for p in state.pages for g in p.groups for s in g.settings
                        if (s.domain, s.path) == ("user", ("mimeTypes",))), None)
+    backup_settings = {s.path[1]: s for p in state.pages for g in p.groups for s in g.settings
+                       if s.domain == "user" and s.path[0] == "backups"}
     steam_games = next((s for p in state.pages for g in p.groups for s in g.settings
                         if (s.domain, s.path) == ("user", schema.STEAM_GAMES)), None)
     gpu_offload = next((s for p in state.pages for g in p.groups for s in g.settings
@@ -476,6 +478,8 @@ def cmd_load(cfg, _args):
             "autostart": next((setting_json(cfg, state, s, multi, modules) for s in startup
                                if s.path == ("autostart",)), None),
             "mimeTypes": mime_types and setting_json(cfg, state, mime_types, multi, modules),
+            "backupSettings": {name: setting_json(cfg, state, s, multi, modules)
+                               for name, s in backup_settings.items()},
             "gpuOffload": gpu_offload and setting_json(cfg, state, gpu_offload, multi, modules),
             "steamGames": steam_games and setting_json(cfg, state, steam_games, multi, modules),
             "localModels": local_models or None,
@@ -914,8 +918,8 @@ def cmd_summaries(cfg, _args):
     except (OSError, KeyError, ValueError):
         age = 0
     base = os.path.join(backupstate.ROOT, socket.gethostname())
-    backups = [{"title": title, "last": backupstate.newest(os.path.join(base, folder))}
-               for _, title, _, _, folder in backupstate.kinds(user)]
+    backups = [{"title": k[1], "last": backupstate.newest(os.path.join(base, k[4]))}
+               for k in backupstate.kinds(user)]
     return {"updates": None if up["checked"] is None else {
                 "upstream": sum(r["status"] == "update" and r["kind"] != "disabled" for r in rows),
                 "fixed": sum(r["status"] == "update" and r["kind"] == "disabled" for r in rows)},
@@ -1165,14 +1169,47 @@ def cmd_disabled_check(cfg, args):
 def cmd_backups(cfg, _args):
     """The backups that apply to the user, each with its folder and newest copy."""
     user = loaded(cfg).resolved["users"][cfg.user]
-    base = os.path.join(backupstate.ROOT, socket.gethostname())
+    host = socket.gethostname()
+    base = os.path.join(backupstate.ROOT, host)
     kinds = []
-    for command, title, what, _, folder in backupstate.kinds(user):
+    for command, title, what, _, folder, name, _ in backupstate.kinds(user):
         path = os.path.join(base, folder)
-        kinds.append({"command": command, "title": title, "what": what, "folder": path,
-                      "exists": os.path.isdir(path), "last": backupstate.newest(path)})
-    return {"base": base, "kinds": kinds, "freetubeOpen": backupstate.freetube_open(),
-            "nixm": bool(shutil.which("nixm"))}
+        kinds.append({"command": command, "title": title, "what": what, "folder": path, "name": name,
+                      "exists": os.path.isdir(path), "last": backupstate.newest(path),
+                      "runs": [dict(run, host=h) for h in backupstate.hosts(folder, host)
+                               for run in backupstate.runs(os.path.join(backupstate.ROOT, h, folder))]})
+    return {"base": base, "root": backupstate.ROOT, "home": os.path.expanduser("~"), "host": host,
+            "defaultFolder": backupstate.DEFAULT_FOLDER, "kinds": kinds,
+            "freetubeOpen": backupstate.freetube_open(), "nixm": bool(shutil.which("nixm")),
+            "ludusavi": bool((user.get("gaming") or {}).get("ludusavi"))}
+
+
+def cmd_backup_restore(_cfg, args):
+    """Copies a listed backup file, or a whole run, to a new scratch folder. Names that
+    aren't listed right now are refused, so no path can reach outside the backups."""
+    kind = next((k for k in backupstate.KINDS if k[0] == args.get("command")), None)
+    if kind is None:
+        raise ValueError("unknown backup")
+    return backupstate.restore(kind, args.get("host"), args.get("stamp"), args.get("file"))
+
+
+def cmd_pick_folder(cfg, _args):
+    """A folder picked in zenity's chooser for backups.folder, ~/-relative under home,
+    or None when cancelled. Refuses the config repo, which may be public."""
+    try:
+        out = subprocess.run(["zenity", "--file-selection", "--directory",
+                              "--title=Choose a backup folder"],
+                             capture_output=True, text=True, timeout=600, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        raise ValueError("couldn't open the file chooser")
+    path = out.stdout.strip()
+    if out.returncode != 0 or not os.path.isdir(path):
+        return None
+    real = os.path.realpath(path) + os.sep
+    if real.startswith(os.path.realpath(cfg.flake) + os.sep):
+        raise ValueError("That folder is inside the config repo, which may be public")
+    home = os.path.expanduser("~")
+    return "~" + path[len(home):] if path.startswith(home + os.sep) else path
 
 
 def cmd_backup(_cfg, args):
@@ -1665,7 +1702,8 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "git": cmd_git, "gitSummary": cmd_git_summary, "summaries": cmd_summaries, "setBackup": cmd_set_backup,
             "flatpaks": cmd_flatpaks, "flatpakUpdates": cmd_flatpak_updates, "flatpakRun": cmd_flatpak_run,
             "flatpakForget": cmd_flatpak_forget, "flatseal": cmd_flatseal, "flatpakSearch": cmd_flatpak_search,
-            "backups": cmd_backups, "backup": cmd_backup, "upstream": cmd_upstream,
+            "backups": cmd_backups, "backup": cmd_backup, "backupRestore": cmd_backup_restore,
+            "pickFolder": cmd_pick_folder, "upstream": cmd_upstream,
             "disabledPackages": cmd_disabled_packages, "disabledCheck": cmd_disabled_check,
             "people": cmd_people, "checkPerson": cmd_check_person,
             "services": cmd_services, "serviceLog": cmd_service_log, "serviceRestart": cmd_service_restart,
