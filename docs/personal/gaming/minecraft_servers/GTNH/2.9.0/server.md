@@ -32,8 +32,13 @@ the copy in use on 2026-11-05 and wasn't on the desktop on 2026-11-06. When it's
 - The client connects to `localhost:25566`.
 
 The laptop gets the `gtnh` command from
-`machines/legion/minecraft-servers/gtnh-server.nix` after the next rebuild. Its copy hasn't
-been checked against this list, so compare its `mods/` and configs before playing there.
+`machines/legion/minecraft-servers/gtnh-server.nix` after the next rebuild. Its copy was
+compared on 2026-11-05 and has the server-side edits from
+[config-tweaks.md](./config-tweaks.md) (mobs, GregTech, Gendustry and the like), with the
+old files in `~/Documents/Minecraft_Servers/config-before-server-tweaks-2026-11-05.tar.gz`.
+It still differs from this page on `level-name` (`World`), the Neo ECO AE jar (7.3.7), the
+EZMiner limits, Distant Horizons' generator plan and the YSM models. Its Omni Server entry
+uses 12288 MB and already loads the translation agent.
 
 ## server.properties
 
