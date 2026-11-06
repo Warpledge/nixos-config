@@ -90,14 +90,17 @@ differently from a local one.
 
 - `B:chunk_claiming=true` [false]
 - Under `commands`, all default `false`, set to `true`: `B:home`, `B:warp`, `B:rtp`,
-  `B:spawn`, `B:tpa`, `B:back`
-- `ranks { B:enabled=false }` stays off for a two-player server
+  `B:spawn`, `B:tpa`. `B:back=false` turns `/back` off (since 2026-11-05).
+- `ranks { B:enabled=true }` [true], `B:override_chat=false` [true] keeps plain chat. The
+  `/home` timers can only be changed through ranks. With ranks off, a player gets the
+  mod's built-in 5 s warmup and 5 minute cooldown (ServerUtilities 2.4.22).
 
-`server/ranks.txt` only matters if ranks are turned on. If they are, the 2.8.4 values
-were claims 5000, chunkloaders 5000 for every rank, homes 3 with no warmup or cooldown,
-and cross-dimension homes. Note that 2.9's file uses the full
-`serverutilities.claims.max_chunks` key form, and it no longer lists the teleport
-warmup keys at all.
+`server/ranks.txt` needs the full `serverutilities.claims.max_chunks` key form. `[player]`
+has `homes.warmup: 5s`, `homes.cooldown: 5s` and `homes.cross_dim: true` (`[admin]` has
+cross-dimension homes too); claims 100, chunkloaders 50 and homes 1 match the built-in
+player defaults. Teleports without a key keep those defaults, so `/warp`, `/spawn`, `/tpa`
+and `/rtp` keep their own cooldowns. These edits are on the laptop's server copy; the
+old files are in `~/Documents/Minecraft_Servers/serverutilities-before-ranks-2026-11-05.tar.gz`.
 
 ## Waystones
 
