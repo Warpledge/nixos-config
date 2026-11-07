@@ -6,14 +6,14 @@
 {pkgs, ...}: let
   xsystem4 = pkgs.stdenv.mkDerivation {
     pname = "xsystem4";
-    version = "1.0.0-unstable-2026-10-27";
+    version = "1.0.0-unstable-2026-11-06";
 
     src = pkgs.fetchFromGitHub {
       owner = "nunuhara";
       repo = "xsystem4";
-      rev = "a85467d78eb5c7fb6e581d7fe5a6fdaec42b9ef7";
+      rev = "92cb183fa5705de142755f634931780612881cd1";
       fetchSubmodules = true; # libsys4
-      hash = "sha256-1QvngNqbmPpZ4P8xmcyGWNo5snzf8LhxLafiOsmf4C4=";
+      hash = "sha256-I91rzLXf5Qq4QfolXga7aqheHRK9ln2CWDhs2GdxkkU=";
     };
 
     #--- No cursor auto-move: the engine's "Auto-move Mouse Cursor" turned off
