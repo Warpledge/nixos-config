@@ -6,6 +6,7 @@
 {
   lib,
   machine,
+  pkgs,
   ...
 }: {
   #--------------------------------------------------------------------#
@@ -68,9 +69,13 @@
   virtualisation.waydroid.enable = true;
 
   #--- Run AppImages directly (double-click or ./app.AppImage)
+  #- Lichii links libgcrypt but ships no libgpg-error, which the runner lacks
   programs.appimage = {
     enable = true;
     binfmt = true;
+    package = pkgs.appimage-run.override {
+      extraPkgs = p: [p.libgpg-error];
+    };
   };
 
   #--------------------------------------------------------------------#
