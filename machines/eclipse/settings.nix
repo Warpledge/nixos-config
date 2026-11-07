@@ -104,7 +104,23 @@
       claude.agentModels.docsDriftAuditor = null;
       claude.agentModels.proseReviewer = null;
       claude.agentModels.publicRepoAuditor = null;
-      windowRules = {};
+      windowRules = {
+        custom-side-rail-terminal = {
+          name = "side-rail-terminal";
+          matches = [{app-id = "^side-rail-terminal$";}];
+          translucent = true;
+        };
+        custom-chrome-search-brave-com-ask-default = {
+          name = "chrome-search.brave.com__ask-Default";
+          matches = [{app-id = "^chrome-search\\.brave\\.com__ask-Default$";}];
+          translucent = true;
+        };
+        custom-chrome-127-0-0-1-ui-default = {
+          name = "chrome-127.0.0.1__ui-Default";
+          matches = [{app-id = "^chrome-127\\.0\\.0\\.1__ui-Default$";}];
+          translucent = true;
+        };
+      };
       sideRail = {};
       mangohud.show = ["fps"];
       mangohud.position = "top-right";
