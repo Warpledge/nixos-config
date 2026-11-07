@@ -65,6 +65,7 @@ Item {
     }
     //--- Firmware updates waiting, for the page list; the Firmware page updates it too
     property int firmwareUpdates: 0
+    signal firmwareChecked(var data)
 
     //--- Services running now, for the page list; Running Now updates it too
     property int servicesRunning: -1
@@ -194,6 +195,13 @@ Item {
             if (job.kind === "apply" && job.outcome === "ok" && !job.preview)
                 omni.pending = {}
             omni.reload()
+            if (job.kind === "firmware")
+                Backend.call("firmware", { fresh: true }, reply => {
+                    if (reply.ok) {
+                        omni.firmwareUpdates = reply.data.updates
+                        omni.firmwareChecked(reply.data)
+                    }
+                })
         }
         function onJobChanged() {
             // A job already running when the view opened

@@ -124,6 +124,8 @@
       claude.mods.rebuildPrompt = true;
       keybinds = {};
       localAi.default = "ornith-1.5-35b-a3b-apex-mtp-i-mini";
+      backups.folder = "~/SyncBackups";
+      backups.skip = [];
     };
   };
 

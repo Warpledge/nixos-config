@@ -651,7 +651,7 @@ def cmd_local_model_quality(cfg, args):
 def cmd_firmware(_cfg, args):
     """The Firmware page: every device and the updates waiting."""
     try:
-        return hardwarestate.firmware(fresh=bool(args.get("fresh")))
+        return hardwarestate.firmware(fresh=bool(args.get("fresh")), refresh=bool(args.get("refresh")))
     except (RuntimeError, subprocess.TimeoutExpired) as e:
         raise ValueError(str(e)) from e
 
