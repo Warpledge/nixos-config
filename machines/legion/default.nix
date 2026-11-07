@@ -40,7 +40,7 @@
 
   services = {
     #--- lavd follows the EPP TLP sets: performance on AC, core packing on battery
-    scx.extraArgs = lib.mkForce ["--autopower"];
+    scx-loader.config.scheds.scx_lavd.gaming_mode = lib.mkForce ["--autopower"];
 
     #--- TLP Power Management (Legion Slim 5 optimized for server)
     tlp = {

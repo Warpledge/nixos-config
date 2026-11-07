@@ -22,9 +22,13 @@
   #-- CPU Scheduler (sched_ext)
   #--------------------------------------------------------------------#
   #--- scx_lavd: BPF scheduler built for gaming latency on single-CCX CPUs
-  services.scx = {
+  services.scx-loader = {
     enable = true;
-    scheduler = "scx_lavd";
-    extraArgs = ["--performance"]; # Default autopilot packs light loads onto fewer cores
+    config = {
+      default_sched = "scx_lavd";
+      default_mode = "Gaming";
+      # Default autopilot packs light loads onto fewer cores
+      scheds.scx_lavd.gaming_mode = ["--performance"];
+    };
   };
 }
