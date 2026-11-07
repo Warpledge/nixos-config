@@ -90,6 +90,11 @@ Faithful x32 base instead, so:
   `KuraNeonGTNH` replaces 837 of its 871 files where they overlap. KuramA's README
   doesn't name this combination, so try removing it if a block looks wrong.
 
+Also in `resourcepacks/` since 2026-11-06, not enabled when added:
+`Modernity-2.9.x-fa35a3d` (Modernity-GTNH weekly 2026-10-26),
+`Modernity-f1-3.10.3.1` (AstroTibs; the wiki lists it for 2.8.X only),
+`Zedtech-GTNH-1.8.0` and `GTNH Polished Textures v2.9.0-RC-2`.
+
 KuramA's README warns of visual bugs on blocks that are both reflective and emissive, and
 calls the packs a work in progress.
 
