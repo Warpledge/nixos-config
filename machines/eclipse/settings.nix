@@ -126,6 +126,8 @@
       localAi.default = "ornith-1.5-35b-a3b-apex-mtp-i-mini";
       backups.folder = "~/SyncBackups";
       backups.skip = [];
+      claude.skills.gtnhModUpdates = "on";
+      claude.skillModels.gtnhModUpdates = null;
     };
   };
 

@@ -214,7 +214,8 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
 - **Advanced Memory Card 1.2.0-1.7.10-GTNH** (2026-11-02): AE2 memory card with bulk
   configuration copy and P2P tunnel management. Declares no dependencies beyond AE2, and
   the copy volume defaults to 2048 blocks.
-- **WTCT 1.0.63-rc1** (2026-10-11): ME combined work terminal, 63-slot extended buses,
+- **[WTCT](https://github.com/233max258/Wtcts-1.7.10) 1.0.63-rc1** (2026-10-11; the jar's
+  hash matches that release, checked 2026-11-06): ME combined work terminal, 63-slot extended buses,
   pattern auto-upload, wireless transceiver and upgrade cards. Built against 2.9.0-RC-1
   and AE2 `rv3-beta-1073`; the pack runs `rv3-beta-1095`, so the launch is the test. It
   ships `en_US.lang`.

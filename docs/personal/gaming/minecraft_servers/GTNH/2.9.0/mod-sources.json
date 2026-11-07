@@ -55,7 +55,7 @@
     {"name": "Kura packs and config", "status": "pinned", "pin": "61984f5947fb4c5b735bd588d5ea44da1eb326da", "paths": "\\.(zip|txt)$", "side": "C", "source": "pinned:KuramA-777/GTNH-2.9.X-Shader-Edits-and-PBR-Packs", "note": "KuraNeon, KuraReflections, KuraBetterCoils, KuraNeonExtras and KuramA's Eclipse config, taken from main. A new config overwrites your own settings."},
     {"name": "Euphoria Patcher", "jar": "^EuphoriaPatcher-", "side": "C", "source": "modrinth:euphoria-patches", "note": "Only the NeonTech fallback uses it, not the active Eclipse setup. Pinned to match NeonTech; a bump means copying the NeonTech values by hand."},
     {"name": "Advanced Memory Card", "jar": "^advanced_memory_card-", "side": "B", "source": "modrinth:advanced-memory-card"},
-    {"name": "WTCT", "jar": "^wtct-", "side": "B", "source": "none", "note": "No public page found; its jar names author 233exp and package com.asdflj.wtct."},
+    {"name": "WTCT", "jar": "^wtct-", "side": "B", "source": "github:233max258/Wtcts-1.7.10"},
     {"name": "AE2Things", "status": "parked", "lastTried": "v1.2.14", "side": "B", "source": "github:asdflj/AE2Things", "asset": "^ae2thing-", "note": "Built against 2.8.4's AE2 internals; wants a 2.9 build."},
     {"name": "LagGoggles", "status": "parked", "lastTried": "4.17.0", "side": "B", "source": "github:FalsePattern/LagGogglesLegacy", "asset": "^laggoggles-", "note": "Built against FalsePatternLib 1.10.7; the pack ships 1.12.2."},
     {"name": "BoxPlusPlus", "status": "parked", "lastTried": "2.1.2", "side": "B", "source": "github:RealSilverMoon/BoxPlusPlus", "asset": "^boxplusplus-", "note": "Sits on GT multiblock internals that 2.9 rewrote."},
