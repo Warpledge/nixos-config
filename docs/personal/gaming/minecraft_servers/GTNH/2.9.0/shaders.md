@@ -65,6 +65,12 @@ mod never downloads code.
 
 ### Settings
 
+Since 2026-11-07 the patched pack runs on its own defaults, with no settings file in
+`shaderpacks/`, so skip the `.txt` in install step 3. KuramA's file as last used is
+`.minecraft/eclipse-tuning/kuramA-settings-as-used-2026-11-07.txt`; to go back, copy it to
+`shaderpacks/` under the patched pack's name plus `.txt`. The Kura resource packs are
+separate and still enabled, and the rest of this section describes KuramA's file.
+
 KuramA recommends the `KuraBalanced` profile for FPS and compatibility in GTNH. Their
 config file matches it, checked against the patched `shaders.properties` on 2026-11-06,
 with two exceptions:
