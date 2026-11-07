@@ -1667,7 +1667,7 @@ Item {
                                       windowrules: windowRulesPage, keybinds: keybindsPage,
                                       siderail: sideRailPage,
                                       startup: startupPage, filetypes: fileTypesPage,
-                                      firmware: firmwarePage, battery: batteryPage, dgpu: dgpuPage,
+                                      firmware: firmwarePage, drives: drivesPage, battery: batteryPage, dgpu: dgpuPage,
                                       scheduler: schedulerPage,
                                       nettools: networkToolsPage, apparmor: appArmorPage,
                                       faceauth: faceAuthPage,
@@ -1677,6 +1677,7 @@ Item {
     Component { id: appArmorPage; AppArmorPage { view: omni } }
     Component { id: faceAuthPage; FaceAuthPage { view: omni } }
     Component { id: firmwarePage; FirmwarePage { view: omni } }
+    Component { id: drivesPage; DrivesPage { view: omni } }
     Component { id: batteryPage; BatteryPage { view: omni } }
     Component { id: dgpuPage; DgpuPage { view: omni } }
     Component { id: schedulerPage; SchedulerPage { view: omni } }

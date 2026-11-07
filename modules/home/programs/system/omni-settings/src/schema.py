@@ -71,6 +71,8 @@ SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
 TOP_PAGES = {"Flatpaks": "flatpaks", "Users": "people", "Battery": "battery", "MangoHud": "mangohud",
              "AppArmor": "apparmor", "Face Auth": "faceauth", "Maintenance": "overview"}
 
+DRIVE_MOUNTS = ("drives", "mounts")
+
 PAGES = {
     "Flatpaks": ("top", "system-software-install-symbolic", "", [("", "", ["flatpak.enable"])]),
     "Users": ("top", "system-users-symbolic", "",
@@ -85,6 +87,7 @@ PAGES = {
                     [("Schedule", "What runs on its own, and how often.",
                       ["maintenance.clean", "maintenance.keepDays", "maintenance.keepGenerations",
                        "maintenance.optimise", "maintenance.updateReminderDays"])]),
+    "Drives": ("drives", "drive-harddisk-symbolic", "", [("", "", ["drives.mounts"])]),
     "Run on dGPU": ("dgpu", "video-display-symbolic", "", [("", "", ["gpuOffload"])]),
     "User Packages": ("userpkgs", "package-x-generic-symbolic", "", [("", "", ["userPackages"])]),
     "Keybinds": ("keybinds", "input-keyboard-symbolic", "", [("", "", ["keybinds"])]),
@@ -464,6 +467,8 @@ def make_setting(domain, path, b, values, choices, labels, doc, lead, header_tit
         s.kind = "steamgames"
     elif path == LOCAL_MODELS:
         s.kind = "localmodels"
+    elif path == DRIVE_MOUNTS:
+        s.kind = "mounts"
     elif path in GROUPED:
         s.kind = "groups"
     elif isinstance(value, list):

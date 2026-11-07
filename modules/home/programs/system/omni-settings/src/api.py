@@ -28,6 +28,7 @@ import changelog  # noqa: E402
 import closure  # noqa: E402
 import crashstate  # noqa: E402
 import dms  # noqa: E402
+import drivestate  # noqa: E402
 import docstate  # noqa: E402
 import flatpakstate  # noqa: E402
 import gitstate  # noqa: E402
@@ -89,6 +90,7 @@ TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
        "security": [("apparmor", "AppArmor", ("security-high-symbolic", "channel-secure-symbolic")),
                     ("faceauth", "Face Auth", ("camera-web-symbolic",))],
        "hardware": [("firmware", "Firmware", ("software-update-available-symbolic", "application-x-firmware")),
+                    ("drives", "Drives", ("drive-harddisk-symbolic", "drive-removable-media-symbolic")),
                     ("battery", "Battery", ("battery-symbolic", "battery-full-symbolic")),
                     ("dgpu", "Run on dGPU", ("video-display-symbolic", "computer-symbolic")),
                     ("scheduler", "CPU Scheduler", ("utilities-system-monitor-symbolic", "cpu-symbolic"))],
@@ -123,6 +125,7 @@ NAV_SUBTITLES = {"overview": "Updates, pinned versions, freeing space, versions"
                  "apparmor": "Each app profile's mode and what it would have blocked since boot. "
                              "Enforcing one waits for Apply.",
                  "firmware": "Firmware for this computer's devices from fwupd, and updates waiting",
+                 "drives": "Disks, free space and health. Mounting at startup waits for Apply.",
                  "battery": "Charge, health, and where charging stops",
                  "dgpu": "Apps whose launcher starts them on the NVIDIA GPU. Changes wait for Apply.",
                  "scheduler": "The sched_ext CPU scheduler running now. A switch here lasts until "
@@ -201,6 +204,8 @@ def shown(setting, value):
         return f"{len(value)} rail app{'' if len(value) == 1 else 's'} changed" if value else "Not set"
     if setting.kind == "steamgames":
         return f"{len(value)} game{'' if len(value) == 1 else 's'} set" if value else "Not set"
+    if setting.kind == "mounts":
+        return ", ".join(m["mountPoint"] for m in value) if value else "Not set"
     if setting.kind == "localmodels":
         return f"{len(value)} model{'' if len(value) == 1 else 's'} changed or added" if value else "Not set"
     if isinstance(value, dict):
@@ -364,7 +369,7 @@ def cmd_load(cfg, _args):
     shell = {}
     for page in state.pages:
         if page.section in ("userpkgs", "keybinds", "windowrules", "siderail", "startup", "filetypes",
-                            "dgpu", "games", "localmodels", "backupsettings"):
+                            "dgpu", "drives", "games", "localmodels", "backupsettings"):
             continue
         pid = schema.TOP_PAGES[page.title] if page.section == "top" else f"page:{page.title}"
         groups = []
@@ -409,6 +414,8 @@ def cmd_load(cfg, _args):
                        if s.domain == "user" and s.path[0] == "backups"}
     steam_games = next((s for p in state.pages for g in p.groups for s in g.settings
                         if (s.domain, s.path) == ("user", schema.STEAM_GAMES)), None)
+    drive_mounts = next((s for p in state.pages for g in p.groups for s in g.settings
+                         if (s.domain, s.path) == ("machine", schema.DRIVE_MOUNTS)), None)
     gpu_offload = next((s for p in state.pages for g in p.groups for s in g.settings
                         if (s.domain, s.path) == ("user", ("gpuOffload",))), None)
     local_models = {s.path[-1]: setting_json(cfg, state, s, multi, modules) for s in schema.flat(state.pages)
@@ -480,6 +487,7 @@ def cmd_load(cfg, _args):
             "mimeTypes": mime_types and setting_json(cfg, state, mime_types, multi, modules),
             "backupSettings": {name: setting_json(cfg, state, s, multi, modules)
                                for name, s in backup_settings.items()},
+            "driveMounts": drive_mounts and setting_json(cfg, state, drive_mounts, multi, modules),
             "gpuOffload": gpu_offload and setting_json(cfg, state, gpu_offload, multi, modules),
             "steamGames": steam_games and setting_json(cfg, state, steam_games, multi, modules),
             "localModels": local_models or None,
@@ -662,6 +670,19 @@ def cmd_firmware_summary(_cfg, _args):
         return len(hardwarestate.updates())
     except (RuntimeError, OSError, subprocess.TimeoutExpired):
         return 0
+
+
+def cmd_drives(_cfg, _args):
+    """The Drives page: disks, volumes and health."""
+    try:
+        return drivestate.drives()
+    except (RuntimeError, OSError, ValueError, subprocess.TimeoutExpired) as e:
+        raise ValueError(str(e)) from e
+
+
+def cmd_drive_mount(_cfg, args):
+    """Mounts ({mount: true}) or unmounts a volume by its device path."""
+    return drivestate.act(args.get("path"), args.get("mount") is True)
 
 
 def cmd_battery(_cfg, _args):
@@ -1722,7 +1743,8 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "keybinds": cmd_keybinds, "launchCommand": cmd_launch_command, "sideRail": cmd_side_rail,
             "appIcon": cmd_app_icon, "pickIconFile": cmd_pick_icon_file, "siteIcon": cmd_site_icon,
             "mimeApps": cmd_mime_apps, "splitCommand": cmd_split_command,
-            "firmware": cmd_firmware, "firmwareSummary": cmd_firmware_summary, "battery": cmd_battery,
+            "firmware": cmd_firmware, "firmwareSummary": cmd_firmware_summary, "drives": cmd_drives,
+            "driveMount": cmd_drive_mount, "battery": cmd_battery,
             "mangohudTest": cmd_mangohud_test, "mangohudPreview": cmd_mangohud_preview, "scheduler": cmd_scheduler,
             "faceAuth": cmd_face_auth}
 

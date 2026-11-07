@@ -27,6 +27,7 @@
 
       #--- System Services
       ./services/desktop.nix
+      ./services/hardware/drive-health.nix
       ./services/hardware/power.nix
       ./services/hardware/sound.nix
       ./services/runtimes/runners.nix
@@ -55,6 +56,7 @@
     ++ lib.optionals machine.bluetooth.enable [./services/hardware/bluetooth.nix]
     ++ lib.optionals machine.printing.enable [./services/hardware/printing.nix]
     ++ lib.optionals (machine.battery.chargeLimit != null) [./services/hardware/battery.nix]
+    ++ lib.optionals (machine.drives.mounts != []) [./services/hardware/drive-mounts.nix]
     #--- Mullvad VPN, system and home-manager halves (controlled by machine settings)
     ++ lib.optionals machine.mullvad.enable [./security/mullvad]
     #--- ClamAV Antivirus (controlled by machine settings)

@@ -129,6 +129,11 @@
   #--- Lenovo's conservation mode stops at its own fixed point instead
   battery.chargeLimit = null;
 
+  #--- Drives
+  # Unencrypted drives mounted at startup, set from Omni Settings' Drives page.
+  # Entries: {uuid = "..."; mountPoint = "/mnt/backup"; fsType = "ext4";}
+  drives.mounts = [];
+
   #--------------------------------------------------------------------#
   #-- Network & Firewall
   #--------------------------------------------------------------------#

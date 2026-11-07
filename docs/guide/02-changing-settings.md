@@ -10,7 +10,7 @@ The icons across the top are tabs. Each tab is one long page you scroll through,
 - **System**: Users, and the computer and personal setting pages
 - **Packages**: searching for software, the app switches (Default Packages) and what you've installed yourself (User Packages)
 - **Niri**: the desktop's shell settings and window rules
-- **Hardware**: firmware updates, and the battery and dGPU pages on a laptop
+- **Hardware**: firmware updates, drives (free space, health, mounting), and the battery and dGPU pages on a laptop
 - **Gaming**: launch options, Proton versions, and the game launchers and tools to install
 - **AI**: Claude and the local AI models
 - **Docs**: these guides and the game notes

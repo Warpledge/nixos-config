@@ -288,6 +288,25 @@
     then "a whole number"
     else "a set in { }";
 
+  #--- One line per bad entry of drives.mounts; the file systems are kept in sync
+  #--- with Omni Settings' drivestate.py and services/hardware/drive-mounts.nix
+  driveMountProblems = value: let
+    fine = m:
+      lib.isAttrs m
+      && builtins.match "[A-Za-z0-9-]+" (m.uuid or "") != null
+      && builtins.match "/mnt/[A-Za-z0-9][A-Za-z0-9._-]*" (m.mountPoint or "") != null
+      && lib.elem (m.fsType or "") ["ext4" "btrfs" "xfs" "vfat" "exfat" "ntfs"];
+    wrong = lib.filter (m: !(fine m)) value;
+    points = map (m: m.mountPoint or "") value;
+  in
+    if !(lib.isList value)
+    then ["`drives.mounts` should be a list of {uuid; mountPoint; fsType;}"]
+    else
+      lib.optional (wrong != [])
+      "`drives.mounts` has ${builtins.toJSON wrong}; use a UUID, a mount point under /mnt and one of ext4, btrfs, xfs, vfat, exfat, ntfs"
+      ++ lib.optional (lib.length (lib.unique points) != lib.length points)
+      "`drives.mounts` lists a mount point twice";
+
   #--- One line per entry of a textSets setting that isn't a name and text
   textSetProblems = name: value:
     if !(lib.isAttrs value)
@@ -333,6 +352,8 @@
       then steamGameProblems value
       else if at == ["localModels" "models"]
       then localModelProblems value
+      else if at == ["drives" "mounts"]
+      then driveMountProblems value
       else if at == ["backups" "folder"]
       then
         lib.optional (!(lib.isString value && builtins.match "(/|~/).*" value != null))
