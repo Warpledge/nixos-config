@@ -65,11 +65,16 @@ mod never downloads code.
 
 ### Settings
 
-Since 2026-11-07 the patched pack runs on its own defaults, with no settings file in
-`shaderpacks/`, so skip the `.txt` in install step 3. KuramA's file as last used is
-`.minecraft/eclipse-tuning/kuramA-settings-as-used-2026-11-07.txt`; to go back, copy it to
-`shaderpacks/` under the patched pack's name plus `.txt`. The Kura resource packs are
-separate and still enabled, and the rest of this section describes KuramA's file.
+Since 2026-11-07 there are two copies of the patched pack:
+
+- `Eclipse-Shader KuraEdit [OBS07-Chroma Patch].zip` has KuramA's file, downloaded fresh
+  from the pinned commit, plus the `indirect_effect` line below.
+- `Eclipse-Shader Warpledge Edit.zip` is a plain copy that starts on the pack's defaults.
+  ChromaPatch doesn't rebuild it, so copy the pack again after a patch or Eclipse update.
+
+The older settings, with local changes on top of KuramA's, are in
+`.minecraft/eclipse-tuning/kuramA-settings-as-used-2026-11-07.txt`. The rest of this
+section describes KuramA's file.
 
 KuramA recommends the `KuraBalanced` profile for FPS and compatibility in GTNH. Their
 config file matches it, checked against the patched `shaders.properties` on 2026-11-06,
