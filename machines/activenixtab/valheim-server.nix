@@ -96,103 +96,139 @@
     '';
   };
 
-  #--- Packs the mods, world and a start script for a non-Nix machine
+  #--- start.sh and README go into both archives
+  startSh = pkgs.writeText "valheim-start.sh" ''
+    #!/bin/sh
+    set -eu
+    here=$(cd "$(dirname "$0")" && pwd)
+    if [ -n "$VALHEIM_GAME" ]; then
+      game=$VALHEIM_GAME
+    else
+      game="$HOME/.local/share/Steam/steamapps/common/Valheim dedicated server"
+    fi
+    if [ ! -x "$game/valheim_server.x86_64" ]; then
+      echo "No Valheim dedicated server in: $game"
+      echo "Install it in Steam (Library, filter Tools), or set VALHEIM_GAME."
+      exit 1
+    fi
+    mkdir -p "$game/BepInEx"
+    if command -v rsync >/dev/null 2>&1; then
+      rsync -a --delete "$here/BepInEx/plugins/" "$game/BepInEx/plugins/"
+      rsync -a --delete "$here/BepInEx/patchers/" "$game/BepInEx/patchers/"
+      rsync -a "$here/BepInEx/core/" "$game/BepInEx/core/"
+      if [ -d "$here/BepInEx/config" ]; then
+        rsync -a --ignore-existing "$here/BepInEx/config/" "$game/BepInEx/config/"
+      fi
+      rsync -a "$here/doorstop_libs/" "$game/doorstop_libs/"
+    else
+      cp -a "$here/BepInEx" "$here/doorstop_libs" "$game/"
+    fi
+    cp -f "$here/doorstop_config.ini" "$game/doorstop_config.ini"
+    cd "$game"
+    export DOORSTOP_ENABLED=1
+    export DOORSTOP_TARGET_ASSEMBLY=./BepInEx/core/BepInEx.Preloader.dll
+    export LD_LIBRARY_PATH="$game/doorstop_libs:$game/linux64"
+    export LD_PRELOAD=libdoorstop_x64.so
+    password=$(cat "$here/password")
+    exec ./valheim_server.x86_64 -name "The Doobie Canoe" -port 2456 -world ${world} \
+      -password "$password" -savedir "$here/worlds" -public 0 -logfile -
+  '';
+
+  readme = pkgs.writeText "valheim-readme.txt" ''
+    The Doobie Canoe - Valheim dedicated server
+
+    The export writes two archives:
+      valheim-server-DATE.tar.gz   everything, for a machine that has none of it
+      valheim-mods-DATE.tar.gz     mods only, for updating an existing install
+
+    Requirements
+      Steam, with "Valheim Dedicated Server" installed (Library, filter Tools).
+      The game files are not in these archives; they come from Steam.
+
+    First install on a new machine
+      tar xzf valheim-server-DATE.tar.gz -C ~
+      ~/valheim-server/start.sh
+
+      If Steam keeps the server elsewhere:
+      VALHEIM_GAME="/path/to/Valheim dedicated server" ~/valheim-server/start.sh
+
+    Updating the mods on an existing install
+      rm -rf ~/valheim-server/BepInEx/plugins ~/valheim-server/BepInEx/patchers
+      tar xzf valheim-mods-DATE.tar.gz -C ~
+      ~/valheim-server/start.sh
+
+      Configs, the world and the password are left alone; a mod without a
+      config gets its defaults on the next start.
+
+    What start.sh does
+      Copies the mods and the doorstop files into the Steam install, then runs
+      valheim_server.x86_64 with -savedir pointing at worlds/ in this folder.
+      Configs already in the Steam install are never overwritten.
+
+    Network
+      Open UDP 2456-2458 in the machine firewall.
+      Forward UDP 2456-2458 on the router to this machine.
+      Friends add the public IP and :2456 in Valheim server list; the server
+      stays off the public list. The password is in the file "password".
+      With CGNAT (WAN IP 100.64.x.x) forwarding cannot work.
+
+    The world
+      worlds/worlds_local/NewAsgard2026. Copy worlds/ while the server is
+      stopped to back it up. Admins are SteamID64s in worlds/adminlist.txt.
+
+    Mods
+      Players need the same Gale profile, "Doobie Canoe With Friends".
+  '';
+
+  #--- Writes a full archive and a mods-only one for a non-Nix machine
   export = pkgs.writeShellApplication {
     name = "valheim-export";
     runtimeInputs = [pkgs.coreutils pkgs.gnutar pkgs.gzip pkgs.systemd];
     text = ''
-            if systemctl is-active --quiet valheim-server.service; then
-              echo "The server is running. Close its console window first, so the world is not mid-save."
-              printf '\nPress Enter to close.\n'
-              read -r _
-              exit 1
-            fi
-            out="/home/${user}/valheim-server-$(date +%Y%m%d).tar.gz"
-            stage=$(mktemp -d)
-            trap 'rm -rf "$stage"' EXIT
-            bundle="$stage/valheim-server"
-            mkdir -p "$bundle"
-            cp -a ${base}/game/BepInEx "$bundle/"
-            cp -a ${base}/game/doorstop_libs "$bundle/"
-            cp -a ${base}/game/doorstop_config.ini "$bundle/"
-            cp -a ${base}/worlds "$bundle/"
-            sed 's/^VALHEIM_PASSWORD=//' ${base}/env > "$bundle/password"
-            chmod 600 "$bundle/password"
-
-            cat > "$bundle/start.sh" <<'EOF'
-      #!/bin/sh
-      set -eu
-      here=$(cd "$(dirname "$0")" && pwd)
-      if [ -n "$VALHEIM_GAME" ]; then
-        game=$VALHEIM_GAME
-      else
-        game="$HOME/.local/share/Steam/steamapps/common/Valheim dedicated server"
-      fi
-      if [ ! -x "$game/valheim_server.x86_64" ]; then
-        echo "No Valheim dedicated server in: $game"
-        echo "Install it in Steam (Library, filter Tools), or set VALHEIM_GAME."
+      if systemctl is-active --quiet valheim-server.service; then
+        echo "The server is running. Close its console window first, so the world is not mid-save."
+        printf '\nPress Enter to close.\n'
+        read -r _
         exit 1
       fi
-      if command -v rsync >/dev/null 2>&1; then
-        rsync -a --delete "$here/BepInEx/" "$game/BepInEx/"
-        rsync -a "$here/doorstop_libs/" "$game/doorstop_libs/"
-      else
-        cp -a "$here/BepInEx" "$here/doorstop_libs" "$game/"
-      fi
-      cp -f "$here/doorstop_config.ini" "$game/doorstop_config.ini"
-      cd "$game"
-      export DOORSTOP_ENABLED=1
-      export DOORSTOP_TARGET_ASSEMBLY=./BepInEx/core/BepInEx.Preloader.dll
-      export LD_LIBRARY_PATH="$game/doorstop_libs:$game/linux64"
-      export LD_PRELOAD=libdoorstop_x64.so
-      password=$(cat "$here/password")
-      exec ./valheim_server.x86_64 -name "The Doobie Canoe" -port 2456 -world ${world} \
-        -password "$password" -savedir "$here/worlds" -public 0 -logfile -
-      EOF
-            chmod +x "$bundle/start.sh"
+      day=$(date +%Y%m%d)
+      full="/home/${user}/valheim-server-$day.tar.gz"
+      mods="/home/${user}/valheim-mods-$day.tar.gz"
+      stage=$(mktemp -d)
+      trap 'rm -rf "$stage"' EXIT
 
-            cat > "$bundle/README.txt" <<'EOF'
-      The Doobie Canoe - Valheim dedicated server
+      mkdir -p "$stage/mods/valheim-server/BepInEx"
+      cp -a ${base}/game/BepInEx/plugins "$stage/mods/valheim-server/BepInEx/"
+      cp -a ${base}/game/BepInEx/patchers "$stage/mods/valheim-server/BepInEx/"
+      cp -a ${base}/game/BepInEx/core "$stage/mods/valheim-server/BepInEx/"
+      cp -a ${base}/game/doorstop_libs "$stage/mods/valheim-server/"
+      cp -a ${base}/game/doorstop_config.ini "$stage/mods/valheim-server/"
+      cp ${startSh} "$stage/mods/valheim-server/start.sh"
+      cp ${readme} "$stage/mods/valheim-server/README.txt"
+      chmod +x "$stage/mods/valheim-server/start.sh"
+      tar -C "$stage/mods" -czf "$mods" valheim-server
 
-      Requirements
-        Steam, with "Valheim Dedicated Server" installed (Library, filter Tools).
-        The game files are not in this archive; they come from Steam.
+      mkdir -p "$stage/full/valheim-server"
+      cp -a ${base}/game/BepInEx "$stage/full/valheim-server/"
+      cp -a ${base}/game/doorstop_libs "$stage/full/valheim-server/"
+      cp -a ${base}/game/doorstop_config.ini "$stage/full/valheim-server/"
+      cp -a ${base}/worlds "$stage/full/valheim-server/"
+      sed 's/^VALHEIM_PASSWORD=//' ${base}/env > "$stage/full/valheim-server/password"
+      chmod 600 "$stage/full/valheim-server/password"
+      cp ${startSh} "$stage/full/valheim-server/start.sh"
+      cp ${readme} "$stage/full/valheim-server/README.txt"
+      chmod +x "$stage/full/valheim-server/start.sh"
+      tar -C "$stage/full" -czf "$full" valheim-server
 
-      Run it
-        tar xzf valheim-server-YYYYMMDD.tar.gz -C ~
-        ~/valheim-server/start.sh
-
-        If Steam keeps the server elsewhere:
-        VALHEIM_GAME="/path/to/Valheim dedicated server" ~/valheim-server/start.sh
-
-      What start.sh does
-        Copies BepInEx and the doorstop files into the Steam install, then runs
-        valheim_server.x86_64 with -savedir pointing at worlds/ in this folder.
-
-      Network
-        Open UDP 2456-2458 in the machine's firewall.
-        Forward UDP 2456-2458 on the router to this machine.
-        Friends add the public IP and :2456 in Valheim's server list; the server
-        stays off the public list. The password is in the file "password".
-        With CGNAT (WAN IP 100.64.x.x) forwarding cannot work.
-
-      The world
-        worlds/worlds_local/NewAsgard2026. Copy worlds/ while the server is
-        stopped to back it up. Admins are SteamID64s in worlds/adminlist.txt.
-
-      Mods
-        Players need the same Gale profile, "Doobie Canoe With Friends".
-        To update, replace BepInEx/ in this folder with a newer export.
-      EOF
-
-            tar -C "$stage" -czf "$out" valheim-server
-            echo
-            echo "Wrote $out"
-            ls -lh "$out"
-            echo
-            echo "Copy it across, then: tar xzf <file> -C ~ && ~/valheim-server/start.sh"
-            printf '\nPress Enter to close.\n'
-            read -r _
+      echo
+      echo "Wrote $full and $mods"
+      ls -lh "$full" "$mods"
+      echo
+      echo "New machine: tar xzf <server file> -C ~ && ~/valheim-server/start.sh"
+      echo "Update mods: rm -rf ~/valheim-server/BepInEx/plugins ~/valheim-server/BepInEx/patchers"
+      echo "             tar xzf <mods file> -C ~ && ~/valheim-server/start.sh"
+      printf '\nPress Enter to close.\n'
+      read -r _
     '';
   };
 in {
