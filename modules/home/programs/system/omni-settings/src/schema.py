@@ -209,8 +209,9 @@ PAGES = {
                "What Claude sees of each skill and subagent, and the model it runs on.",
                [("Repo Skills", "", [f"claude.skills.{n}" for n in (
                    "addApp", "androidDebloatRedo", "apparmorCheck", "commit", "disablePackage",
-                   "flakeUpdate", "freetubeSync", "gameTroubleshooting", "handoff", "mokuBump",
-                   "onboard", "prReview", "rpgmSetup", "todo", "upstream", "vnSetup")]),
+                   "flakeUpdate", "freetubeSync", "gameTroubleshooting", "gtnhModUpdates",
+                   "handoff", "mokuBump", "onboard", "prReview", "rpgmSetup", "todo", "upstream",
+                   "vnSetup")]),
                 ("Subagents", "", [f"claude.agents.{n}" for n in (
                     "buildTriager", "docsDriftAuditor", "proseReviewer", "publicRepoAuditor")]),
                 ("Account Skills", "Synced from your claude.ai account.",

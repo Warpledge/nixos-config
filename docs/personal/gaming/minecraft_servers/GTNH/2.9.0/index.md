@@ -10,6 +10,7 @@ created under 2.9.
 ## Sub-Notes
 
 - [mods.md](./mods.md): which hand-added mods carry over, which have a 2.9 build, and which are out
+- [mod-sources.json](./mod-sources.json): where each added mod is published, for the `gtnh-mod-updates` skill
 - [config-tweaks.md](./config-tweaks.md): every config edit, with 2.9 paths and defaults
 - [java-and-launch.md](./java-and-launch.md): Java, Prism's JVM args, lwjgl3ify
 - [shaders.md](./shaders.md): the NeonTech setup, Complementary Unbound with Euphoria Patches and Neon Horizons

@@ -318,4 +318,5 @@
   localModels.backend = "vulkan";
   faceAuth.enable = false;
   faceAuth.darkThreshold = 90;
+  drives.mounts = [];
 }

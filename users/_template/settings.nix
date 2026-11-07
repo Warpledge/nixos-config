@@ -298,6 +298,7 @@
   claude.skills.flakeUpdate = "on";
   claude.skills.freetubeSync = "on";
   claude.skills.gameTroubleshooting = "on";
+  claude.skills.gtnhModUpdates = "on";
   claude.skills.handoff = "on";
   claude.skills.mokuBump = "on";
   claude.skills.onboard = "on";
@@ -314,6 +315,7 @@
   claude.skillModels.flakeUpdate = null;
   claude.skillModels.freetubeSync = null;
   claude.skillModels.gameTroubleshooting = null;
+  claude.skillModels.gtnhModUpdates = null;
   claude.skillModels.handoff = null;
   claude.skillModels.mokuBump = null;
   claude.skillModels.onboard = null;

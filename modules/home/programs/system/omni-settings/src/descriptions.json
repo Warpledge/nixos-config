@@ -192,6 +192,7 @@
   "claude.skills.flakeUpdate": {"title": "flake-update", "summary": "Updates flake inputs", "text": "Updates flake inputs and fixes the build."},
   "claude.skills.freetubeSync": {"title": "freetube-sync", "summary": "Saves FreeTube's blocklist", "text": "Saves FreeTube's blocked channels to the repo."},
   "claude.skills.gameTroubleshooting": {"title": "game-troubleshooting", "summary": "Diagnoses a broken game", "text": "Diagnoses a game that crashes or won't start."},
+  "claude.skills.gtnhModUpdates": {"title": "gtnh-mod-updates", "summary": "Checks GTNH mods for updates", "text": "Checks the mods added to the GT New Horizons pack for new versions and changelogs, then installs the ones you pick."},
   "claude.skills.handoff": {"title": "handoff", "summary": "Notes for a fresh session", "text": "Writes or picks up a note for a fresh session."},
   "claude.skills.mokuBump": {"title": "moku-bump", "summary": "Updates Moku", "text": "Updates the source-built Moku reader."},
   "claude.skills.onboard": {"title": "onboard", "summary": "CLAUDE.md for a new setup", "text": "Writes CLAUDE.md files for a new machine or person."},
