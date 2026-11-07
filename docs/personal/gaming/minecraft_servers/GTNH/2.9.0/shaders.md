@@ -76,7 +76,8 @@ Since 2026-11-07 there are two copies of the patched pack:
     which fixes distant shimmer and lights that aren't there. labPBR alpha 255 means no
     glow, and mipmaps averaging it with a glowing texel read as almost full glow, so
     distant blocks lit up where they have no lights. The patch only lets a texel glow when
-    the full-size texture glows, as Complementary's `customEmission.glsl` does. Official
+    the full-size texture glows, as Complementary's `customEmission.glsl` does. It also
+    stopped the shimmering, jagged reflections, which were mirroring those false lights. Official
     Eclipse `3c18afc` has the same bug, so KuraEdit shows it too. Confirmed in game
     2026-11-07 with Mipmap Levels at 4.
   - `shaders.properties` drops the blank row under `[Atmosphere]` in the main `screen`, to
