@@ -19,15 +19,22 @@
 ## JVM args
 
 The 2.9 instance has `OverrideJavaArgs=true` with `-XX:+UseZGC`,
-`-XX:+UseCompactObjectHeaders` and the translation agent, `-javaagent:` pointing at
-`.minecraft/gtnh-translation-agent.jar` (set 2026-11-07). An instance's args replace
-Prism's global set rather than add to it (`OverrideJavaArgs` in Prism's
-`MinecraftInstance.cpp`), so the Aikar-style G1 flags in `prismlauncher.cfg` only reach
-the other instances. Memory isn't overridden, so the global `MaxMemAlloc`/`MinMemAlloc`
-of 12288 MB applies. That is twice the wiki's 4-6 GB single-player figure, for the
-hand-added mods and Distant Horizons; drop the client to 10 GB when the local server runs
-on the desktop at the same time. ZGC is generational-only on Java 25, so there is no
+`-XX:SoftMaxHeapSize=11g`, `-XX:+UseCompactObjectHeaders` and the translation agent,
+`-javaagent:` pointing at `.minecraft/gtnh-translation-agent.jar` (set 2026-11-07). An
+instance's args replace Prism's global set rather than add to it (`OverrideJavaArgs` in
+Prism's `MinecraftInstance.cpp`), so the Aikar-style G1 flags in `prismlauncher.cfg`
+only reach the other instances. ZGC is generational-only on Java 25, so there is no
 `-XX:+ZGenerational`; removing `-XX:+UseZGC` falls back to G1.
+
+Memory is overridden too (`OverrideMemory=true`, 14336 MB min and max). A GC log from a
+21-minute session on the laptop server at 12 GB (2026-11-07) showed a steady 5-6 GB live
+set but five allocation stalls of 50-107 ms, when Angelica and Distant Horizons chunk
+building filled the heap before ZGC caught up. The soft cap makes ZGC collect as if the
+heap were 11 GB and keeps the last 3 GB for those bursts. An `Allocation Stall` line in a
+GC log means the reserve ran out. With the local server on the desktop at the same time,
+use 12 GB with `SoftMaxHeapSize=10g`. To log GC in a running client, use
+`jcmd <pid> VM.log output=file=<path> what=gc,gc+heap=info decorators=uptime,level,tags`
+with the instance's JDK.
 
 The agent translates hard-coded Chinese strings in the hand-added mods. Its source, build
 and the matching quest and lore data patches are in
