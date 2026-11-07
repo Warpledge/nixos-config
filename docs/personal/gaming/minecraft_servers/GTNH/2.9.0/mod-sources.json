@@ -23,6 +23,8 @@
     {"name": "MineMenu", "jar": "^MineMenu-", "side": "C", "source": "modrinth:mine-menu"},
     {"name": "Spark", "jar": "^spark-", "side": "C", "source": "curseforge:spark"},
     {"name": "FPS Reducer", "jar": "^FpsReducer-", "side": "C", "source": "modrinth:fps-reducer"},
+    {"name": "Xaero's Minimap", "jar": "^Xaeros_Minimap_", "side": "C", "source": "modrinth:xaeros-minimap", "note": "Replaces JourneyMap; Navigator draws the VisualProspecting layers on it."},
+    {"name": "Xaero's World Map", "jar": "^XaerosWorldMap_", "side": "C", "source": "modrinth:xaeros-world-map", "note": "Open Angelica#2092: crash with a lava-retexturing pack (Modernity) and the Witching Gadgets Thaumic Stone Extruder on screen."},
     {"name": "Trash Slot", "jar": "^trashslot-", "side": "B", "source": "curseforge:trashslot"},
     {"name": "ElytraMining", "jar": "^elytra_mining-", "side": "B", "source": "github:ElytraServers/ElytraMining"},
     {"name": "Waystones-X", "jar": "^waystones-", "side": "B", "source": "modrinth:waystones-x"},

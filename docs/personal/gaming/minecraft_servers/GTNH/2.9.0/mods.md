@@ -187,6 +187,13 @@ Check these again after their next release; none has a 2.9 build.
 
 These are in the 2.9 instance but have no explicit 2.9 release, so a launch is the proof.
 
+- **Xaero's Minimap 21.10.44 and World Map 1.14.1.33** (2026-11-07, client only): the
+  last 1.7.10 Forge builds, from Modrinth, and the CurseForge files Navigator 1.1.10
+  compiles against (`dependencies.gradle`). They replace JourneyMap, which is disabled.
+  Angelica#2092 is open: Xaero's World Map crashes with Angelica when a pack retextures
+  lava (Modernity does) and Witching Gadgets' Thaumic Stone Extruder is on screen.
+  Angelica#1851, a crash on opening NEI, was closed 2026-06-11.
+
 - **SharedProspecting 2.0.4**: built against VisualProspecting 1.5.11 and GTNHLib 0.9.0.
   Its six late mixins still match VP 1.5.42 as shipped in 2.9 (checked 2026-11-01); the
   team sync itself can only be proven on the server.

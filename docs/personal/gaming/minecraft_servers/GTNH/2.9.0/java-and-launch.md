@@ -70,13 +70,11 @@ startup error screen, so a mod init failure looks like a frozen loading screen. 
 not the cause of any startup failure. Switch it back in Video Settings once the pack is
 settled.
 
-## JourneyMap
+## Maps
 
-2.9.0 ships `journeymap-1.7.10-5.2.23-fairplay.jar`, and the instance still runs it
-(checked 2026-11-04): the 2.8.4 swap to the unlimited build has not been redone. To redo
-it, in `.minecraft/mods/`:
-
-1. Delete `journeymap-1.7.10-5.2.23-fairplay.jar`.
-2. Add `5.2.23-unlimited`. It has to be the same JourneyMap version, so don't reuse the
-   old `5.2.10` jar.
-3. Delete `defaultserverlist-1.7.4.jar`, which only adds a pre-populated server list.
+The instance runs Xaero's Minimap and World Map instead of JourneyMap (2026-11-07);
+[mods.md](./mods.md#installed-still-unproven-on-29) has the versions. 2.9.0's
+`journeymap-1.7.10-5.2.23-fairplay.jar` is kept as `.jar.disabled`; to go back, rename it
+and remove the two Xaero jars. JourneyMap's waypoints and explored map don't carry over
+to Xaero's. The prospecting overlays come from Navigator, which has a module for each map
+(`config/navigator.cfg`), and the data stays in VisualProspecting's files either way.
