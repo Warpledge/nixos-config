@@ -17,8 +17,12 @@ which is why this world runs on a dev build instead of waiting for beta.
 - [java-and-launch.md](./java-and-launch.md): Java, Prism's JVM args and memory
 - [difficulty-rules.md](./difficulty-rules.md): the Custom preset, every rule changed and why
 - [mods.md](./mods.md): the six jars added by hand
+- [candidates.md](./candidates.md): the Cosmic Frontiers mods sorted by risk for trials
 - [quests.md](./quests.md): how far the quest book goes
-- [updating.md](./updating.md): backups and moving to a newer build
+- [updating.md](./updating.md): new builds, mod trials and debugging through a staging
+  instance, with the test checklist
+- [../tools/](../tools/): `gto.py` (backup, stage, carry, diff, check) and
+  `overlay.json`, what you add on top of the pack
 
 ## Sources
 

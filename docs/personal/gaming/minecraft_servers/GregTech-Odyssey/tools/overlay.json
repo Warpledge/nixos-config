@@ -1,0 +1,63 @@
+{
+  "mods": [
+    {
+      "jar": "DistantHorizons-3.3.3-1.20.1-fabric-forge.jar",
+      "modId": "distanthorizons",
+      "name": "Distant Horizons",
+      "source": "https://modrinth.com/mod/distanthorizons",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "KeepStepping-Forge-1.20.1-1.0.0.jar",
+      "modId": "keep_stepping",
+      "name": "Keep Stepping",
+      "source": "https://www.curseforge.com/minecraft/mc-mods/keep-stepping",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "Resourcify (1.20.1-forge)-1.8.7.jar",
+      "modId": "resourcify",
+      "name": "Resourcify",
+      "source": "https://modrinth.com/mod/resourcify",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "touhoulittlemaid-1.5.3-forge+mc1.20.1.jar",
+      "modId": "touhou_little_maid",
+      "name": "Touhou Little Maid",
+      "source": "https://modrinth.com/mod/touhou-little-maid",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "maidmarriage-1.0.0-forge+mc1.20.1.jar",
+      "modId": "maidmarriage",
+      "name": "Touhou Little Maid: Heart Pact",
+      "source": "https://modrinth.com/mod/touhou-little-maid-heart-pact",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "ysm-2.6.5-forge+mc1.20.1-release.jar",
+      "modId": "yes_steve_model",
+      "name": "Yes Steve Model",
+      "source": "https://modrinth.com/mod/yes-steve-model",
+      "added": "2026-11-07"
+    }
+  ],
+  "carry": [
+    "config/gtocore-rules.txt",
+    "options.txt",
+    "shaderpacks/Eclipse-Shader Warpledge Edit.zip",
+    "shaderpacks/Eclipse-Shader Warpledge Edit.zip.txt"
+  ],
+  "instanceSettings": [
+    "AutomaticJava",
+    "IgnoreJavaCompatibility",
+    "JavaPath",
+    "JvmArgs",
+    "MaxMemAlloc",
+    "MinMemAlloc",
+    "OverrideJavaArgs",
+    "OverrideJavaLocation",
+    "OverrideMemory"
+  ]
+}

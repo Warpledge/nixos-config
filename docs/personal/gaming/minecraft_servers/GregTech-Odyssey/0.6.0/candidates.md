@@ -1,0 +1,121 @@
+# GTO 0.6.0 Mod Candidates (from Cosmic Frontiers)
+
+The 105 mods added by hand to the Cosmic Frontiers 0.8.0 pack in 2026-04, sorted by how
+risky each would be in GTO 0.6.0-dev27. Checked 2026-11-07 against dev27's mod list and
+each mod's newest 1.20.1 Forge build on Modrinth, including its required dependencies.
+The recovered Cosmic Frontiers notes, with the config and KubeJS work done back then,
+are in `~/Downloads/cosmic_frontiers_notes/`.
+
+**Needs** lists only required mods that dev27 doesn't ship. "CurseForge only" means the
+lookup found no 1.20.1 Forge build on Modrinth. Pick a batch, then trial it with
+`gto stage` as described in [updating.md](./updating.md).
+
+## Already in dev27
+
+All The Leaks, AttributeFix, Embeddium, Model Gap Fix, Distant Horizons, Oh The Biomes
+We've Gone, When Dungeons Arise, Explorer's Compass, Keep Stepping, Resourcify.
+
+## Low risk: client-side or QoL
+
+No recipes that skip GT tiers and no worldgen, so a failed trial can't touch the world.
+The audio and visual mods are a good first batch.
+
+| Mod | Needs | Note |
+| --- | --- | --- |
+| Chunky | | Pre-generates chunks; pairs with Distant Horizons |
+| Ksyxis | | Faster world loading |
+| Entity Culling | | |
+| SmoothBoot (Reloaded) | | CurseForge only |
+| Chunk Sending | | Server side; CurseForge only |
+| Rubidium Extra | | Embeddium add-on |
+| AmbientSounds | | Biome ambience; CreativeCore ships in dev27 |
+| SoL: Onirique | | Also biome ambience: pick it or AmbientSounds. CurseForge only |
+| Presence Footsteps | | |
+| Sounds | MRU, YACL | MRU is CurseForge only |
+| Sound Physics Remastered | | |
+| TIMM | | |
+| Cool Rain | | |
+| Particular | | |
+| Entity Model Features, Entity Texture Features | | EMF needs ETF |
+| Smooth Swapping | | |
+| Particle Core | Fzzy Config, Kotlin for Forge | dev27 ships Async Particles, which also changes particles: trial it alone |
+| Better Climbing | | |
+| Catalogue | | Mod list screen; not found on Modrinth by this lookup |
+| Connectible Chains | | |
+| Diagonal Walls, Windows, Fences | | Puzzles Lib ships in dev27 |
+| Enchantment Descriptions | Bookshelf | |
+| TrashSlot | | |
+| Macaw's Bridges, Lights, Fences, Stairs | | Decoration; vanilla-material recipes |
+| Guard Villagers | | |
+| Enderman Overhaul, Creeper Overhaul | | Mob variants; their libraries ship in dev27 |
+
+## Needs gregification
+
+These add craftable items that would skip GT tiers. The Cosmic Frontiers `gregification.md`
+has the KubeJS patterns and tier tables from the first time.
+
+| Mod | Needs | Note |
+| --- | --- | --- |
+| Tom's Simple Storage | | Item networks that bypass AE2; gregified in Cosmic Frontiers |
+| Simply Swords, Simply Swords Overhaul | Fzzy Config, Simply Tooltips | Gregified in Cosmic Frontiers, unique weapons included |
+| Illager Invasion | | Imbuing table gregified in Cosmic Frontiers; also adds raids |
+| Zipline | | Craftable traversal |
+| Supplementaries | Moonlight | Many utility blocks, some of which shortcut automation |
+
+## Worldgen
+
+These only show up in chunks generated after they're added, so test each in a fresh test
+world as well as in the staging copy. Two biome or structure mods can also fight over
+the same spots.
+
+| Mod | Needs | Note |
+| --- | --- | --- |
+| Biomes O' Plenty | GlitchCore | Shares TerraBlender with BWG; Cosmic Frontiers balanced the two in `biomesoplenty/biome_toggles.json` |
+| Amplified Nether, Nether Remastered | | Nether terrain |
+| YUNG's Better Desert Temples, Dungeons, Jungle Temples, Mineshafts, Nether Fortresses, Ocean Monuments, Witch Huts | YUNG's API | |
+| YUNG's Better Strongholds | YUNG's API | dev27 ships End Remastered, which patches stronghold pieces (`StrongholdPiecesMixin`) and replaces the eyes: check that they work together |
+| YUNG's Cave Biomes | YUNG's API | |
+| When Dungeons Arise: Seven Seas | | Cosmic Frontiers ran the 1.19.2 jar; Modrinth has a 1.20.1 build |
+| Luki's Grand Capitals, Luki's Woodland Mansions | | |
+| Moog's Nether Structures, Moog's Soaring Structures | Moog's Structure Lib | |
+| Integrated Villages | Integrated API | |
+| Structure Essentials | | Spacing control for when you add many structure mods; CurseForge only |
+| Samurai Dynasty | | Adds 6 ores; Cosmic Frontiers suppressed all but Spirit Stone with biome-modifier overrides (`config-tweaks.md`). Its weapons need gregification too |
+| Mowzie's Mobs | | Boss structures |
+| L_Ender's Cataclysm | Lionfish API | Boss arenas and very strong gear: gregify the gear |
+| Integrated Cataclysm, Mowzie's Cataclysm, Simply Swords: Cataclysm, Cataclysm & BetterCombat Compat | | Compat for the mods above; add only with them. Integrated Cataclysm is CurseForge only |
+
+## Gameplay changes
+
+These change how combat and nights feel. They don't break the world, but play a few
+sessions in staging before deciding.
+
+| Mod | Needs | Note |
+| --- | --- | --- |
+| Better Combat | playerAnimator | Changes every melee attack; try it with GT tools, which are weapons too |
+| Apothic Combat | Better Combat | Apotheosis ships in dev27 |
+| Alex's Mobs, Alex's Mobs Interaction | Citadel | 80+ mobs and some craftable gear; Cosmic Frontiers tuned their spawns |
+| Alex's Delight | Alex's Mobs | Farmer's Delight ships in dev27. The Modrinth match was unsure; check the source |
+| L_Ender's Delight | L_Ender's Cataclysm | |
+| Domestication Innovation | Citadel | |
+| Majrusz's Enchantments | Majrusz Library | dev27's Apotheosis already reworks enchanting: check that they work together |
+| Enhanced Celestials | Data Anchor | Blood moons raise spawns; CorgiLib ships in dev27 |
+
+## Skip
+
+| Mod | Why |
+| --- | --- |
+| Majrusz's Difficulty | GTO's own difficulty rules do this job |
+| Inventory Profiles Next, libIPN | dev27 ships Inventory Tweaks; two sorters fight over the same keys |
+| Smooth Chunk Save | Changes how chunks save, on a dev build that already warns of corrupted saves |
+| Integrated Stronghold | Modrinth lists Create, Quark, Supplementaries and Zeta as required; GTO has no Create |
+| Tinkers' Better Combat | Needs Tinkers' Construct, which GTO lacks |
+| Aether Villages | Needs The Aether, which GTO lacks |
+| Quark, Zeta | Too broad to trial in one go (worldgen, automation blocks, mob changes); only worth it with a module-by-module config pass |
+| Cupboard | Only a library for the someaddons mods, none of which are on this list |
+
+## Sources
+
+- Modrinth API `v2/search` and `v2/project/<slug>/version` (Forge, 1.20.1), 2026-11-07
+- dev27's `mods/` jars and their `META-INF/mods.toml`
+- The Cosmic Frontiers notes from `Warpledge/nixos-config-old-private` (deleted 2026-04-26)

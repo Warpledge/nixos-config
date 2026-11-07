@@ -21,5 +21,8 @@ The shader pack is `Eclipse-Shader Warpledge Edit.zip` in `shaderpacks/`, a copy
 one the GTNH notes' [build.py](../../GTNH/2.9.0/eclipse-warpledge-edit/build.py) makes,
 with its own `.zip.txt` settings.
 
-A new pack build is imported as a new instance, which doesn't bring these six along; copy
-them over by hand (see [updating.md](./updating.md)).
+The same jars, with their modIds and sources, are in
+[overlay.json](../tools/overlay.json), which `gto carry` reads to copy them into a new
+build. A mod added or removed here changes there too. Candidates from Cosmic Frontiers
+are sorted by risk in [candidates.md](./candidates.md), and the trial steps are in
+[updating.md](./updating.md#a-mod-trial).
