@@ -185,7 +185,10 @@ when Ky approves it.
   start and stop without a prompt, and `valheim-server-inhibit` holds off idle and lid
   sleep only while the server runs. Rebuilds leave a running server alone
   (`restartIfChanged = false`); changed scripts take effect at the next start from the
-  entry, not mid-game. Gotchas: a vanilla server cannot read the world,
+  entry, not mid-game. `valheim-export` (the "Export Valheim Server" entry) packs the
+  mods, world, admin list and password into `~/valheim-server-<date>.tar.gz` with a
+  `start.sh` and README for a non-Nix machine, and refuses while the server runs so the
+  world is not caught mid-save. Gotchas: a vanilla server cannot read the world,
   which is a modded save (world version -1); a paid mod with a licence check,
   OdinShipPlus, refuses to run and stops the server, which is why the profile runs the
   free OdinShip instead.
