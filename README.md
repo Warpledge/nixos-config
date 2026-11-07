@@ -99,7 +99,7 @@ The search box at the top finds any page or setting, including Dux Shell's own. 
 #### Maintenance
 
 - **Maintenance:** check for and install updates, pin a package to the version it has now, free up disk space, switch to an earlier version, and set what runs on a schedule (cleaning up old versions, store optimizing, a reminder to update)
-- **Git:** the config's changed files, recent commits, commits waiting to pull and open pull requests
+- **Git:** the config's changed files, recent commits, commits waiting to pull and open pull requests, and backing up your settings to a repo of your own ([how](#back-up-your-settings))
 - **Flatpaks:** apps nixpkgs doesn't have, from Flathub: install, update, switch each on or off and clean up
 - **Backups:** pick which apps' data to back up and where, run a backup, see what the last run saved and restore a copy
 - **Disabled Packages:** packages switched off after an update broke them, and whether they build again
@@ -168,15 +168,45 @@ If a rebuild fails, the run page offers **Undo My Changes**. If the computer won
 
 Your computer's folder (`machines/<name>/`) and your folder (`users/<name>/`) exist only in your copy, so pulling my changes in keeps your settings.
 
-There are two kinds of update:
+There are two kinds of update, both on Omni Settings' **Maintenance** page under **Updates**:
 
-- **Update Now** in Omni Settings gets newer versions of your apps.
-- **Pulling from GitHub** gets my changes to the config: new apps, fixes and settings.
+- **Update Now** gets newer versions of your apps.
+- **Pull** gets my changes to the config: new apps, fixes and settings.
+
+### Pull My Changes
+
+When my repo has new commits, a **Config** row under Updates says how many, with a **Pull** button for admins; the Git page lists the commits under **To Pull**.
+
+1. Press **Pull**.
+2. Pick **Pull Now**. **Preview** only builds and shows what would change, then puts everything back; **At Next Restart** applies it when you next boot.
+3. It takes my commits, puts any of yours back on top, and rebuilds. Settings you changed but haven't saved to git are set aside and put back too.
+
+If it went wrong, the run page offers **Undo the Pull**. If one of your changes clashes with one of mine, it stops before changing anything and names the files; use the terminal steps below for those. Settings I've added since show up on the **What's New** card.
+
+### Back Up Your Settings
+
+Your `machines/<name>/` and `users/<name>/` folders exist only on your computer. To keep a copy online, give Omni Settings an empty repo of your own; you don't need to fork mine.
+
+1. Make an empty private repo on GitHub (no README or licence), for example `my-nixos-backup`.
+2. Let git push there without asking for a password. With the GitHub CLI, run these once in a terminal:
+
+   ```bash
+   run gh auth login
+   ```
+
+   ```bash
+   run gh auth setup-git
+   ```
+
+   An SSH key on your GitHub account works too; then paste the repo's `git@github.com:` address in the next step.
+3. In Omni Settings, go to **Maintenance** → **Git** → **Backup**, paste the repo's address and press **Back Up Here**.
+
+From then on, each successful Apply, Rebuild, Update or Pull saves what changed in your computer's and your own folder as a commit (`chore(<computer>): save settings from Omni Settings`) and pushes it there. Updates still come from my repo. Give each computer its own backup repo: it won't overwrite a push another computer made. **Stop** on the same page turns backups off and leaves what's already there.
 
 <details>
-<summary>Pull my changes</summary>
+<summary>Pull my changes from the terminal</summary>
 
-Run these in a terminal:
+For a fork, or when **Pull** reports a clash. Run these in a terminal:
 
 ```bash
 cd /etc/nixos-config
@@ -187,7 +217,7 @@ git pull --rebase
 
 The commit saves your settings first, so the pull can put my changes underneath them. That's what `--rebase` means: git takes my new commits, then replays yours on top. If there's nothing new of yours to save, the commit says so and stops; run `git pull --rebase` on its own.
 
-Then open Omni Settings, press the rebuild button at the top and pick **Rebuild Now**. Settings I've added since show up on its **What's New** page.
+Then open Omni Settings, press the rebuild button at the top and pick **Rebuild Now**.
 
 **If you forked the repo on GitHub**, your fork is `origin` and mine has to be added once:
 
