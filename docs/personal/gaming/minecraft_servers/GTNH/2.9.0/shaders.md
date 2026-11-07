@@ -63,74 +63,74 @@ The first launch shows a ChromaPatch welcome page with the patch result, and ask
 to allow its version check (`updates=ask|on|off` in `config/chromapatch.properties`). The
 mod never downloads code.
 
-### Settings
+### Warpledge Edit
 
-Since 2026-11-07 there are two copies of the patched pack:
+Since 2026-11-07 there are two copies of the patched pack in `shaderpacks/`:
 
-- `Eclipse-Shader KuraEdit [OBS07-Chroma Patch].zip` has KuramA's file, downloaded fresh
-  from the pinned commit and unedited.
-- `Eclipse-Shader Warpledge Edit.zip` is a plain copy that starts on the pack's defaults.
-  ChromaPatch doesn't rebuild it, so copy the pack again after a patch or Eclipse update,
-  then redo its three edits:
-  - `dimensions/all_solid.fsh` has `.minecraft/eclipse-tuning/eclipse-emission-mip.patch`,
-    which fixes distant shimmer and lights that aren't there. labPBR alpha 255 means no
-    glow, and mipmaps averaging it with a glowing texel read as almost full glow, so
-    distant blocks lit up where they have no lights. The patch only lets a texel glow when
-    the full-size texture glows, as Complementary's `customEmission.glsl` does. It also
-    stopped the shimmering, jagged reflections, which were mirroring those false lights. Official
-    Eclipse `3c18afc` has the same bug, so KuraEdit shows it too. Confirmed in game
-    2026-11-07 with Mipmap Levels at 4.
-  - `shaders.properties` drops the blank row under `[Atmosphere]` in the main `screen`, to
-    bring back the Misc Settings and Mod Support row. Whether the row was cut off is
-    unconfirmed.
-  - `dimensions/composite6.fsh` has `.minecraft/eclipse-tuning/eclipse-lod-taa.patch`, to
-    calm Distant Horizons shimmer. LOD pixels keep 90% of the last frame, skip the
-    anti-ghosting ratio and keep the full 3x3 colour range, as Complementary's TAA does for
-    LODs. Untested in game on its own as of 2026-11-07. The packs before each patch are in
-    `.minecraft/eclipse-tuning/` as `Eclipse-Shader Warpledge Edit before LOD TAA.zip` and
-    `... before emission fix.zip`.
+- `Eclipse-Shader KuraEdit [OBS07-Chroma Patch].zip` is ChromaPatch's output with
+  KuramA's settings file, downloaded fresh from the pinned commit and unedited. It's the
+  reference; don't change settings on it.
+- `Eclipse-Shader Warpledge Edit.zip` is the one in use: the same pack with three edits
+  and its own settings.
 
-Warpledge Edit's settings on 2026-11-07, also copied to
-`.minecraft/eclipse-tuning/warpledge-edit-settings-2026-11-07-0210.txt`. To restore them,
-copy that file to `shaderpacks/` as `Eclipse-Shader Warpledge Edit.zip.txt`:
+#### The edits
 
-```properties
-AUTO_EXPOSURE=false
-BLOOM_STRENGTH=0.75
-DEFERRED_SSR_QUALITY=100
-EMISSIVE_TYPE_SETTING=2
-Emissive_Brightness=4.0
-Emissive_Curve=1.0
-FORWARD_SSR_QUALITY=100
-HANDHELD_LIGHT_RANGE=20
-HANDHELD_LIGHT_REFLECTIONS=75
-Haze_amount=0.6
-LPV_NORMAL_STRENGTH=70
-LPV_NOSHADOW_HACK=true
-LPV_SATURATION=70
-LPV_SIZE=8
-LPV_TINT_SATURATION=110
-LPV_VL_FOG_ILLUMINATION=false
-LPV_VL_FOG_ILLUMINATION_BRIGHTNESS=0
-LPV_VL_FOG_ILLUMINATION_HANDHELD_WATER=false
-NORMAL_MAP_MULT=0.5
-POM_DEPTH=0.15
-QUARTER_RES_SSR=false
-RAIN_MODE=0
-SHARPENING=0
-STARS_AMOUNT=1.75
-STARS_BRIGHTNESS=1.5
-TORCH_AMOUNT=1.3
-TORCH_B=0.57
-TORCH_G=0.75
-VL_RENDER_SCALE=1.0
-VL_SAMPLES=4
-shadowDistance=192.0
-```
+Eclipse is "All rights reserved", so the repo keeps no copy or diff of its files, only
+[eclipse-warpledge-edit/build.py](./eclipse-warpledge-edit/build.py), which finds each
+spot by a short anchor and adds the lines below. The full diffs are local, in
+`.minecraft/eclipse-tuning/`.
 
-The older settings, with local changes on top of KuramA's, are in
-`.minecraft/eclipse-tuning/kuramA-settings-as-used-2026-11-07.txt`. The rest of this
-section describes KuramA's file.
+1. **False lights in the distance** (`dimensions/all_solid.fsh`; confirmed in game on
+   2026-11-07 with Mipmap Levels at 4). labPBR glow maps mark "no glow" with alpha 255,
+   and the Kura packs also use 0. Mipmaps average those with glowing texels, and Eclipse
+   reads anything under 254.5/255 as glow, so distant walls and edges lit up as strip
+   lights that don't exist, flickered as the averaging shifted, and showed up again as
+   shimmering, jagged reflections. The edit samples the glow map again at full size
+   (`textureLod(specular, ..., 0.0)`) and only lets a texel glow where both agree, as
+   Complementary's `customEmission.glsl` does. Official Eclipse `3c18afc` has the same
+   bug, so KuraEdit shows it too.
+2. **Distant Horizons shimmer** (`dimensions/composite6.fsh`; not tested on its own). On
+   LOD pixels the anti-aliasing keeps 90% of the last frame, skips Eclipse's
+   `difference / history` boost (which drops history on dark, high-contrast detail) and
+   keeps the full 3x3 colour range, much as Complementary's TAA treats LODs.
+3. **Mod Support menu** (`shaders.properties`). ChromaPatch adds an `[Atmosphere]` row to
+   the main shader menu; the edit drops the blank row under it so Misc Settings and Mod
+   Support fit. Whether that row was really cut off is unconfirmed.
+
+Tried and dropped on 2026-11-07: steadier anti-aliasing on distant real chunks (no
+change; the false lights were the cause), and Mipmap Levels 0 (only a test).
+
+#### Rebuilding it
+
+ChromaPatch never rebuilds Warpledge Edit, so after a ChromaPatch or Eclipse update:
+
+1. Close the game and launch it once so ChromaPatch rebuilds KuraEdit, then close it again.
+2. Move the old `Eclipse-Shader Warpledge Edit.zip` out of `shaderpacks/`, keeping its
+   `.txt`.
+3. From `.minecraft`, run the script on the KuraEdit pack:
+
+   ```bash
+   python3 -I /etc/nixos-config/docs/personal/gaming/minecraft_servers/GTNH/2.9.0/eclipse-warpledge-edit/build.py "shaderpacks/Eclipse-Shader KuraEdit [OBS07-Chroma Patch].zip"
+   ```
+
+   It stops without writing anything if an anchor no longer matches, which means Eclipse
+   changed there and the edit needs redoing by hand from the description above.
+4. If the `.txt` is lost, copy
+   [eclipse-warpledge-edit/settings.txt](./eclipse-warpledge-edit/settings.txt) to
+   `shaderpacks/` as `Eclipse-Shader Warpledge Edit.zip.txt`.
+
+On 2026-11-07 the script's output from KuraEdit matched the hand-edited pack file for
+file.
+
+#### Settings
+
+[eclipse-warpledge-edit/settings.txt](./eclipse-warpledge-edit/settings.txt) is the copy
+from 2026-11-07 03:12. Most values follow KuraEdit where they help GTNH (emission mode,
+brightness and curve, coloured light saturation, minimum light, sharpening off); clouds,
+fog, water and weather stay on Eclipse's defaults. Dated copies, KuramA's file as it was
+used before and the local diffs are in `.minecraft/eclipse-tuning/`.
+
+#### KuramA's settings file
 
 KuramA recommends the `KuraBalanced` profile for FPS and compatibility in GTNH. Their
 config file matches it, checked against the patched `shaders.properties` on 2026-11-06,
@@ -170,6 +170,8 @@ calls the packs a work in progress.
   the Eclipse zip or the patch changes.
 - **Eclipse:** add the new zip to `shaderpacks/` and restart; the newest zip is used. A
   version too far from the target writes no pack, only a `.log`.
+- **Warpledge Edit:** rebuild it after either update, as in
+  [Rebuilding it](#rebuilding-it).
 
 ### Switching back
 
