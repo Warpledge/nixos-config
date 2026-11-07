@@ -91,7 +91,76 @@ The tabs across the top:
 | Set up Claude, opencode and local models | **AI** |
 | Read the guides | **Docs** |
 
-**Window Rules** builds niri rules without writing any config: press **Pick a Window** and click the window (or choose one from **Open Windows**), and its app ID and title fill in. Pick what should happen to it, such as open floating, at a set width or height, maximized, on a workspace or monitor, translucent or hidden from screen capture, then **Add Rule** and **Apply**. The list below shows every rule, the config's and yours, each with a switch to turn it off. Your rules are yours alone; the config's stay in [`window-rules.json`](./modules/wm/niri/home/core/window-rules.json).
+<details>
+<summary>Everything Omni Settings does, tab by tab</summary>
+
+The search box at the top finds any page or setting, including Dux Shell's own. Settings added to the templates since you last looked show on a **What's New** card. Each person changes only their own apps; computer-wide settings, updates and versions are for admins.
+
+#### Maintenance
+
+- **Maintenance:** check for and install updates, pin a package to the version it has now, free up disk space, switch to an earlier version, and set what runs on a schedule (cleaning up old versions, store optimizing, a reminder to update)
+- **Git:** the config's changed files, recent commits, commits waiting to pull and open pull requests
+- **Flatpaks:** apps nixpkgs doesn't have, from Flathub: install, update, switch each on or off and clean up
+- **Backups:** pick which apps' data to back up and where, run a backup, see what the last run saved and restore a copy
+- **Disabled Packages:** packages switched off after an update broke them, and whether they build again
+
+#### System
+
+- **Users:** who can log in, who's an admin, and the name and email on your git commits
+- **System, Boot, Language & Input, Devices, Services:** the computer's name, kernel, boot menu, time zone, language, keyboard layout, Bluetooth, printing, mouse pointer and background services
+- **Default Apps, Startup, File Types:** the apps for links, text, the terminal and folders, environment variables, autostart, and which app opens each file type
+
+#### Packages
+
+- **Search:** find any package in nixpkgs and install it
+- **User Packages:** the packages you added from Search, to move or uninstall
+- **Default Packages:** the apps the config has settings for, as cards by category with each one's options
+
+#### Niri
+
+- **Shell:** tiles that open Dux Shell's settings on the right page: wallpaper and theme, monitors and night light, keyboard, mouse and sound, the bar, dock, launcher and notifications, idle timers and the lock screen
+- **Window Rules:** builds niri rules without writing any config. Press **Pick a Window** and click the window (or choose one from **Open Windows**), and its app ID and title fill in. Pick what should happen to it, such as open floating, at a set width or height, maximized, on a workspace or monitor, translucent or hidden from screen capture, then **Add Rule**. The list shows every rule, the config's and yours, each with a switch to turn it off; the config's stay in [`window-rules.json`](./modules/wm/niri/home/core/window-rules.json)
+- **Side Rail:** the apps on the `Mod+A` rail: turn one off, reorder them, set the width, or add a web page or app of your own
+- **Keybinds:** change a key, turn a keybind off, or add your own, including one that opens or focuses an app you pick
+
+#### Network
+
+- **Connections, Firewall, Blocking, VPN:** Wi-Fi and wired connections, finding file shares, what other devices may reach, the ad and tracker blocklists, and Mullvad with the apps that skip it
+- **Tools:** check the connection and its speed, and how DNS is resolved
+
+#### Security
+
+- **SSH, Antivirus:** logging in from another device, your own SSH keys, and ClamAV scanning
+- **AppArmor:** each app profile's mode and what it would have blocked since boot
+- **Face Auth:** Howdy face unlock, the camera it uses and how dark is too dark
+
+#### Hardware
+
+- **Firmware:** device firmware from fwupd and updates waiting
+- **Drives:** disks, free space and health, and which mount at startup
+- **Battery:** charge, health and where charging stops (laptops)
+- **Run on dGPU:** apps whose launcher starts them on the NVIDIA GPU (hybrid graphics)
+- **CPU Scheduler:** the sched_ext scheduler running now, and switching it until the next restart
+
+#### Gaming
+
+- **Games:** your Steam games, with launch options built for each and its Proton version; they reach Steam once it's closed
+- **Launch Options:** launch options for Steam, Heroic and Lutris to copy, or pick a game's window for its upscaling option
+- **Proton Versions:** the Proton and Wine builds each launcher can use
+- **MangoHud:** what the in-game overlay shows and where, with a test window that shows changes as you make them
+
+#### AI
+
+- **Claude:** Claude Code and Claude Desktop, their plugins, MCP servers and claude.ai connectors, and what Claude sees of each skill and subagent
+- **OpenCode:** opencode's usage bars and rebuild badge
+- **Local AI:** the local model server and its chat page, the models it serves, and tuning how each one loads on the GPU, with a test and a fit check
+
+#### Docs
+
+- **Guides:** the how-tos in `docs/guide/`, starting from the basics
+- **Gaming:** the launch options reference
+
+</details>
 
 If a rebuild fails, the run page offers **Undo My Changes**. If the computer won't start properly, pick an earlier version from the boot menu.
 
