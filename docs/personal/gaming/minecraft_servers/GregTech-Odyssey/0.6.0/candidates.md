@@ -10,6 +10,35 @@ are in `~/Downloads/cosmic_frontiers_notes/`.
 lookup found no 1.20.1 Forge build on Modrinth. Pick a batch, then trial it with
 `gto stage` as described in [updating.md](./updating.md).
 
+## Integrated mods (high priority)
+
+The best structure mods from the Cosmic Frontiers testing. All 11 have 1.20.1 Forge
+builds (Modrinth, 2026-11-07). 8 of them build their structures from Create, Quark and
+Supplementaries blocks, so those three come in as block libraries: their blocks stay
+registered for the structures, while their machines and recipes are removed and hidden.
+dev27 has no KubeJS, so batch 2 adds it for that; the Cosmic Frontiers
+`gregification.md` has the recipe patterns. Create is listed as compatible with GTO on
+the pack's site but has no integration.
+
+| Batch | Mods | Needs from outside dev27 |
+| --- | --- | --- |
+| 1 | Integrated API 1.9.1, Integrated Patches 1.2.0 | none |
+| 2 | IDAS 1.13.0, Integrated Villages 1.3.2, Integrated Stronghold 1.1.1, Integrated Dungeons Arise 2.1.3, Integrated Seven Seas 1.0.0 | Create, Quark, Zeta, Supplementaries, Amendments, Moonlight, KubeJS |
+| 3 | Integrated Cataclysm 1.0.5, Integrated Mowzie's Mobs 1.3.2, Integrated Bosses of Mass Destruction 1.0.0, Integrated Simply Swords 1.3.1 | Each one's base mod: L_Ender's Cataclysm (Lionfish API), Mowzie's Mobs, Bosses of Mass Destruction (Cerbon's API), Simply Swords |
+
+- Integrated Stronghold's last 1.20.1 build is from 2024-03, and Bosses of Mass
+  Destruction's from 2024-01; the rest were updated in 2026.
+- Integrated Dungeons Arise and Seven Seas don't list When Dungeons Arise or WDA: Seven
+  Seas as required. The first trial launch shows whether they need them.
+- Modrinth's dependency lists come from the authors and can be wrong: Integrated
+  Villages lists none, but its jar's `mods.toml` makes Create and Supplementaries
+  mandatory. Read each jar's `mods.toml` when it's added.
+- Batch 1 passed in staging on 2026-11-07 (new world, DH generating, reload, `gto check`
+  clean). It adds no structures by itself, so it stays in staging and goes to main with
+  batch 2.
+- Integrated Stronghold and YUNG's Better Strongholds both replace the stronghold: use
+  one. dev27's End Remastered patches stronghold pieces too.
+
 ## Already in dev27
 
 All The Leaks, AttributeFix, Embeddium, Model Gap Fix, Distant Horizons, Oh The Biomes
@@ -78,12 +107,11 @@ the same spots.
 | When Dungeons Arise: Seven Seas | | Cosmic Frontiers ran the 1.19.2 jar; Modrinth has a 1.20.1 build |
 | Luki's Grand Capitals, Luki's Woodland Mansions | | |
 | Moog's Nether Structures, Moog's Soaring Structures | Moog's Structure Lib | |
-| Integrated Villages | Integrated API | |
 | Structure Essentials | | Spacing control for when you add many structure mods; CurseForge only |
 | Samurai Dynasty | | Adds 6 ores; Cosmic Frontiers suppressed all but Spirit Stone with biome-modifier overrides (`config-tweaks.md`). Its weapons need gregification too |
 | Mowzie's Mobs | | Boss structures |
 | L_Ender's Cataclysm | Lionfish API | Boss arenas and very strong gear: gregify the gear |
-| Integrated Cataclysm, Mowzie's Cataclysm, Simply Swords: Cataclysm, Cataclysm & BetterCombat Compat | | Compat for the mods above; add only with them. Integrated Cataclysm is CurseForge only |
+| Mowzie's Cataclysm, Simply Swords: Cataclysm, Cataclysm & BetterCombat Compat | | Compat for the mods above; add only with them. Integrated Cataclysm is in [the Integrated plan](#integrated-mods-high-priority) |
 
 ## Gameplay changes
 
@@ -108,10 +136,9 @@ sessions in staging before deciding.
 | Majrusz's Difficulty | GTO's own difficulty rules do this job |
 | Inventory Profiles Next, libIPN | dev27 ships Inventory Tweaks; two sorters fight over the same keys |
 | Smooth Chunk Save | Changes how chunks save, on a dev build that already warns of corrupted saves |
-| Integrated Stronghold | Modrinth lists Create, Quark, Supplementaries and Zeta as required; GTO has no Create |
 | Tinkers' Better Combat | Needs Tinkers' Construct, which GTO lacks |
 | Aether Villages | Needs The Aether, which GTO lacks |
-| Quark, Zeta | Too broad to trial in one go (worldgen, automation blocks, mob changes); only worth it with a module-by-module config pass |
+| Quark, Zeta (as a content mod) | Too broad to trial in one go (worldgen, automation blocks, mob changes). It comes in only as a block library for [the Integrated mods](#integrated-mods-high-priority), with a module-by-module config pass |
 | Cupboard | Only a library for the someaddons mods, none of which are on this list |
 
 ## Sources

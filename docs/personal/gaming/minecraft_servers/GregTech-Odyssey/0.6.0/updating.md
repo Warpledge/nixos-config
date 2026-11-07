@@ -35,15 +35,17 @@ build's after an update.
 
 After each launch of a new build or trial:
 
-1. Load the world.
+1. Create a new world for the test (every trial gets its own), or load the copied one
+   for a new build.
 2. Open the quest book and EMI.
 3. Open a running GT multiblock and the AE2 terminal.
 4. Fly into unexplored chunks for a minute (worldgen and Distant Horizons).
 5. Save and quit, relaunch, and load the world again.
 6. Quit and run `gto check`.
 
-A worldgen mod also needs a fresh test world in the staging instance, since chunks that
-already exist never get its features.
+A fresh world matters most for worldgen mods, since chunks that already exist never get
+their features. A new world's first launch logs `Configuration file ... is not correct.
+Correcting` for each server config Forge fills in; that's normal.
 
 ## A new dev build
 
