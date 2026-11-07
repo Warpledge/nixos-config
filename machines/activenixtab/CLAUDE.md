@@ -94,6 +94,9 @@ when Ky approves it.
   (or the notification's "Allow until turned off") has switched that off; opencode
   denies the agents `ask-claude-auto`
 - `home/config-reminder.nix` — a zsh notice when the checkout is behind Warpledge's main
+- `home/dolphin.nix` — Dolphin's Open Terminal Here runs `ghostty +new-window`
+  through kdeglobals' `TerminalApplication`, written by the kdeglobals template's
+  post_hook because matugen rewrites that file on each theme change
 - `home/ghostty.nix` — Ghostty with `ghostty-touch.patch` (a tap clicks at the finger,
   a one-finger drag scrolls), built from source since the patched package isn't
   cached, and the DMS colour theme the shared module doesn't load yet
