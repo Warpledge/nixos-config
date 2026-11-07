@@ -26,6 +26,7 @@ whole file. Its builds are in `newer`, newest first, each with `changelog`, `url
 | --- | --- |
 | `update` | Newer builds exist |
 | `prerelease-only` | Newer builds exist, all pre-releases, while a stable one is installed |
+| `pinned-newer` | A repo tracked by commit (`source: pinned:owner/repo`, for files that aren't jars) has new commits past `pin`; the changelog lists them and the changed files |
 | `baseline-unknown` | The jar matches no listed build (a PR or private build); `newer` holds the latest, which may be older than the jar |
 | `current`, `local`, `no-source` | Nothing to do; `local` is the user's own build and `no-source` has no known page |
 | `missing` | Listed in the sources file, no jar in the instance |
@@ -44,18 +45,23 @@ and failed. Leave out `current` mods apart from a count. For each update give:
 - A 2.9 verdict with its evidence: a changelog, release title or jar name that names 2.9, or
   a dependency it builds against. Without any, say "unproven, a launch is the test". For a
   closer look, read the repo's `dependencies.gradle` or `gradle.properties` at that tag.
-- The entry's `note`, which can overrule the version check. BetterSprinting's 2.x is listed as
-  newer but crashes on 2.9, and Euphoria Patcher is pinned on purpose.
+- The entry's `note`, which can overrule the version check. Euphoria Patcher is listed as newer
+  but pinned on purpose.
 
 A `prerelease-only` update or a pre-release pick gets called out as one. A `disabled` mod is
 off on purpose, so report it but don't install it unless the user asks: installing enables it.
+
+`pinned-newer` entries are the shader setup's Eclipse source and Kura packs. `install.py` can't
+fetch them: on a pick, follow `<pack>/shaders.md`, which says why Eclipse is pinned, then set
+`pin` to the commit installed.
 
 `packNowShips` is a name match against the newest pack's manifest, so check it before saying
 a mod would become a duplicate. On a newer pack, name it and stop there: moving pack is its own
 job, and these jars may not fit it.
 
 For `unmapped` jars, read `mcmod.info` from the jar and try a Modrinth hash lookup, then
-propose the new `mods` entry, or an `ignore` pattern if the pack ships it.
+propose the new `mods` entry, or an `ignore` pattern if the pack ships it. `ignore` also holds
+mods never to check because newer builds break them, such as BetterSprinting; `mods.md` says why.
 
 ## 3. Install what the user picks
 

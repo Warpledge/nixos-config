@@ -162,6 +162,24 @@ def check_curseforge(slug, jar):
     return rows, installed, f"https://www.curseforge.com/minecraft/mc-mods/{slug}/files"
 
 
+def check_pinned(repo, mod):
+    """A repo tracked by commit, for files that aren't jars. Only `paths` matches count."""
+    pin = mod["pin"]
+    diff = gh(f"repos/{repo}/compare/{pin}...HEAD")
+    result = {"installed": pin[:7], "page": f"https://github.com/{repo}/commits"}
+    files = [f["filename"] for f in diff.get("files", [])]
+    if mod.get("paths"):
+        files = [f for f in files if re.search(mod["paths"], f)]
+    if not diff["ahead_by"] or not files:
+        return {**result, "state": "current"}
+    commits = diff["commits"][::-1]
+    log = "\n".join(c["commit"]["message"].split("\n")[0] for c in commits)
+    head = commits[0]
+    return {**result, "state": "pinned-newer", "newer": [
+        entry(head["sha"][:7], head["commit"]["committer"]["date"], False, diff["html_url"],
+              f"{diff['ahead_by']} commits. Files: {', '.join(files)}\n{log}")]}
+
+
 #-- One mod's result
 
 def check_mod(mod, jars, mods_dir):
@@ -169,6 +187,11 @@ def check_mod(mod, jars, mods_dir):
     kind, _, where = source.partition(":")
     parked = mod.get("status") == "parked"
     jar = None
+    if kind == "pinned":
+        try:
+            return {**mod, "jar": None, "newer": [], **check_pinned(where, mod)}
+        except Exception as e:
+            return {**mod, "jar": None, "newer": [], "state": "failed", "error": str(e)[:300]}
     if not parked:
         names = [j for j in jars if re.search(mod["jar"], j)]
         if not names:
@@ -277,7 +300,7 @@ def main():
     with open(out, "w") as f:
         json.dump(report, f, indent=1, ensure_ascii=False)
 
-    order = ["update", "prerelease-only", "baseline-unknown", "failed", "missing", "no-source",
+    order = ["update", "prerelease-only", "pinned-newer", "baseline-unknown", "failed", "missing", "no-source",
              "local", "current"]
     for m in sorted(results, key=lambda m: order.index(m["state"])):
         latest = m["newer"][0]["version"] if m["newer"] else "-"

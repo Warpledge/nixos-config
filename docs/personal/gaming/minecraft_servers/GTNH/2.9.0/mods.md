@@ -209,7 +209,8 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
 - **BetterSprinting 1.1.3**: 2.3.0's coremod fails on 2.9 at the
   `EntityPlayerSP.onLivingUpdate` insertion point. 1.1.3 hooks through PlayerAPI 1.5.0
   instead, which the pack ships, and was installed on both sides on 2026-11-03 to test.
-  It gives sprint toggle, sneak toggle and fly boost, not step assist.
+  It gives sprint toggle, sneak toggle and fly boost, not step assist. Newer versions break
+  it, so the `gtnh-mod-updates` skill leaves it out of its checks.
 - **Advanced Memory Card 1.2.0-1.7.10-GTNH** (2026-11-02): AE2 memory card with bulk
   configuration copy and P2P tunnel management. Declares no dependencies beyond AE2, and
   the copy volume defaults to 2048 blocks.

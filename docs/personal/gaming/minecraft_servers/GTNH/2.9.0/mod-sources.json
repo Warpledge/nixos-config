@@ -3,7 +3,7 @@
     "^industrialcraft-2-", "^AdvancedSolarPanel-", "^BiblioCraft\\[", "^BiblioWoods\\[", "^EMT-", "^GTTweaker-",
     "^HungerOverhaul-", "^OpenGlasses-", "^ProjRed-", "^RWG-alpha-", "^StevesCarts-", "^TConstruct-",
     "^TGregworks-", "^TMechworks-", "^Thaumcraft4Tweaks-", "^WR-CBE-", "^YAMCore-", "^ae2fc-", "^alchgrate-",
-    "^esm-legacy-", "^gregtech-", "^rwg2-", "^salisarcana-"
+    "^esm-legacy-", "^gregtech-", "^rwg2-", "^salisarcana-", "^BetterSprinting-"
   ],
   "mods": [
     {"name": "GT: Not Leisure", "jar": "^sciencenotleisure-", "side": "B", "source": "github:ABKQPO/GT-Not-Leisure", "note": "Needs matching GTNLLib and Better Questing API."},
@@ -49,8 +49,9 @@
     {"name": "Dynamic Surroundings", "jar": "^DynamicSurroundings-", "side": "C", "source": "modrinth:dynamic-surroundings-unofficial-1.7.10"},
     {"name": "Sound-Physics", "jar": "^soundphysics-", "side": "C", "source": "modrinth:sound-physics-1.7.10-mixin-edition"},
     {"name": "ChromaPatch", "jar": "^chromapatch-", "side": "C", "source": "github:Summxx/ChromaPatch", "asset": "forge1710", "note": "A bump can rebuild the patched Eclipse pack; see shaders.md."},
-    {"name": "Euphoria Patcher", "jar": "^EuphoriaPatcher-", "side": "C", "source": "modrinth:euphoria-patches", "note": "Pinned to match NeonTech; a bump means copying the NeonTech values by hand."},
-    {"name": "BetterSprinting", "jar": "^BetterSprinting-", "side": "B", "source": "modrinth:better-sprinting", "note": "2.3.0's coremod aborts on 2.9; 1.1.3 is the working build, so a newer 2.x isn't an upgrade unless it says 2.9."},
+    {"name": "Eclipse Shader", "status": "pinned", "pin": "3c18afcfd89c3bbc4ddf1cf3ea9867731ecd4cc7", "side": "C", "source": "pinned:Merlin1809/Eclipse-Shader", "note": "Pinned to the commit ChromaPatch targets; newer commits may fail to patch, and a move means rebuilding the patched pack. See shaders.md."},
+    {"name": "Kura packs and config", "status": "pinned", "pin": "61984f5947fb4c5b735bd588d5ea44da1eb326da", "paths": "\\.(zip|txt)$", "side": "C", "source": "pinned:KuramA-777/GTNH-2.9.X-Shader-Edits-and-PBR-Packs", "note": "KuraNeon, KuraReflections, KuraBetterCoils, KuraNeonExtras and KuramA's Eclipse config, taken from main. A new config overwrites your own settings."},
+    {"name": "Euphoria Patcher", "jar": "^EuphoriaPatcher-", "side": "C", "source": "modrinth:euphoria-patches", "note": "Only the NeonTech fallback uses it, not the active Eclipse setup. Pinned to match NeonTech; a bump means copying the NeonTech values by hand."},
     {"name": "Advanced Memory Card", "jar": "^advanced_memory_card-", "side": "B", "source": "modrinth:advanced-memory-card"},
     {"name": "WTCT", "jar": "^wtct-", "side": "B", "source": "none", "note": "No public page found; its jar names author 233exp and package com.asdflj.wtct."},
     {"name": "AE2Things", "status": "parked", "lastTried": "v1.2.14", "side": "B", "source": "github:asdflj/AE2Things", "asset": "^ae2thing-", "note": "Built against 2.8.4's AE2 internals; wants a 2.9 build."},
