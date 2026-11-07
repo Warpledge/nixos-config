@@ -72,6 +72,39 @@ Since 2026-11-07 there are two copies of the patched pack:
 - `Eclipse-Shader Warpledge Edit.zip` is a plain copy that starts on the pack's defaults.
   ChromaPatch doesn't rebuild it, so copy the pack again after a patch or Eclipse update.
 
+Warpledge Edit's settings on 2026-11-07, also copied to
+`.minecraft/eclipse-tuning/warpledge-edit-settings-2026-11-07-0130.txt`. To restore them,
+copy that file to `shaderpacks/` as `Eclipse-Shader Warpledge Edit.zip.txt`:
+
+```properties
+AUTO_EXPOSURE=false
+BLOOM_STRENGTH=0.75
+DEFERRED_SSR_QUALITY=100
+EMISSIVE_TYPE_SETTING=2
+Emissive_Brightness=4.0
+Emissive_Curve=1.0
+FORWARD_SSR_QUALITY=100
+HANDHELD_LIGHT_RANGE=20
+HANDHELD_LIGHT_REFLECTIONS=75
+LPV_NORMAL_STRENGTH=70
+LPV_NOSHADOW_HACK=true
+LPV_SATURATION=70
+LPV_TINT_SATURATION=110
+LPV_VL_FOG_ILLUMINATION=false
+LPV_VL_FOG_ILLUMINATION_BRIGHTNESS=0
+LPV_VL_FOG_ILLUMINATION_HANDHELD_WATER=false
+NORMAL_MAP_MULT=0.5
+POM_DEPTH=0.15
+QUARTER_RES_SSR=false
+SHARPENING=25
+STARS_AMOUNT=1.75
+STARS_BRIGHTNESS=1.5
+TORCH_AMOUNT=1.3
+TORCH_B=0.57
+TORCH_G=0.75
+shadowDistance=192.0
+```
+
 The older settings, with local changes on top of KuramA's, are in
 `.minecraft/eclipse-tuning/kuramA-settings-as-used-2026-11-07.txt`. The rest of this
 section describes KuramA's file.
