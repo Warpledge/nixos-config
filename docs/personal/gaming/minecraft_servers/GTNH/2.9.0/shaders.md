@@ -71,15 +71,23 @@ Since 2026-11-07 there are two copies of the patched pack:
   from the pinned commit and unedited.
 - `Eclipse-Shader Warpledge Edit.zip` is a plain copy that starts on the pack's defaults.
   ChromaPatch doesn't rebuild it, so copy the pack again after a patch or Eclipse update,
-  then redo its two edits:
+  then redo its three edits:
+  - `dimensions/all_solid.fsh` has `.minecraft/eclipse-tuning/eclipse-emission-mip.patch`,
+    which fixes distant shimmer and lights that aren't there. labPBR alpha 255 means no
+    glow, and mipmaps averaging it with a glowing texel read as almost full glow, so
+    distant blocks lit up where they have no lights. The patch only lets a texel glow when
+    the full-size texture glows, as Complementary's `customEmission.glsl` does. Official
+    Eclipse `3c18afc` has the same bug, so KuraEdit shows it too. Confirmed in game
+    2026-11-07 with Mipmap Levels at 4.
   - `shaders.properties` drops the blank row under `[Atmosphere]` in the main `screen`, to
     bring back the Misc Settings and Mod Support row. Whether the row was cut off is
     unconfirmed.
   - `dimensions/composite6.fsh` has `.minecraft/eclipse-tuning/eclipse-lod-taa.patch`, to
     calm Distant Horizons shimmer. LOD pixels keep 90% of the last frame, skip the
     anti-ghosting ratio and keep the full 3x3 colour range, as Complementary's TAA does for
-    LODs. Untested in game as of 2026-11-07; the pack before it is
-    `.minecraft/eclipse-tuning/Eclipse-Shader Warpledge Edit before LOD TAA.zip`.
+    LODs. Untested in game on its own as of 2026-11-07. The packs before each patch are in
+    `.minecraft/eclipse-tuning/` as `Eclipse-Shader Warpledge Edit before LOD TAA.zip` and
+    `... before emission fix.zip`.
 
 Warpledge Edit's settings on 2026-11-07, also copied to
 `.minecraft/eclipse-tuning/warpledge-edit-settings-2026-11-07-0210.txt`. To restore them,
