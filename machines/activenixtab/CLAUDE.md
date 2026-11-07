@@ -189,7 +189,9 @@ when Ky approves it.
   archives with a `start.sh` and README for a non-Nix machine: the full
   `~/valheim-server-<date>.tar.gz` (mods, world, admin list, password) and the mods-only
   `~/valheim-mods-<date>.tar.gz`, which updates an existing install without touching its
-  configs or world. It refuses while the server runs so the world is not caught
+  configs or world. On the other machine the archive's `start.sh` prefers a local Gale
+  profile (`VALHEIM_PROFILE` to override) over the bundled mods, so mod updates there
+  need no new archive. It refuses while the server runs so the world is not caught
   mid-save. Gotchas: a vanilla server cannot read the world,
   which is a modded save (world version -1); a paid mod with a licence check,
   OdinShipPlus, refuses to run and stops the server, which is why the profile runs the

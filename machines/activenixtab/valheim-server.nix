@@ -111,19 +111,34 @@
       echo "Install it in Steam (Library, filter Tools), or set VALHEIM_GAME."
       exit 1
     fi
+    #--- A Gale profile on this machine is the source of truth for the mods;
+    #--- the copies in this folder are the fallback
+    if [ -n "$VALHEIM_PROFILE" ]; then
+      profile=$VALHEIM_PROFILE
+    else
+      profile="$HOME/.local/share/com.kesomannen.gale/valheim/profiles/Doobie Canoe With Friends"
+    fi
+    modsrc=$here
+    if [ -d "$profile/BepInEx/plugins" ]; then
+      modsrc=$profile
+      echo "Mods from $profile"
+    fi
+    if [ ! -d "$modsrc/doorstop_libs" ]; then
+      modsrc=$here
+    fi
     mkdir -p "$game/BepInEx"
     if command -v rsync >/dev/null 2>&1; then
-      rsync -a --delete "$here/BepInEx/plugins/" "$game/BepInEx/plugins/"
-      rsync -a --delete "$here/BepInEx/patchers/" "$game/BepInEx/patchers/"
-      rsync -a "$here/BepInEx/core/" "$game/BepInEx/core/"
-      if [ -d "$here/BepInEx/config" ]; then
-        rsync -a --ignore-existing "$here/BepInEx/config/" "$game/BepInEx/config/"
+      rsync -a --delete "$modsrc/BepInEx/plugins/" "$game/BepInEx/plugins/"
+      rsync -a --delete "$modsrc/BepInEx/patchers/" "$game/BepInEx/patchers/"
+      rsync -a "$modsrc/BepInEx/core/" "$game/BepInEx/core/"
+      if [ -d "$modsrc/BepInEx/config" ]; then
+        rsync -a --ignore-existing "$modsrc/BepInEx/config/" "$game/BepInEx/config/"
       fi
-      rsync -a "$here/doorstop_libs/" "$game/doorstop_libs/"
+      rsync -a "$modsrc/doorstop_libs/" "$game/doorstop_libs/"
     else
-      cp -a "$here/BepInEx" "$here/doorstop_libs" "$game/"
+      cp -a "$modsrc/BepInEx" "$modsrc/doorstop_libs" "$game/"
     fi
-    cp -f "$here/doorstop_config.ini" "$game/doorstop_config.ini"
+    cp -f "$modsrc/doorstop_config.ini" "$game/doorstop_config.ini"
     cd "$game"
     export DOORSTOP_ENABLED=1
     export DOORSTOP_TARGET_ASSEMBLY=./BepInEx/core/BepInEx.Preloader.dll
@@ -152,18 +167,27 @@
       If Steam keeps the server elsewhere:
       VALHEIM_GAME="/path/to/Valheim dedicated server" ~/valheim-server/start.sh
 
-    Updating the mods on an existing install
+    Updating the mods
+      With Gale on this machine and the profile "Doobie Canoe With Friends"
+      imported, update the profile in Gale and run start.sh: the mods come
+      from the profile, configs are only seeded, the world stays.
+
+      If Gale keeps profiles somewhere else:
+      VALHEIM_PROFILE="/path/to/Doobie Canoe With Friends" ~/valheim-server/start.sh
+
+      Without Gale here, the mods archive replaces the mod set:
       rm -rf ~/valheim-server/BepInEx/plugins ~/valheim-server/BepInEx/patchers
       tar xzf valheim-mods-DATE.tar.gz -C ~
       ~/valheim-server/start.sh
 
-      Configs, the world and the password are left alone; a mod without a
-      config gets its defaults on the next start.
+      A mod without a config gets its defaults on the next start.
 
     What start.sh does
       Copies the mods and the doorstop files into the Steam install, then runs
       valheim_server.x86_64 with -savedir pointing at worlds/ in this folder.
-      Configs already in the Steam install are never overwritten.
+      The mods come from the local Gale profile when there is one, otherwise
+      from the copies in this folder. Configs already present are never
+      overwritten.
 
     Network
       Open UDP 2456-2458 in the machine firewall.
