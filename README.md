@@ -51,7 +51,7 @@ Colors change live from the shell, with no rebuild:
 - Makes a folder for your computer in `machines/` and one for each person in `users/`
 - Fills in your hardware, time zone, language, keyboard, graphics drivers, monitors and disk unlock from what the installer set up
 - Moves the repo to `/etc/nixos-config`, so every admin can edit it (`~/nixos-config` stays as a link)
-- Builds the new system to start on the next boot
+- Builds the new system to start on the next boot; the first build downloads a lot, so it takes a while
 
 Everyone starts with Zen, kitty, Helix, Zed, Nautilus, yazi, mpv, Steam and Omni Settings.
 
@@ -65,20 +65,33 @@ Other uses:
 
 ## Using It
 
-Open **Omni Settings** with `Mod+S` (`Mod` is the Windows key). Change what you want and press **Apply**: it saves, checks and rebuilds, asking for your password once.
+Open **Omni Settings** with `Mod+S` (`Mod` is the Windows key). Change what you want and press **Apply**: it saves, checks and rebuilds, asking for your password once. The rebuild button at the top rebuilds without changes, and offers **Preview** (build and show what would change) and **At Next Restart**.
+
+The tabs across the top:
 
 | To | Go to |
 | --- | --- |
+| Update everything | **Maintenance** → Maintenance → Update Now |
+| Go back to an earlier version | **Maintenance** → Maintenance → Versions |
+| Free up disk space | **Maintenance** → Maintenance → Free Up Space |
+| Commit or pull the config, back up app data, manage Flatpaks | **Maintenance** → Git, Backups, Flatpaks |
+| Change the kernel, services, language or keyboard | **System** |
+| Add a person | **System** → Users |
+| Set environment variables, autostart or which app opens a file type | **System** → Startup, File Types |
 | Turn apps on or off | **Packages** → Default Packages |
 | Install any other app from nixpkgs | **Packages** → Search → Install |
-| Change the kernel, services, firewall, language or keyboard | **Main**, the pages in the sidebar |
-| Update everything | **Main** → Maintenance → Update Now |
-| Go back to an earlier version | **Main** → Maintenance → Versions |
-| Free up disk space | **Main** → Maintenance → Clean Up Old Versions |
-| Add a person | **Main** → Users |
-| Change monitors, shortcuts, mouse or theme | **Niri** (opens Dux Shell's settings) |
+| Change monitors, mouse, bar or theme | **Niri** → Shell (opens Dux Shell's settings on that page) |
 | Make a window float, size or open on a workspace | **Niri** → Window Rules |
-| Copy a Proton launch option | **Docs** |
+| Change keybinds or the `Mod+A` app rail | **Niri** → Keybinds, Side Rail |
+| Wi-Fi, firewall, ad blocking, VPN, connection checks | **Network** |
+| SSH, antivirus, app sandboxing, face unlock | **Security** |
+| Firmware updates, disks, battery limit, CPU scheduler | **Hardware** |
+| Set a Steam game's launch options and Proton version | **Gaming** → Games |
+| Copy a launch option, add Proton builds, set up the in-game overlay | **Gaming** → Launch Options, Proton Versions, MangoHud |
+| Set up Claude, opencode and local models | **AI** |
+| Read the guides | **Docs** |
+
+**Window Rules** builds niri rules without writing any config: press **Pick a Window** and click the window (or choose one from **Open Windows**), and its app ID and title fill in. Pick what should happen to it, such as open floating, at a set width or height, maximized, on a workspace or monitor, translucent or hidden from screen capture, then **Add Rule** and **Apply**. The list below shows every rule, the config's and yours, each with a switch to turn it off. Your rules are yours alone; the config's stay in [`window-rules.json`](./modules/wm/niri/home/core/window-rules.json).
 
 If a rebuild fails, the run page offers **Undo My Changes**. If the computer won't start properly, pick an earlier version from the boot menu.
 
@@ -105,7 +118,7 @@ git pull --rebase
 
 The commit saves your settings first, so the pull can put my changes underneath them. That's what `--rebase` means: git takes my new commits, then replays yours on top. If there's nothing new of yours to save, the commit says so and stops; run `git pull --rebase` on its own.
 
-Then open Omni Settings and press **Rebuild** at the top. Settings I've added since show up on its **What's New** page.
+Then open Omni Settings, press the rebuild button at the top and pick **Rebuild Now**. Settings I've added since show up on its **What's New** page.
 
 **If you forked the repo on GitHub**, your fork is `origin` and mine has to be added once:
 
@@ -145,6 +158,7 @@ The few to know first:
 | `Mod+Comma` | Dux Shell settings |
 | `Mod+Q` | Close window |
 | `Mod+Tab` | Overview of all windows |
+| `Mod+A` | App side rail |
 
 ## Shell Shortcuts
 
@@ -164,6 +178,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | `ls` / `l` / `ll` | `eza` |
 | `tree` | `eza --tree` |
 | `y` | `yazi` |
+| `icat <image>` | show an image in Kitty |
 | `open <file>` | `xdg-open` |
 
 #### Navigation
@@ -193,6 +208,8 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | `run <pkg>` _(fn)_ | try a package once without installing it (`nix run nixpkgs#<pkg>`) |
 | `listgen` | list system generations |
 | `bloat` | show current system closure size |
+| `cleanup` | `nh clean all --keep 5` (keeps 5 generations to roll back to) |
+| `nixremove` | `nix-store --gc` |
 
 #### System & Misc
 
@@ -201,6 +218,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | `c` / `e` | `clear` / `exit` |
 | `us` / `rs` | `systemctl --user` / `sudo systemctl` |
 | `cleanram` | drop filesystem caches |
+| `trimall` | `sudo fstrim -va` (TRIM every SSD) |
 | `fetch` | `fastfetch` |
 | `anime` | `ani-cli` |
 | `f` | `figlet` |
@@ -266,6 +284,7 @@ The top level is a set of categories. Pick one and it opens into its own menu of
 | `nixm boot` | Build the config and apply it on next boot (`nh os boot`) |
 | `nixm upgrade` | Update all flake inputs and rebuild |
 | `nixm flake-update` | Update flake inputs without rebuilding |
+| `nixm check-updates` | List upstream apps and inputs with a newer version out |
 | `nixm dryrun` | Preview what a rebuild would change |
 | `nixm gc` | Garbage collect, keeping last 5 generations |
 | `nixm optimize` | Hardlink identical files in the Nix store |
@@ -435,7 +454,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | **Printing** | [CUPS][cups], with [Avahi][avahi] finding network printers (`printing.enable`, off by default) |
 | **GPU Tuning** | [LACT][lact] for the desktop's RX 9070 XT, with amdgpu overdrive on so it can undervolt |
 | **Bootloader** | [systemd-boot][systemd-boot] |
-| **Kernel** | [CachyOS kernel][cachyos-kernel] (selectable: zen / latest / xanmod / cachyos), with the [scx_lavd][scx] sched_ext scheduler |
+| **Kernel** | zen by default, or latest, xanmod or the [CachyOS kernel][cachyos-kernel] (`kernel`), with the [scx_lavd][scx] sched_ext scheduler |
 </details>
 
 <details>
@@ -643,8 +662,9 @@ machines/
   └── {eclipse,legion}/           # my machine configs
         ├── settings.nix          # machine toggles, and who logs in
         ├── default.nix           # machine entry
-        ├── hardware/             # hardware-configuration.nix, GPU, LUKS game drives (desktop), swapfile (laptop)
+        ├── hardware/             # hardware-configuration.nix, GPU, storage, swapfile (laptop)
         ├── wm/                   # per-machine WM settings, monitors included
+        ├── games/                # games installed on that machine's drives (desktop)
         └── minecraft-servers/    # GTNH + TerraFirmaGreg servers (laptop)
 users/
   ├── _template/                  # copied for a new person
@@ -655,7 +675,12 @@ modules/
   ├── home/                       # user modules
   ├── theme/                      # matugen templates, DMS theme, GTK, Qt, fonts
   └── wm/                         # window managers
-docs/                             # notes on Proton, security and the WM
+docs/                             # notes and guides
+  ├── guide/                      # how-tos, shown in Omni Settings' Docs tab
+  ├── gaming/                     # launch options, also in the Docs tab
+  ├── nixpkgs/                    # packages switched off after an update broke them
+  ├── security/ wm/               # security and window manager notes
+  ├── todo/                       # planned work
   └── personal/                   # notes for hardware and games only I use
 ```
 
@@ -696,4 +721,5 @@ flake.nix
 | [`claude-code`](https://github.com/sadjow/claude-code-nix) | Claude Code, packaged so it updates without waiting on nixpkgs |
 | [`claude-desktop`](https://github.com/kubastick/claude-desktop-nixos) | Anthropic's Linux .deb of the Claude desktop app, patched for NixOS |
 | [`nix-index-database`](https://github.com/nix-community/nix-index-database) | Prebuilt weekly nix-index database for comma and the command-not-found hint |
+| [`mcp-nixos`](https://github.com/utensils/mcp-nixos) | MCP server that lets AI tools search nixpkgs and NixOS options |
 | [`affinity-nix`](https://github.com/mrshmllow/affinity-nix) | Affinity Suite v3 (Photo, Designer, Publisher) via Wine |
