@@ -170,30 +170,6 @@ when Ky approves it.
 - `home/unreal-engine.nix` — `unreal-editor` and its desktop entry: Epic's prebuilt
   5.8.4 editor in `~/Games/UnrealEngine/` (extracted by hand, not in git), run in
   Steam's FHS environment plus nss/nspr
-- `valheim-server.nix` — `valheim-server.service` hosts Ky's Gale profile ("Doobie
-  Canoe With Friends") on Steam's install in `~/.local/share/valheim-server/game`,
-  re-copied on every start: plugins and patchers follow the profile, while configs are
-  seeded only for mods that have none yet, so the server's own `BepInEx/config` wins
-  from then on. World `NewAsgard2026` is seeded once from Steam Cloud into `worlds/`
-  and owned by the server after that. UDP 2456-2458, `-public 0` so friends add the IP
-  themselves; the password sits in `~/.local/share/valheim-server/env`, never the repo.
-  Admins are SteamID64s in `worlds/adminlist.txt`, beside the save and read at server
-  start, so Ky's own ID stays out of git. The
-  "Valheim Server" desktop entry runs `valheim-console` in Ghostty: it starts the
-  service, follows `logs/server.log` (`-logfile -` plus systemd's append), and closes
-  the window to stop it, so nothing starts at boot. A polkit rule lets that one unit
-  start and stop without a prompt, and `valheim-server-inhibit` holds off idle and lid
-  sleep only while the server runs. Rebuilds leave a running server alone
-  (`restartIfChanged = false`); changed scripts take effect at the next start from the
-  entry, not mid-game. `valheim-export` (the "Export Valheim Server" entry) writes two
-  archives with a `start.sh` and README for a non-Nix machine: the full
-  `~/valheim-server-<date>.tar.gz` (mods, world, admin list, password) and the mods-only
-  `~/valheim-mods-<date>.tar.gz`, which updates an existing install without touching its
-  configs or world. On the other machine the archive's `start.sh` prefers a local Gale
-  profile (`VALHEIM_PROFILE` to override) over the bundled mods, so mod updates there
-  need no new archive. It refuses while the server runs so the world is not caught
-  mid-save. Gotchas: a vanilla server cannot read the world,
-  which is a modded save (world version -1); a paid mod with a licence check,
-  OdinShipPlus, refuses to run and stops the server, which is why the profile runs the
-  free OdinShip instead.
+- The Valheim server moved to the Arch box on 2026-11-07; this machine no longer
+  hosts it.
 - `INSTALL.md` — reinstalling from scratch (run `./setup.sh` and choose “Reinstall activenixtab”; the script will detect the existing machine folder and reapply the exact configuration)

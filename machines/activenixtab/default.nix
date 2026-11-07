@@ -90,7 +90,6 @@
     [
       ./hardware/hardware-configuration.nix
       ./face-auth.nix
-      ./valheim-server.nix
 
       ../../modules
     ]
