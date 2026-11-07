@@ -48,6 +48,7 @@
     {"name": "Distant Horizons", "jar": "^DistantHorizons-", "side": "B", "source": "github:DarkShadow44/DistantHorizonsStandalone", "note": "Client and server run the same jar; config is in mods.md."},
     {"name": "Dynamic Surroundings", "jar": "^DynamicSurroundings-", "side": "C", "source": "modrinth:dynamic-surroundings-unofficial-1.7.10"},
     {"name": "Sound-Physics", "jar": "^soundphysics-", "side": "C", "source": "modrinth:sound-physics-1.7.10-mixin-edition"},
+    {"name": "ChromaPatch", "jar": "^chromapatch-", "side": "C", "source": "github:Summxx/ChromaPatch", "asset": "forge1710", "note": "A bump can rebuild the patched Eclipse pack; see shaders.md."},
     {"name": "Euphoria Patcher", "jar": "^EuphoriaPatcher-", "side": "C", "source": "modrinth:euphoria-patches", "note": "Pinned to match NeonTech; a bump means copying the NeonTech values by hand."},
     {"name": "BetterSprinting", "jar": "^BetterSprinting-", "side": "B", "source": "modrinth:better-sprinting", "note": "2.3.0's coremod aborts on 2.9; 1.1.3 is the working build, so a newer 2.x isn't an upgrade unless it says 2.9."},
     {"name": "Advanced Memory Card", "jar": "^advanced_memory_card-", "side": "B", "source": "modrinth:advanced-memory-card"},

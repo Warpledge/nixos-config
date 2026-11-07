@@ -202,6 +202,8 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
 - **Dynamic Surroundings 1.0.9.0** (2026-09-30): mist475's 1.7.10 fork, newer than the
   2.8.4 jar's 1.0.7.7; adds Seasonal Horizons compatibility.
 - **Sound-Physics 1.1.1** (2026-06-27): the 1.7.10 mixin edition.
+- **ChromaPatch 1.0.2** (2026-11-05): builds the patched Eclipse shader pack at launch;
+  see [shaders.md](./shaders.md#eclipse-with-chromapatch).
 - **Euphoria Patcher 1.9.3** is installed to match the NeonTech settings. 1.10.5 exists,
   but moving to it means copying the NeonTech values by hand.
 - **BetterSprinting 1.1.3**: 2.3.0's coremod fails on 2.9 at the
