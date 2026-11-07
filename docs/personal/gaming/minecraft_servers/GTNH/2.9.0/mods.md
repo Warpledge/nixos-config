@@ -25,10 +25,10 @@ Do not add these: the pack carries its own copy.
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
 | Twist Space Technology | 0.8.0 | B | release 2026-11-02 includes the 2.9 fix (PR #1386) |
 | 123Technology | 2.2.1.1 | B | 2.2.1's release notes say it's adapted to 2.9.0 stable |
-| EZMiner | 6.3 | B | built against `2.9.0-beta-3` |
+| EZMiner | 6.3 | B | no 2.9 evidence since 6.2 (built against `2.9.0-beta-3`) |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
 | EZStorage | 1.8.2 | B | builds against GTNHLib 0.11.52, NEI 2.8.158 |
-| Programmable Hatches | 0.2.1p7-beta | B | changelog: only pack 2.9.0 is supported from this version on |
+| Programmable Hatches | 0.2.1p7-beta | B | p7 notes: only 2.9.0 supported; builds against GT 5.09.54.264, GTNHLib 0.11.54, NEI 2.8.171 |
 | NH-Utilities | 1.7.0 | B | commit "Fit 29x" |
 | YesSteveModel Unofficial | 1.9 | B | wiki lists 2.9.0-beta-1 to RC-2; loads on stable, 2026-11-02 |
 | MineMenu | 1.2.0.B44 | C | latest on Modrinth, 2025-12-07 |
@@ -41,15 +41,19 @@ Do not add these: the pack carries its own copy.
 `bqapi-1.1.3.jar` (GTNLLib >= 1.1, BetterQuestingAPI >= 1.1.3). Without GTNLLib the
 game stops before the main menu with `NoClassDefFoundError: com/gtnllib/mod/ModList`.
 GTNLLib 1.1.1 also fails at launch on Angelica 2.2.43: its font-batch `@ModifyArg` finds
-0 targets, so the font renderer cannot load. 1.1.3 changes that mixin, and 1.1.4 only adds
-GUI themes on top.
+0 targets, so the font renderer cannot load. 1.1.3 changed that mixin, and 1.1.4 only adds
+GUI themes on top: its diff touches no font or mixin files.
 
-**The builds above went on the client on 2026-11-06, and the launch is still to test:**
-GTNLLib 1.1.4, 123Technology 2.2.1.1, EZMiner 6.3, Programmable Hatches 0.2.1p7-beta and the
-MIAOKATZE mods below. The server keeps its old jars until it's updated on the laptop;
-[server.md](./server.md) lists them. Both sides must match to join. 123Technology had been on
-a [PR #269](https://github.com/CallmeSHaobe/123Technology/pull/269) build, because the older
-release crashed during init on 2.9.0 stable; that PR merged on 2026-11-02.
+**The 2026-11-06 update is on the client and the laptop server, and both sides must match to
+join:** GTNLLib 1.1.4, 123Technology 2.2.1.1, EZMiner 6.3, Programmable Hatches 0.2.1p7-beta
+and the five MIAOKATZE mods below. The server booted on them that evening and a client
+joined it (server log); nothing's been tested past that.
+
+**123Technology is back on its release.** Releases before 2.2.1 crash during init on 2.9.0
+stable, so the set ran the build from
+[PR #269](https://github.com/CallmeSHaobe/123Technology/pull/269), merged 2026-11-02, until
+2.2.1.1. Use 2.2.1.1 rather than 2.2.1: with Twist loaded, 2.2.1 skips the recipes of two
+multiblocks (fix for #277).
 
 Twist's tracker had the matching startup-crash report (#1390, from 2026-11-01), and the
 0.8.0 release caught up on 2026-11-02: its changelog lists PR #1386 and its tag sits 11
@@ -65,7 +69,7 @@ server, and the server boots with all of them next to GTNL.
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
 | Waystones-X | 1.0.16 | B | [JackOfNoneTrades fork](https://github.com/JackOfNoneTrades/WaystonesFork) of BlayTheNinth's mod; `config/waystones.cfg` sets `xpBaseCost=-1` |
-| MIAOKATZE Core | 0.2.5 | B | required by the four Miao mods below, on both sides |
+| MIAOKATZE Core | 0.2.5 | B | required by the four Miao mods below, on both sides; GT-Miao-Blueprint 0.3.17 needs 0.2.5+ |
 | GT-Miao-Blueprint | 0.3.17 | B | Neko Blueprint Hologram Projector: blueprint, cut and demolition modes |
 | GT-Steam-Reborn | 2.1.26 | B | steam industry, hubs and nodes, singularity tech, the Prosperity dimension, portable weapons, a BQ line |
 | GT-Interesting-Thing | 2.1.4 | B | float cores, rings, Neko dimensional pocket, infinity storage, coins and trading |

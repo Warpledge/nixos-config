@@ -132,6 +132,10 @@
       gpuOffload = [];
       steamGames = {};
       sideRail = {};
+      claude.skills.gtnhModUpdates = "on";
+      claude.skillModels.gtnhModUpdates = null;
+      backups.folder = "~/SyncBackups";
+      backups.skip = [];
     };
   };
 
@@ -187,7 +191,7 @@
   blocklist.extra = ["fakenews" "gambling" "porn"];
 
   #--- Mullvad VPN
-  mullvad.enable = true;
+  mullvad.enable = false;
   # Apps always routed around the VPN (see nixos/security/mullvad/)
   mullvad.splitTunnel = ["steam" "heroic" "prismlauncher" "opencode" "claude" "spotify" "freetube" "ferdium" "omni-settings" "protonplus" "nix-daemon" "claude-desktop" "lm-studio" "omni-server"];
 
@@ -233,4 +237,5 @@
   faceAuth.enable = false;
   faceAuth.darkThreshold = 90;
   apparmor.enforce = [];
+  drives.mounts = [];
 }

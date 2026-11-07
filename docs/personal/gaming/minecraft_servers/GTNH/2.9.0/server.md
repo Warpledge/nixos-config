@@ -9,8 +9,8 @@ backup; the new one is a separate folder.
 1. Download the 2.9.0 **Java 17-26** server zip from
    [the version history page](https://www.gtnewhorizons.com/version-history/) and unpack
    it to `~/Documents/Minecraft_Servers/GT_New_Horizons_2.9.0_Server_Modified`.
-2. Copy the server-side mods from [mods.md](./mods.md): every row marked **B**, using
-   123Technology's PR build; Twist uses its 0.8.0 release. Leave out **C**-only rows.
+2. Copy the server-side mods from [mods.md](./mods.md): every row marked **B**. Leave out
+   **C**-only rows.
 3. `machines/legion/minecraft-servers/gtnh-server.nix` now points its `serverDir` and
    header comment at that folder. The Java path (`jdk25`), the JVM args and the tmux
    crash loop are unchanged.
@@ -51,16 +51,16 @@ uses 12288 MB and already loads the translation agent.
 
 From [mods.md](./mods.md), the **B** rows:
 
-- GTNL 0.2.7-rc2.1 with GTNLLib 1.1.3 and BetterQuestingAPI 1.1.3, GTNHRates 1.12.0-2.9,
+- GTNL 0.2.7-rc2.1 with GTNLLib 1.1.4 and BetterQuestingAPI 1.1.3, GTNHRates 1.12.0-2.9,
   Twist Space `TwistSpaceTechnology-0.8.0.jar` (release 2026-11-02),
-  123Technology `OTHTechnology-2.2.0.1-git.3+2b1a0b5fbd.jar` (PR #269), EZMiner 6.2,
-  EZNuclear 1.1.1, EZStorage 1.8.2, NH-Utilities 1.7.0, Programmable Hatches 0.2.1p2-beta
+  123Technology `OTHTechnology-2.2.1.1.jar`, EZMiner 6.3,
+  EZNuclear 1.1.1, EZStorage 1.8.2, NH-Utilities 1.7.0, Programmable Hatches 0.2.1p7-beta
 - ElytraMining 1.2.0.1, Trash Slot 1.0.31, SharedProspecting 2.0.4
 - YesSteveModel Unofficial 1.9, with its models in `config/ysmu/custom/`
 - Distant Horizons `upstream-preview8-rple-biomes`, so the server builds and syncs the
   LODs the client shows (see mods.md for the generation settings)
-- Waystones-X 1.0.16, MIAOKATZE Core 0.2.0, GT-Miao-Blueprint 0.3.0,
-  GT-Steam-Reborn 2.1.1, GT-Interesting-Thing 2.1.0, GT-Simple-Wireless-Network 2.1.0
+- Waystones-X 1.0.16, MIAOKATZE Core 0.2.5, GT-Miao-Blueprint 0.3.17,
+  GT-Steam-Reborn 2.1.26, GT-Interesting-Thing 2.1.4, GT-Simple-Wireless-Network 2.1.15
 - ThinkTech 0.3.1, OmniOcular Unofficial 1.6.0, BetterSprinting 1.1.3,
   Advanced Memory Card 1.2.0-1.7.10-GTNH, WTCT 1.0.63-rc1, Omni Tweaks 0.2.0,
   Effortless Building Gadgets 0.10.1
