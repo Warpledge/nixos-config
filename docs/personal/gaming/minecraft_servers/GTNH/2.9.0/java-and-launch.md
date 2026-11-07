@@ -28,11 +28,13 @@ only reach the other instances. ZGC is generational-only on Java 25, so there is
 
 Memory is overridden too (`OverrideMemory=true`, 14336 MB min and max). A GC log from a
 21-minute session on the laptop server at 12 GB (2026-11-07) showed a steady 5-6 GB live
-set but five allocation stalls of 50-107 ms, when Angelica and Distant Horizons chunk
-building filled the heap before ZGC caught up. The soft cap makes ZGC collect as if the
-heap were 11 GB and keeps the last 3 GB for those bursts. An `Allocation Stall` line in a
-GC log means the reserve ran out. With the local server on the desktop at the same time,
-use 12 GB with `SoftMaxHeapSize=10g`. To log GC in a running client, use
+set but five allocation stalls of 50-107 ms. They lined up with five Waystones teleports
+of 1k-3k blocks, where Angelica and Distant Horizons rebuild the whole view at once and
+fill the heap before ZGC catches up; play between teleports had none. The soft cap makes
+ZGC collect as if the heap were 11 GB and keeps the last 3 GB for those bursts. An
+`Allocation Stall` line in a GC log means the reserve ran out. With the local server on
+the desktop at the same time, use 12 GB with `SoftMaxHeapSize=10g`. To log GC in a
+running client, use
 `jcmd <pid> VM.log output=file=<path> what=gc,gc+heap=info decorators=uptime,level,tags`
 with the instance's JDK.
 
