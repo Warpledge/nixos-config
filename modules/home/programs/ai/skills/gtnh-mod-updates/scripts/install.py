@@ -3,7 +3,8 @@
 
 Usage: install.py REPORT "Mod Name" "Other Mod=version" ...
 A bare name takes the newest stable build, or the newest build if none is stable.
-The old jar moves to .minecraft/backups/replaced-mods/<date>/; nothing is deleted.
+The report's role says where it goes: the client, or the server on a server machine.
+The old jar moves to backups/replaced-mods/<date>/ on that side; nothing is deleted.
 """
 import argparse
 import datetime
@@ -33,16 +34,6 @@ def running_in(folders):
         if any(cwd == f or cwd.startswith(f + "/") for f in folders):
             pids.append(os.path.basename(proc))
     return pids
-
-
-def server_folder(pack):
-    """The Omni Server folder for this pack version, existing or not."""
-    want = "gtnh-" + pack.replace(".", "-")
-    path = os.path.expanduser(f"~/.config/omni-server/servers/{want}.json")
-    if not os.path.exists(path):
-        return None
-    with open(path) as f:
-        return json.load(f).get("dir")
 
 
 def download(url, dest):
@@ -94,14 +85,15 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     ap.add_argument("report")
     ap.add_argument("mods", nargs="+", metavar="MOD[=VERSION]")
-    ap.add_argument("--server", help="server folder (default: Omni Server's for this pack)")
     args = ap.parse_args()
 
     with open(args.report) as f:
         report = json.load(f)
     by_name = {m["name"]: m for m in report["mods"]}
-    server = args.server or server_folder(report["pack"])
-    has_server = bool(server and os.path.isdir(os.path.join(server, "mods")))
+    is_server = report["role"] == "server"
+    server = report["serverDir"]
+    other = [host for host, role in report["machines"].items() if role != report["role"]]
+    other = other[0] if other else "the other machine"
 
     picks = []
     for arg in args.mods:
@@ -114,16 +106,15 @@ def main():
             sys.exit(f"No installable build for {arg}; its source has no jar to download.")
         picks.append((mod, build))
 
-    folders = [os.path.realpath(report["instance"])]
-    if has_server:
-        folders.append(os.path.realpath(server))
+    folders = [os.path.realpath(p) for p in (report["instance"], server) if p]
     pids = running_in(folders)
     if pids:
         sys.exit(f"Close the game and stop the server first; java is running there: {pids}")
 
     stamp = datetime.date.today().isoformat()
-    client_backup = os.path.join(report["instance"], ".minecraft/backups/replaced-mods", stamp)
-    manual, failed = [], []
+    server_backup = os.path.join(server, "backups/replaced-mods", stamp) if server else None
+    server_mods = os.path.join(server, "mods") if server else None
+    failed = []
     with tempfile.TemporaryDirectory(prefix="gtnh-mod-updates-") as tmp:
         for mod, build in picks:
             name = build["asset"]["name"]
@@ -135,30 +126,28 @@ def main():
                 failed.append(f"{mod['name']}: {e}")
                 continue
             pattern = mod.get("jarPattern")
-            swap(report["modsDir"], pattern, path, client_backup)
-            where = "client"
-            if mod["side"] == "B":
-                if has_server:
-                    swap(os.path.join(server, "mods"), pattern, path,
-                         os.path.join(server, "backups/replaced-mods", stamp))
-                    where = "client and server"
-                else:
-                    keep = os.path.join(client_backup, "for-server")
-                    os.makedirs(keep, exist_ok=True)
-                    shutil.copy2(path, keep)
-                    manual.append(f"{name} (replaces {mod.get('jar')})")
+            if is_server:
+                swap(server_mods, pattern, path, server_backup)
+                where = "server"
+            else:
+                client_backup = os.path.join(report["instance"],
+                                             ".minecraft/backups/replaced-mods", stamp)
+                swap(report["modsDir"], pattern, path, client_backup)
+                where = "client"
+                # A client machine's own server is only there for debugging
+                if mod["side"] == "B" and server:
+                    swap(server_mods, pattern, path, server_backup)
+                    where = "client and this machine's debug server"
             print(f"{mod['name']}: {mod.get('jar')} -> {name} on {where}; checked {checked}")
             if mod.get("note"):
                 print(f"  Note: {mod['note']}")
 
-    if manual:
-        print(f"\nNo server mods folder here. Copy these to the server by hand, from "
-              f"{client_backup}/for-server, or the two sides won't match:")
-        for line in manual:
-            print(f"  {line}")
     failed_names = {line.partition(":")[0] for line in failed}
-    if any(m["side"] == "B" and m["name"] not in failed_names for m, _ in picks):
-        print("\nBack up the world before the server loads these.")
+    shared = [m["name"] for m, _ in picks if m["side"] == "B" and m["name"] not in failed_names]
+    if shared:
+        print(f"\nBoth sides must match. Update these on {other} too: {', '.join(shared)}")
+        if is_server or server:
+            print("Back up the world before the server loads these.")
     if failed:
         print("\nNot installed:")
         for line in failed:

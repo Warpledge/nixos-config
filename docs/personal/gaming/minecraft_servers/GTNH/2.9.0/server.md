@@ -17,8 +17,9 @@ backup; the new one is a separate folder.
 
 ## Local server on the desktop
 
-The same folder is unpacked on eclipse, with the mods and configs below copied over, and
-this is the copy in use (checked 2026-11-05):
+The laptop hosts the server, and the desktop is client only apart from debugging. For that,
+the same folder is unpacked on eclipse with the mods and configs below copied over. It was
+the copy in use on 2026-11-05 and wasn't on the desktop on 2026-11-06. When it's there:
 
 - The Omni Server app runs it as `gtnh-2-9-0`
   (`~/.config/omni-server/servers/gtnh-2-9-0.json`): Java 25, 6144 MB heap, the G1 preset

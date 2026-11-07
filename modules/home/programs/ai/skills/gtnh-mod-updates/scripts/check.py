@@ -11,6 +11,7 @@ import hashlib
 import json
 import os
 import re
+import socket
 import subprocess
 import sys
 import urllib.parse
@@ -18,6 +19,8 @@ import urllib.request
 
 UA = "gtnh-mod-updates (github.com/Warpledge/nixos-config)"
 INSTANCES = "~/.local/share/PrismLauncher/instances/GT_New_Horizons_*"
+OMNI_SERVERS = "~/.config/omni-server/servers/gtnh-*.json"
+SERVERS = "~/Documents/Minecraft_Servers/GT_New_Horizons_*_Server_Modified"
 MANIFESTS = "repos/GTNewHorizons/DreamAssemblerXXL/contents/releases/manifests"
 RAW_MANIFEST = ("https://raw.githubusercontent.com/GTNewHorizons/DreamAssemblerXXL/"
                 "master/releases/manifests/{}.json")
@@ -47,21 +50,38 @@ def find_instance(given):
     return found[-1]
 
 
-def pack_version(instance):
-    m = re.search(r"GT_New_Horizons_(\d+(?:\.\d+)+)", instance)
-    return m.group(1) if m else None
-
-
-def find_sources(given, pack):
+def find_server(given):
+    """The server folder with a mods/ on this machine, or None."""
     if given:
         return given
-    top = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True)
-    repo = top.stdout.strip() or os.getcwd()
-    return f"{repo}/docs/personal/gaming/minecraft_servers/GTNH/{pack}/mod-sources.json"
+    dirs = []
+    for path in glob.glob(os.path.expanduser(OMNI_SERVERS)):
+        with open(path) as f:
+            dirs.append(json.load(f).get("dir", ""))
+    dirs += glob.glob(os.path.expanduser(SERVERS))
+    found = [d for d in dirs if os.path.isdir(os.path.join(d, "mods"))]
+    return max(found, key=os.path.getmtime) if found else None
+
+
+def pack_version(folder):
+    m = re.search(r"GT_New_Horizons_(\d+(?:\.\d+)+)", folder)
+    return m.group(1) if m else None
 
 
 def version_key(v):
     return tuple(int(x) for x in v.split("."))
+
+
+def find_sources(given):
+    """Read before the pack is known, since it says which folder holds the pack's mods."""
+    if given:
+        return given
+    top = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True)
+    repo = top.stdout.strip() or os.getcwd()
+    found = glob.glob(f"{repo}/docs/personal/gaming/minecraft_servers/GTNH/*/mod-sources.json")
+    if not found:
+        sys.exit("No GTNH mod-sources.json in this repo's docs/personal.")
+    return max(found, key=lambda p: version_key(os.path.basename(os.path.dirname(p))))
 
 
 def clean(name):
@@ -258,23 +278,41 @@ def pack_owns(jar, manifest):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--role", choices=["client", "server"],
+                    help="what to check (default: this machine's role in mod-sources.json)")
     ap.add_argument("--instance", help="Prism instance folder (default: newest GTNH one)")
-    ap.add_argument("--sources", help="mod-sources.json (default: the pack's folder in docs/)")
+    ap.add_argument("--server", help="server folder (default: found on this machine)")
+    ap.add_argument("--sources", help="mod-sources.json (default: newest pack's in docs/)")
     ap.add_argument("--out", help="report path (default: $XDG_RUNTIME_DIR)")
     args = ap.parse_args()
 
-    instance = find_instance(args.instance)
-    pack = pack_version(instance)
-    mods_dir = os.path.join(instance, ".minecraft", "mods")
-    with open(find_sources(args.sources, pack)) as f:
+    with open(find_sources(args.sources)) as f:
         sources = json.load(f)
+    machines = sources.get("machines", {})
+    host = socket.gethostname()
+    role = args.role or machines.get(host)
+    if not role:
+        sys.exit(f"{host} isn't under machines in mod-sources.json; pass --role client or server.")
+
+    server = find_server(args.server)
+    if role == "server":
+        if not server:
+            sys.exit("No GTNH server folder with a mods/ on this machine.")
+        instance, mods_dir, pack = None, os.path.join(server, "mods"), pack_version(server)
+        # A server has no use for client-only mods, so they aren't checked at all
+        wanted = [m for m in sources["mods"] if m["side"] == "B"]
+    else:
+        instance = find_instance(args.instance)
+        mods_dir, pack = os.path.join(instance, ".minecraft", "mods"), pack_version(instance)
+        wanted = sources["mods"]
     out = args.out or os.path.join(os.environ.get("XDG_RUNTIME_DIR", "/tmp"), "gtnh-mod-updates.json")
 
     jars = sorted(j for j in os.listdir(mods_dir) if j.endswith((".jar", ".jar.disabled")))
     with concurrent.futures.ThreadPoolExecutor(8) as pool:
-        results = list(pool.map(lambda m: check_mod(m, jars, mods_dir), sources["mods"]))
+        results = list(pool.map(lambda m: check_mod(m, jars, mods_dir), wanted))
 
-    report = {"instance": instance, "pack": pack, "modsDir": mods_dir, "mods": results,
+    report = {"role": role, "machines": machines, "instance": instance, "serverDir": server,
+              "pack": pack, "modsDir": mods_dir, "mods": results,
               "unmapped": [], "packError": None, "newerPack": None, "packNowShips": []}
     try:
         manifest = manifest_mods(pack)
@@ -307,7 +345,10 @@ def main():
         have = m.get("installed") or m.get("lastTried") or m.get("jar") or "-"
         tag = " [parked]" if m.get("status") == "parked" else " [disabled]" if m.get("disabled") else ""
         print(f"{m['state']:<17} {m['name'] + tag:<38} {str(have)[:34]:<35} {latest[:34]}")
-    print(f"\nPack {pack}; newer stable pack: {report['newerPack'] or 'none'}")
+    print(f"\n{host} as {role}: {mods_dir}")
+    if role == "client" and server:
+        print(f"Debug server on this machine: {server}")
+    print(f"Pack {pack}; newer stable pack: {report['newerPack'] or 'none'}")
     for key in ("unmapped", "packNowShips", "packError"):
         if report[key]:
             print(f"{key}: {report[key]}")

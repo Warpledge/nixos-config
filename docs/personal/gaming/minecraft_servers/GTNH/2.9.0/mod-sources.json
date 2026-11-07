@@ -1,5 +1,7 @@
 {
+  "machines": {"eclipse": "client", "legion": "server"},
   "ignore": [
+    "^JourneyMapServer",
     "^industrialcraft-2-", "^AdvancedSolarPanel-", "^BiblioCraft\\[", "^BiblioWoods\\[", "^EMT-", "^GTTweaker-",
     "^HungerOverhaul-", "^OpenGlasses-", "^ProjRed-", "^RWG-alpha-", "^StevesCarts-", "^TConstruct-",
     "^TGregworks-", "^TMechworks-", "^Thaumcraft4Tweaks-", "^WR-CBE-", "^YAMCore-", "^ae2fc-", "^alchgrate-",
