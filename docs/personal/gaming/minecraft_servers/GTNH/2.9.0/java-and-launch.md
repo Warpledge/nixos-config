@@ -2,19 +2,21 @@
 
 ## Java
 
-- The instance points at OpenJDK 25 (`/nix/store/6mjvrmphia72izv1qpm04j5fkvpqjbhy-openjdk-25.0.4.1+1/bin/java`,
-  `JavaVersion=25.0.4.1`).
+- The instance runs `/run/current-system/sw/bin/java`, the system's OpenJDK 25 (25.0.5
+  on 2026-11-07), as do TerraFirmaGreg, GregTech Odyssey and Prism's global setting.
+  A `/nix/store` path breaks once garbage collection removes an older JDK after an
+  update; the link follows the system. Prism's AppArmor profile allows both.
 - 2.9.0 ships as a Java 17-26 pack. The [Installing and Migrating](https://wiki.gtnewhorizons.com/wiki/Installing_and_Migrating)
   page (read 2026-11-02) recommends Prism with **Java 25+** over everything else,
   calling 25 the most optimized and least memory-hungry runtime for GTNH, and notes that
   25 needs 2.8+ and 26 needs 2.9+.
 - The same page suggests `-XX:+UseCompactObjectHeaders` on Java 25+. The instance sets it
-  through `OverrideJavaArgs=true` and `JvmArgs=-XX:+UseCompactObjectHeaders`; the pack's
-  own args come from the lwjgl3ify launchargs patch, not from that field.
-- `modules/nixos/gaming/tools/java.nix` marks jdk21 `lowPrio`, so the profile's `java` is
-  25 (25.0.5, checked 2026-11-04). The local server's `start.sh` doesn't use it: it pins
-  the same 25.0.4.1 store path as the instance (override with `GTNH_JAVA=...`) and passes
-  the same flag. The laptop module uses `pkgs.jdk25` and passes it too.
+  in `JvmArgs` (see [JVM args](#jvm-args)); the pack's own args come from the lwjgl3ify
+  launchargs patch, not from that field.
+- `modules/nixos/gaming/tools/java.nix` marks jdk21 `lowPrio`, so the system's `java` is
+  25; changing that changes every Prism instance. The desktop server's `start.sh` pinned
+  the old 25.0.4.1 store path (override with `GTNH_JAVA=...`), so point it at the link
+  if that copy comes back. The laptop module uses `pkgs.jdk25`.
 
 ## JVM args
 
