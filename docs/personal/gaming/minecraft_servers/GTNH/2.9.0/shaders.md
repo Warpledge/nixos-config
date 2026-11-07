@@ -70,10 +70,19 @@ Since 2026-11-07 there are two copies of the patched pack:
 - `Eclipse-Shader KuraEdit [OBS07-Chroma Patch].zip` has KuramA's file, downloaded fresh
   from the pinned commit and unedited.
 - `Eclipse-Shader Warpledge Edit.zip` is a plain copy that starts on the pack's defaults.
-  ChromaPatch doesn't rebuild it, so copy the pack again after a patch or Eclipse update.
+  ChromaPatch doesn't rebuild it, so copy the pack again after a patch or Eclipse update,
+  then redo its two edits:
+  - `shaders.properties` drops the blank row under `[Atmosphere]` in the main `screen`, to
+    bring back the Misc Settings and Mod Support row. Whether the row was cut off is
+    unconfirmed.
+  - `dimensions/composite6.fsh` has `.minecraft/eclipse-tuning/eclipse-lod-taa.patch`, to
+    calm Distant Horizons shimmer. LOD pixels keep 90% of the last frame, skip the
+    anti-ghosting ratio and keep the full 3x3 colour range, as Complementary's TAA does for
+    LODs. Untested in game as of 2026-11-07; the pack before it is
+    `.minecraft/eclipse-tuning/Eclipse-Shader Warpledge Edit before LOD TAA.zip`.
 
 Warpledge Edit's settings on 2026-11-07, also copied to
-`.minecraft/eclipse-tuning/warpledge-edit-settings-2026-11-07-0130.txt`. To restore them,
+`.minecraft/eclipse-tuning/warpledge-edit-settings-2026-11-07-0210.txt`. To restore them,
 copy that file to `shaderpacks/` as `Eclipse-Shader Warpledge Edit.zip.txt`:
 
 ```properties
@@ -86,9 +95,11 @@ Emissive_Curve=1.0
 FORWARD_SSR_QUALITY=100
 HANDHELD_LIGHT_RANGE=20
 HANDHELD_LIGHT_REFLECTIONS=75
+Haze_amount=0.6
 LPV_NORMAL_STRENGTH=70
 LPV_NOSHADOW_HACK=true
 LPV_SATURATION=70
+LPV_SIZE=8
 LPV_TINT_SATURATION=110
 LPV_VL_FOG_ILLUMINATION=false
 LPV_VL_FOG_ILLUMINATION_BRIGHTNESS=0
@@ -96,12 +107,15 @@ LPV_VL_FOG_ILLUMINATION_HANDHELD_WATER=false
 NORMAL_MAP_MULT=0.5
 POM_DEPTH=0.15
 QUARTER_RES_SSR=false
-SHARPENING=25
+RAIN_MODE=0
+SHARPENING=0
 STARS_AMOUNT=1.75
 STARS_BRIGHTNESS=1.5
 TORCH_AMOUNT=1.3
 TORCH_B=0.57
 TORCH_G=0.75
+VL_RENDER_SCALE=1.0
+VL_SAMPLES=4
 shadowDistance=192.0
 ```
 
