@@ -128,6 +128,9 @@
       backups.skip = [];
       claude.skills.gtnhModUpdates = "on";
       claude.skillModels.gtnhModUpdates = null;
+      claude.mods.blastRadius = false;
+      claude.statusLine = false;
+      claude.mods.fileTree = false;
     };
   };
 

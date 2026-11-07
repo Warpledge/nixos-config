@@ -36,7 +36,7 @@ const fold = atom({ plugin: 'usage-band', key: 'fold' } as const, null as Fold |
 const palette = atom({ plugin: 'usage-band', key: 'palette' } as const, null as Palette | null)
 const repo = atom({ plugin: 'usage-band', key: 'repo' } as const, null as RepoState | null)
 
-const NAMES: Record<string, string> = { five_hour: '5H', seven_day: '7D', spend_limit: 'SPEND', context: 'CTX' }
+const NAMES: Record<string, string> = { five_hour: '5H', seven_day: '7D', spend_limit: 'SPEND' }
 /** How long each timed window runs; the pace tick marks how much of it has passed. */
 const WINDOW_MS: Record<string, number> = { five_hour: 5 * 3600_000, seven_day: 7 * 24 * 3600_000 }
 /** A terminal needs this many columns to fit all three bars on one row. */
@@ -227,7 +227,7 @@ export const register: Register = on => {
     const INK = p?.ink ?? 'inverseText'
     const OK = p?.ok ?? 'success'
     const barColor = (kind: string) =>
-      kind === 'five_hour' ? (p?.five ?? 'suggestion') : kind === 'context' ? TEXT : (p?.seven ?? 'claude')
+      kind === 'five_hour' ? (p?.five ?? 'suggestion') : (p?.seven ?? 'claude')
     const hue = (mode: 'warm' | 'cold') => (p ? hueOf(p, mode) : mode === 'warm' ? 'warning' : 'suggestion')
     const bg = p ? { backgroundColor: p.bg } : {}
 
@@ -339,10 +339,7 @@ export const register: Register = on => {
         <Text color={TEXT} bold>USAGE</Text>
       </Box>
     )
-    // Context fills the same way a window does, and it's known once a reply has landed.
-    const context: Window[] =
-      view && view.window > 0 ? [{ kind: 'context', percentUsed: Math.round((view.tokens / view.window) * 100) }] : []
-    const shown = [...list, ...context]
+    const shown = list
     const usage = shown.length > 0
       ? shown.map(isWide ? wide : stacked)
       : [<Box key="wait" flexShrink={0} marginRight={3}><Text color={MUTED}>waiting for the first reply</Text></Box>]
