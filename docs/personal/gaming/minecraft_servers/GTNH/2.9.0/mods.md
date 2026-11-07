@@ -190,9 +190,21 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
 - **Xaero's Minimap 21.10.44 and World Map 1.14.1.33** (2026-11-07, client only): the
   last 1.7.10 Forge builds, from Modrinth, and the CurseForge files Navigator 1.1.10
   compiles against (`dependencies.gradle`). They replace JourneyMap, which is disabled.
-  Angelica#2092 is open: Xaero's World Map crashes with Angelica when a pack retextures
-  lava (Modernity does) and Witching Gadgets' Thaumic Stone Extruder is on screen.
   Angelica#1851, a crash on opening NEI, was closed 2026-06-11.
+- **Angelica#2092** (open, checked 2026-11-07): Xaero's World Map crashes the game with
+  an `OpenGLException` when Witching Gadgets' Thaumic Stone Extruder is on screen and a
+  resource pack retextures lava. The Extruder's model uses the active lava texture. Both
+  Modernity packs ship `assets/minecraft/textures/blocks/lava_still.png` and
+  `lava_flow.png`, each with a `.png.mcmeta`. If it hits, don't edit the Modernity zips,
+  since an update replaces them. Make a small pack instead, in a folder like
+  `resourcepacks/VanillaLava/`:
+  1. A `pack.mcmeta` with `{"pack": {"pack_format": 1, "description": "Vanilla lava"}}`.
+  2. The four vanilla lava files at the same paths, copied from the 1.7.10 client jar
+     (`~/.local/share/PrismLauncher/libraries/com/mojang/minecraft/1.7.10/`).
+  3. Enable it and move it above both Modernity packs.
+
+  Untested; the report only shows a modified lava texture triggers it. If the crash
+  persists, remove `XaerosWorldMap_*.jar` until the issue is fixed.
 
 - **SharedProspecting 2.0.4**: built against VisualProspecting 1.5.11 and GTNHLib 0.9.0.
   Its six late mixins still match VP 1.5.42 as shipped in 2.9 (checked 2026-11-01); the
