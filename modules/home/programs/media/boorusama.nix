@@ -11,12 +11,11 @@
 #- app runs. One-time setup per machine: boorusama-vault-init.
 {pkgs, ...}: let
   pname = "boorusama";
-  version = "4.6.1";
-  build = "188";
+  version = "4.6.2";
 
   src = pkgs.fetchurl {
-    url = "https://github.com/khoadng/Boorusama/releases/download/v${version}/${pname}-${version}+${build}-linux-x64.AppImage";
-    hash = "sha256-D65TDPpN+vNxPDJJUfVzAP1SfqXbPf+NSh/sFbNVhIk=";
+    url = "https://github.com/khoadng/Boorusama/releases/download/v${version}/${pname}-${version}-linux-x64.AppImage";
+    hash = "sha256-tJv5ZVWsqHy79Wux4geWM64DoM2iqNa4mjGEcJJvvqI=";
   };
 
   #-- Unpacked only to lift out the icon and desktop entry
