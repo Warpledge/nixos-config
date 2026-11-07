@@ -24,11 +24,11 @@ Do not add these: the pack carries its own copy.
 | GT: Not Leisure (GTNL) | 0.2.7-rc2.1 | B | README: 2.9.0 needs `0.2.7+` |
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
 | Twist Space Technology | 0.8.0 | B | release 2026-11-02 includes the 2.9 fix (PR #1386) |
-| 123Technology | 2.2.0.1 PR build | B | release crashes on 2.9.0 stable; use PR #269 |
-| EZMiner | 6.2 | B | built against `2.9.0-beta-3` |
+| 123Technology | 2.2.1.1 | B | 2.2.1's release notes say it's adapted to 2.9.0 stable |
+| EZMiner | 6.3 | B | built against `2.9.0-beta-3` |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
 | EZStorage | 1.8.2 | B | builds against GTNHLib 0.11.52, NEI 2.8.158 |
-| Programmable Hatches | 0.2.1p2-beta | B | builds against GTNHLib 0.11.54, NEI 2.8.171 |
+| Programmable Hatches | 0.2.1p7-beta | B | changelog: only pack 2.9.0 is supported from this version on |
 | NH-Utilities | 1.7.0 | B | commit "Fit 29x" |
 | YesSteveModel Unofficial | 1.9 | B | wiki lists 2.9.0-beta-1 to RC-2; loads on stable, 2026-11-02 |
 | MineMenu | 1.2.0.B44 | C | latest on Modrinth, 2025-12-07 |
@@ -37,25 +37,24 @@ Do not add these: the pack carries its own copy.
 | Trash Slot | 1.0.31 | B | latest 1.7.10 on CurseForge |
 | ElytraMining | 1.2.0.1 | B | latest, 2023, no GT API use |
 
-**GTNL needs two jars the pack does not ship:** `gtnllib-1.1.3.jar` and
+**GTNL needs two jars the pack does not ship:** `gtnllib-1.1.4.jar` and
 `bqapi-1.1.3.jar` (GTNLLib >= 1.1, BetterQuestingAPI >= 1.1.3). Without GTNLLib the
 game stops before the main menu with `NoClassDefFoundError: com/gtnllib/mod/ModList`.
 GTNLLib 1.1.1 also fails at launch on Angelica 2.2.43: its font-batch `@ModifyArg` finds
-0 targets, so the font renderer cannot load. 1.1.3 changes that mixin and is the build
-to use.
+0 targets, so the font renderer cannot load. 1.1.3 changes that mixin, and 1.1.4 only adds
+GUI themes on top.
 
-**123Technology still needs its unreleased PR build for 2.9.0 stable.** The published jar
-crashes during init; its stable compatibility is on an open PR:
-
-| Mod | Jar to use | Source |
-| --- | --- | --- |
-| 123Technology | `OTHTechnology-2.2.0.1-git.3+2b1a0b5fbd.jar` | [PR #269](https://github.com/CallmeSHaobe/123Technology/pull/269) |
+**The builds above went on the client on 2026-11-06, and the launch is still to test:**
+GTNLLib 1.1.4, 123Technology 2.2.1.1, EZMiner 6.3, Programmable Hatches 0.2.1p7-beta and the
+MIAOKATZE mods below. The server keeps its old jars until it's updated on the laptop;
+[server.md](./server.md) lists them. Both sides must match to join. 123Technology had been on
+a [PR #269](https://github.com/CallmeSHaobe/123Technology/pull/269) build, because the older
+release crashed during init on 2.9.0 stable; that PR merged on 2026-11-02.
 
 Twist's tracker had the matching startup-crash report (#1390, from 2026-11-01), and the
 0.8.0 release caught up on 2026-11-02: its changelog lists PR #1386 and its tag sits 11
 commits past that PR's head. `TwistSpaceTechnology-0.8.0.jar` replaced the PR build on
-both sides and the server loads it. Swap 123Technology back to its release once PR #269
-merges. On a Twist update, reset `GregTech.lang` and `TwistSpaceTechnology.cfg` to avoid
+both sides and the server loads it. On a Twist update, reset `GregTech.lang` and `TwistSpaceTechnology.cfg` to avoid
 config conflicts.
 
 ## Installed on 2.9.0 only
@@ -66,11 +65,11 @@ server, and the server boots with all of them next to GTNL.
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
 | Waystones-X | 1.0.16 | B | [JackOfNoneTrades fork](https://github.com/JackOfNoneTrades/WaystonesFork) of BlayTheNinth's mod; `config/waystones.cfg` sets `xpBaseCost=-1` |
-| MIAOKATZE Core | 0.2.0 | B | required by the four Miao mods below, on both sides |
-| GT-Miao-Blueprint | 0.3.0 | B | Neko Blueprint Hologram Projector: blueprint, cut and demolition modes |
-| GT-Steam-Reborn | 2.1.1 | B | steam industry, hubs and nodes, singularity tech, the Prosperity dimension, portable weapons, a BQ line |
-| GT-Interesting-Thing | 2.1.0 | B | float cores, rings, Neko dimensional pocket, infinity storage, coins and trading |
-| GT-Simple-Wireless-Network | 2.1.0 | B | wireless EU link nodes, monitors, ME quantum terminal |
+| MIAOKATZE Core | 0.2.5 | B | required by the four Miao mods below, on both sides |
+| GT-Miao-Blueprint | 0.3.17 | B | Neko Blueprint Hologram Projector: blueprint, cut and demolition modes |
+| GT-Steam-Reborn | 2.1.26 | B | steam industry, hubs and nodes, singularity tech, the Prosperity dimension, portable weapons, a BQ line |
+| GT-Interesting-Thing | 2.1.4 | B | float cores, rings, Neko dimensional pocket, infinity storage, coins and trading |
+| GT-Simple-Wireless-Network | 2.1.15 | B | wireless EU link nodes, monitors, ME quantum terminal |
 
 All but Waystones come from [MIAOKATZE](https://github.com/MIAOKATZE) and are tagged
 "for GTNH 2.9.0 stable". Their `en_US.lang` files are complete, so the in-game text is
