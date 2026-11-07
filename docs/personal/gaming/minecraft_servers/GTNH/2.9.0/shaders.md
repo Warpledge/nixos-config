@@ -49,7 +49,7 @@ Close the game first: it rewrites `options.txt` on exit.
    reports the match count, and a failed patch writes a `.log` listing the failed parts.
 
    ```bash
-   java -cp mods/chromapatch-1.0.2-forge1710-1.7.10.jar obs07.chroma.Patcher shaderpacks
+   java -cp mods/chromapatch-1.0.2-forge1710-1.7.10.jar obs07.chroma.Patcher
    ```
 
 5. Select the patched pack under Video Settings, Shader Packs. The same setting is
@@ -68,7 +68,7 @@ mod never downloads code.
 Since 2026-11-07 there are two copies of the patched pack:
 
 - `Eclipse-Shader KuraEdit [OBS07-Chroma Patch].zip` has KuramA's file, downloaded fresh
-  from the pinned commit, plus the `indirect_effect` line below.
+  from the pinned commit and unedited.
 - `Eclipse-Shader Warpledge Edit.zip` is a plain copy that starts on the pack's defaults.
   ChromaPatch doesn't rebuild it, so copy the pack again after a patch or Eclipse update.
 
@@ -81,8 +81,7 @@ config file matches it, checked against the patched `shaders.properties` on 2026
 with two exceptions:
 
 - The file leaves out `indirect_effect`, so it falls back to `SSAO_FILTERED` where the
-  profile sets `VANILLA_AO`. This instance's copy has `indirect_effect=VANILLA_AO` appended
-  to match, so redo that if the file is downloaded again.
+  profile sets `VANILLA_AO`. This instance's copy leaves it that way.
 - The file adds `LPV_NOSHADOW_HACK=true`, which the profile doesn't set.
 
 The profile leaves the OBS07 fog, dust and lamp beam effects off; they're on the Atmosphere
