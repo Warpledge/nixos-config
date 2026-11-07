@@ -195,16 +195,14 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   an `OpenGLException` when Witching Gadgets' Thaumic Stone Extruder is on screen and a
   resource pack retextures lava. The Extruder's model uses the active lava texture. Both
   Modernity packs ship `assets/minecraft/textures/blocks/lava_still.png` and
-  `lava_flow.png`, each with a `.png.mcmeta`. If it hits, don't edit the Modernity zips,
-  since an update replaces them. Make a small pack instead, in a folder like
-  `resourcepacks/VanillaLava/`:
-  1. A `pack.mcmeta` with `{"pack": {"pack_format": 1, "description": "Vanilla lava"}}`.
-  2. The four vanilla lava files at the same paths, copied from the 1.7.10 client jar
-     (`~/.local/share/PrismLauncher/libraries/com/mojang/minecraft/1.7.10/`).
-  3. Enable it and move it above both Modernity packs.
-
-  Untested; the report only shows a modified lava texture triggers it. If the crash
-  persists, remove `XaerosWorldMap_*.jar` until the issue is fixed.
+  `lava_flow.png`, each with a `.png.mcmeta`. Rather than editing the Modernity zips,
+  which an update replaces, the folder pack `resourcepacks/VanillaLava/` (2026-11-07)
+  holds a `pack.mcmeta` and the four vanilla lava files from
+  `~/.local/share/PrismLauncher/libraries/com/mojang/minecraft/1.7.10/minecraft-1.7.10-client.jar`.
+  It sits right after both Modernity packs in `options.txt`'s `resourcePacks`, where
+  later entries override earlier ones, so it shows above them in game. Keep it above
+  any new pack that retextures lava. Untested against the crash itself; if it still
+  happens, remove `XaerosWorldMap_*.jar` until the issue is fixed.
 
 - **SharedProspecting 2.0.4**: built against VisualProspecting 1.5.11 and GTNHLib 0.9.0.
   Its six late mixins still match VP 1.5.42 as shipped in 2.9 (checked 2026-11-01); the
