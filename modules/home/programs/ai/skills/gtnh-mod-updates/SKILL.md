@@ -66,6 +66,12 @@ off on purpose, so report it but don't install it unless the user asks: installi
 fetch them: on a pick, follow `<pack>/shaders.md`, which says why Eclipse is pinned, then set
 `pin` to the commit installed.
 
+After installing a new Eclipse commit or ChromaPatch jar, have the user launch once so
+ChromaPatch rebuilds KuraEdit, then rebuild the user's Warpledge Edit pack with
+`<pack>/eclipse-warpledge-edit/build.py` ("Rebuilding it" in `shaders.md`). If it stops on an
+anchor, Eclipse changed there: redo that edit by hand from the notes, syntax-check the
+result, have the user check it in game, then update the anchor in `build.py`.
+
 `packNowShips` is a name match against the newest pack's manifest, so check it before saying
 a mod would become a duplicate. On a newer pack, name it and stop there: moving pack is its own
 job, and these jars may not fit it.
