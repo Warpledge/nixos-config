@@ -19,6 +19,7 @@ Unless the machine is `eclipse` or `legion` and the user `warpledge`, the person
 When something fails repeatedly, the user has to re-explain, or a tool limitation needs a workaround, add a bullet here under 15 words, no explanation.
 
 - Scratch QML check files: don't name them `shell.qml`; the Bash hook blocks it.
+- Desktop app chat: markdown links in table cells show raw; link outside tables.
 
 ## Critical Rules
 
