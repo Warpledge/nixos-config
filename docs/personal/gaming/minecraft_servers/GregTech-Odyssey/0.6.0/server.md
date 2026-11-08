@@ -70,10 +70,10 @@ rules in [difficulty-rules.md](./difficulty-rules.md) apply. Check with the in-g
 Rules screen.
 
 **Check `config/gtocore-rules.txt` before the first start.** The folder built on
-2026-11-08 carried only `preset = custom` and `gtm.explosion_damages_terrain`, so the
-other 13 rules were set by hand on the laptop to match difficulty-rules.md (the old copy
-is `gtocore-rules.txt.before-rules-2026-11-08`). `gto server` copies `config/` from the
-client, so check the instance's file before rebuilding a folder with no world yet.
+2026-11-08 carried an older client file with only `preset = custom` and
+`gtm.explosion_damages_terrain`, so the laptop's copy was set by hand to match
+difficulty-rules.md before any world existed. `gto server` copies `config/` from the
+client, so rebuilding a folder with no world yet takes the client's file as it is then.
 
 ## Client-only jars
 
