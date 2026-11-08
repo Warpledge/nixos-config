@@ -157,10 +157,13 @@ dev27's LeanObject (`leanobject`) had already rewritten. `reduceAllocations` is 
 false, which only drops that module.
 
 With that, a new singleplayer world on the desktop ran DH generation at 68 chunks/s
-(2026-11-08), against about 8 on the laptop server without it. The two aren't the same
-CPU, so the laptop's own figure is still to be measured, as is a check for broken chunks.
-With Tectonic added back it ran at 32 chunks/s, far above Tectonic's earlier trial without
-FastChunkGen.
+(2026-11-08), against about 8 on the laptop server without it. With Tectonic added back it
+ran at 32 chunks/s, far above Tectonic's earlier trial without FastChunkGen.
+
+On the laptop server, with Tectonic, a new world's DH pregen (radius 256, 14 DH threads)
+ran at 42 chunks/s with every CPU thread busy (2026-11-08). FastChunkGen logs that it
+couldn't disable ModernFix's `mixin.perf.release_protochunks`. A check for broken chunks
+is still to do.
 
 ## Integrated structures (2026-11-12)
 
