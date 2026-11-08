@@ -2,7 +2,8 @@
 
 Client instance: `GregTech.Odyssey-0.6.0-dev27` (Prism Launcher, CurseForge import)
 Path: `~/.local/share/PrismLauncher/instances/GregTech.Odyssey-0.6.0-dev27/minecraft/`
-World: `New Worldaa`, created 2026-11-07 on dev27 with the Custom preset
+World: the laptop server's ([server.md](./server.md)), with the Custom preset. The
+client's `New Worldaa` and the later test worlds were deleted by 2026-11-08
 
 Minecraft 1.20.1, Forge 47.4.20. The dev27 manifest lists 153 CurseForge files, and the
 zip's overrides add 4 more jars (GTOCore, ExtendedAE, DataSyncLib and Botania).

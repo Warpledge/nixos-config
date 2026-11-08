@@ -1,7 +1,7 @@
 # GTO 0.6.0 Updating, Trials and Debugging
 
 Dev builds come out often and can corrupt saves, so nothing new reaches the real world
-(`New Worldaa` in `GregTech.Odyssey-0.6.0-dev27`) before it has passed in a copy. The
+(the laptop server's, built from `GregTech.Odyssey-0.6.0-dev27`) before it has passed in a copy. The
 copy is a staging instance, and [tools/gto.py](../tools/gto.py) does the copying,
 carrying and checking. Run it with the game closed:
 
@@ -115,4 +115,4 @@ instance's `minecraft/backups/<world>/`. To restore one, run `restore-script.sh`
 instance, so `gto backup` is the copy that survives a broken instance.
 
 The 0.5.6-to-0.6 migration bug, GregTech-Odyssey#2013, is fixed, but no world here was
-migrated: `New Worldaa` started on 0.6.
+migrated: every 0.6 world here started on 0.6.
