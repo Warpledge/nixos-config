@@ -32,6 +32,11 @@ Rules screen.
 | `gtm.hard_multiblock_controllers` | Hard Multiblock Controller Recipes | true | false |
 | `gtm.explosion_damages_terrain` | Explosions Damage Terrain | false | true |
 | `gtm.electric_tool_damage_chance` | Electric Tool Damage Chance (%) | 0 | 20 |
+| `gtm.ordered_assembly_line_fluids` | Ordered Assembly Line Fluids | true | false |
+
+`gtm.ordered_assembly_line_fluids` was added on the laptop server's copy on 2026-11-08,
+before its world existed, to match GTNH's ordered assembly line inputs. The client's
+file doesn't have it yet.
 
 ## Back to Normal on 2026-11-08
 
