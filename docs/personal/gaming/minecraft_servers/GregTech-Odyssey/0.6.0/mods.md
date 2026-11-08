@@ -146,6 +146,10 @@ With defaults, creating a world crashed (2026-11-08): its `reduceAllocations` mi
 dev27's LeanObject (`leanobject`) had already rewritten. `reduceAllocations` is set to
 false, which only drops that module.
 
+With that, a new singleplayer world on the desktop ran DH generation at 68 chunks/s
+(2026-11-08), against about 8 on the laptop server without it. The two aren't the same
+CPU, so the laptop's own figure is still to be measured, as is a check for broken chunks.
+
 ## Overlay
 
 The same jars, with their modIds and sources, are in
