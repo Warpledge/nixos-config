@@ -68,7 +68,12 @@ We've Gone, When Dungeons Arise, Explorer's Compass, Keep Stepping, Resourcify.
 ## Low risk: client-side or QoL
 
 No recipes that skip GT tiers and no worldgen, so a failed trial can't touch the world.
-The audio and visual mods are a good first batch.
+
+**Added to main on 2026-11-07** (see [mods.md](./mods.md)): AmbientSounds, Presence
+Footsteps, Sounds, Sound Physics Remastered, Cool Rain, Particular, EMF, ETF, Smooth
+Swapping, Particle Core, Better Climbing, Connectible Chains, TrashSlot, the four
+Macaw's mods, Enderman Overhaul and Creeper Overhaul, plus Zipline from the
+gregification list. The Diagonal mods failed and moved to [Skip](#skip).
 
 | Mod | Needs | Note |
 | --- | --- | --- |
@@ -81,7 +86,7 @@ The audio and visual mods are a good first batch.
 | AmbientSounds | | Biome ambience; CreativeCore ships in dev27 |
 | SoL: Onirique | | Also biome ambience: pick it or AmbientSounds. CurseForge only |
 | Presence Footsteps | | |
-| Sounds | MRU, YACL | MRU is CurseForge only |
+| Sounds | MRU, YACL | MRU is CurseForge only. Neither declares YACL, so Prism skips it; add it by hand |
 | Sound Physics Remastered | | |
 | TIMM | | |
 | Cool Rain | | |
@@ -92,7 +97,6 @@ The audio and visual mods are a good first batch.
 | Better Climbing | | |
 | Catalogue | | Mod list screen; not found on Modrinth by this lookup |
 | Connectible Chains | | |
-| Diagonal Walls, Windows, Fences | | Puzzles Lib ships in dev27 |
 | Enchantment Descriptions | Bookshelf | |
 | TrashSlot | | |
 | Macaw's Bridges, Lights, Fences, Stairs | | Decoration; vanilla-material recipes |
@@ -161,6 +165,7 @@ sessions in staging before deciding.
 | Aether Villages | Needs The Aether, which GTO lacks |
 | Quark, Zeta | Too broad to trial in one go (worldgen, automation blocks, mob changes), and with batch 2 of [the Integrated mods](#integrated-mods-dropped-2026-11-07) it broke EMI's recipe reload inside gtolib |
 | Cupboard | Only a library for the someaddons mods, none of which are on this list |
+| Diagonal Walls, Windows, Fences | Their `diagonalblocks` 8.0.6 throws `target block tags not empty` on the second tag reload (staging, 2026-11-07): the first world loads, but EMI never gets its data, and leaving to the title and loading or creating any world crashes |
 
 ## Sources
 

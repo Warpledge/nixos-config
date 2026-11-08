@@ -29,17 +29,171 @@
       "added": "2026-11-07"
     },
     {
-      "jar": "maidmarriage-1.0.0-forge+mc1.20.1.jar",
-      "modId": "maidmarriage",
-      "name": "Touhou Little Maid: Heart Pact",
-      "source": "https://modrinth.com/mod/touhou-little-maid-heart-pact",
-      "added": "2026-11-07"
-    },
-    {
       "jar": "ysm-2.6.5-forge+mc1.20.1-release.jar",
       "modId": "yes_steve_model",
       "name": "Yes Steve Model",
       "source": "https://modrinth.com/mod/yes-steve-model",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "AmbientSounds_FORGE_v6.3.11_mc1.20.1.jar",
+      "modId": "ambientsounds",
+      "name": "AmbientSounds",
+      "source": "https://modrinth.com/mod/ambientsounds",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "better_climbing-forge-3.jar",
+      "modId": "better_climbing",
+      "name": "Better Climbing",
+      "source": "https://modrinth.com/mod/better-climbing",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "connectiblechains-forge-1.20.1-2.2.5.jar",
+      "modId": "connectiblechains",
+      "name": "Reconnectible Chains",
+      "source": "https://modrinth.com/mod/reconnectible-chains",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "coolrain-1.20.1-Forge-1.0.3.jar",
+      "modId": "coolrain",
+      "name": "Cool Rain Reforged",
+      "source": "https://modrinth.com/mod/cool-rain-reforged",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "creeperoverhaul-3.0.2-forge.jar",
+      "modId": "creeperoverhaul",
+      "name": "Creeper Overhaul",
+      "source": "https://modrinth.com/mod/creeper-overhaul",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "endermanoverhaul-forge-1.20.1-1.0.4.jar",
+      "modId": "endermanoverhaul",
+      "name": "Enderman Overhaul",
+      "source": "https://modrinth.com/mod/enderman-overhaul",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "entity_model_features-3.3.12-1.20.1-forge.jar",
+      "modId": "entity_model_features",
+      "name": "Entity Model Features",
+      "source": "https://modrinth.com/mod/entity-model-features",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "entity_texture_features-7.2.7-1.20.1-forge.jar",
+      "modId": "entity_texture_features",
+      "name": "Entity Texture Features",
+      "source": "https://modrinth.com/mod/entitytexturefeatures",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "fzzy_config-0.7.7+1.20.1+forge.jar",
+      "modId": "fzzy_config",
+      "name": "Fzzy Config",
+      "source": "https://modrinth.com/mod/fzzy-config",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "mcw-bridges-3.1.2-mc1.20.1forge.jar",
+      "modId": "mcwbridges",
+      "name": "Macaw's Bridges",
+      "source": "https://modrinth.com/mod/macaws-bridges",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "mcw-lights-1.1.5-mc1.20.1forge.jar",
+      "modId": "mcwlights",
+      "name": "Macaw's Lights and Lamps",
+      "source": "https://modrinth.com/mod/macaws-lights-and-lamps",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "mcw-mcwfences-1.2.1-mc1.20.1forge.jar",
+      "modId": "mcwfences",
+      "name": "Macaw's Fences and Walls",
+      "source": "https://modrinth.com/mod/macaws-fences-and-walls",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "mcw-mcwstairs-1.0.2-mc1.20.1forge.jar",
+      "modId": "mcwstairs",
+      "name": "Macaw's Stairs",
+      "source": "https://modrinth.com/mod/macaws-stairs",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "mru-1.0.41+1.20.1-forge.jar",
+      "modId": "mru",
+      "name": "MRU (Mineblock's Repeated Utilities)",
+      "source": "https://www.curseforge.com/projects/669659",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "particle_core-0.3.3+1.20.1+forge.jar",
+      "modId": "particle_core",
+      "name": "Particle Core",
+      "source": "https://modrinth.com/mod/particle-core",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "particular-1.20.1-Forge-1.5.7.jar",
+      "modId": "particular",
+      "name": "Particular Reforged",
+      "source": "https://modrinth.com/mod/particular-reforged",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "Presence Footsteps [FORGE] 1.0.0.jar",
+      "modId": "presencefootsteps",
+      "name": "Presence Footsteps",
+      "source": "https://modrinth.com/mod/presence-footsteps-forge",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "smoothswapping-0.9.3.2-1.20.1-forge.jar",
+      "modId": "smoothswapping",
+      "name": "Smooth Swapping",
+      "source": "https://modrinth.com/mod/smooth-swapping",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "sound-physics-remastered-forge-1.20.1-1.5.1.jar",
+      "modId": "sound_physics_remastered",
+      "name": "Sound Physics Remastered",
+      "source": "https://modrinth.com/mod/sound-physics-remastered",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "Sounds-2.2.1+1.20.1+forge.jar",
+      "modId": "sounds",
+      "name": "Sounds",
+      "source": "https://modrinth.com/mod/sound",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "trashslot-forge-1.20.1-15.1.5.jar",
+      "modId": "trashslot",
+      "name": "TrashSlot",
+      "source": "https://modrinth.com/mod/trashslot",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "yet_another_config_lib_v3-3.6.6+1.20.1-forge.jar",
+      "modId": "yet_another_config_lib_v3",
+      "name": "YetAnotherConfigLib (YACL)",
+      "source": "https://modrinth.com/mod/yacl",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "zipline-forge-1.20.1-1.3.0.jar",
+      "modId": "zipline",
+      "name": "Ziplines: Rezipped!",
+      "source": "https://modrinth.com/mod/ziplines-rezipped",
       "added": "2026-11-07"
     }
   ],
