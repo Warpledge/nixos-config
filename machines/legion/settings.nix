@@ -136,6 +136,8 @@
       claude.skillModels.gtnhModUpdates = null;
       backups.folder = "~/SyncBackups";
       backups.skip = [];
+      claude.mods.fileTree = false;
+      claude.mods.blastRadius = false;
     };
   };
 

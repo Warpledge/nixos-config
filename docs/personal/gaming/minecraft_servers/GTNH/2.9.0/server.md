@@ -51,16 +51,17 @@ uses 12288 MB and already loads the translation agent.
 
 From [mods.md](./mods.md), the **B** rows:
 
-- GTNL 0.2.7-rc2.1 with GTNLLib 1.1.4 and BetterQuestingAPI 1.1.3, GTNHRates 1.12.0-2.9,
+- GTNL 0.2.7-rc2.1 with GTNLLib 1.1.5 and BetterQuestingAPI 1.1.3, GTNHRates 1.12.0-2.9,
   Twist Space `TwistSpaceTechnology-0.8.0.jar` (release 2026-11-02),
   123Technology `OTHTechnology-2.2.1.1.jar`, EZMiner 6.3,
   EZNuclear 1.1.1, EZStorage 1.8.2, NH-Utilities 1.7.0, Programmable Hatches 0.2.1p7-beta
 - ElytraMining 1.2.0.1, Trash Slot 1.0.31, SharedProspecting 2.0.4
-- YesSteveModel Unofficial 1.9, with its models in `config/ysmu/custom/`
+- YesSteveModel Unofficial 2.3, with its models in `config/ysmu/custom/`
 - Distant Horizons `upstream-preview8-rple-biomes`, so the server builds and syncs the
   LODs the client shows (see mods.md for the generation settings)
-- Waystones-X 1.0.16, MIAOKATZE Core 0.2.5, GT-Miao-Blueprint 0.3.17,
-  GT-Steam-Reborn 2.1.26, GT-Interesting-Thing 2.1.4, GT-Simple-Wireless-Network 2.1.15
+- Waystones-X 1.0.16, MIAOKATZE Core 0.2.6, GT-Miao-Blueprint 0.3.17,
+  GT-Steam-Reborn 2.1.28, GT-Interesting-Thing 2.1.6, GT-Simple-Wireless-Network 2.1.19
+- Realistic World Gen 2 `rwg2-2.1.1.jar` in place of the pack's 2.0.6
 - ThinkTech 0.3.1, OmniOcular Unofficial 1.6.0, BetterSprinting 1.1.3,
   Advanced Memory Card 1.2.0-1.7.10-GTNH, WTCT 1.0.63-rc1, Omni Tweaks 0.2.0,
   Effortless Building Gadgets 0.10.1

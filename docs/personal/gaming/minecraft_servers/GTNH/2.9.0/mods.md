@@ -45,9 +45,10 @@ GTNLLib 1.1.1 also fails at launch on Angelica 2.2.43: its font-batch `@ModifyAr
 GUI themes on top: its diff touches no font or mixin files, and neither does 1.1.5's
 (AE2 theme widgets).
 
-**The 2026-11-08 update is on the client only; legion's server still needs it:** GTNLLib
+**The 2026-11-08 update is on the client and the laptop server:** GTNLLib
 1.1.5, YesSteveModel Unofficial 2.3, MIAOKATZE Core 0.2.6, GT-Steam-Reborn 2.1.28,
-GT-Interesting-Thing 2.1.6 and GT-Simple-Wireless-Network 2.1.19. The three Miao mods need
+GT-Interesting-Thing 2.1.6, GT-Simple-Wireless-Network 2.1.19 and Realistic World Gen 2
+2.1.1. The three Miao mods need
 Core 0.2.6 and their release notes say "compatible with GTNH 2.9.0 final"; GTNLLib and
 YSMU name no pack version. GTSWN 2.1.19 lets items and fluids in through the covered face of
 both wireless covers by default (screwdriver or cover UI to turn it off). Not launched yet.
@@ -218,7 +219,7 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   on a bump: check GTNLLib's font, ChromaPatch and the shaders, Distant Horizons and
   Xaero's maps at launch.
 
-- **Realistic World Gen 2 2.1.1** (2026-11-08, client; legion still on 2.0.6): replaces the
+- **Realistic World Gen 2 2.1.1** (2026-11-08, client and server): replaces the
   pack's `rwg2-2.0.6.jar`. Builds against GTNHLib 0.11.54 and NEI 2.8.171, the versions 2.9
   ships. Adds climate bands, per-continent Tainted Land and the `Biome Size Multiplier`,
   set to 1.7 in `config/rwg2.cfg` under `continental rwg` (default 1.0, range 0.25 to 10).
