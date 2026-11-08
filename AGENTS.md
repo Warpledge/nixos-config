@@ -37,6 +37,7 @@ When something fails repeatedly, when the user has to re-explain, or when a work
 
 - Scratch QML check files: don't name them `shell.qml`; the Bash hook blocks it.
 - Desktop app chat: markdown links in table cells show raw; link outside tables.
+- Any `$`, `|`, `;` or `&&` in a command containing `rm` is blocked; run `rm` alone.
 - Folder `AGENTS.md` is a symlink to `CLAUDE.md`: edit that, never the link.
 - A plugin RPC needs `input` and `events`; V2 fails at load without them.
 - The Console API is `console.opencode.ai`; `opencode.ai/api` serves the app.
