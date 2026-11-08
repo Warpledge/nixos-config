@@ -79,8 +79,8 @@ client, so rebuilding a folder with no world yet takes the client's file as it i
 
 The zip decides which of the pack's own mods run on a server, so `clientOnly` only
 covers hand-added ones: EMF, ETF, Presence Footsteps (they crashed Cosmic Frontiers'
-server), Sound Physics Remastered, Cool Rain, Smooth Swapping, Keep Stepping and
-Resourcify. A hand-added mod that crashes the server names a client class
+server), Sound Physics Remastered, Smooth Swapping, Keep Stepping and Resourcify. Cool
+Rain runs on the server too (added 2026-11-08). A hand-added mod that crashes the server names a client class
 (`net.minecraft.client...`) in the crash report; add its modId and rebuild the folder.
 The client keeps every jar, so the list only changes the server.
 

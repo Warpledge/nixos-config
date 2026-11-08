@@ -278,7 +278,6 @@
     "OverrideMemory"
   ],
   "clientOnly": [
-    "coolrain",
     "entity_model_features",
     "entity_texture_features",
     "keep_stepping",
