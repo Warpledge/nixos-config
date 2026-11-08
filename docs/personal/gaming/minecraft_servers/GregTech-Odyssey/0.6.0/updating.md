@@ -17,6 +17,7 @@ alias gto='python3 -I /etc/nixos-config/docs/personal/gaming/minecraft_servers/G
 | `gto diff <old> <new>` | Mods added, removed or updated, your jars the pack now ships, and every config file that changed |
 | `gto check <inst>` | Errors in `logs/latest.log` that the instance's baseline lacks, plus mixin, dependency and load failures and crash reports. Exits 1 on findings |
 | `gto check <inst> --save-baseline` | Records this log's errors as normal for the instance |
+| `gto server <inst> --zip <server zip>` | Builds a dedicated server folder from the release's server zip, the instance's jars and your non-`clientOnly` jars; `--tar` packs it to move to the laptop ([server.md](./server.md)) |
 | `gto datapack <inst>` | Installs the repo's recipe datapack, [datapack/warpledge-gto](../datapack/warpledge-gto/), as `config/openloader/data/warpledge-gto/`, replacing the old copy |
 
 ## Recipe overrides

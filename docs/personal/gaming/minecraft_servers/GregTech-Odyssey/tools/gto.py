@@ -8,8 +8,9 @@ An instance is a folder name under Prism's instances/ or a path. overlay.json be
 this file lists the hand-added jars and the files to carry into a new pack build;
 0.6.0/updating.md has the procedures. Commands that write refuse while Prism or the
 instance's game is running. Nothing is ever deleted except a staging copy replaced
-with --replace, which is backed up first, and the instance's copy of the recipe
-datapack, which `datapack` rebuilds from ../datapack/.
+with --replace, which is backed up first, the instance's copy of the recipe
+datapack, which `datapack` rebuilds from ../datapack/, and a server folder's mods/,
+which `server` rebuilds from the instance.
 """
 
 import argparse
@@ -19,6 +20,7 @@ import json
 import os
 import re
 import shutil
+import subprocess
 import sys
 import time
 import uuid
@@ -309,6 +311,122 @@ def cmd_datapack(a):
     shutil.copytree(src, dst)
     print(f"{dst}: {len(want)} files; reload with /reload or restart the world")
 
+#-- server
+
+SERVER_DIRS = ("config", "defaultconfigs")
+SERVER_PROPERTIES = """\
+server-port=25566
+online-mode=true
+white-list=true
+enforce-whitelist=true
+max-players=2
+motd=GregTech Odyssey {build}
+"""
+
+
+def sha1(path):
+    h = hashlib.sha1()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def cmd_server(a):
+    inst = instance(a.instance)
+    gdir = game_dir(inst)
+    zpath = Path(a.zip).expanduser()
+    out = Path(a.out).expanduser() if a.out else (
+        Path.home() / "Documents/Minecraft_Servers" / f"{inst.name}-server")
+    # A rebuilt folder keeps its world; only the pack's files are replaced.
+    if (out / "world").exists():
+        print(f"{out.name} has a world; keeping it and server.properties")
+    client = set(overlay()["clientOnly"])
+    act = (lambda msg: print("would " + msg)) if a.dry_run else (lambda msg: print(msg))
+
+    # The release's server zip is a packwiz installer: its pack/mods/*.toml name
+    # the server-side jars and their hashes, which the client instance already has.
+    with zipfile.ZipFile(zpath) as z:
+        tomls = [n for n in z.namelist()
+                 if n.startswith("gto-installer/pack/mods/") and n.endswith(".toml")]
+        wanted = []
+        for n in tomls:
+            text = z.read(n).decode("utf-8", "replace")
+            name = re.search(r'^filename\s*=\s*"([^"]+)"', text, re.M).group(1)
+            algo = re.search(r'^hash-format\s*=\s*"([^"]+)"', text, re.M).group(1)
+            want = re.search(r'^hash\s*=\s*"([^"]+)"', text, re.M).group(1)
+            wanted.append((name, algo, want))
+        act(f"unpack {zpath.name} into {out}")
+        if not a.dry_run:
+            if (out / "mods").exists():
+                shutil.rmtree(out / "mods")
+            out.mkdir(parents=True, exist_ok=True)
+            z.extractall(out)
+
+    bad = []
+    for name, algo, want in wanted:
+        src = gdir / "mods" / name
+        if not src.is_file():
+            bad.append(f"{name}: not in {inst.name}")
+        elif (sha1(src) if algo == "sha1" else digest(src)) != want:
+            bad.append(f"{name}: hash differs from the pack index")
+        elif not a.dry_run:
+            shutil.copy2(src, out / "mods" / name)
+    act(f"copy {len(wanted) - len(bad)} of the pack's {len(wanted)} server jars")
+    for line in bad:
+        print(f"  missing {line}")
+    if bad:
+        print("  run install-mods.sh in the folder to download them")
+
+    for mod in overlay()["mods"]:
+        src = gdir / "mods" / mod["jar"]
+        if mod["modId"] in client:
+            print(f"skip client-only {mod['jar']}")
+        elif not src.is_file():
+            print(f"skip {mod['name']}: {mod['jar']} is not in {inst.name}")
+        else:
+            act(f"copy mods/{mod['jar']}")
+            if not a.dry_run:
+                shutil.copy2(src, out / "mods" / mod["jar"])
+
+    # The client's config/ carries the rules file, worldgen configs and datapack.
+    for name in SERVER_DIRS:
+        src = gdir / name
+        if not src.is_dir():
+            continue
+        act(f"copy {name}/")
+        if not a.dry_run:
+            shutil.copytree(src, out / name, dirs_exist_ok=True)
+
+    props = out / "server.properties"
+    if not props.exists():
+        act("write server.properties (port 25566, whitelist on)")
+        if not a.dry_run:
+            props.write_text(SERVER_PROPERTIES.format(build=inst.name.split("-", 1)[-1]))
+
+    pack = json.loads((inst / "mmc-pack.json").read_text())
+    forge = next(c["version"] for c in pack["components"]
+                 if c["uid"] == "net.minecraftforge")
+    full = f"1.20.1-{forge}"
+    installer = out / "gto-installer/tools" / f"forge-{full}-installer.jar"
+    if not (out / "libraries/net/minecraftforge/forge" / full).is_dir():
+        act(f"install Forge {full} with the zip's installer")
+        if not a.dry_run:
+            if not installer.is_file():
+                sys.exit(f"{installer.name} isn't in the zip; is it for Forge {forge}?")
+            subprocess.run(["java", "-jar", str(installer), "--installServer", str(out)],
+                           check=True, stdout=subprocess.DEVNULL)
+
+    if a.tar:
+        tar = out.with_name(out.name + ".tar.zst")
+        act(f"pack {tar.name} (without world/, backups/ and logs/)")
+        if not a.dry_run:
+            subprocess.run(["tar", "--zstd", "-cf", str(tar), "--exclude", "./world",
+                            "--exclude", "./backups", "--exclude", "./logs",
+                            "--exclude", "./crash-reports", "-C", str(out), "."],
+                           check=True)
+            print(f"{tar}: {gib(tar.stat().st_size)}")
+
 #-- diff
 
 def files_under(root):
@@ -490,6 +608,17 @@ def main():
     s.add_argument("instance")
     s.add_argument("-n", "--dry-run", action="store_true")
     s.set_defaults(func=cmd_datapack)
+
+    s = sub.add_parser("server", help="build a dedicated server folder from the server zip")
+    s.add_argument("instance")
+    s.add_argument("--zip", required=True,
+                   help="the release's GregTech-Odyssey-server.zip for the same build")
+    s.add_argument("--out", metavar="DIR",
+                   help="default ~/Documents/Minecraft_Servers/<instance>-server")
+    s.add_argument("--tar", action="store_true",
+                   help="also pack it as <DIR>.tar.zst to move to the laptop")
+    s.add_argument("-n", "--dry-run", action="store_true")
+    s.set_defaults(func=cmd_server)
 
     a = p.parse_args()
     rc = a.func(a)

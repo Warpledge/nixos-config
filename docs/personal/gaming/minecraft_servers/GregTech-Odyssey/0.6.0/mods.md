@@ -45,7 +45,7 @@ Particular and Particle Core were removed on 2026-11-08
 
 **Configs:** `config/zipline.json` sets `consumeDurability` false, so ziplining doesn't
 wear the item (2026-11-08). EMF, ETF and Presence Footsteps crashed a dedicated server in
-Cosmic Frontiers, so a GTO server would need them client-only.
+Cosmic Frontiers, so they're in `overlay.json`'s `clientOnly` list ([server.md](./server.md)).
 
 The shader pack is `Eclipse-Shader Warpledge Edit.zip` in `shaderpacks/`, a copy of the
 one the GTNH notes' [build.py](../../GTNH/2.9.0/eclipse-warpledge-edit/build.py) makes,

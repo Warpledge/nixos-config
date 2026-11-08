@@ -276,5 +276,15 @@
     "OverrideJavaArgs",
     "OverrideJavaLocation",
     "OverrideMemory"
+  ],
+  "clientOnly": [
+    "coolrain",
+    "entity_model_features",
+    "entity_texture_features",
+    "keep_stepping",
+    "presencefootsteps",
+    "resourcify",
+    "smoothswapping",
+    "sound_physics_remastered"
   ]
 }

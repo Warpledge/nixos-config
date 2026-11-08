@@ -19,6 +19,7 @@ which is why this world runs on a dev build instead of waiting for beta.
 - [mods.md](./mods.md): the six jars added by hand
 - [candidates.md](./candidates.md): the Cosmic Frontiers mods sorted by risk for trials
 - [quests.md](./quests.md): how far the quest book goes
+- [server.md](./server.md): the dedicated server on the laptop, built with `gto server`
 - [updating.md](./updating.md): new builds, mod trials and debugging through a staging
   instance, with the test checklist
 - [../tools/](../tools/): `gto.py` (backup, stage, carry, diff, check) and
