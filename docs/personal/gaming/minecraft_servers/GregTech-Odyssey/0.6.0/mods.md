@@ -24,7 +24,6 @@ mods from the same batch crashed on tag reload and were dropped
 
 | Jar | Mod | What it does |
 | --- | --- | --- |
-| `AmbientSounds_FORGE_v6.3.11_mc1.20.1.jar` | AmbientSounds | Expands ambient sounds |
 | `Presence Footsteps [FORGE] 1.0.0.jar` | Presence Footsteps | Footstep sounds by surface (Forge port) |
 | `Sounds-2.2.1+1.20.1+forge.jar` | Sounds | New sound effects and reworked vanilla ones |
 | `sound-physics-remastered-forge-1.20.1-1.5.1.jar` | Sound Physics Remastered | Sound attenuation, reverb and absorption through blocks |
@@ -104,7 +103,6 @@ other dropped mods are in [candidates.md](./candidates.md#skip).
 | `Terralith_1.20.x_v2.5.4.jar` | Terralith | Replaces vanilla's overworld biomes with about 100 of its own. Can't be removed from a world later |
 | `tectonic-3.0.17-forge-1.20.1.jar` | Tectonic | Reshapes overworld terrain: continents, mountain ranges, rivers |
 | `lithostitched-forge-1.20.1-1.4.11.jar` | Lithostitched | Worldgen library Tectonic requires |
-| `structurify-forge-2.0.43+mc1.20.1.jar` | Structurify | Structure spacing and placement checks; uses dev27's YACL |
 | `YungsApi-1.20-Forge-4.0.6.jar` | YUNG's API | Library for the YUNG's mods |
 | `YungsBetterDesertTemples-1.20-Forge-3.0.3.jar` | YUNG's Better Desert Temples | Reworked desert temples |
 | `YungsBetterDungeons-1.20-Forge-4.0.4.jar` | YUNG's Better Dungeons | Reworked and new dungeons |
@@ -124,7 +122,6 @@ All of these are carried by `gto carry`, along with these configs:
 | `config/tectonic.json` | Defaults plus `ultrasmooth`, `elevation_boost` 0.2, `min_y`/`max_y` -128/544, `ocean_offset` -0.5, `continents_scale` 0.3, `ridge_scale` 0.3, `flat_terrain_skew` -0.1 | Smoother, taller terrain with rare oceans. Above -0.45, deep oceans and their monuments stop spawning. GT ores below -64 are unchecked |
 | `config/terrablender.toml` | `overworld_region_size` 4 | Smaller biome-mod regions, so they swap more often |
 | `config/biomeswevegone/world_generation.json` | 48 of dev27's 54 BWG biomes on (Cosmic Frontiers' 11 plus 37 picked on 2026-11-08); off: allium_shrubland, amaranth_grassland, crimson_tundra, eroded_borealis, pumpkin_valley, rainbow_beach; region weights 8 to 2 | At 8, BWG's 3 regions outweighed the vanilla region (10, where Terralith's biomes live) and the world was mostly BWG. At 1, BWG showed up in about 1% of 3,510 visited chunks (2026-11-08) |
-| `config/structurify.json` | Global flatness check (`AUTO`, max height difference 21), `prevent_structure_overlap` | Structures skip steep ground. Written by hand: the in-game screen didn't save on 2026-11-07 |
 | `config/bettermineshafts-forge-1_20.toml` | `Enable Ore Deposits` false | Its deposits are vanilla ores outside GT's veins |
 | `config/DistantHorizons.toml` | `chunkGeneratorMode` `INTERNAL_SERVER`, `generatorPlan` `SURFACE_THEN_CHUNKS` | DH saves real chunks as it pregenerates, as on the GTNH server. Its "C2ME missing" warning is expected; C2ME's unofficial Forge port isn't safe with GT and these worldgen mods |
 

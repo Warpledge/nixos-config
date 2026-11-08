@@ -36,13 +36,6 @@
       "added": "2026-11-07"
     },
     {
-      "jar": "AmbientSounds_FORGE_v6.3.11_mc1.20.1.jar",
-      "modId": "ambientsounds",
-      "name": "AmbientSounds",
-      "source": "https://modrinth.com/mod/ambientsounds",
-      "added": "2026-11-07"
-    },
-    {
       "jar": "better_climbing-forge-3.jar",
       "modId": "better_climbing",
       "name": "Better Climbing",
@@ -225,13 +218,6 @@
       "added": "2026-11-08"
     },
     {
-      "jar": "structurify-forge-2.0.43+mc1.20.1.jar",
-      "modId": "structurify",
-      "name": "Structurify",
-      "source": "https://modrinth.com/mod/structurify",
-      "added": "2026-11-08"
-    },
-    {
       "jar": "YungsApi-1.20-Forge-4.0.6.jar",
       "modId": "yungsapi",
       "name": "YUNG's API",
@@ -313,7 +299,6 @@
     "config/DistantHorizons.toml",
     "config/bettermineshafts-forge-1_20.toml",
     "config/biomeswevegone/world_generation.json",
-    "config/structurify.json",
     "config/tectonic.json",
     "config/terrablender.toml",
     "config/gtocore-rules.txt",

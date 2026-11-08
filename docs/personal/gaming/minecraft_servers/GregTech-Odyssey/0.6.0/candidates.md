@@ -73,7 +73,8 @@ No recipes that skip GT tiers and no worldgen, so a failed trial can't touch the
 Footsteps, Sounds, Sound Physics Remastered, Cool Rain, Particular, EMF, ETF, Smooth
 Swapping, Particle Core, Better Climbing, Connectible Chains, TrashSlot, Enderman
 Overhaul and Creeper Overhaul, plus Zipline from the gregification list. The Diagonal
-mods failed and the four Macaw's mods came out again; both are under [Skip](#skip).
+mods failed, and the four Macaw's mods and AmbientSounds came out again; all are under
+[Skip](#skip).
 
 | Mod | Needs | Note |
 | --- | --- | --- |
@@ -124,7 +125,6 @@ the same spots.
 | --- | --- | --- |
 | When Dungeons Arise: Seven Seas | | Cosmic Frontiers ran the 1.19.2 jar; Modrinth has a 1.20.1 build |
 | Tectonic, Terralith | Lithostitched | In staging. `config/tectonic.json` is on trial: defaults plus `ultrasmooth`, `elevation_boost` 0.2, `min_y`/`max_y` -128/544, `ocean_offset` -0.5 (rare oceans; above -0.45 deep oceans and so monuments stop spawning), `continents_scale` 0.3, `ridge_scale` 0.3, `flat_terrain_skew` -0.1 (2026-11-08). Check GT ores below -64. dev27's BWG is cut to 48 biomes (Cosmic Frontiers' 11 plus 37 more) in `config/biomeswevegone/world_generation.json`, and its three region weights go from 8 to 2: at 8 they outweighed the vanilla region (10, where Terralith's biomes live) and the world came out mostly BWG, and at 1 BWG was about 1% of visited chunks. Carry those files and `config/terrablender.toml` (`overworld_region_size` 4) to main. Terralith can't be removed from a world later |
-| Structurify 2.0.43 | YACL (in dev27) | In staging. Retried for its global flatness check, so structures skip steep ground. Its in-game screen didn't save on 2026-11-07, so `config/structurify.json` is written by hand: global namespace `enable_flatness_check`, mode `AUTO`, max height difference 21, plus `prevent_structure_overlap` (2026-11-08) |
 | Luki's Grand Capitals, Luki's Woodland Mansions | | |
 | Structure Essentials | | Spacing control for when you add many structure mods; CurseForge only |
 | Mowzie's Mobs | | Boss structures |
@@ -169,6 +169,8 @@ sessions in staging before deciding.
 | Samurai Dynasty, AzureLib | 0.0.51 (the 1.20.1 build) has no biomes, only 10 yokai mobs, a shrine, a torii and gear. Gregifying its 130-odd recipes kept turning up empty tags in GTO (GT's parts are under `c:`, Forge's under `forge:`), so it was removed (staging, 2026-11-08) |
 | Amplified Nether | Removed after the staging trial (2026-11-07). It also wrapped vanilla's nether ore features in an extra `count: 2` (quartz, gold, small debris veins) |
 | Macaw's Bridges, Lights, Fences, Stairs | Added to main on 2026-11-07, removed again the same day |
+| AmbientSounds | Added to main on 2026-11-07, removed on 2026-11-08 |
+| Structurify 2.0.43 | Added to main on 2026-11-08 for its global flatness check (structures skip steep ground), removed the same day. Its in-game screen didn't save, so `config/structurify.json` had been written by hand |
 | Chunky | Distant Horizons 3.3.3 calls into Chunky while a new world's spawn chunks generate, before Chunky has started (on `ServerStartingEvent`), so creating a world crashes (staging, 2026-11-07). DH's `chunkGeneratorMode = "INTERNAL_SERVER"` with `SURFACE_THEN_CHUNKS` saves the chunks it generates, which does the pregen instead |
 
 ## Sources
