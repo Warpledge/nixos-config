@@ -75,6 +75,15 @@ Rules screen.
 difficulty-rules.md before any world existed. `gto server` copies `config/` from the
 client, so rebuilding a folder with no world yet takes the client's file as it is then.
 
+## Distant Horizons
+
+DH runs on both sides and reads the same `config/DistantHorizons.toml`
+([mods.md](./mods.md)). In multiplayer the laptop generates every distant chunk and
+saves it as a real chunk, then sends the LODs to the desktop. At a 256-chunk radius that's
+about 262,000 chunks per area explored, so expect hours of background generation and tens
+of GB of region files; `limitIfServerUnhealthy` pauses it when ticks fall behind. Copy
+the file again after changing it on the client.
+
 ## Client-only jars
 
 The zip decides which of the pack's own mods run on a server, so `clientOnly` only
