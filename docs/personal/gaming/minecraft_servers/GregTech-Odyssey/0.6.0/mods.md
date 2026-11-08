@@ -93,11 +93,16 @@ instance's `defaultconfigs/` copy sets them for new worlds:
 Passed a staging trial on 2026-11-08, then copied to main. **Worldgen changes need a
 new world.** Alex's Mobs (EMI's reload failed), Celestisynth, YUNG's Cave Biomes and the
 other dropped mods are in [candidates.md](./candidates.md#skip). Tectonic and
-Lithostitched were removed again on 2026-11-08.
+Lithostitched were removed on 2026-11-08 for slow generation, then added back the same
+day once FastChunkGen made it fast enough. Tectonic's mod jar has Terralith support
+built in, so the separate Terratonic datapack isn't needed. Lithostitched isn't declared
+on Modrinth, so Prism doesn't download it; Tectonic's `mods.toml` requires 1.4.11 or newer.
 
 | Jar | Mod | What it does |
 | --- | --- | --- |
 | `Terralith_1.20.x_v2.5.4.jar` | Terralith | Replaces vanilla's overworld biomes with about 100 of its own. Can't be removed from a world later |
+| `tectonic-3.0.17-forge-1.20.1.jar` | Tectonic | Reshapes overworld terrain: continents, mountain ranges, rivers |
+| `lithostitched-forge-1.20.1-1.4.12.jar` | Lithostitched | Worldgen library Tectonic requires |
 | `YungsApi-1.20-Forge-4.0.6.jar` | YUNG's API | Library for the YUNG's mods |
 | `YungsBetterDesertTemples-1.20-Forge-3.0.3.jar` | YUNG's Better Desert Temples | Reworked desert temples |
 | `YungsBetterDungeons-1.20-Forge-4.0.4.jar` | YUNG's Better Dungeons | Reworked and new dungeons |
@@ -114,18 +119,19 @@ All of these are carried by `gto carry`, along with these configs:
 
 | File | Setting | Why |
 | --- | --- | --- |
+| `config/tectonic.json` | Defaults plus `ultrasmooth`, `elevation_boost` 0.2, `min_y`/`max_y` -128/544, `ocean_offset` -0.5, `continents_scale` 0.3, `ridge_scale` 0.3, `flat_terrain_skew` -0.1, `islands.enabled` false | Smoother, taller terrain with rare oceans and no islands, as in Cosmic Frontiers. Above -0.45, deep oceans and their monuments stop spawning. GT ores below -64 are unchecked |
 | `config/terrablender.toml` | `overworld_region_size` 4 | Smaller biome-mod regions, so they swap more often |
 | `config/biomeswevegone/world_generation.json` | 48 of dev27's 54 BWG biomes on (Cosmic Frontiers' 11 plus 37 picked on 2026-11-08); off: allium_shrubland, amaranth_grassland, crimson_tundra, eroded_borealis, pumpkin_valley, rainbow_beach; region weights 8 to 2 | At 8, BWG's 3 regions outweighed the vanilla region (10, where Terralith's biomes live) and the world was mostly BWG. At 1, BWG showed up in about 1% of 3,510 visited chunks (2026-11-08) |
 | `config/bettermineshafts-forge-1_20.toml` | `Enable Ore Deposits` false | Its deposits are vanilla ores outside GT's veins |
-| `config/DistantHorizons.toml` | `chunkGeneratorMode` `INTERNAL_SERVER`, `generatorPlan` `SURFACE_THEN_CHUNKS`, `lodChunkRenderDistanceRadius` 256, `numberOfThreads` 4, `horizontalQuality`/`verticalQuality` `HIGH`, `enableCaveCulling` true, `playerBandwidthLimit` 0, `enableAdaptiveTransferSpeed` true (2026-11-08) | DH saves real chunks as it pregenerates, as on the GTNH server. The same file goes to the laptop server, which does the generating, so 4 threads leave its other 12 for ticks; the desktop only builds LODs from what the server sends. HIGH instead of EXTREME and cave culling cut LOD build work and VRAM. `INTERNAL_SERVER` tops out near 8 chunks/s on the laptop whatever the thread count, since each chunk goes through the server's own generation; `SURFACE_THEN_CHUNKS` draws a rough surface first so the horizon fills in sooner. No bandwidth cap on the LAN, with adaptive speed against lag. FastChunkGen (below) is on trial as the C2ME-style speedup |
+| `config/DistantHorizons.toml` | `chunkGeneratorMode` `INTERNAL_SERVER`, `generatorPlan` `SURFACE_THEN_CHUNKS`, `lodChunkRenderDistanceRadius` 256, `numberOfThreads` 4, `horizontalQuality`/`verticalQuality` `HIGH`, `enableCaveCulling` true, `playerBandwidthLimit` 0, `enableAdaptiveTransferSpeed` true (2026-11-08) | DH saves real chunks as it pregenerates, as on the GTNH server. The same file goes to the laptop server, which does the generating, so 4 threads leave its other 12 for ticks; the desktop only builds LODs from what the server sends. HIGH instead of EXTREME and cave culling cut LOD build work and VRAM. `INTERNAL_SERVER` tops out near 8 chunks/s on the laptop whatever the thread count, since each chunk goes through the server's own generation; `SURFACE_THEN_CHUNKS` draws a rough surface first so the horizon fills in sooner. No bandwidth cap on the LAN, with adaptive speed against lag. FastChunkGen (below) is the C2ME-style speedup |
 
-## FastChunkGen (on trial, 2026-11-08)
+## FastChunkGen (2026-11-08)
 
 An unofficial Forge 1.20.1 port of C2ME: threaded world generation, async chunk IO and
 threaded lighting. No GTO or GregTech test has been published, and a threading bug can
-write broken chunks without crashing, so it's tried in a throwaway singleplayer world
-before the laptop server gets it. `gto server` copies it there too, since it's in
-`overlay.json` and not in `clientOnly`.
+write broken chunks without crashing; after a throwaway singleplayer trial it goes to
+the laptop server, where `gto server` copies it since it's in `overlay.json` and not in
+`clientOnly`. Watch new terrain there for cut-off or missing chunks.
 
 | Jar | Source |
 | --- | --- |
@@ -149,6 +155,8 @@ false, which only drops that module.
 With that, a new singleplayer world on the desktop ran DH generation at 68 chunks/s
 (2026-11-08), against about 8 on the laptop server without it. The two aren't the same
 CPU, so the laptop's own figure is still to be measured, as is a check for broken chunks.
+With Tectonic added back it ran at 32 chunks/s, far above Tectonic's earlier trial without
+FastChunkGen.
 
 ## Overlay
 

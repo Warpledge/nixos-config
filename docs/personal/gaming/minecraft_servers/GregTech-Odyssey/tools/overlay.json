@@ -258,6 +258,20 @@
       "name": "FastChunkGen",
       "source": "https://github.com/shuttheirprayer/FastChunkGen (built from 18bbfe4)",
       "added": "2026-11-08"
+    },
+    {
+      "jar": "tectonic-3.0.17-forge-1.20.1.jar",
+      "modId": "tectonic",
+      "name": "Tectonic",
+      "source": "https://modrinth.com/mod/tectonic",
+      "added": "2026-11-08"
+    },
+    {
+      "jar": "lithostitched-forge-1.20.1-1.4.12.jar",
+      "modId": "lithostitched",
+      "name": "Lithostitched",
+      "source": "https://modrinth.com/mod/lithostitched",
+      "added": "2026-11-08"
     }
   ],
   "carry": [
@@ -265,6 +279,7 @@
     "config/bettermineshafts-forge-1_20.toml",
     "config/biomeswevegone/world_generation.json",
     "config/fastchunkgen.toml",
+    "config/tectonic.json",
     "config/terrablender.toml",
     "config/zipline.json",
     "config/gtocore-rules.txt",

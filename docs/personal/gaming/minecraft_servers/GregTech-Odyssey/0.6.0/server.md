@@ -89,6 +89,11 @@ GTNH server: `threadRunTimeRatio` 0.5, so its 4 threads run half the time and le
 more for ticks, and `pauseIfMovingQuickly` false, so generation keeps up while flying.
 Set both again after copying the client's file over.
 
+FastChunkGen, Tectonic and Lithostitched are in `overlay.json`, so a rebuilt folder has
+them with `config/fastchunkgen.toml` and `config/tectonic.json`. Tectonic only shapes
+chunks generated after it's added: a world started without it shows seams at the edge of
+old terrain, so start the server's world with it in place.
+
 ## Client-only jars
 
 The zip decides which of the pack's own mods run on a server, so `clientOnly` only
