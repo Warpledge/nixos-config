@@ -301,6 +301,7 @@
     "config/biomeswevegone/world_generation.json",
     "config/tectonic.json",
     "config/terrablender.toml",
+    "config/zipline.json",
     "config/gtocore-rules.txt",
     "config/openloader/data/warpledge-gto",
     "defaultconfigs/toms_storage-server.toml",

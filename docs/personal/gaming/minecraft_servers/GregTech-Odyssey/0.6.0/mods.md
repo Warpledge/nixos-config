@@ -46,7 +46,8 @@ mods from the same batch crashed on tag reload and were dropped
 Kotlin for Forge, which Particle Core and Fzzy Config need, already ships in dev27.
 
 **Configs:** Cosmic Frontiers only changed Particular, to `fallingLeaves = true` and a
-falling-leaf `spawnChance` of 60; 1.5.7's defaults already match. Sounds ships
+falling-leaf `spawnChance` of 60; 1.5.7's defaults already match. `config/zipline.json`
+sets `consumeDurability` false, so ziplining doesn't wear the item (2026-11-08). Sounds ships
 Minecraft 1.21 `c:` tags (mace, breeze rod), which log `Couldn't load tag` errors on
 1.20.1 and are harmless. EMF, ETF, Presence Footsteps and Particle Core crashed a
 dedicated server in Cosmic Frontiers, so a GTO server would need them client-only.
@@ -119,7 +120,7 @@ All of these are carried by `gto carry`, along with these configs:
 
 | File | Setting | Why |
 | --- | --- | --- |
-| `config/tectonic.json` | Defaults plus `ultrasmooth`, `elevation_boost` 0.2, `min_y`/`max_y` -128/544, `ocean_offset` -0.5, `continents_scale` 0.3, `ridge_scale` 0.3, `flat_terrain_skew` -0.1 | Smoother, taller terrain with rare oceans. Above -0.45, deep oceans and their monuments stop spawning. GT ores below -64 are unchecked |
+| `config/tectonic.json` | Defaults plus `ultrasmooth`, `elevation_boost` 0.2, `min_y`/`max_y` -128/544, `ocean_offset` -0.5, `continents_scale` 0.3, `ridge_scale` 0.3, `flat_terrain_skew` -0.1, `islands.enabled` false | Smoother, taller terrain with rare oceans and no islands, as in Cosmic Frontiers. Above -0.45, deep oceans and their monuments stop spawning. GT ores below -64 are unchecked |
 | `config/terrablender.toml` | `overworld_region_size` 4 | Smaller biome-mod regions, so they swap more often |
 | `config/biomeswevegone/world_generation.json` | 48 of dev27's 54 BWG biomes on (Cosmic Frontiers' 11 plus 37 picked on 2026-11-08); off: allium_shrubland, amaranth_grassland, crimson_tundra, eroded_borealis, pumpkin_valley, rainbow_beach; region weights 8 to 2 | At 8, BWG's 3 regions outweighed the vanilla region (10, where Terralith's biomes live) and the world was mostly BWG. At 1, BWG showed up in about 1% of 3,510 visited chunks (2026-11-08) |
 | `config/bettermineshafts-forge-1_20.toml` | `Enable Ore Deposits` false | Its deposits are vanilla ores outside GT's veins |
