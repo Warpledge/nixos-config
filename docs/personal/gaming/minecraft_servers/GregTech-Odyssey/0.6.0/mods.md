@@ -25,11 +25,8 @@ mods from the same batch crashed on tag reload and were dropped
 | Jar | Mod | What it does |
 | --- | --- | --- |
 | `Presence Footsteps [FORGE] 1.0.0.jar` | Presence Footsteps | Footstep sounds by surface (Forge port) |
-| `Sounds-2.2.1+1.20.1+forge.jar` | Sounds | New sound effects and reworked vanilla ones |
 | `sound-physics-remastered-forge-1.20.1-1.5.1.jar` | Sound Physics Remastered | Sound attenuation, reverb and absorption through blocks |
 | `coolrain-1.20.1-Forge-1.0.3.jar` | Cool Rain Reforged | Rain visuals |
-| `particular-1.20.1-Forge-1.5.7.jar` | Particular Reforged | Ambient effects such as falling leaves, fireflies and waterfall spray |
-| `particle_core-0.3.3+1.20.1+forge.jar` | Particle Core | Particle culling and rendering optimization |
 | `entity_model_features-3.3.12-1.20.1-forge.jar` | Entity Model Features | Custom entity model (CEM) resource pack support |
 | `entity_texture_features-7.2.7-1.20.1-forge.jar` | Entity Texture Features | Resource-pack entity texture features; EMF needs it |
 | `smoothswapping-0.9.3.2-1.20.1-forge.jar` | Smooth Swapping | Animates items moving in inventories |
@@ -39,18 +36,16 @@ mods from the same batch crashed on tag reload and were dropped
 | `trashslot-forge-1.20.1-15.1.5.jar` | TrashSlot | Trash slot in the inventory screen |
 | `creeperoverhaul-3.0.2-forge.jar` | Creeper Overhaul | Biome-specific creepers |
 | `endermanoverhaul-forge-1.20.1-1.0.4.jar` | Enderman Overhaul | Biome-specific endermen |
-| `fzzy_config-0.7.7+1.20.1+forge.jar` | Fzzy Config | Library for Particle Core |
-| `mru-1.0.41+1.20.1-forge.jar` | MRU | Library for Sounds; CurseForge only, installed through Prism |
-| `yet_another_config_lib_v3-3.6.6+1.20.1-forge.jar` | YACL | Library; Sounds and MRU call it but don't declare it, so Prism doesn't pull it in |
+| `fzzy_config-0.7.7+1.20.1+forge.jar` | Fzzy Config | Library; Simply Swords needs it |
+| `yet_another_config_lib_v3-3.6.6+1.20.1-forge.jar` | YACL | Library added for Sounds and MRU, which called it without declaring it; no remaining mod declares it |
 
-Kotlin for Forge, which Particle Core and Fzzy Config need, already ships in dev27.
+Kotlin for Forge, which Fzzy Config needs, already ships in dev27. Sounds, MRU,
+Particular and Particle Core were removed on 2026-11-08
+([candidates.md](./candidates.md#skip)).
 
-**Configs:** Cosmic Frontiers only changed Particular, to `fallingLeaves = true` and a
-falling-leaf `spawnChance` of 60; 1.5.7's defaults already match. `config/zipline.json`
-sets `consumeDurability` false, so ziplining doesn't wear the item (2026-11-08). Sounds ships
-Minecraft 1.21 `c:` tags (mace, breeze rod), which log `Couldn't load tag` errors on
-1.20.1 and are harmless. EMF, ETF, Presence Footsteps and Particle Core crashed a
-dedicated server in Cosmic Frontiers, so a GTO server would need them client-only.
+**Configs:** `config/zipline.json` sets `consumeDurability` false, so ziplining doesn't
+wear the item (2026-11-08). EMF, ETF and Presence Footsteps crashed a dedicated server in
+Cosmic Frontiers, so a GTO server would need them client-only.
 
 The shader pack is `Eclipse-Shader Warpledge Edit.zip` in `shaderpacks/`, a copy of the
 one the GTNH notes' [build.py](../../GTNH/2.9.0/eclipse-warpledge-edit/build.py) makes,
@@ -97,13 +92,12 @@ instance's `defaultconfigs/` copy sets them for new worlds:
 
 Passed a staging trial on 2026-11-08, then copied to main. **Worldgen changes need a
 new world.** Alex's Mobs (EMI's reload failed), Celestisynth, YUNG's Cave Biomes and the
-other dropped mods are in [candidates.md](./candidates.md#skip).
+other dropped mods are in [candidates.md](./candidates.md#skip). Tectonic and
+Lithostitched were removed again on 2026-11-08.
 
 | Jar | Mod | What it does |
 | --- | --- | --- |
 | `Terralith_1.20.x_v2.5.4.jar` | Terralith | Replaces vanilla's overworld biomes with about 100 of its own. Can't be removed from a world later |
-| `tectonic-3.0.17-forge-1.20.1.jar` | Tectonic | Reshapes overworld terrain: continents, mountain ranges, rivers |
-| `lithostitched-forge-1.20.1-1.4.11.jar` | Lithostitched | Worldgen library Tectonic requires |
 | `YungsApi-1.20-Forge-4.0.6.jar` | YUNG's API | Library for the YUNG's mods |
 | `YungsBetterDesertTemples-1.20-Forge-3.0.3.jar` | YUNG's Better Desert Temples | Reworked desert temples |
 | `YungsBetterDungeons-1.20-Forge-4.0.4.jar` | YUNG's Better Dungeons | Reworked and new dungeons |
@@ -120,7 +114,6 @@ All of these are carried by `gto carry`, along with these configs:
 
 | File | Setting | Why |
 | --- | --- | --- |
-| `config/tectonic.json` | Defaults plus `ultrasmooth`, `elevation_boost` 0.2, `min_y`/`max_y` -128/544, `ocean_offset` -0.5, `continents_scale` 0.3, `ridge_scale` 0.3, `flat_terrain_skew` -0.1, `islands.enabled` false | Smoother, taller terrain with rare oceans and no islands, as in Cosmic Frontiers. Above -0.45, deep oceans and their monuments stop spawning. GT ores below -64 are unchecked |
 | `config/terrablender.toml` | `overworld_region_size` 4 | Smaller biome-mod regions, so they swap more often |
 | `config/biomeswevegone/world_generation.json` | 48 of dev27's 54 BWG biomes on (Cosmic Frontiers' 11 plus 37 picked on 2026-11-08); off: allium_shrubland, amaranth_grassland, crimson_tundra, eroded_borealis, pumpkin_valley, rainbow_beach; region weights 8 to 2 | At 8, BWG's 3 regions outweighed the vanilla region (10, where Terralith's biomes live) and the world was mostly BWG. At 1, BWG showed up in about 1% of 3,510 visited chunks (2026-11-08) |
 | `config/bettermineshafts-forge-1_20.toml` | `Enable Ore Deposits` false | Its deposits are vanilla ores outside GT's veins |

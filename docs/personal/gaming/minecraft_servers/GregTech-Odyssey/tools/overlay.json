@@ -92,27 +92,6 @@
       "added": "2026-11-07"
     },
     {
-      "jar": "mru-1.0.41+1.20.1-forge.jar",
-      "modId": "mru",
-      "name": "MRU (Mineblock's Repeated Utilities)",
-      "source": "https://www.curseforge.com/projects/669659",
-      "added": "2026-11-07"
-    },
-    {
-      "jar": "particle_core-0.3.3+1.20.1+forge.jar",
-      "modId": "particle_core",
-      "name": "Particle Core",
-      "source": "https://modrinth.com/mod/particle-core",
-      "added": "2026-11-07"
-    },
-    {
-      "jar": "particular-1.20.1-Forge-1.5.7.jar",
-      "modId": "particular",
-      "name": "Particular Reforged",
-      "source": "https://modrinth.com/mod/particular-reforged",
-      "added": "2026-11-07"
-    },
-    {
       "jar": "Presence Footsteps [FORGE] 1.0.0.jar",
       "modId": "presencefootsteps",
       "name": "Presence Footsteps",
@@ -131,13 +110,6 @@
       "modId": "sound_physics_remastered",
       "name": "Sound Physics Remastered",
       "source": "https://modrinth.com/mod/sound-physics-remastered",
-      "added": "2026-11-07"
-    },
-    {
-      "jar": "Sounds-2.2.1+1.20.1+forge.jar",
-      "modId": "sounds",
-      "name": "Sounds",
-      "source": "https://modrinth.com/mod/sound",
       "added": "2026-11-07"
     },
     {
@@ -201,20 +173,6 @@
       "modId": "terralith",
       "name": "Terralith",
       "source": "https://modrinth.com/mod/terralith",
-      "added": "2026-11-08"
-    },
-    {
-      "jar": "tectonic-3.0.17-forge-1.20.1.jar",
-      "modId": "tectonic",
-      "name": "Tectonic",
-      "source": "https://modrinth.com/mod/tectonic",
-      "added": "2026-11-08"
-    },
-    {
-      "jar": "lithostitched-forge-1.20.1-1.4.11.jar",
-      "modId": "lithostitched",
-      "name": "Lithostitched",
-      "source": "https://modrinth.com/mod/lithostitched",
       "added": "2026-11-08"
     },
     {
@@ -299,7 +257,6 @@
     "config/DistantHorizons.toml",
     "config/bettermineshafts-forge-1_20.toml",
     "config/biomeswevegone/world_generation.json",
-    "config/tectonic.json",
     "config/terrablender.toml",
     "config/zipline.json",
     "config/gtocore-rules.txt",
