@@ -17,11 +17,6 @@ A dedicated server on the laptop (legion), LAN only, with its own world created 
 - **Loader:** Forge 1.20.1-47.4.20, read from the instance's `mmc-pack.json`
 - **Java:** `pkgs.jdk25`, 12 GB heap, ZGC with compact object headers like the client
   ([java-and-launch.md](./java-and-launch.md))
-- **Distant Horizons** (`config/DistantHorizons.toml`, set 2026-11-08 to match the GTNH
-  server): `numberOfThreads` 4 at `threadRunTimeRatio` 0.5 (the client's 16 at 1.0
-  would starve the server tick), `pauseIfMovingQuickly` false, `playerBandwidthLimit` 0
-  on the LAN. Generation stays `INTERNAL_SERVER` with `SURFACE_THEN_CHUNKS`. A
-  rebuilt folder takes the client's file again, so redo these after `gto server`
 
 ## Building the folder
 
@@ -88,6 +83,11 @@ saves it as a real chunk, then sends the LODs to the desktop. At a 256-chunk rad
 about 262,000 chunks per area explored, so expect hours of background generation and tens
 of GB of region files; `limitIfServerUnhealthy` pauses it when ticks fall behind. Copy
 the file again after changing it on the client.
+
+The laptop's copy differs from the client's in two values, set 2026-11-08 to match the
+GTNH server: `threadRunTimeRatio` 0.5, so its 4 threads run half the time and leave
+more for ticks, and `pauseIfMovingQuickly` false, so generation keeps up while flying.
+Set both again after copying the client's file over.
 
 ## Client-only jars
 
