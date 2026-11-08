@@ -212,6 +212,13 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   any new pack that retextures lava. Untested against the crash itself; if it still
   happens, remove `XaerosWorldMap_*.jar` until the issue is fixed.
 
+- **Realistic World Gen 2 2.1.1** (2026-11-08, client; legion still on 2.0.6): replaces the
+  pack's `rwg2-2.0.6.jar`. Builds against GTNHLib 0.11.54 and NEI 2.8.171, the versions 2.9
+  ships. Adds climate bands, per-continent Tainted Land and the `Biome Size Multiplier`,
+  set to 1.7 in `config/rwg2.cfg` under `continental rwg` (default 1.0, range 0.25 to 10).
+  Only `RWG2_CONTINENTS` worlds read it, and changing it on an existing world leaves borders
+  between old and new chunks, so it's for a new world. Set it on the server too.
+
 - **SharedProspecting 2.0.4**: built against VisualProspecting 1.5.11 and GTNHLib 0.9.0.
   Its six late mixins still match VP 1.5.42 as shipped in 2.9 (checked 2026-11-01); the
   team sync itself can only be proven on the server.
