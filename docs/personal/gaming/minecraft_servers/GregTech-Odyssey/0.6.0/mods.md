@@ -157,13 +157,21 @@ dev27's LeanObject (`leanobject`) had already rewritten. `reduceAllocations` is 
 false, which only drops that module.
 
 With that, a new singleplayer world on the desktop ran DH generation at 68 chunks/s
-(2026-11-08), against about 8 on the laptop server without it. With Tectonic added back it
-ran at 32 chunks/s, far above Tectonic's earlier trial without FastChunkGen.
+(2026-11-08), against about 8 on the laptop server without it. With Tectonic added back
+it ran at 32 chunks/s, far above Tectonic's earlier trial without FastChunkGen.
 
 On the laptop server, with Tectonic, a new world's DH pregen (radius 256, 14 DH threads)
-ran at 42 chunks/s with every CPU thread busy (2026-11-08). FastChunkGen logs that it
-couldn't disable ModernFix's `mixin.perf.release_protochunks`. A check for broken chunks
-is still to do.
+ran at 42 chunks/s with every CPU thread busy (2026-11-08). No broken chunks were seen
+flying over the new terrain that day.
+
+At startup FastChunkGen warns `Could not disable ModernFix
+mixin.perf.release_protochunks` with a `NullPointerException` (`"option" is null`). It
+tries to switch off that ModernFix option, which frees a chunk's in-progress copy early
+and could clash with threaded generation, but dev27's ModernFix 5.26.2 has no such
+option: the jar has no mixin by that name and `config/modernfix-mixins.properties`
+doesn't list it. Nothing to set; check again if ModernFix is updated.
+`overrideModernFixWorldGenAllocations` in `fastchunkgen.toml` covers the ModernFix
+worldgen mixin that does exist (`perf.worldgen_allocation`).
 
 ## Integrated structures (2026-11-12)
 
