@@ -117,7 +117,29 @@ All of these are carried by `gto carry`, along with these configs:
 | `config/terrablender.toml` | `overworld_region_size` 4 | Smaller biome-mod regions, so they swap more often |
 | `config/biomeswevegone/world_generation.json` | 48 of dev27's 54 BWG biomes on (Cosmic Frontiers' 11 plus 37 picked on 2026-11-08); off: allium_shrubland, amaranth_grassland, crimson_tundra, eroded_borealis, pumpkin_valley, rainbow_beach; region weights 8 to 2 | At 8, BWG's 3 regions outweighed the vanilla region (10, where Terralith's biomes live) and the world was mostly BWG. At 1, BWG showed up in about 1% of 3,510 visited chunks (2026-11-08) |
 | `config/bettermineshafts-forge-1_20.toml` | `Enable Ore Deposits` false | Its deposits are vanilla ores outside GT's veins |
-| `config/DistantHorizons.toml` | `chunkGeneratorMode` `INTERNAL_SERVER`, `generatorPlan` `SURFACE_THEN_CHUNKS`, `lodChunkRenderDistanceRadius` 256, `numberOfThreads` 4, `horizontalQuality`/`verticalQuality` `HIGH`, `enableCaveCulling` true, `playerBandwidthLimit` 0, `enableAdaptiveTransferSpeed` true (2026-11-08) | DH saves real chunks as it pregenerates, as on the GTNH server. The same file goes to the laptop server, which does the generating, so 4 threads leave its other 12 for ticks; the desktop only builds LODs from what the server sends. HIGH instead of EXTREME and cave culling cut LOD build work and VRAM. `INTERNAL_SERVER` tops out near 8 chunks/s on the laptop whatever the thread count, since each chunk goes through the server's own generation; `SURFACE_THEN_CHUNKS` draws a rough surface first so the horizon fills in sooner. No bandwidth cap on the LAN, with adaptive speed against lag. Its "C2ME missing" warning is expected; C2ME's unofficial Forge port isn't safe with GT and these worldgen mods |
+| `config/DistantHorizons.toml` | `chunkGeneratorMode` `INTERNAL_SERVER`, `generatorPlan` `SURFACE_THEN_CHUNKS`, `lodChunkRenderDistanceRadius` 256, `numberOfThreads` 4, `horizontalQuality`/`verticalQuality` `HIGH`, `enableCaveCulling` true, `playerBandwidthLimit` 0, `enableAdaptiveTransferSpeed` true (2026-11-08) | DH saves real chunks as it pregenerates, as on the GTNH server. The same file goes to the laptop server, which does the generating, so 4 threads leave its other 12 for ticks; the desktop only builds LODs from what the server sends. HIGH instead of EXTREME and cave culling cut LOD build work and VRAM. `INTERNAL_SERVER` tops out near 8 chunks/s on the laptop whatever the thread count, since each chunk goes through the server's own generation; `SURFACE_THEN_CHUNKS` draws a rough surface first so the horizon fills in sooner. No bandwidth cap on the LAN, with adaptive speed against lag. FastChunkGen (below) is on trial as the C2ME-style speedup |
+
+## FastChunkGen (on trial, 2026-11-08)
+
+An unofficial Forge 1.20.1 port of C2ME: threaded world generation, async chunk IO and
+threaded lighting. No GTO or GregTech test has been published, and a threading bug can
+write broken chunks without crashing, so it's tried in a throwaway singleplayer world
+before the laptop server gets it. `gto server` copies it there too, since it's in
+`overlay.json` and not in `clientOnly`.
+
+| Jar | Source |
+| --- | --- |
+| `fastchunkgen-0.43-all.jar` | Built from [shuttheirprayer/FastChunkGen](https://github.com/shuttheirprayer/FastChunkGen) at `18bbfe4`; no published releases. 0.40, from another download, came out the same day |
+
+Built with JDK 17 (Gradle 8.8 can't run on Java 25, so `JAVA_HOME` has to point at it):
+
+```bash
+nix-shell -p jdk17 --run 'export JAVA_HOME=$(dirname $(dirname $(readlink -f $(command -v java)))); sh ./gradlew build --no-daemon'
+```
+
+Use `build/libs/fastchunkgen-<version>-all.jar`, which bundles its libraries. It accepts
+any Forge 47, though it's built against 47.4.22. Its settings go in
+`config/fastchunkgen.toml`.
 
 ## Overlay
 

@@ -251,6 +251,13 @@
       "name": "Apothic Combat",
       "source": "https://modrinth.com/mod/apothic-combat",
       "added": "2026-11-08"
+    },
+    {
+      "jar": "fastchunkgen-0.43-all.jar",
+      "modId": "fastchunkgen",
+      "name": "FastChunkGen",
+      "source": "https://github.com/shuttheirprayer/FastChunkGen (built from 18bbfe4)",
+      "added": "2026-11-08"
     }
   ],
   "carry": [
