@@ -264,6 +264,7 @@
     "config/DistantHorizons.toml",
     "config/bettermineshafts-forge-1_20.toml",
     "config/biomeswevegone/world_generation.json",
+    "config/fastchunkgen.toml",
     "config/terrablender.toml",
     "config/zipline.json",
     "config/gtocore-rules.txt",

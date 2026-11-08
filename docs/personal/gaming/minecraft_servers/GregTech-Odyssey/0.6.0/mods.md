@@ -139,7 +139,12 @@ nix-shell -p jdk17 --run 'export JAVA_HOME=$(dirname $(dirname $(readlink -f $(c
 
 Use `build/libs/fastchunkgen-<version>-all.jar`, which bundles its libraries. It accepts
 any Forge 47, though it's built against 47.4.22. Its settings go in
-`config/fastchunkgen.toml`.
+`config/fastchunkgen.toml`, which `gto carry` copies.
+
+With defaults, creating a world crashed (2026-11-08): its `reduceAllocations` mixin
+`NbtOps$NbtRecordBuilderASM` couldn't inject into `NbtOps$NbtRecordBuilder.build`, which
+dev27's LeanObject (`leanobject`) had already rewritten. `reduceAllocations` is set to
+false, which only drops that module.
 
 ## Overlay
 
