@@ -5,8 +5,13 @@ A dedicated server on the laptop (legion), LAN only, with its own world created 
 
 - **Folder:** `~/Documents/Minecraft_Servers/GregTech.Odyssey-0.6.0-dev27-server/` on
   the laptop
+- **Runs in:** Omni Server as `gregtech-odyssey-0-6-0-dev27`
+  (`~/.config/omni-server/servers/gregtech-odyssey-0-6-0-dev27.json`, added 2026-11-08):
+  Java 25, 12288 MB heap, JVM flags preset None with the client's ZGC flags as extra
+  flags, restart on crash
 - **Command:** `gtoserver` (`log`, `stop`, `status`), from
-  `machines/legion/minecraft-servers/gto-server.nix`; also in the `mcservers` picker
+  `machines/legion/minecraft-servers/gto-server.nix`; also in the `mcservers` picker. It
+  only sees its own tmux session, so it won't report a server started from Omni Server
 - **Port:** 25566, already open in `machines/legion/default.nix`. One server runs at a
   time, since the GTNH and TFG servers use it too
 - **Loader:** Forge 1.20.1-47.4.20, read from the instance's `mmc-pack.json`
@@ -63,6 +68,12 @@ java process and read `crash-reports/`.
 The world is created on the first start from the rules file the folder carried, so the
 rules in [difficulty-rules.md](./difficulty-rules.md) apply. Check with the in-game View
 Rules screen.
+
+**Check `config/gtocore-rules.txt` before the first start.** The folder built on
+2026-11-08 carried only `preset = custom` and `gtm.explosion_damages_terrain`, so the
+other 13 rules were set by hand on the laptop to match difficulty-rules.md (the old copy
+is `gtocore-rules.txt.before-rules-2026-11-08`). `gto server` copies `config/` from the
+client, so check the instance's file before rebuilding a folder with no world yet.
 
 ## Client-only jars
 
