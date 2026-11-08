@@ -212,6 +212,12 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   any new pack that retextures lava. Untested against the crash itself; if it still
   happens, remove `XaerosWorldMap_*.jar` until the issue is fixed.
 
+- **Angelica 2.2.45** (2026-11-08, client only): replaces the pack's 2.2.43 for the shader
+  fix for flat item icons on drawers and barrels, and 2.2.44's fix for black patches over
+  the world. Angelica#2092 (the Xaero crash) is still open. Mods that patch Angelica can break
+  on a bump: check GTNLLib's font, ChromaPatch and the shaders, Distant Horizons and
+  Xaero's maps at launch.
+
 - **Realistic World Gen 2 2.1.1** (2026-11-08, client; legion still on 2.0.6): replaces the
   pack's `rwg2-2.0.6.jar`. Builds against GTNHLib 0.11.54 and NEI 2.8.171, the versions 2.9
   ships. Adds climate bands, per-continent Tainted Land and the `Biome Size Multiplier`,
