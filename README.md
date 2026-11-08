@@ -506,7 +506,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | **Media Player** | [mpv][mpv], [Spotify][spotify] via [spicetify-nix][spicetify], [FreeTube][freetube], [yt-dlp][yt-dlp] (downloader), [ani-cli][ani-cli] (anime in mpv) |
 | **Twitch** | [Streamlink Twitch GUI][streamlink-twitch-gui] browses Twitch and hands the stream to [Streamlink][streamlink], which plays it in mpv, so there are no ads and the follow list stays local with no Twitch account attached; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs |
 | **Screenshot / Recording** | [Quick Capture][quick-capture] (Niri), [gpu-screen-recorder][gpu-screen-recorder] |
-| **Clipboard** | [ClipBoard+][clipboard-plus] (Niri) |
+| **Clipboard** | DMS's built-in clipboard history (Niri) |
 | **Wallpaper Picker** | [Wallpaper Carousel][wallpaper-carousel] over the images in `modules/theme/wallpapers` (Niri), the default; each user picks it or Wallpaper Engine with `wallpaper` in their settings |
 | **Animated Wallpaper** | [linux-wallpaperengine][linux-wallpaperengine] plays Wallpaper Engine scenes and videos from the Steam Workshop, in place of DMS's wallpaper; the [Linux Wallpaper Engine][dms-wallpaperengine] DMS plugin picks them (Niri, `wallpaper = "engine"`; needs Wallpaper Engine bought on Steam) |
 | **Graphics** | [Blender][blender], [Krita][krita], [Affinity Suite v3][affinity-nix] (via Wine), all off by default |
@@ -626,7 +626,6 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 [freetube]: https://freetubeapp.io
 [gpu-screen-recorder]: https://git.dec05eba.com/gpu-screen-recorder
 [quick-capture]: https://github.com/hthienloc/dms-plugins
-[clipboard-plus]: https://github.com/Dadangdut33/dms-plugins
 [wallpaper-carousel]: https://github.com/motor-dev/wallpaperCarousel
 [linux-wallpaperengine]: https://github.com/Almamu/linux-wallpaperengine
 [dms-wallpaperengine]: https://github.com/sgtaziz/dms-wallpaperengine
@@ -803,7 +802,7 @@ flake.nix
 | [`nur`](https://github.com/nix-community/NUR) | NixOS User Repository |
 | [`niri`](https://github.com/epireyn/niri-flake) (epireyn/niri-flake) | Niri WM |
 | [`dms`](https://github.com/duxlabs-dev/dux-shell) (duxlabs-dev, stable) | Dux Shell (formerly DankMaterialShell) |
-| [`dms-plugin-registry`](https://github.com/duxlabs-dev/dux-plugin-registry) | Dux Shell plugins (Quick Capture, AMD GPU monitor, ClipBoard+, Wallpaper Carousel, Linux Wallpaper Engine) |
+| [`dms-plugin-registry`](https://github.com/duxlabs-dev/dux-plugin-registry) | Dux Shell plugins (Quick Capture, AMD GPU monitor, Wallpaper Carousel, Linux Wallpaper Engine) |
 | [`dux-files`](https://github.com/duxlabs-dev/dux-files) | Dux Files, standalone file manager from Dux Labs |
 | [`dux-greeter`](https://github.com/duxlabs-dev/dux-greeter) | Login screen that matches Dux Shell |
 | [`stylix`](https://github.com/nix-community/stylix) | Fonts and cursor |

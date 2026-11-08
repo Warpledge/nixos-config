@@ -85,10 +85,6 @@ in {
         '';
       };
 
-      # A bar widget: its IPC target only exists while it sits in a bar
-      # (rightWidgets in settings.json).
-      clipboardPlus.enable = true;
-
       wallpaperCarousel.enable = user.wallpaper == "carousel";
 
       # Runs linux-wallpaperengine itself; picks are saved in plugin_settings.json
@@ -115,13 +111,6 @@ in {
     };
 
     wallpaperCarousel.wallpaperDirectory = "${../../../../theme/wallpapers}";
-
-    clipboardPlus = {
-      backgroundOpacity = 80; # dim behind the panel, 0-80
-      panelOpacityClipboard = 80;
-      panelOpacityPinned = 80;
-      emojiUnicodeEnabled = false;
-    };
   };
 
   #--------------------------------------------------------------------#
@@ -147,7 +136,7 @@ in {
   in {
     #--- DankMaterialShell Controls
     launcher = dmsBind "Mod+space" "App launcher" "spotlight toggle";
-    clipboard = dmsBind "Mod+V" "Clipboard history" "clipboardPlus togglePanel";
+    clipboard = dmsBind "Mod+V" "Clipboard history" "clipboard toggle";
     task-manager = dmsBind "Mod+P" "Task manager" "processlist toggle";
     shell-settings = dmsBind "Mod+Comma" "Shell settings" "settings toggle";
     notepad = dmsBind "Mod+N" "Notepad" "notepad toggle";
