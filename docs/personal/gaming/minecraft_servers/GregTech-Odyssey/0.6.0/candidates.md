@@ -10,7 +10,29 @@ are in `~/Downloads/cosmic_frontiers_notes/`.
 lookup found no 1.20.1 Forge build on Modrinth. Pick a batch, then trial it with
 `gto stage` as described in [updating.md](./updating.md).
 
-## Integrated mods (high priority)
+## Integrated mods (dropped 2026-11-07)
+
+**Dropped after batch 2 broke EMI in staging.** Kept as a record of what was tried, so
+a retry starts from what failed.
+
+- With all of batch 2, EMI's recipe reload threw a NullPointerException inside gtolib
+  (GTO's closed-source core, `EmiRecipes.bake`), so EMI showed no recipes and its search
+  box stopped responding.
+- With Quark, Zeta, IDAS, Integrated Stronghold, Integrated Dungeons Arise and Integrated
+  Seven Seas disabled, the error went away but EMI's search returned nothing; its
+  `EMI Search Bake` thread started and never logged finishing. The unmodified pack's
+  search works, so the rest of batch 2 (Create, Supplementaries, Amendments, Moonlight,
+  KubeJS, Rhino, Integrated API, Patches, Villages) breaks it too.
+- Quark adds 1,602 recipes; the Integrated jars add one or none. The structures use 543
+  Quark block types (about 350,000 placements), so Quark can't be dropped from under
+  them.
+- Integrated Stronghold's 61 templates hold 4,529 block entities (about 570 Create
+  gearboxes, water wheels and shafts, about 500 banners) and 7,583 lava blocks; it
+  dropped the frame rate from about 160 to 20 with shaders.
+- Structures were far too dense on top of When Dungeons Arise, and none of the mods has a
+  spacing setting; it would take a datapack overriding their `structure_set` files.
+- Integrated Villages 1.3.2 lists a `swamp_village` it doesn't ship, which makes the
+  whole `#minecraft:village` tag fail to load.
 
 The best structure mods from the Cosmic Frontiers testing. All 11 have 1.20.1 Forge
 builds (Modrinth, 2026-11-07). 8 of them build their structures from Create, Quark and
@@ -34,8 +56,7 @@ the pack's site but has no integration.
   Villages lists none, but its jar's `mods.toml` makes Create and Supplementaries
   mandatory. Read each jar's `mods.toml` when it's added.
 - Batch 1 passed in staging on 2026-11-07 (new world, DH generating, reload, `gto check`
-  clean). It adds no structures by itself, so it stays in staging and goes to main with
-  batch 2.
+  clean), but adds no structures by itself, so it went no further.
 - Integrated Stronghold and YUNG's Better Strongholds both replace the stronghold: use
   one. dev27's End Remastered patches stronghold pieces too.
 
@@ -111,7 +132,7 @@ the same spots.
 | Samurai Dynasty | | Adds 6 ores; Cosmic Frontiers suppressed all but Spirit Stone with biome-modifier overrides (`config-tweaks.md`). Its weapons need gregification too |
 | Mowzie's Mobs | | Boss structures |
 | L_Ender's Cataclysm | Lionfish API | Boss arenas and very strong gear: gregify the gear |
-| Mowzie's Cataclysm, Simply Swords: Cataclysm, Cataclysm & BetterCombat Compat | | Compat for the mods above; add only with them. Integrated Cataclysm is in [the Integrated plan](#integrated-mods-high-priority) |
+| Mowzie's Cataclysm, Simply Swords: Cataclysm, Cataclysm & BetterCombat Compat | | Compat for the mods above; add only with them. Integrated Cataclysm was [dropped](#integrated-mods-dropped-2026-11-07) |
 
 ## Gameplay changes
 
@@ -138,7 +159,7 @@ sessions in staging before deciding.
 | Smooth Chunk Save | Changes how chunks save, on a dev build that already warns of corrupted saves |
 | Tinkers' Better Combat | Needs Tinkers' Construct, which GTO lacks |
 | Aether Villages | Needs The Aether, which GTO lacks |
-| Quark, Zeta (as a content mod) | Too broad to trial in one go (worldgen, automation blocks, mob changes). It comes in only as a block library for [the Integrated mods](#integrated-mods-high-priority), with a module-by-module config pass |
+| Quark, Zeta | Too broad to trial in one go (worldgen, automation blocks, mob changes), and with batch 2 of [the Integrated mods](#integrated-mods-dropped-2026-11-07) it broke EMI's recipe reload inside gtolib |
 | Cupboard | Only a library for the someaddons mods, none of which are on this list |
 
 ## Sources
