@@ -60,6 +60,44 @@ The shader pack is `Eclipse-Shader Warpledge Edit.zip` in `shaderpacks/`, a copy
 one the GTNH notes' [build.py](../../GTNH/2.9.0/eclipse-warpledge-edit/build.py) makes,
 with its own `.zip.txt` settings.
 
+## Storage and weapons (2026-11-07)
+
+Passed a staging trial on 2026-11-07, then copied to main.
+
+| Jar | Mod | What it does |
+| --- | --- | --- |
+| `toms_storage-1.20-1.7.1.jar` | Tom's Simple Storage | Cables, connectors and a search terminal over ordinary inventories, before AE2 |
+| `Toms-Performant-Storage-forge-0.1.0+1.20.1.jar` | Tom's Performant Storage | Rebuilds the terminal's item list at most once a second, and only when the contents changed. CurseForge only, installed through Prism. Its `mods.toml` makes FTB Teams mandatory, which dev27 ships |
+| `simplyswords-forge-neoforge-1.70.2-1.20.1.jar` | Simply Swords | Weapon types in iron, gold, diamond, netherite and runic, plus loot-only uniques |
+| `SimplyTooltips-forge-0.1.5-1.20.1.jar` | Simply Tooltips | Library Simply Swords requires |
+| `IllagerInvasion-v8.0.7-1.20.1-Forge.jar` | Illager Invasion | New illagers and the imbuing table |
+
+Simply Swords Overhaul was dropped: it only works with Simply Swords 1.56.0
+([candidates.md](./candidates.md#skip)).
+
+### Recipe overrides
+
+The [warpledge-gto datapack](../datapack/warpledge-gto/) replaces these recipes;
+[updating.md](./updating.md#recipe-overrides) has how it's built and installed.
+
+| Mod | Recipes | Change |
+| --- | --- | --- |
+| Tom's Simple Storage | 16 | Steam/ULV tier: wrought iron plates and rods replace planks, trapdoors and sticks; bronze plates go in the connectors and the wireless terminal; vacuum tubes replace diamonds and glowstone. The 3 recipes with none of those stay |
+| Tom's Simple Storage | 1 | The advanced wireless terminal is an LV crafting recipe instead of a netherite upgrade: 2 LV emitters, an LV circuit, 4 steel plates, an LV sensor and the wireless terminal |
+| Simply Swords | 46 | Iron, gold and diamond weapons and sword-on-a-stick: ingots and diamonds become GT plates of the same material, sticks become iron rods. Netherite, runic and the uniques (loot only) stay |
+| Illager Invasion | 1 | The imbuing table's 4 copper blocks become 2 copper plates and 2 LV circuits |
+
+**Tom's ranges** are per world in `serverconfig/toms_storage-server.toml`; the
+instance's `defaultconfigs/` copy sets them for new worlds:
+
+| Setting | Default | Set | Note |
+| --- | --- | --- | --- |
+| `wirelessReach` | 16 | 64 | The config's maximum; a higher value is reset to 16 |
+| `advWirelessRange` | 64 | 512 | The config's maximum |
+| `wirelessTermBeaconLvl` | 1 | 0 | Infinite range for the advanced terminal with any beacon block near the storage terminal |
+
+## Overlay
+
 The same jars, with their modIds and sources, are in
 [overlay.json](../tools/overlay.json), which `gto carry` reads to copy them into a new
 build. A mod added or removed here changes there too. Candidates from Cosmic Frontiers

@@ -7,8 +7,9 @@ Usage:
 An instance is a folder name under Prism's instances/ or a path. overlay.json beside
 this file lists the hand-added jars and the files to carry into a new pack build;
 0.6.0/updating.md has the procedures. Commands that write refuse while Prism or the
-instance's game is running, and nothing is ever deleted except a staging copy replaced
-with --replace, which is backed up first.
+instance's game is running. Nothing is ever deleted except a staging copy replaced
+with --replace, which is backed up first, and the instance's copy of the recipe
+datapack, which `datapack` rebuilds from ../datapack/.
 """
 
 import argparse
@@ -27,6 +28,7 @@ from pathlib import Path
 PRISM = Path.home() / ".local/share/PrismLauncher"
 BACKUPS = Path.home() / "Documents/Minecraft_Servers/GTO-backups"
 OVERLAY = Path(__file__).resolve().with_name("overlay.json")
+DATAPACK = Path(__file__).resolve().parent.parent / "datapack" / "warpledge-gto"
 BASELINE = "gto-baseline.txt"
 FULL_DIFF = {"config/gtocore-rules.txt", "config/gtocore.yaml"}
 
@@ -234,7 +236,14 @@ def cmd_carry(a):
             if not a.dry_run:
                 shutil.copy2(src, dst)
 
-    for rel in ov["carry"]:
+    carried = []
+    for entry in ov["carry"]:
+        root = ogame / entry
+        if root.is_dir():
+            carried += sorted(str(p.relative_to(ogame)) for p in root.rglob("*") if p.is_file())
+        else:
+            carried.append(entry)
+    for rel in carried:
         src, dst = ogame / rel, ngame / rel
         if not src.is_file():
             print(f"skip {rel}: not in {old.name}")
@@ -269,6 +278,36 @@ def cmd_carry(a):
             act(f"copy world {world.name}")
             if not a.dry_run:
                 shutil.copytree(world, dst, symlinks=True)
+
+#-- datapack
+
+def cmd_datapack(a):
+    inst = instance(a.instance)
+    src = DATAPACK
+    dst = game_dir(inst) / "config/openloader/data" / DATAPACK.name
+    if not (src / "pack.mcmeta").is_file():
+        sys.exit(f"no datapack at {src}; run gregify.py first")
+    want = {str(p.relative_to(src)): p for p in src.rglob("*") if p.is_file()}
+    have = {}
+    if dst.is_dir():
+        have = {str(p.relative_to(dst)): p for p in dst.rglob("*") if p.is_file()}
+    changed = [r for r in sorted(want) if r not in have or not same(want[r], have[r])]
+    gone = sorted(have.keys() - want.keys())
+    for r in changed:
+        print(f"{'would copy' if a.dry_run else 'copy'} {r}")
+    for r in gone:
+        print(f"{'would remove' if a.dry_run else 'remove'} {r}")
+    if not changed and not gone:
+        print(f"{dst} is up to date ({len(want)} files)")
+        return
+    if a.dry_run:
+        return
+    refuse_if_running(inst, prism_ok=True)
+    # The folder is generated from the repo, so replacing it whole loses nothing.
+    if dst.exists():
+        shutil.rmtree(dst)
+    shutil.copytree(src, dst)
+    print(f"{dst}: {len(want)} files; reload with /reload or restart the world")
 
 #-- diff
 
@@ -444,6 +483,11 @@ def main():
                    help="use another instance's baseline, such as the old build's")
     s.add_argument("--save-baseline", action="store_true")
     s.set_defaults(func=cmd_check)
+
+    s = sub.add_parser("datapack", help="install the repo's recipe datapack into an instance")
+    s.add_argument("instance")
+    s.add_argument("-n", "--dry-run", action="store_true")
+    s.set_defaults(func=cmd_datapack)
 
     a = p.parse_args()
     rc = a.func(a)

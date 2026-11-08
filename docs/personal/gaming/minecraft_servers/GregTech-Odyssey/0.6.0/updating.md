@@ -17,6 +17,25 @@ alias gto='python3 -I /etc/nixos-config/docs/personal/gaming/minecraft_servers/G
 | `gto diff <old> <new>` | Mods added, removed or updated, your jars the pack now ships, and every config file that changed |
 | `gto check <inst>` | Errors in `logs/latest.log` that the instance's baseline lacks, plus mixin, dependency and load failures and crash reports. Exits 1 on findings |
 | `gto check <inst> --save-baseline` | Records this log's errors as normal for the instance |
+| `gto datapack <inst>` | Installs the repo's recipe datapack, [datapack/warpledge-gto](../datapack/warpledge-gto/), as `config/openloader/data/warpledge-gto/`, replacing the old copy |
+
+## Recipe overrides
+
+dev27 has no KubeJS, so recipes are changed the way GTO changes its own: an Open Loader
+datapack with a JSON at the same `data/<ns>/recipes/<id>.json` as the mod's recipe.
+[tools/gregify.py](../tools/gregify.py) writes it from each mod's jar by swapping
+ingredients for GT parts; [mods.md](./mods.md#recipe-overrides) lists what each mod
+gets. After updating Tom's Simple Storage, Simply Swords or Illager Invasion, or after
+editing a swap in `gregify.py`:
+
+```bash
+python3 -I /etc/nixos-config/docs/personal/gaming/minecraft_servers/GregTech-Odyssey/tools/gregify.py ~/.local/share/PrismLauncher/instances/GregTech.Odyssey-0.6.0-dev27-staging/minecraft/mods
+gto datapack GregTech.Odyssey-0.6.0-dev27-staging
+```
+
+It prints any recipe it no longer writes, so delete that file from the datapack. In
+game, `/reload` picks up the change; check each changed recipe in EMI for an empty slot,
+which means a tag GT doesn't register.
 
 Every writing command takes `-n` to print what it would do. `<inst>` is a folder name
 under Prism's `instances/` or a path.

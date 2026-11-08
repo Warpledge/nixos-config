@@ -195,10 +195,47 @@
       "name": "Ziplines: Rezipped!",
       "source": "https://modrinth.com/mod/ziplines-rezipped",
       "added": "2026-11-07"
+    },
+    {
+      "jar": "toms_storage-1.20-1.7.1.jar",
+      "modId": "toms_storage",
+      "name": "Tom's Simple Storage",
+      "source": "https://modrinth.com/mod/toms-storage",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "Toms-Performant-Storage-forge-0.1.0+1.20.1.jar",
+      "modId": "tomsperformantstorage",
+      "name": "Tom's Performant Storage",
+      "source": "https://www.curseforge.com/projects/1483318",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "simplyswords-forge-neoforge-1.70.2-1.20.1.jar",
+      "modId": "simplyswords",
+      "name": "Simply Swords",
+      "source": "https://modrinth.com/mod/simply-swords",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "SimplyTooltips-forge-0.1.5-1.20.1.jar",
+      "modId": "simplytooltips",
+      "name": "Simply Tooltips",
+      "source": "https://modrinth.com/mod/simply-tooltips",
+      "added": "2026-11-07"
+    },
+    {
+      "jar": "IllagerInvasion-v8.0.7-1.20.1-Forge.jar",
+      "modId": "illagerinvasion",
+      "name": "Illager Invasion",
+      "source": "https://modrinth.com/mod/illager-invasion",
+      "added": "2026-11-07"
     }
   ],
   "carry": [
     "config/gtocore-rules.txt",
+    "config/openloader/data/warpledge-gto",
+    "defaultconfigs/toms_storage-server.toml",
     "options.txt",
     "shaderpacks/Eclipse-Shader Warpledge Edit.zip",
     "shaderpacks/Eclipse-Shader Warpledge Edit.zip.txt"

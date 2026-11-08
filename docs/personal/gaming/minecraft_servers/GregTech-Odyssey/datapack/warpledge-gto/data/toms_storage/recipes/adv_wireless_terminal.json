@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "E": {
+      "item": "gtceu:lv_emitter"
+    },
+    "C": {
+      "item": "gtceu:basic_electronic_circuit"
+    },
+    "P": {
+      "tag": "c:plates/steel"
+    },
+    "W": {
+      "item": "toms_storage:ts.wireless_terminal"
+    },
+    "S": {
+      "item": "gtceu:lv_sensor"
+    }
+  },
+  "pattern": [
+    "ECE",
+    "PWP",
+    "PSP"
+  ],
+  "result": {
+    "item": "toms_storage:ts.adv_wireless_terminal"
+  }
+}

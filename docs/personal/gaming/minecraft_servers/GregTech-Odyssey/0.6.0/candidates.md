@@ -110,9 +110,9 @@ has the KubeJS patterns and tier tables from the first time.
 
 | Mod | Needs | Note |
 | --- | --- | --- |
-| Tom's Simple Storage | | Item networks that bypass AE2; gregified in Cosmic Frontiers |
-| Simply Swords, Simply Swords Overhaul | Fzzy Config, Simply Tooltips | Gregified in Cosmic Frontiers, unique weapons included |
-| Illager Invasion | | Imbuing table gregified in Cosmic Frontiers; also adds raids |
+| Tom's Simple Storage | | **Added 2026-11-07**, with Tom's Performant Storage and GT recipes ([mods.md](./mods.md#recipe-overrides)) |
+| Simply Swords, Simply Swords Overhaul | Fzzy Config, Simply Tooltips | **Simply Swords added 2026-11-07** with GT recipes; Overhaul is in [Skip](#skip). Gregified in Cosmic Frontiers, unique weapons included |
+| Illager Invasion | | **Added 2026-11-07**, imbuing table gregified. Also adds raids |
 | Zipline | | Craftable traversal |
 | Supplementaries | Moonlight | Many utility blocks, some of which shortcut automation |
 
@@ -165,6 +165,7 @@ sessions in staging before deciding.
 | Aether Villages | Needs The Aether, which GTO lacks |
 | Quark, Zeta | Too broad to trial in one go (worldgen, automation blocks, mob changes), and with batch 2 of [the Integrated mods](#integrated-mods-dropped-2026-11-07) it broke EMI's recipe reload inside gtolib |
 | Cupboard | Only a library for the someaddons mods, none of which are on this list |
+| Simply Swords Overhaul | Its last builds (1.0.2 on Modrinth, 1.0.3 and 1.0.4 on GitHub, 2025) target Simply Swords 1.56.0; with 1.70.2 its `StormsEdgeSwordItem` mixin finds no target and the game won't start |
 | Diagonal Walls, Windows, Fences | Their `diagonalblocks` 8.0.6 throws `target block tags not empty` on the second tag reload (staging, 2026-11-07): the first world loads, but EMI never gets its data, and leaving to the title and loading or creating any world crashes |
 
 ## Sources

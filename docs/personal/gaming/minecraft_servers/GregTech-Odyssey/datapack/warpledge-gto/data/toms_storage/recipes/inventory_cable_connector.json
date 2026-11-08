@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " qP",
+    "CcE",
+    " DP"
+  ],
+  "key": {
+    "P": {
+      "tag": "c:plates/bronze"
+    },
+    "c": {
+      "tag": "forge:chests/wooden"
+    },
+    "D": {
+      "item": "gtceu:vacuum_tube"
+    },
+    "C": {
+      "item": "toms_storage:ts.inventory_cable"
+    },
+    "E": {
+      "tag": "forge:ender_pearls"
+    },
+    "q": {
+      "item": "minecraft:quartz"
+    }
+  },
+  "result": {
+    "item": "toms_storage:ts.inventory_cable_connector"
+  }
+}
