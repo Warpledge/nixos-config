@@ -30,19 +30,27 @@ Do not add these: the pack carries its own copy.
 | EZStorage | 1.8.2 | B | builds against GTNHLib 0.11.52, NEI 2.8.158 |
 | Programmable Hatches | 0.2.1p7-beta | B | p7 notes: only 2.9.0 supported; builds against GT 5.09.54.264, GTNHLib 0.11.54, NEI 2.8.171 |
 | NH-Utilities | 1.7.0 | B | commit "Fit 29x" |
-| YesSteveModel Unofficial | 1.9 | B | wiki lists 2.9.0-beta-1 to RC-2; loads on stable, 2026-11-02 |
+| YesSteveModel Unofficial | 2.3 | B | [czqwq fork](https://github.com/czqwq/YesSteveModel-Unofficial); 1.9 loaded on stable 2026-11-02; 2.3 (model loader rewrite) untested |
 | MineMenu | 1.2.0.B44 | C | latest on Modrinth, 2025-12-07 |
 | Spark | 1.10.19 | C | latest 1.7.10 |
 | FPS Reducer | 1.10.3 | C | latest, 2023-09-06 |
 | Trash Slot | 1.0.31 | B | latest 1.7.10 on CurseForge |
 | ElytraMining | 1.2.0.1 | B | latest, 2023, no GT API use |
 
-**GTNL needs two jars the pack does not ship:** `gtnllib-1.1.4.jar` and
+**GTNL needs two jars the pack does not ship:** `gtnllib-1.1.5.jar` and
 `bqapi-1.1.3.jar` (GTNLLib >= 1.1, BetterQuestingAPI >= 1.1.3). Without GTNLLib the
 game stops before the main menu with `NoClassDefFoundError: com/gtnllib/mod/ModList`.
 GTNLLib 1.1.1 also fails at launch on Angelica 2.2.43: its font-batch `@ModifyArg` finds
 0 targets, so the font renderer cannot load. 1.1.3 changed that mixin, and 1.1.4 only adds
-GUI themes on top: its diff touches no font or mixin files.
+GUI themes on top: its diff touches no font or mixin files, and neither does 1.1.5's
+(AE2 theme widgets).
+
+**The 2026-11-08 update is on the client only; legion's server still needs it:** GTNLLib
+1.1.5, YesSteveModel Unofficial 2.3, MIAOKATZE Core 0.2.6, GT-Steam-Reborn 2.1.28,
+GT-Interesting-Thing 2.1.6 and GT-Simple-Wireless-Network 2.1.19. The three Miao mods need
+Core 0.2.6 and their release notes say "compatible with GTNH 2.9.0 final"; GTNLLib and
+YSMU name no pack version. GTSWN 2.1.19 lets items and fluids in through the covered face of
+both wireless covers by default (screwdriver or cover UI to turn it off). Not launched yet.
 
 **The 2026-11-06 update is on the client and the laptop server, and both sides must match to
 join:** GTNLLib 1.1.4, 123Technology 2.2.1.1, EZMiner 6.3, Programmable Hatches 0.2.1p7-beta
@@ -69,11 +77,11 @@ server, and the server boots with all of them next to GTNL.
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
 | Waystones-X | 1.0.16 | B | [JackOfNoneTrades fork](https://github.com/JackOfNoneTrades/WaystonesFork) of BlayTheNinth's mod; `config/waystones.cfg` sets `xpBaseCost=-1` |
-| MIAOKATZE Core | 0.2.5 | B | required by the four Miao mods below, on both sides; GT-Miao-Blueprint 0.3.17 needs 0.2.5+ |
+| MIAOKATZE Core | 0.2.6 | B | required by the four Miao mods below, on both sides; GT-Miao-Blueprint 0.3.17 needs 0.2.5+, GTSR 2.1.28, GTIT 2.1.6 and GTSWN 2.1.19 need 0.2.6 |
 | GT-Miao-Blueprint | 0.3.17 | B | Neko Blueprint Hologram Projector: blueprint, cut and demolition modes |
-| GT-Steam-Reborn | 2.1.26 | B | steam industry, hubs and nodes, singularity tech, the Prosperity dimension, portable weapons, a BQ line |
-| GT-Interesting-Thing | 2.1.4 | B | float cores, rings, Neko dimensional pocket, infinity storage, coins and trading |
-| GT-Simple-Wireless-Network | 2.1.15 | B | wireless EU link nodes, monitors, ME quantum terminal |
+| GT-Steam-Reborn | 2.1.28 | B | steam industry, hubs and nodes, singularity tech, the Prosperity dimension, portable weapons, a BQ line |
+| GT-Interesting-Thing | 2.1.6 | B | float cores, rings, Neko dimensional pocket, infinity storage, coins and trading |
+| GT-Simple-Wireless-Network | 2.1.19 | B | wireless EU link nodes, monitors, ME quantum terminal |
 
 All but Waystones come from [MIAOKATZE](https://github.com/MIAOKATZE) and are tagged
 "for GTNH 2.9.0 stable". Their `en_US.lang` files are complete, so the in-game text is

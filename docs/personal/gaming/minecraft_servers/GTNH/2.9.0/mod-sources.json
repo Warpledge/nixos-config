@@ -19,7 +19,7 @@
     {"name": "EZStorage", "jar": "^ezstorage-", "side": "B", "source": "modrinth:ezstorage", "note": "scripts/simplestorage_gregified.zs names its ids; recheck them on a bump."},
     {"name": "Programmable Hatches", "jar": "^programmablehatches-", "side": "B", "source": "github:reobf/Programmable-Hatches-Mod"},
     {"name": "NH-Utilities", "jar": "^NHUtilities-", "side": "B", "source": "github:Keriils/NH-Utilities"},
-    {"name": "YesSteveModel Unofficial", "jar": "^ysmu-", "side": "B", "source": "github:Huli-fox/YesSteveModel-Unofficial"},
+    {"name": "YesSteveModel Unofficial", "jar": "^ysmu-", "side": "B", "source": "github:czqwq/YesSteveModel-Unofficial"},
     {"name": "MineMenu", "jar": "^MineMenu-", "side": "C", "source": "modrinth:mine-menu"},
     {"name": "Spark", "jar": "^spark-", "side": "C", "source": "curseforge:spark"},
     {"name": "FPS Reducer", "jar": "^FpsReducer-", "side": "C", "source": "modrinth:fps-reducer"},
