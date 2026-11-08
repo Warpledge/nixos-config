@@ -224,7 +224,7 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   ships. Adds climate bands, per-continent Tainted Land and the `Biome Size Multiplier`,
   set to 1.7 in `config/rwg2.cfg` under `continental rwg` (default 1.0, range 0.25 to 10).
   Only `RWG2_CONTINENTS` worlds read it, and changing it on an existing world leaves borders
-  between old and new chunks, so it's for a new world. Set it on the server too.
+  between old and new chunks, so it's for a new world. The server's `rwg2.cfg` has it at 1.7 too.
 
 - **SharedProspecting 2.0.4**: built against VisualProspecting 1.5.11 and GTNHLib 0.9.0.
   Its six late mixins still match VP 1.5.42 as shipped in 2.9 (checked 2026-11-01); the
