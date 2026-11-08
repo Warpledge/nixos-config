@@ -99,34 +99,6 @@
       "added": "2026-11-07"
     },
     {
-      "jar": "mcw-bridges-3.1.2-mc1.20.1forge.jar",
-      "modId": "mcwbridges",
-      "name": "Macaw's Bridges",
-      "source": "https://modrinth.com/mod/macaws-bridges",
-      "added": "2026-11-07"
-    },
-    {
-      "jar": "mcw-lights-1.1.5-mc1.20.1forge.jar",
-      "modId": "mcwlights",
-      "name": "Macaw's Lights and Lamps",
-      "source": "https://modrinth.com/mod/macaws-lights-and-lamps",
-      "added": "2026-11-07"
-    },
-    {
-      "jar": "mcw-mcwfences-1.2.1-mc1.20.1forge.jar",
-      "modId": "mcwfences",
-      "name": "Macaw's Fences and Walls",
-      "source": "https://modrinth.com/mod/macaws-fences-and-walls",
-      "added": "2026-11-07"
-    },
-    {
-      "jar": "mcw-mcwstairs-1.0.2-mc1.20.1forge.jar",
-      "modId": "mcwstairs",
-      "name": "Macaw's Stairs",
-      "source": "https://modrinth.com/mod/macaws-stairs",
-      "added": "2026-11-07"
-    },
-    {
       "jar": "mru-1.0.41+1.20.1-forge.jar",
       "modId": "mru",
       "name": "MRU (Mineblock's Repeated Utilities)",
@@ -230,9 +202,120 @@
       "name": "Illager Invasion",
       "source": "https://modrinth.com/mod/illager-invasion",
       "added": "2026-11-07"
+    },
+    {
+      "jar": "Terralith_1.20.x_v2.5.4.jar",
+      "modId": "terralith",
+      "name": "Terralith",
+      "source": "https://modrinth.com/mod/terralith",
+      "added": "2026-11-08"
+    },
+    {
+      "jar": "tectonic-3.0.17-forge-1.20.1.jar",
+      "modId": "tectonic",
+      "name": "Tectonic",
+      "source": "https://modrinth.com/mod/tectonic",
+      "added": "2026-11-08"
+    },
+    {
+      "jar": "lithostitched-forge-1.20.1-1.4.11.jar",
+      "modId": "lithostitched",
+      "name": "Lithostitched",
+      "source": "https://modrinth.com/mod/lithostitched",
+      "added": "2026-11-08"
+    },
+    {
+      "jar": "structurify-forge-2.0.43+mc1.20.1.jar",
+      "modId": "structurify",
+      "name": "Structurify",
+      "source": "https://modrinth.com/mod/structurify",
+      "added": "2026-11-08"
+    },
+    {
+      "jar": "YungsApi-1.20-Forge-4.0.6.jar",
+      "modId": "yungsapi",
+      "name": "YUNG's API",
+      "source": "https://modrinth.com/mod/yungs-api",
+      "added": "2026-11-08"
+    },
+    {
+      "jar": "YungsBetterDesertTemples-1.20-Forge-3.0.3.jar",
+      "modId": "betterdeserttemples",
+      "name": "YUNG's Better Desert Temples",
+      "source": "https://modrinth.com/mod/yungs-better-desert-temples",
+      "added": "2026-11-08"
+    },
+    {
+      "jar": "YungsBetterDungeons-1.20-Forge-4.0.4.jar",
+      "modId": "betterdungeons",
+      "name": "YUNG's Better Dungeons",
+      "source": "https://modrinth.com/mod/yungs-better-dungeons",
+      "added": "2026-11-08"
+    },
+    {
+      "jar": "YungsBetterJungleTemples-1.20-Forge-2.0.5.jar",
+      "modId": "betterjungletemples",
+      "name": "YUNG's Better Jungle Temples",
+      "source": "https://modrinth.com/mod/yungs-better-jungle-temples",
+      "added": "2026-11-08"
+    },
+    {
+      "jar": "YungsBetterMineshafts-1.20-Forge-4.0.4.jar",
+      "modId": "bettermineshafts",
+      "name": "YUNG's Better Mineshafts",
+      "source": "https://modrinth.com/mod/yungs-better-mineshafts",
+      "added": "2026-11-08"
+    },
+    {
+      "jar": "YungsBetterNetherFortresses-1.20-Forge-2.0.6.jar",
+      "modId": "betterfortresses",
+      "name": "YUNG's Better Nether Fortresses",
+      "source": "https://modrinth.com/mod/yungs-better-nether-fortresses",
+      "added": "2026-11-08"
+    },
+    {
+      "jar": "YungsBetterOceanMonuments-1.20-Forge-3.0.4.jar",
+      "modId": "betteroceanmonuments",
+      "name": "YUNG's Better Ocean Monuments",
+      "source": "https://modrinth.com/mod/yungs-better-ocean-monuments",
+      "added": "2026-11-08"
+    },
+    {
+      "jar": "YungsBetterWitchHuts-1.20-Forge-3.0.3.jar",
+      "modId": "betterwitchhuts",
+      "name": "YUNG's Better Witch Huts",
+      "source": "https://modrinth.com/mod/yungs-better-witch-huts",
+      "added": "2026-11-08"
+    },
+    {
+      "jar": "bettercombat-forge-1.9.0+1.20.1.jar",
+      "modId": "bettercombat",
+      "name": "Better Combat",
+      "source": "https://modrinth.com/mod/better-combat",
+      "added": "2026-11-08"
+    },
+    {
+      "jar": "player-animation-lib-forge-1.0.2-rc1+1.20.jar",
+      "modId": "playeranimator",
+      "name": "playerAnimator",
+      "source": "https://modrinth.com/mod/playeranimator",
+      "added": "2026-11-08"
+    },
+    {
+      "jar": "ApothicCombat-1.20.1-1.1.0.jar",
+      "modId": "apothiccombat",
+      "name": "Apothic Combat",
+      "source": "https://modrinth.com/mod/apothic-combat",
+      "added": "2026-11-08"
     }
   ],
   "carry": [
+    "config/DistantHorizons.toml",
+    "config/bettermineshafts-forge-1_20.toml",
+    "config/biomeswevegone/world_generation.json",
+    "config/structurify.json",
+    "config/tectonic.json",
+    "config/terrablender.toml",
     "config/gtocore-rules.txt",
     "config/openloader/data/warpledge-gto",
     "defaultconfigs/toms_storage-server.toml",

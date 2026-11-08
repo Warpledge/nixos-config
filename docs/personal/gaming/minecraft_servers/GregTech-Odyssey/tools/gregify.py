@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Write the GT recipe overrides for Tom's Simple Storage, Simply Swords and Illager
-Invasion into the datapack beside this folder.
+"""Write the GT overrides for Tom's Simple Storage, Simply Swords, Illager Invasion
+and Terralith into the datapack beside this folder.
 
 Usage:
     python3 -I <this file> <mods folder>
@@ -67,6 +67,13 @@ SWORDS = {
 }
 # Iron, gold and diamond weapons; netherite and runic keep the mod's smithing recipes.
 SWORDS_MATCH = re.compile(r"(iron|gold|diamond)_(?!melting)[a-z]+$|sword_on_a_stick$")
+
+# Terralith re-adds vanilla's cheap redstone recipes from any stone, which GT replaces
+# (removeVanillaBlockRecipes in gtceu.yaml); a false condition makes Forge skip them.
+TERRALITH_OFF = ["piston_alt", "dispenser_alt", "observer_alt", "dropper_alt", "lever_alt"]
+DISABLED = {"type": "minecraft:crafting_shaped", "conditions": [{"type": "forge:false"}]}
+
+
 
 #-- Rewriting
 
@@ -149,12 +156,21 @@ def main():
         if rid == "imbuing_table":
             write(path, imbuing_table(r), written)
 
+    terralith = find(mods, "Terralith_*.jar")
+    with zipfile.ZipFile(terralith) as z:
+        names = set(z.namelist())
+    for rid in TERRALITH_OFF:
+        path = f"data/terralith/recipes/{rid}.json"
+        if path not in names:
+            sys.exit(f"{terralith.name} no longer has {path}; check TERRALITH_OFF")
+        write(path, DISABLED, written)
+
     (OUT / "pack.mcmeta").write_text(json.dumps(PACK, indent=2) + "\n")
     stale = sorted(
         str(p.relative_to(OUT)) for p in OUT.glob("data/**/*.json")
         if str(p.relative_to(OUT)) not in written
     )
-    print(f"wrote {len(written)} recipes to {OUT}")
+    print(f"wrote {len(written)} overrides to {OUT}")
     for p in stale:
         print(f"stale, no longer generated: {p}")
 

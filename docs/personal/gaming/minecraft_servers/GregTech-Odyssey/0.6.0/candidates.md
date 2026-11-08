@@ -71,13 +71,12 @@ No recipes that skip GT tiers and no worldgen, so a failed trial can't touch the
 
 **Added to main on 2026-11-07** (see [mods.md](./mods.md)): AmbientSounds, Presence
 Footsteps, Sounds, Sound Physics Remastered, Cool Rain, Particular, EMF, ETF, Smooth
-Swapping, Particle Core, Better Climbing, Connectible Chains, TrashSlot, the four
-Macaw's mods, Enderman Overhaul and Creeper Overhaul, plus Zipline from the
-gregification list. The Diagonal mods failed and moved to [Skip](#skip).
+Swapping, Particle Core, Better Climbing, Connectible Chains, TrashSlot, Enderman
+Overhaul and Creeper Overhaul, plus Zipline from the gregification list. The Diagonal
+mods failed and the four Macaw's mods came out again; both are under [Skip](#skip).
 
 | Mod | Needs | Note |
 | --- | --- | --- |
-| Chunky | | Pre-generates chunks; pairs with Distant Horizons |
 | Ksyxis | | Faster world loading |
 | Entity Culling | | |
 | SmoothBoot (Reloaded) | | CurseForge only |
@@ -99,7 +98,6 @@ gregification list. The Diagonal mods failed and moved to [Skip](#skip).
 | Connectible Chains | | |
 | Enchantment Descriptions | Bookshelf | |
 | TrashSlot | | |
-| Macaw's Bridges, Lights, Fences, Stairs | | Decoration; vanilla-material recipes |
 | Guard Villagers | | |
 | Enderman Overhaul, Creeper Overhaul | | Mob variants; their libraries ship in dev27 |
 
@@ -124,16 +122,11 @@ the same spots.
 
 | Mod | Needs | Note |
 | --- | --- | --- |
-| Biomes O' Plenty | GlitchCore | Shares TerraBlender with BWG; Cosmic Frontiers balanced the two in `biomesoplenty/biome_toggles.json` |
-| Amplified Nether, Nether Remastered | | Nether terrain |
-| YUNG's Better Desert Temples, Dungeons, Jungle Temples, Mineshafts, Nether Fortresses, Ocean Monuments, Witch Huts | YUNG's API | |
-| YUNG's Better Strongholds | YUNG's API | dev27 ships End Remastered, which patches stronghold pieces (`StrongholdPiecesMixin`) and replaces the eyes: check that they work together |
-| YUNG's Cave Biomes | YUNG's API | |
 | When Dungeons Arise: Seven Seas | | Cosmic Frontiers ran the 1.19.2 jar; Modrinth has a 1.20.1 build |
+| Tectonic, Terralith | Lithostitched | In staging. `config/tectonic.json` is on trial: defaults plus `ultrasmooth`, `elevation_boost` 0.2, `min_y`/`max_y` -128/544, `ocean_offset` -0.5 (rare oceans; above -0.45 deep oceans and so monuments stop spawning), `continents_scale` 0.3, `ridge_scale` 0.3, `flat_terrain_skew` -0.1 (2026-11-08). Check GT ores below -64. dev27's BWG is cut to Cosmic Frontiers' 11 biomes in `config/biomeswevegone/world_generation.json`, and its three region weights go from 8 to 1: at 8 they outweighed the vanilla region (10, where Terralith's biomes live) and the world came out mostly BWG. Carry those files and `config/terrablender.toml` (`overworld_region_size` 4) to main. Terralith can't be removed from a world later |
+| Structurify 2.0.43 | YACL (in dev27) | In staging. Retried for its global flatness check, so structures skip steep ground. Its in-game screen didn't save on 2026-11-07, so `config/structurify.json` is written by hand: global namespace `enable_flatness_check`, mode `AUTO`, max height difference 21, plus `prevent_structure_overlap` (2026-11-08) |
 | Luki's Grand Capitals, Luki's Woodland Mansions | | |
-| Moog's Nether Structures, Moog's Soaring Structures | Moog's Structure Lib | |
 | Structure Essentials | | Spacing control for when you add many structure mods; CurseForge only |
-| Samurai Dynasty | | Adds 6 ores; Cosmic Frontiers suppressed all but Spirit Stone with biome-modifier overrides (`config-tweaks.md`). Its weapons need gregification too |
 | Mowzie's Mobs | | Boss structures |
 | L_Ender's Cataclysm | Lionfish API | Boss arenas and very strong gear: gregify the gear |
 | Mowzie's Cataclysm, Simply Swords: Cataclysm, Cataclysm & BetterCombat Compat | | Compat for the mods above; add only with them. Integrated Cataclysm was [dropped](#integrated-mods-dropped-2026-11-07) |
@@ -147,10 +140,7 @@ sessions in staging before deciding.
 | --- | --- | --- |
 | Better Combat | playerAnimator | Changes every melee attack; try it with GT tools, which are weapons too |
 | Apothic Combat | Better Combat | Apotheosis ships in dev27 |
-| Alex's Mobs, Alex's Mobs Interaction | Citadel | 80+ mobs and some craftable gear; Cosmic Frontiers tuned their spawns |
-| Alex's Delight | Alex's Mobs | Farmer's Delight ships in dev27. The Modrinth match was unsure; check the source |
 | L_Ender's Delight | L_Ender's Cataclysm | |
-| Domestication Innovation | Citadel | |
 | Majrusz's Enchantments | Majrusz Library | dev27's Apotheosis already reworks enchanting: check that they work together |
 | Enhanced Celestials | Data Anchor | Blood moons raise spawns; CorgiLib ships in dev27 |
 
@@ -166,7 +156,20 @@ sessions in staging before deciding.
 | Quark, Zeta | Too broad to trial in one go (worldgen, automation blocks, mob changes), and with batch 2 of [the Integrated mods](#integrated-mods-dropped-2026-11-07) it broke EMI's recipe reload inside gtolib |
 | Cupboard | Only a library for the someaddons mods, none of which are on this list |
 | Simply Swords Overhaul | Its last builds (1.0.2 on Modrinth, 1.0.3 and 1.0.4 on GitHub, 2025) target Simply Swords 1.56.0; with 1.70.2 its `StormsEdgeSwordItem` mixin finds no target and the game won't start |
+| Nether Remastered | Checks its own `nether_remastered:seal_of_the_underworld` advancement every player tick; GTO's AdvancementNoMore removes all advancements, so it crashes on joining a world (staging, 2026-11-07). Kept AdvancementNoMore, which GTO ships for performance |
+| Moog's Nether Structures, Moog's Soaring Structures | Moog's Structure Lib 3.4.2's required `TagLoaderMixin` can't inject into `TagLoader`, which gtolib's own `TagLoaderMixin` (priority 2000) rewrites; the game crashes at world creation (staging, 2026-11-07). An older library might avoid it; untested |
+| YUNG's Better Strongholds | Replaces the stronghold eyes of ender lead to; dev27's End Remastered patches stronghold pieces for its own eyes and portal frames, which gate the End |
 | Diagonal Walls, Windows, Fences | Their `diagonalblocks` 8.0.6 throws `target block tags not empty` on the second tag reload (staging, 2026-11-07): the first world loads, but EMI never gets its data, and leaving to the title and loading or creating any world crashes |
+| Alex's Mobs 1.22.9, Citadel 2.6.3, Domestication Innovation 1.7.1, Alex's Mobs Interaction, Alex's Delight | With Alex's Mobs and Citadel on, EMI's reload fails every time with a `NullPointerException` in gtolib's recipe baking; with them off it loads (staging, 2026-11-08). Domestication Innovation, Interaction and Delight only make sense with Alex's Mobs |
+| Celestisynth 1.3.4 | Dropped after a look in staging (2026-11-08). Its `RecipeManagerAccessor` mixin also clashes with ExtendedAE's, and its spellbook needs Iron's Spellbooks, which GTO lacks |
+| YUNG's Cave Biomes | Worldgen crashed on a chest or pod placed `facing=down` (in `MonsterRoomFeature` and Ars Nouveau trees); the other YUNG's structure mods load fine without it (staging, 2026-11-08) |
+| Biomes O' Plenty | Shares 8 wood names with BWG, so GTO generates duplicate GT recipe ids (e.g. `gtceu:lathe/strip_willow_log`) and EMI fails to load (staging, 2026-11-07) |
+| William Wythers' Overhauled Overworld | Doesn't work well with BWG's biomes (staging, 2026-11-07); Tectonic and Terralith kept instead |
+| Lithosphere | Spammed rare biome trees through ordinary forests (staging, 2026-11-07); Tectonic and Terralith kept instead |
+| Samurai Dynasty, AzureLib | 0.0.51 (the 1.20.1 build) has no biomes, only 10 yokai mobs, a shrine, a torii and gear. Gregifying its 130-odd recipes kept turning up empty tags in GTO (GT's parts are under `c:`, Forge's under `forge:`), so it was removed (staging, 2026-11-08) |
+| Amplified Nether | Removed after the staging trial (2026-11-07). It also wrapped vanilla's nether ore features in an extra `count: 2` (quartz, gold, small debris veins) |
+| Macaw's Bridges, Lights, Fences, Stairs | Added to main on 2026-11-07, removed again the same day |
+| Chunky | Distant Horizons 3.3.3 calls into Chunky while a new world's spawn chunks generate, before Chunky has started (on `ServerStartingEvent`), so creating a world crashes (staging, 2026-11-07). DH's `chunkGeneratorMode = "INTERNAL_SERVER"` with `SURFACE_THEN_CHUNKS` saves the chunks it generates, which does the pregen instead |
 
 ## Sources
 

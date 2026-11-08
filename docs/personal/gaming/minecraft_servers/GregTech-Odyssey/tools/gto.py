@@ -180,7 +180,7 @@ def cmd_backup(a):
 
 def cmd_stage(a):
     inst = instance(a.instance)
-    dst = inst.with_name(inst.name + "-staging")
+    dst = inst.with_name(f"{inst.name}-{a.suffix}")
     if dst.exists() and not a.replace:
         sys.exit(f"{dst.name} exists; pass --replace to back it up and copy again")
     if a.dry_run:
@@ -460,6 +460,8 @@ def main():
 
     s = sub.add_parser("stage", help="clone an instance to <name>-staging")
     s.add_argument("instance")
+    s.add_argument("--as", dest="suffix", default="staging", metavar="SUFFIX",
+                   help="name the copy <name>-SUFFIX, for side-by-side trials")
     s.add_argument("--replace", action="store_true",
                    help="back up an existing staging copy, then copy again")
     s.add_argument("-n", "--dry-run", action="store_true")
