@@ -263,6 +263,17 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   pattern auto-upload, wireless transceiver and upgrade cards. Built against 2.9.0-RC-1
   and AE2 `rv3-beta-1073`; the pack runs `rv3-beta-1095`, so the launch is the test. It
   ships `en_US.lang`.
+- **[GTNH Planner](https://github.com/jackwrichards/gtnh-planner-mod) 0.2.0-beta.3**
+  (2026-11-09, client only; hash matches the release): in-game factory flowchart
+  planner built on PlanNH. Add recipes from NEI with `+`, set a target rate or machine
+  count, and it works out tiers, overclocks and machine counts. The planner button is at
+  the bottom left of the inventory. The release says "Works on every GTNH 2.9 build
+  from beta-1 to RC-2" and builds against RC-2's NEI 2.8.155, GTNHLib 0.11.52 and
+  ModularUI2 2.3.92; it doesn't name 2.9.0 stable, so the launch is the test. Every
+  release so far is a beta or alpha, though GitHub marks them stable. Plans save to
+  `gtnhplanner/plans.dat` with backups beside it. Signing in to gtnhplanner.com (for
+  cloud saves, shared plans and live co-editing) is optional, but the mod checks for
+  updates and its bug key sends crash reports there.
 
 ## Dropped after testing
 
