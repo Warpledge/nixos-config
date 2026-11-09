@@ -156,7 +156,7 @@
     omniServer = true; # Runs modded Minecraft servers, with stats and a console
     r2modman = true; # Thunderstore mod manager
     satisfactoryModManager = true; # Satisfactory mod manager
-    pathOfBuilding = true; # Path of Exile build planner (Rusty PoB)
+    pathOfBuilding = false; # broken in nixpkgs f4a03c0, see disabled-packages.md
     ludusavi = true; # Daily game save backups to <backups.folder>/<host>/Ludusavi
 
     # Local (~/.local/opt bundles, kept out of git)
