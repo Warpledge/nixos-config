@@ -148,6 +148,8 @@ list at the start, and don't write your summary before step 4.
 
 - Never assume a path, option, function, attribute or setting exists. `ls`,
   `grep -rn` or read it first, and name the file and line that shows it.
+- Before saying a setting is on or off, check the person's `settings.nix` and the
+  machine's `users.<name>` block, which overrides it.
 - Before editing a `.nix` file, read it and one sibling that does the same thing,
   and copy that pattern.
 
@@ -158,6 +160,8 @@ list at the start, and don't write your summary before step 4.
 - Touch only the files the task needs. Something else looks wrong? Say so in your
   reply; don't fix it.
 - When a rule or skill says ask or wait, end your turn with the question.
+- If something an approved option assumed turns out false, say so and ask again
+  before acting.
 
 **Long tasks**
 
