@@ -23,7 +23,7 @@ Do not add these: the pack carries its own copy.
 | --- | --- | --- | --- |
 | GT: Not Leisure (GTNL) | 0.2.7-rc2.1 | B | README: 2.9.0 needs `0.2.7+` |
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
-| Twist Space Technology | 0.8.0 | B | release 2026-11-02 includes the 2.9 fix (PR #1386) |
+| Twist Space Technology | 0.8.1 (client; server still 0.8.0) | B | 0.8.0 (2026-11-02) has the 2.9 fix (PR #1386); 0.8.1 (2026-11-08) is fixes and content on the same GT5 dependency |
 | 123Technology | 2.2.1.1 | B | 2.2.1's release notes say it's adapted to 2.9.0 stable |
 | EZMiner | 6.3 | B | no 2.9 evidence since 6.2 (built against `2.9.0-beta-3`) |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
