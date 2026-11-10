@@ -25,12 +25,12 @@ Do not add these: the pack carries its own copy.
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
 | Twist Space Technology | 0.8.0 | B | release 2026-11-02 includes the 2.9 fix (PR #1386); 0.8.1 crashes world start, see below |
 | 123Technology | 2.2.1.1 | B | 2.2.1's release notes say it's adapted to 2.9.0 stable |
-| EZMiner | 6.3 | B | no 2.9 evidence since 6.2 (built against `2.9.0-beta-3`) |
+| EZMiner | 6.4 | B | 6.4 fixes a toolbox crash; still built against `2.9.0-beta-3` |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
 | EZStorage | 1.8.2 | B | builds against GTNHLib 0.11.52, NEI 2.8.158 |
 | Programmable Hatches | 0.2.1p7-beta | B | p7 notes: only 2.9.0 supported; builds against GT 5.09.54.264, GTNHLib 0.11.54, NEI 2.8.171 |
 | NH-Utilities | 1.7.0 | B | commit "Fit 29x" |
-| YesSteveModel Unofficial | 2.3 | B | [czqwq fork](https://github.com/czqwq/YesSteveModel-Unofficial); 1.9 loaded on stable 2026-11-02; 2.3 (model loader rewrite) untested |
+| YesSteveModel Unofficial | 2.5 | B | [czqwq fork](https://github.com/czqwq/YesSteveModel-Unofficial); 2.5 disables the lighting map and builds against 2.9.0; the 2.3 model loader rewrite is still untested |
 | MineMenu | 1.2.0.B44 | C | latest on Modrinth, 2025-12-07 |
 | Spark | 1.10.19 | C | latest 1.7.10 |
 | FPS Reducer | 1.10.3 | C | latest, 2023-09-06 |
@@ -52,6 +52,10 @@ GT-Interesting-Thing 2.1.6, GT-Simple-Wireless-Network 2.1.19 and Realistic Worl
 Core 0.2.6 and their release notes say "compatible with GTNH 2.9.0 final"; GTNLLib and
 YSMU name no pack version. GTSWN 2.1.19 lets items and fluids in through the covered face of
 both wireless covers by default (screwdriver or cover UI to turn it off). Not launched yet.
+
+**The 2026-11-09 update is on the client only:** EZMiner 6.4 (toolbox crash fix) and
+YesSteveModel Unofficial 2.5 (disables the lighting map, built against 2.9.0). The laptop
+server still has 6.3 and 2.3.
 
 **The 2026-11-06 update is on the client and the laptop server, and both sides must match to
 join:** GTNLLib 1.1.4, 123Technology 2.2.1.1, EZMiner 6.3, Programmable Hatches 0.2.1p7-beta
