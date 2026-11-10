@@ -247,12 +247,12 @@ Applied to the client and server copies.
 | Mod | File | Change |
 | --- | --- | --- |
 | 123Technology | `123Technology.cfg` | Overpowered integrated-factory recipes off, output multiplier 1.5 to 1.0, NHU egg-machine compat off. The file repeats each category under a pinyin and a Chinese name; both copies were changed. |
-| GTIT | `gtit/gifts.json` | Starter gift gives no rings: the Ring of Skywalk came out on 2026-11-04 because Omni Tweaks covers step assist, and the random ring pool is empty (`randomRewards` `[]`, `randomCount` 0). The legacy `gift_config.json` was updated too. Already-claimed gifts keep their snapshot; `/gtit gift claimreset <player>` issues the new gift on the next login. |
 | GTNHRates | `gtnhrates.cfg` | Every multiplier halved from the mod defaults: ores 2.0, coal 8.0, energy 2.0, tools 4.0, bees, crops, pump, resin and IC2 crops 2.0, sapling chance 1.0. `gtSimpleMinersEnergyDiscount` stays 1.0. |
 | EZMiner | `EZMiner/EZMiner_Server.cfg` | Server limits: chain 64 blocks at radius 8, block swap 64 at radius 8 (the same 64-block `max_blocks` as FTB Ultimine), tree felling 8 blocks and 256 blocks, preview 64 blocks. `addExhaustion=0.0` removes the hunger cost. Client preferences live in `config/EZMiner/EZMiner.cfg`. |
+| GTMB | `gtmb-stargate-rules.cfg` | `enabled=true`: blueprint demolition cannot mine ores, cut/paste cannot move or overwrite ores, and decoration vouchers are off. |
 | GTSWN | `gtswn/gtswn_network.cfg` | `UplinkLossEU=0.1`, so wireless power uploads lose 10 percent against the 15 percent downlink. |
+| GTSWN | `gtswn/gtswn.cfg` | `deviceTeleportXPCost=0`, so device info terminal teleports are free like the Waystones. |
 | GTSR | `gtsr/gtsr.cfg` | `singularityDestroyBlocks=false`, so worldgen singularities cannot eat builds. |
 
 Left alone on purpose: Twist's Blood Hatch infinite drain, Waystones' free
-teleports, 123Technology's Alien Fishery (a late-game goal), and the GTIT AE
-trade presets (not selected).
+teleports, and 123Technology's Alien Fishery (a late-game goal).

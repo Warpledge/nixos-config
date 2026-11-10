@@ -53,9 +53,9 @@ BetterQuesting stays. GTNL's Steam Revolution machines (Cactus Wonder, Steam Cir
 Assembler, Steam Assembly Line) shortcut the steam age; the Cactus Wonder alone outputs
 up to 32M L/s. The GTNL jars are in `backups/removed-mods/2026-11-10/`.
 
-**ElytraMining, SharedProspecting and BetterLineBreak were removed on 2026-11-10;** their
-jars are in `backups/removed-mods/2026-11-10/`. VisualProspecting 1.5.42 in 2.9.0 already
-shares within GTNHLib teams; SharedProspecting only bridged ServerUtilities teams.
+**ElytraMining, SharedProspecting, BetterLineBreak and GTIT were removed on 2026-11-10;**
+their jars are in `backups/removed-mods/2026-11-10/`. VisualProspecting 1.5.42 in 2.9.0
+already shares within GTNHLib teams; SharedProspecting only bridged ServerUtilities teams.
 BetterLineBreak only changes line breaks for non-alphabetic languages.
 
 **The 2026-11-06 update is on the client and the laptop server, and both sides must match to
@@ -93,18 +93,16 @@ server, and the server boots with all of them.
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
 | Waystones-X | 1.0.16 | B | [JackOfNoneTrades fork](https://github.com/JackOfNoneTrades/WaystonesFork) of BlayTheNinth's mod; `config/waystones.cfg` sets `xpBaseCost=-1` |
-| MIAOKATZE Core | 0.2.6 | B | required by the four Miao mods below, on both sides; GT-Miao-Blueprint 0.3.17 needs 0.2.5+, GTSR 2.1.28, GTIT 2.1.6 and GTSWN 2.1.19 need 0.2.6 |
+| MIAOKATZE Core | 0.2.6 | B | required by the three Miao mods below, on both sides; GT-Miao-Blueprint 0.3.17 needs 0.2.5+, GTSR 2.1.28 and GTSWN 2.1.19 need 0.2.6 |
 | GT-Miao-Blueprint | 0.3.17 | B | Neko Blueprint Hologram Projector: blueprint, cut and demolition modes |
 | GT-Steam-Reborn | 2.1.28 | B | steam industry, hubs and nodes, singularity tech, the Prosperity dimension, portable weapons, a BQ line |
-| GT-Interesting-Thing | 2.1.6 | B | float cores, rings, Neko dimensional pocket, infinity storage, coins and trading |
 | GT-Simple-Wireless-Network | 2.1.19 | B | wireless EU link nodes, monitors, ME quantum terminal |
 
 All but Waystones come from [MIAOKATZE](https://github.com/MIAOKATZE) and are tagged
 "for GTNH 2.9.0 stable". Their `en_US.lang` files are complete, so the in-game text is
 English; the READMEs are Chinese. GT-Miao-Blueprint needs Applied Energistics and
-StructureLib, GTSWN needs AE2, the other two only GregTech. Since 2026-11-04 the
-GTIT starter gift gives no rings, because Omni Tweaks covers step assist, and since
-2026-11-03 123Technology's overpowered recipes are off; the values are in
+StructureLib, GTSWN needs AE2, GTSR only GregTech. Since 2026-11-03
+123Technology's overpowered recipes are off; the values are in
 [config-tweaks.md](./config-tweaks.md#balance-edits-2026-11-03).
 
 One more joined them later on 2026-11-02, client and server:
