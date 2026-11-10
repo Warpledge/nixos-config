@@ -28,6 +28,8 @@ hand the step to the user with the exact command.
 - No `rm` with a `$VAR`, a glob or a chain; one literal absolute path per command.
 - No secrets, tokens or passwords in any file.
 - Below 95% sure what to build? Ask, then end your turn. Don't guess and continue.
+- Work touching three or more files: write the plan, end your turn, and wait.
+  "Go ahead" said before you've shown a plan doesn't approve it.
 
 ## Whose computer
 
@@ -83,7 +85,8 @@ Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
    the template in `modules/theme/matugen/` or beside the module. The app's config
    includes the rendered file, which must stay a plain file, never a home-manager
    link. Fonts come from `config.stylix.fonts`. Name a CSS template `.css.matugen`:
-   its `{{ }}` placeholders run Zed's biome out of memory.
+   its `{{ }}` placeholders run Zed's biome out of memory. Asked for a specific
+   colour? Say matugen sets it from the DMS theme, so it changes with the theme.
 6. **Commits** use Conventional Commits, `type(scope): subject` plus a bullet body,
    through the `commit` skill (forked: pass what changed and why), authored by the
    person at the keyboard (`user.git.name`/`user.git.email` in
@@ -94,7 +97,8 @@ Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
    each edit or each file, and don't batch unrelated work into one commit. Since
    you can't amend, commit when the unit is finished and checked, and don't end a
    task with a checked change uncommitted. Run the skill's steps, `scan.sh`
-   included. Never push, amend or rebase. Changed
+   included. Commit shared `modules/` changes apart from changes to
+   `users/<name>/` or `machines/<name>/`. Never push, amend or rebase. Changed
    `machines/*/settings.nix` and `users/*/settings.nix` ride along in the commit
    being made, unmentioned (or a `chore(<machine>): save settings from Omni
    Settings` one alone when nothing else changed); never leave them uncommitted.
@@ -113,8 +117,9 @@ Numbered as in CLAUDE.md, so a skill's "CLAUDE.md rule N" is rule N here.
 
 Any task with more than two steps, a read-only audit included, starts with a todo
 list made with the `todowrite` tool (or a file in `/tmp` without it), one item per
-step, not per file. Tick items off as you go; after a compaction, it's where you
-pick up. Read the files a step needs together, several `read` calls in one turn.
+step, not per file. Set an item in progress as you start it and completed as
+soon as it's done, in the same step as your next tool call; never mark them all at
+the end. After a compaction, it's where you pick up. Read the files a step needs together, several `read` calls in one turn.
 The first read in a folder loads its `AGENTS.md`, so open the file you mean to
 change before editing it.
 
@@ -127,7 +132,9 @@ list at the start, and don't write your summary before step 4.
 2. `nix flake check 2>&1 | tail -n 30` (skip for JSON, Markdown or comment-only
    changes). Its `stranger` check builds a machine on template defaults, so a
    shared module that needs `machines/` or `users/warpledge/` fails there.
-3. Load the `commit` skill and run every step, `scan.sh` included.
+3. Load the `commit` skill and run every step, `scan.sh` included. Shared
+   `modules/` changes and a person's `users/` or `machines/` changes are separate
+   commits.
 4. A QML, plugin or app change: run it and look. Build its package and start it
    the way the folder's `CLAUDE.md` says. A build proves it packages, not that the
    page renders or the button fires once.
@@ -160,6 +167,8 @@ list at the start, and don't write your summary before step 4.
 - Touch only the files the task needs. Something else looks wrong? Say so in your
   reply; don't fix it.
 - When a rule or skill says ask or wait, end your turn with the question.
+- Don't restructure existing code to fit a change. If the change needs that, ask
+  first.
 - If something an approved option assumed turns out false, say so and ask again
   before acting.
 
@@ -177,8 +186,9 @@ list at the start, and don't write your summary before step 4.
 - After a compaction, read the todo list and run
   `git status --short && git diff --stat && git log --oneline -3`; re-read only
   what you'll quote.
-- Batch independent shell commands and file reads; finish one file before starting
-  the next.
+- While exploring, read several files in one step: one `shell` call with several
+  `cat`s, or several tool calls together. A step with a single small read wastes a
+  round-trip. Finish one file's edits before starting the next.
 - When asked "where are we?", give a short status (done, blocked, next) and wait.
 
 ## Commands
