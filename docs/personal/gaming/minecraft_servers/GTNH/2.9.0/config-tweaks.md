@@ -68,12 +68,11 @@ one switch.
 `B:enderman_griefing=false` [true]: endermen never pick up or place blocks. The mod reads
 this switch, so it applies even if `mobGriefing` is on.
 
-The variants that touch the world all take `mobGriefing` from the world, so with griefing
-off they leave no blocks behind:
+With `mobGriefing` off none of the restored variants leaves blocks behind:
 
 - `creeper_rates` `fire` passes the gamerule as the explosion's block-damage flag and
   `dirt` and `gravel` call their block-scattering helpers only when it is on.
-- `creeper_rates` `lightning` spawns a 3x3 grid of lightning bolts and does not check the
+- `creeper_rates` `lightning` spawns a 3x3 grid of lightning bolts and ignores the
   gamerule. `doFireTick` stops the fires; the damage and the charged creepers do not.
 - `creeper_rates` `gravity` pulls entities in and explodes at power 5 instead of 3.
 - `zombie_rates` and `pigzombie_rates` `plague` add 1.3x speed and one random debuff per
