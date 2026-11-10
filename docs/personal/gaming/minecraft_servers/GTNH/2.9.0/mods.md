@@ -237,14 +237,16 @@ EZStorage, built with GTNH's ExampleMod starter.
 
 ## Smooth Swapping, written for this setup on 2026-11-10
 
-`smoothswapping` 0.2.0 animates item stacks moving between slots, client only. It is a
+`smoothswapping` 0.6.0 animates item stacks moving between slots, client only. It is a
 rewrite of the 1.20.1 mod's behaviour, not its code: upstream's licence is unset and its
 renderer is Fabric's `DrawContext`, neither of which transfers. Source is
 `~/Projects/smoothswapping`, built with GTNH's ExampleMod starter.
 
-- Snapshots the open container once per client tick, pairs what left a slot with what
-  arrived in another, and draws the pair on a quadratic arc at the end of
-  `GuiContainer.drawScreen`.
+- Compares the open container at the top of every `GuiContainer.drawScreen`, pairs what
+  left a slot with what arrived in another, and draws the pair on a quadratic arc at the
+  end of that same frame. The destination slot is hidden while its copy travels, and
+  detecting before the slots are drawn is what stops the stack showing there first and
+  then flashing out.
 - Config screen behind the Mods list: speed from 50 to 1000 (default 300, which is 200 ms),
   curve from 0 to 1 of the distance (default 0.35) and an on/off toggle. Settings save to
   `config/smoothswapping.cfg` and apply to the next move.
