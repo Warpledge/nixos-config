@@ -32,7 +32,7 @@
     {"name": "GT-Interesting-Thing", "jar": "^gtit-", "side": "B", "source": "github:MIAOKATZE/GT-Interesting-Thing", "note": "Needs MIAOKATZE Core; see that entry. Starter-gift edit is in config-tweaks.md."},
     {"name": "GT-Simple-Wireless-Network", "jar": "^gtswn-", "side": "B", "source": "github:MIAOKATZE/GT-Simple-Wireless-Network", "note": "Needs MIAOKATZE Core; see that entry."},
     {"name": "ThinkTech", "jar": "^thinktech-", "side": "B", "source": "github:Ol925/ThinkTech"},
-    {"name": "World Tooltips", "jar": "^World-Tooltips-", "side": "C", "source": "curseforge:world-tooltips"},
+    {"name": "World Tooltips", "jar": "^World-Tooltips-", "side": "C", "source": "curseforge:world-tooltips", "note": "Source code: github.com/GenuineSounds/World-Tooltips. The 1.7.10 1.2.3 build is on CurseForge only; GitHub's 1.7.10 release is 1.0.11."},
     {"name": "Better Line Break", "jar": "^BetterLineBreak-", "side": "C", "source": "modrinth:better-line-break"},
     {"name": "MyCTMLib", "jar": "^MyCTMLib-", "side": "C", "source": "github:ABKQPO/MyCTMLib"},
     {"name": "OmniOcular Unofficial", "jar": "^OmniOcularUnofficial-", "side": "B", "source": "github:Taskeren/OmniOcular-Unofficial", "note": "The English scripts in config/OmniOcular/ aren't refreshed by an update."},

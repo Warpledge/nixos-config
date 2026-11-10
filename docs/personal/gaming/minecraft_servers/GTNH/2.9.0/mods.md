@@ -121,7 +121,7 @@ Four client-side additions on 2026-11-02:
 
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
-| World Tooltips | 1.2.3 | C | floating tooltip over dropped items; no lang files, it shows the game's own item names |
+| World Tooltips | 1.2.3 | C | floating tooltip over dropped items; no lang files, it shows the game's own item names; [source code](https://github.com/GenuineSounds/World-Tooltips) |
 | Better Line Break | 1.0.1 | C | replaces Minecraft's line wrapping; no text of its own |
 | MyCTMLib | 1.4.4-290 | C | connected-texture support for resource packs |
 | OmniOcular Unofficial | 1.6.0 | B | WAILA add-on showing machine internals; see the scripts note below |
