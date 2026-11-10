@@ -15,6 +15,20 @@ home-manager, Niri WM, Dux Shell (formerly DankMaterialShell, still called DMS i
 the code), colours from DMS's matugen (default Catppuccin Mocha), fonts and cursor
 from Stylix.
 
+## Hard stops
+
+Check each command against this list before you run it. If one applies, stop and
+hand the step to the user with the exact command.
+
+- No `nixm rebuild`, `nixm boot`, `nixm rollback`, `nixos-rebuild`, `nh os`,
+  `./setup.sh` or `sudo`.
+- No `git push`, `git commit --amend`, `git rebase`, `git add -A` or `git add .`.
+- No `kill`, `pkill`, `killall`, `systemctl stop` or `tmux kill-*` on a process you
+  didn't start this session: a game, a Minecraft server or another agent.
+- No `rm` with a `$VAR`, a glob or a chain; one literal absolute path per command.
+- No secrets, tokens or passwords in any file.
+- Below 95% sure what to build? Ask, then end your turn. Don't guess and continue.
+
 ## Whose computer
 
 Before anything touching a machine, a person or their apps:
@@ -119,6 +133,50 @@ list at the start, and don't write your summary before step 4.
    page renders or the button fires once.
 5. Reply with what changed and the commit hash.
 
+## Working habits
+
+**Tool calls**
+
+- When a step needs a command or an edit, call the tool. Don't write the command
+  in your reply as if it ran, and never say a command passed without its output.
+- Copy an edit's old text from a read made this turn, whitespace included. If an
+  edit fails, read those lines again; don't resend the same text.
+- One change per edit call, in file order. After three edits to one file, read it
+  again before the next.
+
+**Read before you write**
+
+- Never assume a path, option, function, attribute or setting exists. `ls`,
+  `grep -rn` or read it first, and name the file and line that shows it.
+- Before editing a `.nix` file, read it and one sibling that does the same thing,
+  and copy that pattern.
+
+**Scope**
+
+- Make the smallest change that does what was asked. No extra options, helpers,
+  refactors, renames or new files the task didn't ask for.
+- Touch only the files the task needs. Something else looks wrong? Say so in your
+  reply; don't fix it.
+- When a rule or skill says ask or wait, end your turn with the question.
+
+**Long tasks**
+
+- After every five or so tool calls, reread your todo list and the user's request,
+  and check you are still doing what they asked.
+- If a fix fails twice, change approach. After three, stop and report what you
+  tried and the exact error, then wait.
+- Don't re-run an unchanged command or re-read an unchanged file.
+- Read each file once, only what the task touches; two or three sibling modules are
+  enough to learn a pattern.
+- Trim output at the source: `| tail -n 30`, `| grep`. Never print a store listing,
+  a derivation, a full build log or a whole game log.
+- After a compaction, read the todo list and run
+  `git status --short && git diff --stat && git log --oneline -3`; re-read only
+  what you'll quote.
+- Batch independent shell commands and file reads; finish one file before starting
+  the next.
+- When asked "where are we?", give a short status (done, blocked, next) and wait.
+
 ## Commands
 
 ```bash
@@ -136,8 +194,6 @@ nixm                               # fzf menu of every subcommand; alias `n`
   xwayland-satellite: a live switch froze the desktop (2026-10). `nixm rollback` is
   the user's too.
 - `nixm upgrade` is `nixm rebuild --update`; `nixm flake-update` bumps every input.
-- Never run `nixm`, `nixos-rebuild` or `./setup.sh` yourself. They need sudo and
-  activate the system; hand them back.
 
 ## Verify what fails silently
 
@@ -191,22 +247,6 @@ fail silently, and act on a reasonable assumption for the rest.
 - `attribute missing` → a module reads a setting the `_template` files don't define.
 - Slow or hung → `df -h`, then `nix build --offline`.
 - Rollback is the user's: `nixm rollback`, or a generation from the bootloader.
-
-## Working efficiently
-
-- If a fix fails twice, change approach. After three, stop and report what you
-  tried and the exact error, then wait.
-- Don't re-run an unchanged command or re-read an unchanged file.
-- Read each file once, only what the task touches; two or three sibling modules are
-  enough to learn a pattern.
-- Trim output at the source: `| tail -n 30`, `| grep`. Never print a store listing,
-  a derivation or a full build log.
-- After a compaction, read the todo list and run
-  `git status --short && git diff --stat && git log --oneline -3`; re-read only
-  what you'll quote.
-- Batch independent shell commands and file reads; finish one file before starting
-  the next.
-- When asked "where are we?", give a short status (done, blocked, next) and wait.
 
 ## Where things go
 
@@ -293,6 +333,55 @@ build passes and the setting or page does nothing.
 4. `alejandra <file>`, then `nix flake check`.
 5. A system service also needs `setup.sh`'s `services` list.
 
+## Outside the repo
+
+Game files, logs and launcher data live outside the repo, so opencode asks before
+each read there; batch the reads you need. On `eclipse` or `legion` as `warpledge`,
+the notes are in `docs/personal/gaming/`; on anyone else's machine, find the paths
+with `ls` and use none of warpledge's.
+
+- **Before editing a world, a save, a mod list or a game config**, copy it beside
+  itself with a dated suffix (`cp -r <dir> "<dir>.bak-$(date +%F)"`), and edit with
+  the game and its server stopped: they can rewrite their files on exit.
+- **Logs are read, never printed whole.** `grep -n -i -E 'error|exception|caused by'
+  <log> | head -n 40`, then read around the first hit with `sed -n`.
+- **A running server or game is the user's.** Read a tmux session with
+  `tmux capture-pane -p -t <session> | tail -n 40`; never `send-keys`, stop or
+  restart it. Ask the user to.
+- **Mod versions and changelogs come from the mod's own GitHub, Modrinth or
+  CurseForge page**, never memory; quote the version and date you read.
+- **After a change, update that game's note** in the same commit (rule 7).
+
+**Minecraft** (PrismLauncher)
+
+- Instance: `~/.local/share/PrismLauncher/instances/<instance>/.minecraft/`, with
+  `logs/latest.log`, `crash-reports/`, `mods/` and `config/`.
+- warpledge's servers run in tmux from `~/Documents/Minecraft_Servers/`, set up by
+  `machines/legion/minecraft-servers/`.
+- GTNH: `docs/personal/gaming/minecraft_servers/GTNH/<version>/`. A mod added or
+  removed by hand also changes that version's `mod-sources.json`; updates go
+  through the `gtnh-mod-updates` skill.
+- GregTech Odyssey (`docs/personal/gaming/minecraft_servers/GregTech-Odyssey/`):
+  hand-added jars go in `tools/overlay.json` and `mods.md`
+  together. Its recipe JSON is generated by `tools/gregify.py`: change the swap
+  tables and rerun it, never edit the JSON.
+- `docs/CLAUDE.md` lists each pack's files and what to update when.
+
+**tModLoader**
+
+- Game and logs: `~/.local/share/Steam/steamapps/common/tModLoader/`, logs in
+  `tModLoader-Logs/` (`client.log` first, then `Launch.log`).
+- Saves, mods and configs: `~/.local/share/Terraria/tModLoader/` (`Mods/enabled.json`,
+  `ModConfigs/`); `ls` it first, since it isn't on every machine.
+  `docs/personal/gaming/tmodloader-debugging.md` has the rest.
+
+**Other games**
+
+- A crash, freeze or launch failure: the `game-troubleshooting` skill first. It
+  says which log to collect and how; don't change launch options before reading it.
+- A VN or RPG Maker game: `vn-setup` or `rpgm-setup`.
+- Launch options and why each is set: `docs/gaming/launch-parameters.md`.
+
 ## Gotchas
 
 - **A GUI app's settings must stay writable.** `home.file`/`xdg.configFile` and
@@ -338,7 +427,9 @@ only when the user runs `/flake-update`.
 - `<skill-dir>` is `modules/home/programs/ai/skills/<name>`.
 - `commit`, `freetube-sync` and `apparmor-check` run forked: they can't see this
   chat, so pass what changed and why as the argument, and expect questions back.
-- A step that hands work to a subagent is yours to do: for
+- opencode has the four subagents (`opencode-agents/`); start one with its name
+  where a skill calls for it. Where your tool can't start a subagent, its step is
+  yours to do: for
   `public-repo-auditor` (only when the user asks), read `git diff --cached` for
   personal data, private paths, hostnames and tokens; for `prose-reviewer`, cut
   words from what you wrote; for `docs-drift-auditor`, grep the docs for the paths
@@ -366,8 +457,6 @@ Every module opens with a banner; copy it byte for byte from a neighbour:
 - Comments and user-facing text (Omni Settings descriptions, template comments,
   README) are plain, short and easy to read. Keep NixOS terms (rebuild,
   generation, flake input, garbage collection) and explain them briefly.
-- `nix fmt` with no argument waits on stdin; use `nix fmt .`. `nixm lint` runs
-  deadnix plus statix.
 
 ## Writing style
 
