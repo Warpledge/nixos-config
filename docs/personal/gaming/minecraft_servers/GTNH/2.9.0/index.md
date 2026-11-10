@@ -47,7 +47,7 @@ time per tick, out of a 50,000,000 ns budget:
 Multiblocks run higher than single blocks because of structure validation, so a high
 value on an idle machine is structure-check overhead. Heavy I/O (AE2 interfaces, sorting,
 void excess) tends to spike. For the whole game, run `/spark profiler` in the client;
-Spark is not on the server, and LagGoggles is not installed on 2.9.
+Spark is not on the server, and LagGoggles is client only so far.
 
 ## Sources
 
