@@ -53,8 +53,9 @@ BetterQuesting stays. GTNL's Steam Revolution machines (Cactus Wonder, Steam Cir
 Assembler, Steam Assembly Line) shortcut the steam age; the Cactus Wonder alone outputs
 up to 32M L/s. The GTNL jars are in `backups/removed-mods/2026-11-10/`.
 
-**ElytraMining was removed on 2026-11-10;** its jar is in
-`backups/removed-mods/2026-11-10/`.
+**ElytraMining and SharedProspecting were removed on 2026-11-10;** their jars are in
+`backups/removed-mods/2026-11-10/`. VisualProspecting 1.5.42 in 2.9.0 already shares within
+GTNHLib teams; SharedProspecting only bridged ServerUtilities teams.
 
 **The 2026-11-06 update is on the client and the laptop server, and both sides must match to
 join:** GTNLLib 1.1.4, 123Technology 2.2.1.1, EZMiner 6.3, Programmable Hatches 0.2.1p7-beta
@@ -248,9 +249,6 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   Only `RWG2_CONTINENTS` worlds read it, and changing it on an existing world leaves borders
   between old and new chunks, so it's for a new world. The server's `rwg2.cfg` has it at 1.7 too.
 
-- **SharedProspecting 2.0.4**: built against VisualProspecting 1.5.11 and GTNHLib 0.9.0.
-  Its six late mixins still match VP 1.5.42 as shipped in 2.9 (checked 2026-11-01); the
-  team sync itself can only be proven on the server.
 - **Distant Horizons `upstream-preview8-rple-biomes`** (2026-10-18): the 2.8.4 jar was
   `alpha18`; this is the newest build and the first from the 2.9 period. Enable
   Aggressive Chunk Loading under Video Settings, Performance, to stop transparent

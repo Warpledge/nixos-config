@@ -48,7 +48,6 @@
     {"name": "GTNH Planner", "jar": "^gtnhplanner-", "side": "C", "source": "github:jackwrichards/gtnh-planner-mod", "note": "Betas, though GitHub marks them stable. Plans live in gtnhplanner/plans.dat; back it up before a bump."},
     {"name": "Right Proper GUI Scale", "jar": "^RightProperGUIScale-", "side": "C", "source": "modrinth:rightproperguiscale"},
     {"name": "Neo ECO AE Extension", "jar": "^neoecoae-", "side": "B", "source": "github:Yang120231/GTNH-ECO-1.7.10", "note": "On trial. GitHub is the official 1.7.10 repo; Modrinth lags it. Back up the world first; see mods.md."},
-    {"name": "SharedProspecting", "jar": "^sharedprospecting-", "side": "B", "source": "github:Lyfts/SharedProspecting"},
     {"name": "Distant Horizons", "jar": "^DistantHorizons-", "side": "B", "source": "github:DarkShadow44/DistantHorizonsStandalone", "note": "Client and server run the same jar; config is in mods.md."},
     {"name": "Dynamic Surroundings", "jar": "^DynamicSurroundings-", "side": "C", "source": "modrinth:dynamic-surroundings-unofficial-1.7.10"},
     {"name": "Sound-Physics", "jar": "^soundphysics-", "side": "C", "source": "modrinth:sound-physics-1.7.10-mixin-edition"},
