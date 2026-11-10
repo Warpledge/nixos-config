@@ -124,7 +124,7 @@ Four client-side additions on 2026-11-02:
 | --- | --- | --- | --- |
 | World Tooltips | 1.2.3 | C | floating tooltip over dropped items; no lang files, it shows the game's own item names; [source code](https://github.com/GenuineSounds/World-Tooltips) |
 | MyCTMLib | 1.4.4-290 | C | connected-texture support for resource packs |
-| OmniOcular Unofficial | 1.6.0 | B | WAILA add-on showing machine internals; see the scripts note below |
+| OmniOcular Unofficial | 1.7.2 | B | WAILA add-on showing machine internals; client full jar, server `-server.jar`; see the scripts note below |
 
 Fancy Block Particles 2.4.1 was removed after its 3D block particles rendered as
 screen-filling shards under Angelica and the shader pack; its `config/FBP/` folder is gone
@@ -146,7 +146,10 @@ names and script output, 194 display names plus 111 single-quoted literals. The 
 is named `GregTech5U.xml` so the mod does not drop its own older copy beside it. Two
 Chinese leftovers are harmless: comments inside the XML, and `GregTech6.xml`, which only
 fires for GregorianTech 6 blocks that GTNH does not have. A pack update will not refresh
-these files, so new Chinese strings would need translating again.
+these files, so new Chinese strings would need translating again. From 1.7.x the mod can
+pull config from the GTNH repo; back these scripts up before a bump. The client's
+`forceUseClientXml` ignores server config. 1.7.2 still stalls on the config merge for
+10+ seconds at startup; the fix is in a commit after the release.
 
 One mod written for this setup on 2026-11-04, client and server:
 

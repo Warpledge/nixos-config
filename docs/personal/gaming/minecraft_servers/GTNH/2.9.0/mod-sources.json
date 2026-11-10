@@ -34,7 +34,7 @@
     {"name": "ThinkTech", "jar": "^thinktech-", "side": "B", "source": "github:Ol925/ThinkTech"},
     {"name": "World Tooltips", "jar": "^World-Tooltips-", "side": "C", "source": "curseforge:world-tooltips", "note": "Source code: github.com/GenuineSounds/World-Tooltips. The 1.7.10 1.2.3 build is on CurseForge only; GitHub's 1.7.10 release is 1.0.11."},
     {"name": "MyCTMLib", "jar": "^MyCTMLib-", "side": "C", "source": "github:ABKQPO/MyCTMLib"},
-    {"name": "OmniOcular Unofficial", "jar": "^OmniOcularUnofficial-", "side": "B", "source": "github:Taskeren/OmniOcular-Unofficial", "note": "The English scripts in config/OmniOcular/ aren't refreshed by an update."},
+    {"name": "OmniOcular Unofficial", "jar": "^OmniOcularUnofficial-", "side": "B", "source": "github:luomolhx/OmniOcular-Unofficial", "asset": "^OmniOcularUnofficial-[0-9.]+(-[0-9.]+)?\\.jar$", "note": "Client uses the full jar; the server uses OmniOcularUnofficial-<version>-server.jar. 1.7.x can pull GTNH config; back up config/OmniOcular/ before a bump."},
     {"name": "Omni Tweaks", "jar": "^omnitweaks-", "side": "B", "source": "local:~/Projects/omni-tweaks"},
     {"name": "Omni Craft", "jar": "^omnicraft-", "side": "C", "source": "local:~/Projects/omni-craft"},
     {"name": "World Preview NH", "jar": "^worldpreview-", "side": "C", "source": "modrinth:world-preview-nh"},

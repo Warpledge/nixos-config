@@ -62,7 +62,7 @@ From [mods.md](./mods.md), the **B** rows:
 - Waystones-X 1.0.16, MIAOKATZE Core 0.2.6, GT-Miao-Blueprint 0.3.17,
   GT-Steam-Reborn 2.1.28, GT-Interesting-Thing 2.1.6, GT-Simple-Wireless-Network 2.1.19
 - Realistic World Gen 2 `rwg2-2.1.1.jar` in place of the pack's 2.0.6
-- ThinkTech 0.3.1, OmniOcular Unofficial 1.6.0, BetterSprinting 1.1.3,
+- ThinkTech 0.3.1, OmniOcular Unofficial 1.7.2 (server jar), BetterSprinting 1.1.3,
   Advanced Memory Card 1.2.0-1.7.10-GTNH, WTCT 1.0.63-rc1, Omni Tweaks 0.2.0,
   Effortless Building Gadgets 0.10.1
 - The EZStorage script `scripts/simplestorage_gregified.zs` must be on the server too, or
@@ -78,7 +78,7 @@ Legacy, so do not copy the 2.8.4 versions of those to the server.
 The configs copied with the mods are `123Technology.cfg`, `EZNuclear.cfg`,
 `ezstorage.cfg`,
 `gtnhrates.cfg`, `programmablehatches.cfg`, `proghatches.mixin.properties`,
-`TwistSpaceTechnology.cfg`, `visualprospecting.cfg`, `NHUtilities/`, `waystones.cfg`
+`TwistSpaceTechnology.cfg`, `visualprospecting.cfg`, `OmniOcular/`, `NHUtilities/`, `waystones.cfg`
 (`xpBaseCost=-1`) and the `gtit/`, `gtmb/`, `gtsr/` and `gtswn/` folders.
 
 ## ServerUtilities
