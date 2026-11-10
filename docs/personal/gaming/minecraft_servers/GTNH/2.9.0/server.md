@@ -45,7 +45,9 @@ uses 12288 MB and already loads the translation agent.
 - `server-port=25566`
 - `view-distance=10`
 - `max-tick-time=0`: stops the watchdog killing the server during heavy worldgen
-- `level-name=World3`: the current world. The earlier `World` folder is still beside it.
+- `level-name=World3`: the folder the next generated world will use. The server keeps no
+  persistent world while the pack is still being tuned, so this is a name waiting for a
+  world rather than one in use.
 
 ## Mods the server needs on top of the pack
 

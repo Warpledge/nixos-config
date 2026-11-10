@@ -217,8 +217,9 @@ a launch is the proof.
 ## EZStorage craft fix, written for this setup on 2026-11-10
 
 `ezstoragecraftfix` 0.4.0 patches Simple Storage (`ezstorage`) crafting, client only so
-far; the laptop's server `mods/` needs the same jar before `World3` benefits. Source is
-`~/Projects/ezstorage-craftfix`, MIT like EZStorage, built with GTNH's ExampleMod starter.
+far; the laptop's server `mods/` needs the same jar before the server benefits, and there
+is no persistent server world yet. Source is `~/Projects/ezstorage-craftfix`, MIT like
+EZStorage, built with GTNH's ExampleMod starter.
 
 - The crafting box recomputes its result on every grid slot change, and setting a recipe
   fills nine slots, so one craft cost nine full scans of the recipe list. GTNH registers
