@@ -51,7 +51,7 @@ uses 12288 MB and already loads the translation agent.
 
 From [mods.md](./mods.md), the **B** rows:
 
-- GTNL 0.2.7-rc2.1 with GTNLLib 1.1.5 and BetterQuestingAPI 1.1.3, GTNHRates 1.12.0-2.9,
+- Better Questing API 1.1.3, GTNHRates 1.12.0-2.9,
   Twist Space `TwistSpaceTechnology-0.8.0.jar` (release 2026-11-02),
   123Technology `OTHTechnology-2.2.1.1.jar`, EZMiner 6.4,
   EZNuclear 1.1.1, EZStorage 1.8.2, NH-Utilities 1.7.0, Programmable Hatches 0.2.1p7-beta
@@ -75,8 +75,8 @@ still not installed. Neo ECO AE Extension 7.3.6 is also on the server, on trial.
 2.9.0 supplies its own lwjgl3ify, GTNHLib, FalsePatternLib and Extreme Sound Muffler
 Legacy, so do not copy the 2.8.4 versions of those to the server.
 
-The configs copied with the mods are `config/GTNotLeisure/` (without `client.cfg`),
-`123Technology.cfg`, `elytra_mining.cfg`, `EZNuclear.cfg`, `ezstorage.cfg`,
+The configs copied with the mods are `123Technology.cfg`, `elytra_mining.cfg`,
+`EZNuclear.cfg`, `ezstorage.cfg`,
 `gtnhrates.cfg`, `programmablehatches.cfg`, `proghatches.mixin.properties`,
 `TwistSpaceTechnology.cfg`, `visualprospecting.cfg`, `NHUtilities/`, `waystones.cfg`
 (`xpBaseCost=-1`) and the `gtit/`, `gtmb/`, `gtsr/` and `gtswn/` folders.

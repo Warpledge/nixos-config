@@ -8,8 +8,6 @@
     "^esm-legacy-", "^gregtech-", "^salisarcana-", "^BetterSprinting-"
   ],
   "mods": [
-    {"name": "GT: Not Leisure", "jar": "^sciencenotleisure-", "side": "B", "source": "github:ABKQPO/GT-Not-Leisure", "note": "Needs matching GTNLLib and Better Questing API."},
-    {"name": "GTNLLib", "jar": "^gtnllib-", "side": "B", "source": "github:GTNotLeisure/GTNLLib", "note": "1.1.1 fails at launch on Angelica 2.2.43; check the font mixin on a bump."},
     {"name": "Better Questing API", "jar": "^bqapi-", "side": "B", "source": "modrinth:better-questing-api"},
     {"name": "GTNHRates", "jar": "^gtnhrates-", "side": "B", "source": "github:Sladki/GTNHRates"},
     {"name": "Twist Space Technology", "jar": "^TwistSpaceTechnology-", "side": "B", "source": "github:Nxer/Twist-Space-Technology-Mod", "note": "Reset GregTech.lang and TwistSpaceTechnology.cfg on update. 0.8.1 crashes world start on 2.9.0 (Bottled Chaos, thionyl chloride); skip it, see mods.md."},
@@ -21,7 +19,7 @@
     {"name": "NH-Utilities", "jar": "^NHUtilities-", "side": "B", "source": "github:Keriils/NH-Utilities"},
     {"name": "YesSteveModel Unofficial", "jar": "^ysmu-", "side": "B", "source": "github:czqwq/YesSteveModel-Unofficial"},
     {"name": "Realistic World Gen 2", "jar": "^rwg2-", "side": "B", "source": "github:GTNewHorizons/Realistic-World-Gen-2", "note": "Replaces the pack's 2.0.6. Biome Size Multiplier 1.7 in rwg2.cfg; continental settings only apply to new worlds."},
-    {"name": "Angelica", "jar": "^angelica-", "side": "C", "source": "github:GTNewHorizons/Angelica", "note": "Pack ships 2.2.43; 2.2.45 installed 2026-11-08. Update for a fix you need (Angelica#2092, Vulkan flicker), then test GTNLLib, ChromaPatch and shaders, Distant Horizons and Xaero's maps."},
+    {"name": "Angelica", "jar": "^angelica-", "side": "C", "source": "github:GTNewHorizons/Angelica", "note": "Pack ships 2.2.43; 2.2.45 installed 2026-11-08. Update for a fix you need (Angelica#2092, Vulkan flicker), then test ChromaPatch and shaders, Distant Horizons and Xaero's maps."},
     {"name": "MineMenu", "jar": "^MineMenu-", "side": "C", "source": "modrinth:mine-menu"},
     {"name": "Spark", "jar": "^spark-", "side": "C", "source": "curseforge:spark"},
     {"name": "FPS Reducer", "jar": "^FpsReducer-", "side": "C", "source": "modrinth:fps-reducer"},

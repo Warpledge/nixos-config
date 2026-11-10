@@ -184,10 +184,6 @@ files.
 
 These files appear once the mod is installed. Check a new version's file for added keys.
 
-- **GTNL**: 0.2.7 splits its config through GTNHLib into
-  `config/GTNotLeisure/{general,item,machine,recipe,re_avaritia,client}.cfg`, so the old
-  single `GTNotLeisure.cfg` is not there. The stick setting is `enableStickItem=false`
-  [true] in `item.cfg`. The Integrated Ore Factory option from 0.2.4 no longer exists.
 - **GTNHRates**: `config/gtnhrates.cfg` → the multipliers are in
   [Balance edits](#balance-edits-2026-11-03). Keep `enableNEIBookmarksContents=false`
   [true]: the bookmark NPE was never confirmed fixed. `ic2CropsYield` now multiplies
@@ -252,7 +248,6 @@ Applied to the client and server copies.
 | --- | --- | --- |
 | 123Technology | `123Technology.cfg` | Overpowered integrated-factory recipes off, output multiplier 1.5 to 1.0, NHU egg-machine compat off. The file repeats each category under a pinyin and a Chinese name; both copies were changed. |
 | GTIT | `gtit/gifts.json` | Starter gift gives no rings: the Ring of Skywalk came out on 2026-11-04 because Omni Tweaks covers step assist, and the random ring pool is empty (`randomRewards` `[]`, `randomCount` 0). The legacy `gift_config.json` was updated too. Already-claimed gifts keep their snapshot; `/gtit gift claimreset <player>` issues the new gift on the next login. |
-| GTNL | `GTNotLeisure/` | Vein Mining Pickaxe `maxAmount=1` and `maxRange=1`, so it no longer chains; `enableSomethingRecipe=false`; `enableVoidMinerTweak=false`; `enableSaturationHeal=false`. `enableRecipeOutputChance` stays on. |
 | GTNHRates | `gtnhrates.cfg` | Every multiplier halved from the mod defaults: ores 2.0, coal 8.0, energy 2.0, tools 4.0, bees, crops, pump, resin and IC2 crops 2.0, sapling chance 1.0. `gtSimpleMinersEnergyDiscount` stays 1.0. |
 | EZMiner | `EZMiner/EZMiner_Server.cfg` | Server limits: chain 64 blocks at radius 8, block swap 64 at radius 8 (the same 64-block `max_blocks` as FTB Ultimine), tree felling 8 blocks and 256 blocks, preview 64 blocks. `addExhaustion=0.0` removes the hunger cost. Client preferences live in `config/EZMiner/EZMiner.cfg`. |
 | GTSWN | `gtswn/gtswn_network.cfg` | `UplinkLossEU=0.1`, so wireless power uploads lose 10 percent against the 15 percent downlink. |
