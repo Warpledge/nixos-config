@@ -122,7 +122,7 @@ Four client-side additions on 2026-11-02:
 
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
-| World Tooltips | 1.2.3 | C | floating tooltip over dropped items; no lang files, it shows the game's own item names; [source code](https://github.com/GenuineSounds/World-Tooltips) |
+| World Tooltips | 1.2.3-87 | C | floating tooltip over dropped items; shader-compatible continuation of GenuineSounds' mod; [source code](https://github.com/kotmatross28729/WorldTooltipsShadersFix) |
 | MyCTMLib | 1.4.4-290 | C | connected-texture support for resource packs |
 | OmniOcular Unofficial | 1.7.2 | B | WAILA add-on showing machine internals; client full jar, server `-server.jar`; see the scripts note below |
 
