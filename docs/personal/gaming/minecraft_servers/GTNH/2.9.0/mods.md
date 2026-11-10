@@ -34,7 +34,6 @@ Do not add these: the pack carries its own copy.
 | Spark | 1.10.19 | C | latest 1.7.10 |
 | FPS Reducer | 1.10.3 | C | latest, 2023-09-06 |
 | Trash Slot | 1.0.31 | B | latest 1.7.10 on CurseForge |
-| ElytraMining | 1.2.0.1 | B | latest, 2023, no GT API use |
 
 **The 2026-11-08 update is on the client and the laptop server:** GTNLLib
 1.1.5, YesSteveModel Unofficial 2.3, MIAOKATZE Core 0.2.6, GT-Steam-Reborn 2.1.28,
@@ -53,6 +52,9 @@ was installed on 2026-11-01 for GTNL's quest lines, so it is unused now; the pac
 BetterQuesting stays. GTNL's Steam Revolution machines (Cactus Wonder, Steam Circuit
 Assembler, Steam Assembly Line) shortcut the steam age; the Cactus Wonder alone outputs
 up to 32M L/s. The GTNL jars are in `backups/removed-mods/2026-11-10/`.
+
+**ElytraMining was removed on 2026-11-10;** its jar is in
+`backups/removed-mods/2026-11-10/`.
 
 **The 2026-11-06 update is on the client and the laptop server, and both sides must match to
 join:** GTNLLib 1.1.4, 123Technology 2.2.1.1, EZMiner 6.3, Programmable Hatches 0.2.1p7-beta

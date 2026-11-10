@@ -25,7 +25,6 @@
     {"name": "Xaero's Minimap", "jar": "^Xaeros_Minimap_", "side": "C", "source": "modrinth:xaeros-minimap", "note": "Replaces JourneyMap; Navigator draws the VisualProspecting layers on it."},
     {"name": "Xaero's World Map", "jar": "^XaerosWorldMap_", "side": "C", "source": "modrinth:xaeros-world-map", "note": "Open Angelica#2092: crash with a lava-retexturing pack (Modernity) and the Witching Gadgets Thaumic Stone Extruder on screen."},
     {"name": "Trash Slot", "jar": "^trashslot-", "side": "B", "source": "curseforge:trashslot"},
-    {"name": "ElytraMining", "jar": "^elytra_mining-", "side": "B", "source": "github:ElytraServers/ElytraMining"},
     {"name": "Waystones-X", "jar": "^waystones-", "side": "B", "source": "modrinth:waystones-x"},
     {"name": "MIAOKATZE Core", "jar": "^miaokatzecore-", "side": "B", "source": "github:MIAOKATZE/MIAOKATZE-Core", "note": "The four Miao mods bundle the core version they want in their release assets; keep it in step."},
     {"name": "GT-Miao-Blueprint", "jar": "^gtmb-", "side": "B", "source": "github:MIAOKATZE/GT-Miao-Blueprint", "note": "Needs MIAOKATZE Core; see that entry."},
