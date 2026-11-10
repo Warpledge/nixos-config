@@ -119,6 +119,8 @@ sections:
 ### Thaumcraft: `config/Thaumcraft.cfg`
 
 - `B:wuss_mode=true` (default: `false`). Warp still accumulates; its side effects stop.
+- `I:biome_taint_spread=0` [200]: no taint when a block updates. Existing tainted land
+  stays, and the wiki warns the option may not stop every spread path.
 
 ## Food & Survival
 
