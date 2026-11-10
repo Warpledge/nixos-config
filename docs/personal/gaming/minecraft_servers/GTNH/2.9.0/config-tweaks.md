@@ -275,7 +275,7 @@ Applied to the client and server copies.
 | GTMB | `gtmb-stargate-rules.cfg` | `enabled=true`: blueprint demolition cannot mine ores, cut/paste cannot move or overwrite ores, and decoration vouchers are off. |
 | GTSWN | `gtswn/gtswn_network.cfg` | `UplinkLossEU=0.1`, so wireless power uploads lose 10 percent against the 15 percent downlink. |
 | GTSWN | `gtswn/gtswn.cfg` | `deviceTeleportXPCost=0`, so device info terminal teleports are free like the Waystones. |
-| GTSR | `gtsr/gtsr.cfg` | `singularityDestroyBlocks=false`, so worldgen singularities cannot eat builds. |
+| GTSR | `gtsr/gtsr.cfg` | `singularityDestroyBlocks=true` is back at the default. It was off while singularities were common; at 168x168 chunks they are rare enough to leave their block eating alone. Client only so far, like the frequency below. |
 | GTSR | `gtsr/gtsr.cfg` | `singularitySpawnFrequency=168` [48], so a Spacetime Singularity Altar averages one per 168x168 chunks instead of 48x48, about 3.5 times rarer. New chunks only; `shatteredSingularityMultiplier` still makes the Shattered dimension 8 times denser than that. Client only so far: the laptop's server copy needs the same value before a world is generated. |
 
 Left alone on purpose: Twist's Blood Hatch infinite drain, Waystones' free
