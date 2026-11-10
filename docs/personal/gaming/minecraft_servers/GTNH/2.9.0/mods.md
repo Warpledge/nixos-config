@@ -47,11 +47,11 @@ both wireless covers by default (screwdriver or cover UI to turn it off). Not la
 YesSteveModel Unofficial 2.5 (disables the lighting map, built against 2.9.0). The laptop
 server still has 6.3 and 2.3.
 
-**2026-11-10: GTNL and GTNLLib were removed; Better Questing API is disabled.** BQ API
-was installed on 2026-11-01 for GTNL's quest lines, so it is unused now; the pack's
-BetterQuesting stays. GTNL's Steam Revolution machines (Cactus Wonder, Steam Circuit
-Assembler, Steam Assembly Line) shortcut the steam age; the Cactus Wonder alone outputs
-up to 32M L/s. The GTNL jars are in `backups/removed-mods/2026-11-10/`.
+**2026-11-10: GTNL and GTNLLib were removed; Better Questing API went with them.** BQ API
+was installed on 2026-11-01 for GTNL's quest lines, so it is unused now and its jar is gone
+from `mods/`; the pack's BetterQuesting stays. GTNL's Steam Revolution machines (Cactus
+Wonder, Steam Circuit Assembler, Steam Assembly Line) shortcut the steam age; the Cactus
+Wonder alone outputs up to 32M L/s. The GTNL jars are in `backups/removed-mods/2026-11-10/`.
 
 **ElytraMining, SharedProspecting, BetterLineBreak and GTIT were removed on 2026-11-10;**
 their jars are in `backups/removed-mods/2026-11-10/`. VisualProspecting 1.5.42 in 2.9.0
@@ -154,7 +154,6 @@ One mod written for this setup on 2026-11-04, client and server:
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
 | Omni Tweaks | 0.2.0 | B | QoL backports from modern Minecraft, so far step height 1.0 (0.5 while sneaking) and better ladder and vine climbing |
-| Omni Craft | 0.1.0 | C | One-click multi-step crafting from the inventory through NEI's autocrafting; client only; untested in game |
 
 It reimplements the wanted features of Keep Stepping and Better Climbing, neither of which
 has a 1.7.10 build; no code comes from them. Its climbing mixin hooks
@@ -164,14 +163,6 @@ when walking into a ladder. Toggles and speeds are in `config/omnitweaks.cfg`. T
 features passed in-game testing on 2026-11-04, under the mod's first name, Footwork. The
 source is in `~/Projects/omni-tweaks`, a local git repo built with GTNH's ExampleMod
 starter; the jar is `build/libs/omnitweaks-0.2.0.jar`.
-
-Omni Craft (2026-11-09) adds an "OC" button to NEI's bottom bar in any GUI with a crafting
-grid. It opens a screen listing every item the inventory can make in up to `depth` crafting
-steps (`config/omnicraft.cfg`, default 3), with the chain for the picked item and a recipe
-switch per step; NEI favourites (F) are tried first. Craft closes back to the crafting GUI
-and hands the chain to NEI's `AutoCraftingManager`, so NEI's Autocrafting option must be on.
-It plans with NEI 2.8.171's `RecipeChainMath`; an NEI update can break it. Source is
-`~/Projects/omni-craft`, same starter; jar `build/libs/omnicraft-0.1.0.jar`.
 
 ## Added on 2026-11-05
 
@@ -204,13 +195,30 @@ Its recipes looked in line with GTNH in NEI. Still to check: autocrafting throug
 machines alongside WTCT, and what a world loses when it's removed. The world from before it
 went on the server is `~/Documents/Minecraft_Servers/World-Backups/World3-before-neoecoae-2026-11-05.tar.gz`.
 
+## Added on 2026-11-09
+
+Nine jars went into the client instance that day; the laptop's `mods/` has not been checked
+from this repo since, so treat the server side as unconfirmed. Every one is side **B** except
+MouseSideButtonFix. Only the two arturia-Xayah mods name 2.9.0 in their release; for the rest
+a launch is the proof.
+
+| Mod | Build | Side | Note |
+| --- | --- | --- | --- |
+| GTNH Modernization Upgrade | 0.3.4-alpha | B | Structure terminal (project, build, replace and dismantle a GT multiblock from its StructureLib definition), ME packing tape, integrated 36-pattern item, AE order element, colour power budget for the Plasma Forge and fusion, and an ME storage vault. Alpha, one author, AI-written; the vault keeps inventory in `<world>/data/aestoragevault/`, and 0.3.0 changed that format without reading 0.2.x |
+| AE2 Wireless Transceiver | 1.2.1 | B | [peco331](https://github.com/peco331/AE2WirelessTransceiver-GTNH) fork; each release ships a plain 2.9 asset and a separate `-gtnh2.8.4` one, and the plain one is installed |
+| Benzene Fuels | 0.5.1-alpha | B | Eight staged benzene fluids from LuV to UIV and the Resonance Fuel Generator; needs GoodGenerator and GT++ ([arturia-Xayah](https://github.com/arturia-Xayah/gtnh-benzene-fuels)) |
+| GT:NH Processing+ | 0.2.5.3-alpha | B | New processing chains built on materials chemistry, meant to fill progression gaps ([shusidefloof](https://github.com/shusidefloof/GTNH-ProcessingPlus)) |
+| MouseSideButtonFix | 1.0 | C | Binds the mouse side buttons, which 1.7.10 ignores ([asdflj](https://github.com/asdflj/MouseSideButtonFix)) |
+| Patchee | 1.7.3 | B | Cross-mod fixes: JABBA Dolly carries single-block bee housings, Tinkers' Mattock digs sand and snow at shovel speed, a filled Super Tank or Super Chest stops applying its effects to the carrier, VeinMiner stays server-controlled, ServerUtilities team chunk limits read the best member's rank instead of summing, F7 marks only pitch-dark blocks, and the Twilight Forest aurora and arctic fur blocks break faster once earned. No public page, so update checks report it as no-source |
+| Thaumic Duality Interface | 1.0.2 | B | ME essentia dual interface as a block, item part and P2P tunnel ([CaelixOrbit](https://github.com/CaelixOrbit/ThaumicDualityInterface)) |
+| Wildcard Pattern | 1.1.1 | B | AE2 processing pattern with configurable name and ore-dictionary matching that expands into real patterns ([clfpwp](https://github.com/clfpwp/WildcardPatternforGTNH-1.7.10)) |
+| LagGoggles | 4.17.0 | B | Profiler; built against FalsePatternLib 1.10.7 while the pack ships 1.12.2, so loading is the proof. It moved here from the left-out list |
+
 ## Left out until their author ships a 2.9 build
 
 - **AE2Things 1.2.14**: built against 2.8.4's AE2 `rv3-beta-695`, `AE2FluidCraft 1.4.120`
   and `ae2stuff`, which 2.9 removed. AE2 was unified for items, fluids, gasses and
   essentia, so the mod's internals do not match the pack.
-- **LagGoggles 4.17.0**: in the 2.8.4 instance only; not copied to 2.9.0. It was built
-  against FalsePatternLib 1.10.7, the pack ships 1.12.2, so a launch is still the proof.
 - **BoxPlusPlus 2.1.2**: last release 2025-12-10, built against Galaxy Space 1.1.121.
   It sits on GT multiblock internals, which 2.9 rewrote across more than fifty machines.
 
