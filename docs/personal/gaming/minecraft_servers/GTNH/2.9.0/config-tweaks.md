@@ -61,15 +61,23 @@ All seven default to `true`, set to `false`:
 Same keys and defaults as 2.8.4. Each appears once per mob section, so edit the one in
 the named section.
 
-Disabled variants, each default `1` set to `0`:
+Variant weights are all the pack default. Every special variant was set to `0` from
+2026-11-01 to 2026-11-10 and restored together; the file now matches the default except
+one switch.
 
-- `creeper_rates`: `dirt`, `gravel`, `gravity`, `fire`, `lightning`
-- `skeleton_rates`: `fire`
-- `spider_rates`: `poison`
-- `zombie_rates`: `fire`, `plague`
-- `pigzombie_rates`: `plague`
+`B:enderman_griefing=false` [true]: endermen never pick up or place blocks. The mod reads
+this switch, so it applies even if `mobGriefing` is on.
 
-Also `B:enderman_griefing=false` (default: `true`).
+The variants that touch the world all take `mobGriefing` from the world, so with griefing
+off they leave no blocks behind:
+
+- `creeper_rates` `fire` passes the gamerule as the explosion's block-damage flag and
+  `dirt` and `gravel` call their block-scattering helpers only when it is on.
+- `creeper_rates` `lightning` spawns a 3x3 grid of lightning bolts and does not check the
+  gamerule. `doFireTick` stops the fires; the damage and the charged creepers do not.
+- `creeper_rates` `gravity` pulls entities in and explodes at power 5 instead of 3.
+- `zombie_rates` and `pigzombie_rates` `plague` add 1.3x speed and one random debuff per
+  hit, from slowness, nausea, blindness, hunger, weakness and poison.
 
 ### Infernal Mobs: `config/InfernalMobs.cfg`
 
