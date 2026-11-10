@@ -172,7 +172,7 @@ Right Proper GUI Scale 2.1.1 is also on the client. It keeps the scale as a deci
 `options.txt` (`guiScale:3.5`, between vanilla's 3 and 4) and applies a change when the
 settings screen closes, so it can look like nothing happened. `/guiscale` sets it in game.
 
-Neo ECO AE Extension 7.3.7 is on the client (eclipse jar, 2026-11-09), on trial since
+Neo ECO AE Extension 7.3.9 is on the client (2026-11-09; server still 7.3.7), on trial since
 2026-11-05: three tiered AE2 multiblock systems for storage, crafting and computation, an
 optional upgrade path rather than a replacement for normal AE2. Both sides must match.
 Modrinth lags the official 1.7.10 repo
