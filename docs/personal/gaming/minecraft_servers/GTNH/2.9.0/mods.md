@@ -23,7 +23,7 @@ Do not add these: the pack carries its own copy.
 | --- | --- | --- | --- |
 | GT: Not Leisure (GTNL) | 0.2.7-rc2.1 | B | README: 2.9.0 needs `0.2.7+` |
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
-| Twist Space Technology | 0.8.1 (client; server still 0.8.0) | B | 0.8.0 (2026-11-02) has the 2.9 fix (PR #1386); 0.8.1 (2026-11-08) is fixes and content on the same GT5 dependency |
+| Twist Space Technology | 0.8.0 | B | release 2026-11-02 includes the 2.9 fix (PR #1386); 0.8.1 crashes world start, see below |
 | 123Technology | 2.2.1.1 | B | 2.2.1's release notes say it's adapted to 2.9.0 stable |
 | EZMiner | 6.3 | B | no 2.9 evidence since 6.2 (built against `2.9.0-beta-3`) |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
@@ -69,6 +69,16 @@ Twist's tracker had the matching startup-crash report (#1390, from 2026-11-01), 
 commits past that PR's head. `TwistSpaceTechnology-0.8.0.jar` replaced the PR build on
 both sides and the server loads it. On a Twist update, reset `GregTech.lang` and `TwistSpaceTechnology.cfg` to avoid
 config conflicts.
+
+**0.8.1 (2026-11-08) crashes the server at world start on 2.9.0**, tried on the client on
+2026-11-09. Its new Bottled Chaos recipes can't resolve thionyl chloride ("unresolved
+intermediate input in route 150: thionylchloride"), since GT 5.09.54.265 makes it from
+cells in the chemical reactor map, not as a fluid recipe.
+`BottledChaosFakeRecipes.registerCredentialRecipes:203` then passes a null to `GTRecipeBuilder.itemInputs`, and
+FML aborts the server-about-to-start event. A singleplayer client looks frozen on the
+loading screen. Back on 0.8.0 with its own config and lang; the 0.8.1 jar and the files it
+generated are in `backups/replaced-mods/2026-11-09/twist-0.8.1/`. Skip 0.8.1 until a
+release fixes Bottled Chaos (PR #1361).
 
 ## Installed on 2.9.0 only
 

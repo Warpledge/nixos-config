@@ -12,7 +12,7 @@
     {"name": "GTNLLib", "jar": "^gtnllib-", "side": "B", "source": "github:GTNotLeisure/GTNLLib", "note": "1.1.1 fails at launch on Angelica 2.2.43; check the font mixin on a bump."},
     {"name": "Better Questing API", "jar": "^bqapi-", "side": "B", "source": "modrinth:better-questing-api"},
     {"name": "GTNHRates", "jar": "^gtnhrates-", "side": "B", "source": "github:Sladki/GTNHRates"},
-    {"name": "Twist Space Technology", "jar": "^TwistSpaceTechnology-", "side": "B", "source": "github:Nxer/Twist-Space-Technology-Mod", "note": "Reset GregTech.lang and TwistSpaceTechnology.cfg on update."},
+    {"name": "Twist Space Technology", "jar": "^TwistSpaceTechnology-", "side": "B", "source": "github:Nxer/Twist-Space-Technology-Mod", "note": "Reset GregTech.lang and TwistSpaceTechnology.cfg on update. 0.8.1 crashes world start on 2.9.0 (Bottled Chaos, thionyl chloride); skip it, see mods.md."},
     {"name": "123Technology", "jar": "^OTHTechnology-", "side": "B", "source": "github:CallmeSHaobe/123Technology", "note": "Releases before 2.2.1 crash on 2.9.0 stable, and 2.2.1 skips recipes with Twist loaded; its overpowered recipes are off in config-tweaks.md."},
     {"name": "EZMiner", "jar": "^EZMiner-", "side": "B", "source": "github:czqwq/EZMiner"},
     {"name": "EZNuclear", "jar": "^eznuclear-", "side": "B", "source": "github:czqwq/EZNuclear", "asset": "^eznuclear-.*\\+.*\\.jar$"},
