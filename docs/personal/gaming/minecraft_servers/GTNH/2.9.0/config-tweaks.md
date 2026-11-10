@@ -73,16 +73,30 @@ Also `B:enderman_griefing=false` (default: `true`).
 
 ### Infernal Mobs: `config/InfernalMobs.cfg`
 
-All default to `true`, set to `false`: `MM_Gravity`, `MM_Storm`, `MM_Wither`,
-`MM_Blastoff`, `MM_Ghastly`, `MM_Webber`, `MM_Choke`, `MM_Vengeance`, `MM_Darkness`,
-`MM_Exhaust`, `MM_Fiery`, `MM_Poisonous`, `MM_Quicksand`.
+Modifier counts, health factor, rarities and the `mm_*` values are the pack defaults.
 
-Modifier counts, defaults in brackets:
+Kept off, each default `true`:
 
-- `I:maxInfernoModifiers=8` [15]
-- `I:minInfernoModifiers=5` [8]
-- `I:maxUltraModifiers=6` [10]
-- `I:minUltraModifiers=3` [5]
+- `MM_Blastoff`, `MM_Gravity`, `MM_Choke`, `MM_Darkness`: fling you into the air, drag
+  you around, drain your air through armor or blind you
+- `MM_Exhaust`: adds hunger exhaustion, working against the Hunger Overhaul change above
+- `MM_Poisonous`, `MM_Vengeance`: vengeance reflects half your damage with no cap
+
+Back on (turned off 2026-11-01, restored 2026-11-10): `MM_Storm`, `MM_Ghastly`,
+`MM_Webber`, `MM_Fiery`, `MM_Quicksand`, `MM_Wither`. None of them can break a block
+under the world's gamerules:
+
+- `MM_Webber` returns before placing a cobweb unless `mobGriefing` is on, so it does
+  nothing with mob griefing off.
+- `MM_Ghastly`'s fireball passes `mobGriefing` as the explosion's block-damage flag, so
+  it leaves no crater. It still hits for ghast fireball damage and knocks you about.
+- `MM_Storm` places no fire with `doFireTick` off, and lightning damage and the 8 s of
+  burning are unaffected by it. It can also charge creepers, whose explosion does no
+  block damage either. With `doFireTick` on it sets fires that spread across wood and
+  grass, but fire destroys no blocks, only dropped items.
+
+The laptop's server copy of this file must match the client's, since the server decides
+which modifiers a mob gets.
 
 ### Anger Mod: `config/angermod.cfg`
 
