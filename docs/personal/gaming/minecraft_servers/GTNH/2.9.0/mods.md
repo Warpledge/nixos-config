@@ -235,6 +235,23 @@ EZStorage, built with GTNH's ExampleMod starter.
   coalesce the nine calls. It broke shift-click (one item instead of a stack) and made
   the grid refill consume the grid instead of pulling from storage.
 
+## Smooth Swapping, written for this setup on 2026-11-10
+
+`smoothswapping` 0.2.0 animates item stacks moving between slots, client only. It is a
+rewrite of the 1.20.1 mod's behaviour, not its code: upstream's licence is unset and its
+renderer is Fabric's `DrawContext`, neither of which transfers. Source is
+`~/Projects/smoothswapping`, built with GTNH's ExampleMod starter.
+
+- Snapshots the open container once per client tick, pairs what left a slot with what
+  arrived in another, and draws the pair on a quadratic arc at the end of
+  `GuiContainer.drawScreen`.
+- Config screen behind the Mods list: speed from 50 to 1000 (default 300, which is 200 ms),
+  curve from 0 to 1 of the distance (default 0.35) and an on/off toggle. Settings save to
+  `config/smoothswapping.cfg` and apply to the next move.
+- Only `GuiContainer` screens animate. GT and AE ModularUI screens do not, and moving a
+  stack onto the cursor is not animated yet, because hiding the GUI's own cursor stack
+  needs its own hook.
+
 ## Left out until their author ships a 2.9 build
 
 - **AE2Things 1.2.14**: built against 2.8.4's AE2 `rv3-beta-695`, `AE2FluidCraft 1.4.120`
