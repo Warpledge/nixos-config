@@ -62,6 +62,7 @@
     {"name": "Patchee", "jar": "^patchee-", "side": "B", "source": "none", "note": "No public page, so the update check reports no-source. Its server-side parts are the ServerUtilities team chunk cap and the VeinMiner control."},
     {"name": "Thaumic Duality Interface", "jar": "^ThaumicDualityInterface-", "side": "B", "source": "github:CaelixOrbit/ThaumicDualityInterface"},
     {"name": "Wildcard Pattern", "jar": "^wildcardpattern-", "side": "B", "source": "github:clfpwp/WildcardPatternforGTNH-1.7.10"},
+    {"name": "EZStorage Craft Fix", "jar": "^ezstoragecraftfix-", "side": "B", "source": "local:~/Projects/ezstorage-craftfix", "note": "Caches recipe lookups for Simple Storage; see mods.md. Client only so far."},
     {"name": "AE2Things", "status": "parked", "lastTried": "v1.2.14", "side": "B", "source": "github:asdflj/AE2Things", "asset": "^ae2thing-", "note": "Built against 2.8.4's AE2 internals; wants a 2.9 build."},
     {"name": "LagGoggles", "jar": "^laggoggles-", "side": "B", "source": "github:FalsePattern/LagGogglesLegacy", "note": "Installed 2026-11-09. It was parked because it was built against FalsePatternLib 1.10.7 while the pack ships 1.12.2; loading is the proof."},
     {"name": "BoxPlusPlus", "status": "parked", "lastTried": "2.1.2", "side": "B", "source": "github:RealSilverMoon/BoxPlusPlus", "asset": "^boxplusplus-", "note": "Sits on GT multiblock internals that 2.9 rewrote."},

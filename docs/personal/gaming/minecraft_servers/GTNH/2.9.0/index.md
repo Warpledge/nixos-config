@@ -46,8 +46,16 @@ time per tick, out of a 50,000,000 ns budget:
 
 Multiblocks run higher than single blocks because of structure validation, so a high
 value on an idle machine is structure-check overhead. Heavy I/O (AE2 interfaces, sorting,
-void excess) tends to spike. For the whole game, run `/spark profiler` in the client;
-Spark is not on the server, and LagGoggles is client only so far.
+void excess) tends to spike. Spark is not on the server, and LagGoggles is client only so
+far. For the whole game, do not use `/spark profiler`: its bundled async-profiler predates
+JDK 25 and the JVM dies with `SIGSEGV` in `VMThread::nativeThreadId`. Record with JFR
+instead, then aggregate the samples:
+
+```bash
+jcmd <pid> JFR.start name=gtnh settings=profile maxsize=512m filename=/tmp/gtnh.jfr
+jcmd <pid> JFR.stop name=gtnh
+jfr print --events jdk.ExecutionSample --stack-depth 1 /tmp/gtnh.jfr
+```
 
 ## Sources
 

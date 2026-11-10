@@ -214,6 +214,26 @@ a launch is the proof.
 | Wildcard Pattern | 1.1.1 | B | AE2 processing pattern with configurable name and ore-dictionary matching that expands into real patterns ([clfpwp](https://github.com/clfpwp/WildcardPatternforGTNH-1.7.10)) |
 | LagGoggles | 4.17.0 | B | Profiler; built against FalsePatternLib 1.10.7 while the pack ships 1.12.2, so loading is the proof. It moved here from the left-out list |
 
+## EZStorage craft fix, written for this setup on 2026-11-10
+
+`ezstoragecraftfix` 0.4.0 patches Simple Storage (`ezstorage`) crafting, client only so
+far; the laptop's server `mods/` needs the same jar before `World3` benefits. Source is
+`~/Projects/ezstorage-craftfix`, MIT like EZStorage, built with GTNH's ExampleMod starter.
+
+- The crafting box recomputes its result on every grid slot change, and setting a recipe
+  fills nine slots, so one craft cost nine full scans of the recipe list. GTNH registers
+  thousands and its GT recipe classes are heavier than vanilla's.
+- The mixin caches results per grid, NBT included (128 entries, five seconds), and keeps
+  a second key without NBT that maps to the matched `IRecipe`. A tool whose NBT changes
+  with each use still hits, because only that one recipe's `matches()` runs and a failure
+  falls back to the full scan.
+- Measured with JFR on 2026-11-10: `findMatchingRecipe` 7.6/s to 1.4/s on the server and
+  8.3/s to 1.6/s on the client. Repeated clay dust crafts became instant. GT tool recipes
+  still pause, since that is GT's own per-recipe cost, but far less than before.
+- Do not retry the first attempt, which deferred the recompute to the next tick to
+  coalesce the nine calls. It broke shift-click (one item instead of a stack) and made
+  the grid refill consume the grid instead of pulling from storage.
+
 ## Left out until their author ships a 2.9 build
 
 - **AE2Things 1.2.14**: built against 2.8.4's AE2 `rv3-beta-695`, `AE2FluidCraft 1.4.120`
