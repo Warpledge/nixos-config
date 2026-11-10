@@ -53,9 +53,10 @@ BetterQuesting stays. GTNL's Steam Revolution machines (Cactus Wonder, Steam Cir
 Assembler, Steam Assembly Line) shortcut the steam age; the Cactus Wonder alone outputs
 up to 32M L/s. The GTNL jars are in `backups/removed-mods/2026-11-10/`.
 
-**ElytraMining and SharedProspecting were removed on 2026-11-10;** their jars are in
-`backups/removed-mods/2026-11-10/`. VisualProspecting 1.5.42 in 2.9.0 already shares within
-GTNHLib teams; SharedProspecting only bridged ServerUtilities teams.
+**ElytraMining, SharedProspecting and BetterLineBreak were removed on 2026-11-10;** their
+jars are in `backups/removed-mods/2026-11-10/`. VisualProspecting 1.5.42 in 2.9.0 already
+shares within GTNHLib teams; SharedProspecting only bridged ServerUtilities teams.
+BetterLineBreak only changes line breaks for non-alphabetic languages.
 
 **The 2026-11-06 update is on the client and the laptop server, and both sides must match to
 join:** GTNLLib 1.1.4, 123Technology 2.2.1.1, EZMiner 6.3, Programmable Hatches 0.2.1p7-beta
@@ -122,7 +123,6 @@ Four client-side additions on 2026-11-02:
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
 | World Tooltips | 1.2.3 | C | floating tooltip over dropped items; no lang files, it shows the game's own item names; [source code](https://github.com/GenuineSounds/World-Tooltips) |
-| Better Line Break | 1.0.1 | C | replaces Minecraft's line wrapping; no text of its own |
 | MyCTMLib | 1.4.4-290 | C | connected-texture support for resource packs |
 | OmniOcular Unofficial | 1.6.0 | B | WAILA add-on showing machine internals; see the scripts note below |
 
