@@ -48,11 +48,11 @@ both wireless covers by default (screwdriver or cover UI to turn it off). Not la
 YesSteveModel Unofficial 2.5 (disables the lighting map, built against 2.9.0). The laptop
 server still has 6.3 and 2.3.
 
-**2026-11-10: GTNL and GTNLLib were removed.** Better Questing API stays; it was
-installed on 2026-11-01 for the quest setup. GTNL's Steam Revolution machines (Cactus
-Wonder, Steam Circuit Assembler, Steam Assembly Line) shortcut the steam age; the Cactus
-Wonder alone outputs up to 32M L/s. The GTNL jars are in
-`backups/removed-mods/2026-11-10/`.
+**2026-11-10: GTNL and GTNLLib were removed; Better Questing API is disabled.** BQ API
+was installed on 2026-11-01 for GTNL's quest lines, so it is unused now; the pack's
+BetterQuesting stays. GTNL's Steam Revolution machines (Cactus Wonder, Steam Circuit
+Assembler, Steam Assembly Line) shortcut the steam age; the Cactus Wonder alone outputs
+up to 32M L/s. The GTNL jars are in `backups/removed-mods/2026-11-10/`.
 
 **The 2026-11-06 update is on the client and the laptop server, and both sides must match to
 join:** GTNLLib 1.1.4, 123Technology 2.2.1.1, EZMiner 6.3, Programmable Hatches 0.2.1p7-beta

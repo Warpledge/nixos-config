@@ -51,7 +51,7 @@ uses 12288 MB and already loads the translation agent.
 
 From [mods.md](./mods.md), the **B** rows:
 
-- Better Questing API 1.1.3, GTNHRates 1.12.0-2.9,
+- GTNHRates 1.12.0-2.9,
   Twist Space `TwistSpaceTechnology-0.8.0.jar` (release 2026-11-02),
   123Technology `OTHTechnology-2.2.1.1.jar`, EZMiner 6.4,
   EZNuclear 1.1.1, EZStorage 1.8.2, NH-Utilities 1.7.0, Programmable Hatches 0.2.1p7-beta
