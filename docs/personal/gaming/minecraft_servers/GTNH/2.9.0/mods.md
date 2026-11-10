@@ -151,6 +151,7 @@ One mod written for this setup on 2026-11-04, client and server:
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
 | Omni Tweaks | 0.2.0 | B | QoL backports from modern Minecraft, so far step height 1.0 (0.5 while sneaking) and better ladder and vine climbing |
+| Omni Craft | 0.1.0 | C | One-click multi-step crafting from the inventory through NEI's autocrafting; client only; untested in game |
 
 It reimplements the wanted features of Keep Stepping and Better Climbing, neither of which
 has a 1.7.10 build; no code comes from them. Its climbing mixin hooks
@@ -160,6 +161,14 @@ when walking into a ladder. Toggles and speeds are in `config/omnitweaks.cfg`. T
 features passed in-game testing on 2026-11-04, under the mod's first name, Footwork. The
 source is in `~/Projects/omni-tweaks`, a local git repo built with GTNH's ExampleMod
 starter; the jar is `build/libs/omnitweaks-0.2.0.jar`.
+
+Omni Craft (2026-11-09) adds an "OC" button to NEI's bottom bar in any GUI with a crafting
+grid. It opens a screen listing every item the inventory can make in up to `depth` crafting
+steps (`config/omnicraft.cfg`, default 3), with the chain for the picked item and a recipe
+switch per step; NEI favourites (F) are tried first. Craft closes back to the crafting GUI
+and hands the chain to NEI's `AutoCraftingManager`, so NEI's Autocrafting option must be on.
+It plans with NEI 2.8.171's `RecipeChainMath`; an NEI update can break it. Source is
+`~/Projects/omni-craft`, same starter; jar `build/libs/omnicraft-0.1.0.jar`.
 
 ## Added on 2026-11-05
 
