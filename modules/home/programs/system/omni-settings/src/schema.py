@@ -71,6 +71,8 @@ SECTIONS = [("computer", "This Computer"), ("desktop", "Desktop"),
 TOP_PAGES = {"Flatpaks": "flatpaks", "Users": "people", "Battery": "battery", "MangoHud": "mangohud",
              "AppArmor": "apparmor", "Face Auth": "faceauth", "Maintenance": "overview"}
 
+DRIVE_MOUNTS = ("drives", "mounts")
+
 PAGES = {
     "Flatpaks": ("top", "system-software-install-symbolic", "", [("", "", ["flatpak.enable"])]),
     "Users": ("top", "system-users-symbolic", "",
@@ -85,6 +87,7 @@ PAGES = {
                     [("Schedule", "What runs on its own, and how often.",
                       ["maintenance.clean", "maintenance.keepDays", "maintenance.keepGenerations",
                        "maintenance.optimise", "maintenance.updateReminderDays"])]),
+    "Drives": ("drives", "drive-harddisk-symbolic", "", [("", "", ["drives.mounts"])]),
     "Run on dGPU": ("dgpu", "video-display-symbolic", "", [("", "", ["gpuOffload"])]),
     "User Packages": ("userpkgs", "package-x-generic-symbolic", "", [("", "", ["userPackages"])]),
     "Keybinds": ("keybinds", "input-keyboard-symbolic", "", [("", "", ["keybinds"])]),
@@ -151,6 +154,8 @@ PAGES = {
                      "Apps for links, text, the terminal and folders.",
                      [("", "", ["defaultApps.browser", "defaultApps.textEditor",
                                 "defaultApps.terminal", "defaultApps.fileManager"])]),
+    "Backup Settings": ("backupsettings", "document-save-symbolic", "",
+                        [("", "", ["backups.folder", "backups.skip"])]),
     "Startup": ("startup", "system-run-symbolic",
                 "Variables every program sees, and autostart.",
                 [("", "", ["env", "autostart"])]),
@@ -204,8 +209,9 @@ PAGES = {
                "What Claude sees of each skill and subagent, and the model it runs on.",
                [("Repo Skills", "", [f"claude.skills.{n}" for n in (
                    "addApp", "androidDebloatRedo", "apparmorCheck", "commit", "disablePackage",
-                   "flakeUpdate", "freetubeSync", "gameTroubleshooting", "handoff", "mokuBump",
-                   "onboard", "prReview", "rpgmSetup", "todo", "upstream", "vnSetup")]),
+                   "flakeUpdate", "freetubeSync", "gameTroubleshooting", "gtnhModUpdates",
+                   "handoff", "mokuBump", "onboard", "prReview", "rpgmSetup", "todo", "upstream",
+                   "vnSetup")]),
                 ("Subagents", "", [f"claude.agents.{n}" for n in (
                     "buildTriager", "docsDriftAuditor", "proseReviewer", "publicRepoAuditor")]),
                 ("Account Skills", "Synced from your claude.ai account.",
@@ -462,6 +468,8 @@ def make_setting(domain, path, b, values, choices, labels, doc, lead, header_tit
         s.kind = "steamgames"
     elif path == LOCAL_MODELS:
         s.kind = "localmodels"
+    elif path == DRIVE_MOUNTS:
+        s.kind = "mounts"
     elif path in GROUPED:
         s.kind = "groups"
     elif isinstance(value, list):

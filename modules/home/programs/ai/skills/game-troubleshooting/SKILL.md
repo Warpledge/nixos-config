@@ -103,7 +103,7 @@ A new one goes in through the `add-app` skill.
 | tModLoader paths and log queries | `docs/personal/gaming/tmodloader-debugging.md` |
 | Rocksmith 2014 (Katana DI, RS_ASIO) | `docs/personal/gaming/rocksmith-2014.md` |
 | feedBack audio settings, Guitar Pro import | `docs/personal/gaming/feedback.md` |
-| Minecraft servers (GTNH, TerraFirmaGreg) | `docs/personal/gaming/minecraft_servers/<pack>/index.md` |
+| Minecraft servers (GTNH, GregTech Odyssey, TerraFirmaGreg) | `docs/personal/gaming/minecraft_servers/<pack>/index.md` |
 
 ## Afterwards: keep this current
 

@@ -5,6 +5,7 @@ Packages switched off because they stopped building after a flake update. Add a 
 | Package | Disabled in | Date | Broken at nixpkgs | Reason |
 | --- | --- | --- | --- | --- |
 | sbomnix | dropped from `environment.systemPackages` in `modules/nixos/security/hardening/default.nix` | 2026-10-20 | `ac6b216` (python3.14.7) | python314Packages.sqliteschema fails to build, breaking sbomnix's dependency chain (sqliteschema → SimpleSQLite → df-diskcache) |
+| rusty-path-of-building | `gaming.pathOfBuilding = false` in `users/warpledge/settings.nix` | 2026-11-08 | `f4a03c0` (2026-11-07) | 0.3.3 fails: zstd-sys build.rs can't find `libzstd` via pkg-config (zstd missing from buildInputs) |
 
 ## Pinned ahead
 

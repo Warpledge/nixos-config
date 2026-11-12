@@ -17,8 +17,7 @@ user: {
   # Shared by every guitar toggle; this folder loads when any one is on.
 
   home.packages = with pkgs; [
-    #--- Cabinet impulse responses and utility processing
-    ir-lv2 # Convolution IR loader
+    #--- Utility processing
     x42-plugins # Includes x42-tuner
     lsp-plugins
 

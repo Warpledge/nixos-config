@@ -13,9 +13,10 @@ ColumnLayout {
     readonly property var waiting: fw ? fw.devices.filter(d => d.available) : []
     spacing: 6
 
-    function load(fresh) {
+    //--- `refresh` fetches new metadata first (Check again)
+    function load(refresh) {
         checking = true
-        Backend.call("firmware", { fresh: !!fresh }, reply => {
+        Backend.call("firmware", { refresh: !!refresh }, reply => {
             if (!page)
                 return  // the tab was left before the reply came
             checking = false
@@ -27,6 +28,15 @@ ColumnLayout {
                 error = reply.error
             }
         })
+    }
+
+    //--- A firmware job ended (OmniView.qml re-checked)
+    Connections {
+        target: page.view
+        function onFirmwareChecked(data) {
+            page.error = ""
+            page.fw = data
+        }
     }
 
     function update() {
@@ -60,9 +70,12 @@ ColumnLayout {
     }
     ListRow {
         visible: !page.waiting.length
-        icon: "verified"
-        title: !page.fw && !page.error ? "Checking…" : "Everything is up to date"
-        alert: page.error
+        icon: page.error ? "error" : "verified"
+        tone: page.error ? "caution" : ""
+        title: page.error ? "Couldn't check for updates"
+             : !page.fw ? "Checking…" : "Everything is up to date"
+        alert: page.error || (page.fw && page.fw.refreshFailed
+                              ? "Couldn't fetch new metadata, so this list may be out of date." : "")
     }
     ListRow {
         visible: page.waiting.length > 0
@@ -81,6 +94,18 @@ ColumnLayout {
             title: modelData.name
             subtitle: `${modelData.vendor ? modelData.vendor + " · " : ""}${modelData.version} → ${modelData.available}`
             info: modelData.summary
+        }
+    }
+
+    Repeater {
+        model: page.fw ? page.fw.history : []
+        ListRow {
+            required property var modelData
+            icon: modelData.restart ? "restart_alt" : "error"
+            tone: "caution"
+            title: modelData.restart ? `${modelData.name}: restart to finish` : `${modelData.name}: update failed`
+            subtitle: modelData.version ? `Was going to ${modelData.version}` : ""
+            alert: modelData.restart ? "" : modelData.error
         }
     }
 

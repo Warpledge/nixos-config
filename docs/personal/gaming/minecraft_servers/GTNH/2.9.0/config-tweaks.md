@@ -61,28 +61,49 @@ All seven default to `true`, set to `false`:
 Same keys and defaults as 2.8.4. Each appears once per mob section, so edit the one in
 the named section.
 
-Disabled variants, each default `1` set to `0`:
+Variant weights are all the pack default. Every special variant was set to `0` from
+2026-11-01 to 2026-11-10 and restored together; the file now matches the default except
+one switch.
 
-- `creeper_rates`: `dirt`, `gravel`, `gravity`, `fire`, `lightning`
-- `skeleton_rates`: `fire`
-- `spider_rates`: `poison`
-- `zombie_rates`: `fire`, `plague`
-- `pigzombie_rates`: `plague`
+`B:enderman_griefing=false` [true]: endermen never pick up or place blocks. The mod reads
+this switch, so it applies even if `mobGriefing` is on.
 
-Also `B:enderman_griefing=false` (default: `true`).
+With `mobGriefing` off none of the restored variants leaves blocks behind:
+
+- `creeper_rates` `fire` passes the gamerule as the explosion's block-damage flag and
+  `dirt` and `gravel` call their block-scattering helpers only when it is on.
+- `creeper_rates` `lightning` spawns a 3x3 grid of lightning bolts and ignores the
+  gamerule. `doFireTick` stops the fires; the damage and the charged creepers do not.
+- `creeper_rates` `gravity` pulls entities in and explodes at power 5 instead of 3.
+- `zombie_rates` and `pigzombie_rates` `plague` add 1.3x speed and one random debuff per
+  hit, from slowness, nausea, blindness, hunger, weakness and poison.
 
 ### Infernal Mobs: `config/InfernalMobs.cfg`
 
-All default to `true`, set to `false`: `MM_Gravity`, `MM_Storm`, `MM_Wither`,
-`MM_Blastoff`, `MM_Ghastly`, `MM_Webber`, `MM_Choke`, `MM_Vengeance`, `MM_Darkness`,
-`MM_Exhaust`, `MM_Fiery`, `MM_Poisonous`, `MM_Quicksand`.
+Modifier counts, health factor, rarities and the `mm_*` values are the pack defaults.
 
-Modifier counts, defaults in brackets:
+Kept off, each default `true`:
 
-- `I:maxInfernoModifiers=8` [15]
-- `I:minInfernoModifiers=5` [8]
-- `I:maxUltraModifiers=6` [10]
-- `I:minUltraModifiers=3` [5]
+- `MM_Blastoff`, `MM_Gravity`, `MM_Choke`, `MM_Darkness`: fling you into the air, drag
+  you around, drain your air through armor or blind you
+- `MM_Exhaust`: adds hunger exhaustion, working against the Hunger Overhaul change above
+- `MM_Poisonous`, `MM_Vengeance`: vengeance reflects half your damage with no cap
+
+Back on (turned off 2026-11-01, restored 2026-11-10): `MM_Storm`, `MM_Ghastly`,
+`MM_Webber`, `MM_Fiery`, `MM_Quicksand`, `MM_Wither`. None of them can break a block
+under the world's gamerules:
+
+- `MM_Webber` returns before placing a cobweb unless `mobGriefing` is on, so it does
+  nothing with mob griefing off.
+- `MM_Ghastly`'s fireball passes `mobGriefing` as the explosion's block-damage flag, so
+  it leaves no crater. It still hits for ghast fireball damage and knocks you about.
+- `MM_Storm` places no fire with `doFireTick` off, and lightning damage and the 8 s of
+  burning are unaffected by it. It can also charge creepers, whose explosion does no
+  block damage either. With `doFireTick` on it sets fires that spread across wood and
+  grass, but fire destroys no blocks, only dropped items.
+
+The laptop's server copy of this file must match the client's, since the server decides
+which modifiers a mob gets.
 
 ### Anger Mod: `config/angermod.cfg`
 
@@ -98,6 +119,8 @@ sections:
 ### Thaumcraft: `config/Thaumcraft.cfg`
 
 - `B:wuss_mode=true` (default: `false`). Warp still accumulates; its side effects stop.
+- `I:biome_taint_spread=0` [200]: no taint when a block updates. Existing tainted land
+  stays, and the wiki warns the option may not stop every spread path.
 
 ## Food & Survival
 
@@ -184,10 +207,6 @@ files.
 
 These files appear once the mod is installed. Check a new version's file for added keys.
 
-- **GTNL**: 0.2.7 splits its config through GTNHLib into
-  `config/GTNotLeisure/{general,item,machine,recipe,re_avaritia,client}.cfg`, so the old
-  single `GTNotLeisure.cfg` is not there. The stick setting is `enableStickItem=false`
-  [true] in `item.cfg`. The Integrated Ore Factory option from 0.2.4 no longer exists.
 - **GTNHRates**: `config/gtnhrates.cfg` → the multipliers are in
   [Balance edits](#balance-edits-2026-11-03). Keep `enableNEIBookmarksContents=false`
   [true]: the bookmark NPE was never confirmed fixed. `ic2CropsYield` now multiplies
@@ -251,13 +270,13 @@ Applied to the client and server copies.
 | Mod | File | Change |
 | --- | --- | --- |
 | 123Technology | `123Technology.cfg` | Overpowered integrated-factory recipes off, output multiplier 1.5 to 1.0, NHU egg-machine compat off. The file repeats each category under a pinyin and a Chinese name; both copies were changed. |
-| GTIT | `gtit/gifts.json` | Starter gift gives no rings: the Ring of Skywalk came out on 2026-11-04 because Omni Tweaks covers step assist, and the random ring pool is empty (`randomRewards` `[]`, `randomCount` 0). The legacy `gift_config.json` was updated too. Already-claimed gifts keep their snapshot; `/gtit gift claimreset <player>` issues the new gift on the next login. |
-| GTNL | `GTNotLeisure/` | Vein Mining Pickaxe `maxAmount=1` and `maxRange=1`, so it no longer chains; `enableSomethingRecipe=false`; `enableVoidMinerTweak=false`; `enableSaturationHeal=false`. `enableRecipeOutputChance` stays on. |
 | GTNHRates | `gtnhrates.cfg` | Every multiplier halved from the mod defaults: ores 2.0, coal 8.0, energy 2.0, tools 4.0, bees, crops, pump, resin and IC2 crops 2.0, sapling chance 1.0. `gtSimpleMinersEnergyDiscount` stays 1.0. |
 | EZMiner | `EZMiner/EZMiner_Server.cfg` | Server limits: chain 64 blocks at radius 8, block swap 64 at radius 8 (the same 64-block `max_blocks` as FTB Ultimine), tree felling 8 blocks and 256 blocks, preview 64 blocks. `addExhaustion=0.0` removes the hunger cost. Client preferences live in `config/EZMiner/EZMiner.cfg`. |
+| GTMB | `gtmb-stargate-rules.cfg` | `enabled=true`: blueprint demolition cannot mine ores, cut/paste cannot move or overwrite ores, and decoration vouchers are off. |
 | GTSWN | `gtswn/gtswn_network.cfg` | `UplinkLossEU=0.1`, so wireless power uploads lose 10 percent against the 15 percent downlink. |
-| GTSR | `gtsr/gtsr.cfg` | `singularityDestroyBlocks=false`, so worldgen singularities cannot eat builds. |
+| GTSWN | `gtswn/gtswn.cfg` | `deviceTeleportXPCost=0`, so device info terminal teleports are free like the Waystones. |
+| GTSR | `gtsr/gtsr.cfg` | `singularityDestroyBlocks=true` is back at the default. It was off while singularities were common; at 168x168 chunks they are rare enough to leave their block eating alone. Client only so far, like the frequency below. |
+| GTSR | `gtsr/gtsr.cfg` | `singularitySpawnFrequency=168` [48], so a Spacetime Singularity Altar averages one per 168x168 chunks instead of 48x48, about 3.5 times rarer. New chunks only; `shatteredSingularityMultiplier` still makes the Shattered dimension 8 times denser than that. Client only so far: the laptop's server copy needs the same value before a world is generated. |
 
 Left alone on purpose: Twist's Blood Hatch infinite drain, Waystones' free
-teleports, 123Technology's Alien Fishery (a late-game goal), and the GTIT AE
-trade presets (not selected).
+teleports, and 123Technology's Alien Fishery (a late-game goal).

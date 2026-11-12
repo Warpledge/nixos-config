@@ -7,6 +7,7 @@
 #- (nixos/system/user/omni-settings-helper.nix), which also updates the
 #- flake inputs and switches back to earlier versions
 {
+  config,
   pkgs,
   lib,
   machine,
@@ -15,6 +16,11 @@
   ...
 }: let
   inherit (pkgs) alejandra;
+  #--- Where this build's nixm writes, which the Backups page lists until a rebuild
+  backupFolder = import ../../../../../lib/backup-folder.nix {
+    inherit lib user;
+    home = config.home.homeDirectory;
+  };
   #--- The weekly nh clean job (nixos/nix/nh.nix), which the Overview's clean-up matches
   clean = osConfig.programs.nh.clean;
   #--- Proton builds steam.nix adds to Steam, listed on Proton Versions
@@ -82,6 +88,7 @@
         --set OMNI_SETTINGS_CLEAN_DATES ${lib.escapeShellArg (lib.optionalString clean.enable clean.dates)} \
         --set OMNI_SETTINGS_COMPAT_TOOLS ${lib.escapeShellArg compatTools} \
         --set OMNI_SETTINGS_APPARMOR_INCLUDES ${pkgs.apparmor-profiles}/etc/apparmor.d \
+        --set OMNI_SETTINGS_BACKUP_FOLDER ${lib.escapeShellArg backupFolder} \
         ${lib.optionalString user.llamaSwap.enable
         # The Tuning page's test: the same build llama-swap runs. The line's
         # backslash stays outside, so an empty string still continues the command

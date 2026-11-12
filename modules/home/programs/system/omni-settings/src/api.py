@@ -28,6 +28,7 @@ import changelog  # noqa: E402
 import closure  # noqa: E402
 import crashstate  # noqa: E402
 import dms  # noqa: E402
+import drivestate  # noqa: E402
 import docstate  # noqa: E402
 import flatpakstate  # noqa: E402
 import gitstate  # noqa: E402
@@ -89,6 +90,7 @@ TOP = {"main": [("overview", "Maintenance", ("computer-symbolic",)),
        "security": [("apparmor", "AppArmor", ("security-high-symbolic", "channel-secure-symbolic")),
                     ("faceauth", "Face Auth", ("camera-web-symbolic",))],
        "hardware": [("firmware", "Firmware", ("software-update-available-symbolic", "application-x-firmware")),
+                    ("drives", "Drives", ("drive-harddisk-symbolic", "drive-removable-media-symbolic")),
                     ("battery", "Battery", ("battery-symbolic", "battery-full-symbolic")),
                     ("dgpu", "Run on dGPU", ("video-display-symbolic", "computer-symbolic")),
                     ("scheduler", "CPU Scheduler", ("utilities-system-monitor-symbolic", "cpu-symbolic"))],
@@ -123,6 +125,7 @@ NAV_SUBTITLES = {"overview": "Updates, pinned versions, freeing space, versions"
                  "apparmor": "Each app profile's mode and what it would have blocked since boot. "
                              "Enforcing one waits for Apply.",
                  "firmware": "Firmware for this computer's devices from fwupd, and updates waiting",
+                 "drives": "Disks, free space and health. Mounting at startup waits for Apply.",
                  "battery": "Charge, health, and where charging stops",
                  "dgpu": "Apps whose launcher starts them on the NVIDIA GPU. Changes wait for Apply.",
                  "scheduler": "The sched_ext CPU scheduler running now. A switch here lasts until "
@@ -201,6 +204,8 @@ def shown(setting, value):
         return f"{len(value)} rail app{'' if len(value) == 1 else 's'} changed" if value else "Not set"
     if setting.kind == "steamgames":
         return f"{len(value)} game{'' if len(value) == 1 else 's'} set" if value else "Not set"
+    if setting.kind == "mounts":
+        return ", ".join(m["mountPoint"] for m in value) if value else "Not set"
     if setting.kind == "localmodels":
         return f"{len(value)} model{'' if len(value) == 1 else 's'} changed or added" if value else "Not set"
     if isinstance(value, dict):
@@ -364,7 +369,7 @@ def cmd_load(cfg, _args):
     shell = {}
     for page in state.pages:
         if page.section in ("userpkgs", "keybinds", "windowrules", "siderail", "startup", "filetypes",
-                            "dgpu", "games", "localmodels"):
+                            "dgpu", "drives", "games", "localmodels", "backupsettings"):
             continue
         pid = schema.TOP_PAGES[page.title] if page.section == "top" else f"page:{page.title}"
         groups = []
@@ -405,8 +410,12 @@ def cmd_load(cfg, _args):
                if (s.domain, s.path) in (("user", ("env",)), ("user", ("autostart",)))]
     mime_types = next((s for p in state.pages for g in p.groups for s in g.settings
                        if (s.domain, s.path) == ("user", ("mimeTypes",))), None)
+    backup_settings = {s.path[1]: s for p in state.pages for g in p.groups for s in g.settings
+                       if s.domain == "user" and s.path[0] == "backups"}
     steam_games = next((s for p in state.pages for g in p.groups for s in g.settings
                         if (s.domain, s.path) == ("user", schema.STEAM_GAMES)), None)
+    drive_mounts = next((s for p in state.pages for g in p.groups for s in g.settings
+                         if (s.domain, s.path) == ("machine", schema.DRIVE_MOUNTS)), None)
     gpu_offload = next((s for p in state.pages for g in p.groups for s in g.settings
                         if (s.domain, s.path) == ("user", ("gpuOffload",))), None)
     local_models = {s.path[-1]: setting_json(cfg, state, s, multi, modules) for s in schema.flat(state.pages)
@@ -476,6 +485,9 @@ def cmd_load(cfg, _args):
             "autostart": next((setting_json(cfg, state, s, multi, modules) for s in startup
                                if s.path == ("autostart",)), None),
             "mimeTypes": mime_types and setting_json(cfg, state, mime_types, multi, modules),
+            "backupSettings": {name: setting_json(cfg, state, s, multi, modules)
+                               for name, s in backup_settings.items()},
+            "driveMounts": drive_mounts and setting_json(cfg, state, drive_mounts, multi, modules),
             "gpuOffload": gpu_offload and setting_json(cfg, state, gpu_offload, multi, modules),
             "steamGames": steam_games and setting_json(cfg, state, steam_games, multi, modules),
             "localModels": local_models or None,
@@ -647,7 +659,7 @@ def cmd_local_model_quality(cfg, args):
 def cmd_firmware(_cfg, args):
     """The Firmware page: every device and the updates waiting."""
     try:
-        return hardwarestate.firmware(fresh=bool(args.get("fresh")))
+        return hardwarestate.firmware(fresh=bool(args.get("fresh")), refresh=bool(args.get("refresh")))
     except (RuntimeError, subprocess.TimeoutExpired) as e:
         raise ValueError(str(e)) from e
 
@@ -658,6 +670,19 @@ def cmd_firmware_summary(_cfg, _args):
         return len(hardwarestate.updates())
     except (RuntimeError, OSError, subprocess.TimeoutExpired):
         return 0
+
+
+def cmd_drives(_cfg, _args):
+    """The Drives page: disks, volumes and health."""
+    try:
+        return drivestate.drives()
+    except (RuntimeError, OSError, ValueError, subprocess.TimeoutExpired) as e:
+        raise ValueError(str(e)) from e
+
+
+def cmd_drive_mount(_cfg, args):
+    """Mounts ({mount: true}) or unmounts a volume by its device path."""
+    return drivestate.act(args.get("path"), args.get("mount") is True)
 
 
 def cmd_battery(_cfg, _args):
@@ -914,8 +939,8 @@ def cmd_summaries(cfg, _args):
     except (OSError, KeyError, ValueError):
         age = 0
     base = os.path.join(backupstate.ROOT, socket.gethostname())
-    backups = [{"title": title, "last": backupstate.newest(os.path.join(base, folder))}
-               for _, title, _, _, folder in backupstate.kinds(user)]
+    backups = [{"title": k[1], "last": backupstate.newest(os.path.join(base, k[4]))}
+               for k in backupstate.kinds(user)]
     return {"updates": None if up["checked"] is None else {
                 "upstream": sum(r["status"] == "update" and r["kind"] != "disabled" for r in rows),
                 "fixed": sum(r["status"] == "update" and r["kind"] == "disabled" for r in rows)},
@@ -1165,14 +1190,47 @@ def cmd_disabled_check(cfg, args):
 def cmd_backups(cfg, _args):
     """The backups that apply to the user, each with its folder and newest copy."""
     user = loaded(cfg).resolved["users"][cfg.user]
-    base = os.path.join(backupstate.ROOT, socket.gethostname())
+    host = socket.gethostname()
+    base = os.path.join(backupstate.ROOT, host)
     kinds = []
-    for command, title, what, _, folder in backupstate.kinds(user):
+    for command, title, what, _, folder, name, _ in backupstate.kinds(user):
         path = os.path.join(base, folder)
-        kinds.append({"command": command, "title": title, "what": what, "folder": path,
-                      "exists": os.path.isdir(path), "last": backupstate.newest(path)})
-    return {"base": base, "kinds": kinds, "freetubeOpen": backupstate.freetube_open(),
-            "nixm": bool(shutil.which("nixm"))}
+        kinds.append({"command": command, "title": title, "what": what, "folder": path, "name": name,
+                      "exists": os.path.isdir(path), "last": backupstate.newest(path),
+                      "runs": [dict(run, host=h) for h in backupstate.hosts(folder, host)
+                               for run in backupstate.runs(os.path.join(backupstate.ROOT, h, folder))]})
+    return {"base": base, "root": backupstate.ROOT, "home": os.path.expanduser("~"), "host": host,
+            "defaultFolder": backupstate.DEFAULT_FOLDER, "kinds": kinds,
+            "freetubeOpen": backupstate.freetube_open(), "nixm": bool(shutil.which("nixm")),
+            "ludusavi": bool((user.get("gaming") or {}).get("ludusavi"))}
+
+
+def cmd_backup_restore(_cfg, args):
+    """Copies a listed backup file, or a whole run, to a new scratch folder. Names that
+    aren't listed right now are refused, so no path can reach outside the backups."""
+    kind = next((k for k in backupstate.KINDS if k[0] == args.get("command")), None)
+    if kind is None:
+        raise ValueError("unknown backup")
+    return backupstate.restore(kind, args.get("host"), args.get("stamp"), args.get("file"))
+
+
+def cmd_pick_folder(cfg, _args):
+    """A folder picked in zenity's chooser for backups.folder, ~/-relative under home,
+    or None when cancelled. Refuses the config repo, which may be public."""
+    try:
+        out = subprocess.run(["zenity", "--file-selection", "--directory",
+                              "--title=Choose a backup folder"],
+                             capture_output=True, text=True, timeout=600, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        raise ValueError("couldn't open the file chooser")
+    path = out.stdout.strip()
+    if out.returncode != 0 or not os.path.isdir(path):
+        return None
+    real = os.path.realpath(path) + os.sep
+    if real.startswith(os.path.realpath(cfg.flake) + os.sep):
+        raise ValueError("That folder is inside the config repo, which may be public")
+    home = os.path.expanduser("~")
+    return "~" + path[len(home):] if path.startswith(home + os.sep) else path
 
 
 def cmd_backup(_cfg, args):
@@ -1665,7 +1723,8 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "git": cmd_git, "gitSummary": cmd_git_summary, "summaries": cmd_summaries, "setBackup": cmd_set_backup,
             "flatpaks": cmd_flatpaks, "flatpakUpdates": cmd_flatpak_updates, "flatpakRun": cmd_flatpak_run,
             "flatpakForget": cmd_flatpak_forget, "flatseal": cmd_flatseal, "flatpakSearch": cmd_flatpak_search,
-            "backups": cmd_backups, "backup": cmd_backup, "upstream": cmd_upstream,
+            "backups": cmd_backups, "backup": cmd_backup, "backupRestore": cmd_backup_restore,
+            "pickFolder": cmd_pick_folder, "upstream": cmd_upstream,
             "disabledPackages": cmd_disabled_packages, "disabledCheck": cmd_disabled_check,
             "people": cmd_people, "checkPerson": cmd_check_person,
             "services": cmd_services, "serviceLog": cmd_service_log, "serviceRestart": cmd_service_restart,
@@ -1684,7 +1743,8 @@ COMMANDS = {"load": cmd_load, "list": cmd_list, "review": cmd_review, "save": cm
             "keybinds": cmd_keybinds, "launchCommand": cmd_launch_command, "sideRail": cmd_side_rail,
             "appIcon": cmd_app_icon, "pickIconFile": cmd_pick_icon_file, "siteIcon": cmd_site_icon,
             "mimeApps": cmd_mime_apps, "splitCommand": cmd_split_command,
-            "firmware": cmd_firmware, "firmwareSummary": cmd_firmware_summary, "battery": cmd_battery,
+            "firmware": cmd_firmware, "firmwareSummary": cmd_firmware_summary, "drives": cmd_drives,
+            "driveMount": cmd_drive_mount, "battery": cmd_battery,
             "mangohudTest": cmd_mangohud_test, "mangohudPreview": cmd_mangohud_preview, "scheduler": cmd_scheduler,
             "faceAuth": cmd_face_auth}
 

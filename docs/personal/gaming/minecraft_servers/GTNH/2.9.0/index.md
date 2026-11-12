@@ -10,9 +10,11 @@ created under 2.9.
 ## Sub-Notes
 
 - [mods.md](./mods.md): which hand-added mods carry over, which have a 2.9 build, and which are out
+- [mod-sources.json](./mod-sources.json): where each added mod is published, for the `gtnh-mod-updates` skill
 - [config-tweaks.md](./config-tweaks.md): every config edit, with 2.9 paths and defaults
 - [java-and-launch.md](./java-and-launch.md): Java, Prism's JVM args, lwjgl3ify
-- [shaders.md](./shaders.md): the NeonTech setup, Complementary Unbound with Euphoria Patches and Neon Horizons
+- [shaders.md](./shaders.md): Eclipse with ChromaPatch and the Kura packs (active), and NeonTech, Complementary Unbound with Euphoria Patches and Neon Horizons
+- [eclipse-warpledge-edit/](./eclipse-warpledge-edit/): `build.py`, which rebuilds the Warpledge Edit shader pack from KuraEdit, and `settings.txt`, its shader settings
 - [server.md](./server.md): the desktop and laptop servers, their mods and the current world
 
 The translation agent and data patches for the hand-added mods are outside this repo, in
@@ -44,8 +46,16 @@ time per tick, out of a 50,000,000 ns budget:
 
 Multiblocks run higher than single blocks because of structure validation, so a high
 value on an idle machine is structure-check overhead. Heavy I/O (AE2 interfaces, sorting,
-void excess) tends to spike. For the whole game, run `/spark profiler` in the client;
-Spark is not on the server, and LagGoggles is not installed on 2.9.
+void excess) tends to spike. Spark is not on the server, and LagGoggles is client only so
+far. For the whole game, do not use `/spark profiler`: its bundled async-profiler predates
+JDK 25 and the JVM dies with `SIGSEGV` in `VMThread::nativeThreadId`. Record with JFR
+instead, then aggregate the samples:
+
+```bash
+jcmd <pid> JFR.start name=gtnh settings=profile maxsize=512m filename=/tmp/gtnh.jfr
+jcmd <pid> JFR.stop name=gtnh
+jfr print --events jdk.ExecutionSample --stack-depth 1 /tmp/gtnh.jfr
+```
 
 ## Sources
 

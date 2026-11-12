@@ -20,7 +20,8 @@ lid and power key are ignored, and DMS auto-lock is off under niri.
 - `hardware/storage.nix` — the second NVMe (SK Hynix) as LUKS storage on `/mnt/storage`,
   unlocked after boot from a key file on the encrypted root (crypttab). Not imported yet:
   the drive still holds an old EFI and ext4 `root`, with no `storage` partition
-- `minecraft-servers/` — GTNH and TerraFirmaGreg server definitions, plus `mcservers.nix`,
+- `minecraft-servers/` — GTNH, GregTech Odyssey and TerraFirmaGreg server definitions
+  (the GTO folder is built on the desktop by `gto server`), plus `mcservers.nix`,
   an fzf picker over them. It's a **home-manager** module injected from `default.nix`
   through `home-manager.users.${machine.mainUser}.imports`, not a NixOS module, since the
   servers live in the main user's `~/Documents`. Their notes are in

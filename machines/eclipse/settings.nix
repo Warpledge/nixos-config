@@ -12,7 +12,7 @@
     warpledge = {
       gaming.retroshelf = false;
       fileBrowsers.dolphin = false;
-      wallpaper = "carousel";
+      wallpaper = "engine";
       editors.vscodium = false;
       localAi.models = ["gemma-4-26b-a4b" "ornith-1.5-35b-a3b" "qwen3.6-35b-a3b-q4" "flint" "gemma-4-12b-it-qat" "ornith-1.5-35b-a3b-apex-mtp-i-mini" "qwen3.8-27b" "qwen3.8-27b-q2" "qwen3.8-27b-q3"];
       localAi.edit = null;
@@ -104,7 +104,23 @@
       claude.agentModels.docsDriftAuditor = null;
       claude.agentModels.proseReviewer = null;
       claude.agentModels.publicRepoAuditor = null;
-      windowRules = {};
+      windowRules = {
+        custom-side-rail-terminal = {
+          name = "side-rail-terminal";
+          matches = [{app-id = "^side-rail-terminal$";}];
+          translucent = true;
+        };
+        custom-chrome-search-brave-com-ask-default = {
+          name = "chrome-search.brave.com__ask-Default";
+          matches = [{app-id = "^chrome-search\\.brave\\.com__ask-Default$";}];
+          translucent = true;
+        };
+        custom-chrome-127-0-0-1-ui-default = {
+          name = "chrome-127.0.0.1__ui-Default";
+          matches = [{app-id = "^chrome-127\\.0\\.0\\.1__ui-Default$";}];
+          translucent = true;
+        };
+      };
       sideRail = {};
       mangohud.show = ["fps"];
       mangohud.position = "top-right";
@@ -124,6 +140,13 @@
       claude.mods.rebuildPrompt = true;
       keybinds = {};
       localAi.default = "ornith-1.5-35b-a3b-apex-mtp-i-mini";
+      backups.folder = "~/SyncBackups";
+      backups.skip = [];
+      claude.skills.gtnhModUpdates = "on";
+      claude.skillModels.gtnhModUpdates = null;
+      claude.mods.blastRadius = false;
+      claude.statusLine = false;
+      claude.mods.fileTree = false;
     };
   };
 
@@ -225,7 +248,7 @@
   smb.enable = false;
   boot.menu.timeout = 5;
   boot.menu.entries = 10;
-  apparmor.enforce = ["evince" "file-roller" "katana-floorboard" "mpv" "obsidian" "prismlauncher" "streamlink" "tonkatsu-box" "tsunagu" "unrar" "yt-dlp"];
+  apparmor.enforce = ["evince" "file-roller" "katana-floorboard" "mpv" "obsidian" "streamlink" "tonkatsu-box" "tsunagu" "unrar" "yt-dlp"];
   blocklist.allow = [];
   maintenance.clean = "weekly";
   maintenance.keepDays = 5;
@@ -316,4 +339,5 @@
   localModels.backend = "vulkan";
   faceAuth.enable = false;
   faceAuth.darkThreshold = 90;
+  drives.mounts = [];
 }

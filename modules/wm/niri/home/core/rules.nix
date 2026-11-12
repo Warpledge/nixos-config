@@ -118,8 +118,6 @@ in {
         matches = [
           {namespace = "^dms:clipboard$";}
           {namespace = "^dms:notification-popup$";}
-          # ClipBoard+ panel, emoji picker and item context menu
-          {namespace = "^dms-clipboardPlus-";}
           {namespace = "^dms-selection-menu-";}
         ];
         block-out-from = "screen-capture";

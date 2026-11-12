@@ -99,7 +99,9 @@
   #--- Not a wrapper: the daemon moves itself into the cgroup (see below)
   daemonExcluded = lib.elem "nix-daemon" wanted;
 
-  unknown = lib.subtractLists (lib.attrNames systemTargets ++ ["nix-daemon"]) wanted;
+  #--- Neither is a wrapper; omni-server's unit reads the list itself
+  #--- (home/programs/gaming/omni-server/default.nix)
+  unknown = lib.subtractLists (lib.attrNames systemTargets ++ ["nix-daemon" "omni-server"]) wanted;
   active = targets: lib.filter (n: targets ? ${n} && targets.${n}.enable) wanted;
 
   #--- Falls back to running unwrapped if the setuid helper is absent,

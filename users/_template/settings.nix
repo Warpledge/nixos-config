@@ -190,7 +190,7 @@
     r2modman = false; # Thunderstore mod manager
     satisfactoryModManager = false; # Satisfactory mod manager
     pathOfBuilding = false; # Path of Exile build planner (Rusty PoB)
-    ludusavi = false; # Daily game save backups to ~/SyncBackups/<host>/Ludusavi
+    ludusavi = false; # Daily game save backups to <backups.folder>/<host>/Ludusavi
     retroshelf = false; # ES-DE / RetroDECK library tidier
 
     # Needs prebuilt bundles outside the repo
@@ -298,6 +298,7 @@
   claude.skills.flakeUpdate = "on";
   claude.skills.freetubeSync = "on";
   claude.skills.gameTroubleshooting = "on";
+  claude.skills.gtnhModUpdates = "on";
   claude.skills.handoff = "on";
   claude.skills.mokuBump = "on";
   claude.skills.onboard = "on";
@@ -314,6 +315,7 @@
   claude.skillModels.flakeUpdate = null;
   claude.skillModels.freetubeSync = null;
   claude.skillModels.gameTroubleshooting = null;
+  claude.skillModels.gtnhModUpdates = null;
   claude.skillModels.handoff = null;
   claude.skillModels.mokuBump = null;
   claude.skillModels.onboard = null;
@@ -338,6 +340,17 @@
   japanese = {
     ime = false;
     vn = false;
+  };
+
+  #--------------------------------------------------------------------#
+  #-- Backups
+  #--------------------------------------------------------------------#
+  #--- Backups
+  # Where nixm and Ludusavi save, as <folder>/<host>/<App>, and which apps
+  # (freetube, zen) nixm backup leaves out. Set on Omni Settings' Backups page.
+  backups = {
+    folder = "~/SyncBackups";
+    skip = [];
   };
 
   #--------------------------------------------------------------------#

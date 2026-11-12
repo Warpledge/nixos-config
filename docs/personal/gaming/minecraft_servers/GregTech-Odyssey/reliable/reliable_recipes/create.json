@@ -1,0 +1,74 @@
+[
+  {
+    "action": "remove_recipe",
+    "type": "create:crushing"
+  },
+  {
+    "action": "remove_recipe",
+    "type": "create:milling"
+  },
+  {
+    "action": "remove_recipe",
+    "type": "create:mixing"
+  },
+  {
+    "action": "remove_recipe",
+    "type": "create:compacting"
+  },
+  {
+    "action": "remove_recipe",
+    "type": "create:pressing"
+  },
+  {
+    "action": "remove_recipe",
+    "type": "create:splashing"
+  },
+  {
+    "action": "remove_recipe",
+    "type": "create:haunting"
+  },
+  {
+    "action": "remove_recipe",
+    "type": "create:deploying"
+  },
+  {
+    "action": "remove_recipe",
+    "type": "create:filling"
+  },
+  {
+    "action": "remove_recipe",
+    "type": "create:emptying"
+  },
+  {
+    "action": "remove_recipe",
+    "type": "create:cutting"
+  },
+  {
+    "action": "remove_recipe",
+    "type": "create:sequenced_assembly"
+  },
+  {
+    "action": "remove_recipe",
+    "type": "create:mechanical_crafting"
+  },
+  {
+    "action": "remove_recipe",
+    "type": "create:item_application"
+  },
+  {
+    "action": "remove_recipe",
+    "type": "create:sandpaper_polishing"
+  },
+  {
+    "action": "remove_recipe",
+    "type": "create:basin"
+  },
+  {
+    "action": "remove_recipe",
+    "id": [
+      "create:crafting/appliances/chain_from_zinc",
+      "create:crafting/curiosities/cake",
+      "create:crafting/materials/copper_ingot"
+    ]
+  }
+]

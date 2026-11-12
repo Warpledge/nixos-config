@@ -14,6 +14,9 @@ import system
 #--- fwupd-refresh.timer keeps the metadata fresh; this only spares the badge
 #--- a slow get-updates on every check
 UPDATES_TTL = 3600
+#--- fwupd's update states: pending 1, failed 3, needs reboot 4, failed transient 5
+HISTORY_UNFINISHED = (1, 3, 4, 5)
+HISTORY_RESTART = (1, 4)
 
 
 #--------------------------------------------------------------------#
@@ -56,11 +59,26 @@ def updates(fresh=False):
     return out
 
 
-def firmware(fresh=False):
-    """Every named device fwupd knows, updatable ones first, with any update waiting."""
-    waiting = {u["id"]: u for u in updates(fresh)}
+def refresh_metadata():
+    """Fetches the newest LVFS metadata; False when that failed (the list then
+    comes from what's already here)."""
+    exe = shutil.which("fwupdmgr")
+    try:
+        return exe is not None and subprocess.run(
+            [exe, "refresh", "--force"], capture_output=True, timeout=120, check=False
+        ).returncode in (0, 2)
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+
+
+def firmware(fresh=False, refresh=False):
+    """Every named device fwupd knows, updatable ones first, with any update waiting
+    and installs that didn't finish. `refresh` fetches new metadata first."""
+    refresh_failed = refresh and not refresh_metadata()
+    waiting = {u["id"]: u for u in updates(fresh or refresh)}
     devices = []
-    for d in fwupd("get-devices"):
+    known = fwupd("get-devices")
+    for d in known:
         flags = d.get("Flags") or []
         if not d.get("Name") or "updatable-hidden" in flags:
             continue
@@ -68,8 +86,34 @@ def firmware(fresh=False):
         devices.append({"id": d.get("DeviceId", ""), "name": d["Name"], "vendor": d.get("Vendor", ""),
                         "version": d.get("Version", ""), "updatable": "updatable" in flags,
                         "available": u["available"] if u else "", "summary": u["summary"] if u else ""})
+    #--- An update on a device the loop skipped still needs its row and Update button
+    listed = {d["id"] for d in devices}
+    for u in waiting.values():
+        if u["id"] not in listed:
+            devices.append({**u, "name": u["name"] or "Unnamed device", "updatable": True})
     devices.sort(key=lambda d: (not d["available"], not d["updatable"], d["name"].casefold()))
-    return {"devices": devices, "updates": len(waiting)}
+    return {"devices": devices, "updates": len(waiting), "history": history(known),
+            "refreshFailed": refresh_failed}
+
+
+def history(known):
+    """Installs that didn't finish, for devices not yet on the version they were
+    going to: [{name, version, error, restart}]. fwupd keeps these forever, so one
+    that has since landed another way is left out."""
+    current = {d.get("DeviceId"): d.get("Version") for d in known}
+    try:
+        entries = fwupd("get-history")
+    except (RuntimeError, subprocess.TimeoutExpired):
+        return []
+    out = []
+    for d in entries:
+        state = d.get("UpdateState")
+        target = (d.get("Releases") or [{}])[0].get("Version", "")
+        if state not in HISTORY_UNFINISHED or current.get(d.get("DeviceId")) == target:
+            continue
+        out.append({"name": d.get("Name", ""), "version": target, "error": d.get("UpdateError", ""),
+                    "restart": state in HISTORY_RESTART})
+    return out
 
 
 #--------------------------------------------------------------------#

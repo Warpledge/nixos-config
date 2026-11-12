@@ -9,6 +9,7 @@
   #--------------------------------------------------------------------#
   imports = [
     ./gtnh-server.nix
+    ./gto-server.nix
     ./tfg-server.nix
     ./mcservers.nix
   ];

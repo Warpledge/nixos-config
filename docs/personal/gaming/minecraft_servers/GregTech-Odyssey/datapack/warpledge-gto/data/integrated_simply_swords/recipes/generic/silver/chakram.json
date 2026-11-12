@@ -1,0 +1,31 @@
+{
+  "conditions": [
+    {
+      "type": "forge:not",
+      "value": {
+        "type": "forge:tag_empty",
+        "tag": "forge:ingots/silver"
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "tag": "c:rods/iron"
+    },
+    "X": {
+      "tag": "c:plates/silver"
+    },
+    "Y": {
+      "item": "minecraft:iron_nugget"
+    }
+  },
+  "pattern": [
+    "YXY",
+    "X X",
+    "Y#Y"
+  ],
+  "result": {
+    "item": "integrated_simply_swords:silver/chakram"
+  }
+}

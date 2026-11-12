@@ -1,0 +1,29 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="CC BY-NC-SA 3.0 (adapted from Quark by Vazkii and contributors)"
+
+[[mods]]
+modId="quarkblocks"
+version="1.0.0"
+displayName="Quark Blocks"
+authors="warpledge; blocks, textures, models and the monster box from Quark by Vazkii"
+description='''
+The Quark blocks that the Integrated structure mods build with, without the rest of Quark,
+for GregTech Odyssey. Adapted from Quark (https://github.com/VazkiiMods/Quark) under
+CC BY-NC-SA 3.0: blocks renamed from quark: to quarkblocks:, machines kept for their look
+only, no recipes. Not made or endorsed by Quark's authors.
+'''
+
+[[dependencies.quarkblocks]]
+modId="forge"
+mandatory=true
+versionRange="[47,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.quarkblocks]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.20.2)"
+ordering="NONE"
+side="BOTH"

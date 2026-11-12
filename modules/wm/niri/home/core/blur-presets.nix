@@ -107,7 +107,6 @@
       // They blur through the region DMS sends, since popupTransparency is under 1
       layer-rule {
           match namespace="^dms:(app-launcher|control-center|dash|keybinds|omni-settings|plugins:plugin|process-list-popout|side-rail|slideout)$"
-          match namespace="^dms-clipboardPlus-panel-"
           opacity ${p.opacity}
       }
 

@@ -114,7 +114,7 @@ test('the desktop draws a bar in matugen colours; the terminal draws blocks', as
   await term.unmount()
 })
 
-test('each timed window marks its pace, and context joins the bars after a reply', async ($, on) => {
+test('each timed window marks its pace', async ($, on) => {
   world(on, { palette: PALETTE })
   await $.session.start({ surface: 'terminal', isInteractive: true, cwd: '/work' })
   await $.classic.SessionStart({ source: 'resume', seconds_since_last_response: 60, context_tokens: 250000, model: 'claude-opus-5-5' })
@@ -124,7 +124,7 @@ test('each timed window marks its pace, and context joins the bars after a reply
   const bars = JSON.stringify(await desk.findAll({ type: 'Svg' }))
   expect(bars).toContain('x=\\"65\\"')
   expect(bars.split('class=\\"pace\\"').length - 1).toBe(1)
-  expect(await desk.find({ text: ' 25%' })).toBeDefined()
+  expect(await desk.find({ text: 'CTX' })).toBeUndefined()
   expect(await desk.find({ key: 'status' })).toBeDefined()
   await desk.unmount()
 

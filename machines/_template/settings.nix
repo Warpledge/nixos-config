@@ -129,6 +129,11 @@
   #--- Lenovo's conservation mode stops at its own fixed point instead
   battery.chargeLimit = null;
 
+  #--- Drives
+  # Unencrypted drives mounted at startup, set from Omni Settings' Drives page.
+  # Entries: {uuid = "..."; mountPoint = "/mnt/backup"; fsType = "ext4";}
+  drives.mounts = [];
+
   #--------------------------------------------------------------------#
   #-- Network & Firewall
   #--------------------------------------------------------------------#
@@ -157,8 +162,9 @@
   #--- Mullvad VPN (needs a Mullvad account)
   mullvad.enable = false;
   # Apps always routed around the VPN (see nixos/security/mullvad/); nix-daemon
-  # covers rebuild downloads. Known names: steam, heroic, prismlauncher,
-  # opencode, claude, spotify, freetube, ferdium, omni-settings, protonplus, nix-daemon
+  # covers rebuild downloads, omni-server the servers Omni Server runs. Known names:
+  # steam, heroic, prismlauncher, opencode, claude, spotify, freetube, ferdium,
+  # omni-settings, protonplus, nix-daemon, omni-server
   mullvad.splitTunnel = [];
 
   #--- SSH Server

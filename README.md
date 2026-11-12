@@ -51,7 +51,7 @@ Colors change live from the shell, with no rebuild:
 - Makes a folder for your computer in `machines/` and one for each person in `users/`
 - Fills in your hardware, time zone, language, keyboard, graphics drivers, monitors and disk unlock from what the installer set up
 - Moves the repo to `/etc/nixos-config`, so every admin can edit it (`~/nixos-config` stays as a link)
-- Builds the new system to start on the next boot
+- Builds the new system to start on the next boot; the first build downloads a lot, so it takes a while
 
 Everyone starts with Zen, kitty, Helix, Zed, Nautilus, yazi, mpv, Steam and Omni Settings.
 
@@ -65,20 +65,102 @@ Other uses:
 
 ## Using It
 
-Open **Omni Settings** with `Mod+S` (`Mod` is the Windows key). Change what you want and press **Apply**: it saves, checks and rebuilds, asking for your password once.
+Open **Omni Settings** with `Mod+S` (`Mod` is the Windows key). Change what you want and press **Apply**: it saves, checks and rebuilds, asking for your password once. The rebuild button at the top rebuilds without changes, and offers **Preview** (build and show what would change) and **At Next Restart**.
+
+The tabs across the top:
 
 | To | Go to |
 | --- | --- |
+| Update everything | **Maintenance** → Maintenance → Update Now |
+| Go back to an earlier version | **Maintenance** → Maintenance → Versions |
+| Free up disk space | **Maintenance** → Maintenance → Free Up Space |
+| Commit or pull the config, back up app data, manage Flatpaks | **Maintenance** → Git, Backups, Flatpaks |
+| Change the kernel, services, language or keyboard | **System** |
+| Add a person | **System** → Users |
+| Set environment variables, autostart or which app opens a file type | **System** → Startup, File Types |
 | Turn apps on or off | **Packages** → Default Packages |
 | Install any other app from nixpkgs | **Packages** → Search → Install |
-| Change the kernel, services, firewall, language or keyboard | **Main**, the pages in the sidebar |
-| Update everything | **Main** → Maintenance → Update Now |
-| Go back to an earlier version | **Main** → Maintenance → Versions |
-| Free up disk space | **Main** → Maintenance → Clean Up Old Versions |
-| Add a person | **Main** → Users |
-| Change monitors, shortcuts, mouse or theme | **Niri** (opens Dux Shell's settings) |
+| Change monitors, mouse, bar or theme | **Niri** → Shell (opens Dux Shell's settings on that page) |
 | Make a window float, size or open on a workspace | **Niri** → Window Rules |
-| Copy a Proton launch option | **Docs** |
+| Change keybinds or the `Mod+A` app rail | **Niri** → Keybinds, Side Rail |
+| Wi-Fi, firewall, ad blocking, VPN, connection checks | **Network** |
+| SSH, antivirus, app sandboxing, face unlock | **Security** |
+| Firmware updates, disks, battery limit, CPU scheduler | **Hardware** |
+| Set a Steam game's launch options and Proton version | **Gaming** → Games |
+| Copy a launch option, add Proton builds, set up the in-game overlay | **Gaming** → Launch Options, Proton Versions, MangoHud |
+| Set up Claude, opencode and local models | **AI** |
+| Read the guides | **Docs** |
+
+<details>
+<summary>Everything Omni Settings does, tab by tab</summary>
+
+The search box at the top finds any page or setting, including Dux Shell's own. Settings added to the templates since you last looked show on a **What's New** card. Each person changes only their own apps; computer-wide settings, updates and versions are for admins.
+
+#### Maintenance
+
+- **Maintenance:** check for and install updates, pin a package to the version it has now, free up disk space, switch to an earlier version, and set what runs on a schedule (cleaning up old versions, store optimizing, a reminder to update)
+- **Git:** the config's changed files, recent commits, commits waiting to pull and open pull requests, and backing up your settings to a repo of your own ([how](#back-up-your-settings))
+- **Flatpaks:** apps nixpkgs doesn't have, from Flathub: install, update, switch each on or off and clean up
+- **Backups:** pick which apps' data to back up and where, run a backup, see what the last run saved and restore a copy
+- **Disabled Packages:** packages switched off after an update broke them, and whether they build again
+
+#### System
+
+- **Users:** who can log in, who's an admin, and the name and email on your git commits
+- **System, Boot, Language & Input, Devices, Services:** the computer's name, kernel, boot menu, time zone, language, keyboard layout, Bluetooth, printing, mouse pointer and background services
+- **Default Apps, Startup, File Types:** the apps for links, text, the terminal and folders, environment variables, autostart, and which app opens each file type
+
+#### Packages
+
+- **Search:** find any package in nixpkgs and install it
+- **User Packages:** the packages you added from Search, to move or uninstall
+- **Default Packages:** the apps the config has settings for, as cards by category with each one's options
+
+#### Niri
+
+- **Shell:** tiles that open Dux Shell's settings on the right page: wallpaper and theme, monitors and night light, keyboard, mouse and sound, the bar, dock, launcher and notifications, idle timers and the lock screen
+- **Window Rules:** builds niri rules without writing any config. Press **Pick a Window** and click the window (or choose one from **Open Windows**), and its app ID and title fill in. Pick what should happen to it, such as open floating, at a set width or height, maximized, on a workspace or monitor, translucent or hidden from screen capture, then **Add Rule**. The list shows every rule, the config's and yours, each with a switch to turn it off; the config's stay in [`window-rules.json`](./modules/wm/niri/home/core/window-rules.json)
+- **Side Rail:** the apps on the `Mod+A` rail: turn one off, reorder them, set the width, or add a web page or app of your own
+- **Keybinds:** change a key, turn a keybind off, or add your own, including one that opens or focuses an app you pick
+
+#### Network
+
+- **Connections, Firewall, Blocking, VPN:** Wi-Fi and wired connections, finding file shares, what other devices may reach, the ad and tracker blocklists, and Mullvad with the apps that skip it
+- **Tools:** check the connection and its speed, and how DNS is resolved
+
+#### Security
+
+- **SSH, Antivirus:** logging in from another device, your own SSH keys, and ClamAV scanning
+- **AppArmor:** each app profile's mode and what it would have blocked since boot
+- **Face Auth:** Howdy face unlock, the camera it uses and how dark is too dark
+
+#### Hardware
+
+- **Firmware:** device firmware from fwupd and updates waiting
+- **Drives:** disks, free space and health, and which mount at startup
+- **Battery:** charge, health and where charging stops (laptops)
+- **Run on dGPU:** apps whose launcher starts them on the NVIDIA GPU (hybrid graphics)
+- **CPU Scheduler:** the sched_ext scheduler running now, and switching it until the next restart
+
+#### Gaming
+
+- **Games:** your Steam games, with launch options built for each and its Proton version; they reach Steam once it's closed
+- **Launch Options:** launch options for Steam, Heroic and Lutris to copy, or pick a game's window for its upscaling option
+- **Proton Versions:** the Proton and Wine builds each launcher can use
+- **MangoHud:** what the in-game overlay shows and where, with a test window that shows changes as you make them
+
+#### AI
+
+- **Claude:** Claude Code and Claude Desktop, their plugins, MCP servers and claude.ai connectors, and what Claude sees of each skill and subagent
+- **OpenCode:** opencode's usage bars and rebuild badge
+- **Local AI:** the local model server and its chat page, the models it serves, and tuning how each one loads on the GPU, with a test and a fit check
+
+#### Docs
+
+- **Guides:** the how-tos in `docs/guide/`, starting from the basics
+- **Gaming:** the launch options reference
+
+</details>
 
 If a rebuild fails, the run page offers **Undo My Changes**. If the computer won't start properly, pick an earlier version from the boot menu.
 
@@ -86,15 +168,45 @@ If a rebuild fails, the run page offers **Undo My Changes**. If the computer won
 
 Your computer's folder (`machines/<name>/`) and your folder (`users/<name>/`) exist only in your copy, so pulling my changes in keeps your settings.
 
-There are two kinds of update:
+There are two kinds of update, both on Omni Settings' **Maintenance** page under **Updates**:
 
-- **Update Now** in Omni Settings gets newer versions of your apps.
-- **Pulling from GitHub** gets my changes to the config: new apps, fixes and settings.
+- **Update Now** gets newer versions of your apps.
+- **Pull** gets my changes to the config: new apps, fixes and settings.
+
+### Pull My Changes
+
+When my repo has new commits, a **Config** row under Updates says how many, with a **Pull** button for admins; the Git page lists the commits under **To Pull**.
+
+1. Press **Pull**.
+2. Pick **Pull Now**. **Preview** only builds and shows what would change, then puts everything back; **At Next Restart** applies it when you next boot.
+3. It takes my commits, puts any of yours back on top, and rebuilds. Settings you changed but haven't saved to git are set aside and put back too.
+
+If it went wrong, the run page offers **Undo the Pull**. If one of your changes clashes with one of mine, it stops before changing anything and names the files; use the terminal steps below for those. Settings I've added since show up on the **What's New** card.
+
+### Back Up Your Settings
+
+Your `machines/<name>/` and `users/<name>/` folders exist only on your computer. To keep a copy online, give Omni Settings an empty repo of your own; you don't need to fork mine.
+
+1. Make an empty private repo on GitHub (no README or licence), for example `my-nixos-backup`.
+2. Let git push there without asking for a password. With the GitHub CLI, run these once in a terminal:
+
+   ```bash
+   run gh auth login
+   ```
+
+   ```bash
+   run gh auth setup-git
+   ```
+
+   An SSH key on your GitHub account works too; then paste the repo's `git@github.com:` address in the next step.
+3. In Omni Settings, go to **Maintenance** → **Git** → **Backup**, paste the repo's address and press **Back Up Here**.
+
+From then on, each successful Apply, Rebuild, Update or Pull saves what changed in your computer's and your own folder as a commit (`chore(<computer>): save settings from Omni Settings`) and pushes it there. Updates still come from my repo. Give each computer its own backup repo: it won't overwrite a push another computer made. **Stop** on the same page turns backups off and leaves what's already there.
 
 <details>
-<summary>Pull my changes</summary>
+<summary>Pull my changes from the terminal</summary>
 
-Run these in a terminal:
+For a fork, or when **Pull** reports a clash. Run these in a terminal:
 
 ```bash
 cd /etc/nixos-config
@@ -105,7 +217,7 @@ git pull --rebase
 
 The commit saves your settings first, so the pull can put my changes underneath them. That's what `--rebase` means: git takes my new commits, then replays yours on top. If there's nothing new of yours to save, the commit says so and stops; run `git pull --rebase` on its own.
 
-Then open Omni Settings and press **Rebuild** at the top. Settings I've added since show up on its **What's New** page.
+Then open Omni Settings, press the rebuild button at the top and pick **Rebuild Now**.
 
 **If you forked the repo on GitHub**, your fork is `origin` and mine has to be added once:
 
@@ -145,6 +257,7 @@ The few to know first:
 | `Mod+Comma` | Dux Shell settings |
 | `Mod+Q` | Close window |
 | `Mod+Tab` | Overview of all windows |
+| `Mod+A` | App side rail |
 
 ## Shell Shortcuts
 
@@ -164,6 +277,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | `ls` / `l` / `ll` | `eza` |
 | `tree` | `eza --tree` |
 | `y` | `yazi` |
+| `icat <image>` | show an image in Kitty |
 | `open <file>` | `xdg-open` |
 
 #### Navigation
@@ -193,6 +307,8 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | `run <pkg>` _(fn)_ | try a package once without installing it (`nix run nixpkgs#<pkg>`) |
 | `listgen` | list system generations |
 | `bloat` | show current system closure size |
+| `cleanup` | `nh clean all --keep 5` (keeps 5 generations to roll back to) |
+| `nixremove` | `nix-store --gc` |
 
 #### System & Misc
 
@@ -201,6 +317,7 @@ Short commands I use in place of longer ones, all set up in [`zsh.nix`](./module
 | `c` / `e` | `clear` / `exit` |
 | `us` / `rs` | `systemctl --user` / `sudo systemctl` |
 | `cleanram` | drop filesystem caches |
+| `trimall` | `sudo fstrim -va` (TRIM every SSD) |
 | `fetch` | `fastfetch` |
 | `anime` | `ani-cli` |
 | `f` | `figlet` |
@@ -266,6 +383,7 @@ The top level is a set of categories. Pick one and it opens into its own menu of
 | `nixm boot` | Build the config and apply it on next boot (`nh os boot`) |
 | `nixm upgrade` | Update all flake inputs and rebuild |
 | `nixm flake-update` | Update flake inputs without rebuilding |
+| `nixm check-updates` | List upstream apps and inputs with a newer version out |
 | `nixm dryrun` | Preview what a rebuild would change |
 | `nixm gc` | Garbage collect, keeping last 5 generations |
 | `nixm optimize` | Hardlink identical files in the Nix store |
@@ -388,13 +506,13 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | **Media Player** | [mpv][mpv], [Spotify][spotify] via [spicetify-nix][spicetify], [FreeTube][freetube], [yt-dlp][yt-dlp] (downloader), [ani-cli][ani-cli] (anime in mpv) |
 | **Twitch** | [Streamlink Twitch GUI][streamlink-twitch-gui] browses Twitch and hands the stream to [Streamlink][streamlink], which plays it in mpv, so there are no ads and the follow list stays local with no Twitch account attached; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs |
 | **Screenshot / Recording** | [Quick Capture][quick-capture] (Niri), [gpu-screen-recorder][gpu-screen-recorder] |
-| **Clipboard** | [ClipBoard+][clipboard-plus] (Niri) |
+| **Clipboard** | DMS's built-in clipboard history (Niri) |
 | **Wallpaper Picker** | [Wallpaper Carousel][wallpaper-carousel] over the images in `modules/theme/wallpapers` (Niri), the default; each user picks it or Wallpaper Engine with `wallpaper` in their settings |
 | **Animated Wallpaper** | [linux-wallpaperengine][linux-wallpaperengine] plays Wallpaper Engine scenes and videos from the Steam Workshop, in place of DMS's wallpaper; the [Linux Wallpaper Engine][dms-wallpaperengine] DMS plugin picks them (Niri, `wallpaper = "engine"`; needs Wallpaper Engine bought on Steam) |
 | **Graphics** | [Blender][blender], [Krita][krita], [Affinity Suite v3][affinity-nix] (via Wine), all off by default |
 | **ArtCraft** | The [ArtCraft][artcraft] apps, each its own toggle and off by default: PhotoCraft, LightCraft, VectorCraft, DesignCraft, FigCraft, EffectCraft, FilmCraft, SoundCraft, CADCraft, PdfCraft, WordCraft, GridCraft and DeckCraft; wrapped from the upstream AppImages with `appimageTools`, since they are not in nixpkgs |
 | **Audio** | [Reaper][reaper] (DAW, with [SWS][sws] and [ReaPack][reapack]) |
-| **Guitar** | [TONE3000][tone3000] (official NAM player, browses its capture and IR library in-app), [Guitarix][guitarix] (modular amp rig), [ir.lv2][ir-lv2] for cabinet IRs, [qpwgraph][qpwgraph] for patching, plus [FxFloorBoard][katana-fxfloorboard] to edit patches on the Boss Katana itself |
+| **Guitar** | [TONE3000][tone3000] (official NAM player, browses its capture and IR library in-app), [Guitarix][guitarix] (modular amp rig), [qpwgraph][qpwgraph] for patching, plus [FxFloorBoard][katana-fxfloorboard] to edit patches on the Boss Katana itself |
 | **Rhythm Games** | [feedBack][feedback] plays Guitar Pro tabs through its own audio engine, with VST hosting and amp modeling, so the Katana DI feed doubles as the game input; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs. [Rocksmith 2014][rocksmith] runs on Proton and reads the same DI through [PipeASIO][pipeasio] and [RS_ASIO][rs-asio]; the module writes their config, and the hand-done install steps live in `docs/personal/gaming/rocksmith-2014.md` |
 | **Chat / Productivity** | [GoofCord][goofcord] or [Vesktop][vesktop] (follows the shell's theme live) via [nixcord][nixcord] (Vencord, with [arRPC][arrpc] running alongside it so Steam and Proton games show up as rich presence), [Ferdium][ferdium] (all your web messengers in one window), [Thunderbird][thunderbird], [Obsidian][obsidian] |
 | **AI Tooling** | [Claude Code][claude-code], [Claude Desktop][claude-desktop], [OpenCode][opencode], [OpenCode Desktop][opencode-desktop], [Pi][pi], [LM Studio][lmstudio], [llama-swap][llama-swap], [Open WebUI][open-webui] |
@@ -435,7 +553,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | **Printing** | [CUPS][cups], with [Avahi][avahi] finding network printers (`printing.enable`, off by default) |
 | **GPU Tuning** | [LACT][lact] for the desktop's RX 9070 XT, with amdgpu overdrive on so it can undervolt |
 | **Bootloader** | [systemd-boot][systemd-boot] |
-| **Kernel** | [CachyOS kernel][cachyos-kernel] (selectable: zen / latest / xanmod / cachyos), with the [scx_lavd][scx] sched_ext scheduler |
+| **Kernel** | zen by default, or latest, xanmod or the [CachyOS kernel][cachyos-kernel] (`kernel`), with the [scx_lavd][scx] sched_ext scheduler |
 </details>
 
 <details>
@@ -508,7 +626,6 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 [freetube]: https://freetubeapp.io
 [gpu-screen-recorder]: https://git.dec05eba.com/gpu-screen-recorder
 [quick-capture]: https://github.com/hthienloc/dms-plugins
-[clipboard-plus]: https://github.com/Dadangdut33/dms-plugins
 [wallpaper-carousel]: https://github.com/motor-dev/wallpaperCarousel
 [linux-wallpaperengine]: https://github.com/Almamu/linux-wallpaperengine
 [dms-wallpaperengine]: https://github.com/sgtaziz/dms-wallpaperengine
@@ -522,7 +639,6 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 [tone3000]: https://www.tone3000.com/plugin
 [tonkatsu-box]: https://github.com/hacan359/tonkatsu_box
 [guitarix]: https://guitarix.org
-[ir-lv2]: https://github.com/tomszilagyi/ir.lv2
 [qpwgraph]: https://gitlab.freedesktop.org/rncbc/qpwgraph
 [katana-fxfloorboard]: https://github.com/gumtown/Katana-MK2-FxFloorBoard
 [goofcord]: https://github.com/Milkshiift/GoofCord
@@ -643,8 +759,9 @@ machines/
   └── {eclipse,legion}/           # my machine configs
         ├── settings.nix          # machine toggles, and who logs in
         ├── default.nix           # machine entry
-        ├── hardware/             # hardware-configuration.nix, GPU, LUKS game drives (desktop), swapfile (laptop)
+        ├── hardware/             # hardware-configuration.nix, GPU, storage, swapfile (laptop)
         ├── wm/                   # per-machine WM settings, monitors included
+        ├── games/                # games installed on that machine's drives (desktop)
         └── minecraft-servers/    # GTNH + TerraFirmaGreg servers (laptop)
 users/
   ├── _template/                  # copied for a new person
@@ -655,7 +772,12 @@ modules/
   ├── home/                       # user modules
   ├── theme/                      # matugen templates, DMS theme, GTK, Qt, fonts
   └── wm/                         # window managers
-docs/                             # notes on Proton, security and the WM
+docs/                             # notes and guides
+  ├── guide/                      # how-tos, shown in Omni Settings' Docs tab
+  ├── gaming/                     # launch options, also in the Docs tab
+  ├── nixpkgs/                    # packages switched off after an update broke them
+  ├── security/ wm/               # security and window manager notes
+  ├── todo/                       # planned work
   └── personal/                   # notes for hardware and games only I use
 ```
 
@@ -679,7 +801,7 @@ flake.nix
 | [`nur`](https://github.com/nix-community/NUR) | NixOS User Repository |
 | [`niri`](https://github.com/epireyn/niri-flake) (epireyn/niri-flake) | Niri WM |
 | [`dms`](https://github.com/duxlabs-dev/dux-shell) (duxlabs-dev, stable) | Dux Shell (formerly DankMaterialShell) |
-| [`dms-plugin-registry`](https://github.com/duxlabs-dev/dux-plugin-registry) | Dux Shell plugins (Quick Capture, AMD GPU monitor, ClipBoard+, Wallpaper Carousel, Linux Wallpaper Engine) |
+| [`dms-plugin-registry`](https://github.com/duxlabs-dev/dux-plugin-registry) | Dux Shell plugins (Quick Capture, AMD GPU monitor, Wallpaper Carousel, Linux Wallpaper Engine) |
 | [`dux-files`](https://github.com/duxlabs-dev/dux-files) | Dux Files, standalone file manager from Dux Labs |
 | [`dux-greeter`](https://github.com/duxlabs-dev/dux-greeter) | Login screen that matches Dux Shell |
 | [`stylix`](https://github.com/nix-community/stylix) | Fonts and cursor |
@@ -696,4 +818,5 @@ flake.nix
 | [`claude-code`](https://github.com/sadjow/claude-code-nix) | Claude Code, packaged so it updates without waiting on nixpkgs |
 | [`claude-desktop`](https://github.com/kubastick/claude-desktop-nixos) | Anthropic's Linux .deb of the Claude desktop app, patched for NixOS |
 | [`nix-index-database`](https://github.com/nix-community/nix-index-database) | Prebuilt weekly nix-index database for comma and the command-not-found hint |
+| [`mcp-nixos`](https://github.com/utensils/mcp-nixos) | MCP server that lets AI tools search nixpkgs and NixOS options |
 | [`affinity-nix`](https://github.com/mrshmllow/affinity-nix) | Affinity Suite v3 (Photo, Designer, Publisher) via Wine |
