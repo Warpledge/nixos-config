@@ -524,6 +524,20 @@
       "name": "Nullscape",
       "source": "https://modrinth.com/mod/nullscape",
       "added": "2026-11-12"
+    },
+    {
+      "jar": "Delightful-1.20.1-3.8.1.jar",
+      "modId": "delightful",
+      "name": "Delightful",
+      "source": "https://modrinth.com/mod/delightful",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "knavesneeds-forge-1.20.1-3.1.0-beta.1.jar",
+      "modId": "knavesneeds",
+      "name": "Knaves' Needs",
+      "source": "https://modrinth.com/mod/knaves-needs",
+      "added": "2026-11-12"
     }
   ],
   "removed": [

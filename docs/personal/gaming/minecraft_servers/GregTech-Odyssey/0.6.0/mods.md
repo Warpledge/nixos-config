@@ -309,6 +309,25 @@ in seconds. [gregify.py](../tools/gregify.py) writes `lives_without_oxygen`,
 in its `AIRLESS_JARS` and vanilla's hostiles. A new mod whose mobs reach the Nether or
 End goes in that list.
 
+## Food and weapons (2026-11-12)
+
+Passed a staging trial on 2026-11-12. Neither gets recipe overrides.
+
+| Jar | Mod | What it does |
+| --- | --- | --- |
+| `Delightful-1.20.1-3.8.1.jar` | Delightful | Farmer's Delight foods, wild cantaloupe, mini melons and salmonberries, and knives from other mods' metals |
+| `knavesneeds-forge-1.20.1-3.1.0-beta.1.jar` | Knaves' Needs | Simply Swords weapons for other mods' materials; only Deeper Darker's Warden set loads here |
+
+Delightful's knives are one GT ingot or gem and a stick, like Farmer's Delight's own
+knives, which GTO leaves alone too. Knaves' Needs gates every set on its mod; the
+Warden weapons need reinforced echo shards, which GTO puts behind GT processing. Its
+resonarium set doesn't show, since GTO reworks Deeper Darker's items (`DDItemsMixin`).
+The 3.1.0 beta is the only build on Fzzy Config, which the pack already has; 2.0 (2023)
+needs Architectury.
+
+EMI logs `Exception thrown registering repair recipes` six times since this batch: an
+item whose repair material is empty, so EMI skips its anvil recipe. It's harmless.
+
 ## Overlay
 
 The same jars, with their modIds and sources, are in
