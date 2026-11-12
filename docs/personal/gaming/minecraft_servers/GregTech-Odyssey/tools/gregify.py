@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Write the GT overrides for Tom's Simple Storage, Simply Swords, Illager Invasion
-and Terralith into the datapack beside this folder.
+"""Write the GT overrides for Tom's Simple Storage, Simply Swords, Illager Invasion,
+Terralith and, when their jars are there, L_Ender's Cataclysm and Integrated Simply
+Swords into the datapack beside this folder.
 
 Usage:
     python3 -I <this file> <mods folder>
@@ -67,6 +68,23 @@ SWORDS = {
 }
 # Iron, gold and diamond weapons; netherite and runic keep the mod's smithing recipes.
 SWORDS_MATCH = re.compile(r"(iron|gold|diamond)_(?!melting)[a-z]+$|sword_on_a_stick$")
+
+# Cataclysm's gear needs boss drops; only these use plain vanilla metals. The first six
+# are the ones Integrated Cataclysm turns into Create recipes the bans remove, so they're
+# written even unchanged, to put Cataclysm's crafting recipe back.
+CATACLYSM = {k: v for k, v in SWORDS.items() if k[0] == "item"}
+CATACLYSM_RESTORE = [
+    "mech_eye", "mechanical_fusion_anvil", "the_incinerator", "meat_shredder",
+    "laser_gatling", "wither_assault_shoulder_weapon",
+]
+CATACLYSM_GREG = ["storm_eye", "desert_eye", "cursed_eye", "belt_of_beginner",
+                  "netherite_effigy"]
+
+# Integrated Simply Swords: only its silver weapons load in GTO, from GT's silver.
+INTEGRATED_SWORDS = {
+    ("item", "minecraft:stick"): tag("c:rods/iron"),
+    ("tag", "forge:ingots/silver"): tag("c:plates/silver"),
+}
 
 # Terralith re-adds vanilla's cheap redstone recipes from any stone, which GT replaces
 # (removeVanillaBlockRecipes in gtceu.yaml); a false condition makes Forge skip them.
@@ -155,6 +173,25 @@ def main():
     for path, rid, r in recipes(find(mods, "IllagerInvasion-*.jar"), "illagerinvasion"):
         if rid == "imbuing_table":
             write(path, imbuing_table(r), written)
+
+    if any(mods.glob("L_Enders_Cataclysm-*.jar")):
+        cat = {rid: (path, r) for path, rid, r in
+               recipes(find(mods, "L_Enders_Cataclysm-*.jar"), "cataclysm")}
+        for rid in CATACLYSM_RESTORE + CATACLYSM_GREG:
+            if rid not in cat:
+                sys.exit(f"Cataclysm no longer has recipe {rid}; check CATACLYSM_*")
+            path, r = cat[rid]
+            new = rewrite(r, CATACLYSM)
+            if new != r or rid in CATACLYSM_RESTORE:
+                write(path, new, written)
+
+    if any(mods.glob("integrated_simply_swords-*.jar")):
+        jar = find(mods, "integrated_simply_swords-*.jar")
+        for path, rid, r in recipes(jar, "integrated_simply_swords"):
+            if rid.startswith("generic/silver/"):
+                new = rewrite(r, INTEGRATED_SWORDS)
+                if new != r:
+                    write(path, new, written)
 
     terralith = find(mods, "Terralith_*.jar")
     with zipfile.ZipFile(terralith) as z:

@@ -363,6 +363,34 @@
       "name": "Integrated Villages",
       "source": "https://modrinth.com/mod/integrated-villages",
       "added": "2026-11-12"
+    },
+    {
+      "jar": "integrated_cataclysm_forge-1.0.5+1.20.1.jar",
+      "modId": "integrated_cataclysm",
+      "name": "Integrated Cataclysm",
+      "source": "https://modrinth.com/mod/integrated-catalcysm (mods.toml patched by libgate.py)",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "L_Enders_Cataclysm-3.31.jar",
+      "modId": "cataclysm",
+      "name": "L_Ender's Cataclysm",
+      "source": "https://modrinth.com/mod/l_enders-cataclysm",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "lionfishapi-3.0.jar",
+      "modId": "lionfishapi",
+      "name": "Lionfish API",
+      "source": "https://modrinth.com/mod/lionfish-api",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "integrated_simply_swords-forge-1.3.1+1.20.1.jar",
+      "modId": "integrated_simply_swords",
+      "name": "Integrated Simply Swords",
+      "source": "https://modrinth.com/mod/integrated-simply-swords",
+      "added": "2026-11-12"
     }
   ],
   "carry": [

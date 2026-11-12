@@ -24,7 +24,7 @@ to `quarkblocks:`.
 
 ## What's in it
 
-- 509 blocks. Each block uses a vanilla class where Quark's shape is a vanilla one
+- 513 blocks. Each block uses a vanilla class where Quark's shape is a vanilla one
   (slabs, stairs, walls, panes, fences, doors, leaves, clusters). `PropsBlock` covers
   the rest (vertical slabs, posts, hedges, stools, pipes, potted plants), with the
   properties of Quark's current blockstate. Older Quark properties some templates carry

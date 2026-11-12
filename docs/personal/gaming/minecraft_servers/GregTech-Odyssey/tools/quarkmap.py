@@ -34,11 +34,12 @@ BLOCK_ENTITIES = {
 ENTITIES = {"quark:wraith": "minecraft:stray", "quark:forgotten": "minecraft:skeleton"}
 
 # The Integrated mods whose templates and data name Quark ids.
-JAR_PREFIXES = ("idas", "ida_", "iss-", "integrated_villages")
+JAR_PREFIXES = ("idas", "ida_", "iss-", "integrated_villages", "integrated_cataclysm")
 # Integrated Dungeons Arise reskins When Dungeons Arise at the same paths without
-# requiring it, so which mod's file loads is arbitrary; the pack carries all of IDA's
-# data so its structures, pools, processors and templates always load together.
-WHOLE_DATA = ("ida_",)
+# requiring it, and Integrated Cataclysm does the same to Cataclysm, so which mod's file
+# loads is arbitrary; the pack carries all of their data so structures, pools,
+# processors and templates always load together.
+WHOLE_DATA = ("ida_", "integrated_cataclysm")
 
 
 def vanilla(qid):

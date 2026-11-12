@@ -77,6 +77,8 @@ The [warpledge-gto datapack](../datapack/warpledge-gto/) replaces these recipes;
 | Tom's Simple Storage | 1 | The advanced wireless terminal is an LV crafting recipe instead of a netherite upgrade: 2 LV emitters, an LV circuit, 4 steel plates, an LV sensor and the wireless terminal |
 | Simply Swords | 46 | Iron, gold and diamond weapons and sword-on-a-stick: ingots and diamonds become GT plates of the same material, sticks become iron rods. Netherite, runic and the uniques (loot only) stay |
 | Illager Invasion | 1 | The imbuing table's 4 copper blocks become 2 copper plates and 2 LV circuits |
+| L_Ender's Cataclysm | 11 | Iron, gold and diamond become GT plates in the 5 boss eyes, Belt of Beginner and Netherite Effigy that use them, and in 6 recipes [Integrated Cataclysm](#integrated-structures-2026-11-12) replaces with Create ones (written even where nothing swaps, to put Cataclysm's crafting recipe back). Boss-drop gear stays |
+| Integrated Simply Swords | 15 | Its silver weapons, the only ones whose recipes load without Ice and Fire, Oreganized or Caverns and Chasms: GT silver plates and iron rods replace silver ingots and sticks |
 | Terralith | 5 | Its cheap piston, dispenser, observer, dropper and lever recipes from any stone are switched off, since GT replaces those vanilla recipes |
 
 **Tom's ranges** are per world in `serverconfig/toms_storage-server.toml`; the
@@ -179,16 +181,28 @@ way: Quark breaks EMI, and Integrated Dungeons Arise overlaps When Dungeons Aris
 | `moonlight-1.20-2.16.39-forge.jar` | Moonlight Lib | Library Supplementaries and Amendments require |
 | `reliable_remover-3.9.0+1.20.1-forge.jar` | Reliable Remover | Bans items by JSON: hidden in EMI, recipes, tags, loot, drops and trades stripped |
 | `reliable_recipes-3.9.0+1.20.1-forge.jar` | Reliable Recipes | Removes recipes by JSON; Reliable Remover requires it |
-| `quarkblocks-1.0.0.jar` | Quark Blocks | The 509 Quark blocks the structures use, built here ([tools/quarkblocks](../tools/quarkblocks/README.md)) |
+| `quarkblocks-1.0.0.jar` | Quark Blocks | The 513 Quark blocks the structures use, built here ([tools/quarkblocks](../tools/quarkblocks/README.md)) |
+| `integrated_cataclysm_forge-1.0.5+1.20.1.jar` | Integrated Cataclysm | Rebuilds Cataclysm's boss arenas with Create, Quark and Supplementaries blocks, with other mods' loot in their chests (added 2026-11-12) |
+| `L_Enders_Cataclysm-3.31.jar` | L_Ender's Cataclysm | Bosses, their arenas and boss-drop gear |
+| `lionfishapi-3.0.jar` | Lionfish API | Library Cataclysm requires |
+| `integrated_simply_swords-forge-1.3.1+1.20.1.jar` | Integrated Simply Swords | Simply Swords weapons for other mods' materials; only the silver ones are craftable here |
 
-**Quark isn't installed.** IDAS, Integrated Dungeons Arise and Seven Seas require it in
+**Integrated Cataclysm** reskins Cataclysm at the same 147 data paths, so the pack carries
+all its data, as with Integrated Dungeons Arise. Its recipes stay out: it turns 6 of
+Cataclysm's (Mechanical Fusion Anvil, Mech Eye, the Incinerator, Meat Shredder, Laser
+Gatling, Wither Assault Shoulder Weapon) into Create recipes the bans below remove, and
+[gregify.py](../tools/gregify.py) writes Cataclysm's own at those paths instead.
+
+**Quark isn't installed.** IDAS, Integrated Dungeons Arise, Seven Seas and Integrated
+Cataclysm require it in
 `mods.toml`; [libgate.py](../tools/libgate.py) patches that to optional in the jars
 themselves, so a fresh download needs `libgate.py` rerun before it loads. It also
-writes the `warpledge-gto-integrated` Open Loader pack (gitignored): their 703 templates
-and 157 data files that name Quark, renamed to `quarkblocks:`, plus all of Integrated
-Dungeons Arise's other data. Quark's variant chests, furnaces, crate and blossom sign
-become the vanilla blocks, keeping their loot and text; its wraith and forgotten mobs
-become a stray and a skeleton; 740 Quark entities such as glass item frames are dropped.
+writes the `warpledge-gto-integrated` Open Loader pack (gitignored): their 780 templates
+and 160 data files that name Quark, renamed to `quarkblocks:`, plus all of Integrated
+Dungeons Arise's and Integrated Cataclysm's other data. Quark's variant chests, furnaces,
+crate and blossom sign become the vanilla blocks, keeping their loot and text; its wraith
+and forgotten mobs become a stray and a skeleton; 746 Quark entities such as glass item
+frames are dropped.
 The same pack holds the village tag fix: Integrated Villages 1.3.2 names a
 `swamp_village` it doesn't ship, which fails the whole `#minecraft:village` tag, so
 every entry is made optional.

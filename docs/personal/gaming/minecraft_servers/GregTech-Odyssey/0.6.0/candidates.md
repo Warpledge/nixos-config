@@ -14,7 +14,8 @@ lookup found no 1.20.1 Forge build on Modrinth. Pick a batch, then trial it with
 
 **Batches 1 and 2 are in main since 2026-11-12, without Quark** (minus Integrated
 Stronghold); [mods.md](./mods.md#integrated-structures-2026-11-12) has what went in and
-how. Batch 3 is still a candidate. The first try (2026-11-07) was dropped when EMI
+how. Of batch 3, Integrated Cataclysm and Integrated Simply Swords went in on 2026-11-12
+too; the other two are still candidates. The first try (2026-11-07) was dropped when EMI
 broke; what the retry found, layer by layer in staging:
 
 - **Quark breaks EMI on its own.** gtolib replaces EMI's recipe bake (sealed code), and
@@ -50,7 +51,7 @@ Create is listed as compatible with GTO on the pack's site but has no integratio
 | --- | --- | --- |
 | 1 (in main) | Integrated API 1.9.2, Integrated Patches 1.2.0 | none |
 | 2 (in main, without Stronghold) | IDAS 1.13.0, Integrated Villages 1.3.2, Integrated Stronghold 1.1.1, Integrated Dungeons Arise 2.1.3, Integrated Seven Seas 1.0.0 | Create, Supplementaries, Amendments, Moonlight, Reliable Remover and Recipes, the quarkblocks jar in place of Quark |
-| 3 | Integrated Cataclysm 1.0.5, Integrated Mowzie's Mobs 1.3.2, Integrated Bosses of Mass Destruction 1.0.0, Integrated Simply Swords 1.3.1 | Each one's base mod: L_Ender's Cataclysm (Lionfish API), Mowzie's Mobs, Bosses of Mass Destruction (Cerbon's API), Simply Swords |
+| 3 (Cataclysm and Simply Swords in main) | Integrated Cataclysm 1.0.5, Integrated Mowzie's Mobs 1.3.2, Integrated Bosses of Mass Destruction 1.0.0, Integrated Simply Swords 1.3.1 | Each one's base mod: L_Ender's Cataclysm (Lionfish API), Mowzie's Mobs, Bosses of Mass Destruction (Cerbon's API), Simply Swords |
 
 - Integrated Stronghold's last 1.20.1 build is from 2024-03, and Bosses of Mass
   Destruction's from 2024-01; the rest were updated in 2026.
@@ -130,8 +131,8 @@ the same spots.
 | Luki's Grand Capitals, Luki's Woodland Mansions | | |
 | Structure Essentials | | Spacing control for when you add many structure mods; CurseForge only |
 | Mowzie's Mobs | | Boss structures |
-| L_Ender's Cataclysm | Lionfish API | Boss arenas and very strong gear: gregify the gear |
-| Mowzie's Cataclysm, Simply Swords: Cataclysm, Cataclysm & BetterCombat Compat | | Compat for the mods above; add only with them. Integrated Cataclysm is in [batch 3](#integrated-mods) |
+| L_Ender's Cataclysm | Lionfish API | **Added 2026-11-12** with Integrated Cataclysm; its gear needs boss drops, so only the vanilla-metal recipes were gregified ([mods.md](./mods.md#recipe-overrides)) |
+| Mowzie's Cataclysm, Cataclysm & BetterCombat Compat | | Compat for the mods above; add only with them. Simply Swords: Cataclysm is in [Skip](#skip) |
 
 ## Gameplay changes
 
@@ -157,6 +158,7 @@ sessions in staging before deciding.
 | Aether Villages | Needs The Aether, which GTO lacks |
 | Quark, Zeta | Breaks EMI's recipe bake inside gtolib even with every Quark category off (staging, 2026-11-11); [the Integrated mods](#integrated-mods) get its blocks from the quarkblocks jar instead |
 | Cupboard | Only a library for the someaddons mods, none of which are on this list |
+| Simply Swords: Cataclysm 1.0.1 | Its Forge 1.20.1 builds (1.0.1, 2025-12) target Simply Swords 1.56.0 and call its `ConfigDefaultValues`, which 1.70.0's new config system removed; registration fails and the game won't start (staging, 2026-11-12) |
 | Simply Swords Overhaul | Its last builds (1.0.2 on Modrinth, 1.0.3 and 1.0.4 on GitHub, 2025) target Simply Swords 1.56.0; with 1.70.2 its `StormsEdgeSwordItem` mixin finds no target and the game won't start |
 | Nether Remastered | Checks its own `nether_remastered:seal_of_the_underworld` advancement every player tick; GTO's AdvancementNoMore removes all advancements, so it crashes on joining a world (staging, 2026-11-07). Kept AdvancementNoMore, which GTO ships for performance |
 | Moog's Nether Structures, Moog's Soaring Structures | Moog's Structure Lib 3.4.2's required `TagLoaderMixin` can't inject into `TagLoader`, which gtolib's own `TagLoaderMixin` (priority 2000) rewrites; the game crashes at world creation (staging, 2026-11-07). An older library might avoid it; untested |

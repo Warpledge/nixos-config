@@ -21,9 +21,10 @@ structures, and Quark (which breaks GTO's EMI) is replaced by the quarkblocks ja
   - data/minecraft/tags/worldgen/structure/village.json: the village tag with every
     entry optional, since Integrated Villages 1.3.2 names a swamp_village it doesn't
     ship and that fails the whole tag.
-  - every template and data file of IDAS, Dungeons Arise, Seven Seas and Integrated
-    Villages that names Quark, renamed through quarkmap.py, plus the rest of
-    Integrated Dungeons Arise's data (quarkmap.WHOLE_DATA says why).
+  - every template and data file of IDAS, Dungeons Arise, Seven Seas, Integrated
+    Villages and Integrated Cataclysm that names Quark, renamed through quarkmap.py,
+    plus the rest of Integrated Dungeons Arise's and Integrated Cataclysm's data
+    (quarkmap.WHOLE_DATA says why), recipes excepted.
 
 It also patches those mods' jars in place so Quark is optional. `gto datapack`
 installs both packs. Rerun after updating any of these mods. 0.6.0/mods.md explains
@@ -290,6 +291,10 @@ def unquark(mods):
         all_data = jar.name.lower().startswith(quarkmap.WHOLE_DATA)
         with zipfile.ZipFile(jar) as z:
             for n in z.namelist():
+                # Integrated Cataclysm's recipes are Create ones the bans remove;
+                # gregify.py writes Cataclysm's own at those paths instead.
+                if all_data and "/recipes/" in n:
+                    continue
                 if all_data and n.startswith("data/") and not n.endswith("/"):
                     raw = z.read(n)
                     body = gzip.decompress(raw) if n.endswith(".nbt") else raw
@@ -322,7 +327,7 @@ def unquark(mods):
                     files += 1
     print(f"integrated pack: {templates} templates and {files} data files renamed, "
           f"{dropped} Quark entities (item frames and such) dropped, "
-          f"{whole} more of IDA's files copied so they win over WDA's")
+          f"{whole} more files of the reskins copied so they win over the originals")
     if missing:
         print(f"  not in quarkblocks, placed as air: {', '.join(sorted(missing))}")
     left = [p for p in INTEGRATED.rglob("*.nbt") if quark_values(nbt.load(p.read_bytes())[1])]
