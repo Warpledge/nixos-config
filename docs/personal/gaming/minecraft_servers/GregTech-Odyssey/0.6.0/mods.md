@@ -158,6 +158,57 @@ CPU, so the laptop's own figure is still to be measured, as is a check for broke
 With Tectonic added back it ran at 32 chunks/s, far above Tectonic's earlier trial without
 FastChunkGen.
 
+## Integrated structures (2026-11-12)
+
+Passed a staging trial one layer at a time on 2026-11-11 and 2026-11-12 (each layer a new
+world, EMI search, `gto check`), then copied to main. **The structures only generate in
+new chunks.** [candidates.md](./candidates.md#integrated-mods) has what failed on the
+way: Quark breaks EMI, and Integrated Dungeons Arise overlaps When Dungeons Arise.
+
+| Jar | Mod | What it does |
+| --- | --- | --- |
+| `integrated_api-forge-1.20.1-1.9.2.jar` | Integrated API | Structure library the others run on |
+| `integrated_patches v1.2.0-1.20.1.jar` | Integrated Patches | Fixes for the Integrated mods |
+| `idas_forge-1.13.0+1.20.1.jar` | Integrated Dungeons and Structures | 95 structures: dungeons, towers, ruins, camps |
+| `IDA_v2.1.3-1.20.1.jar` | Integrated Dungeons Arise | Rebuilds dev27's When Dungeons Arise structures with Create and Quark blocks |
+| `ISS-1.20.1.jar` | Integrated Seven Seas | Ships, in the style of WDA: Seven Seas (not needed) |
+| `integrated_villages-1.3.2+1.20.1-forge.jar` | Integrated Villages | 11 village types |
+| `create-1.20.1-6.0.8.jar` | Create | Block library: its decor stays, its machines are banned |
+| `supplementaries-1.20-3.1.44-forge.jar` | Supplementaries | Block library; nothing banned |
+| `amendments-1.20-2.2.6.jar` | Amendments | Supplementaries' companion, needed by Integrated Dungeons Arise |
+| `moonlight-1.20-2.16.39-forge.jar` | Moonlight Lib | Library Supplementaries and Amendments require |
+| `reliable_remover-3.9.0+1.20.1-forge.jar` | Reliable Remover | Bans items by JSON: hidden in EMI, recipes, tags, loot, drops and trades stripped |
+| `reliable_recipes-3.9.0+1.20.1-forge.jar` | Reliable Recipes | Removes recipes by JSON; Reliable Remover requires it |
+| `quarkblocks-1.0.0.jar` | Quark Blocks | The 509 Quark blocks the structures use, built here ([tools/quarkblocks](../tools/quarkblocks/README.md)) |
+
+**Quark isn't installed.** IDAS, Integrated Dungeons Arise and Seven Seas require it in
+`mods.toml`; [libgate.py](../tools/libgate.py) patches that to optional in the jars
+themselves, so a fresh download needs `libgate.py` rerun before it loads. It also
+writes the `warpledge-gto-integrated` Open Loader pack (gitignored): their 703 templates
+and 157 data files that name Quark, renamed to `quarkblocks:`, plus all of Integrated
+Dungeons Arise's other data. Quark's variant chests, furnaces, crate and blossom sign
+become the vanilla blocks, keeping their loot and text; its wraith and forgotten mobs
+become a stray and a skeleton; 740 Quark entities such as glass item frames are dropped.
+The same pack holds the village tag fix: Integrated Villages 1.3.2 names a
+`swamp_village` it doesn't ship, which fails the whole `#minecraft:village` tag, so
+every entry is made optional.
+
+**Create** is gated by `libgate.py` too, through Reliable Remover and Recipes
+(`reliable/` in the repo, installed into `config/` by `gto datapack`):
+
+| Rule | What |
+| --- | --- |
+| Banned | 206 items: kinetics, logistics, processing machines, contraptions, trains, tools (wrench and goggles included) and machine parts. Structures still place them, but breaking one drops nothing |
+| Kept | 479 items: cut and polished stone, windows, seats, sails, ladders, bars, doors, casings, copycats, zinc and brass materials, food |
+| No right-click | The 21 processing machines (millstone, crushing wheels, press, mixer, basin, blaze burner, deployer, fan, spout, drain, mechanical crafter, arm, drill, saw, harvester, plough, roller, schematic machines). Cranks, levers, valves and contraption controls work, so the structures' doors and contraptions do |
+| Recipes | Every Create machine recipe type removed (crushing, milling, mixing, pressing, washing and the rest), plus 3 crafting recipes for other mods' items |
+| Worldgen | Zinc ore and Create's stone layers off (`forge:none` biome modifiers in the warpledge-gto datapack) |
+
+Supplementaries needed no rules: none of its recipes turns vanilla ingredients into
+vanilla items. Integrated Stronghold stayed out (frame rate), and Integrated API's
+`dread_citadel` spawner list logs an error at every start because Ice and Fire isn't
+installed; the structure needing it never generates.
+
 ## Overlay
 
 The same jars, with their modIds and sources, are in

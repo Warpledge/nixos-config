@@ -41,6 +41,25 @@ which means a tag GT doesn't register.
 Every writing command takes `-n` to print what it would do. `<inst>` is a folder name
 under Prism's `instances/` or a path.
 
+## Integrated structures and Create
+
+The Integrated mods, Create and Supplementaries come with generated files
+([mods.md](./mods.md#integrated-structures-2026-11-12)): the quarkblocks jar, the
+Reliable Remover/Recipes rules, the `warpledge-gto-integrated` pack, and a patched
+`mods.toml` in three of the jars. After updating any of those mods, in this order:
+
+```bash
+python3 -I /etc/nixos-config/docs/personal/gaming/minecraft_servers/GregTech-Odyssey/tools/quarkblocks/build.py ~/Downloads/Quark-4.0-462.jar ~/.local/share/PrismLauncher/instances/GregTech.Odyssey-0.6.0-dev27-staging/minecraft/mods
+python3 -I /etc/nixos-config/docs/personal/gaming/minecraft_servers/GregTech-Odyssey/tools/libgate.py ~/.local/share/PrismLauncher/instances/GregTech.Odyssey-0.6.0-dev27-staging/minecraft/mods
+gto datapack GregTech.Odyssey-0.6.0-dev27-staging
+```
+
+`build.py` takes the Quark jar only to copy its blocks (Quark 4.0-462 from Modrinth; it
+never goes in `mods/`). `libgate.py` takes about 10 minutes, mostly rewriting templates,
+and stops if a `quark:` id is left anywhere. A fresh download of IDAS, Integrated
+Dungeons Arise or Seven Seas won't load until `libgate.py` has patched it. Changes to
+the pack reach only new chunks, so test in a new world.
+
 ## The baseline
 
 A normal dev27 session logs about 140 ERROR lines (EventBus transformer noise, Curios

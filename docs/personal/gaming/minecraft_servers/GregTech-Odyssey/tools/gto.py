@@ -9,8 +9,9 @@ this file lists the hand-added jars and the files to carry into a new pack build
 0.6.0/updating.md has the procedures. Commands that write refuse while Prism or the
 instance's game is running. Nothing is ever deleted except a staging copy replaced
 with --replace, which is backed up first, the instance's copy of the recipe
-datapack, which `datapack` rebuilds from ../datapack/, and a server folder's mods/,
-which `server` rebuilds from the instance.
+datapack and the Reliable Remover/Recipes rules, which `datapack` rebuilds from
+../datapack/ and ../reliable/, and a server folder's mods/, which `server` rebuilds
+from the instance.
 """
 
 import argparse
@@ -31,6 +32,8 @@ PRISM = Path.home() / ".local/share/PrismLauncher"
 BACKUPS = Path.home() / "Documents/Minecraft_Servers/GTO-backups"
 OVERLAY = Path(__file__).resolve().with_name("overlay.json")
 DATAPACK = Path(__file__).resolve().parent.parent / "datapack" / "warpledge-gto"
+RELIABLE = Path(__file__).resolve().parent.parent / "reliable"
+INTEGRATED = DATAPACK.with_name("warpledge-gto-integrated")
 BASELINE = "gto-baseline.txt"
 FULL_DIFF = {"config/gtocore-rules.txt", "config/gtocore.yaml"}
 
@@ -283,33 +286,55 @@ def cmd_carry(a):
 
 #-- datapack
 
-def cmd_datapack(a):
-    inst = instance(a.instance)
-    src = DATAPACK
-    dst = game_dir(inst) / "config/openloader/data" / DATAPACK.name
-    if not (src / "pack.mcmeta").is_file():
-        sys.exit(f"no datapack at {src}; run gregify.py first")
+def sync_tree(inst, src, dst, dry_run):
+    """Make dst a copy of src; reports and returns whether anything changed."""
     want = {str(p.relative_to(src)): p for p in src.rglob("*") if p.is_file()}
     have = {}
     if dst.is_dir():
-        have = {str(p.relative_to(dst)): p for p in dst.rglob("*") if p.is_file()}
+        # The Reliable mods write a *.disabled example into their folders on launch.
+        have = {str(p.relative_to(dst)): p for p in dst.rglob("*")
+                if p.is_file() and p.suffix != ".disabled"}
     changed = [r for r in sorted(want) if r not in have or not same(want[r], have[r])]
     gone = sorted(have.keys() - want.keys())
     for r in changed:
-        print(f"{'would copy' if a.dry_run else 'copy'} {r}")
+        print(f"{'would copy' if dry_run else 'copy'} {dst.name}/{r}")
     for r in gone:
-        print(f"{'would remove' if a.dry_run else 'remove'} {r}")
+        print(f"{'would remove' if dry_run else 'remove'} {dst.name}/{r}")
     if not changed and not gone:
         print(f"{dst} is up to date ({len(want)} files)")
-        return
-    if a.dry_run:
-        return
+        return False
+    if dry_run:
+        return True
     refuse_if_running(inst, prism_ok=True)
     # The folder is generated from the repo, so replacing it whole loses nothing.
     if dst.exists():
         shutil.rmtree(dst)
     shutil.copytree(src, dst)
-    print(f"{dst}: {len(want)} files; reload with /reload or restart the world")
+    print(f"{dst}: {len(want)} files")
+    return True
+
+
+def cmd_datapack(a):
+    inst = instance(a.instance)
+    gdir = game_dir(inst)
+    if not (DATAPACK / "pack.mcmeta").is_file():
+        sys.exit(f"no datapack at {DATAPACK}; run gregify.py first")
+    pairs = [(DATAPACK, gdir / "config/openloader/data" / DATAPACK.name)]
+    # Names the Integrated mods' structures; without them a new world won't load.
+    if INTEGRATED.is_dir():
+        if any((gdir / "mods").glob("integrated_api-*.jar")):
+            pairs.append((INTEGRATED, gdir / "config/openloader/data" / INTEGRATED.name))
+        else:
+            print(f"skip {INTEGRATED.name}: Integrated API isn't in {inst.name}")
+    # libgate.py's Reliable Remover/Recipes rules, only once those mods are installed.
+    for src in sorted(RELIABLE.glob("reliable_*")) if RELIABLE.is_dir() else []:
+        if any((gdir / "mods").glob(f"{src.name}-*.jar")):
+            pairs.append((src, gdir / "config" / src.name))
+        else:
+            print(f"skip {src.name}: the mod isn't in {inst.name}")
+    changed = [sync_tree(inst, s, d, a.dry_run) for s, d in pairs]
+    if any(changed) and not a.dry_run:
+        print("reload with /reload or restart the world")
 
 #-- server
 

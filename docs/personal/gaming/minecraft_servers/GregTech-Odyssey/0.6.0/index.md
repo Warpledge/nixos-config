@@ -24,7 +24,8 @@ which is why this world runs on a dev build instead of waiting for beta.
 - [updating.md](./updating.md): new builds, mod trials and debugging through a staging
   instance, with the test checklist
 - [../tools/](../tools/): `gto.py` (backup, stage, carry, diff, check) and
-  `overlay.json`, what you add on top of the pack
+  `overlay.json`, what you add on top of the pack; `gregify.py` and `libgate.py`, which
+  write the recipe, ban and structure files; `quarkblocks/`, the Quark block jar
 
 ## Sources
 

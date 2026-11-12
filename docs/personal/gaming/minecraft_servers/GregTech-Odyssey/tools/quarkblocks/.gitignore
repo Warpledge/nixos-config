@@ -1,0 +1,5 @@
+# Quark's assets and data (CC BY-NC-SA) are copied in by gen.py at build time.
+src/generated/
+build/
+.gradle/
+run/

@@ -10,53 +10,54 @@ are in `~/Downloads/cosmic_frontiers_notes/`.
 lookup found no 1.20.1 Forge build on Modrinth. Pick a batch, then trial it with
 `gto stage` as described in [updating.md](./updating.md).
 
-## Integrated mods (dropped 2026-11-07)
+## Integrated mods
 
-**Dropped after batch 2 broke EMI in staging.** Kept as a record of what was tried, so
-a retry starts from what failed.
+**Batches 1 and 2 are in main since 2026-11-12, without Quark** (minus Integrated
+Stronghold); [mods.md](./mods.md#integrated-structures-2026-11-12) has what went in and
+how. Batch 3 is still a candidate. The first try (2026-11-07) was dropped when EMI
+broke; what the retry found, layer by layer in staging:
 
-- With all of batch 2, EMI's recipe reload threw a NullPointerException inside gtolib
-  (GTO's closed-source core, `EmiRecipes.bake`), so EMI showed no recipes and its search
-  box stopped responding.
-- With Quark, Zeta, IDAS, Integrated Stronghold, Integrated Dungeons Arise and Integrated
-  Seven Seas disabled, the error went away but EMI's search returned nothing; its
-  `EMI Search Bake` thread started and never logged finishing. The unmodified pack's
-  search works, so the rest of batch 2 (Create, Supplementaries, Amendments, Moonlight,
-  KubeJS, Rhino, Integrated API, Patches, Villages) breaks it too.
-- Quark adds 1,602 recipes; the Integrated jars add one or none. The structures use 543
-  Quark block types (about 350,000 placements), so Quark can't be dropped from under
-  them.
+- **Quark breaks EMI on its own.** gtolib replaces EMI's recipe bake (sealed code), and
+  upstream EMI skips a stack whose data changes while it's indexed ("self-mutated")
+  where gtolib passes the null on to `ArrayList.addAll`. Quark 4.0-462 with Zeta 1.0-31
+  does it even with all ten categories off, Zeta's creative tab appends forced and its
+  hiding off, so it's Quark's code, not its items. Alex's Mobs with Citadel fails the
+  same way ([Skip](#skip)).
+- KubeJS and Rhino weren't needed: Reliable Remover and Reliable Recipes do the bans as
+  JSON. Create, Moonlight, Supplementaries and Amendments each passed alone.
+- IDAS, Integrated Dungeons Arise and Seven Seas require Quark in `mods.toml` but have no
+  code calling it, and their 703 templates place 509 Quark block types. Those blocks
+  went into a jar of their own (`quarkblocks`), with the requirement patched out.
+- Integrated Dungeons Arise reskins When Dungeons Arise at the same 381 template and 225
+  data paths and doesn't require it, so which file loads is arbitrary. Mixed, the
+  structures' spawners came out empty; the pack now carries all of IDA's data.
 - Integrated Stronghold's 61 templates hold 4,529 block entities (about 570 Create
   gearboxes, water wheels and shafts, about 500 banners) and 7,583 lava blocks; it
-  dropped the frame rate from about 160 to 20 with shaders.
-- Structures were far too dense on top of When Dungeons Arise, and none of the mods has a
-  spacing setting; it would take a datapack overriding their `structure_set` files.
+  dropped the frame rate from about 160 to 20 with shaders, so it stayed out.
+- Doubling the structures' spacing put the nearest Collectors Museum 16,000 blocks out;
+  their own spacing stays. Overlap with other structure mods (a Keep Kayra mostly cut
+  away by a neighbour) is for a spacing mod; Structurify was tried once ([Skip](#skip)).
 - Integrated Villages 1.3.2 lists a `swamp_village` it doesn't ship, which makes the
-  whole `#minecraft:village` tag fail to load.
+  whole `#minecraft:village` tag fail to load; the pack's tag makes every entry optional.
 
 The best structure mods from the Cosmic Frontiers testing. All 11 have 1.20.1 Forge
 builds (Modrinth, 2026-11-07). 8 of them build their structures from Create, Quark and
 Supplementaries blocks, so those three come in as block libraries: their blocks stay
 registered for the structures, while their machines and recipes are removed and hidden.
-dev27 has no KubeJS, so batch 2 adds it for that; the Cosmic Frontiers
-`gregification.md` has the recipe patterns. Create is listed as compatible with GTO on
-the pack's site but has no integration.
+Create is listed as compatible with GTO on the pack's site but has no integration.
 
 | Batch | Mods | Needs from outside dev27 |
 | --- | --- | --- |
-| 1 | Integrated API 1.9.1, Integrated Patches 1.2.0 | none |
-| 2 | IDAS 1.13.0, Integrated Villages 1.3.2, Integrated Stronghold 1.1.1, Integrated Dungeons Arise 2.1.3, Integrated Seven Seas 1.0.0 | Create, Quark, Zeta, Supplementaries, Amendments, Moonlight, KubeJS |
+| 1 (in main) | Integrated API 1.9.2, Integrated Patches 1.2.0 | none |
+| 2 (in main, without Stronghold) | IDAS 1.13.0, Integrated Villages 1.3.2, Integrated Stronghold 1.1.1, Integrated Dungeons Arise 2.1.3, Integrated Seven Seas 1.0.0 | Create, Supplementaries, Amendments, Moonlight, Reliable Remover and Recipes, the quarkblocks jar in place of Quark |
 | 3 | Integrated Cataclysm 1.0.5, Integrated Mowzie's Mobs 1.3.2, Integrated Bosses of Mass Destruction 1.0.0, Integrated Simply Swords 1.3.1 | Each one's base mod: L_Ender's Cataclysm (Lionfish API), Mowzie's Mobs, Bosses of Mass Destruction (Cerbon's API), Simply Swords |
 
 - Integrated Stronghold's last 1.20.1 build is from 2024-03, and Bosses of Mass
   Destruction's from 2024-01; the rest were updated in 2026.
-- Integrated Dungeons Arise and Seven Seas don't list When Dungeons Arise or WDA: Seven
-  Seas as required. The first trial launch shows whether they need them.
+- Integrated Seven Seas runs without WDA: Seven Seas (2026-11-12).
 - Modrinth's dependency lists come from the authors and can be wrong: Integrated
   Villages lists none, but its jar's `mods.toml` makes Create and Supplementaries
   mandatory. Read each jar's `mods.toml` when it's added.
-- Batch 1 passed in staging on 2026-11-07 (new world, DH generating, reload, `gto check`
-  clean), but adds no structures by itself, so it went no further.
 - Integrated Stronghold and YUNG's Better Strongholds both replace the stronghold: use
   one. dev27's End Remastered patches stronghold pieces too.
 
@@ -130,7 +131,7 @@ the same spots.
 | Structure Essentials | | Spacing control for when you add many structure mods; CurseForge only |
 | Mowzie's Mobs | | Boss structures |
 | L_Ender's Cataclysm | Lionfish API | Boss arenas and very strong gear: gregify the gear |
-| Mowzie's Cataclysm, Simply Swords: Cataclysm, Cataclysm & BetterCombat Compat | | Compat for the mods above; add only with them. Integrated Cataclysm was [dropped](#integrated-mods-dropped-2026-11-07) |
+| Mowzie's Cataclysm, Simply Swords: Cataclysm, Cataclysm & BetterCombat Compat | | Compat for the mods above; add only with them. Integrated Cataclysm is in [batch 3](#integrated-mods) |
 
 ## Gameplay changes
 
@@ -154,7 +155,7 @@ sessions in staging before deciding.
 | Smooth Chunk Save | Changes how chunks save, on a dev build that already warns of corrupted saves |
 | Tinkers' Better Combat | Needs Tinkers' Construct, which GTO lacks |
 | Aether Villages | Needs The Aether, which GTO lacks |
-| Quark, Zeta | Too broad to trial in one go (worldgen, automation blocks, mob changes), and with batch 2 of [the Integrated mods](#integrated-mods-dropped-2026-11-07) it broke EMI's recipe reload inside gtolib |
+| Quark, Zeta | Breaks EMI's recipe bake inside gtolib even with every Quark category off (staging, 2026-11-11); [the Integrated mods](#integrated-mods) get its blocks from the quarkblocks jar instead |
 | Cupboard | Only a library for the someaddons mods, none of which are on this list |
 | Simply Swords Overhaul | Its last builds (1.0.2 on Modrinth, 1.0.3 and 1.0.4 on GitHub, 2025) target Simply Swords 1.56.0; with 1.70.2 its `StormsEdgeSwordItem` mixin finds no target and the game won't start |
 | Nether Remastered | Checks its own `nether_remastered:seal_of_the_underworld` advancement every player tick; GTO's AdvancementNoMore removes all advancements, so it crashes on joining a world (staging, 2026-11-07). Kept AdvancementNoMore, which GTO ships for performance |
