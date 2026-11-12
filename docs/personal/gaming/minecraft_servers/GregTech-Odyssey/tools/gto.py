@@ -5,7 +5,9 @@ Usage:
     python3 -I <this file> <command> <instance> [...]
 
 An instance is a folder name under Prism's instances/ or a path. overlay.json beside
-this file lists the hand-added jars and the files to carry into a new pack build;
+this file lists the hand-added jars, the pack's own jars switched off (`removed`, which
+`carry` disables with Prism's .disabled suffix and `server` leaves out) and the files
+to carry into a new pack build;
 0.6.0/updating.md has the procedures. Commands that write refuse while Prism or the
 instance's game is running. Nothing is ever deleted except a staging copy replaced
 with --replace, which is backed up first, the instance's copy of the recipe
@@ -241,6 +243,16 @@ def cmd_carry(a):
             if not a.dry_run:
                 shutil.copy2(src, dst)
 
+    for mod in ov.get("removed", []):
+        have = shipped.get(mod["modId"])
+        if not have:
+            print(f"have {mod['name']} off")
+            continue
+        jar = ngame / "mods" / have[1]
+        act(f"disable mods/{jar.name}")
+        if not a.dry_run:
+            jar.rename(jar.with_name(jar.name + ".disabled"))
+
     carried = []
     for entry in ov["carry"]:
         root = ogame / entry
@@ -367,6 +379,7 @@ def cmd_server(a):
     if (out / "world").exists():
         print(f"{out.name} has a world; keeping it and server.properties")
     client = set(overlay()["clientOnly"])
+    removed = {m["modId"] for m in overlay().get("removed", [])}
     act = (lambda msg: print("would " + msg)) if a.dry_run else (lambda msg: print(msg))
 
     # The release's server zip is a packwiz installer: its pack/mods/*.toml name
@@ -389,9 +402,13 @@ def cmd_server(a):
             z.extractall(out)
 
     bad = []
-    for name, algo, want in wanted:
+    for name, algo, want in list(wanted):
         src = gdir / "mods" / name
-        if not src.is_file():
+        off = gdir / "mods" / (name + ".disabled")
+        if off.is_file() and jar_mods(off).keys() & removed:
+            print(f"skip removed {name}")
+            wanted.remove((name, algo, want))
+        elif not src.is_file():
             bad.append(f"{name}: not in {inst.name}")
         elif (sha1(src) if algo == "sha1" else digest(src)) != want:
             bad.append(f"{name}: hash differs from the pack index")

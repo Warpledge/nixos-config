@@ -93,7 +93,7 @@ Core came out again; all are under
 | Sound Physics Remastered | | |
 | TIMM | | |
 | Cool Rain | | |
-| Particular | | |
+| Particular | | **Added again 2026-11-12** with Leaves Be Gone and Better Advancements ([mods.md](./mods.md#advancements-and-qol-2026-11-12)) |
 | Entity Model Features, Entity Texture Features | | EMF needs ETF |
 | Smooth Swapping | | |
 | Particle Core | Fzzy Config, Kotlin for Forge | dev27 ships Async Particles, which also changes particles: trial it alone |
@@ -160,7 +160,7 @@ sessions in staging before deciding.
 | Cupboard | Only a library for the someaddons mods, none of which are on this list |
 | Simply Swords: Cataclysm 1.0.1 | Its Forge 1.20.1 builds (1.0.1, 2025-12) target Simply Swords 1.56.0 and call its `ConfigDefaultValues`, which 1.70.0's new config system removed; registration fails and the game won't start (staging, 2026-11-12) |
 | Simply Swords Overhaul | Its last builds (1.0.2 on Modrinth, 1.0.3 and 1.0.4 on GitHub, 2025) target Simply Swords 1.56.0; with 1.70.2 its `StormsEdgeSwordItem` mixin finds no target and the game won't start |
-| Nether Remastered | Checks its own `nether_remastered:seal_of_the_underworld` advancement every player tick; GTO's AdvancementNoMore removes all advancements, so it crashes on joining a world (staging, 2026-11-07). Kept AdvancementNoMore, which GTO ships for performance |
+| Nether Remastered | Checks its own `nether_remastered:seal_of_the_underworld` advancement every player tick; GTO's AdvancementNoMore removes all advancements, so it crashes on joining a world (staging, 2026-11-07). AdvancementNoMore has been off since 2026-11-12, so it can be retried |
 | Moog's Nether Structures, Moog's Soaring Structures | Moog's Structure Lib 3.4.2's required `TagLoaderMixin` can't inject into `TagLoader`, which gtolib's own `TagLoaderMixin` (priority 2000) rewrites; the game crashes at world creation (staging, 2026-11-07). An older library might avoid it; untested |
 | YUNG's Better Strongholds | Replaces the stronghold eyes of ender lead to; dev27's End Remastered patches stronghold pieces for its own eyes and portal frames, which gate the End |
 | Diagonal Walls, Windows, Fences | Their `diagonalblocks` 8.0.6 throws `target block tags not empty` on the second tag reload (staging, 2026-11-07): the first world loads, but EMI never gets its data, and leaving to the title and loading or creating any world crashes |
@@ -174,7 +174,7 @@ sessions in staging before deciding.
 | Amplified Nether | Removed after the staging trial (2026-11-07). It also wrapped vanilla's nether ore features in an extra `count: 2` (quartz, gold, small debris veins) |
 | Macaw's Bridges, Lights, Fences, Stairs | Added to main on 2026-11-07, removed again the same day |
 | AmbientSounds | Added to main on 2026-11-07, removed on 2026-11-08 |
-| Sounds, MRU, Particular, Particle Core | Added to main on 2026-11-07, removed on 2026-11-08. YACL, added for Sounds and MRU, is still in |
+| Sounds, MRU, Particle Core | Added to main on 2026-11-07, removed on 2026-11-08 with Particular, which came back on 2026-11-12. YACL, added for Sounds and MRU, is still in |
 | Structurify 2.0.43 | Added to main on 2026-11-08 for its global flatness check (structures skip steep ground), removed the same day. Its in-game screen didn't save, so `config/structurify.json` had been written by hand |
 | Chunky | Distant Horizons 3.3.3 calls into Chunky while a new world's spawn chunks generate, before Chunky has started (on `ServerStartingEvent`), so creating a world crashes (staging, 2026-11-07). DH's `chunkGeneratorMode = "INTERNAL_SERVER"` with `SURFACE_THEN_CHUNKS` saves the chunks it generates, which does the pregen instead |
 

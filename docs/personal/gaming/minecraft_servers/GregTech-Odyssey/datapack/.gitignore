@@ -1,2 +1,4 @@
 # libgate.py writes it from the Integrated mods' own templates and data on each run.
 warpledge-gto-integrated/
+# What that pack was built from, so an unchanged run reuses it.
+warpledge-gto-integrated.stamp

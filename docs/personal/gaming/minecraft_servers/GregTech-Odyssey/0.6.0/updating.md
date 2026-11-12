@@ -56,8 +56,12 @@ gto datapack GregTech.Odyssey-0.6.0-dev27-staging
 
 `build.py` takes the Quark jar only to copy its blocks (Quark 4.0-462 from Modrinth; it
 never goes in `mods/`). `libgate.py` takes about 10 minutes, mostly rewriting templates,
-and stops if a `quark:` id is left anywhere. A fresh download of IDAS, Integrated
-Dungeons Arise or Seven Seas won't load until `libgate.py` has patched it. Changes to
+and stops if a `quark:` id is left anywhere. It keeps the result: while the Integrated
+jars' contents, `quarkmap.py`, `nbt.py` and the quarkblocks block list are unchanged
+(`datapack/warpledge-gto-integrated.stamp`), a rerun, on staging or main, reuses the
+templates and takes seconds. A change to how `libgate.py` itself rewrites them needs its
+`UNQUARK_VERSION` bumped. A fresh download of IDAS, Integrated Dungeons Arise, Seven
+Seas or Integrated Cataclysm won't load until `libgate.py` has patched it. Changes to
 the pack reach only new chunks, so test in a new world.
 
 ## The baseline

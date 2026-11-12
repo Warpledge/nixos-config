@@ -123,7 +123,7 @@ All of these are carried by `gto carry`, along with these configs:
 | --- | --- | --- |
 | `config/tectonic.json` | Defaults plus `ultrasmooth`, `elevation_boost` 0.2, `min_y`/`max_y` -128/544, `ocean_offset` -0.5, `continents_scale` 0.3, `ridge_scale` 0.3, `flat_terrain_skew` -0.1, `islands.enabled` false | Smoother, taller terrain with rare oceans and no islands, as in Cosmic Frontiers. Above -0.45, deep oceans and their monuments stop spawning. GT ores below -64 are unchecked |
 | `config/terrablender.toml` | `overworld_region_size` 4 | Smaller biome-mod regions, so they swap more often |
-| `config/biomeswevegone/world_generation.json` | 48 of dev27's 54 BWG biomes on (Cosmic Frontiers' 11 plus 37 picked on 2026-11-08); off: allium_shrubland, amaranth_grassland, crimson_tundra, eroded_borealis, pumpkin_valley, rainbow_beach; region weights 8 to 2 | At 8, BWG's 3 regions outweighed the vanilla region (10, where Terralith's biomes live) and the world was mostly BWG. At 1, BWG showed up in about 1% of 3,510 visited chunks (2026-11-08) |
+| `config/biomeswevegone/world_generation.json` | 51 of dev27's 54 BWG biomes on; off: crimson_tundra, eroded_borealis, pumpkin_valley. Allium Shrubland, Amaranth Grassland and Rainbow Beach came back on 2026-11-12 (giant alliums give the petal blocks GTO turns into purple, pink and white wool; red wool's rose petal blocks are on Forgotten Forest's Florus trees). Eroded Borealis, off by BWG's default, was tried the same day and turned off again. Region weights 8 to 2 | At 8, BWG's 3 regions outweighed the vanilla region (10, where Terralith's biomes live) and the world was mostly BWG. At 1, BWG showed up in about 1% of 3,510 visited chunks (2026-11-08) |
 | `config/bettermineshafts-forge-1_20.toml` | `Enable Ore Deposits` false | Its deposits are vanilla ores outside GT's veins |
 | `config/DistantHorizons.toml` | `chunkGeneratorMode` `INTERNAL_SERVER`, `generatorPlan` `SURFACE_THEN_CHUNKS`, `lodChunkRenderDistanceRadius` 256, `numberOfThreads` 4, `horizontalQuality`/`verticalQuality` `HIGH`, `enableCaveCulling` true, `playerBandwidthLimit` 0, `enableAdaptiveTransferSpeed` true (2026-11-08) | DH saves real chunks as it pregenerates, as on the GTNH server. The same file goes to the laptop server, which does the generating, so 4 threads leave its other 12 for ticks; the desktop only builds LODs from what the server sends. HIGH instead of EXTREME and cave culling cut LOD build work and VRAM. `INTERNAL_SERVER` tops out near 8 chunks/s on the laptop whatever the thread count, since each chunk goes through the server's own generation; `SURFACE_THEN_CHUNKS` draws a rough surface first so the horizon fills in sooner. No bandwidth cap on the LAN, with adaptive speed against lag. FastChunkGen (below) is the C2ME-style speedup |
 
@@ -222,6 +222,33 @@ Supplementaries needed no rules: none of its recipes turns vanilla ingredients i
 vanilla items. Integrated Stronghold stayed out (frame rate), and Integrated API's
 `dread_citadel` spawner list logs an error at every start because Ice and Fire isn't
 installed; the structure needing it never generates.
+
+**Integrated Simply Swords** registers its silver weapons only when it recognises a mod
+that adds silver, and GT doesn't count; its creative tab icon is the silver cutlass, so
+opening the tab crashed. `config/integrated_simply_swords/silver.json5` sets `ENABLED`
+to `TRUE` (carried by `gto carry`). Its Born in Chaos dark metal weapons register too,
+but their recipes check for Ice and Fire by mistake, so they never load.
+
+**Minka villages** (Integrated Villages) spawn in its `collections/floral` biome tag,
+which names BWG's pre-rename `#byg:is_floral`; libgate.py adds `#biomeswevegone:floral`
+to it in the integrated pack.
+
+## Advancements and QoL (2026-11-12)
+
+Passed a staging trial in a new world on 2026-11-12.
+
+| Jar | Mod | What it does |
+| --- | --- | --- |
+| `BetterAdvancements-Forge-1.20.1-0.6.0.73.jar` | Better Advancements | Reworked advancements screen; client only |
+| `LeavesBeGone-v8.0.0-1.20.1-Forge.jar` | Leaves Be Gone | Fast leaf decay after a tree is cut; Puzzles Lib ships in dev27 |
+| `particular-1.20.1-Forge-1.5.7.jar` | Particular Reforged | Ambient particles; client only. Also in from 2026-11-07 to 2026-11-08 |
+
+**AdvancementNoMore is off** (`advancementnomore-1.20.1-1.0.1.jar.disabled`, listed under
+`removed` in [overlay.json](../tools/overlay.json), so `gto carry` disables it in a new
+pack build and `gto server` leaves it out). GTO ships it to skip advancement checks for
+performance, but Born in Chaos's infected diamond ore throws on every break without
+the advancement it grants, and Nether Remastered crashed on joining a world
+([candidates.md](./candidates.md#skip)), so that one can be retried.
 
 ## Overlay
 

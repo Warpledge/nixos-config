@@ -391,6 +391,35 @@
       "name": "Integrated Simply Swords",
       "source": "https://modrinth.com/mod/integrated-simply-swords",
       "added": "2026-11-12"
+    },
+    {
+      "jar": "BetterAdvancements-Forge-1.20.1-0.6.0.73.jar",
+      "modId": "betteradvancements",
+      "name": "Better Advancements",
+      "source": "https://modrinth.com/mod/better-advancements",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "LeavesBeGone-v8.0.0-1.20.1-Forge.jar",
+      "modId": "leavesbegone",
+      "name": "Leaves Be Gone",
+      "source": "https://modrinth.com/mod/leaves-be-gone",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "particular-1.20.1-Forge-1.5.7.jar",
+      "modId": "particular",
+      "name": "Particular Reforged",
+      "source": "https://modrinth.com/mod/particular-reforged",
+      "added": "2026-11-12"
+    }
+  ],
+  "removed": [
+    {
+      "modId": "advancementnomore",
+      "name": "AdvancementNoMore",
+      "reason": "Born in Chaos and Nether Remastered read advancements it removes",
+      "removed": "2026-11-12"
     }
   ],
   "carry": [
@@ -402,6 +431,7 @@
     "config/terrablender.toml",
     "config/zipline.json",
     "config/gtocore-rules.txt",
+    "config/integrated_simply_swords/silver.json5",
     "config/openloader/data/warpledge-gto",
     "config/openloader/data/warpledge-gto-integrated",
     "config/reliable_recipes",
@@ -423,9 +453,11 @@
     "OverrideMemory"
   ],
   "clientOnly": [
+    "betteradvancements",
     "entity_model_features",
     "entity_texture_features",
     "keep_stepping",
+    "particular",
     "presencefootsteps",
     "resourcify",
     "smoothswapping",

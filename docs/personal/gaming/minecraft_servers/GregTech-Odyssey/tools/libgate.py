@@ -21,6 +21,8 @@ structures, and Quark (which breaks GTO's EMI) is replaced by the quarkblocks ja
   - data/minecraft/tags/worldgen/structure/village.json: the village tag with every
     entry optional, since Integrated Villages 1.3.2 names a swamp_village it doesn't
     ship and that fails the whole tag.
+  - data/integrated_villages/tags/worldgen/biome/collections/floral.json: BWG's
+    floral biomes added, since Integrated Villages names BWG's old `byg:` tag.
   - every template and data file of IDAS, Dungeons Arise, Seven Seas, Integrated
     Villages and Integrated Cataclysm that names Quark, renamed through quarkmap.py,
     plus the rest of Integrated Dungeons Arise's and Integrated Cataclysm's data
@@ -33,6 +35,7 @@ the choices.
 
 import argparse
 import gzip
+import hashlib
 import json
 import os
 import re
@@ -207,10 +210,41 @@ def village_tag(mods):
           {"replace": True, "values": [{"id": v, "required": False} for v in ids]})
 
 
+def floral_tag():
+    """Add BWG's floral biomes to Integrated Villages' floral set (Minka villages).
+
+    Its tag names `#byg:is_floral`, the namespace BWG had before the rename.
+    """
+    write(INTEGRATED / "data" / "integrated_villages" / "tags" / "worldgen" / "biome"
+          / "collections" / "floral.json",
+          {"replace": False, "values": [{"id": "#biomeswevegone:floral", "required": False}]})
+
+
 #-- Quark out, quarkblocks in
 
 QUARKBLOCKS = (Path(__file__).resolve().parent / "quarkblocks" / "src" / "generated"
                / "resources" / "quarkblocks" / "blocks.json")
+
+# unquark() takes about 10 minutes, so its output is reused while its inputs match.
+# Bump when unquark()'s own code changes what it writes for the same jars.
+UNQUARK_VERSION = 1
+STAMP = INTEGRATED.with_name(INTEGRATED.name + ".stamp")
+
+
+def unquark_key(mods):
+    """Hash of everything unquark() reads: jar entry CRCs, the rename tables, blocks."""
+    h = hashlib.sha256(f"v{UNQUARK_VERSION}".encode())
+    here = Path(__file__).resolve().parent
+    for f in (here / "quarkmap.py", here / "nbt.py", QUARKBLOCKS):
+        h.update(f.read_bytes() if f.is_file() else b"-")
+    for jar in quarkmap.integrated_jars(mods):
+        h.update(jar.name.encode())
+        with zipfile.ZipFile(jar) as z:
+            # mods.toml is left out: patch_requires_quark() edits it after the build.
+            for i in sorted(z.infolist(), key=lambda i: i.filename):
+                if i.filename != "META-INF/mods.toml":
+                    h.update(f"{i.filename}:{i.CRC}".encode())
+    return h.hexdigest()
 
 
 def jar_blocks():
@@ -359,15 +393,25 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("mods", type=Path)
     a = ap.parse_args()
-    # Generated whole from the jars each run, so a template a mod dropped doesn't linger.
-    if INTEGRATED.exists():
-        shutil.rmtree(INTEGRATED)
+    key = unquark_key(a.mods) if quarkmap.integrated_jars(a.mods) else None
+    reuse = (key is not None and INTEGRATED.is_dir() and STAMP.is_file()
+             and STAMP.read_text().strip() == key)
+    # Otherwise generated whole from the jars, so a template a mod dropped doesn't linger.
+    if not reuse:
+        if INTEGRATED.exists():
+            shutil.rmtree(INTEGRATED)
+        STAMP.unlink(missing_ok=True)
     gate_create(a.mods)
     create_worldgen(a.mods)
     gate_crafting(a.mods, "supplementaries-", "supplementaries")
     village_tag(a.mods)
-    if quarkmap.integrated_jars(a.mods):
-        unquark(a.mods)
+    floral_tag()
+    if key is not None:
+        if reuse:
+            print("integrated pack: jars and rename tables unchanged, templates reused")
+        else:
+            unquark(a.mods)
+            STAMP.write_text(key + "\n")
         patch_requires_quark(a.mods)
     write(INTEGRATED / "pack.mcmeta", {"pack": {
         "pack_format": 15, "description": "warpledge GTO Integrated worldgen fixes"}})
