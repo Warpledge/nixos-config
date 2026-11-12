@@ -100,10 +100,10 @@ server, and the server boots with all of them.
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
 | Waystones-X | 1.0.16 | B | [JackOfNoneTrades fork](https://github.com/JackOfNoneTrades/WaystonesFork) of BlayTheNinth's mod; `config/waystones.cfg` sets `xpBaseCost=-1` |
-| MIAOKATZE Core | 0.2.6 | B | required by the three Miao mods below, on both sides; GT-Miao-Blueprint 0.3.17 needs 0.2.5+, GTSR 2.1.28 and GTSWN 2.1.19 need 0.2.6 |
-| GT-Miao-Blueprint | 0.3.17 | B | Neko Blueprint Hologram Projector: blueprint, cut and demolition modes |
-| GT-Steam-Reborn | 2.1.28 | B | steam industry, hubs and nodes, singularity tech, the Prosperity dimension, portable weapons, a BQ line |
-| GT-Simple-Wireless-Network | 2.1.19 | B | wireless EU link nodes, monitors, ME quantum terminal |
+| MIAOKATZE Core | 0.2.14 | B | required by the three Miao mods below, on both sides; the three bundle it in their release assets, all updated together on 2026-11-12 (Core's release says compatible with 2.9.0 final) |
+| GT-Miao-Blueprint | 0.3.26 | B | Neko Blueprint Hologram Projector: blueprint, cut and demolition modes |
+| GT-Steam-Reborn | 2.1.42 | B | steam industry, hubs and nodes, singularity tech, the Prosperity dimension, portable weapons, a BQ line |
+| GT-Simple-Wireless-Network | 2.1.28 | B | wireless EU link nodes, monitors, ME quantum terminal |
 
 All but Waystones come from [MIAOKATZE](https://github.com/MIAOKATZE) and are tagged
 "for GTNH 2.9.0 stable". Their `en_US.lang` files are complete, so the in-game text is
@@ -116,7 +116,7 @@ One more joined them later on 2026-11-02, client and server:
 
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
-| ThinkTech | 0.3.1 | B | chemistry and materials: briquettes, methane clathrate, catalysts, computing chips, explosives (PETN, HMX, HNIW), separation control cores |
+| ThinkTech | 0.3.2 | B | chemistry and materials: briquettes, methane clathrate, catalysts, computing chips, explosives (PETN, HMX, HNIW), separation control cores |
 
 TenkeiTech 1.1.0 was installed with it and removed the same day: it hands you an
 "Useless Tools" staff on spawn with force kill, spawn eggs, area damage, bedrock mining
@@ -180,7 +180,7 @@ release; all of them passed in-game testing on 2026-11-05.
 | --- | --- | --- | --- |
 | World Preview NH | 1.0.3 | C | biome and height preview on Create New World |
 | Vintage Pick Up Notifier | 1.0.0 | C | item pickup notices |
-| Vintage Resourcify, with AngelLib 1.0.0 | 1.0.6 | C | in-game resource and shader pack browser |
+| Vintage Resourcify, with AngelLib 1.0.1 | 1.0.6 | C | in-game resource and shader pack browser |
 | Better Search | 1.6.2 | C | typo-tolerant search, with NEI and AE2 hooks |
 | Effortless Building Gadgets | 0.10.1 | B | shape building through a crafted gadget; `B:consumesEnergy=false` on both sides, so it needs no power |
 | Shoulder Surfing Reloaded | 2.4.1 | C | over-the-shoulder camera; a 2023 build that patches vanilla code, so suspect it first after a pack update |
