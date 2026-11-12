@@ -58,7 +58,7 @@ From [mods.md](./mods.md), the **B** rows:
   123Technology `OTHTechnology-2.2.1.1.jar`, EZMiner 6.4,
   EZNuclear 1.1.1, EZStorage 1.8.2, NH-Utilities 1.7.0, Programmable Hatches 0.2.1p7-beta
 - Trash Slot 1.0.31
-- YesSteveModel Unofficial 2.5, with its models in `config/ysmu/custom/`
+- YesSteveModel Unofficial 2.8, with its models in `config/ysmu/custom/`
 - Distant Horizons `upstream-preview8-rple-biomes`, so the server builds and syncs the
   LODs the client shows (see mods.md for the generation settings)
 - Waystones-X 1.0.16, MIAOKATZE Core 0.2.6, GT-Miao-Blueprint 0.3.17,
@@ -71,7 +71,7 @@ From [mods.md](./mods.md), the **B** rows:
   the recipes differ from the client.
 
 BetterSprinting 2.3.0 and deconfigintegration are dropped (see mods.md). LagGoggles is
-still not installed. Neo ECO AE Extension 7.3.6 is also on the server, on trial.
+still not installed. The server also needs Neo ECO AE Extension 7.3.10, on trial.
 `JourneyMapServer1.0.5_MC1.7.10.jar` is in `mods/` too, server only.
 
 2.9.0 supplies its own lwjgl3ify, GTNHLib, FalsePatternLib and Extreme Sound Muffler

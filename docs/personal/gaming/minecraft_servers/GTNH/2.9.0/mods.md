@@ -29,7 +29,7 @@ Do not add these: the pack carries its own copy.
 | EZStorage | 1.8.2 | B | builds against GTNHLib 0.11.52, NEI 2.8.158 |
 | Programmable Hatches | 0.2.1p7-beta | B | p7 notes: only 2.9.0 supported; builds against GT 5.09.54.264, GTNHLib 0.11.54, NEI 2.8.171 |
 | NH-Utilities | 1.7.0 | B | commit "Fit 29x" |
-| YesSteveModel Unofficial | 2.5 | B | [czqwq fork](https://github.com/czqwq/YesSteveModel-Unofficial); 2.5 disables the lighting map and builds against 2.9.0; the 2.3 model loader rewrite is still untested |
+| YesSteveModel Unofficial | 2.8 | B | [czqwq fork](https://github.com/czqwq/YesSteveModel-Unofficial); 2.8's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`; 2.6 fixes the animation loop and 2.7 restores the animation storage system; 2.5 disabled the lighting map |
 | MineMenu | 1.2.0.B44 | C | latest on Modrinth, 2025-12-07 |
 | Spark | 1.10.19 | C | latest 1.7.10 |
 | FPS Reducer | 1.10.3 | C | latest, 2023-09-06 |
@@ -46,6 +46,13 @@ both wireless covers by default (screwdriver or cover UI to turn it off). Not la
 **The 2026-11-09 update is on the client only:** EZMiner 6.4 (toolbox crash fix) and
 YesSteveModel Unofficial 2.5 (disables the lighting map, built against 2.9.0). The laptop
 server still has 6.3 and 2.3.
+
+**The 2026-11-11 update is on the client only:** YesSteveModel Unofficial 2.8, Neo ECO AE
+Extension 7.3.10 and GTNH Modernization Upgrade 0.3.5-alpha-GTNH-2.9.0. YesSteveModel's
+releases carry almost no notes (2.8 none, 2.7 warns off its WIP features) but build
+against 2.9.0. Neo ECO's notes say 2.9.0-RC1 and later. GTNH Modernization says it
+requires 2.9.0, but its testing stopped at a headless server, and 0.3.5 is a
+pre-release. All three are side B, so the laptop needs the same jars.
 
 **2026-11-10: GTNL and GTNLLib were removed; Better Questing API went with them.** BQ API
 was installed on 2026-11-01 for GTNL's quest lines, so it is unused now and its jar is gone
@@ -185,12 +192,13 @@ Right Proper GUI Scale 2.1.1 is also on the client. It keeps the scale as a deci
 `options.txt` (`guiScale:3.5`, between vanilla's 3 and 4) and applies a change when the
 settings screen closes, so it can look like nothing happened. `/guiscale` sets it in game.
 
-Neo ECO AE Extension 7.3.9 is on the client (2026-11-09; server still 7.3.7), on trial since
+Neo ECO AE Extension 7.3.10 is on the client (2026-11-11; server still 7.3.7), on trial since
 2026-11-05: three tiered AE2 multiblock systems for storage, crafting and computation, an
 optional upgrade path rather than a replacement for normal AE2. Both sides must match.
 Modrinth lags the official 1.7.10 repo
-([Yang120231/GTNH-ECO-1.7.10](https://github.com/Yang120231/GTNH-ECO-1.7.10), 7.3.9 on
-2026-11-08 against Modrinth's 7.3.7), so `mod-sources.json` checks GitHub.
+([Yang120231/GTNH-ECO-1.7.10](https://github.com/Yang120231/GTNH-ECO-1.7.10), 7.3.10 on
+2026-11-11 against Modrinth's 7.3.7), so `mod-sources.json` checks GitHub. Its 7.3.10 notes
+name GTNH 2.9.0-RC1 and later.
 Its recipes looked in line with GTNH in NEI. Still to check: autocrafting through GT
 machines alongside WTCT, and what a world loses when it's removed. The world from before it
 went on the server is `~/Documents/Minecraft_Servers/World-Backups/World3-before-neoecoae-2026-11-05.tar.gz`.
@@ -204,7 +212,7 @@ a launch is the proof.
 
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
-| GTNH Modernization Upgrade | 0.3.4-alpha | B | Structure terminal (project, build, replace and dismantle a GT multiblock from its StructureLib definition), ME packing tape, integrated 36-pattern item, AE order element, colour power budget for the Plasma Forge and fusion, and an ME storage vault. Alpha, one author, AI-written; the vault keeps inventory in `<world>/data/aestoragevault/`, and 0.3.0 changed that format without reading 0.2.x |
+| GTNH Modernization Upgrade | 0.3.5-alpha | B | Structure terminal (project, build, replace and dismantle a GT multiblock from its StructureLib definition), ME packing tape, integrated 36-pattern item, AE order element, colour power budget for the Plasma Forge and fusion, and an ME storage vault. Alpha, one author, AI-written; the vault keeps inventory in `<world>/data/aestoragevault/`, and 0.3.0 changed that format without reading 0.2.x |
 | AE2 Wireless Transceiver | 1.2.1 | B | [peco331](https://github.com/peco331/AE2WirelessTransceiver-GTNH) fork; each release ships a plain 2.9 asset and a separate `-gtnh2.8.4` one, and the plain one is installed |
 | Benzene Fuels | 0.5.1-alpha | B | Eight staged benzene fluids from LuV to UIV and the Resonance Fuel Generator; needs GoodGenerator and GT++ ([arturia-Xayah](https://github.com/arturia-Xayah/gtnh-benzene-fuels)) |
 | GT:NH Processing+ | 0.2.5.3-alpha | B | New processing chains built on materials chemistry, meant to fill progression gaps ([shusidefloof](https://github.com/shusidefloof/GTNH-ProcessingPlus)) |
