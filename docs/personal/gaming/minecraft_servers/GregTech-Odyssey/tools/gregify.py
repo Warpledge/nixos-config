@@ -11,6 +11,9 @@ the ingredients by the tables below and writes the result to
 datapack/warpledge-gto/data/<ns>/recipes/<id>.json, the same path as in the jar, so the
 datapack replaces the mod's recipe. Rerun after updating one of these mods. A recipe
 not matched by a rule is left to the mod. 0.6.0/mods.md explains the choices.
+
+It also writes Ad Astra's entity tags that let modded mobs live in the airless Nether
+and End (AIRLESS_*).
 """
 
 import json
@@ -91,6 +94,28 @@ INTEGRATED_SWORDS = {
 TERRALITH_OFF = ["piston_alt", "dispenser_alt", "observer_alt", "dropper_alt", "lever_alt"]
 DISABLED = {"type": "minecraft:crafting_shaped", "conditions": [{"type": "forge:false"}]}
 
+#-- Airless dimensions
+
+# GTO runs the Nether and End through Ad Astra with no oxygen (hot and cold), so a mob
+# missing from these tags dies there in seconds. GTO lists vanilla's Nether and End
+# mobs only; every entity of these mods (from their lang keys) and vanilla's hostiles
+# are added, each optional so a missing id can't break the tag.
+AIRLESS_JARS = [
+    "L_Enders_Cataclysm-*.jar", "Jadens-Nether-Expansion-*.jar",
+    "legendarymonsters-*.jar", "endermanoverhaul-*.jar", "born_in_chaos_*.jar",
+    "BOMD-*.jar", "mowziesmobs-*.jar",
+]
+AIRLESS_VANILLA = [
+    "zombie", "husk", "drowned", "zombie_villager", "skeleton", "stray", "creeper",
+    "spider", "cave_spider", "witch", "slime", "silverfish", "endermite", "phantom",
+    "vex", "vindicator", "evoker", "pillager", "illusioner", "ravager", "guardian",
+    "elder_guardian", "shulker", "enderman", "wither_skeleton", "piglin",
+    "piglin_brute", "hoglin", "zoglin", "ghast", "blaze", "magma_cube", "strider",
+    "zombified_piglin", "warden",
+]
+AIRLESS_TAGS = ["lives_without_oxygen", "can_survive_extreme_heat",
+                "can_survive_extreme_cold"]
+
 
 
 #-- Rewriting
@@ -138,6 +163,19 @@ def find(mods, pattern):
     if len(hits) != 1:
         sys.exit(f"expected one {pattern} in {mods}, found {len(hits)}")
     return hits[0]
+
+
+def entities(jar):
+    """Entity ids named by the jar's en_us lang keys (entity.<ns>.<name>)."""
+    ids = set()
+    with zipfile.ZipFile(jar) as z:
+        for name in z.namelist():
+            if re.match(r"assets/[^/]+/lang/en_us\.json$", name):
+                for key in json.loads(z.read(name)):
+                    m = re.match(r"entity\.([a-z0-9_]+)\.([a-z0-9_]+)$", key)
+                    if m and m.group(1) != "minecraft":
+                        ids.add(f"{m.group(1)}:{m.group(2)}")
+    return ids
 
 
 def write(path, recipe, written):
@@ -201,6 +239,15 @@ def main():
         if path not in names:
             sys.exit(f"{terralith.name} no longer has {path}; check TERRALITH_OFF")
         write(path, DISABLED, written)
+
+    mobs = {f"minecraft:{m}" for m in AIRLESS_VANILLA}
+    for pattern in AIRLESS_JARS:
+        for jar in mods.glob(pattern):
+            mobs |= entities(jar)
+    values = [{"id": m, "required": False} for m in sorted(mobs)]
+    for name in AIRLESS_TAGS:
+        write(f"data/ad_astra/tags/entity_types/{name}.json",
+              {"replace": False, "values": values}, written)
 
     (OUT / "pack.mcmeta").write_text(json.dumps(PACK, indent=2) + "\n")
     stale = sorted(

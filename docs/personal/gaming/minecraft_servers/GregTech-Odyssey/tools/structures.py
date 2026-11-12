@@ -30,12 +30,17 @@ import gto  # noqa: E402
 SPREAD = {
     "ae2:meteorite": (55, 14),
     "dungeoncrawl:dungeons": (55, 21),
+    # Vanilla's bastions: Incendium (16/8) and Jaden's (27/4) both override the set
+    "minecraft:nether_complexes": (27, 4),
+    # Nullscape already thins End cities from vanilla's 20/11; the tier would add 3x
+    "minecraft:end_cities": (26, 18),
 }
 # Tiers for every other set by its own spacing: (below this spacing, factor). Rarity
 # goes with spacing squared, so x1.73 is 3x rarer and x1.41 2x. 40 and up stay.
 TIERS = [(30, 3 ** 0.5), (40, 2 ** 0.5)]
 # Sets that keep their own spread: terrain decor (BWG, Terralith rubble and
-# underground rooms), small dungeons, mineshafts, way signs, the Nether fortress
+# underground rooms, Jaden's Nether fossils, MES pillars and spikes), small
+# dungeons, mineshafts, way signs, the Nether fortress
 # (blaze rods), and Ad Astra's planets (prefix).
 KEEP = {
     "biomeswevegone:dripstone_arches", "biomeswevegone:lush_arch",
@@ -46,6 +51,7 @@ KEEP = {
     "betterdungeons:small_dungeons", "betterdungeons:small_nether_dungeons",
     "bettermineshafts:mineshafts", "supplementaries:way_signs",
     "legendary_monsters:warped_fungussus_nest", "betterfortresses:fortress",
+    "netherexp:mega_fossils", "mes:ruined_pillar", "mes:enderpin_spikes",
 }
 KEEP_PREFIX = ("ad_astra:",)
 # Small or common structures left out of overlap prevention so they never cancel a

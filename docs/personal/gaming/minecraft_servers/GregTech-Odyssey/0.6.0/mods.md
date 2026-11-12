@@ -274,6 +274,41 @@ Its `config/structurify.json` is written by
 [structure-spacing.md](./structure-spacing.md) has the settings, why, and what to do
 when a structure mod is added.
 
+## Nether and End (2026-11-12)
+
+Passed a staging trial in a new world on 2026-11-12. GTO gates both dimensions itself
+(gtocore 26.11.1 source): Nether portals never light, the Nether opens at HV through
+the Nether Reactor Core (Nano suit for its missing oxygen), and the End at LuV through
+End Remastered's 12 eyes. GTO adds GT ore veins there but no terrain, biomes or
+structures, so these overlap nothing.
+
+| Jar | Mod | What it does |
+| --- | --- | --- |
+| `Jadens-Nether-Expansion-2.3.5.jar` | Jaden's Nether Expansion | Nether mobs, blocks, structures and the Black Ice Glaciers biome; its netherite recipes come after HV, so nothing is gregified |
+| `ElysiumAPI-1.20.1-1.1.3.jar` | Elysium API | Library Jaden's requires |
+| `Incendium_1.20.x_v5.3.5.jar` | Incendium | Nether terrain and 8 biomes, 9 structures and loot-only weapons |
+| `MoogsEndStructures-universal-1.20-2.1.0.jar` | MES - Moog's End Structures | 24 End structures, no recipes |
+| `MoogsStructureLib-forge-1.20-3.1.2.jar` | Moog's Structure Lib | Library MES requires; held at 3.1.2 |
+| `Nullscape_1.20.x_v1.2.8.jar` | Nullscape | End terrain and 3 biomes, no items |
+
+**Moog's Structure Lib stays at 3.1.2.** 3.3.0 and later add a `TagLoaderMixin` that
+can't inject past gtolib's (the 3.4.2 crash in [candidates.md](./candidates.md#skip)),
+and MES 2.1.0 came out while 3.1.2 was current.
+
+**Incendium and Nullscape replace the dimensions' biome lists.** Nullscape drops End
+Midlands, so the structures limited to Midlands and Highlands (Cataclysm's Ruined
+Citadel, Dungeons Arise's End ones, Legendary Monsters' towers) only come in Highlands.
+Incendium also rewrites vanilla's piston, dispenser, dropper, observer, comparator,
+repeater and lever recipes at vanilla's ids, which GT's `removeVanillaBlockRecipes`
+removes.
+
+**Mobs need Ad Astra's tags to live there.** GTO makes the Nether and End airless (hot
+and cold) and tags only vanilla's mobs, so Cataclysm's bosses and structure spawns died
+in seconds. [gregify.py](../tools/gregify.py) writes `lives_without_oxygen`,
+`can_survive_extreme_heat` and `can_survive_extreme_cold` with every entity of the mods
+in its `AIRLESS_JARS` and vanilla's hostiles. A new mod whose mobs reach the Nether or
+End goes in that list.
+
 ## Overlay
 
 The same jars, with their modIds and sources, are in
