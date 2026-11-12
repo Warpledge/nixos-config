@@ -538,6 +538,13 @@
       "name": "Knaves' Needs",
       "source": "https://modrinth.com/mod/knaves-needs",
       "added": "2026-11-12"
+    },
+    {
+      "jar": "borninconfig-FORGE.jar",
+      "modId": "borninconfiguration",
+      "name": "Born In Configuration",
+      "source": "https://modrinth.com/mod/born-in-configuration",
+      "added": "2026-11-12"
     }
   ],
   "removed": [
@@ -551,6 +558,7 @@
   "carry": [
     "config/DistantHorizons.toml",
     "config/bettermineshafts-forge-1_20.toml",
+    "config/borninconfiguration-general.toml",
     "config/biomeswevegone/world_generation.json",
     "config/fastchunkgen.toml",
     "config/structurify.json",

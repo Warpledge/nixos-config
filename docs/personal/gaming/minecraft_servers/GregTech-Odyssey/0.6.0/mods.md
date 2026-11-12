@@ -328,6 +328,29 @@ needs Architectury.
 EMI logs `Exception thrown registering repair recipes` six times since this batch: an
 item whose repair material is empty, so EMI skips its anvil recipe. It's harmless.
 
+## Born In Configuration (2026-11-12)
+
+Passed a staging trial on 2026-11-12.
+
+| Jar | Mod | What it does |
+| --- | --- | --- |
+| `borninconfig-FORGE.jar` | Born In Configuration | Config file and screen for Born in Chaos's game rules, mob and item stats and per-mob spawning; 4.0, needs Born in Chaos 1.7.5 or later |
+
+`config/borninconfiguration-general.toml` (common, carried by `gto carry`) keeps every
+mob and item stat at -1, Born in Chaos's own value, and changes:
+
+- `INFESTED_DIAMONDS_ENABLED = false`: the ore that throws without AdvancementNoMore's
+  advancement. With it off and Nether Remastered skipped, AdvancementNoMore could be
+  retried.
+- `DAYS_TILL_NIGHTMARE = 20` (default 3) and `NIGHTMARE_STRENGTH_ENABLED = false`: the
+  Nightmare Stalker came on day 3 and kept growing with world age, too early and too
+  open-ended for GTO's pace.
+- `KRAMPUS_HENCHMAN_DROPING_ENABLED = false`: its hits knocked items out of the
+  inventory.
+
+Chaotic Spring (Easter) and Chilling Horror (Christmas) stay date-based; forcing them
+on makes their mobs carry and drop event gear all year.
+
 ## Overlay
 
 The same jars, with their modIds and sources, are in
