@@ -192,6 +192,9 @@ way: Quark breaks EMI, and Integrated Dungeons Arise overlaps When Dungeons Aris
 | `IBOMD v1.0.0-1.20.1.jar` | Integrated Bosses of Mass Destruction | Rebuilds BOMD's Lich Tower, Obsidilith and Gauntlet arenas (added 2026-11-12) |
 | `BOMD-Forge-1.20.1-1.1.2.jar` | Bosses of Mass Destruction | Four bosses; its recipes need their drops or netherite scrap, so nothing is gregified |
 | `CerbonsAPI-Forge-1.20.1-1.1.0.jar` | Cerbon's API | Library BOMD requires |
+| `legendarymonsters-2.2.4 MC 1.20.1.jar` | Legendary Monsters | Bosses and their structures (added 2026-11-12); gear needs their drops, so nothing is gregified |
+| `crittersandcompanions-forge-1.20.1-2.7.1.jar` | Critters and Companions | Small ambient mobs and pets; its vanilla-metal dragonfly armor and grappling hook are left as they are |
+| `moremobvariants-forge+1.20.1-1.3.0.1.jar` | More Mob Variants | Skin variants for vanilla mobs |
 
 **Integrated Cataclysm** reskins Cataclysm at the same 147 data paths, so the pack carries
 all its data, as with Integrated Dungeons Arise. Its recipes stay out: it turns 6 of
