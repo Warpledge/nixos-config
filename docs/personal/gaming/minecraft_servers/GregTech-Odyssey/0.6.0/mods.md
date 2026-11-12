@@ -263,6 +263,17 @@ performance, but Born in Chaos's infected diamond ore throws on every break with
 the advancement it grants, and Nether Remastered crashed on joining a world
 ([candidates.md](./candidates.md#skip)), so that one can be retried.
 
+## Structure spacing (2026-11-12)
+
+| Jar | Mod | What it does |
+| --- | --- | --- |
+| `structurify-forge-2.0.43+mc1.20.1.jar` | Structurify | Stops structures overlapping and thins the common structure sets; YACL ships in dev27 |
+
+Its `config/structurify.json` is written by
+[structures.py](../tools/structures.py), not the in-game screen.
+[structure-spacing.md](./structure-spacing.md) has the settings, why, and what to do
+when a structure mod is added.
+
 ## Overlay
 
 The same jars, with their modIds and sources, are in

@@ -456,6 +456,13 @@
       "added": "2026-11-12"
     },
     {
+      "jar": "structurify-forge-2.0.43+mc1.20.1.jar",
+      "modId": "structurify",
+      "name": "Structurify",
+      "source": "https://modrinth.com/mod/structurify (config written by structures.py)",
+      "added": "2026-11-12"
+    },
+    {
       "jar": "BetterAdvancements-Forge-1.20.1-0.6.0.73.jar",
       "modId": "betteradvancements",
       "name": "Better Advancements",
@@ -490,6 +497,7 @@
     "config/bettermineshafts-forge-1_20.toml",
     "config/biomeswevegone/world_generation.json",
     "config/fastchunkgen.toml",
+    "config/structurify.json",
     "config/tectonic.json",
     "config/terrablender.toml",
     "config/zipline.json",

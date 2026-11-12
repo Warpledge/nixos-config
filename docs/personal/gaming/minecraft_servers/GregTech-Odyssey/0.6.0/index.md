@@ -19,13 +19,16 @@ which is why this world runs on a dev build instead of waiting for beta.
 - [difficulty-rules.md](./difficulty-rules.md): the Custom preset, every rule changed and why
 - [mods.md](./mods.md): the six jars added by hand
 - [candidates.md](./candidates.md): the Cosmic Frontiers mods sorted by risk for trials
+- [structure-spacing.md](./structure-spacing.md): Structurify's overlap prevention and
+  spacing tiers, and how to fit a new structure mod in
 - [quests.md](./quests.md): how far the quest book goes
 - [server.md](./server.md): the dedicated server on the laptop, built with `gto server`
 - [updating.md](./updating.md): new builds, mod trials and debugging through a staging
   instance, with the test checklist
 - [../tools/](../tools/): `gto.py` (backup, stage, carry, diff, check) and
   `overlay.json`, what you add on top of the pack; `gregify.py` and `libgate.py`, which
-  write the recipe, ban and structure files; `quarkblocks/`, the Quark block jar
+  write the recipe, ban and structure files; `structures.py`, which lists structure
+  sets and writes Structurify's config; `quarkblocks/`, the Quark block jar
 
 ## Sources
 

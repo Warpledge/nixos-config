@@ -36,7 +36,8 @@ broke; what the retry found, layer by layer in staging:
   dropped the frame rate from about 160 to 20 with shaders, so it stayed out.
 - Doubling the structures' spacing put the nearest Collectors Museum 16,000 blocks out;
   their own spacing stays. Overlap with other structure mods (a Keep Kayra mostly cut
-  away by a neighbour) is for a spacing mod; Structurify was tried once ([Skip](#skip)).
+  away by a neighbour) is what Structurify handles since 2026-11-12
+  ([structure-spacing.md](./structure-spacing.md)).
 - Integrated Villages 1.3.2 lists a `swamp_village` it doesn't ship, which makes the
   whole `#minecraft:village` tag fail to load; the pack's tag makes every entry optional.
 
@@ -128,7 +129,7 @@ the same spots.
 | When Dungeons Arise: Seven Seas | | Cosmic Frontiers ran the 1.19.2 jar; Modrinth has a 1.20.1 build |
 | Tectonic, Terralith | Lithostitched | Added to main on 2026-11-08. Tectonic came out the same day for slow generation and went back in with FastChunkGen ([mods.md](./mods.md)). dev27's BWG is cut to 48 biomes (Cosmic Frontiers' 11 plus 37 more) in `config/biomeswevegone/world_generation.json`, and its three region weights go from 8 to 2: at 8 they outweighed the vanilla region (10, where Terralith's biomes live) and the world came out mostly BWG, and at 1 BWG was about 1% of visited chunks. Carry those files and `config/terrablender.toml` (`overworld_region_size` 4) to main. Terralith can't be removed from a world later |
 | Luki's Grand Capitals, Luki's Woodland Mansions | | |
-| Structure Essentials | | Spacing control for when you add many structure mods; CurseForge only |
+| Structure Essentials | | Spacing control; CurseForge only. Not needed while Structurify does the job ([structure-spacing.md](./structure-spacing.md)) |
 | Mowzie's Mobs | | **Added 2026-11-12** with Integrated Mowzie's Mobs and Mowzie's Cataclysm; nothing gregified, its gear needs boss drops |
 | L_Ender's Cataclysm | Lionfish API | **Added 2026-11-12** with Integrated Cataclysm; its gear needs boss drops, so only the vanilla-metal recipes were gregified ([mods.md](./mods.md#recipe-overrides)) |
 | Cataclysm & BetterCombat Compat | | Compat for the mods above; add only with them. Mowzie's Cataclysm went in with Mowzie's Mobs. Simply Swords: Cataclysm is in [Skip](#skip) |
@@ -174,7 +175,7 @@ sessions in staging before deciding.
 | Macaw's Bridges, Lights, Fences, Stairs | Added to main on 2026-11-07, removed again the same day |
 | AmbientSounds | Added to main on 2026-11-07, removed on 2026-11-08 |
 | Sounds, MRU, Particle Core | Added to main on 2026-11-07, removed on 2026-11-08 with Particular, which came back on 2026-11-12. YACL, added for Sounds and MRU, is still in |
-| Structurify 2.0.43 | Added to main on 2026-11-08 for its global flatness check (structures skip steep ground), removed the same day. Its in-game screen didn't save, so `config/structurify.json` had been written by hand |
+| Structurify 2.0.43, global flatness check | Added to main on 2026-11-08 with a global flatness check (structures skip steep ground), removed the same day for a reason not recorded. Its in-game screen didn't save. **Back since 2026-11-12** without the flatness check ([structure-spacing.md](./structure-spacing.md)) |
 | Chunky | Distant Horizons 3.3.3 calls into Chunky while a new world's spawn chunks generate, before Chunky has started (on `ServerStartingEvent`), so creating a world crashes (staging, 2026-11-07). DH's `chunkGeneratorMode = "INTERNAL_SERVER"` with `SURFACE_THEN_CHUNKS` saves the chunks it generates, which does the pregen instead |
 
 ## Sources
