@@ -14,8 +14,7 @@ lookup found no 1.20.1 Forge build on Modrinth. Pick a batch, then trial it with
 
 **Batches 1 and 2 are in main since 2026-11-12, without Quark** (minus Integrated
 Stronghold); [mods.md](./mods.md#integrated-structures-2026-11-12) has what went in and
-how. Of batch 3, Integrated Cataclysm and Integrated Simply Swords went in on 2026-11-12
-too; the other two are still candidates. The first try (2026-11-07) was dropped when EMI
+how. Batch 3 went in on 2026-11-12 too. The first try (2026-11-07) was dropped when EMI
 broke; what the retry found, layer by layer in staging:
 
 - **Quark breaks EMI on its own.** gtolib replaces EMI's recipe bake (sealed code), and
@@ -51,7 +50,7 @@ Create is listed as compatible with GTO on the pack's site but has no integratio
 | --- | --- | --- |
 | 1 (in main) | Integrated API 1.9.2, Integrated Patches 1.2.0 | none |
 | 2 (in main, without Stronghold) | IDAS 1.13.0, Integrated Villages 1.3.2, Integrated Stronghold 1.1.1, Integrated Dungeons Arise 2.1.3, Integrated Seven Seas 1.0.0 | Create, Supplementaries, Amendments, Moonlight, Reliable Remover and Recipes, the quarkblocks jar in place of Quark |
-| 3 (Cataclysm and Simply Swords in main) | Integrated Cataclysm 1.0.5, Integrated Mowzie's Mobs 1.3.2, Integrated Bosses of Mass Destruction 1.0.0, Integrated Simply Swords 1.3.1 | Each one's base mod: L_Ender's Cataclysm (Lionfish API), Mowzie's Mobs, Bosses of Mass Destruction (Cerbon's API), Simply Swords |
+| 3 (in main) | Integrated Cataclysm 1.0.5, Integrated Mowzie's Mobs 1.3.2, Integrated Bosses of Mass Destruction 1.0.0, Integrated Simply Swords 1.3.1 | Each one's base mod: L_Ender's Cataclysm (Lionfish API), Mowzie's Mobs, Bosses of Mass Destruction (Cerbon's API), Simply Swords |
 
 - Integrated Stronghold's last 1.20.1 build is from 2024-03, and Bosses of Mass
   Destruction's from 2024-01; the rest were updated in 2026.
@@ -130,9 +129,9 @@ the same spots.
 | Tectonic, Terralith | Lithostitched | Added to main on 2026-11-08. Tectonic came out the same day for slow generation and went back in with FastChunkGen ([mods.md](./mods.md)). dev27's BWG is cut to 48 biomes (Cosmic Frontiers' 11 plus 37 more) in `config/biomeswevegone/world_generation.json`, and its three region weights go from 8 to 2: at 8 they outweighed the vanilla region (10, where Terralith's biomes live) and the world came out mostly BWG, and at 1 BWG was about 1% of visited chunks. Carry those files and `config/terrablender.toml` (`overworld_region_size` 4) to main. Terralith can't be removed from a world later |
 | Luki's Grand Capitals, Luki's Woodland Mansions | | |
 | Structure Essentials | | Spacing control for when you add many structure mods; CurseForge only |
-| Mowzie's Mobs | | Boss structures |
+| Mowzie's Mobs | | **Added 2026-11-12** with Integrated Mowzie's Mobs and Mowzie's Cataclysm; nothing gregified, its gear needs boss drops |
 | L_Ender's Cataclysm | Lionfish API | **Added 2026-11-12** with Integrated Cataclysm; its gear needs boss drops, so only the vanilla-metal recipes were gregified ([mods.md](./mods.md#recipe-overrides)) |
-| Mowzie's Cataclysm, Cataclysm & BetterCombat Compat | | Compat for the mods above; add only with them. Simply Swords: Cataclysm is in [Skip](#skip) |
+| Cataclysm & BetterCombat Compat | | Compat for the mods above; add only with them. Mowzie's Cataclysm went in with Mowzie's Mobs. Simply Swords: Cataclysm is in [Skip](#skip) |
 
 ## Gameplay changes
 

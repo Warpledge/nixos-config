@@ -393,6 +393,48 @@
       "added": "2026-11-12"
     },
     {
+      "jar": "IMM v1.3.2-1.20.1.jar",
+      "modId": "integrated_mowzies_mobs",
+      "name": "Integrated Mowzie's Mobs",
+      "source": "https://modrinth.com/mod/integrated-mowzies-mobs (mods.toml patched by libgate.py)",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "mowziesmobs-1.8.2.jar",
+      "modId": "mowziesmobs",
+      "name": "Mowzie's Mobs",
+      "source": "https://modrinth.com/mod/mowzies-mobs",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "mowzies_cataclysm-1.2.1.jar",
+      "modId": "mowzies_cataclysm",
+      "name": "Mowzie's Cataclysm",
+      "source": "https://modrinth.com/mod/mowzies-cataclysm",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "IBOMD v1.0.0-1.20.1.jar",
+      "modId": "integrated_bosses_of_mass_destruction",
+      "name": "Integrated Bosses of Mass Destruction",
+      "source": "https://modrinth.com/mod/integrated-bosses-of-mass-destruction (mods.toml patched by libgate.py)",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "BOMD-Forge-1.20.1-1.1.2.jar",
+      "modId": "bosses_of_mass_destruction",
+      "name": "Bosses of Mass Destruction",
+      "source": "https://modrinth.com/mod/bosses-of-mass-destruction-forge",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "CerbonsAPI-Forge-1.20.1-1.1.0.jar",
+      "modId": "cerbons_api",
+      "name": "Cerbon's API",
+      "source": "https://modrinth.com/mod/cerbons-api",
+      "added": "2026-11-12"
+    },
+    {
       "jar": "BetterAdvancements-Forge-1.20.1-0.6.0.73.jar",
       "modId": "betteradvancements",
       "name": "Better Advancements",

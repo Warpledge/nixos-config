@@ -172,12 +172,24 @@ def template_props(jars, ids):
                 if not rx.search(gzip.decompress(raw)):
                     continue
                 root = nbt.plain(nbt.load(raw)[1])
-                for pal in root.get("palettes") or [root.get("palette") or []]:
-                    for e in pal:
-                        q = e["Name"][6:] if e["Name"].startswith("quark:") else None
-                        if q in ids:
-                            for a, b in (e.get("Properties") or {}).items():
-                                found.setdefault(q, {}).setdefault(a, set()).add(b)
+                states = [e for pal in root.get("palettes") or [root.get("palette") or []]
+                          for e in pal]
+                # Block entities can hold states too (IMM's Mimic), with the same
+                # Name/Properties shape as a palette entry.
+                stack = [b.get("nbt") for b in root.get("blocks") or []]
+                while stack:
+                    t = stack.pop()
+                    if isinstance(t, dict):
+                        if isinstance(t.get("Name"), str) and "Properties" in t:
+                            states.append(t)
+                        stack.extend(t.values())
+                    elif isinstance(t, list):
+                        stack.extend(t)
+                for e in states:
+                    q = e["Name"][6:] if e["Name"].startswith("quark:") else None
+                    if q in ids:
+                        for a, b in (e.get("Properties") or {}).items():
+                            found.setdefault(q, {}).setdefault(a, set()).add(b)
     return found
 
 #-- Assets

@@ -27,6 +27,7 @@ VANILLA = [
 BLOCK_ENTITIES = {
     "quark:variant_chest": "minecraft:chest",
     "quark:variant_trapped_chest": "minecraft:trapped_chest",
+    "quark:variant_furnace": "minecraft:furnace",
     "quark:crate": "minecraft:barrel",
     "quark:monster_box": f"{NS}:monster_box",
 }
@@ -34,12 +35,15 @@ BLOCK_ENTITIES = {
 ENTITIES = {"quark:wraith": "minecraft:stray", "quark:forgotten": "minecraft:skeleton"}
 
 # The Integrated mods whose templates and data name Quark ids.
-JAR_PREFIXES = ("idas", "ida_", "iss-", "integrated_villages", "integrated_cataclysm")
+# "imm v" and "ibomd v" are Integrated Mowzie's Mobs and Integrated BOMD
+# (IMM v1.3.2-1.20.1.jar); the space keeps ImmediatelyFast and Immersive Aircraft out.
+JAR_PREFIXES = ("idas", "ida_", "iss-", "integrated_villages", "integrated_cataclysm",
+                "imm v", "ibomd v")
 # Integrated Dungeons Arise reskins When Dungeons Arise at the same paths without
-# requiring it, and Integrated Cataclysm does the same to Cataclysm, so which mod's file
-# loads is arbitrary; the pack carries all of their data so structures, pools,
-# processors and templates always load together.
-WHOLE_DATA = ("ida_", "integrated_cataclysm")
+# requiring it, and Integrated Cataclysm, Mowzie's Mobs and BOMD do the same to their
+# base mods, so which mod's file loads is arbitrary; the pack carries all of their data
+# so structures, pools, processors and templates always load together.
+WHOLE_DATA = ("ida_", "integrated_cataclysm", "imm v", "ibomd v")
 
 
 def vanilla(qid):
