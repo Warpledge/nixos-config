@@ -222,6 +222,10 @@
       opencode.plugins.rebuildBadge = true;
       gaming.omniServer = true;
       claude.mods.rebuildPrompt = false;
+      claude.skills.gtnhModUpdates = "on";
+      claude.skillModels.gtnhModUpdates = null;
+      backups.folder = "~/SyncBackups";
+      backups.skip = [];
     };
   };
 
@@ -361,4 +365,5 @@
   sunshine.enable = false;
   faceAuth.enable = false;
   faceAuth.darkThreshold = 90;
+  drives.mounts = [];
 }

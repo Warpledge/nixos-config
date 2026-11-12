@@ -51,7 +51,7 @@
     heroic = true;
     prismlauncher = true;
     r2modman = true;
-    pathOfBuilding = true;
+    pathOfBuilding = false; # broken in nixpkgs f4a03c0, see disabled-packages.md
     retroshelf = true;
   };
 
