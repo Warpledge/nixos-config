@@ -89,6 +89,23 @@
   security.apparmor.policies.prismlauncher.state = lib.mkForce "disable";
 
   #--------------------------------------------------------------------#
+  #-- Packages
+  #--------------------------------------------------------------------#
+  #--- dwarfs 0.15.8 aborts in six dwarfsextract_format_test cases (pwb,
+  #--- raw, xar); Gear Lever only runs its binaries
+  nixpkgs.overlays = [
+    (_: prev: {
+      dwarfs = prev.dwarfs.overrideAttrs {
+        checkPhase = ''
+          runHook preCheck
+          ctest --output-on-failure -E "dwarfsextract_format_test\.basic/\((pwb|raw|xar), "
+          runHook postCheck
+        '';
+      };
+    })
+  ];
+
+  #--------------------------------------------------------------------#
   #-- Imports
   #--------------------------------------------------------------------#
   imports =
