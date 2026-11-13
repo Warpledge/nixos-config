@@ -678,6 +678,13 @@
       "name": "Iron's Lib",
       "source": "https://modrinth.com/mod/irons-lib",
       "added": "2026-11-12"
+    },
+    {
+      "jar": "manaunification-1.20.1-2.0.0-SNAPSHOT-6.jar",
+      "modId": "manaunification",
+      "name": "Mana Unification",
+      "source": "https://modrinth.com/mod/mana-unification",
+      "added": "2026-11-13"
     }
   ],
   "removed": [

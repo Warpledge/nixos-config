@@ -493,6 +493,7 @@ Player Animator already ship in dev27. Taken from the Integrated MC instance.
 | --- | --- | --- |
 | `irons_spellbooks-1.20.1-3.16.3.jar` | Iron's Spells 'n Spellbooks | Spells, spell books, scrolls and inks, mage armour, curios, bosses and 9 structure sets (towers, catacombs, a citadel) |
 | `irons_lib-1.20.1-2.2.0.jar` | Iron's Lib | Its required library |
+| `manaunification-1.20.1-2.0.0-SNAPSHOT-6.jar` | Mana Unification | One mana pool for Iron's Spells and Ars Nouveau: both mods' spells spend it, and their max mana and regen bonuses add to it. Added 2026-11-13 |
 
 **Mithril is GTOCore's.** GTOCore has its own MV Mithril, which Iron's recipes don't
 accept (its parts are under `c:`, Iron's asks for `forge:ingots/mithril`). So Iron's
@@ -511,6 +512,13 @@ the jar (the tome pages go in through `set_nbt`).
 Its JEI plugin is listed in `gtocore.yaml` ([EMI and JEI plugins](#emi-and-jei-plugins-2026-11-12)).
 Harmless log lines: EMF gives up on the pyrium staff's two model parts, and Maid
 Storage Manager logs `cooked_ice_spider_egg_from_campfire_cooking` as added twice.
+
+**Mana Unification** (staging trial 2026-11-13) hooks 7 classes in GTO's Ars Nouveau
+fork (mana capability, regen, `ManaUtil`, the spell resolver's mana checks, the mana
+HUD) with a required mixin config; every method and field it names exists in the
+fork's 4.12.24, so check them first when GTO updates its Ars Nouveau. Its Apotheosis,
+EB Wizardry and Put Mana In mixins skip, since the pack has none of those classes. Its
+conversion rates are the 1.0 defaults in `config/manaunification-common.toml`.
 
 ## Overlay
 
