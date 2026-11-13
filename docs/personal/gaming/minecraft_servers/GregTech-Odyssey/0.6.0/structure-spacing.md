@@ -81,7 +81,9 @@ names can turn out to have been dropped when you get there.
    should probably keep it (add the set to `KEEP`), and a very common one may need a
    hand value in `SPREAD`.
 3. Add its small pieces (rocks, ruins, signs) to `KEEP` so they aren't respaced, which
-   also leaves them out of overlap prevention.
+   also leaves them out of overlap prevention. A mod whose structures shouldn't
+   generate at all, such as Maid Spell's with loot from mods the pack lacks, goes in
+   `DISABLED_NAMESPACES` (Structurify's `is_disabled` on its namespace).
 4. Run `structures.py write` on staging, restart, and test in chunks nobody has
    generated (`/tp @s 30000 200 30000`): `/locate` its structures and fly over a few.
 5. Copy the jar to main, run `write` on main, and commit the tables with the mod.

@@ -463,13 +463,6 @@
       "added": "2026-11-12"
     },
     {
-      "jar": "BetterAdvancements-Forge-1.20.1-0.6.0.73.jar",
-      "modId": "betteradvancements",
-      "name": "Better Advancements",
-      "source": "https://modrinth.com/mod/better-advancements",
-      "added": "2026-11-12"
-    },
-    {
       "jar": "LeavesBeGone-v8.0.0-1.20.1-Forge.jar",
       "modId": "leavesbegone",
       "name": "Leaves Be Gone",
@@ -545,6 +538,90 @@
       "name": "Born In Configuration",
       "source": "https://modrinth.com/mod/born-in-configuration",
       "added": "2026-11-12"
+    },
+    {
+      "jar": "1.20.1-maid_useful_task-1.4.2.jar",
+      "modId": "maid_useful_task",
+      "name": "Maid Useful Task",
+      "source": "https://modrinth.com/mod/maid-useful-task",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "1.20.1-maid_storage_manager-1.15.6.jar",
+      "modId": "maid_storage_manager",
+      "name": "Maid Storage Manager",
+      "source": "https://modrinth.com/mod/maid-storage-manager (patched by mixinpatch.py)",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "maidsoulkitchen-1.20.1-alpha-v0.3.0.9-all.jar",
+      "modId": "maidsoulkitchen",
+      "name": "Maidsoul Kitchen",
+      "source": "https://modrinth.com/mod/maidsoul-kitchen",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "touhou_little_maid_spell-1.8.0.1-forge+mc1.20.1.jar",
+      "modId": "touhou_little_maid_spell",
+      "name": "Touhou Little Maid: Spell",
+      "source": "https://modrinth.com/mod/touhou-little-maid-spell (held at 1.8.0.1)",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "maid_rpg_task-release.jar",
+      "modId": "maid_rpg_task",
+      "name": "Touhou Little Maid RPG Task",
+      "source": "https://modrinth.com/mod/touhou-little-maid-rpg-task",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "tlm_atrribute_display-1.0.2-forge+mc1.20.1.jar",
+      "modId": "tlm_atrribute_display",
+      "name": "Touhou Little Maid: Attribute Display",
+      "source": "https://modrinth.com/mod/tlm-attributedisplay",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "tlm-self-talk-1.4.1-forge-1.20.1.jar",
+      "modId": "maid_self_talk",
+      "name": "TouhouLittleMaid-Self-Talk",
+      "source": "https://modrinth.com/mod/touhoulittlemaid-self-talk",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "solmaid-1.0.1.jar",
+      "modId": "solmaid",
+      "name": "Spice of Life: Maid",
+      "source": "https://modrinth.com/mod/spice-of-life-maid",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "solmaiddream-1.0.1.jar",
+      "modId": "solmaiddream",
+      "name": "Spice of Life: Maids' Dream",
+      "source": "https://modrinth.com/mod/spice-of-life-maids-dream",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "tamablefairy-1.2.0-beta.5-forge+mc1.20.1.jar",
+      "modId": "tamablefairy",
+      "name": "Tamable Fairy",
+      "source": "https://modrinth.com/mod/tamablefairy",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "touhou-maid-affection-1.7.5.2.jar",
+      "modId": "touhou_maid_affection",
+      "name": "Touhou Maid: Affection",
+      "source": "https://modrinth.com/mod/touhou-maid-affection",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "youkaishomecoming-2.7.2.jar",
+      "modId": "youkaishomecoming",
+      "name": "Youkai's Homecoming",
+      "source": "https://modrinth.com/mod/youkaishomecoming (patched by mixinpatch.py)",
+      "added": "2026-11-12"
     }
   ],
   "removed": [
@@ -561,9 +638,13 @@
     "config/borninconfiguration-general.toml",
     "config/biomeswevegone/world_generation.json",
     "config/fastchunkgen.toml",
+    "config/maid_storage_manager-common.toml",
+    "config/maidsoulkitchen-common.toml",
     "config/structurify.json",
     "config/tectonic.json",
     "config/terrablender.toml",
+    "config/touhou_little_maid-common.toml",
+    "config/touhou_little_maid/sites/llm.json",
     "config/zipline.json",
     "config/gtocore-rules.txt",
     "config/integrated_simply_swords/silver.json5",
@@ -588,7 +669,6 @@
     "OverrideMemory"
   ],
   "clientOnly": [
-    "betteradvancements",
     "entity_model_features",
     "entity_texture_features",
     "keep_stepping",

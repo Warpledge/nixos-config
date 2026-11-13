@@ -252,7 +252,6 @@ Passed a staging trial in a new world on 2026-11-12.
 
 | Jar | Mod | What it does |
 | --- | --- | --- |
-| `BetterAdvancements-Forge-1.20.1-0.6.0.73.jar` | Better Advancements | Reworked advancements screen; client only |
 | `LeavesBeGone-v8.0.0-1.20.1-Forge.jar` | Leaves Be Gone | Fast leaf decay after a tree is cut; Puzzles Lib ships in dev27 |
 | `particular-1.20.1-Forge-1.5.7.jar` | Particular Reforged | Ambient particles; client only. Also in from 2026-11-07 to 2026-11-08 |
 
@@ -262,6 +261,12 @@ pack build and `gto server` leaves it out). GTO ships it to skip advancement che
 performance, but Born in Chaos's infected diamond ore throws on every break without
 the advancement it grants, and Nether Remastered crashed on joining a world
 ([candidates.md](./candidates.md#skip)), so that one can be retried.
+
+**GTO loads no advancements anyway.** Every session's log, with AdvancementNoMore on
+or off, says `Loaded 0 advancements`, and `/advancement grant @s only
+minecraft:story/root` answers "Unknown advancement" (2026-11-12). No config or readable
+mixin does it, so it's in gtolib's obfuscated or native code. Better Advancements, added
+in this batch, showed an empty screen and was removed on 2026-11-12.
 
 ## Structure spacing (2026-11-12)
 
@@ -339,9 +344,8 @@ Passed a staging trial on 2026-11-12.
 `config/borninconfiguration-general.toml` (common, carried by `gto carry`) keeps every
 mob and item stat at -1, Born in Chaos's own value, and changes:
 
-- `INFESTED_DIAMONDS_ENABLED = false`: the ore that throws without AdvancementNoMore's
-  advancement. With it off and Nether Remastered skipped, AdvancementNoMore could be
-  retried.
+- `INFESTED_DIAMONDS_ENABLED = false`: the ore that throws without the advancement it
+  grants, which never exists here (GTO loads no advancements, see above).
 - `DAYS_TILL_NIGHTMARE = 20` (default 3) and `NIGHTMARE_STRENGTH_ENABLED = false`: the
   Nightmare Stalker came on day 3 and kept growing with world age, too early and too
   open-ended for GTO's pace.
@@ -350,6 +354,62 @@ mob and item stat at -1, Born in Chaos's own value, and changes:
 
 Chaotic Spring (Easter) and Chilling Horror (Christmas) stay date-based; forcing them
 on makes their mobs carry and drop event gear all year.
+
+## Maid addons and Youkai's Homecoming (2026-11-12)
+
+Passed a staging trial in a new world on 2026-11-12. None get recipe overrides: the
+maid items are made at TLM's altar for power points or from cheap vanilla items, and
+Youkai's utensils cost iron ingots like Farmer's Delight's cooking pot.
+
+| Jar | Mod | What it does |
+| --- | --- | --- |
+| `1.20.1-maid_useful_task-1.4.2.jar` | Maid Useful Task | Logging, locate and revive-player tasks |
+| `1.20.1-maid_storage_manager-1.15.6.jar` | Maid Storage Manager | Maids sort storage and craft from craft guides; any item inventory (GT machines included), AE2 and Create's stock keeper. Patched, see below |
+| `maidsoulkitchen-1.20.1-alpha-v0.3.0.9-all.jar` | Maidsoul Kitchen | Maids cook and farm at other mods' stations (Farmer's Delight) |
+| `touhou_little_maid_spell-1.8.0.1-forge+mc1.20.1.jar` | Touhou Little Maid: Spell | Maids cast from spell books (Ars Nouveau here); held at 1.8.0.1, structures off |
+| `maid_rpg_task-release.jar` | Touhou Little Maid RPG Task | RPG-style combat tasks |
+| `tlm_atrribute_display-1.0.2-forge+mc1.20.1.jar` | Attribute Display | A screen with a maid's attributes |
+| `tlm-self-talk-1.4.1-forge-1.20.1.jar` | Self-Talk | Maids talk to themselves and greet you |
+| `solmaid-1.0.1.jar` | Spice of Life: Maid | Spice of Life for maids |
+| `solmaiddream-1.0.1.jar` | Spice of Life: Maids' Dream | Rewards maids for a varied diet |
+| `tamablefairy-1.2.0-beta.5-forge+mc1.20.1.jar` | Tamable Fairy | Tame the maid fairies |
+| `touhou-maid-affection-1.7.5.2.jar` | Touhou Maid: Affection | Kissing and bond abilities: Emergency Rescue shields you from a fatal hit, Random Gift brings items |
+| `youkaishomecoming-2.7.2.jar` | Youkai's Homecoming | Japanese food, crops and cooking utensils, sakura biomes, Hakurei Shrine and two nests, Touhou characters and animals; bundles L2 Harvester and its libraries. Patched, see below |
+
+**Maid Spell stays at 1.8.0.1.** From 1.9.0 it's a bootstrap jar that registers a
+ModLauncher service (`maidspell_hurt_head`), and `gto_native` refuses unknown services,
+so the game stops before a crash report. 1.8.0.1 is the last plain jar. It's built for
+Iron's Spells, which the pack lacks: 18 of its loot entries name Iron's items and 3 name
+Youkai's, so [structures.py](../tools/structures.py) disables its structures
+(`DISABLED_NAMESPACES`) and its 4 mobs drop nothing.
+
+**Two jars are patched** by [mixinpatch.py](../tools/mixinpatch.py), rerun after
+updating either: Maid Storage Manager's `JEIRecipeTransferHook` fails against the
+pack's JEI 15.59 (it applies whenever JEI is installed) and left JEI's recipe transfer
+button unloadable, and Youkai's `CriterionGridMixin` wrapped a call Better Advancements
+0.6.0.73 doesn't make and crashed the game on launch.
+
+**Maidsoul Kitchen can't run Youkai's kettle or fermentation tank**: it calls 9 methods
+Youkai's 2.7.2 no longer has, blocks those tasks and warned on every world load until
+`YhcTeaKettleTaskEnabled` and `YhcFermentationTaskEnabled` were set false in
+`maidsoulkitchen-common.toml`. The rest of its tasks work. It and Maid Storage Manager
+log "task can not load" and "added for twice" lines at startup; both are harmless.
+
+**Configs**, all carried by `gto carry`:
+
+- `touhou_little_maid-common.toml`: `MaidWorkRange = 32` (default 12; the max is 64, but
+  farm tasks scan every block in range) and `MaidNonHomeRange = 16` (default 8), for
+  GTO-size bases. `TTSEnabled` and `STTEnabled` are off: both expect the Player2 app.
+  `LLMEnabled` turns maid chat on and off.
+- `touhou_little_maid/sites/llm.json`: a `local` site for llama-swap
+  (`127.0.0.1:8090`), first `gemma-4-12b-it-qat-instruct` (thinking off, from the
+  desktop's `localModels`), then plain `gemma-4-12b-it-qat`. DeepSeek, the default, is
+  off. Gemma 12B (6.7 GB) is the largest model that leaves VRAM for the game.
+- `maid_storage_manager-common.toml`: crafting, collect and place speeds 1.0 (default
+  0.5).
+
+Iron's Spells 'n Spellbooks (needs Iron's Lib) is on the todo list; adding it would let
+Maid Spell's structures back on.
 
 ## Overlay
 

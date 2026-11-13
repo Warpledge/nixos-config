@@ -63,6 +63,9 @@ NO_OVERLAP = [
     "minecraft:buried_treasure", "minecraft:nether_fossil",
 ] + [f"minecraft:ruined_portal{s}" for s in
      ("", "_desert", "_jungle", "_swamp", "_mountain", "_ocean", "_nether")]
+# Mods whose structures never generate. Maid Spell's loot and mobs name Iron's Spells
+# items, which the pack lacks, so its dungeons would be empty.
+DISABLED_NAMESPACES = ["touhou_little_maid_spell"]
 
 #-- Scan
 
@@ -136,10 +139,12 @@ def config(all_sets):
     no_overlap = set(NO_OVERLAP)
     for k in NO_OVERLAP_SETS:
         no_overlap.update(by[k]["structures"])
-    spreads = [(s["set"], r) for s in all_sets if (r := spread(s))]
+    spreads = [(s["set"], r) for s in all_sets
+               if s["set"].split(":")[0] not in DISABLED_NAMESPACES and (r := spread(s))]
     return {
         "general": {"prevent_structure_overlap": True, "overlap_padding": 0},
-        "structure_namespaces": [],
+        "structure_namespaces": [{"name": n, "is_disabled": True}
+                                 for n in DISABLED_NAMESPACES],
         "structures": [{"name": n, "exclude_from_overlap_prevention": True}
                        for n in sorted(no_overlap)],
         "structure_sets": [{"name": k, "override_global_spacing_and_separation_modifier": True,

@@ -93,7 +93,7 @@ Core came out again; all are under
 | Sound Physics Remastered | | |
 | TIMM | | |
 | Cool Rain | | |
-| Particular | | **Added again 2026-11-12** with Leaves Be Gone and Better Advancements ([mods.md](./mods.md#advancements-and-qol-2026-11-12)) |
+| Particular | | **Added again 2026-11-12** with Leaves Be Gone and Better Advancements (removed the same day: GTO loads no advancements) ([mods.md](./mods.md#advancements-and-qol-2026-11-12)) |
 | Entity Model Features, Entity Texture Features | | EMF needs ETF |
 | Smooth Swapping | | |
 | Particle Core | Fzzy Config, Kotlin for Forge | dev27 ships Async Particles, which also changes particles: trial it alone |

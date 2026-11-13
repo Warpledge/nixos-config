@@ -64,6 +64,16 @@ templates and takes seconds. A change to how `libgate.py` itself rewrites them n
 Seas or Integrated Cataclysm won't load until `libgate.py` has patched it. Changes to
 the pack reach only new chunks, so test in a new world.
 
+## Patched mixins
+
+[tools/mixinpatch.py](../tools/mixinpatch.py) removes mixins that break against the
+pack from Maid Storage Manager and Youkai's Homecoming ([mods.md](./mods.md)). A fresh
+download of either crashes or breaks JEI until it has run:
+
+```bash
+python3 -I /etc/nixos-config/docs/personal/gaming/minecraft_servers/GregTech-Odyssey/tools/mixinpatch.py ~/.local/share/PrismLauncher/instances/GregTech.Odyssey-0.6.0-dev27-staging/minecraft/mods
+```
+
 ## The baseline
 
 A normal dev27 session logs about 140 ERROR lines (EventBus transformer noise, Curios
