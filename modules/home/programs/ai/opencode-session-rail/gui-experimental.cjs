@@ -214,8 +214,8 @@ function connectorDot(tone) {
   return node("span", `flex:none;width:7px;height:7px;border-radius:50%;background:${tone};`);
 }
 
-// The tab strip's own toggle, beside Review. The panel's tab is hidden, so
-// this is the only trigger while the side region is open.
+// The rail's own header toggle, outside the review panel. The panel's tab is
+// hidden, so this is the only trigger while the side region is open.
 function railButton(ctx, input) {
   const button = node(
     "button",
@@ -731,8 +731,8 @@ module.exports = Plugin.define({
     });
 
     ctx.add(Slot, {
-      at: "session.panel.end",
-      order: 10,
+      at: "session.header",
+      order: 6,
       render: (input) => railButton(ctx, input),
     });
 
