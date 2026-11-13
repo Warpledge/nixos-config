@@ -224,10 +224,11 @@ def floral_tag():
 
 QUARKBLOCKS = (Path(__file__).resolve().parent / "quarkblocks" / "src" / "generated"
                / "resources" / "quarkblocks" / "blocks.json")
+QUARKITEMS = QUARKBLOCKS.with_name("items.json")
 
 # unquark() takes about 10 minutes, so its output is reused while its inputs match.
 # Bump when unquark()'s own code changes what it writes for the same jars.
-UNQUARK_VERSION = 1
+UNQUARK_VERSION = 3
 STAMP = INTEGRATED.with_name(INTEGRATED.name + ".stamp")
 
 
@@ -235,7 +236,7 @@ def unquark_key(mods):
     """Hash of everything unquark() reads: jar entry CRCs, the rename tables, blocks."""
     h = hashlib.sha256(f"v{UNQUARK_VERSION}".encode())
     here = Path(__file__).resolve().parent
-    for f in (here / "quarkmap.py", here / "nbt.py", QUARKBLOCKS):
+    for f in (here / "quarkmap.py", here / "nbt.py", QUARKBLOCKS, QUARKITEMS):
         h.update(f.read_bytes() if f.is_file() else b"-")
     for jar in quarkmap.integrated_jars(mods):
         h.update(jar.name.encode())
@@ -250,7 +251,9 @@ def unquark_key(mods):
 def jar_blocks():
     if not QUARKBLOCKS.is_file():
         raise SystemExit("no quarkblocks/blocks.json; build the jar first (quarkblocks/build.py)")
-    return {s["id"] for s in json.loads(QUARKBLOCKS.read_text())}
+    # Loot keeps an entry whose item the jar registers, block or not.
+    items = json.loads(QUARKITEMS.read_text()) if QUARKITEMS.is_file() else []
+    return {s["id"] for s in json.loads(QUARKBLOCKS.read_text()) + items}
 
 
 def rename_strings(tag):
@@ -291,14 +294,13 @@ def rename_template(root, ours, missing):
         data = b.value.get("nbt")
         if data is None:
             continue
-        bid = data.value.get("id")
-        if bid is not None and bid.value in quarkmap.BLOCK_ENTITIES:
-            data.value["id"] = nbt.string(quarkmap.BLOCK_ENTITIES[bid.value])
+        # Block entity ids rename like blocks (quark:crate to quarkblocks:crate).
         b.value["nbt"] = rename_strings(data)
     if "entities" in c:
         et, ents = c["entities"].value
-        kept = [x for x in ents
-                if not str(nbt.plain(x).get("nbt", {}).get("id", "")).startswith("quark:")]
+        ids = [str(nbt.plain(x).get("nbt", {}).get("id", "")) for x in ents]
+        kept = [x for x, eid in zip(ents, ids)
+                if not eid.startswith("quark:") or eid[6:] in quarkmap.OUR_ENTITIES]
         # Vanilla entities can still hold Quark items (item frames) or ride Quark mobs.
         c["entities"] = nbt.Tag(nbt.LIST, (et, [rename_strings(x) for x in kept]))
         return len(ents) - len(kept)
@@ -360,7 +362,7 @@ def unquark(mods):
                     out.write_text(quarkmap.dumps(data))
                     files += 1
     print(f"integrated pack: {templates} templates and {files} data files renamed, "
-          f"{dropped} Quark entities (item frames and such) dropped, "
+          f"{dropped} Quark entities quarkblocks lacks dropped, "
           f"{whole} more files of the reskins copied so they win over the originals")
     if missing:
         print(f"  not in quarkblocks, placed as air: {', '.join(sorted(missing))}")

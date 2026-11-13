@@ -17,6 +17,8 @@ alias gto='python3 -I /etc/nixos-config/docs/personal/gaming/minecraft_servers/G
 | `gto diff <old> <new>` | Mods added, removed or updated, your jars the pack now ships, and every config file that changed |
 | `gto check <inst>` | Errors in `logs/latest.log` that the instance's baseline lacks, plus mixin, dependency and load failures and crash reports. Exits 1 on findings |
 | `gto check <inst> --save-baseline` | Records this log's errors as normal for the instance |
+| `gto map <inst>` | GTO's jars, forks and mixins by target, and the classes other mods patch too ([internals/](./internals/index.md)) |
+| `gto map <inst> --mod <jar>` | Checks a candidate jar against them: ModLauncher services, missing or forked dependencies, mixins into code GTO owns or patches |
 | `gto server <inst> --zip <server zip>` | Builds a dedicated server folder from the release's server zip, the instance's jars and your non-`clientOnly` jars; `--tar` packs it to move to the laptop ([server.md](./server.md)) |
 | `gto datapack <inst>` | Installs the repo's recipe datapack, [datapack/warpledge-gto](../datapack/warpledge-gto/), as `config/openloader/data/warpledge-gto/`, replacing the old copy |
 
@@ -64,6 +66,32 @@ templates and takes seconds. A change to how `libgate.py` itself rewrites them n
 Seas or Integrated Cataclysm won't load until `libgate.py` has patched it. Changes to
 the pack reach only new chunks, so test in a new world.
 
+## Patched jars
+
+[tools/mixinpatch.py](../tools/mixinpatch.py) removes mixins that break against the
+pack from Maid Storage Manager and Youkai's Homecoming ([mods.md](./mods.md)). A fresh
+download of either crashes or breaks JEI until it has run:
+
+```bash
+python3 -I /etc/nixos-config/docs/personal/gaming/minecraft_servers/GregTech-Odyssey/tools/mixinpatch.py ~/.local/share/PrismLauncher/instances/GregTech.Odyssey-0.6.0-dev27-staging/minecraft/mods
+```
+
+[tools/classpatch.py](../tools/classpatch.py) compiles replacement classes from
+`tools/classpatch/<mod>/` against the instance's Forge and SRG Minecraft jars (from
+Prism's libraries, so launch the instance once first) and swaps them into the jar. It
+patches Alex's Mobs Continued's brewing, without which EMI's reload fails
+([mods.md](./mods.md#alexs-mobs-continued-2026-11-12)). A fresh download needs it:
+
+```bash
+python3 -I /etc/nixos-config/docs/personal/gaming/minecraft_servers/GregTech-Odyssey/tools/classpatch.py ~/.local/share/PrismLauncher/instances/GregTech.Odyssey-0.6.0-dev27-staging/minecraft/mods
+```
+
+Its jar names are exact versions, since each replacement is a copy of that version's
+class. Before updating a patched mod, decompile the new jar's class (`nix run
+nixpkgs#cfr -- <class> --outputdir <dir>`), carry its changes into the source, then
+bump the jar name in `PATCHES`. It uses `javac` from `PATH`, or else `nix shell
+nixpkgs#jdk21`.
+
 ## The baseline
 
 A normal dev27 session logs about 140 ERROR lines (EventBus transformer noise, Curios
@@ -110,13 +138,15 @@ Correcting` for each server config Forge fills in; that's normal.
 One mod at a time, or a small batch from one section of
 [candidates.md](./candidates.md):
 
-1. `gto stage <main>` (`--replace` if an old staging copy is there).
-2. Add the jars and the libraries they need to the staging instance's `mods/`.
-3. Launch it, run the checklist and `gto check`.
-4. If it passes, add the same jars to main, add an entry to `overlay.json` (jar, modId,
+1. Check the jars offline with `gto map <main> --mod <jar>` and
+   [internals/new-mod-checklist.md](./internals/new-mod-checklist.md).
+2. `gto stage <main>` (`--replace` if an old staging copy is there).
+3. Add the jars and the libraries they need to the staging instance's `mods/`.
+4. Launch it, run the checklist and `gto check`.
+5. If it passes, add the same jars to main, add an entry to `overlay.json` (jar, modId,
    name, source URL, date added), and note it in [mods.md](./mods.md). After main's next
    clean session, save the baseline again.
-5. If it fails, nothing in main changed: delete the jars from staging, or the whole
+6. If it fails, nothing in main changed: delete the jars from staging, or the whole
    staging copy.
 
 ## Debugging

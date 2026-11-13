@@ -11,6 +11,5 @@
   imports = [
     ./settings.nix
     ./blocked-channels.nix
-    ./youtube-dispatch.nix
   ];
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Write the GT overrides for Tom's Simple Storage, Simply Swords, Illager Invasion,
-Terralith and, when their jars are there, L_Ender's Cataclysm and Integrated Simply
-Swords into the datapack beside this folder.
+Terralith and, when their jars are there, L_Ender's Cataclysm, Integrated Simply
+Swords and Iron's Spells into the datapack beside this folder.
 
 Usage:
     python3 -I <this file> <mods folder>
@@ -11,6 +11,10 @@ the ingredients by the tables below and writes the result to
 datapack/warpledge-gto/data/<ns>/recipes/<id>.json, the same path as in the jar, so the
 datapack replaces the mod's recipe. Rerun after updating one of these mods. A recipe
 not matched by a rule is left to the mod. 0.6.0/mods.md explains the choices.
+
+It also writes Ad Astra's entity tags that let modded mobs live in the airless Nether
+and End (AIRLESS_*), and for Iron's Spells its mithril ore off, two loot tables fixed
+for 1.20.1 and a Reliable Remover rule in ../reliable/ hiding its own mithril.
 """
 
 import json
@@ -20,6 +24,7 @@ import zipfile
 from pathlib import Path
 
 OUT = Path(__file__).resolve().parent.parent / "datapack" / "warpledge-gto"
+REMOVER = Path(__file__).resolve().parent.parent / "reliable" / "reliable_remover"
 PACK = {"pack": {"pack_format": 15, "description": "warpledge GTO recipe overrides"}}
 
 VACUUM_TUBE = {"item": "gtceu:vacuum_tube"}
@@ -86,10 +91,50 @@ INTEGRATED_SWORDS = {
     ("tag", "forge:ingots/silver"): tag("c:plates/silver"),
 }
 
+# Iron's Spells: vanilla metals become GT plates, and its mithril is GTOCore's MV
+# Mithril. Its own ore, raw mithril and ingot are off (IRONS_REMOVE), so scrap only
+# comes from GTO's ingot or salvage. Netherite, chains, nuggets and amethyst stay.
+IRONS = {
+    **CATACLYSM,
+    ("item", "minecraft:copper_ingot"): tag("c:plates/copper"),
+    ("tag", "forge:ingots/iron"): tag("c:plates/iron"),
+    ("tag", "forge:ingots/gold"): tag("c:plates/gold"),
+    ("tag", "forge:ingots/copper"): tag("c:plates/copper"),
+    ("tag", "forge:gems/diamond"): tag("c:plates/diamond"),
+    ("tag", "forge:ingots/mithril"): tag("c:ingots/mithril"),
+    ("item", "irons_spellbooks:mithril_ingot"): tag("c:ingots/mithril"),
+}
+IRONS_TYPES = {"minecraft:crafting_shaped", "minecraft:crafting_shapeless",
+               "minecraft:smithing_transform", "minecraft:blasting"}
+IRONS_OFF = ["mithril_ingot_from_scrap", "mithril_scrap_from_ore"]
+IRONS_REMOVE = ["mithril_ore", "deepslate_mithril_ore", "raw_mithril", "mithril_ingot"]
+
 # Terralith re-adds vanilla's cheap redstone recipes from any stone, which GT replaces
 # (removeVanillaBlockRecipes in gtceu.yaml); a false condition makes Forge skip them.
 TERRALITH_OFF = ["piston_alt", "dispenser_alt", "observer_alt", "dropper_alt", "lever_alt"]
 DISABLED = {"type": "minecraft:crafting_shaped", "conditions": [{"type": "forge:false"}]}
+
+#-- Airless dimensions
+
+# GTO runs the Nether and End through Ad Astra with no oxygen (hot and cold), so a mob
+# missing from these tags dies there in seconds. GTO lists vanilla's Nether and End
+# mobs only; every entity of these mods (from their lang keys) and vanilla's hostiles
+# are added, each optional so a missing id can't break the tag.
+AIRLESS_JARS = [
+    "L_Enders_Cataclysm-*.jar", "Jadens-Nether-Expansion-*.jar",
+    "legendarymonsters-*.jar", "endermanoverhaul-*.jar", "born_in_chaos_*.jar",
+    "BOMD-*.jar", "mowziesmobs-*.jar",
+]
+AIRLESS_VANILLA = [
+    "zombie", "husk", "drowned", "zombie_villager", "skeleton", "stray", "creeper",
+    "spider", "cave_spider", "witch", "slime", "silverfish", "endermite", "phantom",
+    "vex", "vindicator", "evoker", "pillager", "illusioner", "ravager", "guardian",
+    "elder_guardian", "shulker", "enderman", "wither_skeleton", "piglin",
+    "piglin_brute", "hoglin", "zoglin", "ghast", "blaze", "magma_cube", "strider",
+    "zombified_piglin", "warden",
+]
+AIRLESS_TAGS = ["lives_without_oxygen", "can_survive_extreme_heat",
+                "can_survive_extreme_cold"]
 
 
 
@@ -113,6 +158,10 @@ def rewrite(recipe, table):
         recipe["key"] = {k: swap(v, table) for k, v in recipe["key"].items()}
     if "ingredients" in recipe:
         recipe["ingredients"] = [swap(i, table) for i in recipe["ingredients"]]
+    # Cooking and smithing recipes name their inputs one by one.
+    for field in ("ingredient", "base", "addition", "template"):
+        if field in recipe:
+            recipe[field] = swap(recipe[field], table)
     return recipe
 
 
@@ -123,6 +172,27 @@ def imbuing_table(recipe):
     recipe["key"]["C"] = LV_CIRCUIT
     recipe["pattern"] = ["#P#", "OSO", "CEC"]
     return recipe
+
+
+def snbt_string(text):
+    return "'" + text.replace("\\", "\\\\").replace("'", "\\'") + "'"
+
+
+def loot_120(node, title):
+    """Iron's ships two loot tables in 1.21 syntax: a table reference by "value" and
+    set_written_book_pages. Rewrites them the 1.20.1 way (pages as JSON strings)."""
+    if isinstance(node, list):
+        return [loot_120(n, title) for n in node]
+    if not isinstance(node, dict):
+        return node
+    node = {k: loot_120(v, title) for k, v in node.items()}
+    if node.get("type") == "minecraft:loot_table" and "value" in node:
+        node["name"] = node.pop("value")
+    if node.get("function") == "minecraft:set_written_book_pages":
+        pages = ",".join(snbt_string(json.dumps(p)) for p in node["pages"])
+        node = {"function": "minecraft:set_nbt",
+                "tag": f"{{title:{snbt_string(title)},author:'',pages:[{pages}]}}"}
+    return node
 
 
 def recipes(jar, ns):
@@ -138,6 +208,19 @@ def find(mods, pattern):
     if len(hits) != 1:
         sys.exit(f"expected one {pattern} in {mods}, found {len(hits)}")
     return hits[0]
+
+
+def entities(jar):
+    """Entity ids named by the jar's en_us lang keys (entity.<ns>.<name>)."""
+    ids = set()
+    with zipfile.ZipFile(jar) as z:
+        for name in z.namelist():
+            if re.match(r"assets/[^/]+/lang/en_us\.json$", name):
+                for key in json.loads(z.read(name)):
+                    m = re.match(r"entity\.([a-z0-9_]+)\.([a-z0-9_]+)$", key)
+                    if m and m.group(1) != "minecraft":
+                        ids.add(f"{m.group(1)}:{m.group(2)}")
+    return ids
 
 
 def write(path, recipe, written):
@@ -193,6 +276,37 @@ def main():
                 if new != r:
                     write(path, new, written)
 
+    if any(mods.glob("irons_spellbooks-*.jar")):
+        jar = find(mods, "irons_spellbooks-*.jar")
+        irons = {rid: (path, r) for path, rid, r in recipes(jar, "irons_spellbooks")}
+        for rid in IRONS_OFF:
+            if rid not in irons:
+                sys.exit(f"Iron's no longer has recipe {rid}; check IRONS_OFF")
+            write(irons[rid][0], DISABLED, written)
+        for rid, (path, r) in irons.items():
+            if rid not in IRONS_OFF and r.get("type") in IRONS_TYPES:
+                new = rewrite(r, IRONS)
+                if new != r:
+                    write(path, new, written)
+        with zipfile.ZipFile(jar) as z:
+            names = set(z.namelist())
+            ore = "data/irons_spellbooks/forge/biome_modifier/add_mithril_ore.json"
+            loot = [f"data/irons_spellbooks/loot_tables/chests/{t}.json"
+                    for t in ("citadel/citadel_tomes", "catacombs/crypt_loot")]
+            for path in [ore] + loot:
+                if path not in names:
+                    sys.exit(f"{jar.name} no longer has {path}; check the Iron's paths")
+            lang = json.loads(z.read("assets/irons_spellbooks/lang/en_us.json"))
+            title = lang.get("lore.citadel_book.title", "Tome")
+            write(ore, {"type": "forge:none"}, written)
+            for path in loot:
+                write(path, loot_120(json.loads(z.read(path)), title), written)
+        REMOVER.mkdir(parents=True, exist_ok=True)
+        (REMOVER / "irons_spellbooks.json").write_text(json.dumps([
+            {"action": "remove",
+             "items": [f"irons_spellbooks:{i}" for i in IRONS_REMOVE]},
+        ], indent=2) + "\n")
+
     terralith = find(mods, "Terralith_*.jar")
     with zipfile.ZipFile(terralith) as z:
         names = set(z.namelist())
@@ -201,6 +315,15 @@ def main():
         if path not in names:
             sys.exit(f"{terralith.name} no longer has {path}; check TERRALITH_OFF")
         write(path, DISABLED, written)
+
+    mobs = {f"minecraft:{m}" for m in AIRLESS_VANILLA}
+    for pattern in AIRLESS_JARS:
+        for jar in mods.glob(pattern):
+            mobs |= entities(jar)
+    values = [{"id": m, "required": False} for m in sorted(mobs)]
+    for name in AIRLESS_TAGS:
+        write(f"data/ad_astra/tags/entity_types/{name}.json",
+              {"replace": False, "values": values}, written)
 
     (OUT / "pack.mcmeta").write_text(json.dumps(PACK, indent=2) + "\n")
     stale = sorted(

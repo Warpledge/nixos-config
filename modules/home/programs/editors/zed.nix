@@ -96,6 +96,10 @@ in {
     ];
   };
 
+  #--- OpenCode Desktop's Open in list runs `zed`; nixpkgs names the CLI
+  #--- `zeditor`, so link the name the app calls into ~/.local/bin
+  home.file.".local/bin/zed".source = lib.getExe pkgs.zed-editor;
+
   #--------------------------------------------------------------------#
   #-- Zed Settings (Declarative Template)
   #--------------------------------------------------------------------#

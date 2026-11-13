@@ -46,12 +46,16 @@ the same ratio:
 | 40 and up | unchanged | Dungeons Arise major (40), IDAS rare (45), Cataclysm's bosses (50 to 112), Collapsed Kingdom (110), airship villages (115), Born in Chaos (60 to 200) |
 
 Set by hand, ahead of the tiers: AE2 meteorites 32 to 55 (3x rarer) and Dungeon Crawl 32
-to 55 (3x), both seen far too often.
+to 55 (3x), both seen far too often. Two vanilla sets are pinned so a mod's file can't
+change them: bastions (`minecraft:nether_complexes`) at vanilla's 27/4, since Incendium
+(16/8) and Jaden's (27/4) both override the set and load order would pick, and End
+cities at Nullscape's 26/18, already sparser than vanilla's 20/11.
 
 Kept as they are: terrain decor (BWG arches, rocks, fossils, gour plateaus and cold
-lakes, Terralith rubble and underground rooms), YUNG's small dungeons and mineshafts,
-way signs, the warped fungussus nest, the Nether fortress (blaze rods), and Ad Astra's
-planets. 42 sets were respaced on 2026-11-12.
+lakes, Terralith rubble and underground rooms, Jaden's Nether fossils, MES pillars and
+spikes), YUNG's small dungeons and mineshafts, way signs, the warped fungussus nest,
+the Nether fortress (blaze rods), and Ad Astra's planets. 42 sets were respaced on
+2026-11-12, 63 after the Nether and End batch the same day.
 
 The tiers also reach other mods' placement types: on 2026-11-12 `/locate` put the
 nearest tavern village (Integrated API placement) 2,027 blocks out in
@@ -77,7 +81,10 @@ names can turn out to have been dropped when you get there.
    should probably keep it (add the set to `KEEP`), and a very common one may need a
    hand value in `SPREAD`.
 3. Add its small pieces (rocks, ruins, signs) to `KEEP` so they aren't respaced, which
-   also leaves them out of overlap prevention.
+   also leaves them out of overlap prevention. A mod whose structures shouldn't
+   generate at all, such as one whose loot names a mod the pack lacks (Maid Spell's
+   until Iron's Spells came in), goes in `DISABLED_NAMESPACES` (Structurify's
+   `is_disabled` on its namespace).
 4. Run `structures.py write` on staging, restart, and test in chunks nobody has
    generated (`/tp @s 30000 200 30000`): `/locate` its structures and fly over a few.
 5. Copy the jar to main, run `write` on main, and commit the tables with the mod.

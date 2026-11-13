@@ -7,7 +7,8 @@ The recovered Cosmic Frontiers notes, with the config and KubeJS work done back 
 are in `~/Downloads/cosmic_frontiers_notes/`.
 
 **Needs** lists only required mods that dev27 doesn't ship. "CurseForge only" means the
-lookup found no 1.20.1 Forge build on Modrinth. Pick a batch, then trial it with
+lookup found no 1.20.1 Forge build on Modrinth. Pick a batch, check it against
+[internals/new-mod-checklist.md](./internals/new-mod-checklist.md), then trial it with
 `gto stage` as described in [updating.md](./updating.md).
 
 ## Integrated mods
@@ -17,12 +18,19 @@ Stronghold); [mods.md](./mods.md#integrated-structures-2026-11-12) has what went
 how. Batch 3 went in on 2026-11-12 too. The first try (2026-11-07) was dropped when EMI
 broke; what the retry found, layer by layer in staging:
 
-- **Quark breaks EMI on its own.** gtolib replaces EMI's recipe bake (sealed code), and
-  upstream EMI skips a stack whose data changes while it's indexed ("self-mutated")
-  where gtolib passes the null on to `ArrayList.addAll`. Quark 4.0-462 with Zeta 1.0-31
-  does it even with all ten categories off, Zeta's creative tab appends forced and its
-  hiding off, so it's Quark's code, not its items. Alex's Mobs with Citadel fails the
-  same way ([Skip](#skip)).
+- **Quark breaks EMI on its own.** gtolib replaces EMI's recipe index with native code,
+  which passes a null to `ArrayList.addAll`. Quark 4.0-462 with Zeta 1.0-31 does it
+  even with all ten categories off, Zeta's creative tab appends forced and its hiding
+  off. Retried on 2026-11-13 with [emiguard](../tools/emiguard/README.md): no recipe EMI
+  hands the index is malformed (no null lists, no stacks changing once indexed, no
+  unregistered categories). Zeta alone loads; Quark without Supplementaries (whose
+  Quark compat loads with it) and the Integrated mods still fails. The
+  one structural change Quark makes is that GT's 19 furnaces drop out of
+  `minecraft:smelting`'s workstations (GT adds them in
+  `GTRecipeEMICategory.registerWorkStations` only for a furnace category marked visible),
+  so the cause is in GTO's own handling of GT's furnace category with `quark` loaded,
+  out of reach without GTO's source. Alex's Mobs fails with the same trace
+  ([Skip](#skip)), for another reason.
 - KubeJS and Rhino weren't needed: Reliable Remover and Reliable Recipes do the bans as
   JSON. Create, Moonlight, Supplementaries and Amendments each passed alone.
 - IDAS, Integrated Dungeons Arise and Seven Seas require Quark in `mods.toml` but have no
@@ -93,7 +101,7 @@ Core came out again; all are under
 | Sound Physics Remastered | | |
 | TIMM | | |
 | Cool Rain | | |
-| Particular | | **Added again 2026-11-12** with Leaves Be Gone and Better Advancements ([mods.md](./mods.md#advancements-and-qol-2026-11-12)) |
+| Particular | | **Added again 2026-11-12** with Leaves Be Gone and Better Advancements (removed the same day: GTO loads no advancements) ([mods.md](./mods.md#advancements-and-qol-2026-11-12)) |
 | Entity Model Features, Entity Texture Features | | EMF needs ETF |
 | Smooth Swapping | | |
 | Particle Core | Fzzy Config, Kotlin for Forge | dev27 ships Async Particles, which also changes particles: trial it alone |
@@ -156,16 +164,16 @@ sessions in staging before deciding.
 | Smooth Chunk Save | Changes how chunks save, on a dev build that already warns of corrupted saves |
 | Tinkers' Better Combat | Needs Tinkers' Construct, which GTO lacks |
 | Aether Villages | Needs The Aether, which GTO lacks |
-| Quark, Zeta | Breaks EMI's recipe bake inside gtolib even with every Quark category off (staging, 2026-11-11); [the Integrated mods](#integrated-mods) get its blocks from the quarkblocks jar instead |
+| Quark, Zeta | Breaks EMI's recipe bake inside gtolib even with every Quark category off (staging, 2026-11-11; retried with emiguard 2026-11-13, cause inside GTO's code, see [Integrated mods](#integrated-mods)); [the Integrated mods](#integrated-mods) get its blocks from the quarkblocks jar instead |
 | Cupboard | Only a library for the someaddons mods, none of which are on this list |
 | Simply Swords: Cataclysm 1.0.1 | Its Forge 1.20.1 builds (1.0.1, 2025-12) target Simply Swords 1.56.0 and call its `ConfigDefaultValues`, which 1.70.0's new config system removed; registration fails and the game won't start (staging, 2026-11-12) |
 | Simply Swords Overhaul | Its last builds (1.0.2 on Modrinth, 1.0.3 and 1.0.4 on GitHub, 2025) target Simply Swords 1.56.0; with 1.70.2 its `StormsEdgeSwordItem` mixin finds no target and the game won't start |
-| Nether Remastered | Checks its own `nether_remastered:seal_of_the_underworld` advancement every player tick; GTO's AdvancementNoMore removes all advancements, so it crashes on joining a world (staging, 2026-11-07). AdvancementNoMore has been off since 2026-11-12, so it can be retried |
-| Moog's Nether Structures, Moog's Soaring Structures | Moog's Structure Lib 3.4.2's required `TagLoaderMixin` can't inject into `TagLoader`, which gtolib's own `TagLoaderMixin` (priority 2000) rewrites; the game crashes at world creation (staging, 2026-11-07). An older library might avoid it; untested |
+| Nether Remastered | Checks its own `nether_remastered:seal_of_the_underworld` advancement every player tick; GTO's AdvancementNoMore removes all advancements, so it crashes on joining a world (staging, 2026-11-07). AdvancementNoMore has been off since 2026-11-12, but it's still skipped: it cancels any travel to the Nether until its seal is used, which would also block GTO's Nether Reactor Core, and GTO already gates the Nether at HV. It adds no terrain or structures (checked 2026-11-12) |
+| Moog's Nether Structures, Moog's Soaring Structures | Moog's Structure Lib 3.4.2's required `TagLoaderMixin` can't inject into `TagLoader`, which gtolib's own `TagLoaderMixin` (priority 2000) rewrites; the game crashes at world creation (staging, 2026-11-07). 3.1.2, the last without the mixin, runs MES fine ([mods.md](./mods.md#nether-and-end-2026-11-12)); these two weren't retried on it |
 | YUNG's Better Strongholds | Replaces the stronghold eyes of ender lead to; dev27's End Remastered patches stronghold pieces for its own eyes and portal frames, which gate the End |
 | Diagonal Walls, Windows, Fences | Their `diagonalblocks` 8.0.6 throws `target block tags not empty` on the second tag reload (staging, 2026-11-07): the first world loads, but EMI never gets its data, and leaving to the title and loading or creating any world crashes |
-| Alex's Mobs 1.22.9, Citadel 2.6.3, Domestication Innovation 1.7.1, Alex's Mobs Interaction, Alex's Delight | With Alex's Mobs and Citadel on, EMI's reload fails every time with a `NullPointerException` in gtolib's recipe baking; with them off it loads (staging, 2026-11-08). Domestication Innovation, Interaction and Delight only make sense with Alex's Mobs |
-| Celestisynth 1.3.4 | Dropped after a look in staging (2026-11-08). Its `RecipeManagerAccessor` mixin also clashes with ExtendedAE's, and its spellbook needs Iron's Spellbooks, which GTO lacks |
+| Alex's Mobs 1.22.9, Citadel 2.6.3, Domestication Innovation 1.7.1, Alex's Mobs Interaction, Alex's Delight | With Alex's Mobs and Citadel on, EMI's reload fails every time with a `NullPointerException` in gtolib's recipe baking; with them off it loads (staging, 2026-11-08). **Back since 2026-11-12** as Alex's Mobs Continued with its brewing patched, plus Citadel, Domestication Innovation and Continued Delight ([mods.md](./mods.md#alexs-mobs-continued-2026-11-12)); Interaction wasn't retried |
+| Celestisynth 1.3.4 | Dropped after a look in staging (2026-11-08). Its `RecipeManagerAccessor` mixin also clashes with ExtendedAE's, and its spellbook needs Iron's Spellbooks (in main since 2026-11-12; Celestisynth wasn't retried) |
 | YUNG's Cave Biomes | Worldgen crashed on a chest or pod placed `facing=down` (in `MonsterRoomFeature` and Ars Nouveau trees); the other YUNG's structure mods load fine without it (staging, 2026-11-08) |
 | Biomes O' Plenty | Shares 8 wood names with BWG, so GTO generates duplicate GT recipe ids (e.g. `gtceu:lathe/strip_willow_log`) and EMI fails to load (staging, 2026-11-07) |
 | William Wythers' Overhauled Overworld | Doesn't work well with BWG's biomes (staging, 2026-11-07); Terralith kept instead |
@@ -176,6 +184,8 @@ sessions in staging before deciding.
 | AmbientSounds | Added to main on 2026-11-07, removed on 2026-11-08 |
 | Sounds, MRU, Particle Core | Added to main on 2026-11-07, removed on 2026-11-08 with Particular, which came back on 2026-11-12. YACL, added for Sounds and MRU, is still in |
 | Structurify 2.0.43, global flatness check | Added to main on 2026-11-08 with a global flatness check (structures skip steep ground), removed the same day for a reason not recorded. Its in-game screen didn't save. **Back since 2026-11-12** without the flatness check ([structure-spacing.md](./structure-spacing.md)) |
+| spark 1.10.53 | Added to main on 2026-11-12 and removed the same day: leaving a world and loading another in the same session crashes the client, because dev27's FastEvents keeps calling spark's permission listener after spark unregisters it (`NullPointerException` in `ForgeServerSparkPlugin.onPermissionGather`, staging) |
+| From the Fog Reimagined's mods | Its horror mods (stalkers, horror structures and biomes, ambience) were looked at on 2026-11-12 and none are wanted |
 | Chunky | Distant Horizons 3.3.3 calls into Chunky while a new world's spawn chunks generate, before Chunky has started (on `ServerStartingEvent`), so creating a world crashes (staging, 2026-11-07). DH's `chunkGeneratorMode = "INTERNAL_SERVER"` with `SURFACE_THEN_CHUNKS` saves the chunks it generates, which does the pregen instead |
 
 ## Sources
