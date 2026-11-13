@@ -64,7 +64,7 @@ templates and takes seconds. A change to how `libgate.py` itself rewrites them n
 Seas or Integrated Cataclysm won't load until `libgate.py` has patched it. Changes to
 the pack reach only new chunks, so test in a new world.
 
-## Patched mixins
+## Patched jars
 
 [tools/mixinpatch.py](../tools/mixinpatch.py) removes mixins that break against the
 pack from Maid Storage Manager and Youkai's Homecoming ([mods.md](./mods.md)). A fresh
@@ -73,6 +73,22 @@ download of either crashes or breaks JEI until it has run:
 ```bash
 python3 -I /etc/nixos-config/docs/personal/gaming/minecraft_servers/GregTech-Odyssey/tools/mixinpatch.py ~/.local/share/PrismLauncher/instances/GregTech.Odyssey-0.6.0-dev27-staging/minecraft/mods
 ```
+
+[tools/classpatch.py](../tools/classpatch.py) compiles replacement classes from
+`tools/classpatch/<mod>/` against the instance's Forge and SRG Minecraft jars (from
+Prism's libraries, so launch the instance once first) and swaps them into the jar. It
+patches Alex's Mobs Continued's brewing, without which EMI's reload fails
+([mods.md](./mods.md#alexs-mobs-continued-2026-11-12)). A fresh download needs it:
+
+```bash
+python3 -I /etc/nixos-config/docs/personal/gaming/minecraft_servers/GregTech-Odyssey/tools/classpatch.py ~/.local/share/PrismLauncher/instances/GregTech.Odyssey-0.6.0-dev27-staging/minecraft/mods
+```
+
+Its jar names are exact versions, since each replacement is a copy of that version's
+class. Before updating a patched mod, decompile the new jar's class (`nix run
+nixpkgs#cfr -- <class> --outputdir <dir>`), carry its changes into the source, then
+bump the jar name in `PATCHES`. It uses `javac` from `PATH`, or else `nix shell
+nixpkgs#jdk21`.
 
 ## The baseline
 

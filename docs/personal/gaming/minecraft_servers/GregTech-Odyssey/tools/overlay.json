@@ -622,6 +622,41 @@
       "name": "Youkai's Homecoming",
       "source": "https://modrinth.com/mod/youkaishomecoming (patched by mixinpatch.py)",
       "added": "2026-11-12"
+    },
+    {
+      "jar": "alexsmobs-2.3.0-forge+1.20.1.jar",
+      "modId": "alexsmobs",
+      "name": "Alex's Mobs Continued",
+      "source": "https://modrinth.com/mod/alexs-mobs-continued (patched by classpatch.py)",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "codxlib-1.6.1-forge+1.20.1.jar",
+      "modId": "codxlib",
+      "name": "CodxLib",
+      "source": "https://modrinth.com/mod/codxlib",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "amcdelight-1.0.1-forge+1.20.1.jar",
+      "modId": "amcdelight",
+      "name": "Alex's Mobs Continued Delight",
+      "source": "https://modrinth.com/mod/alexs-mobs-continued-delight",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "domesticationinnovation-1.7.1-1.20.1.jar",
+      "modId": "domesticationinnovation",
+      "name": "Domestication Innovation",
+      "source": "https://modrinth.com/mod/domestication-innovation",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "citadel-2.6.3-1.20.1.jar",
+      "modId": "citadel",
+      "name": "Citadel",
+      "source": "https://modrinth.com/mod/citadel",
+      "added": "2026-11-12"
     }
   ],
   "removed": [

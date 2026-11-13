@@ -93,7 +93,8 @@ instance's `defaultconfigs/` copy sets them for new worlds:
 ## Worldgen and combat (2026-11-08)
 
 Passed a staging trial on 2026-11-08, then copied to main. **Worldgen changes need a
-new world.** Alex's Mobs (EMI's reload failed), Celestisynth, YUNG's Cave Biomes and the
+new world.** Alex's Mobs (EMI's reload failed; back on 2026-11-12 as
+[Continued](#alexs-mobs-continued-2026-11-12)), Celestisynth, YUNG's Cave Biomes and the
 other dropped mods are in [candidates.md](./candidates.md#skip). Tectonic and
 Lithostitched were removed on 2026-11-08 for slow generation, then added back the same
 day once FastChunkGen made it fast enough. Tectonic's mod jar has Terralith support
@@ -413,6 +414,36 @@ log "task can not load" and "added for twice" lines at startup; both are harmles
 
 Iron's Spells 'n Spellbooks (needs Iron's Lib) is on the todo list; adding it would let
 Maid Spell's structures back on.
+
+## Alex's Mobs Continued (2026-11-12)
+
+Passed a staging trial on 2026-11-12. None get recipe overrides: the Delight foods
+follow Farmer's Delight, and no structures are added (only a structure tag).
+
+| Jar | Mod | What it does |
+| --- | --- | --- |
+| `alexsmobs-2.3.0-forge+1.20.1.jar` | Alex's Mobs Continued | About 90 animals and monsters, their drops, gear and potions; the maintained fork of Alex's Mobs (1.22.9, 2024), same `alexsmobs` mod ID. Patched, see below |
+| `codxlib-1.6.1-forge+1.20.1.jar` | CodxLib | Library Continued and its Delight require (Continued dropped Citadel) |
+| `amcdelight-1.0.1-forge+1.20.1.jar` | Alex's Mobs Continued Delight | Farmer's Delight cuts and dishes from Alex's Mobs' meats |
+| `domesticationinnovation-1.7.1-1.20.1.jar` | Domestication Innovation | Pet enchantments, beds and commands; no fork exists, works without Alex's Mobs |
+| `citadel-2.6.3-1.20.1.jar` | Citadel | Library Domestication Innovation requires |
+
+**Alex's Mobs broke EMI** (1.22.9, staging, 2026-11-08 and 2026-11-12): the
+reload failed every time with a `NullPointerException` in gtolib's native recipe index
+(`com.gtolib.ㅤࣱࣻࣾ`, which replaces EMI's `EmiRecipeIndex`). GTO's EMI fork ids each
+Forge `BrewingRecipe` as `brewing/forge/<input>/<ingredient>/<output>` by item
+(`EmiForgePlatform`), so Alex's Mobs' potion-to-potion recipes collide: every "long"
+variant is `potion/redstone/potion`. Citadel alone passed; with Alex's brewing stubbed
+out, EMI loaded. Continued's `ProperBrewingRecipe` still extends `BrewingRecipe`, so it
+gets the same patch.
+
+[classpatch.py](../tools/classpatch.py) replaces Alex's `ProperBrewingRecipe` with a
+copy that implements Forge's `IBrewingRecipe` instead of extending `BrewingRecipe`
+(source in `tools/classpatch/alexsmobs/`). EMI's Forge loop skips it, and the brewing
+stand still brews every potion, but **EMI shows no recipe for Alex's potions**. An EMI
+plugin can't add them back: GTO loads EMI plugins from a fixed list only (11 of the 19
+jars that ship one), so Supplementaries', Tom's Storage's and the maid mods' never run
+either. GTO's own potions come from GT's Brewery as fluids.
 
 ## Overlay
 
