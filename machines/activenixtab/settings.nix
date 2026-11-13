@@ -226,6 +226,7 @@
       claude.skillModels.gtnhModUpdates = null;
       backups.folder = "~/SyncBackups";
       backups.skip = [];
+      opencode.plugins.sessionRail = false;
     };
   };
 
