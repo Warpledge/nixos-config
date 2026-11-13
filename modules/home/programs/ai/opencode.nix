@@ -161,9 +161,10 @@ in {
       agents = ./opencode-agents;
 
       #--- Usage bars in the footer, from the Console session /connect created,
-      #--- and the desktop app's rebuild badge
+      #--- the desktop app's rebuild badge, and Session Rain's side panel
       settings.plugins =
-        lib.optional (parts.usageBar || parts.desktopBar || parts.rebuildBadge) "${plugin}";
+        lib.optional (parts.usageBar || parts.desktopBar || parts.rebuildBadge) "${plugin}"
+        ++ lib.optional parts.sessionRain "${./opencode-session-rain}";
 
       #--- Context7 indexes JS/Python framework docs; deepwiki and grep provide
       #--- upstream wiki docs and real-world code examples.

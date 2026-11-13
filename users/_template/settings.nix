@@ -239,6 +239,7 @@
   opencode.plugins.usageBar = true; # Bars in the terminal's prompt and home footers
   opencode.plugins.desktopBar = true; # Usage bar across the desktop app's bottom
   opencode.plugins.rebuildBadge = true; # Desktop badge to rebuild when changes aren't built
+  opencode.plugins.sessionRain = false; # Desktop panel: context, changes, tasks
   pi.enable = false; # Pi: a minimal terminal coding agent, on llama-swap's models
   lmstudio.enable = false; # Runs language models locally
   llamaSwap.enable = false; # llama.cpp server on the GPU, opencode's default model

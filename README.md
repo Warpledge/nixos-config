@@ -152,7 +152,7 @@ The search box at the top finds any page or setting, including Dux Shell's own. 
 #### AI
 
 - **Claude:** Claude Code and Claude Desktop, their plugins, MCP servers and claude.ai connectors, and what Claude sees of each skill and subagent
-- **OpenCode:** opencode's usage bars and rebuild badge
+- **OpenCode:** opencode's usage bars, rebuild badge and Session Rain panel
 - **Local AI:** the local model server and its chat page, the models it serves, and tuning how each one loads on the GPU, with a test and a fit check
 
 #### Docs

@@ -222,6 +222,7 @@
       usageBar = true;
       desktopBar = true;
       rebuildBadge = true;
+      sessionRain = true;
     };
   };
   opencodeDesktop = {enable = true;};
