@@ -74,13 +74,21 @@ class Window(Adw.ApplicationWindow):
         self.kept_list = listing()
         page.append(scrolled(self.kept_list))
 
-        tidy = Gtk.Button(label="Clean up duplicates")
-        tidy.set_halign(Gtk.Align.START)
-        tidy.set_tooltip_text(
+        buttons = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        self.update_button = Gtk.Button(label="Update")
+        self.update_button.set_tooltip_text(
+            "Bring every app to the nixpkgs the system last rebuilt with."
+        )
+        self.update_button.connect("clicked", self.on_update_all)
+        buttons.append(self.update_button)
+
+        clean = Gtk.Button(label="Clean up duplicates")
+        clean.set_tooltip_text(
             "Remove the extra copy of an app that is both installed and kept. The rebuild installs it."
         )
-        tidy.connect("clicked", self.on_tidy)
-        page.append(tidy)
+        clean.connect("clicked", self.on_tidy)
+        buttons.append(clean)
+        page.append(buttons)
         return page
 
     def repair_page(self):
@@ -223,8 +231,8 @@ class Window(Adw.ApplicationWindow):
         def work():
             return backend.install(attr)
 
-        def done(ok, value):
-            self.idle(value)
+        def done(called, value):
+            ok = self.acted(called, value)
             button.set_sensitive(True)
             button.set_label("Installed" if ok else "Install")
             if ok:
@@ -238,30 +246,75 @@ class Window(Adw.ApplicationWindow):
         def work():
             return backend.uninstall(key)
 
-        def done(ok, value):
-            self.idle(value)
+        def done(called, value):
+            self.acted(called, value)
             self.refresh_installed()
 
         self.then(work, done, f"Removing {key}...")
 
+    def on_update(self, key, info, button):
+        button.set_sensitive(False)
+
+        def work():
+            return backend.update(key, info)
+
+        def done(called, value):
+            self.acted(called, value)
+            self.refresh_installed()
+
+        self.then(work, done, f"Updating {info['attr']}...")
+
+    def on_update_all(self, _button):
+        self.update_button.set_sensitive(False)
+
+        def work():
+            return backend.update_all()
+
+        def done(called, value):
+            self.acted(called, value)
+            self.refresh_installed()
+
+        self.then(work, done, "Bringing every app to the system's nixpkgs...")
+
     #-- Installed and kept ----------------------------------------------#
+    def acted(self, called, value):
+        """Status line for an action: the backend's (ok, text), or an
+        exception's text when the call itself failed."""
+        ok, text = value if called else (False, str(value))
+        self.idle(text)
+        return ok
+
     def refresh_installed(self):
         def work():
             return backend.installed(), backend.declared()
 
-        def done(ok, value):
-            if not ok:
-                self.idle(value)
+        def done(called, value):
+            if not called:
+                self.idle(str(value))
                 return
             installed, kept = value
             clear(self.installed_list)
-            for key, attr in sorted(installed.items(), key=lambda item: item[1]):
-                self.installed_list.append(
-                    self.row(attr, "installed without a rebuild", [
-                        ("Keep", lambda btn, a=attr: self.on_keep(a, btn), True),
-                        ("Remove", lambda btn, k=key: self.on_remove(k, btn), False),
-                    ])
+            stale = 0
+            for key, info in sorted(installed.items(), key=lambda item: item[1]["attr"]):
+                actions = []
+                if info["stale"]:
+                    stale += 1
+                    actions.append(
+                        ("Update", lambda btn, k=key, i=info: self.on_update(k, i, btn), True)
+                    )
+                actions.append(
+                    ("Keep", lambda btn, a=info["attr"]: self.on_keep(a, btn), not info["stale"])
                 )
+                actions.append(("Remove", lambda btn, k=key: self.on_remove(k, btn), False))
+                if info["stale"]:
+                    subtitle = "update available"
+                elif info["rev"]:
+                    subtitle = "installed without a rebuild"
+                else:
+                    subtitle = "installed from a store path"
+                self.installed_list.append(self.row(info["attr"], subtitle, actions))
+            self.update_button.set_sensitive(bool(stale))
+            self.update_button.set_label(f"Update {stale}" if stale else "Update")
             if not installed:
                 self.installed_list.append(self.row("Nothing installed on its own", "", []))
 
@@ -284,8 +337,8 @@ class Window(Adw.ApplicationWindow):
         def work():
             return backend.keep(attr)
 
-        def done(ok, value):
-            self.idle(value)
+        def done(called, value):
+            self.acted(called, value)
             self.refresh_installed()
 
         self.then(work, done, f"Keeping {attr}...")
@@ -296,8 +349,8 @@ class Window(Adw.ApplicationWindow):
         def work():
             return backend.unkeep(attr)
 
-        def done(ok, value):
-            self.idle(value)
+        def done(called, value):
+            self.acted(called, value)
             self.refresh_installed()
 
         self.then(work, done, f"Dropping {attr}...")
@@ -306,8 +359,8 @@ class Window(Adw.ApplicationWindow):
         def work():
             return backend.tidy()
 
-        def done(ok, value):
-            self.idle(value)
+        def done(called, value):
+            self.acted(called, value)
             self.refresh_installed()
 
         self.then(work, done, "Cleaning up...")
@@ -390,7 +443,9 @@ def self_test():
     ok, text = backend.validate("this-package-does-not-exist")
     print("validate missing:", ok, text[:90])
     installed = backend.installed()
-    print("profile:", installed or "empty")
+    stale = [info["attr"] for info in installed.values() if info["stale"]]
+    print("locked nixpkgs:", (backend.locked()[0] or "unknown")[:12])
+    print("profile:", len(installed), "apps,", len(stale), "stale:", stale)
     print("declared:", backend.declared() or "none")
 
     import json

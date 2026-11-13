@@ -23,7 +23,9 @@ Plasma, so the niri binds follow Plasma's shortcuts.
 - The **Apps** window (`users/kylerj/app-manager/`, launcher entry `ky-apps`) installs a
   nixpkgs package without a rebuild through `nix profile`, keeps one for good in
   `packages.json` (read by `users/kylerj/home.nix`), and lists the eval errors naming
-  Ky's own files. Try apps there first, then declare only what must exist at boot.
+  Ky's own files. Its Installed page marks the apps older than the last Pull and brings
+  them to the system's nixpkgs. Try apps there first, then declare only what must exist
+  at boot.
 - Only two app keys matter: Meta+T for the terminal and Ctrl+Alt+Delete for the task
   manager. Everything else opens from the launcher.
 - RetroShelf (`votex09/retroshelf`) is Ky's own app, packaged as a flake input that

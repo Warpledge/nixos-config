@@ -6,6 +6,7 @@ raised at the window."""
 
 import json
 import os
+import re
 import shutil
 import socket
 import subprocess
@@ -109,11 +110,26 @@ def validate(attr):
 
 
 #-- The profile ---------------------------------------------------------#
+REV = re.compile(r"[/-]([0-9a-f]{40})\b")
+
+
+def locked():
+    """(rev, narHash) of the nixpkgs the system is built from."""
+    lock = json.loads((REPO / "flake.lock").read_text())
+    node = lock["nodes"][lock["root"]]["inputs"]["nixpkgs"]
+    if not isinstance(node, str):
+        return None, None
+    entry = lock["nodes"][node]["locked"]
+    return entry.get("rev"), entry.get("narHash")
+
+
 def installed():
-    """{profile key: attr path} for what was installed without a rebuild."""
+    """{profile key: {attr, rev, stale}} for what was installed without a
+    rebuild. stale means it came from an older nixpkgs than the system's."""
     ok, out, _ = run([NIX, "profile", "list", "--json"], timeout=120)
     if not ok:
         return {}
+    current, _ = locked()
     found = {}
     for key, item in (json.loads(out).get("elements") or {}).items():
         attr = item.get("attrPath") or key
@@ -121,7 +137,10 @@ def installed():
         # legacyPackages.x86_64-linux.kdePackages.kate -> kdePackages.kate
         if len(parts) > 2 and parts[0] == "legacyPackages":
             attr = ".".join(parts[2:])
-        found[key] = attr
+        match = REV.search(item.get("originalUrl") or "")
+        rev = match.group(1) if match else None
+        # a store-path install has no source to update from
+        found[key] = {"attr": attr, "rev": rev, "stale": rev is not None and rev != current}
     return found
 
 
@@ -134,6 +153,40 @@ def install(attr):
 def uninstall(key):
     ok, out, err = run([NIX, "profile", "remove", key], timeout=300)
     return ok, (f"Removed {key}." if ok else brief(err, out))
+
+
+def update(key, info):
+    """Reinstall one app at the system's nixpkgs. A profile entry added from a
+    locked flake ref can't be upgraded, so it is removed and added again; the
+    old one goes back if the new one fails."""
+    ok, out, err = run([NIX, "profile", "remove", key], timeout=300)
+    if not ok:
+        return False, brief(err, out)
+    ok, out, err = run([NIX, "profile", "add", f"{nixpkgs_ref()}#{info['attr']}"], timeout=1800)
+    if ok:
+        return True, f"Updated {info['attr']}."
+    text = brief(err, out)
+    if info["rev"]:
+        run([NIX, "profile", "add", f"github:NixOS/nixpkgs/{info['rev']}#{info['attr']}"], timeout=1800)
+        return False, f"{info['attr']} stayed as it was.\n{text}"
+    return False, f"{info['attr']} was removed and couldn't be put back.\n{text}"
+
+
+def update_all():
+    """(ok, text) for every app older than the system's nixpkgs."""
+    stale = [(key, info) for key, info in installed().items() if info["stale"]]
+    if not stale:
+        return True, "Every app is at the system's nixpkgs."
+    updated, failed = 0, []
+    for key, info in stale:
+        ok, text = update(key, info)
+        if ok:
+            updated += 1
+        else:
+            failed.append(text)
+    if failed:
+        return False, f"Updated {updated}, {len(failed)} didn't:\n" + "\n".join(failed)
+    return True, f"Updated {updated} apps."
 
 
 #-- Declarations --------------------------------------------------------#
@@ -185,7 +238,7 @@ def tidy():
     """Remove the profile copies of apps that are kept, which the next rebuild
     provides from the system instead."""
     kept = set(declared_attrs())
-    gone = [key for key, attr in installed().items() if attr in kept]
+    gone = [key for key, info in installed().items() if info["attr"] in kept]
     for key in gone:
         ok, text = uninstall(key)
         if not ok:
