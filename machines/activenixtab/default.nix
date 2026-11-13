@@ -125,6 +125,7 @@ in {
     [
       ./hardware/hardware-configuration.nix
       ./face-auth.nix
+      ./kde-partitionmanager.nix
 
       ../../modules
     ]

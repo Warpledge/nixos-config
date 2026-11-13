@@ -13,6 +13,12 @@ changes stay in those two folders so a pull never conflicts; a change to a share
 goes to Warpledge as a pull request through the fork `votex09/nixos-config`, and only
 when Ky approves it.
 
+Updates are pull-only. `flake.lock` comes from Warpledge's main through Omni Settings'
+Pull; never run a flake update here (`nixm upgrade`, `nix flake update`, Omni Settings'
+Update). A local lock bump collides with his next one, and the Pull can't resolve a
+committed lock conflict. A fix to one of his shared files goes into
+`machines/activenixtab/` or `users/kylerj/`, or to him as a PR.
+
 ## Hardware
 
 - **GPU:** the 8060S renders everything (`gpu.type = "amd"`). `ttm.pages_limit` and
