@@ -57,6 +57,7 @@ in {
   #--- asusd: profiles, fan curves, keyboard and light bar (asusctl)
   services.asusd.enable = true;
   services.power-profiles-daemon.enable = true;
+  services.upower.enable = true; # DMS's battery widget reads UPower over D-Bus
 
   #--------------------------------------------------------------------#
   #-- Input
