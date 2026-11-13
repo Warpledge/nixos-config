@@ -1,11 +1,11 @@
 //=====================================================================#
-// SESSION RAIN - CONTEXT SPLIT (SERVER)
+// SESSION RAIL - CONTEXT SPLIT (SERVER)
 //=====================================================================#
 // Measures the request OpenCode assembles for each model call, so the
 // desktop panel can show where the context goes. The figures are
 // estimates at about four characters per token.
 import {Plugin} from "@opencode/plugin";
-import {RainRpc} from "./rpc";
+import {RailRpc} from "./rpc";
 
 type Source = {key: string; tokens: number};
 type Reading = {
@@ -113,7 +113,7 @@ function trim() {
 }
 
 export default Plugin.define({
-  id: "session-rain",
+  id: "session-rail",
   async setup(ctx) {
     const modelLimit = async (ref: ContextEvent["model"]) => {
       if (!ref) return 0;
@@ -151,7 +151,7 @@ export default Plugin.define({
       return mcp.names;
     };
 
-    const registration = await ctx.rpc.register(RainRpc, {
+    const registration = await ctx.rpc.register(RailRpc, {
       context: async (raw) => {
         const input = raw as {sessionID?: unknown};
         const sessionID = typeof input.sessionID === "string" ? input.sessionID : "";

@@ -1,6 +1,6 @@
 "use strict";
 //=====================================================================#
-// SESSION RAIN - DESKTOP PANEL
+// SESSION RAIL - DESKTOP PANEL
 //=====================================================================#
 // Runs in every OpenCode Desktop window. The panel shows what the routed
 // session runs on and uses: its project, context split, connectors,
@@ -10,7 +10,7 @@ const {Command, MenuItem, Panel, Plugin} = require("@opencode/plugin/gui");
 const {Changes} = require("@opencode/plugin/gui/review");
 const {lastAssistantWithUsage} = require("@opencode/client/solid");
 
-const ID = "session-rain";
+const ID = "session-rail";
 const TAB = "main";
 const KEY = `${ID}:${TAB}`;
 const REFRESH_MS = 2000;
@@ -27,8 +27,8 @@ const WARNING = "var(--color-v2-state-fg-warning)";
 const DANGER = "var(--color-v2-state-fg-danger)";
 
 // Matches rpc.ts. The client only reads ids, method names and events.
-const Rain = {
-  id: "session-rain",
+const Rail = {
+  id: "session-rail",
   methods: {
     context: {
       input: {
@@ -313,7 +313,7 @@ function panel(ctx, props, changes) {
     if (busy) return;
     busy = true;
     try {
-      const value = await ctx.client.rpc(Rain).context({sessionID: session.id});
+      const value = await ctx.client.rpc(Rail).context({sessionID: session.id});
       if (value) reading = value;
     } catch {}
     try {
@@ -407,26 +407,30 @@ function panel(ctx, props, changes) {
     } catch {}
 
     const list = [
-      ...mcp.map((server) => ({
-        id: `mcp:${server.name}`,
-        name: server.title || server.name,
-        kind: "MCP",
-        state: server.status?.status ?? "unknown",
-      })),
-      ...integrations.map((integration) => {
-        const connections = integration.connections ?? [];
-        const broken = connections.some((connection) => connection?.status?.status === "needs_auth");
-        return {
-          id: `integration:${integration.id}`,
-          name: integration.name,
-          kind: "Integration",
-          state: connections.length > 0 && !broken ? "connected" : "disabled",
-        };
-      }),
+      ...mcp
+        .filter((server) => server.status?.status !== "disabled")
+        .map((server) => ({
+          id: `mcp:${server.name}`,
+          name: server.title || server.name,
+          kind: "MCP",
+          state: server.status?.status ?? "unknown",
+        })),
+      ...integrations
+        .filter((integration) => (integration.connections ?? []).length > 0)
+        .map((integration) => {
+          const connections = integration.connections ?? [];
+          const broken = connections.some((connection) => connection?.status?.status === "needs_auth");
+          return {
+            id: `integration:${integration.id}`,
+            name: integration.name,
+            kind: "Integration",
+            state: broken ? "needs_auth" : "connected",
+          };
+        }),
     ];
 
     const connected = list.filter((item) => item.state === "connected").length;
-    connectorCount.textContent = list.length > 0 ? `${connected}/${list.length} connected` : "";
+    connectorCount.textContent = connected > 0 ? `${connected} connected` : "";
     connectorRows.replaceChildren();
 
     for (const item of list) {
@@ -452,7 +456,7 @@ function panel(ctx, props, changes) {
       connectorRows.append(line);
     }
 
-    if (list.length === 0) connectorRows.append(node("div", `font-size:0.82em;color:${MUTED};`, "None connected."));
+    if (list.length === 0) connectorRows.append(node("div", `font-size:0.82em;color:${MUTED};`, "Nothing connected."));
   };
 
   const paintChanges = (session) => {
@@ -634,7 +638,7 @@ function panel(ctx, props, changes) {
 
   let unsubscribe = () => {};
   try {
-    unsubscribe = ctx.client.rpc(Rain).events.on("changed", (event) => {
+    unsubscribe = ctx.client.rpc(Rail).events.on("changed", (event) => {
       if (event?.data?.sessionID === props.session?.id) void tick();
     });
   } catch {}
@@ -657,7 +661,7 @@ module.exports = Plugin.define({
     const tab = {
       id: TAB,
       get title() {
-        return "Session Rain";
+        return "Session Rail";
       },
       closable: "compact",
     };
@@ -667,7 +671,7 @@ module.exports = Plugin.define({
       region: "side",
       mobile: {
         get title() {
-          return "Session Rain";
+          return "Session Rail";
         },
         order: 40,
         kind: "menu",
@@ -683,7 +687,7 @@ module.exports = Plugin.define({
       return {
         menu: "session.panel",
         id: "open",
-        title: "Session Rain",
+        title: "Session Rail",
         icon: "window-analytics",
         description: "Context, connectors, changes and tasks",
         opened: ctx.layout.state(KEY, session) !== "closed",
@@ -693,7 +697,7 @@ module.exports = Plugin.define({
 
     ctx.add(Command, () => ({
       id: "open",
-      title: "Open Session Rain",
+      title: "Open Session Rail",
       keywords: "context connectors changes tasks background",
       section: "navigation",
       run: open,

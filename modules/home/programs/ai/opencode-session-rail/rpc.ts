@@ -1,5 +1,5 @@
 //=====================================================================#
-// SESSION RAIN - RPC CONTRACT
+// SESSION RAIL - RPC CONTRACT
 //=====================================================================#
 import {Rpc} from "@opencode/plugin/rpc";
 
@@ -29,8 +29,8 @@ const reading = {
   additionalProperties: false,
 } as const;
 
-export const RainRpc = Rpc.define({
-  id: "session-rain",
+export const RailRpc = Rpc.define({
+  id: "session-rail",
   methods: {
     context: {
       input: {

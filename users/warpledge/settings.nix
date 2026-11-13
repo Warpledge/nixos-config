@@ -222,7 +222,7 @@
       usageBar = true;
       desktopBar = true;
       rebuildBadge = true;
-      sessionRain = true;
+      sessionRail = true;
     };
   };
   opencodeDesktop = {enable = true;};
