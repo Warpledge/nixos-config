@@ -31,11 +31,7 @@ with lib; let
       else ["org.gnome.FileRoller.desktop"];
     discord = ["discord.desktop"];
     freetube = ["freetube.desktop"];
-    #--- youtube-dispatch exists only with FreeTube on
-    webLinks =
-      if user.media.freetube
-      then ["youtube-dispatch.desktop"]
-      else [chosen.browser.desktop];
+    webLinks = [chosen.browser.desktop];
   };
 
   mimeMap = {
@@ -108,7 +104,6 @@ with lib; let
       "x-scheme-handler/about"
       "x-scheme-handler/unknown"
     ];
-    #--- routed through youtube-dispatch so YouTube links reach FreeTube
     webLinks = [
       "x-scheme-handler/http"
       "x-scheme-handler/https"

@@ -229,17 +229,6 @@
     ]
   },
   {
-    "id": "freetube-opens-in-the-background",
-    "name": "FreeTube Opens in the Background",
-    "note": "Keeps youtube-dispatch link handoffs in the background, since each one opens a new window. Outranks the activation token.",
-    "matches": [
-      {
-        "app-id": "freetube"
-      }
-    ],
-    "open-focused": false
-  },
-  {
     "id": "protonup-qt",
     "name": "ProtonUp-Qt",
     "note": "Wine and Proton installer.",
