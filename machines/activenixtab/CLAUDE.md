@@ -63,8 +63,8 @@ committed lock conflict. A fix to one of his shared files goes into
 - `default.nix` — the hardware above, asusd, keyd, input-remapper, Tailscale, Waydroid,
   AppImage binfmt
 - `wm/niri.nix` — the monitor, scroll factors, auto-rotation and touchscreen gestures
-- `home/apps.nix` — apps with no switch in the user template, and Vivaldi as default
-  browser (it isn't one of `lib/default-apps.nix`'s choices)
+- `home/apps.nix` — Vivaldi, because the default browser names its desktop file; every
+  other app here is installed from the Apps window into the user profile
 - `home/binds.nix` — niri binds matching Ky's KDE Plasma shortcuts; each wins its key
   (`winsKey`), so a repo bind on the same key, even one added later, is switched off
 - `home/local-ai.nix` — Ky's opencode agents and extras around the config's

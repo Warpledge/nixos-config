@@ -17,8 +17,9 @@ Plasma, so the niri binds follow Plasma's shortcuts.
 - `home.nix` gives opencode global rules (`agents/opencode-global.md`) and adds the
   `godot` and `tmodloader-workflow` skills (`skills/`) to opencode and Claude Code. It
   also links the claude.ai-synced `tmodloader` skill for opencode.
-- Apps with no settings switch are in `machines/activenixtab/home/apps.nix`; the browser
-  is Vivaldi, though `defaultApps.browser` says zen.
+- Apps are installed from the Apps window into the user profile. Only
+  `machines/activenixtab/home/apps.nix` stays declared, and only for Vivaldi, whose desktop
+  file the default browser names; `defaultApps.browser` still says zen.
 - The **Apps** window (`users/kylerj/app-manager/`, launcher entry `ky-apps`) installs a
   nixpkgs package without a rebuild through `nix profile`, keeps one for good in
   `packages.json` (read by `users/kylerj/home.nix`), and lists the eval errors naming
