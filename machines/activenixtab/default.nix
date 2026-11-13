@@ -8,7 +8,16 @@
   machine,
   pkgs,
   ...
-}: {
+}: let
+  #--- linux-zen 7.3.4 panics at boot; this revision's 7.2.15 is the kernel the
+  #--- booted generation runs, and its build is already in the store
+  pinnedPkgs = import (builtins.fetchTarball {
+    url =
+      "https://github.com/NixOS/nixpkgs/archive/"
+      + "1d060086d60cb76a40cf37109f979d88a5bd6396.tar.gz";
+    sha256 = "0br4sv8vf37pbasihv20kq62cmpxl925x4q40i5nghfvmg07a2ld";
+  }) {inherit (pkgs.stdenv.hostPlatform) system;};
+in {
   #--------------------------------------------------------------------#
   #-- Hardware
   #--------------------------------------------------------------------#
@@ -24,6 +33,10 @@
     MatchName=Asus WMI hotkeys
     ModelTabletModeSwitchUnreliable=1
   '';
+
+  #--- linux-zen 7.3.4 panics at boot; bootloader.nix picks machine.kernel,
+  #--- so the pin overrides it until a zen release boots here again
+  boot.kernelPackages = lib.mkForce pinnedPkgs.linuxPackages_zen;
 
   #--- NPU driver
   boot.kernelModules = ["amdxdna"];

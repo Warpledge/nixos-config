@@ -251,6 +251,7 @@
   #--- Kernel Selection
   # Options: "zen" | "latest" | "xanmod" | "cachyos"
   # Not cachyos: its 7.0.x builds hang the ASUS WMI controls on this model
+  # default.nix pins zen 7.2.15: 7.3.4 panics at boot on this model
   kernel = "zen";
 
   #--- Mouse Cursor
