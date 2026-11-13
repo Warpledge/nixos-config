@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Back up, stage, update and check GregTech Odyssey Prism instances.
+"""Back up, stage, update, map and check GregTech Odyssey Prism instances.
 
 Usage:
     python3 -I <this file> <command> <instance> [...]
@@ -19,10 +19,12 @@ from the instance.
 import argparse
 import difflib
 import hashlib
+import io
 import json
 import os
 import re
 import shutil
+import struct
 import subprocess
 import sys
 import time
@@ -607,6 +609,336 @@ def cmd_check(a):
     print("\nclean" if not found else f"\n{found} findings")
     return 1 if found else 0
 
+#-- map
+
+# GTO's own mods, and its forks (GTOCore-Main docs/forked-dependencies.md);
+# expatternprovider is ExtendedAE
+GTO_OWN = {"gtocore", "gtolib", "gtorenders", "gtoutils", "datasynclib"}
+GTO_FORKS = {"gtceu", "ae2", "expatternprovider", "emi", "botania", "ars_nouveau"}
+VANILLA = ("net/minecraft/", "com/mojang/", "net/minecraftforge/")
+EXCLUSIVE = {"Overwrite", "Redirect", "ModifyConstant"}  # clash with other mods' mixins
+
+
+def _element(data, pos, cp):
+    """One annotation element_value: (value, next position)."""
+    tag = chr(data[pos])
+    pos += 1
+    if tag == "e":
+        return None, pos + 4
+    if tag == "@":
+        return _annotation(data, pos, cp)
+    if tag == "[":
+        n = struct.unpack_from(">H", data, pos)[0]
+        pos += 2
+        out = []
+        for _ in range(n):
+            v, pos = _element(data, pos, cp)
+            out.append(v)
+        return out, pos
+    return cp[struct.unpack_from(">H", data, pos)[0]], pos + 2
+
+
+def _annotation(data, pos, cp):
+    kind, n = struct.unpack_from(">HH", data, pos)
+    pos += 4
+    values = {}
+    for _ in range(n):
+        name = cp[struct.unpack_from(">H", data, pos)[0]]
+        values[name], pos = _element(data, pos + 2, cp)
+    return (cp[kind], values), pos
+
+
+def _skip_members(data, pos):
+    count = struct.unpack_from(">H", data, pos)[0]
+    pos += 2
+    for _ in range(count):
+        attrs = struct.unpack_from(">H", data, pos + 6)[0]
+        pos += 8
+        for _ in range(attrs):
+            pos += 6 + struct.unpack_from(">I", data, pos + 2)[0]
+    return pos
+
+
+def mixin_info(data):
+    """(target classes, exclusive injector kinds) of one compiled mixin class."""
+    if data[:4] != b"\xca\xfe\xba\xbe":
+        return None
+    count = struct.unpack_from(">H", data, 8)[0]
+    cp, pos, i = [None] * count, 10, 1
+    while i < count:
+        tag = data[pos]
+        pos += 1
+        if tag == 1:
+            n = struct.unpack_from(">H", data, pos)[0]
+            cp[i] = data[pos + 2:pos + 2 + n].decode("utf-8", "replace")
+            pos += 2 + n
+        elif tag in (7, 8, 16, 19, 20):
+            cp[i] = ("ref", struct.unpack_from(">H", data, pos)[0])
+            pos += 2
+        elif tag in (3, 4, 9, 10, 11, 12, 17, 18):
+            pos += 4
+        elif tag in (5, 6):
+            pos += 8
+            i += 1
+        elif tag == 15:
+            pos += 3
+        else:
+            return None
+        i += 1
+    cp = [cp[v[1]] if isinstance(v, tuple) else v for v in cp]
+    pos += 6
+    pos += 2 + 2 * struct.unpack_from(">H", data, pos)[0]
+    pos = _skip_members(data, _skip_members(data, pos))  # fields, then methods
+    targets = []
+    attrs = struct.unpack_from(">H", data, pos)[0]
+    pos += 2
+    for _ in range(attrs):
+        name_index, length = struct.unpack_from(">HI", data, pos)
+        name = cp[name_index]
+        body, pos = pos + 6, pos + 6 + length
+        if name not in ("RuntimeInvisibleAnnotations", "RuntimeVisibleAnnotations"):
+            continue
+        at = body + 2
+        for _ in range(struct.unpack_from(">H", data, body)[0]):
+            (kind, values), at = _annotation(data, at, cp)
+            if kind != "Lorg/spongepowered/asm/mixin/Mixin;":
+                continue
+            for d in values.get("value") or []:
+                targets.append(d[1:-1] if d.startswith("L") else d)
+            for t in values.get("targets") or []:
+                targets.append(t.replace(".", "/"))
+    kinds = {k for k in EXCLUSIVE
+             if f"Lorg/spongepowered/asm/mixin/{k};" in cp
+             or f"Lorg/spongepowered/asm/mixin/injection/{k};" in cp}
+    return targets, kinds
+
+
+def _manifest_main(z):
+    try:
+        text = z.read("META-INF/MANIFEST.MF").decode("utf-8", "replace")
+    except KeyError:
+        return {}
+    main = re.split(r"\r?\n\r?\n", text, maxsplit=1)[0]
+    main = re.sub(r"\r?\n ", "", main)  # manifest continuation lines
+    return dict(line.split(": ", 1) for line in main.splitlines() if ": " in line)
+
+
+def scan_jar(name, z, nested=True):
+    """Everything map reports about one jar, and its jar-in-jar jars."""
+    names = z.namelist()
+    try:
+        toml = z.read("META-INF/mods.toml").decode("utf-8", "replace")
+    except KeyError:
+        toml = ""
+    mods = re.findall(r'^\s*modId\s*=\s*"([^"]+)"', toml.split("[[dependencies", 1)[0], re.M)
+    deps = {}
+    for owner, block in re.findall(r"\[\[dependencies\.([\w-]+)\]\]([^\[]*)", toml):
+        mid = re.search(r'modId\s*=\s*"([^"]+)"', block)
+        rng = re.search(r'versionRange\s*=\s*"([^"]*)"', block)
+        req = re.search(r"mandatory\s*=\s*(\w+)", block)
+        typ = re.search(r'type\s*=\s*"(\w+)"', block)
+        if mid and mid.group(1) not in ("minecraft", "forge"):
+            kind = (typ.group(1).lower() if typ else
+                    "required" if req and req.group(1) == "true" else "optional")
+            deps[mid.group(1)] = f"{kind} {rng.group(1) if rng else ''}".strip()
+    manifest = _manifest_main(z)
+    configs = [c.strip() for c in manifest.get("MixinConfigs", "").split(",") if c.strip()]
+    configs += re.findall(r'\[\[mixins\]\]\s*config\s*=\s*"([^"]+)"', toml)
+    mixins, plugins = [], []
+    for cfg in dict.fromkeys(configs):
+        try:
+            conf = json.loads(z.read(cfg))
+        except (KeyError, ValueError):
+            continue
+        if conf.get("plugin"):
+            plugins.append(conf["plugin"])
+        pkg = conf.get("package", "").replace(".", "/")
+        for side in ("mixins", "client", "server"):
+            for m in conf.get(side) or []:
+                path = f"{pkg}/{m.replace('.', '/')}.class"
+                try:
+                    info = mixin_info(z.read(path))
+                except (KeyError, struct.error, IndexError):
+                    info = None
+                targets, kinds = info or ([], set())
+                mixins.append({"name": m, "side": side, "config": cfg,
+                               "targets": targets, "kinds": sorted(kinds)})
+    jar = {
+        "jar": name, "mods": mods, "deps": deps, "mixins": mixins, "plugins": plugins,
+        "services": [n.split("/")[-1] for n in names
+                     if n.startswith("META-INF/services/") and not n.endswith("/")],
+        "at": sum(1 for line in z.read("META-INF/accesstransformer.cfg").decode(
+            "utf-8", "replace").splitlines() if line.strip() and not line.startswith("#"))
+        if "META-INF/accesstransformer.cfg" in names else 0,
+        "sealed": sum(1 for n in names if n.endswith(".prod.bin")),
+        "classes": {n[:-6] for n in names if n.endswith(".class")},
+        "jarjar": [],
+    }
+    if nested:
+        for n in names:
+            if n.startswith("META-INF/jarjar/") and n.endswith(".jar"):
+                try:
+                    with zipfile.ZipFile(io.BytesIO(z.read(n))) as inner:
+                        jar["jarjar"].append(scan_jar(n.split("/")[-1], inner, False))
+                except zipfile.BadZipFile:
+                    pass
+    return jar
+
+
+def open_jar(path):
+    try:
+        with zipfile.ZipFile(path) as z:
+            return scan_jar(path.name, z)
+    except zipfile.BadZipFile:
+        return None
+
+
+def owner_index(jars):
+    owners = {}
+    for jar in jars:
+        for j in [jar] + jar["jarjar"]:
+            label = j["mods"][0] if j["mods"] else j["jar"]
+            for c in j["classes"]:
+                owners.setdefault(c, label)
+    return owners
+
+
+def owner_of(cls, owners):
+    if cls.startswith(VANILLA):
+        return "minecraft" if not cls.startswith("net/minecraftforge/") else "forge"
+    return owners.get(cls, "?")
+
+
+def mixin_targets(jars):
+    """target class -> [(mod, mixin, kinds)] across every jar."""
+    found = {}
+    for jar in jars:
+        for j in [jar] + jar["jarjar"]:
+            label = j["mods"][0] if j["mods"] else j["jar"]
+            for m in j["mixins"]:
+                # gtocore's jar carries gtolib's mixins too; name them by their config
+                src = m["config"].split(".mixins")[0] if label in GTO_OWN else label
+                for t in m["targets"]:
+                    found.setdefault(t, []).append((src, m["name"], m["kinds"]))
+    return found
+
+
+def is_gto(mod):
+    return mod in GTO_OWN or mod in GTO_FORKS
+
+
+def print_jar(jar):
+    sides = {}
+    for m in jar["mixins"]:
+        sides[m["side"]] = sides.get(m["side"], 0) + 1
+    print(f"\n{jar['jar']}")
+    print(f"  mods: {', '.join(jar['mods']) or '(none: not a Forge mod)'}")
+    if jar["deps"]:
+        print("  deps: " + ", ".join(f"{k} {v}" for k, v in sorted(jar["deps"].items())))
+    if jar["mixins"]:
+        print(f"  mixins: {len(jar['mixins'])} ("
+              + ", ".join(f"{k} {v}" for k, v in sorted(sides.items())) + ")"
+              + (f", plugin {', '.join(jar['plugins'])}" if jar["plugins"] else ""))
+    for key, label in (("services", "services"), ("at", "access transformer lines"),
+                       ("sealed", "sealed method bodies (.prod.bin)")):
+        if jar[key]:
+            val = jar[key]
+            print(f"  {label}: {', '.join(val) if isinstance(val, list) else val}")
+    for inner in jar["jarjar"]:
+        print(f"  jar-in-jar: {inner['jar']} ({', '.join(inner['mods']) or 'library'})")
+
+
+def cmd_map(a):
+    gdir = game_dir(instance(a.instance))
+    jars = [j for j in (open_jar(p) for p in sorted((gdir / "mods").glob("*.jar"))) if j]
+    extra = [j for j in (open_jar(Path(p).expanduser()) for p in a.mod or []) if j]
+    owners = owner_index(jars + extra)
+    targets = mixin_targets(jars)
+
+    if extra:
+        return check_mods(extra, jars, owners, targets)
+
+    gto = [j for j in jars if any(is_gto(m) for m in j["mods"]) or j["jar"].startswith("gto-")]
+    print("== GTO's own jars")
+    for jar in gto:
+        if any(m in GTO_OWN for m in jar["mods"]) or not jar["mods"]:
+            print_jar(jar)
+    print("\n== GTO's forks")
+    for jar in gto:
+        if any(m in GTO_FORKS for m in jar["mods"]):
+            print_jar(jar)
+
+    by_mod = {}
+    for cls, hits in targets.items():
+        for mod, name, kinds in hits:
+            if mod in GTO_OWN:
+                by_mod.setdefault(owner_of(cls, owners), {}).setdefault(cls, []).append(
+                    (f"{mod}:{name}", kinds))
+    print("\n== GTO's own mixins by target mod (target class: mixins, [exclusive])")
+    for mod in sorted(by_mod, key=lambda k: -sum(len(v) for v in by_mod[k].values())):
+        classes = by_mod[mod]
+        print(f"\n{mod}: {sum(len(v) for v in classes.values())} mixins, "
+              f"{len(classes)} classes")
+        if a.summary:
+            continue
+        for cls in sorted(classes):
+            names = ", ".join(n + (f" [{'/'.join(k)}]" if k else "")
+                              for n, k in classes[cls])
+            print(f"  {cls.split('/')[-1]} ({cls.rsplit('/', 1)[0]}): {names}")
+
+    print("\n== Classes GTO patches that other mods patch too")
+    shared = 0
+    for cls in sorted(targets):
+        hits = targets[cls]
+        mine = [h for h in hits if is_gto(h[0])]
+        other = [h for h in hits if not is_gto(h[0])]
+        if mine and other:
+            shared += 1
+            ex = any(h[2] for h in hits)
+            print(f"  {cls}{'  [exclusive injector]' if ex else ''}")
+            print("    GTO: " + ", ".join(f"{m}:{n}" for m, n, _ in mine))
+            print("    others: " + ", ".join(sorted({m for m, _, _ in other})))
+    print(f"\n{shared} shared classes")
+    return 0
+
+
+def check_mods(extra, jars, owners, targets):
+    """Report what a candidate jar touches that GTO also owns or patches."""
+    installed = {m: j["jar"] for j in jars for m in j["mods"]}
+    for jar in extra:
+        print_jar(jar)
+        for m in jar["mods"]:
+            if m in installed:
+                print(f"  ! modId {m} already provided by {installed[m]}")
+        # gto_native stops the game on unknown ModLauncher services (mods.md, Maid Spell)
+        for j in [jar] + jar["jarjar"]:
+            for svc in j["services"]:
+                if svc.startswith("cpw.mods.modlauncher."):
+                    print(f"  ! {j['jar']} registers ModLauncher service {svc}")
+        for dep, rng in sorted(jar["deps"].items()):
+            if rng.startswith("required") and dep not in installed:
+                print(f"  ! needs {dep} ({rng}), not in the pack")
+            if dep in GTO_FORKS and rng.startswith("required"):
+                print(f"  ! depends on {dep}, which GTO forks: check the API it uses")
+            if rng.startswith("incompatible") and dep in installed:
+                print(f"  ! declares {dep} incompatible, and the pack has it")
+        clash = 0
+        for m in jar["mixins"]:
+            for t in m["targets"]:
+                owner = owner_of(t, owners)
+                gto_hits = [h for h in targets.get(t, []) if is_gto(h[0])]
+                if gto_hits or owner in GTO_OWN or owner in GTO_FORKS:
+                    clash += 1
+                    why = (f"GTO patches it ({', '.join(f'{x}:{n}' for x, n, _ in gto_hits)})"
+                           if gto_hits else f"class belongs to {owner}, which GTO "
+                           + ("owns" if owner in GTO_OWN else "forks"))
+                    kinds = f" [{'/'.join(m['kinds'])}]" if m["kinds"] else ""
+                    print(f"  ~ {m['name']}{kinds} -> {t}: {why}")
+                elif owner == "?":
+                    print(f"  ? {m['name']} -> {t}: target not in the pack (soft mixin?)")
+        print(f"  {clash} mixin targets overlap GTO")
+    return 0
+
 #-- Arguments
 
 def main():
@@ -645,6 +977,14 @@ def main():
                    help="use another instance's baseline, such as the old build's")
     s.add_argument("--save-baseline", action="store_true")
     s.set_defaults(func=cmd_check)
+
+    s = sub.add_parser("map", help="list GTO's jars and mixins, or check a new mod against them")
+    s.add_argument("instance")
+    s.add_argument("--mod", action="append", metavar="JAR",
+                   help="a candidate jar to check instead (repeatable)")
+    s.add_argument("--summary", action="store_true",
+                   help="counts per target mod, without each class")
+    s.set_defaults(func=cmd_map)
 
     s = sub.add_parser("datapack", help="install the repo's recipe datapack into an instance")
     s.add_argument("instance")

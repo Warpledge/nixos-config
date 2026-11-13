@@ -440,10 +440,13 @@ gets the same patch.
 [classpatch.py](../tools/classpatch.py) replaces Alex's `ProperBrewingRecipe` with a
 copy that implements Forge's `IBrewingRecipe` instead of extending `BrewingRecipe`
 (source in `tools/classpatch/alexsmobs/`). EMI's Forge loop skips it, and the brewing
-stand still brews every potion, but **EMI shows no recipe for Alex's potions**. An EMI
-plugin can't add them back: GTO loads EMI plugins from a fixed list only (11 of the 19
-jars that ship one), so Supplementaries', Tom's Storage's and the maid mods' never run
-either. GTO's own potions come from GT's Brewery as fluids.
+stand still brews every potion, but **EMI shows no recipe for Alex's potions**. GTO
+loads EMI and JEI plugins from a fixed list (11 of the 19 jars that ship one), so
+Supplementaries', Tom's Storage's and the maid mods' don't run either. Others can be
+turned on by class name in `misc.enableEmiJeiExternalPlugins` in `config/gtocore.yaml`
+([internals/mixins.md](./internals/mixins.md#emi-and-jei)); none are yet, and each
+needs a staging run first, since a plugin that breaks EMI's bake takes all of EMI down.
+GTO's own potions come from GT's Brewery as fluids.
 
 ## Overlay
 

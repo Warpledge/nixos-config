@@ -22,10 +22,12 @@ which is why this world runs on a dev build instead of waiting for beta.
 - [structure-spacing.md](./structure-spacing.md): Structurify's overlap prevention and
   spacing tiers, and how to fit a new structure mod in
 - [quests.md](./quests.md): how far the quest book goes
+- [internals/](./internals/index.md): what GTO's own jars, forks, mixins and rules
+  change, and the checklist for a new mod
 - [server.md](./server.md): the dedicated server on the laptop, built with `gto server`
 - [updating.md](./updating.md): new builds, mod trials and debugging through a staging
   instance, with the test checklist
-- [../tools/](../tools/): `gto.py` (backup, stage, carry, diff, check) and
+- [../tools/](../tools/): `gto.py` (backup, stage, carry, diff, check, map) and
   `overlay.json`, what you add on top of the pack; `gregify.py` and `libgate.py`, which
   write the recipe, ban and structure files; `structures.py`, which lists structure
   sets and writes Structurify's config; `quarkblocks/`, the Quark block jar

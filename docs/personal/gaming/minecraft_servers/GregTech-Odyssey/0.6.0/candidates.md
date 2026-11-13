@@ -7,7 +7,8 @@ The recovered Cosmic Frontiers notes, with the config and KubeJS work done back 
 are in `~/Downloads/cosmic_frontiers_notes/`.
 
 **Needs** lists only required mods that dev27 doesn't ship. "CurseForge only" means the
-lookup found no 1.20.1 Forge build on Modrinth. Pick a batch, then trial it with
+lookup found no 1.20.1 Forge build on Modrinth. Pick a batch, check it against
+[internals/new-mod-checklist.md](./internals/new-mod-checklist.md), then trial it with
 `gto stage` as described in [updating.md](./updating.md).
 
 ## Integrated mods

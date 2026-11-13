@@ -17,6 +17,8 @@ alias gto='python3 -I /etc/nixos-config/docs/personal/gaming/minecraft_servers/G
 | `gto diff <old> <new>` | Mods added, removed or updated, your jars the pack now ships, and every config file that changed |
 | `gto check <inst>` | Errors in `logs/latest.log` that the instance's baseline lacks, plus mixin, dependency and load failures and crash reports. Exits 1 on findings |
 | `gto check <inst> --save-baseline` | Records this log's errors as normal for the instance |
+| `gto map <inst>` | GTO's jars, forks and mixins by target, and the classes other mods patch too ([internals/](./internals/index.md)) |
+| `gto map <inst> --mod <jar>` | Checks a candidate jar against them: ModLauncher services, missing or forked dependencies, mixins into code GTO owns or patches |
 | `gto server <inst> --zip <server zip>` | Builds a dedicated server folder from the release's server zip, the instance's jars and your non-`clientOnly` jars; `--tar` packs it to move to the laptop ([server.md](./server.md)) |
 | `gto datapack <inst>` | Installs the repo's recipe datapack, [datapack/warpledge-gto](../datapack/warpledge-gto/), as `config/openloader/data/warpledge-gto/`, replacing the old copy |
 
@@ -136,13 +138,15 @@ Correcting` for each server config Forge fills in; that's normal.
 One mod at a time, or a small batch from one section of
 [candidates.md](./candidates.md):
 
-1. `gto stage <main>` (`--replace` if an old staging copy is there).
-2. Add the jars and the libraries they need to the staging instance's `mods/`.
-3. Launch it, run the checklist and `gto check`.
-4. If it passes, add the same jars to main, add an entry to `overlay.json` (jar, modId,
+1. Check the jars offline with `gto map <main> --mod <jar>` and
+   [internals/new-mod-checklist.md](./internals/new-mod-checklist.md).
+2. `gto stage <main>` (`--replace` if an old staging copy is there).
+3. Add the jars and the libraries they need to the staging instance's `mods/`.
+4. Launch it, run the checklist and `gto check`.
+5. If it passes, add the same jars to main, add an entry to `overlay.json` (jar, modId,
    name, source URL, date added), and note it in [mods.md](./mods.md). After main's next
    clean session, save the baseline again.
-5. If it fails, nothing in main changed: delete the jars from staging, or the whole
+6. If it fails, nothing in main changed: delete the jars from staging, or the whole
    staging copy.
 
 ## Debugging

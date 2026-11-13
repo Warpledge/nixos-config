@@ -36,7 +36,8 @@ Rules screen.
 
 `gtm.ordered_assembly_line_fluids` was added on the laptop server's copy on 2026-11-08,
 before its world existed, to match GTNH's ordered assembly line inputs. The client's
-file doesn't have it yet.
+file had it too by 2026-11-12. Every rule with its preset values is in
+[internals/rules.md](./internals/rules.md).
 
 ## Back to Normal on 2026-11-08
 
