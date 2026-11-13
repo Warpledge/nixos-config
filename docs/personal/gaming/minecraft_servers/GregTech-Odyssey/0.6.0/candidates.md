@@ -18,12 +18,19 @@ Stronghold); [mods.md](./mods.md#integrated-structures-2026-11-12) has what went
 how. Batch 3 went in on 2026-11-12 too. The first try (2026-11-07) was dropped when EMI
 broke; what the retry found, layer by layer in staging:
 
-- **Quark breaks EMI on its own.** gtolib replaces EMI's recipe bake (sealed code), and
-  upstream EMI skips a stack whose data changes while it's indexed ("self-mutated")
-  where gtolib passes the null on to `ArrayList.addAll`. Quark 4.0-462 with Zeta 1.0-31
-  does it even with all ten categories off, Zeta's creative tab appends forced and its
-  hiding off, so it's Quark's code, not its items. Alex's Mobs with Citadel fails the
-  same way ([Skip](#skip)).
+- **Quark breaks EMI on its own.** gtolib replaces EMI's recipe index with native code,
+  which passes a null to `ArrayList.addAll`. Quark 4.0-462 with Zeta 1.0-31 does it
+  even with all ten categories off, Zeta's creative tab appends forced and its hiding
+  off. Retried on 2026-11-13 with [emiguard](../tools/emiguard/README.md): no recipe EMI
+  hands the index is malformed (no null lists, no stacks changing once indexed, no
+  unregistered categories). Zeta alone loads; Quark without Supplementaries (whose
+  Quark compat loads with it) and the Integrated mods still fails. The
+  one structural change Quark makes is that GT's 19 furnaces drop out of
+  `minecraft:smelting`'s workstations (GT adds them in
+  `GTRecipeEMICategory.registerWorkStations` only for a furnace category marked visible),
+  so the cause is in GTO's own handling of GT's furnace category with `quark` loaded,
+  out of reach without GTO's source. Alex's Mobs fails with the same trace
+  ([Skip](#skip)), for another reason.
 - KubeJS and Rhino weren't needed: Reliable Remover and Reliable Recipes do the bans as
   JSON. Create, Moonlight, Supplementaries and Amendments each passed alone.
 - IDAS, Integrated Dungeons Arise and Seven Seas require Quark in `mods.toml` but have no
@@ -157,7 +164,7 @@ sessions in staging before deciding.
 | Smooth Chunk Save | Changes how chunks save, on a dev build that already warns of corrupted saves |
 | Tinkers' Better Combat | Needs Tinkers' Construct, which GTO lacks |
 | Aether Villages | Needs The Aether, which GTO lacks |
-| Quark, Zeta | Breaks EMI's recipe bake inside gtolib even with every Quark category off (staging, 2026-11-11); [the Integrated mods](#integrated-mods) get its blocks from the quarkblocks jar instead |
+| Quark, Zeta | Breaks EMI's recipe bake inside gtolib even with every Quark category off (staging, 2026-11-11; retried with emiguard 2026-11-13, cause inside GTO's code, see [Integrated mods](#integrated-mods)); [the Integrated mods](#integrated-mods) get its blocks from the quarkblocks jar instead |
 | Cupboard | Only a library for the someaddons mods, none of which are on this list |
 | Simply Swords: Cataclysm 1.0.1 | Its Forge 1.20.1 builds (1.0.1, 2025-12) target Simply Swords 1.56.0 and call its `ConfigDefaultValues`, which 1.70.0's new config system removed; registration fails and the game won't start (staging, 2026-11-12) |
 | Simply Swords Overhaul | Its last builds (1.0.2 on Modrinth, 1.0.3 and 1.0.4 on GitHub, 2025) target Simply Swords 1.56.0; with 1.70.2 its `StormsEdgeSwordItem` mixin finds no target and the game won't start |

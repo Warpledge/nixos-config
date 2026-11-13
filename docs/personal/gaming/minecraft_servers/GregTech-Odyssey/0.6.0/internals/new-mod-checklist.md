@@ -39,7 +39,9 @@ facts behind each step are in the other notes in this folder.
    ...YoukaisHomecoming`). Check the plugin's static fields first. Test that EMI still
    bakes with it on: a plugin or mod that breaks the bake takes EMI down for everything
    (Quark, and Alex's Mobs' brewing; see [../candidates.md](../candidates.md) and
-   [../mods.md](../mods.md)).
+   [../mods.md](../mods.md)). When it breaks, build
+   [emiguard](../../tools/emiguard/README.md) into staging: it names a malformed recipe
+   and dumps EMI's input for a with/without diff.
 6. **Brewing recipes:** a mod that adds Forge `BrewingRecipe`s can give two recipes the
    same EMI id, which stops EMI's bake. Alex's Mobs needed
    [classpatch.py](../../tools/classpatch.py).

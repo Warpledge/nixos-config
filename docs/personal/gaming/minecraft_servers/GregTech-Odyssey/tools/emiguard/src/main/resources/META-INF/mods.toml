@@ -1,0 +1,27 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="MIT"
+
+[[mods]]
+modId="emiguard"
+version="1.0.0"
+displayName="EMI Guard"
+authors="warpledge"
+description='''
+Drops and logs EMI recipes that would crash GregTech Odyssey's recipe index during
+EMI's reload. Client only; needs its plugin class listed in config/gtocore.yaml.
+'''
+
+[[dependencies.emiguard]]
+modId="forge"
+mandatory=true
+versionRange="[47,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.emiguard]]
+modId="emi"
+mandatory=true
+versionRange="*"
+ordering="AFTER"
+side="CLIENT"
