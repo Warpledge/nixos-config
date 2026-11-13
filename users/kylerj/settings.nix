@@ -1,8 +1,8 @@
 #=====================================================================#
 # KYLERJ'S USER SETTINGS
 #=====================================================================#
-#- Apps and account settings for kylerj. Apps these switches don't cover
-#- are in machines/activenixtab/home/apps.nix.
+#- Apps and account settings for kylerj. Everything these switches don't cover
+#- is installed from the Apps window into the user profile.
 {
   #--------------------------------------------------------------------#
   #-- Account
@@ -63,4 +63,14 @@
   localAi.code = ["qwen3_8-flash-next" "nemotron-3_5-super-vl"];
   localAi.chat = [];
   openWebui.enable = false; # Off until open-webui.nix drops the mcp2 patch (0.12.5 no longer needs it)
+
+  #--------------------------------------------------------------------#
+  #-- Window Rules
+  #--------------------------------------------------------------------#
+  #--- The Apps window shows the wallpaper through at the Mod+Y preset's
+  #--- opacity, like the other app windows
+  windowRules.custom-ky-apps = {
+    matches = [{app-id = "^io\\.github\\.kylerj\\.Apps$";}];
+    translucent = true;
+  };
 }
