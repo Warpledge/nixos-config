@@ -607,6 +607,8 @@ function panel(ctx, props, changes) {
     paintTasks(session);
   };
 
+  let connected = false;
+
   const stop = () => {
     if (stopped) return;
     stopped = true;
@@ -617,9 +619,12 @@ function panel(ctx, props, changes) {
     } catch {}
   };
 
+  // The host inserts the root after render returns, so the first tick runs
+  // before the node is connected; only stop once it has been shown and left.
   const tick = async () => {
     if (stopped) return;
-    if (!root.isConnected) {
+    if (root.isConnected) connected = true;
+    else if (connected) {
       stop();
       return;
     }
