@@ -75,11 +75,12 @@ GTO overwrites EMI's plugin discovery (`EmiForgePlatform.getPlugins`, gtolib
   and Calculator Overlay when installed.
 
 Any other mod's EMI or JEI plugin is skipped unless its class name goes in
-`misc.enableEmiJeiExternalPlugins` in `config/gtocore.yaml` (a YAML list, empty in
-dev27), for example `- com.simibubi.create.compat.jei.CreateJEI`. Find a mod's plugin
-class with `unzip -l <jar> | grep -iE 'emi|jei'` and look for the class implementing
-`EmiPlugin` or annotated `@JeiPlugin`. `gtocore.yaml` isn't in `overlay.json`'s carried
-files, so a change there has to be carried by hand to a new build.
+`misc.enableEmiJeiExternalPlugins` in `config/gtocore.yaml` (a YAML list, empty as
+dev27 ships), for example `- com.simibubi.create.compat.jei.CreateJEI`. Find a mod's
+plugin class by searching the jar's classes for `Ldev/emi/emi/api/EmiEntrypoint;` or
+`Lmezz/jei/api/JeiPlugin;`. Main's list and the plugins left off are in
+[../mods.md](../mods.md#emi-and-jei-plugins-2026-11-12); `gtocore.yaml` is in
+`overlay.json`'s carry list.
 
 EMI's stack list bake (`EmiStackList`) is overwritten too; mods that hide or add stacks
 through mixins there rather than the plugin API lose them.

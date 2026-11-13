@@ -657,6 +657,20 @@
       "name": "Citadel",
       "source": "https://modrinth.com/mod/citadel",
       "added": "2026-11-12"
+    },
+    {
+      "jar": "spark-1.10.53-forge.jar",
+      "modId": "spark",
+      "name": "spark",
+      "source": "https://www.curseforge.com/projects/361579",
+      "added": "2026-11-12"
+    },
+    {
+      "jar": "Clumps-forge-1.20.1-12.0.0.4.jar",
+      "modId": "clumps",
+      "name": "Clumps",
+      "source": "https://www.curseforge.com/minecraft/mc-mods/clumps",
+      "added": "2026-11-12"
     }
   ],
   "removed": [
@@ -682,6 +696,8 @@
     "config/touhou_little_maid/sites/llm.json",
     "config/zipline.json",
     "config/gtocore-rules.txt",
+    "config/gtocore.yaml",
+    "config/spark/config.json",
     "config/integrated_simply_swords/silver.json5",
     "config/openloader/data/warpledge-gto",
     "config/openloader/data/warpledge-gto-integrated",

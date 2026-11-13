@@ -30,9 +30,13 @@ facts behind each step are in the other notes in this folder.
    is required) or never runs. Moog's Structure Lib 3.3.0+ and its `TagLoaderMixin` is
    the known case.
 5. **EMI or JEI integration:** the mod's plugin won't load on its own. Find its class
-   (`unzip -l <jar> | grep -iE 'emi|jei'`) and add it under
-   `misc.enableEmiJeiExternalPlugins` in `config/gtocore.yaml`, then carry that file by
-   hand to new builds ([mixins.md](./mixins.md#emi-and-jei)). Test that EMI still
+   ([mixins.md](./mixins.md#emi-and-jei)) and add it under
+   `misc.enableEmiJeiExternalPlugins` in `config/gtocore.yaml`, which `gto carry`
+   copies to new builds. GTO loads each listed
+   class with `Class.forName` while mods are still being constructed, so a plugin whose
+   static fields call into its mod's main class kills that mod: Youkai's `YHJeiPlugin`
+   failed this way on 2026-11-12 (`NoClassDefFoundError: Could not initialize class
+   ...YoukaisHomecoming`). Check the plugin's static fields first. Test that EMI still
    bakes with it on: a plugin or mod that breaks the bake takes EMI down for everything
    (Quark, and Alex's Mobs' brewing; see [../candidates.md](../candidates.md) and
    [../mods.md](../mods.md)).

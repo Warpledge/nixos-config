@@ -440,13 +440,51 @@ gets the same patch.
 [classpatch.py](../tools/classpatch.py) replaces Alex's `ProperBrewingRecipe` with a
 copy that implements Forge's `IBrewingRecipe` instead of extending `BrewingRecipe`
 (source in `tools/classpatch/alexsmobs/`). EMI's Forge loop skips it, and the brewing
-stand still brews every potion, but **EMI shows no recipe for Alex's potions**. GTO
-loads EMI and JEI plugins from a fixed list (11 of the 19 jars that ship one), so
-Supplementaries', Tom's Storage's and the maid mods' don't run either. Others can be
-turned on by class name in `misc.enableEmiJeiExternalPlugins` in `config/gtocore.yaml`
-([internals/mixins.md](./internals/mixins.md#emi-and-jei)); none are yet, and each
-needs a staging run first, since a plugin that breaks EMI's bake takes all of EMI down.
+stand still brews every potion, but **EMI shows no recipe for Alex's potions**, and
+its JEI plugin stays off ([EMI and JEI plugins](#emi-and-jei-plugins-2026-11-12)).
 GTO's own potions come from GT's Brewery as fluids.
+
+## EMI and JEI plugins (2026-11-12)
+
+GTO loads only its own list of EMI and JEI plugins
+([internals/mixins.md](./internals/mixins.md#emi-and-jei)), so 13 of the added mods'
+plugins never ran. Ten are now listed under `misc.enableEmiJeiExternalPlugins` in
+`config/gtocore.yaml` (each mod's EMI plugin where it has one, else its JEI plugin):
+Create, Supplementaries, Tom's Simple Storage, Touhou Little Maid, Maid Storage
+Manager, Maidsoul Kitchen, Cataclysm, Reliable Recipes, Reliable Remover and TrashSlot.
+They passed staging on 2026-11-12, with EMI loading and its search working. The file is
+in `overlay.json`'s carry list. Three stay off:
+
+- **Youkai's Homecoming** (`YHJeiPlugin`): crashed the game on load. GTO loads listed
+  classes while mods are still being built, and this one's static fields start
+  `YoukaisHomecoming` too early, so the mod fails with `NoClassDefFoundError`.
+- **Delightful** (`JEIPlugin`): JEI refuses its call to hide items from the loader
+  thread (`IllegalStateException`), so it only adds an error.
+- **Alex's Mobs Continued**: its brewing broke EMI before (above).
+
+## spark and Clumps (2026-11-12)
+
+Passed a staging trial on 2026-11-12. Both were checked first with `gto map --mod`:
+spark patches nothing, and Clumps only patches XP orbs.
+
+| Jar | Mod | What it does |
+| --- | --- | --- |
+| `spark-1.10.53-forge.jar` | spark | Profiler: `/spark profiler`, `/spark tps`, `/spark health` |
+| `Clumps-forge-1.20.1-12.0.0.4.jar` | Clumps | Merges nearby XP orbs into one |
+
+**spark's native profiler crashes Java 25.** With `backgroundProfiler` on (spark's
+default), world creation killed the JVM (`hs_err_pid*.log`: SIGSEGV in
+`libasyncProfiler.so`, `VMThread::nativeThreadId`) with no crash report.
+`config/spark/config.json` sets `"backgroundProfiler": false` and is in the carry
+list, and `gto server` copies it with the rest of `config/`. **Always profile with
+`/spark profiler start --force-java-sampler`**; without the flag spark uses the same
+native profiler and crashes the same way.
+
+The trial's two-minute profile ([report](https://spark.lucko.me/B0mnQ0C3Z9)) had a
+median tick of 3.9 ms (5.4 ms over five minutes) and a 95th percentile of 13 to 22 ms;
+the 2.8 s worst tick was world creation. Block entity ticking took 36% of tick time,
+led by Supplementaries hourglasses (5.7%) and Create machines (3.6%), likely placed by
+the Integrated structures near spawn.
 
 ## Overlay
 
