@@ -12,8 +12,9 @@ to carry into a new pack build;
 instance's game is running. Nothing is ever deleted except a staging copy replaced
 with --replace, which is backed up first, the instance's copy of the recipe
 datapack and the Reliable Remover/Recipes rules, which `datapack` rebuilds from
-../datapack/ and ../reliable/, and a server folder's mods/, which `server` rebuilds
-from the instance.
+../datapack/ and ../reliable/, a server folder's mods/, which `server` rebuilds
+from the instance, and gtocore's resource cache (gtocore/cache and gtocore/hash),
+which `carry` and `datapack` clear so the next launch rebuilds it.
 """
 
 import argparse
@@ -80,6 +81,27 @@ def refuse_if_running(inst=None, prism_ok=False):
     what = running(inst)
     if what and not (prism_ok and what == "Prism Launcher"):
         sys.exit(f"{what} is running; close it first")
+
+
+def clear_gto_cache(gdir):
+    """Drop gtocore's resource cache (misc.cacheResources in config/gtocore.yaml).
+
+    It never notices a jar or datapack that changed under the same name, so a rebuilt
+    quarkblocks jar or a new datapack stays invisible until it's gone. Called by every
+    tool that changes an instance's jars or datapacks; the next launch rebuilds it.
+    """
+    cache, stamp = gdir / "gtocore" / "cache", gdir / "gtocore" / "hash"
+    if not cache.exists() and not stamp.exists():
+        return
+    what = running(gdir.parent)
+    if what and what != "Prism Launcher":
+        print(f"{what} is running; close it, then delete {cache} and {stamp}")
+        return
+    if cache.exists():
+        shutil.rmtree(cache)
+    stamp.unlink(missing_ok=True)
+    print(f"cleared gtocore's resource cache in {gdir.parent.name}; the next launch "
+          "rebuilds it")
 
 
 def read_cfg(inst):
@@ -298,6 +320,9 @@ def cmd_carry(a):
             if not a.dry_run:
                 shutil.copytree(world, dst, symlinks=True)
 
+    if not a.dry_run:
+        clear_gto_cache(ngame)
+
 #-- datapack
 
 def sync_tree(inst, src, dst, dry_run):
@@ -348,6 +373,7 @@ def cmd_datapack(a):
             print(f"skip {src.name}: the mod isn't in {inst.name}")
     changed = [sync_tree(inst, s, d, a.dry_run) for s, d in pairs]
     if any(changed) and not a.dry_run:
+        clear_gto_cache(gdir)
         print("reload with /reload or restart the world")
 
 #-- server

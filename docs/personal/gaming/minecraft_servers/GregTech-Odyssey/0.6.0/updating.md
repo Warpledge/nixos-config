@@ -66,6 +66,13 @@ templates and takes seconds. A change to how `libgate.py` itself rewrites them n
 Seas or Integrated Cataclysm won't load until `libgate.py` has patched it. Changes to
 the pack reach only new chunks, so test in a new world.
 
+All three clear gtocore's resource cache (`gtocore/cache` and `gtocore/hash` in the
+instance), so close the game first. The cache keys on jar names and never notices a jar
+rebuilt under the same name: on 2026-11-13 staging ran a quarkblocks jar whose items,
+models, recipes, loot and tags it couldn't see, and showed missing textures. If a
+quarkblocks change doesn't show up in game, check that `gtocore/cache` is newer than the
+jar.
+
 ## Patched jars
 
 [tools/mixinpatch.py](../tools/mixinpatch.py) removes mixins that break against the

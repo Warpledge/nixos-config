@@ -6,8 +6,10 @@ Usage:
 
 Runs gen.py against the Integrated mods' jars in <mods folder>, builds with nixpkgs'
 JDK 17 and Gradle 8 through nix-shell (the first build downloads Forge, about a
-minute), and copies build/libs/quarkblocks-<version>.jar into <mods folder>. Rerun
-after updating an Integrated mod, then rerun libgate.py, which reads blocks.json.
+minute), copies build/libs/quarkblocks-<version>.jar into <mods folder> and clears
+gtocore's resource cache there (gto.py's clear_gto_cache), which would hide the new
+jar's files. Rerun after updating an Integrated mod, then rerun libgate.py, which
+reads blocks.json.
 """
 
 import argparse
@@ -17,6 +19,9 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE.parent))
+import gto  # noqa: E402
+
 GRADLE = ("export JAVA_HOME=$(dirname $(dirname $(readlink -f $(command -v java)))); "
           "gradle build --no-daemon --console=plain -q")
 
@@ -41,6 +46,8 @@ def main():
             old.unlink()
     shutil.copy2(jars[-1], a.mods / jars[-1].name)
     print(f"copied {jars[-1].name} to {a.mods}")
+    # The jar's name never changes, and gtocore's cache keys on it.
+    gto.clear_gto_cache(a.mods.resolve().parent)
 
 
 if __name__ == "__main__":

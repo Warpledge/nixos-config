@@ -14,7 +14,9 @@ python3 -I build.py <Quark jar> <mods folder> [--zeta <Zeta jar>]
 
 `build.py` runs `gen.py`, then Gradle 8 with JDK 17 through `nix-shell`, and copies
 `build/libs/quarkblocks-<version>.jar` into the mods folder. Then rerun
-[libgate.py](../libgate.py), which renames the structures' Quark blocks to these.
+[libgate.py](../libgate.py), which renames the structures' Quark blocks to these. It also
+clears gtocore's resource cache in that instance, which keys on jar names and would
+otherwise hide everything the rebuilt jar adds ([updating.md](../../0.6.0/updating.md)).
 
 To check the mod loads, `gradle runServer` in `nix-shell -p jdk17 gradle_8` starts a bare
 Forge server with only this mod in `run/` (gitignored); with `enable-rcon` in its
