@@ -93,6 +93,17 @@ final class QuarkItems {
         }
 
         @Override
+        public void initializeClient(java.util.function.Consumer<net.minecraftforge.client.extensions.common.IClientItemExtensions> c) {
+            c.accept(new net.minecraftforge.client.extensions.common.IClientItemExtensions() {
+                @Override
+                public net.minecraft.client.model.HumanoidModel<?> getHumanoidArmorModel(LivingEntity e, ItemStack s,
+                        EquipmentSlot slot, net.minecraft.client.model.HumanoidModel<?> original) {
+                    return ClientMobs.hatModel();
+                }
+            });
+        }
+
+        @Override
         public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot slot) {
             if (attributes == null) {
                 attributes = ImmutableMultimap.<Attribute, AttributeModifier>builder()

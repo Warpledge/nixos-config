@@ -110,7 +110,7 @@ OWN_KINDS = [(r".*_vertical_slab", "vertical_slab"), (r".*_hedge", "hedge"),
              (r"feeding_trough|pipe|ender_watcher|chute|redstone_randomizer|cloud", None),
              (r"crafter|tiny_potato", "keeper")]
 # Data the ported code uses besides blocks: extra models, sounds, screens, lang keys.
-EXTRA_MODELS = {"pipe": ["item/extra/pipe_flare"]}
+EXTRA_MODELS = {"pipe": ["item/extra/pipe_flare"], "glass_item_frame": ["item/extra/glass_item_frame"]}
 EXTRA_SOUNDS = {"monster_box": ["block.monster_box.growl"],
                 "pipe": ["block.pipe.pickup", "block.pipe.shoot"],
                 "pickarang": ["entity.pickarang.throw", "entity.pickarang.clank",
@@ -122,9 +122,21 @@ ITEM_KINDS = {"abacus": "abacus", "ancient_fruit": "ancient_fruit", "ancient_tom
               "forgotten_hat": "forgotten_hat", "pathfinders_quill": "quill",
               "pickarang": "pickarang", "seed_pouch": "seed_pouch",
               "slime_in_a_bucket": "slime_bucket", "smithing_template_rune": "rune",
-              "soul_bead": "soul_bead", "torch_arrow": "torch_arrow", "trowel": "trowel"}
-# Items not ported yet: they need the mobs and entities (a stoneling, the frame entity).
-LATER_ITEMS = {"glass_item_frame", "diamond_heart"}
+              "soul_bead": "soul_bead", "torch_arrow": "torch_arrow", "trowel": "trowel",
+              "glass_item_frame": "glass_frame", "glowing_glass_item_frame": "glass_frame",
+              "crab_bucket": "crab_bucket"}
+# Quark's mobs quarkblocks ports, with their spawn egg colours (Quark's addEgg calls),
+# the items that come with them, and the Quark tags their code reads.
+MOBS = {"wraith": ((0xECECEC, 0xBDBDBD), ["soul_bead"], ["blocks/wraith_spawnable"]),
+        "forgotten": ((0x969487, 0x3A3330), ["forgotten_hat"], []),
+        "foxhound": ((0x890D0D, 0xF2AF4B), [], ["blocks/foxhound_spawnable"]),
+        "crab": ((0x893C22, 0x916548), ["crab_leg", "cooked_crab_leg", "crab_shell", "crab_bucket"],
+                 ["blocks/crab_spawnable", "items/crab_tempt_items"]),
+        "toretoise": ((0x55413B, 0x383237), [], ["blocks/breaks_toretoise_ore"])}
+# Items not ported yet: the diamond heart makes a stoneling, which isn't ported.
+LATER_ITEMS = set()
+# Items registered alongside one the structures use.
+ITEM_SIBLINGS = {"glass_item_frame": ["glowing_glass_item_frame"]}
 QUARK_TAGS = ["blocks/pickarang_immune", "items/seed_pouch_holdable", "items/seed_pouch_fertilizers",
               "worldgen/structure/soul_bead_target"]
 # Blocks an item places, registered with it.
@@ -142,7 +154,21 @@ EXTRA_LANG = {"feeding_trough": ["quark.container.feeding_trough"],
               "smithing_template_rune": ["item.quark.smithing_template.rune.*", "upgrade.quark.rune_upgrade",
                                          "rune.quark.*"]}
 # Data files the ported code needs besides block loot (fnmatch patterns under data/quark/).
-EXTRA_DATA = {"smithing_template_rune": ["recipes/tools/smithing/rune_smithing_*.json"]}
+EXTRA_DATA = {}
+# Recipes for machines and items swap vanilla metals and diamonds for GT plates, as
+# gregify.py does for other mods' gear; decorative blocks keep Quark's recipes.
+FUNCTIONAL_KINDS = {"pipe", "crate", "chute", "feeding_trough", "ender_watcher", "redstone_randomizer",
+                    "furnace", "chest", "trapped_chest"}
+RECIPE_GREG = {
+    ("item", "minecraft:iron_ingot"): {"tag": "c:plates/iron"},
+    ("item", "minecraft:copper_ingot"): {"tag": "c:plates/copper"},
+    ("item", "minecraft:gold_ingot"): {"tag": "c:plates/gold"},
+    ("item", "minecraft:diamond"): {"tag": "c:plates/diamond"},
+    ("tag", "forge:ingots/iron"): {"tag": "c:plates/iron"},
+    ("tag", "forge:ingots/copper"): {"tag": "c:plates/copper"},
+    ("tag", "forge:ingots/gold"): {"tag": "c:plates/gold"},
+    ("tag", "forge:gems/diamond"): {"tag": "c:plates/diamond"},
+}
 CHEST_TEXTURES = ("normal", "left", "right", "trap", "trap_left", "trap_right")
 
 
@@ -203,7 +229,9 @@ def spec(qid, props):
     return s
 
 def item_spec(qid):
-    if qid.startswith("music_disc_"):
+    if qid.endswith("_spawn_egg") and qid[:-10] in MOBS:
+        s = {"id": qid, "kind": "spawn_egg", "mob": qid[:-10], "colors": list(MOBS[qid[:-10]][0])}
+    elif qid.startswith("music_disc_"):
         s = {"id": qid, "kind": "disc"}
     elif qid.startswith("egg_parrot_"):
         s = {"id": qid, "kind": "parrot_egg", "variant": qid[11:]}
@@ -322,7 +350,7 @@ def tint(qid):
     return None
 
 
-def copy_assets(quark, zeta, ids, items):
+def copy_assets(quark, zeta, ids, items, mob_sounds):
     names = set(quark.namelist())
     znames = set(zeta.namelist()) if zeta else set()
     models = [m for q in ids + items for m in EXTRA_MODELS.get(q, [])] + [f"item/{i}" for i in items]
@@ -372,10 +400,13 @@ def copy_assets(quark, zeta, ids, items):
     for key, text in lang.items():
         if key.startswith("item.quark.") and key[11:].split(".")[0] in items:
             ours[key.replace("item.quark.", f"item.{NS}.", 1)] = text
+        elif key.startswith("entity.quark."):  # entity names; unused ones cost nothing
+            ours[key.replace("entity.quark.", f"entity.{NS}.", 1)] = text
     sounds = json.loads(quark.read("assets/quark/sounds.json"))
     events = {e: sounds[e] for q in ids + items for e in extra_sounds(q)}
+    events.update({e: sounds[e] for e in mob_sounds})
     extra = [k for q in ids + items for k in EXTRA_LANG.get(q, [])]
-    extra += [ev["subtitle"] for ev in events.values() if "subtitle" in ev]
+    extra += [ev["subtitle"] for ev in events.values() if ev.get("subtitle", "").startswith("quark.")]
     for pat in extra:
         for key in ([k for k in lang if k.startswith(pat[:-1])] if pat.endswith("*") else [pat]):
             ours[key.replace("quark.", f"{NS}.", 1)] = lang[key]
@@ -398,7 +429,29 @@ def copy_assets(quark, zeta, ids, items):
 def extra_sounds(qid):
     if m := re.fullmatch(r"music_disc_(.+)", qid):
         return [f"ambient.{m[1]}"]
+    if qid == "crab_bucket":
+        return ["item.bucket.fill_crab", "item.bucket.empty_crab"]
     return EXTRA_SOUNDS.get(qid, [])
+
+
+def copy_mobs(quark, mobs, items):
+    """Each mob's textures, sounds and loot table; entities.json lists the sounds for the mod."""
+    names = quark.namelist()
+    sounds = json.loads(quark.read("assets/quark/sounds.json"))
+    keep = lambda q: q in items  # noqa: E731
+    specs = []
+    for mob in mobs:
+        for nm in names:
+            if re.fullmatch(rf"assets/quark/textures/model/entity/{mob}(/.+)?\.png", nm):
+                copy_file(quark, nm, nm.replace("assets/quark/", f"assets/{NS}/", 1))
+        nm = f"data/quark/loot_tables/entities/{mob}.json"
+        if nm in names:
+            out = OUT / f"data/{NS}/loot_tables/entities/{mob}.json"
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(quarkmap.dumps(quarkmap.rename_json(strip_flags(json.loads(quark.read(nm))), keep)))
+        specs.append({"id": mob, "sounds": sorted(k for k in sounds if k.startswith(f"entity.{mob}."))})
+    (OUT / NS / "entities.json").write_text(json.dumps(specs, indent=1))
+    return [e for s in specs for e in s["sounds"]]
 
 def copy_file(src, path, dst_path):
     out = OUT / dst_path
@@ -430,14 +483,46 @@ def copy_entity_textures(quark, specs):
 #-- Data
 
 
+FLAGS = {"quark:flag", "zeta:flag"}
+
+
+def simplify(cond):
+    """A condition with Quark's config flags (always on here) folded away: True, False or
+    what's left of it. Handles Forge's and/or/not around them."""
+    if not isinstance(cond, dict):
+        return cond
+    kind = cond.get("type") or cond.get("condition")
+    if kind in FLAGS:
+        return True
+    if kind in ("forge:and", "forge:or"):
+        parts = [simplify(c) for c in cond.get("values", [])]
+        if kind == "forge:and":
+            if False in parts:
+                return False
+            rest = [p for p in parts if p is not True]
+            return True if not rest else rest[0] if len(rest) == 1 else {**cond, "values": rest}
+        if True in parts:
+            return True
+        rest = [p for p in parts if p is not False]
+        return False if not rest else rest[0] if len(rest) == 1 else {**cond, "values": rest}
+    if kind == "forge:not":
+        inner = simplify(cond.get("value"))
+        return (not inner) if isinstance(inner, bool) else {**cond, "value": inner}
+    return cond
+
+
 def strip_flags(value):
-    """Drop Quark's config-flag conditions (always on here), which name a quark: type."""
+    """Fold Quark's config-flag conditions away (simplify); a list with a false one
+    becomes [{"type": "forge:false"}] so Forge skips the file."""
     if isinstance(value, dict):
         out = {}
         for k, v in value.items():
             if k == "conditions" and isinstance(v, list):
-                v = [c for c in v if not (isinstance(c, dict) and {c.get("type"), c.get("condition")}
-                                          & {"quark:flag", "zeta:flag"})]
+                parts = [simplify(c) for c in v]
+                if False in parts:
+                    out[k] = [{"type": "forge:false"}]
+                    continue
+                v = [p for p in parts if p is not True]
                 if not v:
                     continue
             out[k] = strip_flags(v)
@@ -447,7 +532,68 @@ def strip_flags(value):
     return value
 
 
-def copy_data(quark, blocks, items):
+def recipe_ids(value, out):
+    """Every item id and tag a recipe names, as (kind, id)."""
+    if isinstance(value, dict):
+        for k in ("item", "tag"):
+            if isinstance(value.get(k), str):
+                out.add((k, value[k]))
+        for k, v in value.items():
+            if k != "conditions":
+                recipe_ids(v, out)
+    elif isinstance(value, list):
+        for v in value:
+            recipe_ids(v, out)
+    elif isinstance(value, str) and ":" in value:
+        out.add(("result", value))  # 1.20.1 single-string results (stonecutting, smelting)
+    return out
+
+
+def greg(value):
+    """Swap vanilla metals and diamonds for GT plates (RECIPE_GREG)."""
+    if isinstance(value, dict):
+        for (k, v), new in RECIPE_GREG.items():
+            if value.get(k) == v and len(value) == 1:
+                return dict(new)
+        return {k: greg(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [greg(v) for v in value]
+    return value
+
+
+def copy_recipes(quark, blocks, items, specs):
+    """Quark's recipes that make a quarkblocks block or item from things that exist here.
+
+    A recipe for a vanilla item is left out (GT owns those), as is one naming a Quark id
+    this jar lacks, a Quark tag, or a recipe type of Quark's own other than the rune's.
+    Machines' and items' recipes get RECIPE_GREG's plates. Returns the count written."""
+    ours = blocks | items
+    functional = items | {s["id"] for s in specs if s["kind"] in FUNCTIONAL_KINDS}
+    written = 0
+    for nm in quark.namelist():
+        if not (nm.startswith("data/quark/recipes/") and nm.endswith(".json")):
+            continue
+        data = strip_flags(json.loads(quark.read(nm)))
+        if not str(data.get("type", "")).startswith("minecraft:") and data.get("type") != "quark:smithing_rune":
+            continue
+        # A rune recipe has no result; it recolours the item, so its template decides.
+        result = data.get("template") if data.get("type") == "quark:smithing_rune" else data.get("result")
+        rid = result.get("item") if isinstance(result, dict) else result
+        if not (isinstance(rid, str) and rid.startswith("quark:") and rid[6:] in ours):
+            continue
+        named = recipe_ids({k: v for k, v in data.items() if k != "result"}, set())
+        if any(v.startswith("quark:") and (k == "tag" or v[6:] not in ours) for k, v in named):
+            continue
+        if rid[6:] in functional:
+            data = greg(data)
+        out = OUT / nm.replace("data/quark/", f"data/{NS}/", 1)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(quarkmap.dumps(quarkmap.rename_json(data, lambda q: q in ours)))
+        written += 1
+    return written
+
+
+def copy_data(quark, blocks, items, mob_tags):
     names = quark.namelist()
     ids = blocks | items
     keep = lambda q: q in ids or quarkmap.vanilla(q) is not None  # noqa: E731
@@ -482,7 +628,7 @@ def copy_data(quark, blocks, items):
             out.parent.mkdir(parents=True, exist_ok=True)
             out.write_text(quarkmap.dumps(quarkmap.rename_json(data, keep)))
     # Quark's own tags the ported code reads, as quarkblocks: tags.
-    for t in QUARK_TAGS:
+    for t in QUARK_TAGS + mob_tags:
         nm = f"data/quark/tags/{t}.json"
         if nm not in names:
             print(f"warning: no tag {t}", file=sys.stderr)
@@ -515,8 +661,12 @@ def main():
     named = {quarkmap.current(q) for q in quarkmap.used_ids(jars)} | {"monster_box"}
     ids = {q for q in named if quarkmap.vanilla(q) is None
            and f"assets/quark/blockstates/{q}.json" in names}
-    items = sorted(q for q in named - ids - LATER_ITEMS if quarkmap.vanilla(q) is None
-                   and f"assets/quark/models/item/{q}.json" in names)
+    items = {q for q in named - ids - LATER_ITEMS if quarkmap.vanilla(q) is None
+             and f"assets/quark/models/item/{q}.json" in names}
+    mobs = [m for m in MOBS if m in named]
+    items |= {i for m in mobs for i in MOBS[m][1] + [f"{m}_spawn_egg"]}
+    items = sorted(i for i in items | {s for i in items for s in ITEM_SIBLINGS.get(i, [])}
+                   if f"assets/quark/models/item/{i}.json" in names)
     ids |= {b for i in items for b in ITEM_BLOCKS.get(i, [])}
     # A copper vertical slab weathers and waxes into its siblings, so all of them exist.
     if any(COPPER.fullmatch(q) for q in ids):
@@ -542,11 +692,13 @@ def main():
                 props.setdefault(a_, set()).update(vals)
         specs.append(spec(q, {k: sorted(v) for k, v in sorted(props.items())}))
     (OUT / "pack.mcmeta").write_text(json.dumps(PACK))
-    copy_assets(quark, zeta, ids, items)
+    mob_sounds = copy_mobs(quark, mobs, set(items))
+    copy_assets(quark, zeta, ids, items, mob_sounds)
     item_specs = [item_spec(i) for i in items]
     (OUT / NS / "items.json").write_text(json.dumps(item_specs, indent=1))
     copy_entity_textures(quark, specs + item_specs)
-    copy_data(quark, set(ids), set(items))
+    copy_data(quark, set(ids), set(items), [t for m in mobs for t in MOBS[m][2]])
+    print(f"{copy_recipes(quark, set(ids), set(items), specs)} recipes")
     for s in specs:
         if tinted(s["id"]) and (src := tint(s["id"])):
             s["tint"] = src

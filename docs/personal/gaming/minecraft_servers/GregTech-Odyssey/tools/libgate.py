@@ -228,7 +228,7 @@ QUARKITEMS = QUARKBLOCKS.with_name("items.json")
 
 # unquark() takes about 10 minutes, so its output is reused while its inputs match.
 # Bump when unquark()'s own code changes what it writes for the same jars.
-UNQUARK_VERSION = 2
+UNQUARK_VERSION = 3
 STAMP = INTEGRATED.with_name(INTEGRATED.name + ".stamp")
 
 
@@ -298,8 +298,9 @@ def rename_template(root, ours, missing):
         b.value["nbt"] = rename_strings(data)
     if "entities" in c:
         et, ents = c["entities"].value
-        kept = [x for x in ents
-                if not str(nbt.plain(x).get("nbt", {}).get("id", "")).startswith("quark:")]
+        ids = [str(nbt.plain(x).get("nbt", {}).get("id", "")) for x in ents]
+        kept = [x for x, eid in zip(ents, ids)
+                if not eid.startswith("quark:") or eid[6:] in quarkmap.OUR_ENTITIES]
         # Vanilla entities can still hold Quark items (item frames) or ride Quark mobs.
         c["entities"] = nbt.Tag(nbt.LIST, (et, [rename_strings(x) for x in kept]))
         return len(ents) - len(kept)
@@ -361,7 +362,7 @@ def unquark(mods):
                     out.write_text(quarkmap.dumps(data))
                     files += 1
     print(f"integrated pack: {templates} templates and {files} data files renamed, "
-          f"{dropped} Quark entities (item frames and such) dropped, "
+          f"{dropped} Quark entities quarkblocks lacks dropped, "
           f"{whole} more files of the reskins copied so they win over the originals")
     if missing:
         print(f"  not in quarkblocks, placed as air: {', '.join(sorted(missing))}")

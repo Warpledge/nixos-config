@@ -60,7 +60,17 @@ vanilla block tags, renamed to `quarkblocks:`.
   apply on a smithing table and show in the tooltip, but the glint stays purple:
   colouring it needs Quark's render mixins. Older templates' coloured runes become the
   rune template (`quarkmap.OLD_ITEMS`). `items.json` lists them for the mod, as
-  `blocks.json` does the blocks.
+  `blocks.json` does the blocks. The diamond heart is a plain item: in Quark it makes a
+  stoneling, which isn't ported.
+- Quark's entities under Quark's ids, so templates, spawners and the structures' spawn
+  lists keep them: glass item frames, wraiths, forgotten, foxhounds, crabs and
+  toretoises, with Quark's models, AI, sounds, loot and spawn eggs (`entities.json`
+  lists their sounds). They come from structures only; Quark's own natural spawns are
+  left out.
+- Quark's recipes for the blocks and items here, minus any for a vanilla item (GT owns
+  those) or naming something missing. Machines' and items' recipes take GT plates for
+  vanilla metals and diamonds (`RECIPE_GREG` in `gen.py`), as `gregify.py` does for
+  other mods' gear.
 - The monster box, reimplemented with Quark's defaults: a player within 2.5 blocks wakes
   it, it smokes for 2 seconds, spawns 5 to 8 mobs from `misc/monster_box_spawns` and
   breaks; mobs it spawned drop `misc/monster_box` when a player kills them.

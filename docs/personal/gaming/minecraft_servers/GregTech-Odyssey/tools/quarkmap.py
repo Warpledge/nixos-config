@@ -22,8 +22,11 @@ VANILLA = [
 # smithing template that takes a dye.
 OLD_ITEMS = [(r"(blank|rainbow|white|orange|magenta|light_blue|yellow|lime|pink|gray|light_gray|"
               r"cyan|purple|blue|brown|green|red|black)_rune", "smithing_template_rune")]
-# Quark's wraith and forgotten don't exist without Quark.
-ENTITIES = {"quark:wraith": "minecraft:stray", "quark:forgotten": "minecraft:skeleton"}
+# Quark entities quarkblocks registers under the same name; libgate drops any other
+# Quark entity a template places.
+OUR_ENTITIES = {"glass_frame", "wraith", "forgotten", "foxhound", "crab", "toretoise"}
+# Quark entities that become vanilla ones instead (none now; kept for a future swap).
+ENTITIES = {}
 
 # The Integrated mods whose templates and data name Quark ids.
 # "imm v" and "ibomd v" are Integrated Mowzie's Mobs and Integrated BOMD

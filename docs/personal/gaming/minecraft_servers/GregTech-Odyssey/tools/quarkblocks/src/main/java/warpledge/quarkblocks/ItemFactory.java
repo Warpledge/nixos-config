@@ -5,7 +5,10 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.MobBucketItem;
 import net.minecraft.world.item.RecordItem;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraftforge.common.ForgeSpawnEggItem;
 
 /** Builds one item from its items.json entry; gen.py picks the kind (ITEM_KINDS). */
 final class ItemFactory {
@@ -39,6 +42,11 @@ final class ItemFactory {
             case "torch_arrow" -> new TorchArrow.Item(p);
             case "soul_bead" -> new SoulBead.Item(p);
             case "rune" -> Runes.template();
+            case "glass_frame" -> new GlassItemFrame.FrameItem(p, id.startsWith("glowing_"));
+            case "spawn_egg" -> new ForgeSpawnEggItem(QuarkBlocks.mob(spec.get("mob").getAsString()),
+                    spec.getAsJsonArray("colors").get(0).getAsInt(), spec.getAsJsonArray("colors").get(1).getAsInt(), p);
+            case "crab_bucket" -> new MobBucketItem(QuarkBlocks.CRAB, () -> Fluids.WATER,
+                    QuarkBlocks.SOUND_BY_NAME.get("item.bucket.empty_crab"), p.stacksTo(1));
             default -> throw new IllegalArgumentException("unknown item kind in " + spec);
         };
     }

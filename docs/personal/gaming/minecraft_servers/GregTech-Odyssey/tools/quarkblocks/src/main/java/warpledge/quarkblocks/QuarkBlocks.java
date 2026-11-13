@@ -18,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.SignItem;
@@ -134,6 +135,27 @@ public class QuarkBlocks {
     public static final RegistryObject<EntityType<SoulBead>> SOUL_BEAD = ENTITIES.register("soul_bead",
             () -> EntityType.Builder.<SoulBead>of(SoulBead::new, MobCategory.MISC).sized(0F, 0F)
                     .clientTrackingRange(8).updateInterval(128).fireImmune().build("soul_bead"));
+    // Quark's id, so the templates' frames (quark:glass_frame) load as these.
+    public static final RegistryObject<EntityType<GlassItemFrame>> GLASS_FRAME = ENTITIES.register("glass_frame",
+            () -> EntityType.Builder.<GlassItemFrame>of(GlassItemFrame::new, MobCategory.MISC).sized(0.5F, 0.5F)
+                    .clientTrackingRange(10).updateInterval(Integer.MAX_VALUE).setShouldReceiveVelocityUpdates(false)
+                    .build("glass_frame"));
+    // Quark's mobs, under Quark's ids so the templates' spawners and placed mobs load.
+    public static final RegistryObject<EntityType<Wraith>> WRAITH = ENTITIES.register("wraith",
+            () -> EntityType.Builder.<Wraith>of(Wraith::new, MobCategory.MONSTER).sized(0.6F, 1.95F)
+                    .clientTrackingRange(8).fireImmune().build("wraith"));
+    public static final RegistryObject<EntityType<Forgotten>> FORGOTTEN = ENTITIES.register("forgotten",
+            () -> EntityType.Builder.<Forgotten>of(Forgotten::new, MobCategory.MONSTER).sized(0.7F, 2.4F)
+                    .clientTrackingRange(8).build("forgotten"));
+    public static final RegistryObject<EntityType<Foxhound>> FOXHOUND = ENTITIES.register("foxhound",
+            () -> EntityType.Builder.<Foxhound>of(Foxhound::new, MobCategory.CREATURE).sized(0.8F, 0.8F)
+                    .clientTrackingRange(8).fireImmune().build("foxhound"));
+    public static final RegistryObject<EntityType<Crab>> CRAB = ENTITIES.register("crab",
+            () -> EntityType.Builder.<Crab>of(Crab::new, MobCategory.CREATURE).sized(0.9F, 0.5F)
+                    .clientTrackingRange(8).build("crab"));
+    public static final RegistryObject<EntityType<Toretoise>> TORETOISE = ENTITIES.register("toretoise",
+            () -> EntityType.Builder.<Toretoise>of(Toretoise::new, MobCategory.CREATURE).sized(2F, 1F)
+                    .clientTrackingRange(8).fireImmune().build("toretoise"));
     static final DeferredRegister<RecipeSerializer<?>> RECIPES =
             DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, ID);
     public static final RegistryObject<RecipeSerializer<Runes.Recipe>> RUNE_RECIPE =
@@ -154,6 +176,11 @@ public class QuarkBlocks {
 
     public QuarkBlocks() {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        for (JsonElement e : readSpec("entities.json")) {
+            for (String s : strings(e.getAsJsonObject().getAsJsonArray("sounds"))) {
+                SOUND_BY_NAME.computeIfAbsent(s, QuarkBlocks::sound);
+            }
+        }
         for (JsonElement e : readSpec("items.json")) {
             JsonObject spec = e.getAsJsonObject();
             String id = spec.get("id").getAsString();
@@ -209,6 +236,7 @@ public class QuarkBlocks {
         POIS.register(bus);
         TABS.register(bus);
         bus.addListener(QuarkBlocks::commonSetup);
+        bus.addListener(QuarkBlocks::attributes);
         MinecraftForge.EVENT_BUS.register(MonsterBoxBlockEntity.Drops.class);
         MinecraftForge.EVENT_BUS.register(TroughFeeding.class);
         MinecraftForge.EVENT_BUS.register(QuarkItems.class);
@@ -221,6 +249,8 @@ public class QuarkBlocks {
         if (FMLEnvironment.dist.isClient()) {
             ClientSetup.register(bus);
             ClientItems.register(bus);
+            ClientEntities.register(bus);
+            ClientMobs.register(bus);
         }
     }
 
@@ -249,6 +279,25 @@ public class QuarkBlocks {
                 event.setCancellationResult(InteractionResult.sidedSuccess(level.isClientSide));
             });
         }
+    }
+
+    static java.util.function.Supplier<EntityType<? extends net.minecraft.world.entity.Mob>> mob(String id) {
+        return switch (id) {
+            case "wraith" -> WRAITH::get;
+            case "forgotten" -> FORGOTTEN::get;
+            case "foxhound" -> FOXHOUND::get;
+            case "crab" -> CRAB::get;
+            case "toretoise" -> TORETOISE::get;
+            default -> throw new IllegalArgumentException("no mob " + id);
+        };
+    }
+
+    private static void attributes(net.minecraftforge.event.entity.EntityAttributeCreationEvent event) {
+        event.put(WRAITH.get(), Wraith.attributes().build());
+        event.put(FORGOTTEN.get(), Forgotten.attributes().build());
+        event.put(FOXHOUND.get(), Wolf.createAttributes().build());
+        event.put(CRAB.get(), Crab.attributes().build());
+        event.put(TORETOISE.get(), Toretoise.attributes().build());
     }
 
     static RegistryObject<SoundEvent> sound(String name) {
