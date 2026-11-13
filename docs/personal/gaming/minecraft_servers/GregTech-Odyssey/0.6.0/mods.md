@@ -123,7 +123,7 @@ All of these are carried by `gto carry`, along with these configs:
 
 | File | Setting | Why |
 | --- | --- | --- |
-| `config/tectonic.json` | Defaults plus `ultrasmooth`, `elevation_boost` 0.2, `min_y`/`max_y` -128/544, `ocean_offset` -0.5, `continents_scale` 0.3, `ridge_scale` 0.3, `flat_terrain_skew` -0.1, `islands.enabled` false | Smoother, taller terrain with rare oceans and no islands, as in Cosmic Frontiers. Above -0.45, deep oceans and their monuments stop spawning. GT ores below -64 are unchecked |
+| `config/tectonic.json` | Tectonic 3.0.17's defaults (since 2026-11-12; checked against the jar's constants on 2026-11-13) | The Cosmic Frontiers-style tweaks first used here (`ultrasmooth`, height -128 to 544, fewer oceans, no islands) were dropped; terrain stays at vanilla height, so GT's ore layers sit where the pack expects |
 | `config/terrablender.toml` | `overworld_region_size` 4 | Smaller biome-mod regions, so they swap more often |
 | `config/biomeswevegone/world_generation.json` | 51 of dev27's 54 BWG biomes on; off: crimson_tundra, eroded_borealis, pumpkin_valley. Allium Shrubland, Amaranth Grassland and Rainbow Beach came back on 2026-11-12 (giant alliums give the petal blocks GTO turns into purple, pink and white wool; red wool's rose petal blocks are on Forgotten Forest's Florus trees). Eroded Borealis, off by BWG's default, was tried the same day and turned off again. Region weights 8 to 2 | At 8, BWG's 3 regions outweighed the vanilla region (10, where Terralith's biomes live) and the world was mostly BWG. At 1, BWG showed up in about 1% of 3,510 visited chunks (2026-11-08) |
 | `config/bettermineshafts-forge-1_20.toml` | `Enable Ore Deposits` false | Its deposits are vanilla ores outside GT's veins |
