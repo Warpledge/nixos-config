@@ -24,7 +24,6 @@
       ./security/auth/keyring.nix
       ./security/auth/sudo.nix
       ./security/hardening
-      ./security/kde-partitionmanager.nix
 
       #--- System Services
       ./services/desktop.nix
