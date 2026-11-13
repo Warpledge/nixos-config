@@ -63,9 +63,9 @@ NO_OVERLAP = [
     "minecraft:buried_treasure", "minecraft:nether_fossil",
 ] + [f"minecraft:ruined_portal{s}" for s in
      ("", "_desert", "_jungle", "_swamp", "_mountain", "_ocean", "_nether")]
-# Mods whose structures never generate. Maid Spell's loot and mobs name Iron's Spells
-# items, which the pack lacks, so its dungeons would be empty.
-DISABLED_NAMESPACES = ["touhou_little_maid_spell"]
+# Mods whose structures never generate. Maid Spell's were here until Iron's Spells,
+# which its loot and mobs name, came in.
+DISABLED_NAMESPACES = []
 
 #-- Scan
 

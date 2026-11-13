@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "M": {
+      "tag": "c:ingots/mithril"
+    },
+    "S": {
+      "item": "minecraft:chain"
+    },
+    "X": {
+      "item": "irons_spellbooks:mithril_scrap"
+    }
+  },
+  "pattern": [
+    " S ",
+    "SXS",
+    " M "
+  ],
+  "result": {
+    "count": 1,
+    "item": "irons_spellbooks:concentration_amulet"
+  }
+}

@@ -79,6 +79,7 @@ The [warpledge-gto datapack](../datapack/warpledge-gto/) replaces these recipes;
 | Illager Invasion | 1 | The imbuing table's 4 copper blocks become 2 copper plates and 2 LV circuits |
 | L_Ender's Cataclysm | 11 | Iron, gold and diamond become GT plates in the 5 boss eyes, Belt of Beginner and Netherite Effigy that use them, and in 6 recipes [Integrated Cataclysm](#integrated-structures-2026-11-12) replaces with Create ones (written even where nothing swaps, to put Cataclysm's crafting recipe back). Boss-drop gear stays |
 | Integrated Simply Swords | 15 | Its silver weapons, the only ones whose recipes load without Ice and Fire, Oreganized or Caverns and Chasms: GT silver plates and iron rods replace silver ingots and sticks |
+| Iron's Spells | 24 | Iron, gold, copper and diamond become GT plates; its mithril is GTOCore's MV Mithril ingot, and its own scrap-to-ingot and ore recipes are off ([Iron's Spells](#irons-spells-2026-11-12)). Netherite, chains, nuggets, amethyst and the alchemist cauldron inks stay |
 | Terralith | 5 | Its cheap piston, dispenser, observer, dropper and lever recipes from any stone are switched off, since GT replaces those vanilla recipes |
 
 **Tom's ranges** are per world in `serverconfig/toms_storage-server.toml`; the
@@ -380,9 +381,9 @@ Youkai's utensils cost iron ingots like Farmer's Delight's cooking pot.
 **Maid Spell stays at 1.8.0.1.** From 1.9.0 it's a bootstrap jar that registers a
 ModLauncher service (`maidspell_hurt_head`), and `gto_native` refuses unknown services,
 so the game stops before a crash report. 1.8.0.1 is the last plain jar. It's built for
-Iron's Spells, which the pack lacks: 18 of its loot entries name Iron's items and 3 name
-Youkai's, so [structures.py](../tools/structures.py) disables its structures
-(`DISABLED_NAMESPACES`) and its 4 mobs drop nothing.
+Iron's Spells: its structures' loot names 49 Iron's items, all of which 3.16.3 has.
+[structures.py](../tools/structures.py) kept them off (`DISABLED_NAMESPACES`) until
+[Iron's Spells](#irons-spells-2026-11-12) came in.
 
 **Two jars are patched** by [mixinpatch.py](../tools/mixinpatch.py), rerun after
 updating either: Maid Storage Manager's `JEIRecipeTransferHook` fails against the
@@ -412,8 +413,7 @@ log "task can not load" and "added for twice" lines at startup; both are harmles
 - `maid_storage_manager-common.toml`: crafting, collect and place speeds 1.0 (default
   0.5).
 
-Iron's Spells 'n Spellbooks (needs Iron's Lib) is on the todo list; adding it would let
-Maid Spell's structures back on.
+With Iron's Spells in (2026-11-12), Maid Spell's structures generate again.
 
 ## Alex's Mobs Continued (2026-11-12)
 
@@ -451,8 +451,8 @@ GTO loads only its own list of EMI and JEI plugins
 plugins never ran. Ten are now listed under `misc.enableEmiJeiExternalPlugins` in
 `config/gtocore.yaml` (each mod's EMI plugin where it has one, else its JEI plugin):
 Create, Supplementaries, Tom's Simple Storage, Touhou Little Maid, Maid Storage
-Manager, Maidsoul Kitchen, Cataclysm, Reliable Recipes, Reliable Remover and TrashSlot.
-They passed staging on 2026-11-12, with EMI loading and its search working. The file is
+Manager, Maidsoul Kitchen, Cataclysm, Reliable Recipes, Reliable Remover and TrashSlot,
+plus Iron's Spells' `JeiPlugin` since it came in. They passed staging on 2026-11-12, with EMI loading and its search working. The file is
 in `overlay.json`'s carry list. Three stay off:
 
 - **Youkai's Homecoming** (`YHJeiPlugin`): crashed the game on load. GTO loads listed
@@ -465,26 +465,52 @@ in `overlay.json`'s carry list. Three stay off:
 ## spark and Clumps (2026-11-12)
 
 Passed a staging trial on 2026-11-12. Both were checked first with `gto map --mod`:
-spark patches nothing, and Clumps only patches XP orbs.
+spark patches nothing, and Clumps only patches XP orbs. **spark was removed the same
+day** ([candidates.md](./candidates.md#skip) has why); Clumps stays.
 
 | Jar | Mod | What it does |
 | --- | --- | --- |
-| `spark-1.10.53-forge.jar` | spark | Profiler: `/spark profiler`, `/spark tps`, `/spark health` |
 | `Clumps-forge-1.20.1-12.0.0.4.jar` | Clumps | Merges nearby XP orbs into one |
 
-**spark's native profiler crashes Java 25.** With `backgroundProfiler` on (spark's
-default), world creation killed the JVM (`hs_err_pid*.log`: SIGSEGV in
-`libasyncProfiler.so`, `VMThread::nativeThreadId`) with no crash report.
-`config/spark/config.json` sets `"backgroundProfiler": false` and is in the carry
-list, and `gto server` copies it with the rest of `config/`. **Always profile with
-`/spark profiler start --force-java-sampler`**; without the flag spark uses the same
-native profiler and crashes the same way.
+spark's native profiler also crashed Java 25: with `backgroundProfiler` on (its
+default), world creation killed the JVM (SIGSEGV in `libasyncProfiler.so`) with no
+crash report. If it comes back, set `"backgroundProfiler": false` in
+`config/spark/config.json` and profile with `/spark profiler start --force-java-sampler`.
 
 The trial's two-minute profile ([report](https://spark.lucko.me/B0mnQ0C3Z9)) had a
 median tick of 3.9 ms (5.4 ms over five minutes) and a 95th percentile of 13 to 22 ms;
 the 2.8 s worst tick was world creation. Block entity ticking took 36% of tick time,
 led by Supplementaries hourglasses (5.7%) and Create machines (3.6%), likely placed by
 the Integrated structures near spawn.
+
+## Iron's Spells (2026-11-12)
+
+Passed two staging trials on 2026-11-12, the second with the overrides below. `gto map
+--mod` found no ModLauncher service and no mixin GTO overwrites; Curios, GeckoLib and
+Player Animator already ship in dev27. Taken from the Integrated MC instance.
+
+| Jar | Mod | What it does |
+| --- | --- | --- |
+| `irons_spellbooks-1.20.1-3.16.3.jar` | Iron's Spells 'n Spellbooks | Spells, spell books, scrolls and inks, mage armour, curios, bosses and 9 structure sets (towers, catacombs, a citadel) |
+| `irons_lib-1.20.1-2.2.0.jar` | Iron's Lib | Its required library |
+
+**Mithril is GTOCore's.** GTOCore has its own MV Mithril, which Iron's recipes don't
+accept (its parts are under `c:`, Iron's asks for `forge:ingots/mithril`). So Iron's
+mithril recipes take GTOCore's ingot, its mithril ore is off (a `forge:none` biome
+modifier), and `reliable/reliable_remover/irons_spellbooks.json` hides its ore, raw
+mithril and ingot. Mithril scrap, which most rings and curios need, comes from blasting
+GTOCore's ingot or salvaging Iron's gear. All of it is written by
+[gregify.py](../tools/gregify.py) (`IRONS_*`), with the plate swaps in
+[Recipe overrides](#recipe-overrides).
+
+**Two loot tables are rewritten for 1.20.1**: 3.16.3 ships `chests/catacombs/crypt_loot`
+with a 1.21 table reference (`value` for `name`) and `chests/citadel/citadel_tomes`
+with 1.21's `set_written_book_pages`, so neither loaded. gregify.py rewrites both from
+the jar (the tome pages go in through `set_nbt`).
+
+Its JEI plugin is listed in `gtocore.yaml` ([EMI and JEI plugins](#emi-and-jei-plugins-2026-11-12)).
+Harmless log lines: EMF gives up on the pyrium staff's two model parts, and Maid
+Storage Manager logs `cooked_ice_spider_egg_from_campfire_cooking` as added twice.
 
 ## Overlay
 

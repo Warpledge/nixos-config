@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "AAA",
+    " D ",
+    "SVS"
+  ],
+  "key": {
+    "D": {
+      "tag": "c:plates/diamond"
+    },
+    "V": {
+      "item": "minecraft:anvil"
+    },
+    "S": {
+      "item": "minecraft:polished_deepslate"
+    },
+    "A": {
+      "item": "minecraft:amethyst_block"
+    }
+  },
+  "result": {
+    "item": "irons_spellbooks:arcane_anvil",
+    "count": 1
+  }
+}

@@ -166,7 +166,7 @@ sessions in staging before deciding.
 | YUNG's Better Strongholds | Replaces the stronghold eyes of ender lead to; dev27's End Remastered patches stronghold pieces for its own eyes and portal frames, which gate the End |
 | Diagonal Walls, Windows, Fences | Their `diagonalblocks` 8.0.6 throws `target block tags not empty` on the second tag reload (staging, 2026-11-07): the first world loads, but EMI never gets its data, and leaving to the title and loading or creating any world crashes |
 | Alex's Mobs 1.22.9, Citadel 2.6.3, Domestication Innovation 1.7.1, Alex's Mobs Interaction, Alex's Delight | With Alex's Mobs and Citadel on, EMI's reload fails every time with a `NullPointerException` in gtolib's recipe baking; with them off it loads (staging, 2026-11-08). **Back since 2026-11-12** as Alex's Mobs Continued with its brewing patched, plus Citadel, Domestication Innovation and Continued Delight ([mods.md](./mods.md#alexs-mobs-continued-2026-11-12)); Interaction wasn't retried |
-| Celestisynth 1.3.4 | Dropped after a look in staging (2026-11-08). Its `RecipeManagerAccessor` mixin also clashes with ExtendedAE's, and its spellbook needs Iron's Spellbooks, which GTO lacks |
+| Celestisynth 1.3.4 | Dropped after a look in staging (2026-11-08). Its `RecipeManagerAccessor` mixin also clashes with ExtendedAE's, and its spellbook needs Iron's Spellbooks (in main since 2026-11-12; Celestisynth wasn't retried) |
 | YUNG's Cave Biomes | Worldgen crashed on a chest or pod placed `facing=down` (in `MonsterRoomFeature` and Ars Nouveau trees); the other YUNG's structure mods load fine without it (staging, 2026-11-08) |
 | Biomes O' Plenty | Shares 8 wood names with BWG, so GTO generates duplicate GT recipe ids (e.g. `gtceu:lathe/strip_willow_log`) and EMI fails to load (staging, 2026-11-07) |
 | William Wythers' Overhauled Overworld | Doesn't work well with BWG's biomes (staging, 2026-11-07); Terralith kept instead |
@@ -177,6 +177,8 @@ sessions in staging before deciding.
 | AmbientSounds | Added to main on 2026-11-07, removed on 2026-11-08 |
 | Sounds, MRU, Particle Core | Added to main on 2026-11-07, removed on 2026-11-08 with Particular, which came back on 2026-11-12. YACL, added for Sounds and MRU, is still in |
 | Structurify 2.0.43, global flatness check | Added to main on 2026-11-08 with a global flatness check (structures skip steep ground), removed the same day for a reason not recorded. Its in-game screen didn't save. **Back since 2026-11-12** without the flatness check ([structure-spacing.md](./structure-spacing.md)) |
+| spark 1.10.53 | Added to main on 2026-11-12 and removed the same day: leaving a world and loading another in the same session crashes the client, because dev27's FastEvents keeps calling spark's permission listener after spark unregisters it (`NullPointerException` in `ForgeServerSparkPlugin.onPermissionGather`, staging) |
+| From the Fog Reimagined's mods | Its horror mods (stalkers, horror structures and biomes, ambience) were looked at on 2026-11-12 and none are wanted |
 | Chunky | Distant Horizons 3.3.3 calls into Chunky while a new world's spawn chunks generate, before Chunky has started (on `ServerStartingEvent`), so creating a world crashes (staging, 2026-11-07). DH's `chunkGeneratorMode = "INTERNAL_SERVER"` with `SURFACE_THEN_CHUNKS` saves the chunks it generates, which does the pregen instead |
 
 ## Sources

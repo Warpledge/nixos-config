@@ -17,7 +17,7 @@ which is why this world runs on a dev build instead of waiting for beta.
 
 - [java-and-launch.md](./java-and-launch.md): Java, Prism's JVM args and memory
 - [difficulty-rules.md](./difficulty-rules.md): the Custom preset, every rule changed and why
-- [mods.md](./mods.md): the six jars added by hand
+- [mods.md](./mods.md): the jars added by hand
 - [candidates.md](./candidates.md): the Cosmic Frontiers mods sorted by risk for trials
 - [structure-spacing.md](./structure-spacing.md): Structurify's overlap prevention and
   spacing tiers, and how to fit a new structure mod in
