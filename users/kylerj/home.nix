@@ -28,6 +28,8 @@
   syncedSkills = ["tmodloader"];
   syncedLinks = "${config.home.homeDirectory}/.local/share/opencode-synced-skills";
 in {
+  imports = [./app-manager];
+
   #--------------------------------------------------------------------#
   #-- Helium Theme
   #--------------------------------------------------------------------#
