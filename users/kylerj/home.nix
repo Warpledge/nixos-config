@@ -38,6 +38,14 @@ in {
   };
 
   #--------------------------------------------------------------------#
+  #-- Shell
+  #--------------------------------------------------------------------#
+  #--- SHELL must stay in /etc/shells across rebuilds: zsh.nix pins the store
+  #--- path of the build that started the session, which pkexec refuses once a
+  #--- switch moves it, breaking Omni Settings' rebuild until re-login
+  home.sessionVariables.SHELL = lib.mkForce "/run/current-system/sw/bin/zsh";
+
+  #--------------------------------------------------------------------#
   #-- Agent Rules and Skills
   #--------------------------------------------------------------------#
   #--- ~/.config/opencode/AGENTS.md, read in every project
