@@ -271,6 +271,12 @@
       cache = "q8_0";
       context = 262144;
       dir = "unsloth/gemma-4-12B-it-qat-GGUF";
+      fast = {
+        chat_template_kwargs.enable_thinking = false;
+        temperature = 1.0;
+        top_k = 64;
+        top_p = 0.95;
+      };
       gpuLayers = "all";
       match = "gemma-4-12B-it-qat-UD-Q4_K_XL.gguf";
       name = "gemma 4 12B it qat";
