@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.PressurePlateBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.WallBlock;
@@ -60,6 +61,13 @@ final class BlockFactory {
             case "pressure_plate" -> new PressurePlateBlock(
                     PressurePlateBlock.Sensitivity.MOBS, p.noCollission(), blockSet(set));
             case "cluster" -> new AmethystClusterBlock(7, 3, p.noOcclusion());
+            case "hedge" -> new HedgeBlock(p);
+            case "post" -> new WoodPostBlock(p);
+            case "vertical_slab" -> spec.has("copper")
+                    ? new CopperVerticalSlabBlock(p, spec.get("id").getAsString())
+                    : new VerticalSlabBlock(p);
+            case "stool" -> new StoolBlock(p.sound(SoundType.WOOD).strength(0.2F).noOcclusion());
+            case "leaf_carpet" -> new LeafCarpetBlock(base.defaultMapColor());
             case "monster_box" -> new MonsterBoxBlock(p.noOcclusion());
             case "props" -> PropsBlock.create(spec, p.noOcclusion());
             default -> throw new IllegalArgumentException("unknown kind in " + spec);

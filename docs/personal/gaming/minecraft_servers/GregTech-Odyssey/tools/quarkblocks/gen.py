@@ -7,7 +7,7 @@ Usage:
 Takes every Quark block the Integrated mods' templates and data name (minus the ones
 quarkmap.VANILLA sends to vanilla blocks), and writes into src/generated/resources/:
 blocks.json (kind, properties, the vanilla block whose properties it copies, render
-layer), Quark's blockstates, models, textures, names, block loot tables and vanilla
+layer, colour source), Quark's blockstates, models, textures, names, block loot tables and vanilla
 tags renamed to quarkblocks:, and the monster box's loot tables and sound. Quark's
 assets are CC BY-NC-SA 3.0, so this folder stays out of git. build.py runs this.
 """
@@ -39,7 +39,10 @@ COPY = [
     (r".*(corundum|crystal).*", "minecraft:amethyst_block"),
     (r".*(glass|paper_wall).*", "minecraft:glass"),
     (r".*(lantern|lamp).*", "minecraft:glowstone"),
-    (rf".*(blossom|{WOODS})_(leaves|hedge|leaf_carpet)|.*_hedge", "minecraft:oak_leaves"),
+    # Quark's hedges copy their wood's fence; leaf carpets build their own properties.
+    (r"(cherry|.*blossom)_hedge", "minecraft:cherry_fence"),
+    (r".*_hedge", "minecraft:oak_fence"),
+    (rf".*(blossom|{WOODS})_(leaves|leaf_carpet)", "minecraft:oak_leaves"),
     (r".*bookshelf", "minecraft:bookshelf"),
     (r"(cherry|blossom).*", "minecraft:cherry_planks"),
     (r"(bamboo).*", "minecraft:bamboo_planks"),
@@ -75,8 +78,7 @@ COPY = [
 SETS = [("cherry|blossom", "cherry"), ("bamboo", "bamboo"), ("crimson|warped", "crimson"),
         ("iron", "iron"), ("gold", "gold"), ("obsidian|stone", "stone")]
 # PropsBlock shapes by id; anything else in PropsBlock is a full block.
-SHAPES = [(r".*_vertical_slab", "vertical_slab"), (r".*_post", "post"), (r"iron_rod", "rod"),
-          (r"pipe", "pipe"), (r".*_stool", "stool"), (r"potted_.*", "pot"),
+SHAPES = [(r"iron_rod", "rod"), (r"pipe", "pipe"), (r"potted_.*", "pot"),
           (r"redstone_randomizer|bamboo_mat_carpet", "thin"),
           (r"glow_shroom|glow_lichen_growth|.*_sapling|tiny_potato|rope", "cross")]
 CUTOUT = re.compile(r".*(glass|leaves|hedge|leaf_carpet|ladder|door|trapdoor|cluster|potted_|"
@@ -84,6 +86,15 @@ CUTOUT = re.compile(r".*(glass|leaves|hedge|leaf_carpet|ladder|door|trapdoor|clu
                     r"iron_rod|lantern).*")
 TRANSLUCENT = re.compile(r".*(framed_glass|corundum(?!_cluster)|dirty_glass|crystal).*")
 LIGHT = {"orange_crystal_lamp": 15}
+# Colour source for blocks whose models are tinted: Quark's named colour providers.
+# A block id copies that block's colour; "myalite" is Quark's position-based hue.
+TINT = [(r"myalite.*", "myalite"),
+        (r"(ancient|.+_blossom)_(hedge|leaf_carpet)", rf"{NS}:\1_leaves"),
+        (r"(.+)_(hedge|leaf_carpet)", r"minecraft:\1_leaves")]
+COPPER = re.compile(r"(waxed_)?((exposed|weathered|oxidized)_)?cut_copper_vertical_slab")
+# Neighbour-aware Quark classes, ported to Java; matched before kind()'s other rules.
+OWN_KINDS = [(r".*_vertical_slab", "vertical_slab"), (r".*_hedge", "hedge"),
+             (r".*_post", "post"), (r".*_stool", "stool"), (r".*_leaf_carpet", "leaf_carpet")]
 
 
 def first(table, qid, default=None):
@@ -97,12 +108,12 @@ def kind(qid, props):
     keys = set(props)
     if qid == "monster_box":
         return "monster_box"
-    if qid.endswith("_vertical_slab"):
-        return "props"
+    if own := first(OWN_KINDS, qid):
+        return own
     for suffix, k in (("_slab", "slab"), ("_stairs", "stairs"), ("_wall", "wall"),
                       ("_fence_gate", "fence_gate"), ("_fence", "fence"), ("_trapdoor", "trapdoor"),
                       ("_door", "door"), ("_button", "button"), ("_pressure_plate", "pressure_plate"),
-                      ("_ladder", "ladder"), ("_leaves", "leaves"), ("_leaf_carpet", "carpet"),
+                      ("_ladder", "ladder"), ("_leaves", "leaves"),
                       ("_corundum_cluster", "cluster")):
         if qid.endswith(suffix) and not (k == "wall" and "up" not in keys):
             return k
@@ -127,6 +138,8 @@ def spec(qid, props):
         s["shape"] = first(SHAPES, qid, "full")
     if qid in LIGHT:
         s["light"] = LIGHT[qid]
+    if COPPER.fullmatch(qid):
+        s["copper"] = True
     if TRANSLUCENT.fullmatch(qid):
         s["render"] = "translucent"
     elif CUTOUT.fullmatch(qid):
@@ -213,6 +226,32 @@ def model_refs(model):
     tex = [v for v in (model.get("textures") or {}).values()
            if isinstance(v, str) and not v.startswith("#")]
     return parent, tex
+
+
+def tinted(qid):
+    """Whether any model the block's blockstate uses (or its parents) has a tintindex."""
+    bs = (OUT / f"assets/{NS}/blockstates/{qid}.json").read_text()
+    todo, seen = re.findall(rf'"{NS}:(block/[a-z0-9_/]+)"', bs), set()
+    while todo:
+        m = todo.pop()
+        if m in seen or not (f := OUT / f"assets/{NS}/models/{m}.json").exists():
+            continue
+        seen.add(m)
+        text = f.read_text()
+        parent = json.loads(text).get("parent")
+        if "tintindex" in text or parent == "minecraft:block/leaves":
+            return True
+        if isinstance(parent, str) and parent.startswith(f"{NS}:"):
+            todo.append(parent.split(":", 1)[1])
+    return False
+
+
+def tint(qid):
+    for pat, src in TINT:
+        if re.fullmatch(pat, qid):
+            return re.sub(pat, src, qid) if "\\" in src else src
+    print(f"warning: {qid} has a tinted model but no TINT rule", file=sys.stderr)
+    return None
 
 
 def copy_assets(quark, zeta, ids):
@@ -317,8 +356,13 @@ def main():
         sys.exit(f"no Integrated jars in {a.mods}")
     names = set(quark.namelist())
     named = quarkmap.used_ids(jars) | {"monster_box"}
-    ids = sorted(q for q in named if quarkmap.vanilla(q) is None
-                 and f"assets/quark/blockstates/{q}.json" in names)
+    ids = {q for q in named if quarkmap.vanilla(q) is None
+           and f"assets/quark/blockstates/{q}.json" in names}
+    # A copper vertical slab weathers and waxes into its siblings, so all of them exist.
+    if any(COPPER.fullmatch(q) for q in ids):
+        ids |= {f"{w}{a}cut_copper_vertical_slab" for w in ("", "waxed_")
+                for a in ("", "exposed_", "weathered_", "oxidized_")}
+    ids = sorted(q for q in ids if f"assets/quark/blockstates/{q}.json" in names)
     print(f"{len(ids)} blocks; {len(named) - len(ids)} other ids (items, mobs, vanilla-mapped)")
     tprops = template_props(jars, set(ids))
     if OUT.exists():
@@ -334,10 +378,13 @@ def main():
             if a_ in props or a_ == "waterlogged":
                 props.setdefault(a_, set()).update(vals)
         specs.append(spec(q, {k: sorted(v) for k, v in sorted(props.items())}))
-    (OUT / NS / "blocks.json").write_text(json.dumps(specs, indent=1))
     (OUT / "pack.mcmeta").write_text(json.dumps(PACK))
     copy_assets(quark, zeta, ids)
     copy_data(quark, set(ids))
+    for s in specs:
+        if tinted(s["id"]) and (src := tint(s["id"])):
+            s["tint"] = src
+    (OUT / NS / "blocks.json").write_text(json.dumps(specs, indent=1))
     counts = {}
     for s in specs:
         counts[s["kind"]] = counts.get(s["kind"], 0) + 1

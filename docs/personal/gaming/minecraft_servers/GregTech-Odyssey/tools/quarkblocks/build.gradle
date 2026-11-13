@@ -13,6 +13,14 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 minecraft {
     mappings channel: 'official', version: minecraft_version
+    // `gradle runServer`: a bare Forge server with only this mod, to catch load crashes.
+    runs {
+        server {
+            workingDirectory project.file('run')
+            args '--nogui'
+            mods { quarkblocks { source sourceSets.main } }
+        }
+    }
 }
 
 sourceSets.main.resources.srcDir 'src/generated/resources'

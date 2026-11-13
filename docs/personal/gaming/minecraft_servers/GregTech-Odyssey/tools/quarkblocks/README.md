@@ -16,6 +16,10 @@ python3 -I build.py <Quark jar> <mods folder> [--zeta <Zeta jar>]
 `build/libs/quarkblocks-<version>.jar` into the mods folder. Then rerun
 [libgate.py](../libgate.py), which renames the structures' Quark blocks to these.
 
+To check the mod loads, `gradle runServer` in `nix-shell -p jdk17 gradle_8` starts a bare
+Forge server with only this mod in `run/` (gitignored); with `enable-rcon` in its
+`server.properties`, `setblock` and `execute if block` over RCON test block behaviour.
+
 `gen.py` reads the Integrated mods' jars in the mods folder for every Quark id they name,
 skips the ones [quarkmap.py](../quarkmap.py) turns into vanilla blocks (variant chests,
 furnaces, crate, sign), and writes `src/generated/resources/`: `blocks.json` and Quark's
@@ -24,12 +28,15 @@ to `quarkblocks:`.
 
 ## What's in it
 
-- 513 blocks. Each block uses a vanilla class where Quark's shape is a vanilla one
-  (slabs, stairs, walls, panes, fences, doors, leaves, clusters). `PropsBlock` covers
-  the rest (vertical slabs, posts, hedges, stools, pipes, potted plants), with the
-  properties of Quark's current blockstate. Older Quark properties some templates carry
-  are left out, since they multiplied the posts to 280,000 states each and stalled
-  model loading.
+- 515 blocks. Each block uses a vanilla class where Quark's shape is a vanilla one
+  (slabs, stairs, walls, panes, fences, doors, leaves, clusters). Hedges, posts,
+  vertical slabs, stools and leaf carpets are ports of Quark's classes: hedges join
+  hedges, posts join chains, hanging lanterns and other posts, stools seat a player and
+  grow tall under a block, and the cut copper vertical slabs weather, scrape and wax (all
+  eight, so each stage exists). `PropsBlock` covers the rest (pipes, rods, potted plants)
+  with the properties of Quark's current blockstate.
+- Hedges, leaf carpets and myalite are tinted as in Quark: hedges and carpets copy their
+  leaves' colour, myalite's hue drifts with position.
 - Block properties (sound, strength, map colour) are copied from a similar vanilla
   block. The copy list in `gen.py` avoids blocks whose light or other functions read
   their own properties, which these blocks don't have.
