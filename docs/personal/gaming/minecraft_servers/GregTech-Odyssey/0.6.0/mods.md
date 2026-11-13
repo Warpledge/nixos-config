@@ -214,10 +214,10 @@ themselves, so a fresh download needs `libgate.py` rerun before it loads. It als
 writes the `warpledge-gto-integrated` Open Loader pack (gitignored): their 812 templates
 and 161 data files that name Quark, renamed to `quarkblocks:`, plus all of Integrated
 Dungeons Arise's, Integrated Cataclysm's, Integrated Mowzie's Mobs' and Integrated
-BOMD's other data. Quark's variant chests, furnaces,
-crate and blossom sign become the vanilla blocks, keeping their loot and text; its wraith
-and forgotten mobs become a stray and a skeleton; 760 Quark entities such as glass item
-frames are dropped.
+BOMD's other data. Quark's variant chests, furnaces, crate and blossom sign are real
+quarkblocks blocks under Quark's block entity ids (since 2026-11-13), so their loot,
+contents and text load as placed; its wraith and forgotten mobs become a stray and a
+skeleton; 760 Quark entities such as glass item frames are dropped.
 The same pack holds the village tag fix: Integrated Villages 1.3.2 names a
 `swamp_village` it doesn't ship, which fails the whole `#minecraft:village` tag, so
 every entry is made optional.

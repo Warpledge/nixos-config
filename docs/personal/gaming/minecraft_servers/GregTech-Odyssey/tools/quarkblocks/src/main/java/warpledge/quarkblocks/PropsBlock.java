@@ -10,7 +10,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.AttachFace;
@@ -50,10 +53,36 @@ public class PropsBlock extends Block {
         JsonObject p = spec.getAsJsonObject("props");
         for (String name : p.keySet()) list.add(property(name, Set.copyOf(QuarkBlocks.strings(p.getAsJsonArray(name)))));
         PENDING.set(list);
+        String shape = spec.has("shape") ? spec.get("shape").getAsString() : "full";
         try {
-            return new PropsBlock(props, spec.has("shape") ? spec.get("shape").getAsString() : "full");
+            return spec.get("kind").getAsString().equals("keeper")
+                    ? new Keeper(props, shape, spec.get("id").getAsString())
+                    : new PropsBlock(props, shape);
         } finally {
             PENDING.remove();
+        }
+    }
+
+    /** A look-only machine whose block entity keeps the template's data (KeeperBlockEntity). */
+    static final class Keeper extends PropsBlock implements EntityBlock {
+        private final String id;
+
+        private Keeper(Properties props, String shape, String id) {
+            super(props, shape);
+            this.id = id;
+        }
+
+        @Override
+        public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+            return new KeeperBlockEntity(QuarkBlocks.KEEPERS.get(id).get(), pos, state);
+        }
+
+        @Override
+        public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moving) {
+            if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof KeeperBlockEntity k) {
+                k.dropItems(level, pos);
+            }
+            super.onRemove(state, level, pos, newState, moving);
         }
     }
 
