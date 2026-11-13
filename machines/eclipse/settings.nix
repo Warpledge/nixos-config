@@ -171,7 +171,7 @@
 
   #--- Kernel Selection
   # Options: "zen" | "latest" | "xanmod" | "cachyos"
-  kernel = "zen";
+  kernel = "latest";
 
   #--- Mouse Cursor
   # Options: "bibata" | "catppuccin"

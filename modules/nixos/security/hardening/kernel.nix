@@ -45,61 +45,66 @@
     #-- Kernel Sysctls Configuration
     #--------------------------------------------------------------------#
     kernel = {
-      sysctl = {
-        "kernel.sysrq" = 0; # Disable magic SysRq key
-        "net.ipv4.icmp_ignore_bogus_error_responses" = 1;
-        "net.ipv4.conf.default.rp_filter" = 1; # Drop spoofed source addresses
-        "net.ipv4.conf.all.rp_filter" = 1;
-        "net.ipv4.conf.all.accept_source_route" = 0;
-        "net.ipv6.conf.all.accept_source_route" = 0;
-        "net.ipv4.conf.all.send_redirects" = 0;
-        "net.ipv4.conf.default.send_redirects" = 0;
-        "net.ipv4.conf.all.accept_redirects" = 0; # No ICMP redirects (MITM)
-        "net.ipv4.conf.default.accept_redirects" = 0;
-        "net.ipv4.conf.all.secure_redirects" = 0;
-        "net.ipv4.conf.default.secure_redirects" = 0;
-        "net.ipv6.conf.all.accept_redirects" = 0;
-        "net.ipv6.conf.default.accept_redirects" = 0;
-        "net.ipv4.tcp_syncookies" = 1; # SYN flood protection
-        "net.ipv4.tcp_rfc1337" = 1; # TIME-WAIT assassination protection
-        "net.ipv4.tcp_fastopen" = 3; # TCP Fast Open (both directions)
-        "net.ipv4.tcp_congestion_control" = "bbr";
-        "net.core.default_qdisc" = "cake"; # CAKE qdisc, against bufferbloat
-        "net.core.rmem_default" = 262144; # Default RX buffer
-        "net.core.rmem_max" = 134217728; # Max RX buffer
-        "net.core.wmem_default" = 262144; # Default TX buffer
-        "net.core.wmem_max" = 134217728; # Max TX buffer
-        "net.ipv4.tcp_rmem" = "4096 131072 134217728"; # TCP RX buffer sizes
-        "net.ipv4.tcp_wmem" = "4096 65536 134217728"; # TCP TX buffer sizes
-        "net.ipv4.tcp_window_scaling" = 1;
-        "net.ipv4.tcp_timestamps" = 1;
-        "net.ipv4.tcp_sack" = 1; # Selective Acknowledgment
-        "net.ipv4.tcp_fack" = 1; # Forward Acknowledgment
-        "net.ipv4.tcp_low_latency" = 1;
-        "net.ipv4.tcp_adv_win_scale" = 1;
-        "net.ipv4.tcp_fin_timeout" = 15; # Reduce TIME_WAIT sockets
-        "net.ipv4.tcp_tw_reuse" = 1; # Reuse TIME_WAIT sockets
-        "vm.dirty_ratio" = 10; # Dirty memory threshold (%)
-        "vm.dirty_background_ratio" = 5; # Background writeback threshold (%)
-        "net.core.netdev_budget" = 600; # NAPI budget
-        "net.core.netdev_max_backlog" = 16384; # NIC backlog queue
-        "net.ipv4.tcp_no_metrics_save" = 1;
-        "net.ipv4.tcp_moderate_rcvbuf" = 1; # Moderate RX buffer
-        "kernel.kptr_restrict" = 2; # Hide kernel pointers from unprivileged users
-        "kernel.ftrace_enabled" = false;
-        "kernel.dmesg_restrict" = 1;
-        "fs.protected_fifos" = 2; # Protect FIFOs from untrusted writers
-        "fs.protected_regular" = 2; # Protect regular files from untrusted writers
-        "fs.suid_dumpable" = 0; # Disable core dumps for setuid programs
-        "net.core.bpf_jit_harden" = 2; # Harden BPF JIT compiler
-        "kernel.unprivileged_bpf_disabled" = 1; # No unprivileged BPF (LPE risk)
-        "kernel.io_uring_disabled" = 2; # LPE risk; libuv falls back to plain epoll
-        "kernel.core_uses_pid" = 1; # Append PID to core filenames
-        "kernel.randomize_va_space" = 2; # Full ASLR
-        "vm.mmap_rnd_bits" = 32; # ASLR entropy for mmap
-        "vm.mmap_rnd_compat_bits" = 16; # ASLR entropy for compat mmap
-        "dev.tty.ldisc_autoload" = 0; # Disable TTY line discipline autoloading
-      };
+      sysctl =
+        {
+          "kernel.sysrq" = 0; # Disable magic SysRq key
+          "net.ipv4.icmp_ignore_bogus_error_responses" = 1;
+          "net.ipv4.conf.default.rp_filter" = 1; # Drop spoofed source addresses
+          "net.ipv4.conf.all.rp_filter" = 1;
+          "net.ipv4.conf.all.accept_source_route" = 0;
+          "net.ipv6.conf.all.accept_source_route" = 0;
+          "net.ipv4.conf.all.send_redirects" = 0;
+          "net.ipv4.conf.default.send_redirects" = 0;
+          "net.ipv4.conf.all.accept_redirects" = 0; # No ICMP redirects (MITM)
+          "net.ipv4.conf.default.accept_redirects" = 0;
+          "net.ipv4.conf.all.secure_redirects" = 0;
+          "net.ipv4.conf.default.secure_redirects" = 0;
+          "net.ipv6.conf.all.accept_redirects" = 0;
+          "net.ipv6.conf.default.accept_redirects" = 0;
+          "net.ipv4.tcp_syncookies" = 1; # SYN flood protection
+          "net.ipv4.tcp_rfc1337" = 1; # TIME-WAIT assassination protection
+          "net.ipv4.tcp_fastopen" = 3; # TCP Fast Open (both directions)
+          "net.ipv4.tcp_congestion_control" = "bbr";
+          "net.core.default_qdisc" = "cake"; # CAKE qdisc, against bufferbloat
+          "net.core.rmem_default" = 262144; # Default RX buffer
+          "net.core.rmem_max" = 134217728; # Max RX buffer
+          "net.core.wmem_default" = 262144; # Default TX buffer
+          "net.core.wmem_max" = 134217728; # Max TX buffer
+          "net.ipv4.tcp_rmem" = "4096 131072 134217728"; # TCP RX buffer sizes
+          "net.ipv4.tcp_wmem" = "4096 65536 134217728"; # TCP TX buffer sizes
+          "net.ipv4.tcp_window_scaling" = 1;
+          "net.ipv4.tcp_timestamps" = 1;
+          "net.ipv4.tcp_sack" = 1; # Selective Acknowledgment
+          "net.ipv4.tcp_fack" = 1; # Forward Acknowledgment
+          "net.ipv4.tcp_low_latency" = 1;
+          "net.ipv4.tcp_adv_win_scale" = 1;
+          "net.ipv4.tcp_fin_timeout" = 15; # Reduce TIME_WAIT sockets
+          "net.ipv4.tcp_tw_reuse" = 1; # Reuse TIME_WAIT sockets
+          "vm.dirty_ratio" = 10; # Dirty memory threshold (%)
+          "vm.dirty_background_ratio" = 5; # Background writeback threshold (%)
+          "net.core.netdev_budget" = 600; # NAPI budget
+          "net.core.netdev_max_backlog" = 16384; # NIC backlog queue
+          "net.ipv4.tcp_no_metrics_save" = 1;
+          "net.ipv4.tcp_moderate_rcvbuf" = 1; # Moderate RX buffer
+          "kernel.kptr_restrict" = 2; # Hide kernel pointers from unprivileged users
+          "kernel.dmesg_restrict" = 1;
+          "fs.protected_fifos" = 2; # Protect FIFOs from untrusted writers
+          "fs.protected_regular" = 2; # Protect regular files from untrusted writers
+          "fs.suid_dumpable" = 0; # Disable core dumps for setuid programs
+          "net.core.bpf_jit_harden" = 2; # Harden BPF JIT compiler
+          "kernel.unprivileged_bpf_disabled" = 1; # No unprivileged BPF (LPE risk)
+          "kernel.io_uring_disabled" = 2; # LPE risk; libuv falls back to plain epoll
+          "kernel.core_uses_pid" = 1; # Append PID to core filenames
+          "kernel.randomize_va_space" = 2; # Full ASLR
+          "vm.mmap_rnd_bits" = 32; # ASLR entropy for mmap
+          "vm.mmap_rnd_compat_bits" = 16; # ASLR entropy for compat mmap
+          "dev.tty.ldisc_autoload" = 0; # Disable TTY line discipline autoloading
+        }
+        # 7.3 deprecated ftrace_enabled: writing 0 fails and takes systemd-sysctl down
+        // lib.optionalAttrs
+        (lib.versionOlder config.boot.kernelPackages.kernel.version "7.3") {
+          "kernel.ftrace_enabled" = false;
+        };
     };
 
     #--------------------------------------------------------------------#
