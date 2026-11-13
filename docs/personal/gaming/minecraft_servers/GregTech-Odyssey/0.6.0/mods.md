@@ -390,9 +390,12 @@ button unloadable, and Youkai's `CriterionGridMixin` wrapped a call Better Advan
 0.6.0.73 doesn't make and crashed the game on launch.
 
 **Maidsoul Kitchen can't run Youkai's kettle or fermentation tank**: it calls 9 methods
-Youkai's 2.7.2 no longer has, blocks those tasks and warned on every world load until
-`YhcTeaKettleTaskEnabled` and `YhcFermentationTaskEnabled` were set false in
-`maidsoulkitchen-common.toml`. The rest of its tasks work. It and Maid Storage Manager
+Youkai's 2.7.2 no longer has (its kettle accessor wants a `MAP` field that 2.6.1
+lacks too), and blocks those tasks. `YhcTeaKettleTaskEnabled` and
+`YhcFermentationTaskEnabled` are false in `maidsoulkitchen-common.toml`, but its Maid
+Storage Manager kettle and fermentation tasks have no toggle, so it still posts a chat
+warning at every login; nothing switches that off. Kept anyway, since the rest of its
+tasks work. It and Maid Storage Manager
 log "task can not load" and "added for twice" lines at startup; both are harmless.
 
 **Configs**, all carried by `gto carry`:
