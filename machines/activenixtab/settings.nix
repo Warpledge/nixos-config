@@ -36,6 +36,11 @@
           name = "Obsidian";
           translucent = true;
         };
+        custom-io-github-kylerj-apps = {
+          name = "io.github.kylerj.Apps";
+          matches = [{app-id = "^io\\.github\\.kylerj\\.Apps$";}];
+          translucent = true;
+        };
       };
       claude.mods.usageBand = false;
       claude.mods.skins = false;
