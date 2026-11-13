@@ -6,7 +6,7 @@
 // session runs on and uses: its project, context split, connectors,
 // changes and background tasks. DOM nodes keep the file plain CJS;
 // colours and fonts come from the app's own theme variables.
-const {Command, MenuItem, Panel, Plugin} = require("@opencode/plugin/gui");
+const {Command, MenuItem, Panel, Plugin, Slot} = require("@opencode/plugin/gui");
 const {Changes} = require("@opencode/plugin/gui/review");
 const {lastAssistantWithUsage} = require("@opencode/client/solid");
 
@@ -25,6 +25,10 @@ const ACCENT = "var(--color-v2-icon-icon-accent)";
 const SUCCESS = "var(--color-v2-state-fg-success)";
 const WARNING = "var(--color-v2-state-fg-warning)";
 const DANGER = "var(--color-v2-state-fg-danger)";
+
+// Material's analytics glyph, a panel of bars like the rail itself
+const RAIL_ICON =
+  '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zM9 17H7v-5h2v5zm4 0h-2V7h2v10zm4 0h-2v-3h2v3z"/></svg>';
 
 // Matches rpc.ts. The client only reads ids, method names and events.
 const Rail = {
@@ -208,6 +212,50 @@ function groups(reading) {
 
 function connectorDot(tone) {
   return node("span", `flex:none;width:7px;height:7px;border-radius:50%;background:${tone};`);
+}
+
+// The tab strip's own toggle, beside Review. The panel's tab is hidden, so
+// this is the only trigger while the side region is open.
+function railButton(ctx, input) {
+  const button = node(
+    "button",
+    `display:inline-flex;align-items:center;justify-content:center;flex:none;width:24px;height:24px;padding:0;border:0;border-radius:6px;background:transparent;color:${MUTED};cursor:pointer;`,
+  );
+  button.type = "button";
+  button.title = "Session Rail";
+  button.setAttribute("aria-label", "Toggle Session Rail");
+  button.innerHTML = RAIL_ICON;
+
+  const paint = () => {
+    const session = input.session;
+    if (!session) return;
+    const visible = ctx.layout.state(KEY, session) === "visible";
+    button.style.color = visible ? ACCENT : MUTED;
+    button.setAttribute("aria-pressed", String(visible));
+  };
+
+  button.onmouseenter = () => {
+    button.style.background = TRACK;
+  };
+  button.onmouseleave = () => {
+    button.style.background = "transparent";
+  };
+  button.onclick = () => {
+    const session = input.session;
+    if (session) ctx.layout.toggle(KEY, session);
+    paint();
+  };
+
+  paint();
+  const timer = setInterval(() => {
+    if (!button.isConnected) {
+      clearInterval(timer);
+      return;
+    }
+    paint();
+  }, 1000);
+
+  return button;
 }
 
 function panel(ctx, props, changes) {
@@ -663,7 +711,8 @@ module.exports = Plugin.define({
       get title() {
         return "Session Rail";
       },
-      closable: "compact",
+      hidden: true,
+      closable: false,
     };
 
     ctx.add(Panel, {
@@ -679,6 +728,12 @@ module.exports = Plugin.define({
       },
       list: (input) => (input.open.includes(TAB) ? [tab] : []),
       render: (props) => panel(ctx, props, changes),
+    });
+
+    ctx.add(Slot, {
+      at: "session.panel.end",
+      order: 10,
+      render: (input) => railButton(ctx, input),
     });
 
     ctx.add(MenuItem, () => {
