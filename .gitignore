@@ -27,3 +27,6 @@ __pycache__/
 wip/
 /docs/todo/quick-todos.md
 /docs/todo/system-theming.md
+
+# Third-party Yes Steve Model files, kept local only
+/docs/personal/gaming/minecraft_servers/ysm-backup/
