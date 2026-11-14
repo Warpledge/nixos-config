@@ -9,13 +9,19 @@ and 26 and recommends 25. Prism's Java compatibility check is skipped for the in
 
 ## JVM args
 
-`OverrideJavaArgs=true` with `-XX:+UseZGC -XX:SoftMaxHeapSize=10g
+`OverrideJavaArgs=true` with `-XX:+UseZGC -XX:SoftMaxHeapSize=7g
 -XX:+UseCompactObjectHeaders`. These replace Prism's global args instead of adding to
 them.
 
-Memory isn't overridden in the instance, so it takes Prism's global 12288 MB min and max
-from `prismlauncher.cfg`. 12 GB is an estimate carried from 0.5.6, not measured. To
-check it, log GC in the running client with the instance's JDK:
+Staging overrides memory (`OverrideMemory=true`) with 4096 MB min and 10240 MB max, set
+on 2026-11-14. Prism's global 12288 MB for both meant ZGC committed all 12 GB at launch
+and never gave it back, so RSS sat at 16-17 GB. Measured that day in staging, with
+`jcmd` histograms after a full GC: about 2.6 GB live heap at the title screen and
+4.8 GB in a world, plus about 3 GB native (direct buffers, GPU driver, metaspace). Yes
+Steve Model loads every model in `config/yes_steve_model/custom/` into the heap, about
+800 MB for 80 models; the 35 unstarred ones moved to `ysm-unstarred-backup/` in the
+instance folder. To check the heap size, log GC in the running client with the
+instance's JDK:
 
 ```bash
 jcmd <pid> VM.log output=file=<path> what=gc,gc+heap=info decorators=uptime,level,tags
@@ -27,3 +33,5 @@ jcmd <pid> VM.log output=file=<path> what=gc,gc+heap=info decorators=uptime,leve
 
 - [0.6 guide](https://gtodyssey.com/articles/en/c1f8b283-dbe1-433f-aaaf-ec023e90379f)
 - `instance.cfg` and `prismlauncher.cfg`, read 2026-11-07
+- `jcmd` `GC.heap_info`, `GC.class_histogram` and `VM.native_memory summary` on the
+  staging client, 2026-11-14
