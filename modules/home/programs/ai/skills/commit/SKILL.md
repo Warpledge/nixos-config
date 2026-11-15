@@ -4,7 +4,7 @@ description: Commit the current changes in this public NixOS repo as the user, s
 argument-hint: what changed and why, plus any approved grouping
 context: fork
 agent: general-purpose
-model: haiku
+model: sonnet
 ---
 
 In Claude Code this runs as a forked subagent without the conversation. The caller's note
