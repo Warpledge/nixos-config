@@ -13,6 +13,7 @@
   omni = ../../system/omni-settings/qml;
   #--- Omni Settings' parts this app is built from; a change there reaches both
   shared = [
+    "AppearancePrefs"
     "Backend"
     "Chip"
     "ConfirmDialog"
@@ -23,6 +24,7 @@
     "LineGraph"
     "OutlineButton"
     "Pill"
+    "Prefs"
     "Section"
     "Segmented"
     "Sheet"

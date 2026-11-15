@@ -12,7 +12,7 @@ Rectangle {
     property string pageGlyph: "settings"
     Layout.fillWidth: true
     implicitHeight: col.implicitHeight
-    radius: 14
+    radius: Theme.r(14)
     color: Qt.alpha(Theme.bg, 0.55)
     border.width: 1
     border.color: Theme.rule

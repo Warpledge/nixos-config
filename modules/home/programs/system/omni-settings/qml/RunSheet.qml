@@ -273,7 +273,7 @@ Rectangle {
                     radius: 3
                     width: parent.width * Math.max(0, Math.min(1, sheet.fraction))
                     color: Theme.primary
-                    Behavior on width { NumberAnimation { duration: 300 } }
+                    Behavior on width { NumberAnimation { duration: Theme.ms(300) } }
                 }
             }
             Text {
@@ -450,7 +450,7 @@ Rectangle {
                                     radius: 3
                                     width: item.sized ? parent.width * Math.min(1, item.bytes[0] / item.bytes[1]) : 0
                                     color: Theme.primary
-                                    Behavior on width { NumberAnimation { duration: 400 } }
+                                    Behavior on width { NumberAnimation { duration: Theme.ms(400) } }
                                 }
                                 Shape {
                                     id: stripes

@@ -26,10 +26,10 @@ Rectangle {
     property real bar: -1  // a usage bar under the text, 0 to 1
     signal clicked
     Layout.fillWidth: true
-    implicitHeight: rowCol.implicitHeight + (compact ? 14 : 22)
+    implicitHeight: rowCol.implicitHeight + Theme.pad(compact ? 14 : 22)
     readonly property color accent: Theme.accentOf(row)
     readonly property bool plainCard: !selected && !tone && !compact
-    radius: compact ? 14 : 16
+    radius: Theme.r(compact ? 14 : 16)
     opacity: enabled ? 1 : 0.5
     color: selected ? Theme.selected
          : tone ? Theme.toneFill(tone, hover.hovered ? Theme.hover : Theme.card)
@@ -37,7 +37,7 @@ Rectangle {
          : hover.hovered && !expanded ? Theme.hover : Qt.alpha(Theme.bg, 0.55)
     border.width: plainCard ? 1 : 0
     border.color: expanded ? Qt.alpha(accent, 0.35) : Theme.rule
-    Behavior on color { ColorAnimation { duration: 120 } }
+    Behavior on color { ColorAnimation { duration: Theme.ms(120) } }
 
     ColumnLayout {
         id: rowCol

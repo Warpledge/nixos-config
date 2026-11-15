@@ -17,7 +17,7 @@ Item {
         radius: height / 2
         color: chip.checked ? Qt.alpha(Theme.primary, hover.hovered ? 0.38 : 0.28)
             : hover.hovered ? Theme.hover : "transparent"
-        Behavior on color { ColorAnimation { duration: 120 } }
+        Behavior on color { ColorAnimation { duration: Theme.ms(120) } }
     }
     Shape {
         anchors.fill: parent

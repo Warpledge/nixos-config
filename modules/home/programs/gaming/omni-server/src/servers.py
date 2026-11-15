@@ -38,6 +38,14 @@ G1_FLAGS = [
     "-XX:G1RSetUpdatingPauseTimePercent=5", "-XX:SurvivorRatio=32", "-XX:+AlwaysPreTouch",
     "-XX:+PerfDisableSharedMem", "-XX:+UseTransparentHugePages",
 ]
+#--- ZGC: short pauses on a big heap. Java 21-22 need ZGenerational for the generational
+#--- mode, 23 made it the default and 24 removed the flag; Java 8 has no ZGC, and
+#--- JDK 25's compact headers don't work with it
+ZGC_FLAGS = [
+    "-XX:+UseZGC", "-XX:+AlwaysPreTouch", "-XX:+DisableExplicitGC", "-XX:+PerfDisableSharedMem",
+    "-XX:+UseTransparentHugePages",
+]
+PRESETS = ("g1", "zgc", "none")
 FML_FLAGS = ["-Dfml.readTimeout=180", "-Dfml.loginTimeout=60"]
 
 DEFAULT_SCHEDULE = {
@@ -293,6 +301,12 @@ def launch_argv(cfg):
         argv += G1_FLAGS
         if java_major(cfg) >= 24:
             argv.append("-XX:+UseCompactObjectHeaders")
+    elif cfg.get("preset") == "zgc":
+        if java_major(cfg) == 8:
+            raise ServerError("Java 8 has no ZGC. Pick G1 or a newer Java.")
+        argv += ZGC_FLAGS
+        if 21 <= java_major(cfg) <= 22:
+            argv.append("-XX:+ZGenerational")
     if cfg.get("kind") in ("forge", "neoforge"):
         argv += FML_FLAGS
     argv += shlex.split(cfg.get("extraFlags", ""))

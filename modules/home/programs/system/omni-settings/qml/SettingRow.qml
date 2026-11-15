@@ -31,7 +31,7 @@ Rectangle {
     implicitHeight: col.implicitHeight + 20
     color: Qt.alpha(accent, open ? 0.05 : hover.hovered && expandable ? 0.04 : 0)
     opacity: locked ? 0.6 : 1
-    Behavior on color { ColorAnimation { duration: 120 } }
+    Behavior on color { ColorAnimation { duration: Theme.ms(120) } }
 
     HoverHandler { id: hover }
 
@@ -54,9 +54,9 @@ Rectangle {
         SequentialAnimation on opacity {
             id: flash
             running: false
-            PauseAnimation { duration: 250 }
-            NumberAnimation { to: 0.25; duration: 180 }
-            NumberAnimation { to: 0; duration: 900; easing.type: Easing.InQuad }
+            PauseAnimation { duration: Theme.ms(250) }
+            NumberAnimation { to: 0.25; duration: Theme.ms(180) }
+            NumberAnimation { to: 0; duration: Theme.ms(900); easing.type: Easing.InQuad }
         }
     }
 
@@ -284,7 +284,7 @@ Rectangle {
                     color: Qt.alpha(row.accent, chosen ? 0.2 : optHover.hovered ? 0.1 : 0.03)
                     border.width: chosen ? 1 : 0
                     border.color: Qt.alpha(row.accent, 0.4)
-                    Behavior on color { ColorAnimation { duration: 120 } }
+                    Behavior on color { ColorAnimation { duration: Theme.ms(120) } }
                     RowLayout {
                         anchors.fill: parent
                         anchors.leftMargin: 10
@@ -304,7 +304,7 @@ Rectangle {
                                 height: width
                                 radius: width / 2
                                 color: row.accent
-                                Behavior on width { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+                                Behavior on width { NumberAnimation { duration: Theme.ms(140); easing.type: Easing.OutCubic } }
                             }
                         }
                         Text {

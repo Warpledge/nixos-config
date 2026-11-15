@@ -12,12 +12,13 @@ Rectangle {
     signal tapped()
     Layout.fillWidth: true
     Layout.preferredWidth: 1
-    implicitHeight: col.implicitHeight + 20
-    radius: 12
+    implicitHeight: col.implicitHeight + Theme.pad(20)
+    radius: Theme.r(12)
     color: tappable && hover.hovered ? Theme.hover : Qt.alpha(Theme.bg, 0.55)
     border.width: 1
-    border.color: Theme.rule
-    Behavior on color { ColorAnimation { duration: 120 } }
+    border.color: tappable && hover.hovered ? Qt.alpha(Theme.primary, 0.4) : Theme.rule
+    Behavior on color { ColorAnimation { duration: Theme.ms(120) } }
+    Behavior on border.color { ColorAnimation { duration: Theme.ms(160) } }
 
     ColumnLayout {
         id: col

@@ -78,8 +78,8 @@ ColumnLayout {
                 color: Qt.alpha(accent, cardHover.hovered && !group.open ? 0.13 : 0.07)
                 border.width: 1
                 border.color: Qt.alpha(accent, group.open ? 0.35 : 0.2)
-                Behavior on color { ColorAnimation { duration: 150 } }
-                Behavior on border.color { ColorAnimation { duration: 150 } }
+                Behavior on color { ColorAnimation { duration: Theme.ms(150) } }
+                Behavior on border.color { ColorAnimation { duration: Theme.ms(150) } }
                 ColumnLayout {
                     id: cardCol
                     anchors.top: parent.top
@@ -153,14 +153,14 @@ ColumnLayout {
                             implicitHeight: 30
                             radius: 15
                             color: Qt.alpha(card.accent, group.open ? 0.25 : 0.12)
-                            Behavior on color { ColorAnimation { duration: 150 } }
+                            Behavior on color { ColorAnimation { duration: Theme.ms(150) } }
                             Icon {
                                 anchors.centerIn: parent
                                 icon: "expand_more"
                                 size: 20
                                 color: card.accent
                                 rotation: group.open ? 180 : 0
-                                Behavior on rotation { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
+                                Behavior on rotation { NumberAnimation { duration: Theme.ms(260); easing.type: Easing.OutCubic } }
                             }
                         }
                         HoverHandler { id: cardHover; cursorShape: Qt.PointingHandCursor }

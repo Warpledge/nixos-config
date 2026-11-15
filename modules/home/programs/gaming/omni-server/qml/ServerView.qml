@@ -26,6 +26,21 @@ Item {
     readonly property bool running: state_ === "running" || state_ === "starting" || state_ === "stopping"
     readonly property bool wide: width >= 980
     readonly property int railWidth: 56
+    readonly property bool busy: state_ === "starting" || state_ === "stopping" || state_ === "restarting"
+                                 || (state_ === "running" && !!stats && !stats.ready)
+    readonly property bool ready: state_ === "running" && !!stats && !!stats.ready
+    property bool bootSeen: false  // saw this server start up, so `ready` is news
+    property real now: Date.now() / 1000  // ticks while running, for the uptime
+    //--- Ctrl+F and Ctrl+K: the page that has the field picks these up once loaded
+    property bool searchWanted: false
+    property bool commandWanted: false
+
+    onBusyChanged: if (busy) bootSeen = true
+    onReadyChanged: if (ready && bootSeen) {
+        bootSeen = false
+        readyGlow.restart()
+        toast(`${server ? server.name : "The server"} is ready`, "success")
+    }
 
     signal consoleLine()  // a new line reached consoleModel
     ListModel { id: consoleLines }
@@ -42,8 +57,11 @@ Item {
         { id: "backups", icon: "archive", title: "Backups" },
         { id: "mods", icon: "extension", title: "Mods" },
         { id: "schedule", icon: "event_repeat", title: "Schedule" },
-        { id: "addons", icon: "widgets", title: "Add-ons" }
+        { id: "addons", icon: "widgets", title: "Add-ons" },
+        { id: "prefs", icon: "palette", title: "Preferences" }
     ]
+    //--- With no server only Preferences has anything to show
+    readonly property var shownTabs: server ? tabs : tabs.filter(t => t.id === "prefs")
 
     //--------------------------------------------------------------------//
     //-- Backend
@@ -89,6 +107,7 @@ Item {
         }
         currentId = id
         stats = null
+        bootSeen = false
         status = { state: "stopped", active: false }
         pending = {}
         consoleLines.clear()
@@ -221,7 +240,8 @@ Item {
                 if (!found.includes(m[1]))
                     found.push(m[1])
         }
-        const go = answers => call("quick_run", { name: item.name, steps: item.steps, answers })
+        const go = answers => call("quick_run", { name: item.name, steps: item.steps, answers },
+                                   () => toast(`Ran ${item.name}`, "success"))
         const confirmed = answers => {
             if (!item.confirm)
                 return go(answers)
@@ -237,10 +257,26 @@ Item {
     function ask(spec, callback) { dialog.open(spec, callback) }
     function askText(heading, fields, callback) { prompt.open(heading, fields, callback) }
 
-    function showError(text) {
-        toastText.text = text
-        toast.visible = true
+    //--- A message at the bottom: tone "error" (the default), "success" or "info"
+    function toast(text, tone) {
+        toastBox.tone = tone || "error"
+        toastBox.text = text
+        toastBox.up = true
+        toastTimer.interval = toastBox.tone === "error" ? 7000 : 3500
         toastTimer.restart()
+    }
+    function showError(text) { toast(text, "error") }
+
+    //--- The server's join address on the clipboard
+    function copyAddress() {
+        call("join_address", {}, reply => {
+            Quickshell.clipboardText = reply.address
+            toast(`Copied ${reply.address}`, "success")
+        })
+    }
+    function openFolder() {
+        if (server)
+            Quickshell.execDetached(["xdg-open", server.dir])
     }
 
     function statusWord() {
@@ -248,9 +284,10 @@ Item {
         if (s === "running") {
             if (!stats || !stats.ready)
                 return "Starting"
-            const up = Math.max(0, Date.now() / 1000 - stats.startedAt)
+            const up = Math.max(0, now - stats.startedAt)
             const hours = Math.floor(up / 3600), minutes = Math.floor(up / 60) % 60
-            return `Running ${hours ? hours + "h " : ""}${minutes}m`
+            // Seconds only in the first hour, where they still say something
+            return hours ? `Running ${hours}h ${minutes}m` : `Running ${minutes}m ${Math.floor(up % 60)}s`
         }
         return ({ starting: "Starting", stopping: "Stopping", restarting: "Restarting after a crash",
                   failed: "Crashed", outside: "Running outside Omni Server", stopped: "Stopped" })[s] || s
@@ -270,6 +307,36 @@ Item {
         triggeredOnStart: true
         onTriggered: app.refreshServers()
     }
+    Timer {
+        interval: 1000
+        running: app.state_ === "running"
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: app.now = Date.now() / 1000
+    }
+
+    //--- Ctrl+1 to 9 pick a tab, Ctrl+F searches the console, Ctrl+K goes to the command
+    //--- line, Ctrl+, opens Preferences. Fields pass these up, as they don't use them.
+    Keys.onPressed: event => {
+        if (!(event.modifiers & Qt.ControlModifier))
+            return
+        const n = event.key - Qt.Key_1
+        if (n >= 0 && n < app.shownTabs.length) {
+            app.tab = app.shownTabs[n].id
+        } else if (event.key === Qt.Key_F && app.server) {
+            app.tab = "console"
+            app.searchWanted = true
+        } else if (event.key === Qt.Key_K && app.server) {
+            if (app.tab !== "dash" && app.tab !== "console")
+                app.tab = "console"
+            app.commandWanted = true
+        } else if (event.key === Qt.Key_Comma) {
+            app.tab = "prefs"
+        } else {
+            return
+        }
+        event.accepted = true
+    }
 
     //--------------------------------------------------------------------//
     //-- Layout
@@ -288,11 +355,26 @@ Item {
             contentHeight: railCol.implicitHeight
             clip: true
             boundsBehavior: Flickable.StopAtBounds
+            //--- A bar at the rail's edge that slides to the chosen server
+            Rectangle {
+                readonly property int at: app.servers.findIndex(s => s.id === app.currentId)
+                readonly property Item item: at >= 0 && railRepeater.count > at ? railRepeater.itemAt(at) : null
+                visible: !!item
+                x: 0
+                y: item ? item.y + (item.height - height) / 2 : 0
+                width: 4
+                height: item ? 22 : 0
+                radius: 2
+                color: Theme.primary
+                Behavior on y { NumberAnimation { duration: Theme.ms(280); easing.type: Easing.OutCubic } }
+                Behavior on height { NumberAnimation { duration: Theme.ms(200); easing.type: Easing.OutBack } }
+            }
             Column {
                 id: railCol
                 width: parent.width
                 spacing: 8
                 Repeater {
+                    id: railRepeater
                     model: app.servers
                     Rectangle {
                         id: railItem
@@ -302,10 +384,14 @@ Item {
                         anchors.horizontalCenter: parent.horizontalCenter
                         width: 40
                         height: 40
-                        radius: 12
+                        radius: Theme.r(12)
                         color: chosen ? Qt.alpha(Theme.primary, 0.3) : itemHover.hovered ? Theme.hover : "transparent"
                         border.width: 1
                         border.color: chosen ? Theme.primary : Theme.rule
+                        scale: railTap.pressed ? 0.94 : itemHover.hovered && !chosen ? 1.06 : 1
+                        Behavior on scale { NumberAnimation { duration: Theme.ms(160); easing.type: Easing.OutCubic } }
+                        Behavior on color { ColorAnimation { duration: Theme.ms(160) } }
+                        Behavior on border.color { ColorAnimation { duration: Theme.ms(160) } }
                         Text {
                             anchors.centerIn: parent
                             text: railItem.modelData.tag
@@ -315,6 +401,8 @@ Item {
                             font.weight: Font.Bold
                         }
                         Rectangle {
+                            id: dot
+                            readonly property bool changing: ["starting", "stopping", "restarting"].includes(railItem.st)
                             visible: railItem.st !== "stopped"
                             anchors.right: parent.right
                             anchors.bottom: parent.bottom
@@ -326,6 +414,15 @@ Item {
                             border.color: Theme.card
                             color: railItem.st === "running" ? Theme.success
                                 : railItem.st === "failed" ? Theme.error : Theme.caution
+                            Behavior on color { ColorAnimation { duration: Theme.ms(300) } }
+                            //--- Breathes while the server starts or stops
+                            SequentialAnimation on opacity {
+                                running: dot.changing && Theme.motion > 0
+                                loops: Animation.Infinite
+                                alwaysRunToEnd: true
+                                NumberAnimation { to: 0.35; duration: 650; easing.type: Easing.InOutSine }
+                                NumberAnimation { to: 1; duration: 650; easing.type: Easing.InOutSine }
+                            }
                         }
                         HoverHandler {
                             id: itemHover
@@ -335,6 +432,7 @@ Item {
                                 : Tip.cancel(railItem)
                         }
                         TapHandler {
+                            id: railTap
                             gesturePolicy: TapHandler.ReleaseWithinBounds
                             onTapped: if (!railItem.chosen) app.select(railItem.modelData.id)
                         }
@@ -358,10 +456,23 @@ Item {
 
         //--- First run: nothing registered yet
         ColumnLayout {
-            visible: app.loaded && !app.server
+            visible: app.loaded && !app.server && app.tab !== "prefs"
             anchors.centerIn: parent
             spacing: 12
-            Icon { Layout.alignment: Qt.AlignHCenter; icon: "dns"; size: 48; color: Theme.primary }
+            Icon {
+                Layout.alignment: Qt.AlignHCenter
+                icon: "dns"
+                size: 48
+                color: Theme.primary
+                // A slow bob, so the empty window doesn't look frozen
+                transform: Translate { id: bob }
+                SequentialAnimation {
+                    running: Theme.motion > 0 && app.loaded && !app.server && app.tab !== "prefs"
+                    loops: Animation.Infinite
+                    NumberAnimation { target: bob; property: "y"; from: 0; to: -8; duration: 1400; easing.type: Easing.InOutSine }
+                    NumberAnimation { target: bob; property: "y"; from: -8; to: 0; duration: 1400; easing.type: Easing.InOutSine }
+                }
+            }
             Text {
                 Layout.alignment: Qt.AlignHCenter
                 text: "Add your first server"
@@ -375,23 +486,78 @@ Item {
                 color: Theme.dim
                 font.pixelSize: 14
             }
-            OutlineButton {
+            RowLayout {
                 Layout.alignment: Qt.AlignHCenter
-                filled: true
-                text: "Choose a folder"
-                onClicked: app.addServer()
+                spacing: 8
+                OutlineButton { text: "Preferences"; onClicked: app.tab = "prefs" }
+                OutlineButton {
+                    filled: true
+                    text: "Choose a folder"
+                    onClicked: app.addServer()
+                }
             }
         }
 
         ColumnLayout {
-            visible: !!app.server
+            visible: !!app.server || app.tab === "prefs"
             anchors.fill: parent
             anchors.margins: 12
             spacing: 10
 
             //--- Header
             Card {
+                id: header
+                visible: !!app.server
                 pad: 10
+                //--- A shimmer along the bottom while the server starts or stops, and a
+                //--- green ring that fades out once it's ready
+                overlay: [
+                    Item {
+                        visible: app.busy
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        anchors.leftMargin: header.radius
+                        anchors.rightMargin: header.radius
+                        height: 2
+                        clip: true
+                        Rectangle { anchors.fill: parent; color: Qt.alpha(Theme.caution, 0.18) }
+                        Rectangle {
+                            id: sweep
+                            width: parent.width * 0.35
+                            height: parent.height
+                            gradient: Gradient {
+                                orientation: Gradient.Horizontal
+                                GradientStop { position: 0; color: Qt.alpha(Theme.caution, 0) }
+                                GradientStop { position: 0.5; color: Theme.caution }
+                                GradientStop { position: 1; color: Qt.alpha(Theme.caution, 0) }
+                            }
+                            NumberAnimation on x {
+                                running: app.busy && Theme.motion > 0
+                                loops: Animation.Infinite
+                                from: -sweep.width
+                                to: sweep.parent.width
+                                duration: 1400
+                                easing.type: Easing.InOutQuad
+                            }
+                        }
+                    },
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: header.radius
+                        color: "transparent"
+                        border.width: 2
+                        border.color: Theme.success
+                        opacity: 0
+                        SequentialAnimation on opacity {
+                            id: readyGlow
+                            running: false
+                            NumberAnimation { to: 1; duration: Theme.ms(220); easing.type: Easing.OutQuad }
+                            PauseAnimation { duration: Theme.ms(400) }
+                            NumberAnimation { to: 0; duration: Theme.ms(1200); easing.type: Easing.InQuad }
+                        }
+                    }
+                ]
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 10
@@ -428,6 +594,9 @@ Item {
                         }
                     }
                     Item { Layout.fillWidth: true }
+                    IconButton { icon: "link"; tip: "Copy the join address"; onClicked: app.copyAddress() }
+                    IconButton { icon: "folder_open"; tip: "Open the server's folder"; onClicked: app.openFolder() }
+                    Rectangle { implicitWidth: 1; implicitHeight: 22; color: Theme.rule }
                     OutlineButton {
                         visible: !app.running && app.state_ !== "outside" && app.state_ !== "restarting"
                         filled: true
@@ -455,72 +624,134 @@ Item {
                 }
             }
 
-            //--- Tabs
-            RowLayout {
+            //--- Tabs, with one pill that slides to the chosen tab
+            Item {
                 Layout.fillWidth: true
-                spacing: 4
-                Repeater {
-                    model: app.tabs
-                    Rectangle {
-                        id: tabItem
-                        required property var modelData
-                        readonly property bool chosen: app.tab === modelData.id
-                        implicitWidth: tabRow.implicitWidth + 20
-                        implicitHeight: 34
-                        radius: 11
-                        color: chosen ? Qt.alpha(Theme.primary, 0.3) : tabHover.hovered ? Theme.hover : "transparent"
-                        Row {
-                            id: tabRow
-                            anchors.centerIn: parent
-                            spacing: 6
-                            Icon {
-                                anchors.verticalCenter: parent.verticalCenter
-                                icon: tabItem.modelData.icon
-                                size: 19
-                                fill: tabItem.chosen
-                                color: tabItem.chosen ? Theme.primary : Theme.dim
+                implicitHeight: tabBar.implicitHeight
+                //--- Labels on every tab once all nine fit, or only the chosen one
+                //--- (Preferences)
+                readonly property bool labels: app.width >= 1060 && Prefs.tabLabels === "always"
+
+                Rectangle {
+                    id: tabPill
+                    readonly property int at: app.shownTabs.findIndex(t => t.id === app.tab)
+                    readonly property Item item: at >= 0 && tabRepeater.count > at ? tabRepeater.itemAt(at) : null
+                    property bool armed: false  // no slide in from the left on load
+                    visible: !!item
+                    x: item ? item.x : 0
+                    width: item ? item.width : 0
+                    height: 34
+                    radius: Theme.r(11)
+                    color: Qt.alpha(Theme.primary, 0.3)
+                    Behavior on x {
+                        enabled: tabPill.armed
+                        NumberAnimation { duration: Theme.ms(260); easing.type: Easing.OutCubic }
+                    }
+                    Behavior on width {
+                        enabled: tabPill.armed
+                        NumberAnimation { duration: Theme.ms(260); easing.type: Easing.OutCubic }
+                    }
+                    Timer { running: true; interval: 400; onTriggered: tabPill.armed = true }
+                }
+                RowLayout {
+                    id: tabBar
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    spacing: 4
+                    Repeater {
+                        id: tabRepeater
+                        model: app.shownTabs
+                        Rectangle {
+                            id: tabItem
+                            required property var modelData
+                            readonly property bool chosen: app.tab === modelData.id
+                            readonly property bool labelled: chosen || tabBar.parent.labels
+                            implicitWidth: tabRow.implicitWidth + 20
+                            implicitHeight: 34
+                            radius: Theme.r(11)
+                            color: !chosen && tabHover.hovered ? Theme.hover : "transparent"
+                            Behavior on color { ColorAnimation { duration: Theme.ms(140) } }
+                            Row {
+                                id: tabRow
+                                anchors.centerIn: parent
+                                spacing: tabItem.labelled ? 6 : 0
+                                Icon {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    icon: tabItem.modelData.icon
+                                    size: 19
+                                    fill: tabItem.chosen
+                                    color: tabItem.chosen ? Theme.primary : Theme.dim
+                                    scale: tabTap.pressed ? 0.85 : 1
+                                    Behavior on color { ColorAnimation { duration: Theme.ms(200) } }
+                                    Behavior on scale { NumberAnimation { duration: Theme.ms(140); easing.type: Easing.OutBack } }
+                                }
+                                //--- The label widens out of the icon instead of popping in
+                                Text {
+                                    id: tabLabel
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: tabItem.labelled ? implicitWidth : 0
+                                    opacity: tabItem.labelled ? 1 : 0
+                                    clip: true
+                                    text: tabItem.modelData.title
+                                    color: tabItem.chosen ? Theme.text : Theme.dim
+                                    font.pixelSize: 13
+                                    font.weight: tabItem.chosen ? Font.Bold : Font.Medium
+                                    Behavior on width { NumberAnimation { duration: Theme.ms(240); easing.type: Easing.OutCubic } }
+                                    Behavior on opacity { NumberAnimation { duration: Theme.ms(200) } }
+                                }
                             }
-                            Text {
-                                visible: tabItem.chosen || app.wide
-                                anchors.verticalCenter: parent.verticalCenter
-                                text: tabItem.modelData.title
-                                color: tabItem.chosen ? Theme.text : Theme.dim
-                                font.pixelSize: 13
-                                font.weight: tabItem.chosen ? Font.Bold : Font.Medium
+                            HoverHandler {
+                                id: tabHover
+                                cursorShape: Qt.PointingHandCursor
+                                onHoveredChanged: hovered && !tabItem.labelled
+                                    ? Tip.request(tabItem, tabItem.modelData.title, point.scenePosition)
+                                    : Tip.cancel(tabItem)
                             }
-                        }
-                        HoverHandler {
-                            id: tabHover
-                            cursorShape: Qt.PointingHandCursor
-                            onHoveredChanged: hovered && !app.wide
-                                ? Tip.request(tabItem, tabItem.modelData.title, point.scenePosition)
-                                : Tip.cancel(tabItem)
-                        }
-                        TapHandler {
-                            gesturePolicy: TapHandler.ReleaseWithinBounds
-                            onTapped: app.tab = tabItem.modelData.id
+                            TapHandler {
+                                id: tabTap
+                                gesturePolicy: TapHandler.ReleaseWithinBounds
+                                onTapped: app.tab = tabItem.modelData.id
+                            }
                         }
                     }
+                    Item { Layout.fillWidth: true }
                 }
-                Item { Layout.fillWidth: true }
             }
 
-            //--- Page
+            //--- Page: each one fades in and rises into place, as Omni Settings' tabs do
             Loader {
                 id: pageLoader
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                active: !!app.server
+                active: !!app.server || app.tab === "prefs"
+                opacity: 0
+                transform: Translate { id: pageRise }
                 //--- `app` goes in at creation, as pages read it as soon as they load
                 function show() {
+                    if (!app.server && app.tab !== "prefs")
+                        return
                     setSource(({ dash: "DashboardPage.qml", console: "ConsolePage.qml", players: "PlayersPage.qml",
                                  settings: "ServerSettingsPage.qml", backups: "BackupsPage.qml", mods: "ModsPage.qml",
-                                 schedule: "SchedulePage.qml", addons: "AddonsPage.qml" })[app.tab], { app })
+                                 schedule: "SchedulePage.qml", addons: "AddonsPage.qml",
+                                 prefs: "PrefsPage.qml" })[app.tab], { app })
+                }
+                onLoaded: pageIn.restart()
+                ParallelAnimation {
+                    id: pageIn
+                    NumberAnimation { target: pageLoader; property: "opacity"; from: 0; to: 1; duration: Theme.ms(220); easing.type: Easing.OutQuad }
+                    NumberAnimation { target: pageRise; property: "y"; from: 12; to: 0; duration: Theme.ms(300); easing.type: Easing.OutCubic }
                 }
                 Component.onCompleted: show()
                 Connections {
                     target: app
                     function onTabChanged() { pageLoader.show() }
+                    // Leaving Preferences for the first server, or losing the last one
+                    function onServerChanged() {
+                        if (!app.server && app.tab !== "prefs")
+                            app.tab = "dash"
+                        else if (app.server && !pageLoader.item)
+                            pageLoader.show()
+                    }
                 }
             }
         }
@@ -552,31 +783,58 @@ Item {
     ConfirmDialog { id: dialog; anchors.fill: parent; z: 8 }
     PromptDialog { id: prompt; anchors.fill: parent; z: 8 }
 
-    //--- Errors
+    //--- Toasts (toast()): errors in red, the rest on the toast colour with a tinted
+    //--- icon. They rise in and fade; hovering keeps one up, a tap dismisses it.
     Rectangle {
-        id: toast
-        visible: false
+        id: toastBox
+        property string text: ""
+        property string tone: "error"
+        property bool up: false
+        readonly property bool isError: tone === "error"
         z: 9
+        visible: opacity > 0
+        opacity: up ? 1 : 0
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottomMargin: 16
-        width: Math.min(toastText.implicitWidth + 28, parent.width - 48)
-        height: toastText.implicitHeight + 20
-        radius: 12
-        color: Theme.error
-        Text {
-            id: toastText
-            anchors.centerIn: parent
-            width: Math.min(implicitWidth, toast.parent.width - 76)
-            textFormat: Text.PlainText
-            wrapMode: Text.Wrap
-            color: Theme.inkError
-            font.pixelSize: 14
-            font.weight: Font.DemiBold
+        transform: Translate {
+            y: toastBox.up ? 0 : 16
+            Behavior on y { NumberAnimation { duration: Theme.ms(280); easing.type: Easing.OutCubic } }
         }
-        TapHandler { onTapped: toast.visible = false }
+        Behavior on opacity { NumberAnimation { duration: Theme.ms(200) } }
+        width: Math.min(toastRow.implicitWidth + 28, parent.width - 48)
+        height: toastRow.implicitHeight + 20
+        radius: Theme.r(12)
+        color: isError ? Theme.error : Theme.toast
+        border.width: isError ? 0 : 1
+        border.color: Qt.alpha(Theme.toneColor(tone), 0.45)
+        Row {
+            id: toastRow
+            anchors.centerIn: parent
+            spacing: 8
+            Icon {
+                anchors.verticalCenter: parent.verticalCenter
+                icon: toastBox.isError ? "error" : toastBox.tone === "success" ? "check_circle" : "info"
+                size: 18
+                fill: true
+                color: toastBox.isError ? Theme.inkError : Theme.toneColor(toastBox.tone)
+            }
+            Text {
+                id: toastText
+                anchors.verticalCenter: parent.verticalCenter
+                width: Math.min(implicitWidth, toastBox.parent.width - 102)
+                text: toastBox.text
+                textFormat: Text.PlainText
+                wrapMode: Text.Wrap
+                color: toastBox.isError ? Theme.inkError : Theme.inkToast
+                font.pixelSize: 14
+                font.weight: Font.DemiBold
+            }
+        }
+        HoverHandler { onHoveredChanged: hovered ? toastTimer.stop() : toastTimer.restart() }
+        TapHandler { onTapped: toastBox.up = false }
     }
-    Timer { id: toastTimer; interval: 7000; onTriggered: toast.visible = false }
+    Timer { id: toastTimer; interval: 7000; onTriggered: toastBox.up = false }
 
     //--- Tooltips (Tip.qml)
     Rectangle {
@@ -585,7 +843,7 @@ Item {
         z: 10
         visible: opacity > 0
         opacity: Tip.shown ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: 120 } }
+        Behavior on opacity { NumberAnimation { duration: Theme.ms(120) } }
         width: Math.min(tipText.implicitWidth, 340) + 22
         height: tipText.implicitHeight + 14
         x: Math.max(4, Math.min(at.x + 14, app.width - width - 4))

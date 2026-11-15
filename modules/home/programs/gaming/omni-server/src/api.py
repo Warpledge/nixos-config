@@ -376,6 +376,11 @@ def startup_set(args):
     for key in ("extraFlags", "launch", "command"):
         if key in changes and "\n" in str(changes[key]):
             raise servers.ServerError(f"{key} can't hold a line break")
+    if "preset" in changes and changes["preset"] not in servers.PRESETS:
+        raise servers.ServerError(f"No JVM preset called {changes['preset']}")
+    # Checked on the merged config, so Java 8 can't be picked while ZGC is on either
+    if {**cfg, **changes}.get("preset") == "zgc" and servers.java_major({**cfg, **changes}) == 8:
+        raise servers.ServerError("Java 8 has no ZGC. Pick G1 or a newer Java first.")
     cfg.update(changes)
     servers.launch_argv(cfg) if cfg.get("launch") or cfg.get("command") else None
     servers.save(cfg)
@@ -452,9 +457,33 @@ def set_aside_delete(args):
 
 
 @command
+def join_address(args):
+    """The address players on this network join at: the first non-loopback IPv4 address
+    and the server's port."""
+    cfg = require(args)
+    port = properties.read(servers.props_file(cfg)).get("server-port", "25565")
+    host = "localhost"
+    try:
+        res = subprocess.run(["ip", "-j", "-4", "addr", "show", "scope", "global", "up"],
+                             capture_output=True, text=True, timeout=5, check=False)
+        for link in json.loads(res.stdout or "[]"):
+            addrs = [a["local"] for a in link.get("addr_info", []) if a.get("local")]
+            if addrs and not link.get("ifname", "").startswith(("docker", "virbr", "veth", "wg")):
+                host = addrs[0]
+                break
+    except (OSError, ValueError, subprocess.SubprocessError):
+        pass
+    return {"address": f"{host}:{port}"}
+
+
+@command
 def disk(args):
     cfg = require(args)
-    usage = shutil.disk_usage(cfg["dir"])
+    # A moved or unmounted folder: report the drive of the nearest folder still there
+    path = cfg["dir"]
+    while not os.path.isdir(path) and path != os.path.dirname(path):
+        path = os.path.dirname(path)
+    usage = shutil.disk_usage(path)
     return {"free": usage.free, "total": usage.total}
 
 

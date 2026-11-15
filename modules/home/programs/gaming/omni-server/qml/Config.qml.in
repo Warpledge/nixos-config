@@ -4,4 +4,5 @@ import Quickshell
 
 Singleton {
     readonly property string backend: "@backend@"
+    readonly property string appId: "omni-server"  // ~/.config/<appId>/ (Prefs.qml)
 }

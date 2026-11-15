@@ -862,7 +862,7 @@ Sheet {
                             height: parent.height
                             radius: 3
                             color: Theme.primary
-                            Behavior on width { NumberAnimation { duration: 240 } }
+                            Behavior on width { NumberAnimation { duration: Theme.ms(240) } }
                         }
                     }
                 }

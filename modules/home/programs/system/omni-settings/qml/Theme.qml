@@ -15,11 +15,34 @@ Singleton {
         surface_container_highest: "#45475a", on_surface: "#cdd6f4",
         on_surface_variant: "#a6adc8", outline_variant: "#45475a",
         primary: "#cba6f7", on_primary: "#1e1e2e", primary_container: "#4f3d6b",
-        on_primary_container: "#ead7ff", secondary_container: "#45475a",
-        on_secondary_container: "#cdd6f4", tertiary: "#f9e2af", error: "#f38ba8",
-        on_error: "#1e1e2e"
+        on_primary_container: "#ead7ff", secondary: "#b4befe", on_secondary: "#1e1e2e",
+        secondary_container: "#45475a", on_secondary_container: "#cdd6f4",
+        tertiary: "#f9e2af", on_tertiary: "#1e1e2e", tertiary_container: "#5c5137",
+        on_tertiary_container: "#fdf0d0", error: "#f38ba8", on_error: "#1e1e2e"
     })
     function col(name) { return c[name] || fallback[name] }
+
+    //--- The matugen role Preferences picked as the accent
+    readonly property string role: ["secondary", "tertiary"].includes(Prefs.accent) ? Prefs.accent : "primary"
+
+    //--- Preferences: animation length, corner radius and padding for a base value
+    readonly property real motion: Prefs.motion === "off" ? 0 : Prefs.motion === "reduced" ? 0.5 : 1
+    function ms(n) { return Math.round(n * motion) }
+    readonly property real roundness: Prefs.corners === "sharp" ? 0.45 : Prefs.corners === "round" ? 1.35 : 1
+    function r(n) { return Math.round(n * roundness) }
+    readonly property bool compact: Prefs.density === "compact"
+    function pad(n) { return compact ? Math.round(n * 0.75) : n }
+    //--- A raised surface's fill and edge for the Cards preference; `base` is its
+    //--- solid colour, `edge` the border it has when solid
+    function cardFill(base) {
+        return Prefs.cards === "translucent" ? Qt.alpha(base, 0.62)
+            : Prefs.cards === "outlined" ? Qt.alpha(base, 0.22) : base
+    }
+    function cardEdge(edge) {
+        return Prefs.cards === "outlined" ? Qt.alpha(primary, 0.32)
+            : Prefs.cards === "translucent" ? rule : (edge || "transparent")
+    }
+    readonly property bool cardEdged: !!Prefs.cards && Prefs.cards !== "solid"
 
     readonly property color bg: col("surface_container")
     readonly property color card: col("surface_container_high")
@@ -29,10 +52,10 @@ Singleton {
     readonly property color line: col("outline_variant")
     // Rules and card edges: outline_variant can match the background in some schemes
     readonly property color rule: Qt.alpha(dim, 0.22)
-    readonly property color primary: col("primary")
-    readonly property color inkPrimary: col("on_primary")
-    readonly property color primaryContainer: col("primary_container")
-    readonly property color inkContainer: col("on_primary_container")
+    readonly property color primary: col(role)
+    readonly property color inkPrimary: col("on_" + role)
+    readonly property color primaryContainer: col(role + "_container")
+    readonly property color inkContainer: col("on_" + role + "_container")
     // Tints of primary: DMS's schemes can make secondary_container the card colour
     // and outline_variant the background, so neither shows a hover or a choice
     readonly property color hover: Qt.tint(cardHover, Qt.alpha(primary, 0.16))

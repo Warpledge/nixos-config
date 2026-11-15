@@ -11,8 +11,13 @@ Rectangle {
     signal acted
     Layout.fillWidth: true
     implicitHeight: Math.max(row.implicitHeight + 16, 40)
-    radius: 12
+    radius: Theme.r(12)
     color: Qt.alpha(Theme.toneColor(tone), 0.14)
+    border.width: 1
+    border.color: Qt.alpha(Theme.toneColor(tone), 0.22)
+    // Fades in each time it shows
+    onVisibleChanged: if (visible) fadeIn.restart()
+    NumberAnimation on opacity { id: fadeIn; from: 0; to: 1; duration: Theme.ms(260); easing.type: Easing.OutQuad }
     RowLayout {
         id: row
         anchors.fill: parent

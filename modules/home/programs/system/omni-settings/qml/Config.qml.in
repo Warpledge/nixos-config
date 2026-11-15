@@ -5,4 +5,5 @@ import Quickshell
 Singleton {
     readonly property string backend: "@backend@"
     readonly property var editor: (@editor@)
+    readonly property string appId: "omni-settings"  // ~/.config/<appId>/ (Prefs.qml)
 }

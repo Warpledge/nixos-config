@@ -19,7 +19,7 @@ Rectangle {
     color: bare ? "transparent" : Qt.alpha(tint, hover.hovered ? 0.34 : 0.18)
     border.width: bare ? 0 : 1
     border.color: Qt.alpha(tint, 0.45)
-    Behavior on color { ColorAnimation { duration: 120 } }
+    Behavior on color { ColorAnimation { duration: Theme.ms(120) } }
     Icon {
         anchors.centerIn: parent
         icon: hint.icon
