@@ -64,9 +64,9 @@ portable assembler recipes to configuration circuit 24: existing patterns and ma
 selectors need setting to 24, though the ingredients and costs are unchanged.
 Realistic World Gen 2 2.1.2 renames `rwg_data.dat` to stop it clashing with the RWG 1.5.3
 jar in the same `mods/`. Side C, client alone: Angelica 2.2.46, AngelLib 1.0.2 and Better
-Search 1.6.4. ChromaPatch stays at 1.0.2, so Eclipse stays pinned at `3c18afc`; ChromaPatch
-1.0.3's own patch says it targets Eclipse `e89e6c6`, and moving it means rebuilding the
-patched pack (see [shaders.md](./shaders.md#eclipse-with-chromapatch)). Old jars are in
+Search 1.6.4. Later that day ChromaPatch went to 1.0.3 and Eclipse to `e89e6c6`, the
+commit 1.0.3's patch targets, with the old Eclipse zip moved to the same backup folder
+(see [shaders.md](./shaders.md#eclipse-with-chromapatch)). Old jars are in
 `backups/replaced-mods/2026-11-15/`. Not launched yet.
 
 **2026-11-10: GTNL and GTNLLib were removed; Better Questing API went with them.** BQ API
@@ -350,8 +350,11 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
 - **Dynamic Surroundings 1.0.9.0** (2026-09-30): mist475's 1.7.10 fork, newer than the
   2.8.4 jar's 1.0.7.7; adds Seasonal Horizons compatibility.
 - **Sound-Physics 1.1.1** (2026-06-27): the 1.7.10 mixin edition.
-- **ChromaPatch 1.0.2** (2026-11-05): builds the patched Eclipse shader pack at launch;
-  see [shaders.md](./shaders.md#eclipse-with-chromapatch).
+- **ChromaPatch 1.0.3** (2026-11-13, installed 2026-11-15): builds the patched Eclipse
+  shader pack at launch. The asset names 1.7.10, not 2.9, so the launch is the test. 1.0.3
+  brings its own GTNH patch with about 1600 more GTNH blocks lit, tinted or waving, and
+  FSR fixes for GregTech multiblock effects and sign text; see
+  [shaders.md](./shaders.md#eclipse-with-chromapatch).
 - **Euphoria Patcher 1.9.3** is installed to match the NeonTech settings. 1.10.5 exists,
   but moving to it means copying the NeonTech values by hand.
 - **BetterSprinting 1.1.3**: 2.3.0's coremod fails on 2.9 at the
