@@ -25,8 +25,10 @@ Avoid ChromaPatch 1.0.1 on GTNH: its changelog says most lamps gave no light unt
 
 Eclipse is pinned because `3c18afc` is the commit ChromaPatch targets, and all 19 patched
 files match it. The `Unstable` head on 2026-11-06 (`e89e6c6`) also applied, with 14 of 19
-files matching and no fuzzy hunks, but wasn't installed. The `gtnh-mod-updates` skill reports
-new commits to Eclipse and to the Kura packs against the pins in
+files matching and no fuzzy hunks, but wasn't installed. ChromaPatch 1.0.3 moves the target:
+its patch profile reads `base=Eclipse Unstable e89e6c6`, so 1.0.3 and the `e89e6c6` zip go in
+together. The `gtnh-mod-updates` skill reports new commits to
+Eclipse and to the Kura packs against the pins in
 [mod-sources.json](./mod-sources.json); change a `pin` when you move to that commit.
 
 ### Install
