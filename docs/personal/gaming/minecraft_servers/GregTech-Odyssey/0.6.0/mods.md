@@ -381,12 +381,13 @@ Youkai's utensils cost iron ingots like Farmer's Delight's cooking pot.
 | `touhou_little_maid_spell-1.8.0.1-forge+mc1.20.1.jar` | Touhou Little Maid: Spell | Maids cast from spell books (Ars Nouveau here); held at 1.8.0.1, structures off |
 | `maid_rpg_task-release.jar` | Touhou Little Maid RPG Task | RPG-style combat tasks |
 | `tlm_atrribute_display-1.0.2-forge+mc1.20.1.jar` | Attribute Display | A screen with a maid's attributes |
-| `tlm-self-talk-1.4.1-forge-1.20.1.jar` | Self-Talk | Maids talk to themselves and greet you |
 | `solmaid-1.0.1.jar` | Spice of Life: Maid | Spice of Life for maids |
 | `solmaiddream-1.0.1.jar` | Spice of Life: Maids' Dream | Rewards maids for a varied diet |
-| `tamablefairy-1.2.0-beta.5-forge+mc1.20.1.jar` | Tamable Fairy | Tame the maid fairies |
 | `touhou-maid-affection-1.7.5.2.jar` | Touhou Maid: Affection | Kissing and bond abilities: Emergency Rescue shields you from a fatal hit, Random Gift brings items |
 | `youkaishomecoming-2.7.2.jar` | Youkai's Homecoming | Japanese food, crops and cooking utensils, sakura biomes, Hakurei Shrine and two nests, Touhou characters and animals; bundles L2 Harvester and its libraries. Patched, see below |
+
+Tamable Fairy 1.2.0-beta.5 and Self-Talk 1.4.1 were removed on 2026-11-15 to trim the
+maid add-ons.
 
 **Maid Spell stays at 1.8.0.1.** From 1.9.0 it's a bootstrap jar that registers a
 ModLauncher service (`maidspell_hurt_head`), and `gto_native` refuses unknown services,
