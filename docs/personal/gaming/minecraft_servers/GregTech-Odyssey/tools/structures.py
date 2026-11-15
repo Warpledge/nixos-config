@@ -46,8 +46,9 @@ RARITY = {
     # Villages
     "integrated_villages:regular_villages": 5, "biomeswevegone:villages": 5,
     "terralith:rare_village": 5,
-    # YUNG's desert temples and witch huts
-    "betterdeserttemples:desert_temples": 3, "betterwitchhuts:witch_hut": 3,
+    # YUNG's temples (End Remastered's Old and Rogue eyes) and witch huts
+    "betterdeserttemples:desert_temples": 3, "betterjungletemples:jungle_temples": 3,
+    "betterwitchhuts:witch_hut": 3,
     # Filler that crowded biomes
     "idas:idas_common": 6, "idas:idas_small": 6, "dungeons_arise:minor_structures": 6,
     "apotheosis": 6, "illagerinvasion:firecaller_hut": 6,

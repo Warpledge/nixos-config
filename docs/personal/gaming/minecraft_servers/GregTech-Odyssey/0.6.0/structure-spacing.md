@@ -44,7 +44,7 @@ listed. Separation keeps the same ratio:
 | --- | --- | --- |
 | Bosses and progression: Mowzie's, BOMD, Cataclysm, Legendary Monsters, Dungeons Arise major, IDAS rare | own spread | Mowzie's 25/8, BOMD Lich Tower and Gauntlet 32/16, Cataclysm desert structures 30/20, Dungeons Arise major 40/30 |
 | Villages: Integrated Villages, BWG, Terralith rare | 5x rarer (x2.24) | Integrated Villages 26 to 58, BWG villages 34 to 76, Terralith rare villages 46 to 103 |
-| YUNG's desert temples and witch huts | 3x rarer (x1.73) | both 30 to 52 |
+| YUNG's desert and jungle temples and witch huts | 3x rarer (x1.73) | desert temples and witch huts 30 to 52, jungle temples 24 to 42. The temples hold End Remastered's Old and Rogue eyes, needed for the End at LuV |
 | Filler: IDAS common and small, Dungeons Arise minor, Apotheosis towers, Illager Invasion's firecaller and sorcerer huts, Terralith regular | 6x rarer (x2.45) | sorcerer hut 18 to 44, IDAS common 21 to 51, Apotheosis towers 26 to 64, Terralith regular 27 to 66, Dungeons Arise minor 30 to 73, firecaller hut 42 to 103 |
 
 | Unlisted, own spacing | Change | Examples |
