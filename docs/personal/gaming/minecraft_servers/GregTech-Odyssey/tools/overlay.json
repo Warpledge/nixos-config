@@ -43,13 +43,6 @@
       "added": "2026-11-07"
     },
     {
-      "jar": "connectiblechains-forge-1.20.1-2.2.5.jar",
-      "modId": "connectiblechains",
-      "name": "Reconnectible Chains",
-      "source": "https://modrinth.com/mod/reconnectible-chains",
-      "added": "2026-11-07"
-    },
-    {
       "jar": "coolrain-1.20.1-Forge-1.0.3.jar",
       "modId": "coolrain",
       "name": "Cool Rain Reforged",
@@ -124,13 +117,6 @@
       "modId": "yet_another_config_lib_v3",
       "name": "YetAnotherConfigLib (YACL)",
       "source": "https://modrinth.com/mod/yacl",
-      "added": "2026-11-07"
-    },
-    {
-      "jar": "zipline-forge-1.20.1-1.3.0.jar",
-      "modId": "zipline",
-      "name": "Ziplines: Rezipped!",
-      "source": "https://modrinth.com/mod/ziplines-rezipped",
       "added": "2026-11-07"
     },
     {
@@ -386,6 +372,13 @@
       "added": "2026-11-12"
     },
     {
+      "jar": "integrated_simply_swords-forge-1.3.1+1.20.1.jar",
+      "modId": "integrated_simply_swords",
+      "name": "Integrated Simply Swords",
+      "source": "https://modrinth.com/mod/integrated-simply-swords",
+      "added": "2026-11-12"
+    },
+    {
       "jar": "IMM v1.3.2-1.20.1.jar",
       "modId": "integrated_mowzies_mobs",
       "name": "Integrated Mowzie's Mobs",
@@ -435,20 +428,6 @@
       "added": "2026-11-12"
     },
     {
-      "jar": "crittersandcompanions-forge-1.20.1-2.7.1.jar",
-      "modId": "crittersandcompanions",
-      "name": "Critters and Companions",
-      "source": "https://modrinth.com/mod/critters-and-companions",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "moremobvariants-forge+1.20.1-1.3.0.1.jar",
-      "modId": "moremobvariants",
-      "name": "More Mob Variants",
-      "source": "https://modrinth.com/mod/more-mob-variants",
-      "added": "2026-11-12"
-    },
-    {
       "jar": "structurify-forge-2.0.43+mc1.20.1.jar",
       "modId": "structurify",
       "name": "Structurify",
@@ -467,20 +446,6 @@
       "modId": "particular",
       "name": "Particular Reforged",
       "source": "https://modrinth.com/mod/particular-reforged",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "Jadens-Nether-Expansion-2.3.5.jar",
-      "modId": "netherexp",
-      "name": "Jaden's Nether Expansion",
-      "source": "https://modrinth.com/mod/jadens-nether-expansion",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "ElysiumAPI-1.20.1-1.1.3.jar",
-      "modId": "elysium_api",
-      "name": "Elysium API",
-      "source": "https://modrinth.com/mod/elysium-api",
       "added": "2026-11-12"
     },
     {
@@ -638,25 +603,18 @@
       "added": "2026-11-12"
     },
     {
-      "jar": "irons_spellbooks-1.20.1-3.16.3.jar",
-      "modId": "irons_spellbooks",
-      "name": "Iron's Spells 'n Spellbooks",
-      "source": "https://modrinth.com/mod/irons-spells-n-spellbooks",
-      "added": "2026-11-12"
+      "jar": "incontrol-1.20-9.5.1.jar",
+      "modId": "incontrol",
+      "name": "In Control!",
+      "source": "https://modrinth.com/mod/in-control",
+      "added": "2026-11-15"
     },
     {
-      "jar": "irons_lib-1.20.1-2.2.0.jar",
-      "modId": "irons_lib",
-      "name": "Iron's Lib",
-      "source": "https://modrinth.com/mod/irons-lib",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "manaunification-1.20.1-2.0.0-SNAPSHOT-6.jar",
-      "modId": "manaunification",
-      "name": "Mana Unification",
-      "source": "https://modrinth.com/mod/mana-unification",
-      "added": "2026-11-13"
+      "jar": "cataclysm_compat_1.20.1-1.0.2.jar",
+      "modId": "cataclysm_compat",
+      "name": "Cataclysm & BetterCombat - Compatibility",
+      "source": "https://modrinth.com/mod/cataclysm-x-bettercombat-compat",
+      "added": "2026-11-15"
     }
   ],
   "removed": [
@@ -665,12 +623,6 @@
       "name": "AdvancementNoMore",
       "reason": "Born in Chaos and Nether Remastered read advancements it removes",
       "removed": "2026-11-12"
-    },
-    {
-      "modId": "integrated_simply_swords",
-      "name": "Integrated Simply Swords",
-      "reason": "Trimming the Simply Swords stack for stability",
-      "removed": "2026-11-15"
     },
     {
       "modId": "knavesneeds",
@@ -689,12 +641,72 @@
       "name": "TouhouLittleMaid-Self-Talk",
       "reason": "Trimming the maid add-ons for stability",
       "removed": "2026-11-15"
+    },
+    {
+      "modId": "crittersandcompanions",
+      "name": "Critters and Companions",
+      "reason": "Trimming mob mods",
+      "removed": "2026-11-15"
+    },
+    {
+      "modId": "moremobvariants",
+      "name": "More Mob Variants",
+      "reason": "Trimming mob mods",
+      "removed": "2026-11-15"
+    },
+    {
+      "modId": "zipline",
+      "name": "Ziplines: Rezipped!",
+      "reason": "Crashed with Connectible Chains (2026-11-11)",
+      "removed": "2026-11-15"
+    },
+    {
+      "modId": "connectiblechains",
+      "name": "Reconnectible Chains",
+      "reason": "Removed with Zipline",
+      "removed": "2026-11-15"
+    },
+    {
+      "modId": "irons_spellbooks",
+      "name": "Iron's Spells 'n Spellbooks",
+      "reason": "Trimming magic mods; Ars Nouveau stays",
+      "removed": "2026-11-15"
+    },
+    {
+      "modId": "irons_lib",
+      "name": "Iron's Lib",
+      "reason": "Removed with Iron's Spells",
+      "removed": "2026-11-15"
+    },
+    {
+      "modId": "manaunification",
+      "name": "Mana Unification",
+      "reason": "Requires Iron's Spells",
+      "removed": "2026-11-15"
+    },
+    {
+      "modId": "netherexp",
+      "name": "Jaden's Nether Expansion",
+      "reason": "Trimming Nether mods; Incendium stays",
+      "removed": "2026-11-15"
+    },
+    {
+      "modId": "elysium_api",
+      "name": "Elysium API",
+      "reason": "Removed with Jaden's Nether Expansion",
+      "removed": "2026-11-15"
     }
   ],
   "carry": [
     "config/DistantHorizons.toml",
     "config/bettermineshafts-forge-1_20.toml",
     "config/borninconfiguration-general.toml",
+    "config/bosses_of_mass_destruction.json5",
+    "config/citadel-common.toml",
+    "config/incontrol/phases.json",
+    "config/incontrol/spawn.json",
+    "config/legendary_monsters-common.toml",
+    "config/mowziesmobs-common.toml",
     "config/biomeswevegone/world_generation.json",
     "config/fastchunkgen.toml",
     "config/maid_storage_manager-common.toml",
@@ -704,9 +716,9 @@
     "config/terrablender.toml",
     "config/touhou_little_maid-common.toml",
     "config/touhou_little_maid/sites/llm.json",
-    "config/zipline.json",
     "config/gtocore-rules.txt",
     "config/gtocore.yaml",
+    "config/integrated_simply_swords/silver.json5",
     "config/openloader/data/warpledge-gto",
     "config/openloader/data/warpledge-gto-integrated",
     "config/reliable_recipes",

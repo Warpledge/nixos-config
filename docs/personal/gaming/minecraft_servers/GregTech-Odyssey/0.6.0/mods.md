@@ -31,8 +31,6 @@ mods from the same batch crashed on tag reload and were dropped
 | `entity_texture_features-7.2.7-1.20.1-forge.jar` | Entity Texture Features | Resource-pack entity texture features; EMF needs it |
 | `smoothswapping-0.9.3.2-1.20.1-forge.jar` | Smooth Swapping | Animates items moving in inventories |
 | `better_climbing-forge-3.jar` | Better Climbing | Climbing improvements |
-| `connectiblechains-forge-1.20.1-2.2.5.jar` | Reconnectible Chains | Decorative chains between fences |
-| `zipline-forge-1.20.1-1.3.0.jar` | Ziplines: Rezipped! | Ziplines |
 | `trashslot-forge-1.20.1-15.1.5.jar` | TrashSlot | Trash slot in the inventory screen |
 | `creeperoverhaul-3.0.2-forge.jar` | Creeper Overhaul | Biome-specific creepers |
 | `endermanoverhaul-forge-1.20.1-1.0.4.jar` | Enderman Overhaul | Biome-specific endermen |
@@ -43,9 +41,12 @@ Kotlin for Forge, which Fzzy Config needs, already ships in dev27. Sounds, MRU,
 Particular and Particle Core were removed on 2026-11-08
 ([candidates.md](./candidates.md#skip)).
 
-**Configs:** `config/zipline.json` sets `consumeDurability` false, so ziplining doesn't
-wear the item (2026-11-08). EMF, ETF and Presence Footsteps crashed a dedicated server in
-Cosmic Frontiers, so they're in `overlay.json`'s `clientOnly` list ([server.md](./server.md)).
+Ziplines: Rezipped! 1.3.0 and Reconnectible Chains 2.2.5 were removed on 2026-11-15:
+Zipline's Connectible Chains compat crashed the client with a
+`ConcurrentModificationException` while ziplining (2026-11-11).
+
+**Configs:** EMF, ETF and Presence Footsteps crashed a dedicated server in Cosmic
+Frontiers, so they're in `overlay.json`'s `clientOnly` list ([server.md](./server.md)).
 
 The shader pack is `Eclipse-Shader Warpledge Edit.zip` in `shaderpacks/`, a copy of the
 one the GTNH notes' [build.py](../../GTNH/2.9.0/eclipse-warpledge-edit/build.py) makes,
@@ -78,7 +79,7 @@ The [warpledge-gto datapack](../datapack/warpledge-gto/) replaces these recipes;
 | Simply Swords | 46 | Iron, gold and diamond weapons and sword-on-a-stick: ingots and diamonds become GT plates of the same material, sticks become iron rods. Netherite, runic and the uniques (loot only) stay |
 | Illager Invasion | 1 | The imbuing table's 4 copper blocks become 2 copper plates and 2 LV circuits |
 | L_Ender's Cataclysm | 11 | Iron, gold and diamond become GT plates in the 5 boss eyes, Belt of Beginner and Netherite Effigy that use them, and in 6 recipes [Integrated Cataclysm](#integrated-structures-2026-11-12) replaces with Create ones (written even where nothing swaps, to put Cataclysm's crafting recipe back). Boss-drop gear stays |
-| Iron's Spells | 24 | Iron, gold, copper and diamond become GT plates; its mithril is GTOCore's MV Mithril ingot, and its own scrap-to-ingot and ore recipes are off ([Iron's Spells](#irons-spells-2026-11-12)). Netherite, chains, nuggets, amethyst and the alchemist cauldron inks stay |
+| Integrated Simply Swords | 15 | Its silver weapons, the only ones whose recipes load without Ice and Fire, Oreganized or Caverns and Chasms: GT silver plates and iron rods replace silver ingots and sticks |
 | Terralith | 5 | Its cheap piston, dispenser, observer, dropper and lever recipes from any stone are switched off, since GT replaces those vanilla recipes |
 
 **Tom's ranges** are per world in `serverconfig/toms_storage-server.toml`; the
@@ -197,6 +198,7 @@ way: Quark breaks EMI, and Integrated Dungeons Arise overlaps When Dungeons Aris
 | `integrated_cataclysm_forge-1.0.5+1.20.1.jar` | Integrated Cataclysm | Rebuilds Cataclysm's boss arenas with Create, Quark and Supplementaries blocks, with other mods' loot in their chests (added 2026-11-12) |
 | `L_Enders_Cataclysm-3.31.jar` | L_Ender's Cataclysm | Bosses, their arenas and boss-drop gear |
 | `lionfishapi-3.0.jar` | Lionfish API | Library Cataclysm requires |
+| `integrated_simply_swords-forge-1.3.1+1.20.1.jar` | Integrated Simply Swords | Simply Swords weapons for other mods' materials; only the silver ones are craftable here. Back on 2026-11-15 |
 | `IMM v1.3.2-1.20.1.jar` | Integrated Mowzie's Mobs | Rebuilds Mowzie's Monastery, Umvunthana Grove, Frostmaw and Wroughtnaut structures (added 2026-11-12) |
 | `mowziesmobs-1.8.2.jar` | Mowzie's Mobs | Bosses and mobs; its gear needs their drops, so nothing is gregified |
 | `mowzies_cataclysm-1.2.1.jar` | Mowzie's Cataclysm | Cataclysm-style locator eyes (Ender Eye recipes) for Mowzie's boss structures |
@@ -204,8 +206,9 @@ way: Quark breaks EMI, and Integrated Dungeons Arise overlaps When Dungeons Aris
 | `BOMD-Forge-1.20.1-1.1.2.jar` | Bosses of Mass Destruction | Four bosses; its recipes need their drops or netherite scrap, so nothing is gregified |
 | `CerbonsAPI-Forge-1.20.1-1.1.0.jar` | Cerbon's API | Library BOMD requires |
 | `legendarymonsters-2.2.4 MC 1.20.1.jar` | Legendary Monsters | Bosses and their structures (added 2026-11-12); gear needs their drops, so nothing is gregified |
-| `crittersandcompanions-forge-1.20.1-2.7.1.jar` | Critters and Companions | Small ambient mobs and pets; its vanilla-metal dragonfly armor and grappling hook are left as they are |
-| `moremobvariants-forge+1.20.1-1.3.0.1.jar` | More Mob Variants | Skin variants for vanilla mobs |
+
+Critters and Companions 2.7.1 and More Mob Variants 1.3.0.1 were removed on 2026-11-15
+to trim the mob mods.
 
 **Integrated Cataclysm** reskins Cataclysm at the same 147 data paths, so the pack carries
 all its data, as with Integrated Dungeons Arise. Its recipes stay out: it turns 6 of
@@ -247,12 +250,12 @@ vanilla items. Integrated Stronghold stayed out (frame rate), and Integrated API
 `dread_citadel` spawner list logs an error at every start because Ice and Fire isn't
 installed; the structure needing it never generates.
 
-**Integrated Simply Swords 1.3.1 was removed on 2026-11-15** to trim the Simply Swords
-stack; it added only 15 silver weapons here. If it comes back:
-it registers its silver weapons only when it recognises a mod that adds silver, and GT
-doesn't count, so its creative tab (icon: the silver cutlass) crashed until
-`config/integrated_simply_swords/silver.json5` set `ENABLED` to `TRUE`. gregify.py still
-writes its silver recipes whenever the jar is in `mods/`.
+**Integrated Simply Swords** registers its silver weapons only when it recognises a mod
+that adds silver, and GT doesn't count; its creative tab icon is the silver cutlass, so
+opening the tab crashed. `config/integrated_simply_swords/silver.json5` sets `ENABLED`
+to `TRUE` (carried by `gto carry`). Its Born in Chaos dark metal weapons register too,
+but their recipes check for Ice and Fire by mistake, so they never load. Removed with
+Knaves' Needs earlier on 2026-11-15, it came back on its own the same day.
 
 **Minka villages** (Integrated Villages) spawn in its `collections/floral` biome tag,
 which names BWG's pre-rename `#byg:is_floral`; libgate.py adds `#biomeswevegone:floral`
@@ -301,12 +304,15 @@ structures, so these overlap nothing.
 
 | Jar | Mod | What it does |
 | --- | --- | --- |
-| `Jadens-Nether-Expansion-2.3.5.jar` | Jaden's Nether Expansion | Nether mobs, blocks, structures and the Black Ice Glaciers biome; its netherite recipes come after HV, so nothing is gregified |
-| `ElysiumAPI-1.20.1-1.1.3.jar` | Elysium API | Library Jaden's requires |
 | `Incendium_1.20.x_v5.3.5.jar` | Incendium | Nether terrain and 8 biomes, 9 structures and loot-only weapons |
 | `MoogsEndStructures-universal-1.20-2.1.0.jar` | MES - Moog's End Structures | 24 End structures, no recipes |
 | `MoogsStructureLib-forge-1.20-3.1.2.jar` | Moog's Structure Lib | Library MES requires; held at 3.1.2 |
 | `Nullscape_1.20.x_v1.2.8.jar` | Nullscape | End terrain and 3 biomes, no items |
+
+**Jaden's Nether Expansion 2.3.5 and Elysium API 1.1.3 were removed on 2026-11-15**
+to trim the Nether mods; Incendium stays. Jaden's added Nether mobs, blocks,
+structures and the Black Ice Glaciers biome, and nothing was gregified. gregify.py
+still lists it in `AIRLESS_JARS`, which skips a missing jar.
 
 **Moog's Structure Lib stays at 3.1.2.** 3.3.0 and later add a `TagLoaderMixin` that
 can't inject past gtolib's (the 3.4.2 crash in [candidates.md](./candidates.md#skip)),
@@ -391,10 +397,11 @@ maid add-ons.
 
 **Maid Spell stays at 1.8.0.1.** From 1.9.0 it's a bootstrap jar that registers a
 ModLauncher service (`maidspell_hurt_head`), and `gto_native` refuses unknown services,
-so the game stops before a crash report. 1.8.0.1 is the last plain jar. It's built for
-Iron's Spells: its structures' loot names 49 Iron's items, all of which 3.16.3 has.
-[structures.py](../tools/structures.py) kept them off (`DISABLED_NAMESPACES`) until
-[Iron's Spells](#irons-spells-2026-11-12) came in.
+so the game stops before a crash report. 1.8.0.1 is the last plain jar. Its own
+`ArsNouveauProvider` and three Ars mixins let maids cast Ars Nouveau spells. Its 12
+structure sets are built for Iron's Spells (their loot names 49 Iron's items), so
+[structures.py](../tools/structures.py) keeps them off (`DISABLED_NAMESPACES`); they
+generated only while [Iron's Spells](#irons-spells-2026-11-12) was in.
 
 **Two jars are patched** by [mixinpatch.py](../tools/mixinpatch.py), rerun after
 updating either: Maid Storage Manager's `JEIRecipeTransferHook` fails against the
@@ -427,7 +434,7 @@ log "task can not load" and "added for twice" lines at startup; both are harmles
 - `maid_storage_manager-common.toml`: crafting, collect and place speeds 1.0 (default
   0.5).
 
-With Iron's Spells in (2026-11-12), Maid Spell's structures generate again.
+Maid Spell's structures are off again since Iron's Spells went on 2026-11-15.
 
 ## Alex's Mobs Continued (2026-11-12)
 
@@ -465,8 +472,9 @@ GTO loads only its own list of EMI and JEI plugins
 plugins never ran. Ten are now listed under `misc.enableEmiJeiExternalPlugins` in
 `config/gtocore.yaml` (each mod's EMI plugin where it has one, else its JEI plugin):
 Create, Supplementaries, Tom's Simple Storage, Touhou Little Maid, Maid Storage
-Manager, Maidsoul Kitchen, Cataclysm, Reliable Recipes, Reliable Remover and TrashSlot,
-plus Iron's Spells' `JeiPlugin` since it came in. They passed staging on 2026-11-12, with EMI loading and its search working. The file is
+Manager, Maidsoul Kitchen, Cataclysm, Reliable Recipes, Reliable Remover and TrashSlot
+(Iron's Spells' `JeiPlugin` went with it on 2026-11-15). They passed staging on
+2026-11-12, with EMI loading and its search working. The file is
 in `overlay.json`'s carry list. Three stay off:
 
 - **Youkai's Homecoming** (`YHJeiPlugin`): crashed the game on load. GTO loads listed
@@ -499,15 +507,18 @@ the Integrated structures near spawn.
 
 ## Iron's Spells (2026-11-12)
 
-Passed two staging trials on 2026-11-12, the second with the overrides below. `gto map
---mod` found no ModLauncher service and no mixin GTO overwrites; Curios, GeckoLib and
-Player Animator already ship in dev27. Taken from the Integrated MC instance.
+**Iron's Spells 'n Spellbooks 3.16.3, Iron's Lib 2.2.0 and Mana Unification 2.0.0
+were removed on 2026-11-15** to trim the magic mods; Ars Nouveau stays. Mana
+Unification requires Iron's. The notes below are for bringing them back: gregify.py's
+`IRONS_*` code still runs whenever the jar is in `mods/`, its JEI plugin
+(`io.redspace.ironsspellbooks.jei.JeiPlugin`) goes back in `gtocore.yaml`, and Maid
+Spell's namespace comes out of `DISABLED_NAMESPACES`.
 
-| Jar | Mod | What it does |
-| --- | --- | --- |
-| `irons_spellbooks-1.20.1-3.16.3.jar` | Iron's Spells 'n Spellbooks | Spells, spell books, scrolls and inks, mage armour, curios, bosses and 9 structure sets (towers, catacombs, a citadel) |
-| `irons_lib-1.20.1-2.2.0.jar` | Iron's Lib | Its required library |
-| `manaunification-1.20.1-2.0.0-SNAPSHOT-6.jar` | Mana Unification | One mana pool for Iron's Spells and Ars Nouveau: both mods' spells spend it, and their max mana and regen bonuses add to it. Added 2026-11-13 |
+It passed two staging trials on 2026-11-12. `gto map --mod` found no ModLauncher
+service and no mixin GTO overwrites; Curios, GeckoLib and Player Animator already ship
+in dev27. It came from the Integrated MC instance, with spells, spell books, scrolls,
+mage armour, curios, bosses and 9 structure sets; Mana Unification (added 2026-11-13)
+gave it and Ars Nouveau one mana pool.
 
 **Mithril is GTOCore's.** GTOCore has its own MV Mithril, which Iron's recipes don't
 accept (its parts are under `c:`, Iron's asks for `forge:ingots/mithril`). So Iron's
@@ -523,7 +534,7 @@ with a 1.21 table reference (`value` for `name`) and `chests/citadel/citadel_tom
 with 1.21's `set_written_book_pages`, so neither loaded. gregify.py rewrites both from
 the jar (the tome pages go in through `set_nbt`).
 
-Its JEI plugin is listed in `gtocore.yaml` ([EMI and JEI plugins](#emi-and-jei-plugins-2026-11-12)).
+Its JEI plugin was listed in `gtocore.yaml` ([EMI and JEI plugins](#emi-and-jei-plugins-2026-11-12)).
 Harmless log lines: EMF gives up on the pyrium staff's two model parts, and Maid
 Storage Manager logs `cooked_ice_spider_egg_from_campfire_cooking` as added twice.
 
@@ -533,6 +544,71 @@ HUD) with a required mixin config; every method and field it names exists in the
 fork's 4.12.24, so check them first when GTO updates its Ars Nouveau. Its Apotheosis,
 EB Wizardry and Put Mana In mixins skip, since the pack has none of those classes. Its
 conversion rates are the 1.0 defaults in `config/manaunification-common.toml`.
+
+## Mob tuning (2026-11-15)
+
+In staging since 2026-11-15, trial pending. Modelled on Integrated MC 1.6.9's configs,
+with boss buffs halved because GTO already boosts mobs. All of it stays clear of GTO's
+own mob code: no rule or value touches vanilla's or GTO's mobs, spawn rates, light
+checks, despawning or regeneration.
+
+**GTO's boost** (gtocore 26.11.1 `MobMixin`, rule `survival.mob_enhancement`): when a
+mob spawns, every boss (Jade's boss check) and half of the other mobs get extra max
+health and attack damage, a random amount between `base / 2` (bosses) or `base / 10`
+(others) and `base`, times difficulty / 2. On Hard that's +75 to 150% for bosses and +15
+to 150% for the rest, on top of whatever base the mod's own config sets.
+`mobConfig.naturalRegeneration` in `gtocore.yaml` also makes every mob regenerate, so no
+boss healing below goes up.
+
+| Jar | Mod | What it does |
+| --- | --- | --- |
+| `incontrol-1.20-9.5.1.jar` | In Control! | Rule files that allow or deny spawns; here, Born in Chaos's day phases |
+| `cataclysm_compat_1.20.1-1.0.2.jar` | Cataclysm & BetterCombat - Compatibility | Data only: Better Combat weapon attributes (swing animations, reach) for 20 Cataclysm weapons, several of which had none |
+
+`gto map --mod` found no mixin target shared with GTO, and gtocore subscribes to no
+Forge spawn event (only `EntityJoinLevelEvent`), so In Control's checks don't collide.
+
+**Born in Chaos spawn weights are a third of its own**: its 44 `forge:add_spawns` biome
+modifiers add 544 weight to every biome (a plains biome's vanilla hostiles total about
+515), now 181. [gregify.py](../tools/gregify.py) rewrites them from the jar
+(`BIC_WEIGHT_DIVISOR`), keeping their `forge:any` biomes so the airless tags still
+apply.
+
+**In Control** (`config/incontrol/spawn.json` and `phases.json`, Integrated MC's rules
+for the mods GTO has; first match wins):
+
+| Rule | Mobs |
+| --- | --- |
+| Always denied | Born in Chaos: zombie clown (both), dire hound leader, glutton fish, maggot, corpse fly, swarmer, dark vortex, bloody gadfly, baby spider, krampus. Also Alex's crow and Cataclysm's five deeplings (Integrated MC's koi fish rule left out with Critters and Companions) |
+| Day 5, 75% | door knight, baby skeleton, zombie lumberjack, zombie fisherman, zombie bruiser |
+| Day 10, 25% | skeleton demoman, skeleton thrasher |
+| Day 15, 75% | bonescaller, siamese skeletons, phantom creeper, restless spirit, seared spirit |
+| Day 25, 50% | mother spider, spirit guide, spirit guide assistant |
+| Day 50, 50% | missioner, spirit of chaos, supreme bonescaller |
+| Day 75 | fallen chaos knight (50%), nightmare stalker (60%) |
+| Day 100, 50% | lifestealer |
+
+A phased mob is denied before its day, and after it spawns at the given share of its
+(already cut) weight. Zombie bruiser isn't in Integrated MC's final deny, so nothing
+denies it and it spawns from day 1 at its full (cut) weight; kept as Integrated MC has
+it. Its
+rules for Alex's Caves biomes and mods GTO lacks (Biome Makeover, Eidolon, Quark,
+Forbidden Arcanus, Upgrade Aquatic, Caverns and Chasms) were left out.
+
+**Boss stats** take half of each Integrated MC buff: a multiplier m becomes
+1 + (m - 1) / 2, and a flat value moves halfway from the default to Integrated MC's.
+
+| File | Changed |
+| --- | --- |
+| `bosses_of_mass_destruction.json5` | Night Lich health 300 to 400, missile damage 9 to 10.5, comet explosion 4 to 5.5; Void Blossom idle healing 0.5 to 0.4 |
+| `mowziesmobs-common.toml` | Frostmaw health 1.75, attack 1.65; Ferrous Wroughtnaut 1.25 and 1.25 |
+| `legendary_monsters-common.toml` | 45 Mob Settings multipliers: most to 1.25; Ancient Guardian damage 2.5, health 3.5; Cloud Golem and Dune Sentinel 1.5 and 2.0; Frostbitten Golem, Bomber and Skeletosaurus health 1.5; Withered Abomination damage 1.75, health 1.5; Obliterator 1.5 and 1.75; Flame Drifter and Wandering Eye 1.5; Mossy Golem damage 1.15. Damage caps and toggles unchanged |
+
+Taken as Integrated MC has them: BOMD's `eternalNighttime` false (the Night Lich no
+longer keeps it night) and `numEntitiesKilledToDropSoulStar` 50 to 1000, Mowzie's
+`suns_blessing_duration` 60 to 120, and Citadel's April Fools content off. Integrated MC
+left Cataclysm, Alex's Mobs and Born in Chaos's own stats at their defaults, and so does
+this.
 
 ## Overlay
 

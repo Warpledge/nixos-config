@@ -13,8 +13,9 @@ datapack replaces the mod's recipe. Rerun after updating one of these mods. A re
 not matched by a rule is left to the mod. 0.6.0/mods.md explains the choices.
 
 It also writes Ad Astra's entity tags that let modded mobs live in the airless Nether
-and End (AIRLESS_*), and for Iron's Spells its mithril ore off, two loot tables fixed
-for 1.20.1 and a Reliable Remover rule in ../reliable/ hiding its own mithril.
+and End (AIRLESS_*), Born in Chaos's spawn weights cut (BIC_WEIGHT_DIVISOR), and for
+Iron's Spells its mithril ore off, two loot tables fixed for 1.20.1 and a Reliable
+Remover rule in ../reliable/ hiding its own mithril.
 """
 
 import json
@@ -135,6 +136,13 @@ AIRLESS_VANILLA = [
 ]
 AIRLESS_TAGS = ["lives_without_oxygen", "can_survive_extreme_heat",
                 "can_survive_extreme_cold"]
+
+#-- Spawn weights
+
+# Born in Chaos adds 544 weight of hostiles to every biome, more than vanilla's own list.
+# Each of its add_spawns biome modifiers is rewritten with the weight divided by this;
+# config/incontrol/spawn.json phases its mobs in on top (0.6.0/mods.md).
+BIC_WEIGHT_DIVISOR = 3
 
 
 
@@ -315,6 +323,21 @@ def main():
         if path not in names:
             sys.exit(f"{terralith.name} no longer has {path}; check TERRALITH_OFF")
         write(path, DISABLED, written)
+
+    if any(mods.glob("born_in_chaos_*.jar")):
+        bic = find(mods, "born_in_chaos_*.jar")
+        modifier = re.compile(r"data/born_in_chaos_v1/forge/biome_modifier/[^/]+\.json$")
+        with zipfile.ZipFile(bic) as z:
+            for path in sorted(z.namelist()):
+                if not modifier.match(path):
+                    continue
+                mod = json.loads(z.read(path))
+                if mod.get("type") != "forge:add_spawns":
+                    continue
+                spawners = mod["spawners"]
+                for s in spawners if isinstance(spawners, list) else [spawners]:
+                    s["weight"] = max(1, round(s["weight"] / BIC_WEIGHT_DIVISOR))
+                write(path, mod, written)
 
     mobs = {f"minecraft:{m}" for m in AIRLESS_VANILLA}
     for pattern in AIRLESS_JARS:

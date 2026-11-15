@@ -59,7 +59,7 @@ Create is listed as compatible with GTO on the pack's site but has no integratio
 | --- | --- | --- |
 | 1 (in main) | Integrated API 1.9.2, Integrated Patches 1.2.0 | none |
 | 2 (in main, without Stronghold) | IDAS 1.13.0, Integrated Villages 1.3.2, Integrated Stronghold 1.1.1, Integrated Dungeons Arise 2.1.3, Integrated Seven Seas 1.0.0 | Create, Supplementaries, Amendments, Moonlight, Reliable Remover and Recipes, the quarkblocks jar in place of Quark |
-| 3 (in main) | Integrated Cataclysm 1.0.5, Integrated Mowzie's Mobs 1.3.2, Integrated Bosses of Mass Destruction 1.0.0, Integrated Simply Swords 1.3.1 (removed 2026-11-15) | Each one's base mod: L_Ender's Cataclysm (Lionfish API), Mowzie's Mobs, Bosses of Mass Destruction (Cerbon's API), Simply Swords |
+| 3 (in main) | Integrated Cataclysm 1.0.5, Integrated Mowzie's Mobs 1.3.2, Integrated Bosses of Mass Destruction 1.0.0, Integrated Simply Swords 1.3.1 | Each one's base mod: L_Ender's Cataclysm (Lionfish API), Mowzie's Mobs, Bosses of Mass Destruction (Cerbon's API), Simply Swords |
 
 - Integrated Stronghold's last 1.20.1 build is from 2024-03, and Bosses of Mass
   Destruction's from 2024-01; the rest were updated in 2026.
@@ -140,7 +140,7 @@ the same spots.
 | Structure Essentials | | Spacing control; CurseForge only. Not needed while Structurify does the job ([structure-spacing.md](./structure-spacing.md)) |
 | Mowzie's Mobs | | **Added 2026-11-12** with Integrated Mowzie's Mobs and Mowzie's Cataclysm; nothing gregified, its gear needs boss drops |
 | L_Ender's Cataclysm | Lionfish API | **Added 2026-11-12** with Integrated Cataclysm; its gear needs boss drops, so only the vanilla-metal recipes were gregified ([mods.md](./mods.md#recipe-overrides)) |
-| Cataclysm & BetterCombat Compat | | Compat for the mods above; add only with them. Mowzie's Cataclysm went in with Mowzie's Mobs. Simply Swords: Cataclysm is in [Skip](#skip) |
+| Cataclysm & BetterCombat Compat | | **In staging since 2026-11-15** ([mods.md](./mods.md#mob-tuning-2026-11-15)). Compat for the mods above; add only with them. Mowzie's Cataclysm went in with Mowzie's Mobs. Simply Swords: Cataclysm is in [Skip](#skip) |
 
 ## Gameplay changes
 
@@ -173,7 +173,7 @@ sessions in staging before deciding.
 | YUNG's Better Strongholds | Replaces the stronghold eyes of ender lead to; dev27's End Remastered patches stronghold pieces for its own eyes and portal frames, which gate the End |
 | Diagonal Walls, Windows, Fences | Their `diagonalblocks` 8.0.6 throws `target block tags not empty` on the second tag reload (staging, 2026-11-07): the first world loads, but EMI never gets its data, and leaving to the title and loading or creating any world crashes |
 | Alex's Mobs 1.22.9, Citadel 2.6.3, Domestication Innovation 1.7.1, Alex's Mobs Interaction, Alex's Delight | With Alex's Mobs and Citadel on, EMI's reload fails every time with a `NullPointerException` in gtolib's recipe baking; with them off it loads (staging, 2026-11-08). **Back since 2026-11-12** as Alex's Mobs Continued with its brewing patched, plus Citadel, Domestication Innovation and Continued Delight ([mods.md](./mods.md#alexs-mobs-continued-2026-11-12)); Interaction wasn't retried |
-| Celestisynth 1.3.4 | Dropped after a look in staging (2026-11-08). Its `RecipeManagerAccessor` mixin also clashes with ExtendedAE's, and its spellbook needs Iron's Spellbooks (in main since 2026-11-12; Celestisynth wasn't retried) |
+| Celestisynth 1.3.4 | Dropped after a look in staging (2026-11-08). Its `RecipeManagerAccessor` mixin also clashes with ExtendedAE's, and its spellbook needs Iron's Spellbooks (in main 2026-11-12 to 2026-11-15; Celestisynth wasn't retried) |
 | YUNG's Cave Biomes | Worldgen crashed on a chest or pod placed `facing=down` (in `MonsterRoomFeature` and Ars Nouveau trees); the other YUNG's structure mods load fine without it (staging, 2026-11-08) |
 | Biomes O' Plenty | Shares 8 wood names with BWG, so GTO generates duplicate GT recipe ids (e.g. `gtceu:lathe/strip_willow_log`) and EMI fails to load (staging, 2026-11-07) |
 | William Wythers' Overhauled Overworld | Doesn't work well with BWG's biomes (staging, 2026-11-07); Terralith kept instead |

@@ -1260,62 +1260,6 @@
     {
       "id": "mowziesmobs:umvuthi",
       "required": false
-    },
-    {
-      "id": "netherexp:antidote",
-      "required": false
-    },
-    {
-      "id": "netherexp:apparition",
-      "required": false
-    },
-    {
-      "id": "netherexp:banshee",
-      "required": false
-    },
-    {
-      "id": "netherexp:carcass",
-      "required": false
-    },
-    {
-      "id": "netherexp:ecto_slab",
-      "required": false
-    },
-    {
-      "id": "netherexp:false_carcass",
-      "required": false
-    },
-    {
-      "id": "netherexp:grenade_effect_cloud",
-      "required": false
-    },
-    {
-      "id": "netherexp:phasmo_arrow",
-      "required": false
-    },
-    {
-      "id": "netherexp:shotgun_pellet",
-      "required": false
-    },
-    {
-      "id": "netherexp:stampede",
-      "required": false
-    },
-    {
-      "id": "netherexp:vessel",
-      "required": false
-    },
-    {
-      "id": "netherexp:warphopper",
-      "required": false
-    },
-    {
-      "id": "netherexp:will_o_wisp",
-      "required": false
-    },
-    {
-      "id": "netherexp:wisp",
-      "required": false
     }
   ]
 }
