@@ -4,7 +4,7 @@ description: Commit the current changes in this public NixOS repo as the user, s
 argument-hint: what changed and why, plus any approved grouping
 context: fork
 agent: general-purpose
-model: sonnet
+model: haiku
 ---
 
 In Claude Code this runs as a forked subagent without the conversation. The caller's note
@@ -21,7 +21,7 @@ keyboard, never another person's. Push and history rewrites (amend, rebase, forc
 
 ## Steps
 
-1. **See the work**: `git status --short` and `git diff --stat`. Untracked files the flake
+1. **See the work**: `git status --short && git diff --stat`. Untracked files the flake
    needs are part of it; build artifacts and the Katana runtime files at the root are not.
 2. **Group** by what someone would revert as a unit: normally one commit per task or
    feature, with its fixes and docs; a standalone fix gets its own. Not one per file,
@@ -45,8 +45,9 @@ keyboard, never another person's. Push and history rewrites (amend, rebase, forc
      Two topics inside one hunk can't be split; put that hunk with the larger topic.
    - With more than four groups and no approved grouping in the caller's note, commit
      nothing and return the plan (one line per planned commit) for the user to confirm.
-3. For each group, `git add <paths>` by path, never `git add -A` or `.` (or stage hunks), then **check** (only when the
-   note at the end calls for it) **and scan**:
+3. For each group, `git add <paths>` by path (or stage hunks), never `git add -A` or `.`.
+   **Check** only a group split by hunk or one leaving out a file the staged ones might
+   reference (CLAUDE.md rule 1; a broken commit is worse than one big one):
    ```bash
    bash <skill-dir>/scripts/check-staged.sh
    ```
@@ -90,7 +91,3 @@ keyboard, never another person's. Push and history rewrites (amend, rebase, forc
    (`git commit -F <file>`; `-m` per paragraph also works), then
    `git log -1 --format='%an <%ae>%n%B'` to confirm the author is the user.
 6. Report the commits made (hash and subject) and that nothing was pushed.
-
-Run `check-staged.sh` only for a group split by hunk or one that leaves out a file the
-staged ones might reference; a group of whole files from an already-working tree skips
-it (CLAUDE.md rule 1). A commit that breaks evaluation is worse than one big commit.

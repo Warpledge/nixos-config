@@ -274,6 +274,7 @@
   claude.connectors.googleCalendar = true;
   claude.connectors.googleDrive = true;
   claude.connectors.claudeDocs = true;
+  claude.desktopPlanList = true; # Claude Desktop's plan checklist; off blocks ccd_turn
   #--- Account Skills
   # Skills synced from your claude.ai account
   claude.accountSkills.builtInBrowser = true;

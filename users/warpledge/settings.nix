@@ -194,6 +194,7 @@
       grep = true;
     };
     connectors.claudeDocs = true;
+    desktopPlanList = false;
     accountSkills = {
       builtInBrowser = true;
       chromeBrowser = true;
