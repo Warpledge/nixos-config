@@ -67,7 +67,9 @@ jar in the same `mods/`. Side C, client alone: Angelica 2.2.46, AngelLib 1.0.2 a
 Search 1.6.4. Later that day ChromaPatch went to 1.0.3 and Eclipse to `e89e6c6`, the
 commit 1.0.3's patch targets, with the old Eclipse zip moved to the same backup folder
 (see [shaders.md](./shaders.md#eclipse-with-chromapatch)). Old jars are in
-`backups/replaced-mods/2026-11-15/`. Not launched yet.
+`backups/replaced-mods/2026-11-15/`. Neo ECO AE Extension then went to 7.3.12 the same
+day on the client; legion still needs 7.3.12 and the rest of the side B jars above. Not
+launched yet.
 
 **2026-11-10: GTNL and GTNLLib were removed; Better Questing API went with them.** BQ API
 was installed on 2026-11-01 for GTNL's quest lines, so it is unused now and its jar is gone
@@ -212,14 +214,20 @@ Right Proper GUI Scale 2.1.1 is also on the client. It keeps the scale as a deci
 `options.txt` (`guiScale:3.5`, between vanilla's 3 and 4) and applies a change when the
 settings screen closes, so it can look like nothing happened. `/guiscale` sets it in game.
 
-Neo ECO AE Extension 7.3.11 is on the client (2026-11-15), on trial since
+Neo ECO AE Extension 7.3.12 is on the client (2026-11-15), on trial since
 2026-11-05: three tiered AE2 multiblock systems for storage, crafting and computation, an
 optional upgrade path rather than a replacement for normal AE2. Both sides must match.
 Modrinth lags the official 1.7.10 repo
-([Yang120231/GTNH-ECO-1.7.10](https://github.com/Yang120231/GTNH-ECO-1.7.10), 7.3.11 on
-2026-11-13 against Modrinth's 7.3.7), so `mod-sources.json` checks GitHub. Its 7.3.11 notes
-name GTNH 2.9.0-RC1 and later. 7.3.11 batches processing patterns against remaining demand
-and fixes a scan cursor that left later recipes unscanned.
+([Yang120231/GTNH-ECO-1.7.10](https://github.com/Yang120231/GTNH-ECO-1.7.10), 7.3.12 on
+2026-11-15 against Modrinth's 7.3.7), so `mod-sources.json` checks GitHub. Its 7.3.11
+notes name GTNH 2.9.0-RC1 and later, and so do 7.3.12's. 7.3.12 adds extended resource
+keys with exact inventory accounting, CraftTweaker recipes for the single-block
+Integrated Workstation, processing status for TecTech multiblocks and the Space Elevator,
+and batched structure validation for the computation subsystems; it fixes a stuck 100%
+progress bar on completed materials, a stalled ME Fluid Auto-Filler, Assembly Matrix batch
+inputs and container returns, and keeps running crafting CPUs through structure changes.
+7.3.11 batched processing patterns against remaining demand
+and fixed a scan cursor that left later recipes unscanned.
 Its recipes looked in line with GTNH in NEI. Still to check: autocrafting through GT
 machines alongside WTCT, and what a world loses when it's removed. The world from before it
 went on the server is `~/Documents/Minecraft_Servers/World-Backups/World3-before-neoecoae-2026-11-05.tar.gz`.
