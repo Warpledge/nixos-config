@@ -482,6 +482,12 @@ def kill(cfg):
     code, out = systemctl("kill", "-s", "SIGKILL", unit(cfg["id"]))
     if code:
         raise ServerError(out)
+    #--- SIGKILL leaves the unit failed, which the window would show as a crash
+    for _ in range(20):
+        if not status_of(cfg)["active"]:
+            break
+        time.sleep(0.25)
+    systemctl("reset-failed", unit(cfg["id"]))
 
 
 def set_boot(cfg, on):

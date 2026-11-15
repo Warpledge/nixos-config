@@ -195,25 +195,17 @@ def series(args):
     return {"points": history.series(file, args.get("field"), args.get("range"))}
 
 
-def monitor_request(cfg, message):
-    sock = connect_monitor(cfg["id"])
-    if not sock:
-        raise servers.ServerError("The server isn't running")
-    #--- The hello it sends first needn't be read: closing right after is fine
-    sock.sendall((json.dumps(message) + "\n").encode())
-    select.select([sock], [], [], 0.2)
-    sock.close()
-
-
-def monitor_query(cfg, text):
-    """A read-only command's reply through the monitor's RCON connection; None with RCON off."""
+def monitor_ask(cfg, request, answer):
+    """Send the monitor a request and wait for its reply of type `answer`. Reading
+    until then matters: closing with its hello unread resets the connection, and
+    the monitor drops the request unread."""
     sock = connect_monitor(cfg["id"])
     if not sock:
         raise servers.ServerError("The server isn't running")
     deadline = time.time() + QUERY_WAIT
-    pending = b""
+    pending, old = b"", False
     try:
-        sock.sendall((json.dumps({"cmd": "query", "command": text}) + "\n").encode())
+        sock.sendall((json.dumps(request) + "\n").encode())
         #--- Console lines arrive here too, so only the deadline ends the wait
         while time.time() < deadline:
             if not select.select([sock], [], [], deadline - time.time())[0]:
@@ -224,12 +216,28 @@ def monitor_query(cfg, text):
             *lines, pending = (pending + chunk).split(b"\n")
             for line in lines:
                 message = json.loads(line)
-                if message.get("type") == "reply":
-                    return message["text"] if message["ok"] else None
+                if message.get("type") == answer:
+                    return message
+                #--- A monitor from before acks (it runs old code until the server's
+                #--- next start) gets a moment to read the request, then counts as done
+                if message.get("type") == "hello" and answer == "ack" and not message.get("acks"):
+                    old, deadline = True, min(deadline, time.time() + 2)
     finally:
         sock.close()
+    if old:
+        return {}
     raise servers.ServerError("The monitor didn't answer. If the app was just updated, "
                               "the monitor picks that up at the server's next start.")
+
+
+def monitor_request(cfg, message):
+    monitor_ask(cfg, message, "ack")
+
+
+def monitor_query(cfg, text):
+    """A read-only command's reply through the monitor's RCON connection; None with RCON off."""
+    message = monitor_ask(cfg, {"cmd": "query", "command": text}, "reply")
+    return message["text"] if message["ok"] else None
 
 
 #--------------------------------------------------------------------#

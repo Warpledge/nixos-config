@@ -41,7 +41,8 @@ A `form` has `fields` (`{id, type, label, default}`; type `int` with `min`/`max`
 
 ## Gotchas
 
-- **The monitor runs old code until the server's next start.** Its unit is also `keep-old`, so after a rebuild a running server's monitor doesn't know a new request, and the window (new code) waits `QUERY_WAIT` for it, then says so.
+- **The monitor runs old code until the server's next start.** Its unit is also `keep-old`, so after a rebuild a running server's monitor doesn't know a new request, and the window (new code) waits `QUERY_WAIT` for it, then says so. A monitor whose hello lacks `acks` predates the `run`/`cancel` ack, so `monitor_ask` gives it 2 s to read the request and counts it done.
+- **A client of `<id>.sock` must read until its answer.** Closing with the monitor's hello unread resets the connection, and the monitor drops the request unread; quick commands were lost this way until 2026-11-15.
 - **`omni-server@.service` has no `Install` section.** With `WantedBy`, home-manager's switch tries to start the bare template and the rebuild fails with "missing the instance name". `systemctl add-wants` isn't the way around it either: it also links `default.target` to a store path in `~/.config/systemd/user/`.
 - **The monitor is ordered `Before` the server, not `After`.** A stop runs in reverse order, so `After` stops the monitor first and it misses the shutdown lines that name the dimensions.
 - **Never send two RCON packets at once.** 1.7.10 reads one packet per socket read and drops the connection otherwise; `src/rcon.py` only sends its closing request after a full-sized reply packet. Long replies come back split at 4096 bytes with nothing marking the end.
