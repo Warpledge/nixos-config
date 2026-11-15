@@ -386,13 +386,6 @@
       "added": "2026-11-12"
     },
     {
-      "jar": "integrated_simply_swords-forge-1.3.1+1.20.1.jar",
-      "modId": "integrated_simply_swords",
-      "name": "Integrated Simply Swords",
-      "source": "https://modrinth.com/mod/integrated-simply-swords",
-      "added": "2026-11-12"
-    },
-    {
       "jar": "IMM v1.3.2-1.20.1.jar",
       "modId": "integrated_mowzies_mobs",
       "name": "Integrated Mowzie's Mobs",
@@ -523,13 +516,6 @@
       "modId": "delightful",
       "name": "Delightful",
       "source": "https://modrinth.com/mod/delightful",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "knavesneeds-forge-1.20.1-3.1.0-beta.1.jar",
-      "modId": "knavesneeds",
-      "name": "Knaves' Needs",
-      "source": "https://modrinth.com/mod/knaves-needs",
       "added": "2026-11-12"
     },
     {
@@ -693,6 +679,18 @@
       "name": "AdvancementNoMore",
       "reason": "Born in Chaos and Nether Remastered read advancements it removes",
       "removed": "2026-11-12"
+    },
+    {
+      "modId": "integrated_simply_swords",
+      "name": "Integrated Simply Swords",
+      "reason": "Trimming the Simply Swords stack for stability",
+      "removed": "2026-11-15"
+    },
+    {
+      "modId": "knavesneeds",
+      "name": "Knaves' Needs",
+      "reason": "Trimming the Simply Swords stack for stability",
+      "removed": "2026-11-15"
     }
   ],
   "carry": [
@@ -711,7 +709,6 @@
     "config/zipline.json",
     "config/gtocore-rules.txt",
     "config/gtocore.yaml",
-    "config/integrated_simply_swords/silver.json5",
     "config/openloader/data/warpledge-gto",
     "config/openloader/data/warpledge-gto-integrated",
     "config/reliable_recipes",

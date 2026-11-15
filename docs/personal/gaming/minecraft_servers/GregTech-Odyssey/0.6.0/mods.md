@@ -78,7 +78,6 @@ The [warpledge-gto datapack](../datapack/warpledge-gto/) replaces these recipes;
 | Simply Swords | 46 | Iron, gold and diamond weapons and sword-on-a-stick: ingots and diamonds become GT plates of the same material, sticks become iron rods. Netherite, runic and the uniques (loot only) stay |
 | Illager Invasion | 1 | The imbuing table's 4 copper blocks become 2 copper plates and 2 LV circuits |
 | L_Ender's Cataclysm | 11 | Iron, gold and diamond become GT plates in the 5 boss eyes, Belt of Beginner and Netherite Effigy that use them, and in 6 recipes [Integrated Cataclysm](#integrated-structures-2026-11-12) replaces with Create ones (written even where nothing swaps, to put Cataclysm's crafting recipe back). Boss-drop gear stays |
-| Integrated Simply Swords | 15 | Its silver weapons, the only ones whose recipes load without Ice and Fire, Oreganized or Caverns and Chasms: GT silver plates and iron rods replace silver ingots and sticks |
 | Iron's Spells | 24 | Iron, gold, copper and diamond become GT plates; its mithril is GTOCore's MV Mithril ingot, and its own scrap-to-ingot and ore recipes are off ([Iron's Spells](#irons-spells-2026-11-12)). Netherite, chains, nuggets, amethyst and the alchemist cauldron inks stay |
 | Terralith | 5 | Its cheap piston, dispenser, observer, dropper and lever recipes from any stone are switched off, since GT replaces those vanilla recipes |
 
@@ -198,7 +197,6 @@ way: Quark breaks EMI, and Integrated Dungeons Arise overlaps When Dungeons Aris
 | `integrated_cataclysm_forge-1.0.5+1.20.1.jar` | Integrated Cataclysm | Rebuilds Cataclysm's boss arenas with Create, Quark and Supplementaries blocks, with other mods' loot in their chests (added 2026-11-12) |
 | `L_Enders_Cataclysm-3.31.jar` | L_Ender's Cataclysm | Bosses, their arenas and boss-drop gear |
 | `lionfishapi-3.0.jar` | Lionfish API | Library Cataclysm requires |
-| `integrated_simply_swords-forge-1.3.1+1.20.1.jar` | Integrated Simply Swords | Simply Swords weapons for other mods' materials; only the silver ones are craftable here |
 | `IMM v1.3.2-1.20.1.jar` | Integrated Mowzie's Mobs | Rebuilds Mowzie's Monastery, Umvunthana Grove, Frostmaw and Wroughtnaut structures (added 2026-11-12) |
 | `mowziesmobs-1.8.2.jar` | Mowzie's Mobs | Bosses and mobs; its gear needs their drops, so nothing is gregified |
 | `mowzies_cataclysm-1.2.1.jar` | Mowzie's Cataclysm | Cataclysm-style locator eyes (Ender Eye recipes) for Mowzie's boss structures |
@@ -249,11 +247,12 @@ vanilla items. Integrated Stronghold stayed out (frame rate), and Integrated API
 `dread_citadel` spawner list logs an error at every start because Ice and Fire isn't
 installed; the structure needing it never generates.
 
-**Integrated Simply Swords** registers its silver weapons only when it recognises a mod
-that adds silver, and GT doesn't count; its creative tab icon is the silver cutlass, so
-opening the tab crashed. `config/integrated_simply_swords/silver.json5` sets `ENABLED`
-to `TRUE` (carried by `gto carry`). Its Born in Chaos dark metal weapons register too,
-but their recipes check for Ice and Fire by mistake, so they never load.
+**Integrated Simply Swords 1.3.1 was removed on 2026-11-15** to trim the Simply Swords
+stack; it added only 15 silver weapons here. If it comes back:
+it registers its silver weapons only when it recognises a mod that adds silver, and GT
+doesn't count, so its creative tab (icon: the silver cutlass) crashed until
+`config/integrated_simply_swords/silver.json5` set `ENABLED` to `TRUE`. gregify.py still
+writes its silver recipes whenever the jar is in `mods/`.
 
 **Minka villages** (Integrated Villages) spawn in its `collections/floral` biome tag,
 which names BWG's pre-rename `#byg:is_floral`; libgate.py adds `#biomeswevegone:floral`
@@ -329,19 +328,19 @@ End goes in that list.
 
 ## Food and weapons (2026-11-12)
 
-Passed a staging trial on 2026-11-12. Neither gets recipe overrides.
+Passed a staging trial on 2026-11-12. It gets no recipe overrides.
 
 | Jar | Mod | What it does |
 | --- | --- | --- |
 | `Delightful-1.20.1-3.8.1.jar` | Delightful | Farmer's Delight foods, wild cantaloupe, mini melons and salmonberries, and knives from other mods' metals |
-| `knavesneeds-forge-1.20.1-3.1.0-beta.1.jar` | Knaves' Needs | Simply Swords weapons for other mods' materials; only Deeper Darker's Warden set loads here |
 
 Delightful's knives are one GT ingot or gem and a stick, like Farmer's Delight's own
-knives, which GTO leaves alone too. Knaves' Needs gates every set on its mod; the
-Warden weapons need reinforced echo shards, which GTO puts behind GT processing. Its
-resonarium set doesn't show, since GTO reworks Deeper Darker's items (`DDItemsMixin`).
-The 3.1.0 beta is the only build on Fzzy Config, which the pack already has; 2.0 (2023)
-needs Architectury.
+knives, which GTO leaves alone too.
+
+**Knaves' Needs 3.1.0-beta.1 was removed on 2026-11-15** to trim the Simply Swords
+stack: only Deeper Darker's Warden set loaded here (its resonarium set doesn't show,
+since GTO reworks Deeper Darker's items in `DDItemsMixin`). The 3.1.0 beta is the only
+build on Fzzy Config; 2.0 (2023) needs Architectury.
 
 EMI logs `Exception thrown registering repair recipes` six times since this batch: an
 item whose repair material is empty, so EMI skips its anvil recipe. It's harmless.

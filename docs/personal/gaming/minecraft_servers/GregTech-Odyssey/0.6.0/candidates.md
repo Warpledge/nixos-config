@@ -59,7 +59,7 @@ Create is listed as compatible with GTO on the pack's site but has no integratio
 | --- | --- | --- |
 | 1 (in main) | Integrated API 1.9.2, Integrated Patches 1.2.0 | none |
 | 2 (in main, without Stronghold) | IDAS 1.13.0, Integrated Villages 1.3.2, Integrated Stronghold 1.1.1, Integrated Dungeons Arise 2.1.3, Integrated Seven Seas 1.0.0 | Create, Supplementaries, Amendments, Moonlight, Reliable Remover and Recipes, the quarkblocks jar in place of Quark |
-| 3 (in main) | Integrated Cataclysm 1.0.5, Integrated Mowzie's Mobs 1.3.2, Integrated Bosses of Mass Destruction 1.0.0, Integrated Simply Swords 1.3.1 | Each one's base mod: L_Ender's Cataclysm (Lionfish API), Mowzie's Mobs, Bosses of Mass Destruction (Cerbon's API), Simply Swords |
+| 3 (in main) | Integrated Cataclysm 1.0.5, Integrated Mowzie's Mobs 1.3.2, Integrated Bosses of Mass Destruction 1.0.0, Integrated Simply Swords 1.3.1 (removed 2026-11-15) | Each one's base mod: L_Ender's Cataclysm (Lionfish API), Mowzie's Mobs, Bosses of Mass Destruction (Cerbon's API), Simply Swords |
 
 - Integrated Stronghold's last 1.20.1 build is from 2024-03, and Bosses of Mass
   Destruction's from 2024-01; the rest were updated in 2026.
