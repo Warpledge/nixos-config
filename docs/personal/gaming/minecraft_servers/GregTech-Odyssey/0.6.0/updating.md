@@ -87,7 +87,9 @@ python3 -I /etc/nixos-config/docs/personal/gaming/minecraft_servers/GregTech-Ody
 `tools/classpatch/<mod>/` against the instance's Forge and SRG Minecraft jars (from
 Prism's libraries, so launch the instance once first) and swaps them into the jar. It
 patches Alex's Mobs Continued's brewing, without which EMI's reload fails
-([mods.md](./mods.md#alexs-mobs-continued-2026-11-12)). A fresh download needs it:
+([mods.md](./mods.md#alexs-mobs-continued-2026-11-12)), and Maidsoul Kitchen's login
+warning ([mods.md](./mods.md#maid-addons-and-youkais-homecoming-2026-11-12)). A fresh
+download needs it:
 
 ```bash
 python3 -I /etc/nixos-config/docs/personal/gaming/minecraft_servers/GregTech-Odyssey/tools/classpatch.py ~/.local/share/PrismLauncher/instances/GregTech.Odyssey-0.6.0-dev27-staging/minecraft/mods

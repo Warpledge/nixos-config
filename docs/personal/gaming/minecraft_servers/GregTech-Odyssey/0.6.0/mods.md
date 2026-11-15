@@ -406,9 +406,12 @@ button unloadable, and Youkai's `CriterionGridMixin` wrapped a call Better Advan
 Youkai's 2.7.2 no longer has (its kettle accessor wants a `MAP` field that 2.6.1
 lacks too), and blocks those tasks. `YhcTeaKettleTaskEnabled` and
 `YhcFermentationTaskEnabled` are false in `maidsoulkitchen-common.toml`, but its Maid
-Storage Manager kettle and fermentation tasks have no toggle, so it still posts a chat
-warning at every login; nothing switches that off. Kept anyway, since the rest of its
-tasks work. It and Maid Storage Manager
+Storage Manager kettle and fermentation tasks have no toggle, so its task check posted a
+chat warning at every login. Since 2026-11-15 [classpatch.py](../tools/classpatch.py)
+swaps in a `ReportErrorEvent` that never sends it (source in
+`tools/classpatch/maidsoulkitchen/`); the two tasks stay off, and
+`logs/maidsoulkitchen_task_clazz_analysis.txt` is still written. Kept, since its other
+25 tasks load. It and Maid Storage Manager
 log "task can not load" and "added for twice" lines at startup; both are harmless.
 
 **Configs**, all carried by `gto carry`:

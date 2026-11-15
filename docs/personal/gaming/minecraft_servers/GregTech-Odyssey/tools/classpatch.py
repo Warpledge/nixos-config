@@ -31,6 +31,8 @@ STAMP = "META-INF/warpledge-classpatch.sha256"
 PATCHES = [
     # Its brewing recipes share EMI ids in GTO's EMI, which crashes gtolib's bake.
     ("alexsmobs-2.3.0-forge+1.20.1.jar", "alexsmobs"),
+    # Its task check posts a chat warning at every login for tasks that can't load.
+    ("maidsoulkitchen-1.20.1-alpha-v0.3.0.9-all.jar", "maidsoulkitchen"),
 ]
 
 
