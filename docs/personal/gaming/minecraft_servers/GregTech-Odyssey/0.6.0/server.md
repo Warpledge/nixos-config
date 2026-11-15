@@ -55,6 +55,13 @@ cleanly. A server that crashes while loading mods can hang instead of exiting, s
 restart loop never runs and `gtoserver stop` does nothing; stop it with `kill` on the
 java process and read `crash-reports/`.
 
+Retested on 2026-11-15 after the mob tuning: `Done` in 7 s, but after `stop` the JVM
+never exits. It logs `All dimensions are saved`, then AllTheLeaks reports stuck threads
+and FastChunkGen's watchdog "forcing exit" doesn't end it either; only `kill -9` does.
+The world is saved by then, so once that line is in the log, kill the java process.
+The same build's first run failed because Born in Chaos was missing from
+`overlay.json`; Born In Configuration requires it.
+
 ## First start on the laptop
 
 1. Move the archive to the laptop (Syncthing or a USB stick) and unpack it:

@@ -357,6 +357,7 @@ Passed a staging trial on 2026-11-12.
 
 | Jar | Mod | What it does |
 | --- | --- | --- |
+| `born_in_chaos_[Forge]1.20.1_1.7.5.jar` | Born in Chaos | Horror mobs, bosses and their gear; needs GeckoLib (in dev27). Added from Prism on 2026-11-11; runs on both sides |
 | `borninconfig-FORGE.jar` | Born In Configuration | Config file and screen for Born in Chaos's game rules, mob and item stats and per-mob spawning; 4.0, needs Born in Chaos 1.7.5 or later |
 
 `config/borninconfiguration-general.toml` (common, carried by `gto carry`) keeps every
