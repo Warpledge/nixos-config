@@ -43,12 +43,13 @@ RARITY = {
     "mowziesmobs": 1, "bosses_of_mass_destruction": 1, "cataclysm": 1,
     "legendary_monsters": 1,
     "dungeons_arise:major_structures": 1, "idas:idas_rare": 1,
+    # YUNG's replacements for vanilla's biome-locked structures: the temples hold End
+    # Remastered's Old and Rogue eyes
+    "betterdeserttemples:desert_temples": 1, "betterjungletemples:jungle_temples": 1,
+    "betterwitchhuts:witch_hut": 1,
     # Villages
     "integrated_villages:regular_villages": 5, "biomeswevegone:villages": 5,
     "terralith:rare_village": 5,
-    # YUNG's temples (End Remastered's Old and Rogue eyes) and witch huts
-    "betterdeserttemples:desert_temples": 3, "betterjungletemples:jungle_temples": 3,
-    "betterwitchhuts:witch_hut": 3,
     # Filler that crowded biomes
     "idas:idas_common": 6, "idas:idas_small": 6, "dungeons_arise:minor_structures": 6,
     "apotheosis": 6, "illagerinvasion:firecaller_hut": 6,
