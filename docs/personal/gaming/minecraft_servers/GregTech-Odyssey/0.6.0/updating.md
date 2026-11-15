@@ -14,7 +14,7 @@ alias gto='python3 -I /etc/nixos-config/docs/personal/gaming/minecraft_servers/G
 | `gto backup <inst>` | Copies the whole instance to `~/Documents/Minecraft_Servers/GTO-backups/<inst>-<date>/` |
 | `gto stage <inst>` | Clones it, world included, to `<inst>-staging` (`--replace` backs up and redoes an old one). Prism must be closed |
 | `gto carry <old> <new>` | Copies your jars, files and Java settings from [overlay.json](../tools/overlay.json) into a new build; `--saves` copies the worlds too |
-| `gto diff <old> <new>` | Mods added, removed or updated, your jars the pack now ships, and every config file that changed |
+| `gto diff <old> <new>` | Mods added, removed or updated (including a jar rebuilt under the same version, such as quarkblocks), your jars the pack now ships, and every config file that changed |
 | `gto check <inst>` | Errors in `logs/latest.log` that the instance's baseline lacks, plus mixin, dependency and load failures and crash reports. Exits 1 on findings |
 | `gto check <inst> --save-baseline` | Records this log's errors as normal for the instance |
 | `gto map <inst>` | GTO's jars, forks and mixins by target, and the classes other mods patch too ([internals/](./internals/index.md)) |

@@ -55,12 +55,16 @@ cleanly. A server that crashes while loading mods can hang instead of exiting, s
 restart loop never runs and `gtoserver stop` does nothing; stop it with `kill` on the
 java process and read `crash-reports/`.
 
-Retested on 2026-11-15 after the mob tuning: `Done` in 7 s, but after `stop` the JVM
-never exits. It logs `All dimensions are saved`, then AllTheLeaks reports stuck threads
-and FastChunkGen's watchdog "forcing exit" doesn't end it either; only `kill -9` does.
-The world is saved by then, so once that line is in the log, kill the java process.
-The same build's first run failed because Born in Chaos was missing from
-`overlay.json`; Born In Configuration requires it.
+Retested on 2026-11-15 after the mob tuning: `Done` in 7 s, and `stop` exits with code
+0 about 45 s later, once an idle thread pool times out (AllTheLeaks warns about stuck
+threads meanwhile; ignore it). FastChunkGen's `disableLoggingShutdownHook` must stay
+`false` in `config/fastchunkgen.toml`: its default forces an exit 30 s after `stop`,
+which deadlocked the JVM until `kill -9`, so the restart loop never ran. The same
+build's first run failed because Born in Chaos was missing from `overlay.json`; Born
+In Configuration requires it.
+
+`gto server` clears the folder's gtocore resource cache and leaves it out of the
+archive, since the cache misses jars rebuilt under the same name.
 
 ## First start on the laptop
 
@@ -105,8 +109,9 @@ old terrain, so start the server's world with it in place.
 
 The zip decides which of the pack's own mods run on a server, so `clientOnly` only
 covers hand-added ones: EMF, ETF, Presence Footsteps (they crashed Cosmic Frontiers'
-server), Sound Physics Remastered, Smooth Swapping, Keep Stepping and Resourcify. Cool
-Rain runs on the server too (added 2026-11-08). A hand-added mod that crashes the server names a client class
+server), Sound Physics Remastered, Smooth Swapping, Keep Stepping, Resourcify, Particular,
+Better Controls, Shoulder Surfing Reloaded and More Overlays Updated. Cool Rain runs on
+the server too (added 2026-11-08). A hand-added mod that crashes the server names a client class
 (`net.minecraft.client...`) in the crash report; add its modId and rebuild the folder.
 The client keeps every jar, so the list only changes the server.
 

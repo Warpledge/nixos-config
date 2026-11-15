@@ -12,6 +12,13 @@ jar's `META-INF/mods.toml`.
 | `Resourcify (1.20.1-forge)-1.8.7.jar` | Resourcify | In-game browser for resource packs, data packs and shaders |
 | `touhoulittlemaid-1.5.3-forge+mc1.20.1.jar` | Touhou Little Maid | Maid companions |
 | `ysm-2.6.5-forge+mc1.20.1-release.jar` | Yes Steve Model | Replaces the player model (GeckoLib based) |
+| `BetterControls-Forge-1.20+v1.3.0.jar` | Better Controls | New ways to control sprinting, sneaking and flying |
+| `ShoulderSurfing-Forge-1.20.1-5.3.1.jar` | Shoulder Surfing Reloaded | Configurable third-person camera |
+| `moreoverlays-1.22.7-mc1.20.2.jar` | More Overlays Updated | Light level and chunk border overlays, and a JEI item search highlight |
+
+Better Controls (2026-11-08), Shoulder Surfing Reloaded (2026-11-10) and More Overlays
+Updated (2026-11-11) were added from Prism without a staging trial. All three are
+client-only, so `gto server` leaves them out.
 
 Distant Horizons, Touhou Little Maid and Yes Steve Model were also in the 0.5.6
 instance at the same versions. dev27 ships Embeddium, Oculus and Xaero's maps itself.
@@ -154,7 +161,8 @@ any Forge 47, though it's built against 47.4.22. Its settings go in
 With defaults, creating a world crashed (2026-11-08): its `reduceAllocations` mixin
 `NbtOps$NbtRecordBuilderASM` couldn't inject into `NbtOps$NbtRecordBuilder.build`, which
 dev27's LeanObject (`leanobject`) had already rewritten. `reduceAllocations` is set to
-false, which only drops that module.
+false, which only drops that module. `disableLoggingShutdownHook` is false too
+(2026-11-15), since its forced exit hung the dedicated server ([server.md](./server.md)).
 
 With that, a new singleplayer world on the desktop ran DH generation at 68 chunks/s
 (2026-11-08), against about 8 on the laptop server without it. With Tectonic added back

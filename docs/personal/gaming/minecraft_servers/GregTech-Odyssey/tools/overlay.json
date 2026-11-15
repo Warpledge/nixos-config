@@ -622,6 +622,27 @@
       "name": "Cataclysm & BetterCombat - Compatibility",
       "source": "https://modrinth.com/mod/cataclysm-x-bettercombat-compat",
       "added": "2026-11-15"
+    },
+    {
+      "jar": "BetterControls-Forge-1.20+v1.3.0.jar",
+      "modId": "bettercontrols",
+      "name": "Better Controls",
+      "source": "https://modrinth.com/mod/better-controls",
+      "added": "2026-11-08"
+    },
+    {
+      "jar": "ShoulderSurfing-Forge-1.20.1-5.3.1.jar",
+      "modId": "shouldersurfing",
+      "name": "Shoulder Surfing Reloaded",
+      "source": "https://modrinth.com/mod/shoulder-surfing-reloaded",
+      "added": "2026-11-10"
+    },
+    {
+      "jar": "moreoverlays-1.22.7-mc1.20.2.jar",
+      "modId": "moreoverlays",
+      "name": "More Overlays Updated",
+      "source": "https://modrinth.com/mod/more-overlays-updated",
+      "added": "2026-11-11"
     }
   ],
   "removed": [
@@ -747,12 +768,15 @@
     "OverrideMemory"
   ],
   "clientOnly": [
+    "bettercontrols",
     "entity_model_features",
     "entity_texture_features",
     "keep_stepping",
+    "moreoverlays",
     "particular",
     "presencefootsteps",
     "resourcify",
+    "shouldersurfing",
     "smoothswapping",
     "sound_physics_remastered"
   ]

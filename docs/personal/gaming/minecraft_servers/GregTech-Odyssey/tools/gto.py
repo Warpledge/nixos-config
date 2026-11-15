@@ -468,6 +468,14 @@ def cmd_server(a):
         if not a.dry_run:
             shutil.copytree(src, out / name, dirs_exist_ok=True)
 
+    # gtocore's resource cache misses jars rebuilt under the same name (clear_gto_cache)
+    cache, stamp = out / "gtocore" / "cache", out / "gtocore" / "hash"
+    if cache.exists() or stamp.exists():
+        act("clear gtocore's resource cache")
+        if not a.dry_run:
+            shutil.rmtree(cache, ignore_errors=True)
+            stamp.unlink(missing_ok=True)
+
     props = out / "server.properties"
     if not props.exists():
         act("write server.properties (port 25566, whitelist on)")
@@ -493,7 +501,8 @@ def cmd_server(a):
         if not a.dry_run:
             subprocess.run(["tar", "--zstd", "-cf", str(tar), "--exclude", "./world",
                             "--exclude", "./backups", "--exclude", "./logs",
-                            "--exclude", "./crash-reports", "-C", str(out), "."],
+                            "--exclude", "./crash-reports", "--exclude", "./gtocore/cache",
+                            "--exclude", "./gtocore/hash", "-C", str(out), "."],
                            check=True)
             print(f"{tar}: {gib(tar.stat().st_size)}")
 
@@ -528,6 +537,9 @@ def cmd_diff(a):
     for mid in sorted(om.keys() & nm.keys()):
         if om[mid][0] != nm[mid][0]:
             print(f"~ {mid} {om[mid][0]} -> {nm[mid][0]}")
+        # A jar rebuilt under the same version (quarkblocks) only shows by its contents
+        elif not same(ogame / "mods" / om[mid][1], ngame / "mods" / nm[mid][1]):
+            print(f"~ {mid} {nm[mid][0]} rebuilt: {nm[mid][1]} differs")
     yours = {m["modId"]: m["jar"] for m in overlay()["mods"]}
     for mid, jar in sorted(yours.items()):
         if mid in nm and nm[mid][1] != jar:
