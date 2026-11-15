@@ -166,9 +166,14 @@ names and script output, 194 display names plus 111 single-quoted literals. The 
 is named `GregTech5U.xml` so the mod does not drop its own older copy beside it. Two
 Chinese leftovers are harmless: comments inside the XML, and `GregTech6.xml`, which only
 fires for GregorianTech 6 blocks that GTNH does not have. A pack update will not refresh
-these files, so new Chinese strings would need translating again. From 1.7.x the mod can
-pull config from the GTNH repo; back these scripts up before a bump. The client's
-`forceUseClientXml` ignores server config. 1.7.2 still stalls on the config merge for
+these files, so new Chinese strings would need translating again. From 1.7.x the mod pulls
+config from luomolhx/GTNH_OmniOcular on every launch (`gtnhConfigAutoUpdate`, on by
+default): on 2026-11-10 it overwrote eight English scripts with Chinese ones, added
+`GregTech5U-GTNH.xml` and blanked `GregTech5U.xml`, keeping the originals in
+`config/OmniOcular/oo-backup/`. On 2026-11-15 the client got the English files back from
+there, `gtnhConfigAutoUpdate=false`, and `forceUseClientXml=true` so a server's copy can't
+override them; the upstream files are in `config/OmniOcular.upstream-zh-2026-11-10/`. The
+server needs the same. 1.7.2 still stalls on the config merge for
 10+ seconds at startup; the fix is in a commit after the release.
 
 One mod written for this setup on 2026-11-04, client and server:

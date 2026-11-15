@@ -81,7 +81,9 @@ The configs copied with the mods are `123Technology.cfg`, `EZNuclear.cfg`,
 `ezstorage.cfg`,
 `gtnhrates.cfg`, `programmablehatches.cfg`, `proghatches.mixin.properties`,
 `TwistSpaceTechnology.cfg`, `visualprospecting.cfg`, `OmniOcular/`, `NHUtilities/`, `waystones.cfg`
-(`xpBaseCost=-1`) and the `gtmb/`, `gtsr/` and `gtswn/` folders.
+(`xpBaseCost=-1`) and the `gtmb/`, `gtsr/` and `gtswn/` folders. `Omni Ocular
+Unofficial.cfg` needs `gtnhConfigAutoUpdate=false`, or each start replaces the English
+`OmniOcular/` scripts with Chinese ones (see [mods.md](./mods.md)).
 
 ## ServerUtilities
 

@@ -33,7 +33,7 @@
     {"name": "ThinkTech", "jar": "^thinktech-", "side": "B", "source": "github:Ol925/ThinkTech"},
     {"name": "World Tooltips", "jar": "^world-tooltips-", "side": "C", "source": "modrinth:worldtooltips-continuation", "note": "Shader-compatible continuation of GenuineSounds' mod. Source code: github.com/kotmatross28729/WorldTooltipsShadersFix. The 1.2.3-87 release reworks the config; delete the old one on update."},
     {"name": "MyCTMLib", "jar": "^MyCTMLib-", "side": "C", "source": "github:ABKQPO/MyCTMLib"},
-    {"name": "OmniOcular Unofficial", "jar": "^OmniOcularUnofficial-", "side": "B", "source": "github:luomolhx/OmniOcular-Unofficial", "asset": "^OmniOcularUnofficial-[0-9.]+(-[0-9.]+)?\\.jar$", "note": "Client uses the full jar; the server uses OmniOcularUnofficial-<version>-server.jar. 1.7.x can pull GTNH config; back up config/OmniOcular/ before a bump."},
+    {"name": "OmniOcular Unofficial", "jar": "^OmniOcularUnofficial-", "side": "B", "source": "github:luomolhx/OmniOcular-Unofficial", "asset": "^OmniOcularUnofficial-[0-9.]+(-[0-9.]+)?\\.jar$", "note": "Client uses the full jar; the server uses OmniOcularUnofficial-<version>-server.jar. 1.7.x overwrites the English scripts from the upstream repo unless gtnhConfigAutoUpdate=false in its .cfg (set on both sides; see mods.md)."},
     {"name": "Omni Tweaks", "jar": "^omnitweaks-", "side": "B", "source": "local:~/Projects/omni-tweaks"},
     {"name": "World Preview NH", "jar": "^worldpreview-", "side": "C", "source": "modrinth:world-preview-nh"},
     {"name": "Vintage Pick Up Notifier", "jar": "^vintagepickupnotifier-", "side": "C", "source": "modrinth:vpun"},
