@@ -291,6 +291,27 @@ renderer is Fabric's `DrawContext`, neither of which transfers. Source is
   stack onto the cursor is not animated yet, because hiding the GUI's own cursor stack
   needs its own hook.
 
+## Dashboard, added on 2026-11-15
+
+`dashboard-1.0.22.jar` (1.0.22, 2026-11-11) is on the client only. It is GTNH's own HUD
+editor: every HUD element, from Minecraft and from the mods it supports, gets a box you
+drag, resize or hide, and bars, the crosshair, the hotbar and the screen overlays can be
+restyled. Three layouts are kept, switched with a key.
+
+- 2.9.0 does not ship it, and it names no pack version. Its `dependencies.gradle` builds
+  against GTNHLib 0.11.52 and NEI 2.8.158; the pack has 0.11.54 and 2.8.171, and its
+  `mcmod.info` requires `gtnhlib` alone. Not launched yet.
+- Keybinds under **Controls**, **Dashboard**: Open Dashboard HUD Editor (none by
+  default), Next HUD Layout and Show/Hide Pictures. Without a key, Mod Options,
+  Dashboard, Config, then Open HUD Editor.
+- Everything changed in the editor saves as you go, to `config/dashboard/editor.cfg`.
+  PNGs put in `config/dashboard/images/` become movable elements after **F3 + T**.
+- InGameInfoXML 2.9.8 is installed, so its text areas can be moved and resized as well.
+  Watch the shaders (Eclipse through ChromaPatch) and Xaero's maps on the first launch,
+  since Dashboard draws over the same frame.
+- The jar came from the 1.0.22 release and its sha256 matches the one GitHub lists. The
+  server needs nothing; side C.
+
 ## Left out until their author ships a 2.9 build
 
 - **AE2Things 1.2.14**: built against 2.8.4's AE2 `rv3-beta-695`, `AE2FluidCraft 1.4.120`
