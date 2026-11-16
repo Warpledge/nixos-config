@@ -135,7 +135,9 @@ Correcting` for each server config Forge fills in; that's normal.
    carried file differs, carry keeps it as `<file>.pack-new`, so a new build's new options
    in `gtocore-rules.txt` can be read before deleting it.
 4. `gto diff <main> <new>` and read it. `!` lines are your jars that the pack now ships.
-   Take them out of `overlay.json` and [mods.md](./mods.md).
+   Take them out of `overlay.json` and [mods.md](./mods.md). If gtceu or gtocore
+   changed, rerun `pbrpack.py --replace` on the new instance's `mods/`
+   ([shaders.md](./shaders.md#the-pbr-pack)).
 5. Launch the new instance, run the checklist, then `gto check <new> --against <main>`.
 6. If it's clean, the new instance becomes main: `gto check <new> --save-baseline`, and
    update the instance name in this note and [index.md](./index.md). The world's rules

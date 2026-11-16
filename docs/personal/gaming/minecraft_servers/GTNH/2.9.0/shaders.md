@@ -73,8 +73,11 @@ Since 2026-11-07 there are two copies of the patched pack in `shaderpacks/`:
 - `Eclipse-Shader KuraEdit [OBS07-Chroma Patch].zip` is ChromaPatch's output with
   KuramA's settings file, downloaded fresh from the pinned commit and unedited. It's the
   reference; don't change settings on it.
-- `Eclipse-Shader Warpledge Edit.zip` is the one in use: the same pack with three edits
-  and its own settings.
+- `Eclipse-Shader Warpledge Edit.zip` is the one in use: the same pack with the edits
+  below and its own settings.
+
+GregTech Odyssey runs the same edits on ChromaPatch's 1.20.1 build
+([its shaders.md](../../GregTech-Odyssey/0.6.0/shaders.md)).
 
 #### The edits
 
@@ -99,6 +102,9 @@ spot by a short anchor and adds the lines below. The full diffs are local, in
 3. **Mod Support menu** (`shaders.properties`). ChromaPatch adds an `[Atmosphere]` row to
    the main shader menu; the edit drops the blank row under it so Misc Settings and Mod
    Support fit. Whether that row was really cut off is unconfirmed.
+4. **GTCEu bordered lamps** (`block.properties`; since 2026-11-15, for GTO). ChromaPatch's
+   1.20.1 list gives only the borderless GTCEu lamps their colour; the edit adds each
+   `gtceu:<colour>_lamp` beside its borderless one. GTNH ignores those ids.
 
 Tried and dropped on 2026-11-07: steadier anti-aliasing on distant real chunks (no
 change; the false lights were the cause), and Mipmap Levels 0 (only a test).

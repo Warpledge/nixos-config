@@ -10,6 +10,7 @@ spot and the lines it adds; shaders.md explains each edit.
 """
 
 import os
+import re
 import sys
 import zipfile
 
@@ -83,10 +84,23 @@ def menu_row(text):
     return "\n".join(lines[: i + 1] + lines[i + 2 :])
 
 
+def lamp_ids(text):
+    """block.properties: give GTCEu's bordered lamps their borderless lamp's colour."""
+    tokens = set(text.split())
+
+    def add(match):
+        lamp = f"gtceu:{match.group(1)}_lamp"
+        return match.group(0) if lamp in tokens else f"{match.group(0)} {lamp}"
+
+    # ChromaPatch lists only the borderless lamps; GTNH ignores the unknown ids.
+    return re.sub(r"gtceu:([a-z_]+?)_borderless_lamp(?=\s)", add, text)
+
+
 EDITS = {
     "shaders/dimensions/all_solid.fsh": emission_fix,
     "shaders/dimensions/composite6.fsh": lod_taa,
     "shaders/shaders.properties": menu_row,
+    "shaders/block.properties": lamp_ids,
 }
 
 

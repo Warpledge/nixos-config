@@ -15,10 +15,11 @@ jar's `META-INF/mods.toml`.
 | `BetterControls-Forge-1.20+v1.3.0.jar` | Better Controls | New ways to control sprinting, sneaking and flying |
 | `ShoulderSurfing-Forge-1.20.1-5.3.1.jar` | Shoulder Surfing Reloaded | Configurable third-person camera |
 | `moreoverlays-1.22.7-mc1.20.2.jar` | More Overlays Updated | Light level and chunk border overlays, and a JEI item search highlight |
+| `chromapatch-1.0.3-forge1201-1.20.1.jar` | Chroma Patch | Builds the coloured-light Eclipse edit from the Eclipse zip in `shaderpacks/` ([shaders.md](./shaders.md)) |
 
-Better Controls (2026-11-08), Shoulder Surfing Reloaded (2026-11-10) and More Overlays
-Updated (2026-11-11) were added from Prism without a staging trial. All three are
-client-only, so `gto server` leaves them out.
+Better Controls (2026-11-08), Shoulder Surfing Reloaded (2026-11-10), More Overlays
+Updated (2026-11-11) and Chroma Patch (2026-11-15) were added without a staging trial.
+All four are client-only, so `gto server` leaves them out.
 
 Distant Horizons, Touhou Little Maid and Yes Steve Model were also in the 0.5.6
 instance at the same versions. dev27 ships Embeddium, Oculus and Xaero's maps itself.
@@ -55,9 +56,11 @@ Zipline's Connectible Chains compat crashed the client with a
 **Configs:** EMF, ETF and Presence Footsteps crashed a dedicated server in Cosmic
 Frontiers, so they're in `overlay.json`'s `clientOnly` list ([server.md](./server.md)).
 
-The shader pack is `Eclipse-Shader Warpledge Edit.zip` in `shaderpacks/`, a copy of the
-one the GTNH notes' [build.py](../../GTNH/2.9.0/eclipse-warpledge-edit/build.py) makes,
-with its own `.zip.txt` settings.
+The shader pack is `Eclipse-Shader Warpledge Edit.zip` in `shaderpacks/`, built for
+1.20.1 with Chroma Patch and the GTNH notes'
+[build.py](../../GTNH/2.9.0/eclipse-warpledge-edit/build.py), with its own `.zip.txt`
+settings and the generated `Warpledge GT PBR.zip` resource pack
+([shaders.md](./shaders.md)).
 
 ## Storage and weapons (2026-11-07)
 

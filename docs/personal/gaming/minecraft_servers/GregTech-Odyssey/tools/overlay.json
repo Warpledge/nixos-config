@@ -643,6 +643,13 @@
       "name": "More Overlays Updated",
       "source": "https://modrinth.com/mod/more-overlays-updated",
       "added": "2026-11-11"
+    },
+    {
+      "jar": "chromapatch-1.0.3-forge1201-1.20.1.jar",
+      "modId": "chromapatch",
+      "name": "Chroma Patch",
+      "source": "https://github.com/Summxx/ChromaPatch/releases",
+      "added": "2026-11-15"
     }
   ],
   "removed": [
@@ -753,6 +760,8 @@
     "config/reliable_remover",
     "defaultconfigs/toms_storage-server.toml",
     "options.txt",
+    "resourcepacks/Warpledge GT PBR.zip",
+    "shaderpacks/Eclipse-Shader-e89e6c6.zip",
     "shaderpacks/Eclipse-Shader Warpledge Edit.zip",
     "shaderpacks/Eclipse-Shader Warpledge Edit.zip.txt"
   ],
@@ -769,6 +778,7 @@
   ],
   "clientOnly": [
     "bettercontrols",
+    "chromapatch",
     "entity_model_features",
     "entity_texture_features",
     "keep_stepping",

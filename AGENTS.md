@@ -381,6 +381,8 @@ with `ls` and use none of warpledge's.
   tables and rerun it, never edit the JSON. `tools/quarkblocks/build.py` then
   `tools/libgate.py` regenerate the Create bans, the Quark block jar and the
   Integrated structure pack after those mods update (`0.6.0/updating.md`).
+  `tools/pbrpack.py` generates the GT PBR resource pack from the jars; tune its
+  tables and rerun it, never edit the maps (`0.6.0/shaders.md`).
 - `docs/CLAUDE.md` lists each pack's files and what to update when.
 
 **tModLoader**
