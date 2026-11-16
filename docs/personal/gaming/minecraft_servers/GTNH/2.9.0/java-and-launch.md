@@ -40,12 +40,15 @@ running client, use
 `jcmd <pid> VM.log output=file=<path> what=gc,gc+heap=info decorators=uptime,level,tags`
 with the instance's JDK.
 
-The agent translates hard-coded Chinese strings in the hand-added mods. Its source, build
-and the matching quest and lore data patches are in
-`~/Documents/Minecraft_Servers/GTNH-Translation/`, with the steps in its `translations.md`.
-It isn't in this repo. Updating one of those mods can bring back untranslated text. The
-client's copy sits in `.minecraft/` because the Prism Launcher AppArmor profile denies
-reading it from `~/Documents`, and the JVM then exits without writing a log.
+The agent translates hard-coded Chinese strings in the hand-added mods, from the table in
+`config/gtnh-translation.tsv`. Its source, master table and table tool are in
+`~/Projects/gtnh-translation-agent/`, with the steps in its `translations.md`; it isn't in
+this repo. The original folder in `~/Documents/Minecraft_Servers/` was lost, so the source
+was rebuilt from the jar on 2026-11-15, and its quest and lore data patches are gone.
+Updating one of those mods can bring back untranslated text: after an update, run the
+project's `tsvtool.py diff` on the old and new jar. The client's copy sits in
+`.minecraft/` because the Prism Launcher AppArmor profile denies reading it from
+`~/Documents` or `~/Projects`, and the JVM then exits without writing a log.
 
 The laptop's args live in `machines/legion/minecraft-servers/gtnh-server.nix`; the only
 2.9 change there is `-XX:+UseCompactObjectHeaders`, and it doesn't load the agent yet. The

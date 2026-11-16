@@ -44,6 +44,12 @@ apply. gtolib has its own plugin, `com.gtolib.MixinConfigPlugin`, which is seale
   A mod's own `TagLoader` mixin may fail to inject into the overwritten method (Moog's
   Structure Lib 3.3.0+ does, see [../mods.md](../mods.md)). GTOTags also drops tag entries after
   `morered:red_alloy_ingot` in a tag file and AE2's legacy tiered interface IDs.
+- **Resource cache:** with `cacheResources` on, gtolib keeps a file index per mod jar
+  (`gtocore/cache/<jar>.bin`) and caches tags, recipes and loot tables under
+  `gtocore/cache/`. It keys on jar names, so a jar rebuilt under the same name keeps
+  its old index and its new files can't be found (seen 2026-11-13). The repo's tools
+  delete `gtocore/cache` and `gtocore/hash` after changing an instance
+  ([../updating.md](../updating.md#integrated-structures-and-create)).
 - **Loot tables:** gtolib `LootDataManagerMixin` builds the loot table map once per
   game session (`GTOLoots.cache`) and hands back the same map on every reload, so
   **`/reload` never picks up a loot table change**; restart the game. It adds GTO's

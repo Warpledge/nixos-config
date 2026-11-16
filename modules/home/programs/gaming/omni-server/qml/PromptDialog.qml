@@ -8,7 +8,11 @@ Rectangle {
     property string heading
     property var fields: []
     property var done: null
-    visible: false
+    //--- Fades in and its card grows into place, as ConfirmDialog does
+    property bool showing: false
+    visible: opacity > 0
+    opacity: showing ? 1 : 0
+    Behavior on opacity { NumberAnimation { duration: Theme.ms(180); easing.type: Easing.OutQuad } }
     color: Qt.rgba(0, 0, 0, 0.5)
 
     function open(title, items, callback) {
@@ -16,9 +20,10 @@ Rectangle {
         fields = items.map(f => typeof f === "string"
             ? { key: f, label: f[0].toUpperCase() + f.slice(1), value: "" } : f)
         done = callback
-        visible = true
+        showing = true
         forceActiveFocus()
     }
+    function dismiss() { showing = false }
 
     function finish() {
         const answers = {}
@@ -26,21 +31,23 @@ Rectangle {
             const row = inputs.itemAt(i)
             answers[row.modelData.key] = row.answer
         }
-        visible = false
+        showing = false
         const callback = done
         done = null
         if (callback)
             Qt.callLater(callback, answers)
     }
 
-    Keys.onEscapePressed: visible = false
-    MouseArea { anchors.fill: parent; onClicked: dialog.visible = false }
+    Keys.onEscapePressed: dismiss()
+    MouseArea { anchors.fill: parent; enabled: dialog.showing; onClicked: dialog.dismiss() }
 
     Rectangle {
         anchors.centerIn: parent
         width: Math.min(parent.width - 32, 440)
         implicitHeight: col.implicitHeight + 40
-        radius: 24
+        radius: Theme.r(24)
+        scale: dialog.showing ? 1 : 0.94
+        Behavior on scale { NumberAnimation { duration: Theme.ms(240); easing.type: Easing.OutCubic } }
         color: Theme.card
         border.width: 1
         border.color: Theme.line
@@ -74,14 +81,14 @@ Rectangle {
                             input.forceActiveFocus()
                     }
                     onAccepted: dialog.finish()
-                    onEscaped: dialog.visible = false
+                    onEscaped: dialog.dismiss()
                 }
             }
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 8
                 Item { Layout.fillWidth: true }
-                Pill { quiet: true; text: "Cancel"; onClicked: dialog.visible = false }
+                Pill { quiet: true; text: "Cancel"; onClicked: dialog.dismiss() }
                 Pill { text: "OK"; onClicked: dialog.finish() }
             }
         }

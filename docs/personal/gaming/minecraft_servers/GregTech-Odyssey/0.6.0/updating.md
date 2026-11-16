@@ -14,7 +14,7 @@ alias gto='python3 -I /etc/nixos-config/docs/personal/gaming/minecraft_servers/G
 | `gto backup <inst>` | Copies the whole instance to `~/Documents/Minecraft_Servers/GTO-backups/<inst>-<date>/` |
 | `gto stage <inst>` | Clones it, world included, to `<inst>-staging` (`--replace` backs up and redoes an old one). Prism must be closed |
 | `gto carry <old> <new>` | Copies your jars, files and Java settings from [overlay.json](../tools/overlay.json) into a new build; `--saves` copies the worlds too |
-| `gto diff <old> <new>` | Mods added, removed or updated, your jars the pack now ships, and every config file that changed |
+| `gto diff <old> <new>` | Mods added, removed or updated (including a jar rebuilt under the same version, such as quarkblocks), your jars the pack now ships, and every config file that changed |
 | `gto check <inst>` | Errors in `logs/latest.log` that the instance's baseline lacks, plus mixin, dependency and load failures and crash reports. Exits 1 on findings |
 | `gto check <inst> --save-baseline` | Records this log's errors as normal for the instance |
 | `gto map <inst>` | GTO's jars, forks and mixins by target, and the classes other mods patch too ([internals/](./internals/index.md)) |
@@ -66,6 +66,13 @@ templates and takes seconds. A change to how `libgate.py` itself rewrites them n
 Seas or Integrated Cataclysm won't load until `libgate.py` has patched it. Changes to
 the pack reach only new chunks, so test in a new world.
 
+All three clear gtocore's resource cache (`gtocore/cache` and `gtocore/hash` in the
+instance), so close the game first. The cache keys on jar names and never notices a jar
+rebuilt under the same name: on 2026-11-13 staging ran a quarkblocks jar whose items,
+models, recipes, loot and tags it couldn't see, and showed missing textures. If a
+quarkblocks change doesn't show up in game, check that `gtocore/cache` is newer than the
+jar.
+
 ## Patched jars
 
 [tools/mixinpatch.py](../tools/mixinpatch.py) removes mixins that break against the
@@ -80,7 +87,9 @@ python3 -I /etc/nixos-config/docs/personal/gaming/minecraft_servers/GregTech-Ody
 `tools/classpatch/<mod>/` against the instance's Forge and SRG Minecraft jars (from
 Prism's libraries, so launch the instance once first) and swaps them into the jar. It
 patches Alex's Mobs Continued's brewing, without which EMI's reload fails
-([mods.md](./mods.md#alexs-mobs-continued-2026-11-12)). A fresh download needs it:
+([mods.md](./mods.md#alexs-mobs-continued-2026-11-12)), and Maidsoul Kitchen's login
+warning ([mods.md](./mods.md#maid-addons-and-youkais-homecoming-2026-11-12)). A fresh
+download needs it:
 
 ```bash
 python3 -I /etc/nixos-config/docs/personal/gaming/minecraft_servers/GregTech-Odyssey/tools/classpatch.py ~/.local/share/PrismLauncher/instances/GregTech.Odyssey-0.6.0-dev27-staging/minecraft/mods
@@ -126,7 +135,9 @@ Correcting` for each server config Forge fills in; that's normal.
    carried file differs, carry keeps it as `<file>.pack-new`, so a new build's new options
    in `gtocore-rules.txt` can be read before deleting it.
 4. `gto diff <main> <new>` and read it. `!` lines are your jars that the pack now ships.
-   Take them out of `overlay.json` and [mods.md](./mods.md).
+   Take them out of `overlay.json` and [mods.md](./mods.md). If gtceu or gtocore
+   changed, rerun `pbrpack.py --replace` on the new instance's `mods/`
+   ([shaders.md](./shaders.md#the-pbr-pack)).
 5. Launch the new instance, run the checklist, then `gto check <new> --against <main>`.
 6. If it's clean, the new instance becomes main: `gto check <new> --save-baseline`, and
    update the instance name in this note and [index.md](./index.md). The world's rules

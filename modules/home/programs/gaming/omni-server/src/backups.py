@@ -4,6 +4,7 @@ world aside rather than deleting it."""
 
 import glob
 import os
+import re
 import shutil
 import sys
 import time
@@ -46,14 +47,20 @@ def report(line):
     print(line, file=sys.stderr, flush=True)
 
 
+#--- `save-all flush`'s last line: 1.7.10 to 1.12 say world, 1.13 and later game
+SAVED = re.compile(rb"Saved the (?:world|game)")
+
+
 def wait_for_save(cfg, since):
     """Until the console shows a finished save, or SAVE_WAIT runs out."""
     log = f"{servers.state_dir(cfg['id'])}/console.log"
     deadline = time.time() + SAVE_WAIT
+    seen = b""
     with open(log, "rb") as f:
         f.seek(since)
         while time.time() < deadline:
-            if b"Saved the world" in f.read():
+            seen = seen[-64:] + f.read()  # the tail keeps a line split across reads
+            if SAVED.search(seen):
                 return
             time.sleep(0.5)
 

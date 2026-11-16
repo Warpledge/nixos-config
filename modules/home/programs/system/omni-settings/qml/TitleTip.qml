@@ -17,7 +17,7 @@ Item {
         y: tt.height - 1
         spacing: 2
         opacity: hover.hovered ? 0.7 : 0
-        Behavior on opacity { NumberAnimation { duration: 120 } }
+        Behavior on opacity { NumberAnimation { duration: Theme.ms(120) } }
         Repeater {
             model: Math.floor(tt.width / 4)
             Rectangle { width: 2; height: 2; radius: 1; color: tt.title.color }

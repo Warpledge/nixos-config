@@ -24,12 +24,12 @@ Do not add these: the pack carries its own copy.
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
 | Twist Space Technology | 0.8.0 | B | release 2026-11-02 includes the 2.9 fix (PR #1386); 0.8.1 crashes world start, see below |
 | 123Technology | 2.2.1.1 | B | 2.2.1's release notes say it's adapted to 2.9.0 stable |
-| EZMiner | 6.4 | B | 6.4 fixes a toolbox crash; still built against `2.9.0-beta-3` |
+| EZMiner | 6.6 | B | 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"` |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
-| EZStorage | 1.8.2 | B | builds against GTNHLib 0.11.52, NEI 2.8.158 |
+| EZStorage | 1.8.3 | B | builds against GTNHLib 0.11.52, NEI 2.8.158; 1.8.3 fixes NEI bookmark pull with large stacks |
 | Programmable Hatches | 0.2.1p7-beta | B | p7 notes: only 2.9.0 supported; builds against GT 5.09.54.264, GTNHLib 0.11.54, NEI 2.8.171 |
 | NH-Utilities | 1.7.0 | B | commit "Fit 29x" |
-| YesSteveModel Unofficial | 2.8 | B | [czqwq fork](https://github.com/czqwq/YesSteveModel-Unofficial); 2.8's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`; 2.6 fixes the animation loop and 2.7 restores the animation storage system; 2.5 disabled the lighting map |
+| YesSteveModel Unofficial | 2.9 | B | [czqwq fork](https://github.com/czqwq/YesSteveModel-Unofficial); 2.9's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`; 2.9 adds the preview setting's entrance and fixes the math parser; 2.6 fixes the animation loop and 2.7 restores the animation storage system; 2.5 disabled the lighting map |
 | MineMenu | 1.2.0.B44 | C | latest on Modrinth, 2025-12-07 |
 | Spark | 1.10.19 | C | latest 1.7.10 |
 | FPS Reducer | 1.10.3 | C | latest, 2023-09-06 |
@@ -53,6 +53,23 @@ releases carry almost no notes (2.8 none, 2.7 warns off its WIP features) but bu
 against 2.9.0. Neo ECO's notes say 2.9.0-RC1 and later. GTNH Modernization says it
 requires 2.9.0, but its testing stopped at a headless server, and 0.3.5 is a
 pre-release. All three are side B, so the laptop needs the same jars.
+
+**The 2026-11-15 update is on the client only, thirteen jars.** Side B, so legion needs
+the same ten before a world can be joined: EZMiner 6.6, EZStorage 1.8.3, YesSteveModel
+Unofficial 2.9, Realistic World Gen 2 2.1.2, MIAOKATZE Core 0.2.15, GT-Miao-Blueprint
+0.3.30, GT-Steam-Reborn 2.1.45, GT-Simple-Wireless-Network 2.1.34, ThinkTech 0.3.3 and
+Neo ECO AE Extension 7.3.11. The three Miao mods name Core 0.2.15 as their prerequisite,
+and all four say they are compatible with 2.9.0 final. GT-Steam-Reborn 2.1.45 moves its
+portable assembler recipes to configuration circuit 24: existing patterns and machine
+selectors need setting to 24, though the ingredients and costs are unchanged.
+Realistic World Gen 2 2.1.2 renames `rwg_data.dat` to stop it clashing with the RWG 1.5.3
+jar in the same `mods/`. Side C, client alone: Angelica 2.2.46, AngelLib 1.0.2 and Better
+Search 1.6.4. Later that day ChromaPatch went to 1.0.3 and Eclipse to `e89e6c6`, the
+commit 1.0.3's patch targets, with the old Eclipse zip moved to the same backup folder
+(see [shaders.md](./shaders.md#eclipse-with-chromapatch)). Old jars are in
+`backups/replaced-mods/2026-11-15/`. Neo ECO AE Extension then went to 7.3.12 the same
+day on the client; legion still needs 7.3.12 and the rest of the side B jars above. Not
+launched yet.
 
 **2026-11-10: GTNL and GTNLLib were removed; Better Questing API went with them.** BQ API
 was installed on 2026-11-01 for GTNL's quest lines, so it is unused now and its jar is gone
@@ -100,10 +117,10 @@ server, and the server boots with all of them.
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
 | Waystones-X | 1.0.16 | B | [JackOfNoneTrades fork](https://github.com/JackOfNoneTrades/WaystonesFork) of BlayTheNinth's mod; `config/waystones.cfg` sets `xpBaseCost=-1` |
-| MIAOKATZE Core | 0.2.14 | B | required by the three Miao mods below, on both sides; the three bundle it in their release assets, all updated together on 2026-11-12 (Core's release says compatible with 2.9.0 final) |
-| GT-Miao-Blueprint | 0.3.26 | B | Neko Blueprint Hologram Projector: blueprint, cut and demolition modes |
-| GT-Steam-Reborn | 2.1.42 | B | steam industry, hubs and nodes, singularity tech, the Prosperity dimension, portable weapons, a BQ line |
-| GT-Simple-Wireless-Network | 2.1.28 | B | wireless EU link nodes, monitors, ME quantum terminal |
+| MIAOKATZE Core | 0.2.15 | B | required by the three Miao mods below, on both sides; the three bundle it in their release assets, all updated together on 2026-11-15 (Core's release says compatible with 2.9.0 final) |
+| GT-Miao-Blueprint | 0.3.30 | B | Neko Blueprint Hologram Projector: blueprint, cut and demolition modes |
+| GT-Steam-Reborn | 2.1.45 | B | steam industry, hubs and nodes, singularity tech, the Prosperity dimension, portable weapons, a BQ line |
+| GT-Simple-Wireless-Network | 2.1.34 | B | wireless EU link nodes, monitors, ME quantum terminal |
 
 All but Waystones come from [MIAOKATZE](https://github.com/MIAOKATZE) and are tagged
 "for GTNH 2.9.0 stable". Their `en_US.lang` files are complete, so the in-game text is
@@ -116,7 +133,7 @@ One more joined them later on 2026-11-02, client and server:
 
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
-| ThinkTech | 0.3.2 | B | chemistry and materials: briquettes, methane clathrate, catalysts, computing chips, explosives (PETN, HMX, HNIW), separation control cores |
+| ThinkTech | 0.3.3 | B | chemistry and materials: briquettes, methane clathrate, catalysts, computing chips, explosives (PETN, HMX, HNIW), separation control cores; 0.3.3 fixes the implosion generator's power display and structure and the crucible recipes for Nichrome and Platinum |
 
 TenkeiTech 1.1.0 was installed with it and removed the same day: it hands you an
 "Useless Tools" staff on spawn with force kill, spawn eggs, area damage, bedrock mining
@@ -151,9 +168,14 @@ names and script output, 194 display names plus 111 single-quoted literals. The 
 is named `GregTech5U.xml` so the mod does not drop its own older copy beside it. Two
 Chinese leftovers are harmless: comments inside the XML, and `GregTech6.xml`, which only
 fires for GregorianTech 6 blocks that GTNH does not have. A pack update will not refresh
-these files, so new Chinese strings would need translating again. From 1.7.x the mod can
-pull config from the GTNH repo; back these scripts up before a bump. The client's
-`forceUseClientXml` ignores server config. 1.7.2 still stalls on the config merge for
+these files, so new Chinese strings would need translating again. From 1.7.x the mod pulls
+config from luomolhx/GTNH_OmniOcular on every launch (`gtnhConfigAutoUpdate`, on by
+default): on 2026-11-10 it overwrote eight English scripts with Chinese ones, added
+`GregTech5U-GTNH.xml` and blanked `GregTech5U.xml`, keeping the originals in
+`config/OmniOcular/oo-backup/`. On 2026-11-15 the client got the English files back from
+there, `gtnhConfigAutoUpdate=false`, and `forceUseClientXml=true` so a server's copy can't
+override them; the upstream files are in `config/OmniOcular.upstream-zh-2026-11-10/`. The
+server needs the same. 1.7.2 still stalls on the config merge for
 10+ seconds at startup; the fix is in a commit after the release.
 
 One mod written for this setup on 2026-11-04, client and server:
@@ -180,8 +202,8 @@ release; all of them passed in-game testing on 2026-11-05.
 | --- | --- | --- | --- |
 | World Preview NH | 1.0.3 | C | biome and height preview on Create New World |
 | Vintage Pick Up Notifier | 1.0.0 | C | item pickup notices |
-| Vintage Resourcify, with AngelLib 1.0.1 | 1.0.6 | C | in-game resource and shader pack browser |
-| Better Search | 1.6.2 | C | typo-tolerant search, with NEI and AE2 hooks |
+| Vintage Resourcify, with AngelLib 1.0.2 | 1.0.6 | C | in-game resource and shader pack browser; 1.0.2 marks server list pings with port 0 rather than a hostname suffix, so e4mc worlds stop showing as "Unknown server" |
+| Better Search | 1.6.4 | C | typo-tolerant search, with NEI and AE2 hooks; 1.6.4 fixes its AE2 mixin errors and works with Language Reload |
 | Effortless Building Gadgets | 0.10.1 | B | shape building through a crafted gadget; `B:consumesEnergy=false` on both sides, so it needs no power |
 | Shoulder Surfing Reloaded | 2.4.1 | C | over-the-shoulder camera; a 2023 build that patches vanilla code, so suspect it first after a pack update |
 
@@ -192,13 +214,20 @@ Right Proper GUI Scale 2.1.1 is also on the client. It keeps the scale as a deci
 `options.txt` (`guiScale:3.5`, between vanilla's 3 and 4) and applies a change when the
 settings screen closes, so it can look like nothing happened. `/guiscale` sets it in game.
 
-Neo ECO AE Extension 7.3.10 is on the client (2026-11-11; server still 7.3.7), on trial since
+Neo ECO AE Extension 7.3.12 is on the client (2026-11-15), on trial since
 2026-11-05: three tiered AE2 multiblock systems for storage, crafting and computation, an
 optional upgrade path rather than a replacement for normal AE2. Both sides must match.
 Modrinth lags the official 1.7.10 repo
-([Yang120231/GTNH-ECO-1.7.10](https://github.com/Yang120231/GTNH-ECO-1.7.10), 7.3.10 on
-2026-11-11 against Modrinth's 7.3.7), so `mod-sources.json` checks GitHub. Its 7.3.10 notes
-name GTNH 2.9.0-RC1 and later.
+([Yang120231/GTNH-ECO-1.7.10](https://github.com/Yang120231/GTNH-ECO-1.7.10), 7.3.12 on
+2026-11-15 against Modrinth's 7.3.7), so `mod-sources.json` checks GitHub. Its 7.3.11
+notes name GTNH 2.9.0-RC1 and later, and so do 7.3.12's. 7.3.12 adds extended resource
+keys with exact inventory accounting, CraftTweaker recipes for the single-block
+Integrated Workstation, processing status for TecTech multiblocks and the Space Elevator,
+and batched structure validation for the computation subsystems; it fixes a stuck 100%
+progress bar on completed materials, a stalled ME Fluid Auto-Filler, Assembly Matrix batch
+inputs and container returns, and keeps running crafting CPUs through structure changes.
+7.3.11 batched processing patterns against remaining demand
+and fixed a scan cursor that left later recipes unscanned.
 Its recipes looked in line with GTNH in NEI. Still to check: autocrafting through GT
 machines alongside WTCT, and what a world loses when it's removed. The world from before it
 went on the server is `~/Documents/Minecraft_Servers/World-Backups/World3-before-neoecoae-2026-11-05.tar.gz`.
@@ -262,6 +291,27 @@ renderer is Fabric's `DrawContext`, neither of which transfers. Source is
   stack onto the cursor is not animated yet, because hiding the GUI's own cursor stack
   needs its own hook.
 
+## Dashboard, added on 2026-11-15
+
+`dashboard-1.0.22.jar` (1.0.22, 2026-11-11) is on the client only. It is GTNH's own HUD
+editor: every HUD element, from Minecraft and from the mods it supports, gets a box you
+drag, resize or hide, and bars, the crosshair, the hotbar and the screen overlays can be
+restyled. Three layouts are kept, switched with a key.
+
+- 2.9.0 does not ship it, and it names no pack version. Its `dependencies.gradle` builds
+  against GTNHLib 0.11.52 and NEI 2.8.158; the pack has 0.11.54 and 2.8.171, and its
+  `mcmod.info` requires `gtnhlib` alone. Not launched yet.
+- Keybinds under **Controls**, **Dashboard**: Open Dashboard HUD Editor (none by
+  default), Next HUD Layout and Show/Hide Pictures. Without a key, Mod Options,
+  Dashboard, Config, then Open HUD Editor.
+- Everything changed in the editor saves as you go, to `config/dashboard/editor.cfg`.
+  PNGs put in `config/dashboard/images/` become movable elements after **F3 + T**.
+- InGameInfoXML 2.9.8 is installed, so its text areas can be moved and resized as well.
+  Watch the shaders (Eclipse through ChromaPatch) and Xaero's maps on the first launch,
+  since Dashboard draws over the same frame.
+- The jar came from the 1.0.22 release and its sha256 matches the one GitHub lists. The
+  server needs nothing; side C.
+
 ## Left out until their author ships a 2.9 build
 
 - **AE2Things 1.2.14**: built against 2.8.4's AE2 `rv3-beta-695`, `AE2FluidCraft 1.4.120`
@@ -299,6 +349,17 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   on a bump: check ChromaPatch and the shaders, Distant Horizons and
   Xaero's maps at launch.
 
+- **Angelica 2.2.46** (2026-11-13, client only): restores FluidLogged and LiquidLogged
+  fluid rendering, fixes LOTR compatibility and a world client leak, adds a weather API
+  for mods, and tags profiler captures with its version. Angelica#2092 is still open, so
+  the Xaero workaround above still applies. Check ChromaPatch and the shaders, Distant
+  Horizons and Xaero's maps at launch.
+
+- **Realistic World Gen 2 2.1.2** (2026-11-14, client only so far): keeps one landmark per
+  river junction, improves `runPreview`, and renames `rwg_data.dat` so it stops clashing
+  with the RWG 1.5.3 jar in the same `mods/`. `rwg2.cfg` is unchanged, so `Biome Size
+  Multiplier` stays at 1.7.
+
 - **Realistic World Gen 2 2.1.1** (2026-11-08, client and server): replaces the
   pack's `rwg2-2.0.6.jar`. Builds against GTNHLib 0.11.54 and NEI 2.8.171, the versions 2.9
   ships. Adds climate bands, per-continent Tainted Land and the `Biome Size Multiplier`,
@@ -323,8 +384,11 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
 - **Dynamic Surroundings 1.0.9.0** (2026-09-30): mist475's 1.7.10 fork, newer than the
   2.8.4 jar's 1.0.7.7; adds Seasonal Horizons compatibility.
 - **Sound-Physics 1.1.1** (2026-06-27): the 1.7.10 mixin edition.
-- **ChromaPatch 1.0.2** (2026-11-05): builds the patched Eclipse shader pack at launch;
-  see [shaders.md](./shaders.md#eclipse-with-chromapatch).
+- **ChromaPatch 1.0.3** (2026-11-13, installed 2026-11-15): builds the patched Eclipse
+  shader pack at launch. The asset names 1.7.10, not 2.9, so the launch is the test. 1.0.3
+  brings its own GTNH patch with about 1600 more GTNH blocks lit, tinted or waving, and
+  FSR fixes for GregTech multiblock effects and sign text; see
+  [shaders.md](./shaders.md#eclipse-with-chromapatch).
 - **Euphoria Patcher 1.9.3** is installed to match the NeonTech settings. 1.10.5 exists,
   but moving to it means copying the NeonTech values by hand.
 - **BetterSprinting 1.1.3**: 2.3.0's coremod fails on 2.9 at the
@@ -400,7 +464,7 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   default recipes and rebuilds them from GT materials. Every block and item id it uses
   (`storage_core`, `storage_box`, `condensed_storage_box`, `hyper_storage_box`,
   `crafting_box`, `input_port`, `portable_storage_terminal`) still exists in EZStorage
-  1.8.2.
+  1.8.3 (rechecked on the 2026-11-15 bump).
 
 ## Quest data
 

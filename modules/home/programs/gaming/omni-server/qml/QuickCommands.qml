@@ -72,7 +72,7 @@ ColumnLayout {
                         if (root.app.running)
                             root.app.runQuick(quickItem.modelData)
                         else
-                            root.app.showError("Start the server first")
+                            root.app.toast("Start the server first", "info")
                     }
                 }
                 TapHandler {

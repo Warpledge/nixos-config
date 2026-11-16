@@ -14,15 +14,17 @@ Rectangle {
          : switchHover.hovered ? Theme.hover : Theme.cardHover
     border.width: checked ? 0 : 2
     border.color: Theme.line
-    Behavior on color { ColorAnimation { duration: 120 } }
+    Behavior on color { ColorAnimation { duration: Theme.ms(140) } }
     Rectangle {
-        width: toggle.checked ? 18 : 14
+        // Grows as it travels, and a little more while pressed
+        width: (toggle.checked ? 18 : 14) + (press.pressed ? 2 : 0)
+        Behavior on width { NumberAnimation { duration: Theme.ms(160); easing.type: Easing.OutBack } }
         height: width
         radius: width / 2
         anchors.verticalCenter: parent.verticalCenter
         x: toggle.checked ? parent.width - width - 4 : 6
         color: toggle.checked ? Theme.inkPrimary : Theme.dim
-        Behavior on x { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+        Behavior on x { NumberAnimation { duration: Theme.ms(200); easing.type: Easing.OutCubic } }
     }
     readonly property point cursor: switchHover.point.scenePosition
     onCursorChanged: if (tip) Tip.move(toggle, cursor)
@@ -32,5 +34,9 @@ Rectangle {
         onHoveredChanged: hovered && toggle.tip ? Tip.request(toggle, toggle.tip, point.scenePosition)
                                                 : Tip.cancel(toggle)
     }
-    TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: toggle.toggled(!toggle.checked) }
+    TapHandler {
+        id: press
+        gesturePolicy: TapHandler.ReleaseWithinBounds
+        onTapped: toggle.toggled(!toggle.checked)
+    }
 }

@@ -735,7 +735,7 @@ Item {
         id: scrollAnim
         target: bodyFlick
         property: "contentY"
-        duration: 380
+        duration: Theme.ms(380)
         easing.type: Easing.OutCubic
         // A section above that grew meanwhile moved the target
         onFinished: omni.anchorTop()
@@ -825,8 +825,8 @@ Item {
     Timer { id: revealCap; interval: 700; onTriggered: omni.showPage() }
     ParallelAnimation {
         id: pageIn
-        NumberAnimation { target: omni; property: "reveal"; to: 1; duration: 220; easing.type: Easing.OutQuad }
-        NumberAnimation { target: omni; property: "rise"; to: 0; duration: 300; easing.type: Easing.OutCubic }
+        NumberAnimation { target: omni; property: "reveal"; to: 1; duration: Theme.ms(220); easing.type: Easing.OutQuad }
+        NumberAnimation { target: omni; property: "rise"; to: 0; duration: Theme.ms(300); easing.type: Easing.OutCubic }
     }
 
     function openFile(rel) {
@@ -989,11 +989,11 @@ Item {
                             width: active ? tabLabel.x + tabLabel.implicitWidth + 14 : 38
                             height: 38
                             anchors.verticalCenter: parent.verticalCenter
-                            Behavior on width { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+                            Behavior on width { NumberAnimation { duration: Theme.ms(200); easing.type: Easing.OutCubic } }
                             radius: 11
                             clip: true
                             color: active ? Qt.alpha(Theme.primary, 0.28) : tabHover.hovered ? Theme.hover : "transparent"
-                            Behavior on color { ColorAnimation { duration: 150 } }
+                            Behavior on color { ColorAnimation { duration: Theme.ms(150) } }
                             Icon {
                                 id: tabIcon
                                 x: tab.active ? 10 : 8
@@ -1022,7 +1022,7 @@ Item {
                                 font.weight: Font.Bold
                                 color: Theme.primary
                                 opacity: tab.active ? 1 : 0
-                                Behavior on opacity { NumberAnimation { duration: 150 } }
+                                Behavior on opacity { NumberAnimation { duration: Theme.ms(150) } }
                             }
                             readonly property point cursor: tabHover.point.scenePosition
                             onCursorChanged: Tip.move(tab, cursor)
@@ -1051,7 +1051,7 @@ Item {
             radius: 16
             color: Theme.card
             clip: true
-            Behavior on Layout.preferredHeight { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+            Behavior on Layout.preferredHeight { NumberAnimation { duration: Theme.ms(220); easing.type: Easing.OutCubic } }
 
             ColumnLayout {
                 id: pickerCol
@@ -1157,7 +1157,7 @@ Item {
             onVisibleChanged: if (visible) omni.setY(contentY)
             onContentYChanged: omni.spy()
             opacity: omni.picking || packageSearch.open ? 0.35 : 1
-            Behavior on opacity { NumberAnimation { duration: 150 } }
+            Behavior on opacity { NumberAnimation { duration: Theme.ms(150) } }
 
             //--- A tap on the dimmed page closes the picker or the package results
             MouseArea {
@@ -1343,7 +1343,7 @@ Item {
         anchors.margins: omni.edge
         anchors.topMargin: mainCol.y + tabsBar.y + tabsBar.height + 6  // under Rebuild
         // As tall as its icons, up to the window's bottom margin
-        height: Math.min(railList.contentHeight + allToggle.height + 18,
+        height: Math.min(railList.contentHeight + allToggle.height + prefsButton.height + 26,
                          parent.height - anchors.topMargin - omni.edge)
         width: omni.railItem + 8
         radius: width / 2
@@ -1362,7 +1362,7 @@ Item {
             color: allHover.hovered ? Theme.hover : Qt.alpha(Theme.bg, 0.55)
             border.width: 1
             border.color: Theme.rule
-            Behavior on color { ColorAnimation { duration: 120 } }
+            Behavior on color { ColorAnimation { duration: Theme.ms(120) } }
             Icon {
                 anchors.centerIn: parent
                 icon: omni.anyOpen ? "collapse_all" : "expand_all"
@@ -1384,12 +1384,53 @@ Item {
             }
         }
 
+        //--- The app's own look (PrefsSheet.qml), pinned under the page icons
+        Rectangle {
+            id: prefsButton
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 6
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: omni.railItem - 6
+            height: width
+            radius: width / 2
+            color: prefsHover.hovered ? Theme.hover : Qt.alpha(Theme.bg, 0.55)
+            border.width: 1
+            border.color: Theme.rule
+            Behavior on color { ColorAnimation { duration: Theme.ms(120) } }
+            Icon {
+                anchors.centerIn: parent
+                icon: "palette"  // not a gear: pages on the rail already use one
+                size: 19
+                color: prefsHover.hovered ? Theme.primary : Theme.dim
+                // A quarter turn under the cursor
+                rotation: prefsHover.hovered ? 90 : 0
+                Behavior on rotation { NumberAnimation { duration: Theme.ms(320); easing.type: Easing.OutCubic } }
+                Behavior on color { ColorAnimation { duration: Theme.ms(120) } }
+            }
+            readonly property point cursor: prefsHover.point.scenePosition
+            onCursorChanged: Tip.move(prefsButton, cursor)
+            HoverHandler {
+                id: prefsHover
+                cursorShape: Qt.PointingHandCursor
+                onHoveredChanged: hovered ? Tip.request(prefsButton, "Preferences", point.scenePosition)
+                                          : Tip.cancel(prefsButton)
+            }
+            TapHandler {
+                gesturePolicy: TapHandler.ReleaseWithinBounds
+                onTapped: {
+                    Tip.cancel(prefsButton)
+                    omni.sheet = prefsSheet
+                }
+            }
+        }
+        Component { id: prefsSheet; PrefsSheet { view: omni } }
+
         ListView {
             id: railList
             anchors.top: allToggle.bottom
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.bottom: parent.bottom
+            anchors.bottom: prefsButton.top
             anchors.margins: 4
             anchors.topMargin: 8
             clip: true
@@ -1421,7 +1462,7 @@ Item {
                     height: omni.railItem
                     radius: 11  // as the tabs'
                     color: railItem.active ? Qt.alpha(Theme.primary, 0.28) : railHover.hovered ? Theme.hover : "transparent"
-                    Behavior on color { ColorAnimation { duration: 120 } }
+                    Behavior on color { ColorAnimation { duration: Theme.ms(120) } }
                     Icon {
                         anchors.centerIn: parent
                         icon: Theme.glyph(railItem.modelData.icon)
@@ -1454,7 +1495,7 @@ Item {
         readonly property bool lit: rebuildHover.hovered && !Jobs.running
         opacity: Jobs.running ? 0.45 : 1
         color: lit ? Qt.lighter(Theme.primary, 1.12) : Theme.primary
-        Behavior on color { ColorAnimation { duration: 120 } }
+        Behavior on color { ColorAnimation { duration: Theme.ms(120) } }
         Icon {
             anchors.centerIn: parent
             icon: Jobs.running ? "progress_activity" : "autorenew"
@@ -1696,7 +1737,7 @@ Item {
         property bool shown
         visible: opacity > 0
         opacity: shown ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: 150 } }
+        Behavior on opacity { NumberAnimation { duration: Theme.ms(150) } }
         anchors.left: toLeft ? tabsFlick.left : undefined
         anchors.right: toLeft ? undefined : tabsFlick.right
         anchors.top: tabsFlick.top
@@ -1787,16 +1828,18 @@ Item {
             Layout.fillWidth: true
             Layout.leftMargin: -omni.gutter
             implicitHeight: frameCol.implicitHeight
-            radius: 20
-            color: Qt.alpha(Theme.text, (section.index % 2 ? 0.075 : 0.035)
-                                        + (headHover.hovered && !section.open ? 0.03 : 0))
+            radius: Theme.r(20)
+            // The Cards preference thins the wash: translucent to 60%, outlined to a trace
+            readonly property real wash: Prefs.cards === "outlined" ? 0.25 : Prefs.cards === "translucent" ? 0.6 : 1
+            color: Qt.alpha(Theme.text, ((section.index % 2 ? 0.075 : 0.035)
+                                         + (headHover.hovered && !section.open ? 0.03 : 0)) * wash)
             // An open page is edged in primary; the one under the cursor gets a firmer
             // ring like niri's focus ring, so the page being read is easy to find
             border.width: 1
             border.color: cardHover.hovered ? Theme.primary
-                : section.open ? Qt.alpha(Theme.primary, 0.3) : Theme.rule
-            Behavior on color { ColorAnimation { duration: 150 } }
-            Behavior on border.color { ColorAnimation { duration: 150 } }
+                : section.open ? Qt.alpha(Theme.primary, 0.3) : Theme.cardEdge(Theme.rule)
+            Behavior on color { ColorAnimation { duration: Theme.ms(150) } }
+            Behavior on border.color { ColorAnimation { duration: Theme.ms(150) } }
             HoverHandler { id: cardHover }
 
             ColumnLayout {
@@ -1811,14 +1854,14 @@ Item {
                 RowLayout {
                     id: head
                     Layout.fillWidth: true
-                    Layout.margins: 12
+                    Layout.margins: Theme.pad(12)
                     spacing: 12
                     Rectangle {
                         implicitWidth: 34
                         implicitHeight: 34
                         radius: 17
                         color: section.open ? Theme.primary : Theme.cardHover
-                        Behavior on color { ColorAnimation { duration: 150 } }
+                        Behavior on color { ColorAnimation { duration: Theme.ms(150) } }
                         Icon {
                             anchors.centerIn: parent
                             icon: Theme.glyph(section.modelData.icon, "description")
@@ -1909,16 +1952,16 @@ Item {
                     opacity: section.open ? 1 : 0
                     Behavior on Layout.preferredHeight {
                         enabled: body.armed
-                        NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
+                        NumberAnimation { duration: Theme.ms(300); easing.type: Easing.OutCubic }
                     }
-                    Behavior on opacity { enabled: body.armed; NumberAnimation { duration: 220; easing.type: Easing.OutQuad } }
+                    Behavior on opacity { enabled: body.armed; NumberAnimation { duration: Theme.ms(220); easing.type: Easing.OutQuad } }
                     Loader {
                         id: loader
                         width: parent.width
                         active: (section.open || body.height > 0) && !!section.comp
                         sourceComponent: section.comp
                         // Data that came after the tab showed eases in
-                        NumberAnimation on opacity { id: arrived; running: false; from: 0.3; to: 1; duration: 260 }
+                        NumberAnimation on opacity { id: arrived; running: false; from: 0.3; to: 1; duration: Theme.ms(260) }
                     }
                 }
             }
@@ -1940,14 +1983,25 @@ Item {
 
     //--- Toast
     Rectangle {
+        id: toastBox
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottomMargin: 80
-        visible: omni.toast !== ""
+        //--- Rises and fades in; the last text stays while it fades out
+        readonly property bool up: omni.toast !== ""
+        property string held: ""
+        Connections {
+            target: omni
+            function onToastChanged() { if (omni.toast) toastBox.held = omni.toast }
+        }
+        visible: opacity > 0
+        opacity: up ? 1 : 0
+        transform: Translate { y: toastBox.up ? 0 : 14; Behavior on y { NumberAnimation { duration: Theme.ms(260); easing.type: Easing.OutCubic } } }
+        Behavior on opacity { NumberAnimation { duration: Theme.ms(200) } }
         readonly property real actionWidth: omni.toastAction ? toastButton.implicitWidth + 12 : 0
         width: Math.min(toastText.implicitWidth + actionWidth + 28, omni.width - 32)
         height: toastText.implicitHeight + 16
-        radius: 18
+        radius: Theme.r(18)
         color: Theme.toast
         Row {
             anchors.centerIn: parent
@@ -1956,7 +2010,7 @@ Item {
                 id: toastText
                 anchors.verticalCenter: parent.verticalCenter
                 width: Math.min(implicitWidth, omni.width - 60 - parent.parent.actionWidth)
-                text: omni.toast
+                text: omni.toast || toastBox.held
                 color: Theme.inkToast
                 wrapMode: Text.Wrap
             }
@@ -1992,7 +2046,7 @@ Item {
         z: 10
         visible: opacity > 0
         opacity: Tip.shown ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: 120 } }
+        Behavior on opacity { NumberAnimation { duration: Theme.ms(120) } }
         width: Math.min(tipText.implicitWidth, 340) + 22
         height: tipText.implicitHeight + 14
         x: Math.max(4, Math.min(at.x + 14, omni.width - width - 4))

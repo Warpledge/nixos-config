@@ -14,12 +14,16 @@ Rectangle {
     signal tapped
     Layout.fillWidth: true
     Layout.preferredWidth: 1
-    implicitHeight: col.implicitHeight + 20
-    radius: 12
+    implicitHeight: col.implicitHeight + Theme.pad(20)
+    radius: Theme.r(12)
     color: hover.hovered ? Theme.hover : Qt.alpha(Theme.bg, 0.55)
-    border.width: 1
-    border.color: selected ? Theme.primary : Theme.rule
-    Behavior on color { ColorAnimation { duration: 120 } }
+    border.width: selected ? 2 : 1
+    border.color: selected ? Theme.primary : hover.hovered ? Qt.alpha(Theme.primary, 0.4) : Theme.rule
+    // Lifts a touch under the cursor, and dips when pressed
+    scale: tap.pressed ? 0.98 : hover.hovered ? 1.015 : 1
+    Behavior on scale { NumberAnimation { duration: Theme.ms(160); easing.type: Easing.OutCubic } }
+    Behavior on color { ColorAnimation { duration: Theme.ms(140) } }
+    Behavior on border.color { ColorAnimation { duration: Theme.ms(180) } }
 
     ColumnLayout {
         id: col
@@ -40,6 +44,7 @@ Rectangle {
             Layout.fillWidth: true
             text: tile.value
             color: tile.ink
+            Behavior on color { ColorAnimation { duration: Theme.ms(400) } }
             font.pixelSize: 22
             font.weight: Font.Bold
             fontSizeMode: Text.HorizontalFit
@@ -55,7 +60,7 @@ Rectangle {
         }
         LineGraph {
             Layout.fillWidth: true
-            Layout.preferredHeight: 22
+            Layout.preferredHeight: 26
             Layout.topMargin: 4
             values: tile.points
             count: Math.max(2, tile.points.length)
@@ -63,5 +68,5 @@ Rectangle {
         }
     }
     HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
-    TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: tile.tapped() }
+    TapHandler { id: tap; gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: tile.tapped() }
 }

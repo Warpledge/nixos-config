@@ -106,7 +106,7 @@ Flickable {
             text: "TPS updates every 30 s through the console. Turn on live stats to poll it silently over RCON."
             action: "Turn on"
             onActed: page.app.call("rcon_set", { on: true }, () =>
-                page.app.showError("Live stats start with the next server restart"))
+                page.app.toast("Live stats start with the next server restart", "info"))
         }
         Banner {
             visible: page.app ? page.app.state_ === "failed" : false
@@ -274,6 +274,8 @@ Flickable {
                                     radius: 3
                                     width: parent.width * Math.min(1, dimRow.ms / 50)
                                     color: Theme.loadColor(dimRow.ms / 50)
+                                    Behavior on width { NumberAnimation { duration: Theme.ms(500); easing.type: Easing.OutCubic } }
+                                    Behavior on color { ColorAnimation { duration: Theme.ms(300) } }
                                 }
                             }
                             Text {
@@ -310,7 +312,7 @@ Flickable {
                     title: "Console"
                     Layout.preferredHeight: 310
                     headerExtras: OutlineButton { text: "Open"; onClicked: page.app.tab = "console" }
-                    ConsoleView { app: page.app; fontSize: 11 }
+                    ConsoleView { app: page.app; fontSize: Math.max(9, Prefs.consoleSize - 1) }
                     CommandLine { app: page.app }
                 }
                 Card {

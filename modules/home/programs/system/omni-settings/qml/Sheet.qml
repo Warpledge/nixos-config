@@ -11,6 +11,22 @@ Rectangle {
     signal back
     color: Theme.bg
 
+    //--- Slides in from the right as it fades in
+    opacity: 0
+    transform: Translate { id: slide; x: 24 }
+    // A loaded sheet arrives on creation, a kept one (CategorySheet) each time it shows
+    Component.onCompleted: if (visible) arrive.start()
+    onVisibleChanged: if (visible) {
+        opacity = 0
+        slide.x = 24
+        arrive.restart()
+    }
+    ParallelAnimation {
+        id: arrive
+        NumberAnimation { target: sheet; property: "opacity"; to: 1; duration: Theme.ms(200); easing.type: Easing.OutQuad }
+        NumberAnimation { target: slide; property: "x"; to: 0; duration: Theme.ms(280); easing.type: Easing.OutCubic }
+    }
+
     Keys.onEscapePressed: back()
 
     ColumnLayout {

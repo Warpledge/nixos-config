@@ -204,7 +204,8 @@ PAGES = {
                ("MCP Servers", "Shared with OpenCode.", [f"claude.mcp.{n}" for n in (
                    "nixos", "context7", "github", "deepwiki", "grep")]),
                ("claude.ai Connectors", "One turned off is blocked by name.", [f"claude.connectors.{n}" for n in (
-                    "gmail", "googleCalendar", "googleDrive", "claudeDocs")])]),
+                    "gmail", "googleCalendar", "googleDrive", "claudeDocs")]),
+               ("Claude Desktop", "", ["claude.desktopPlanList"])]),
     "Skills": ("cloudai", "view-list-symbolic",
                "What Claude sees of each skill and subagent, and the model it runs on.",
                [("Repo Skills", "", [f"claude.skills.{n}" for n in (

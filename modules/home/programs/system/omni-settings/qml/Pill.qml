@@ -11,12 +11,12 @@ Rectangle {
     signal clicked
     implicitWidth: pillText.implicitWidth + 28
     implicitHeight: 34
-    radius: 17
+    radius: Math.min(height / 2, Theme.r(17))
     opacity: enabled ? 1 : 0.45
-    // Lifts a little under the cursor, like the cards' hover
-    scale: lit ? 1.03 : 1
-    Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
-    Behavior on color { ColorAnimation { duration: 120 } }
+    // Lifts a little under the cursor, like the cards' hover, and dips when pressed
+    scale: tap.pressed ? 0.97 : lit ? 1.03 : 1
+    Behavior on scale { NumberAnimation { duration: Theme.ms(140); easing.type: Easing.OutCubic } }
+    Behavior on color { ColorAnimation { duration: Theme.ms(120) } }
     color: danger ? (lit ? Qt.lighter(Theme.error, 1.12) : Theme.error)
          : quiet ? Qt.alpha(accent, lit ? 0.26 : 0.14)
          : lit ? Qt.lighter(accent, 1.12) : accent
@@ -31,5 +31,5 @@ Rectangle {
     }
     HoverHandler { id: hover; cursorShape: pill.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor }
     // Takes the press, so a dialog closing on release doesn't hand it to what's below
-    TapHandler { gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: pill.clicked() }
+    TapHandler { id: tap; gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: pill.clicked() }
 }

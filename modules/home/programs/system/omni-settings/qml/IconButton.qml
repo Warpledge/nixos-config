@@ -13,13 +13,15 @@ Rectangle {
     implicitHeight: 32
     radius: 16
     color: hover.hovered ? Qt.alpha(accent, 0.2) : filled ? Qt.alpha(accent, 0.1) : "transparent"
-    Behavior on color { ColorAnimation { duration: 120 } }
+    Behavior on color { ColorAnimation { duration: Theme.ms(140) } }
     Icon {
         anchors.centerIn: parent
         icon: btn.icon
         size: 18
         color: hover.hovered ? btn.accent : btn.tint
-        Behavior on color { ColorAnimation { duration: 120 } }
+        scale: tap.pressed ? 0.85 : 1
+        Behavior on color { ColorAnimation { duration: Theme.ms(140) } }
+        Behavior on scale { NumberAnimation { duration: Theme.ms(140); easing.type: Easing.OutBack } }
     }
     readonly property point cursor: hover.point.scenePosition
     onCursorChanged: Tip.move(btn, cursor)
@@ -29,6 +31,7 @@ Rectangle {
         onHoveredChanged: hovered ? Tip.request(btn, btn.tip, point.scenePosition) : Tip.cancel(btn)
     }
     TapHandler {
+        id: tap
         gesturePolicy: TapHandler.ReleaseWithinBounds
         onTapped: {
             Tip.cancel(btn)

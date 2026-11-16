@@ -27,4 +27,16 @@ Field {
         back = Math.max(-1, back - 1)
         input.text = back >= 0 ? history[back] : ""
     }
+    //--- Ctrl+K from anywhere lands here
+    function takeFocus() {
+        if (app && app.commandWanted) {
+            app.commandWanted = false
+            input.forceActiveFocus()
+        }
+    }
+    Component.onCompleted: Qt.callLater(takeFocus)
+    Connections {
+        target: box.app
+        function onCommandWantedChanged() { box.takeFocus() }
+    }
 }

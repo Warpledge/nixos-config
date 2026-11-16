@@ -17,8 +17,8 @@ created under 2.9.
 - [eclipse-warpledge-edit/](./eclipse-warpledge-edit/): `build.py`, which rebuilds the Warpledge Edit shader pack from KuraEdit, and `settings.txt`, its shader settings
 - [server.md](./server.md): the desktop and laptop servers, their mods and the current world
 
-The translation agent and data patches for the hand-added mods are outside this repo, in
-`~/Documents/Minecraft_Servers/GTNH-Translation/`; see
+The translation agent for the hand-added mods is outside this repo, in
+`~/Projects/gtnh-translation-agent/`; see
 [java-and-launch.md](./java-and-launch.md#jvm-args).
 
 ## Startup crashes in 2.9

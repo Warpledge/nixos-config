@@ -12,7 +12,7 @@ Rectangle {
     signal tapped
     implicitWidth: row.implicitWidth + 20
     implicitHeight: 26
-    radius: 13
+    radius: Math.min(height / 2, Theme.r(13))
     readonly property bool lit: tappable && hover.hovered
     readonly property color pageColour: Theme.accentOf(chip)
     readonly property color tint: tone ? Theme.toneColor(tone) : pageColour
@@ -20,7 +20,10 @@ Rectangle {
          : Qt.alpha(tint, lit ? 0.14 : 0.06)
     border.width: 1
     border.color: Qt.alpha(tint, tone || accent ? 0.35 : 0.12)
-    Behavior on color { ColorAnimation { duration: 120 } }
+    Behavior on color { ColorAnimation { duration: Theme.ms(160) } }
+    Behavior on border.color { ColorAnimation { duration: Theme.ms(160) } }
+    scale: tapper.pressed ? 0.95 : 1
+    Behavior on scale { NumberAnimation { duration: Theme.ms(120); easing.type: Easing.OutCubic } }
     Row {
         id: row
         anchors.centerIn: parent
@@ -31,6 +34,7 @@ Rectangle {
             font.pixelSize: 13
             font.weight: chip.tone || chip.accent ? Font.DemiBold : Font.Normal
             color: chip.tone || chip.accent ? chip.tint : Theme.dim
+            Behavior on color { ColorAnimation { duration: Theme.ms(160) } }
         }
         Icon {
             visible: chip.icon !== ""
@@ -54,5 +58,10 @@ Rectangle {
         }
     }
     // A label leaves the tap to what's under it
-    TapHandler { enabled: chip.tappable; gesturePolicy: TapHandler.ReleaseWithinBounds; onTapped: chip.tapped() }
+    TapHandler {
+        id: tapper
+        enabled: chip.tappable
+        gesturePolicy: TapHandler.ReleaseWithinBounds
+        onTapped: chip.tapped()
+    }
 }

@@ -12,10 +12,13 @@ Rectangle {
     signal escaped
     Layout.fillWidth: true
     implicitHeight: 38
-    radius: 19
+    radius: Math.min(height / 2, Theme.r(19))
     color: fieldHover.hovered && !input.activeFocus ? Theme.hover : Theme.cardHover
-    border.width: input.activeFocus ? 2 : 0
-    border.color: Theme.primary
+    // Fades the focus ring in rather than snapping it on
+    border.width: 2
+    border.color: input.activeFocus ? Theme.primary : Qt.alpha(Theme.primary, 0)
+    Behavior on color { ColorAnimation { duration: Theme.ms(140) } }
+    Behavior on border.color { ColorAnimation { duration: Theme.ms(180) } }
     HoverHandler { id: fieldHover; cursorShape: Qt.IBeamCursor }
     RowLayout {
         anchors.fill: parent

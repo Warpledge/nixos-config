@@ -106,4 +106,6 @@ the world before the server loads a side `B` update.
 
 1. Update the build and evidence in `<pack>/mods.md`, and the jar list in `<pack>/server.md`
    when a server mod changed. Update `mod-sources.json` if a mod's page or `lastTried` moved.
-2. Commit through the `commit` skill.
+2. If the pack's `java-and-launch.md` names a translation agent, run its `tsvtool.py diff`
+   on each updated mod's old and new jar, and follow its `translations.md` for any it covers.
+3. Commit through the `commit` skill.

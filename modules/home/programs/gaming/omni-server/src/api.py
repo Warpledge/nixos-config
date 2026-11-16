@@ -195,25 +195,17 @@ def series(args):
     return {"points": history.series(file, args.get("field"), args.get("range"))}
 
 
-def monitor_request(cfg, message):
-    sock = connect_monitor(cfg["id"])
-    if not sock:
-        raise servers.ServerError("The server isn't running")
-    #--- The hello it sends first needn't be read: closing right after is fine
-    sock.sendall((json.dumps(message) + "\n").encode())
-    select.select([sock], [], [], 0.2)
-    sock.close()
-
-
-def monitor_query(cfg, text):
-    """A read-only command's reply through the monitor's RCON connection; None with RCON off."""
+def monitor_ask(cfg, request, answer):
+    """Send the monitor a request and wait for its reply of type `answer`. Reading
+    until then matters: closing with its hello unread resets the connection, and
+    the monitor drops the request unread."""
     sock = connect_monitor(cfg["id"])
     if not sock:
         raise servers.ServerError("The server isn't running")
     deadline = time.time() + QUERY_WAIT
-    pending = b""
+    pending, old = b"", False
     try:
-        sock.sendall((json.dumps({"cmd": "query", "command": text}) + "\n").encode())
+        sock.sendall((json.dumps(request) + "\n").encode())
         #--- Console lines arrive here too, so only the deadline ends the wait
         while time.time() < deadline:
             if not select.select([sock], [], [], deadline - time.time())[0]:
@@ -224,12 +216,28 @@ def monitor_query(cfg, text):
             *lines, pending = (pending + chunk).split(b"\n")
             for line in lines:
                 message = json.loads(line)
-                if message.get("type") == "reply":
-                    return message["text"] if message["ok"] else None
+                if message.get("type") == answer:
+                    return message
+                #--- A monitor from before acks (it runs old code until the server's
+                #--- next start) gets a moment to read the request, then counts as done
+                if message.get("type") == "hello" and answer == "ack" and not message.get("acks"):
+                    old, deadline = True, min(deadline, time.time() + 2)
     finally:
         sock.close()
+    if old:
+        return {}
     raise servers.ServerError("The monitor didn't answer. If the app was just updated, "
                               "the monitor picks that up at the server's next start.")
+
+
+def monitor_request(cfg, message):
+    monitor_ask(cfg, message, "ack")
+
+
+def monitor_query(cfg, text):
+    """A read-only command's reply through the monitor's RCON connection; None with RCON off."""
+    message = monitor_ask(cfg, {"cmd": "query", "command": text}, "reply")
+    return message["text"] if message["ok"] else None
 
 
 #--------------------------------------------------------------------#
@@ -368,6 +376,11 @@ def startup_set(args):
     for key in ("extraFlags", "launch", "command"):
         if key in changes and "\n" in str(changes[key]):
             raise servers.ServerError(f"{key} can't hold a line break")
+    if "preset" in changes and changes["preset"] not in servers.PRESETS:
+        raise servers.ServerError(f"No JVM preset called {changes['preset']}")
+    # Checked on the merged config, so Java 8 can't be picked while ZGC is on either
+    if {**cfg, **changes}.get("preset") == "zgc" and servers.java_major({**cfg, **changes}) == 8:
+        raise servers.ServerError("Java 8 has no ZGC. Pick G1 or a newer Java first.")
     cfg.update(changes)
     servers.launch_argv(cfg) if cfg.get("launch") or cfg.get("command") else None
     servers.save(cfg)
@@ -444,9 +457,33 @@ def set_aside_delete(args):
 
 
 @command
+def join_address(args):
+    """The address players on this network join at: the first non-loopback IPv4 address
+    and the server's port."""
+    cfg = require(args)
+    port = properties.read(servers.props_file(cfg)).get("server-port", "25565")
+    host = "localhost"
+    try:
+        res = subprocess.run(["ip", "-j", "-4", "addr", "show", "scope", "global", "up"],
+                             capture_output=True, text=True, timeout=5, check=False)
+        for link in json.loads(res.stdout or "[]"):
+            addrs = [a["local"] for a in link.get("addr_info", []) if a.get("local")]
+            if addrs and not link.get("ifname", "").startswith(("docker", "virbr", "veth", "wg")):
+                host = addrs[0]
+                break
+    except (OSError, ValueError, subprocess.SubprocessError):
+        pass
+    return {"address": f"{host}:{port}"}
+
+
+@command
 def disk(args):
     cfg = require(args)
-    usage = shutil.disk_usage(cfg["dir"])
+    # A moved or unmounted folder: report the drive of the nearest folder still there
+    path = cfg["dir"]
+    while not os.path.isdir(path) and path != os.path.dirname(path):
+        path = os.path.dirname(path)
+    usage = shutil.disk_usage(path)
     return {"free": usage.free, "total": usage.total}
 
 

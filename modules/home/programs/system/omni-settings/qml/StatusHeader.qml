@@ -253,7 +253,7 @@ ColumnLayout {
         implicitHeight: big ? 26 : 22
         radius: height / 2
         color: fill
-        Behavior on color { ColorAnimation { duration: 120 } }
+        Behavior on color { ColorAnimation { duration: Theme.ms(120) } }
         readonly property point cursor: tipHover.point.scenePosition
         onCursorChanged: Tip.move(pill, cursor)
         HoverHandler {

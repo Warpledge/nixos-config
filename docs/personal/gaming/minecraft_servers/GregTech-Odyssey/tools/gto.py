@@ -12,8 +12,9 @@ to carry into a new pack build;
 instance's game is running. Nothing is ever deleted except a staging copy replaced
 with --replace, which is backed up first, the instance's copy of the recipe
 datapack and the Reliable Remover/Recipes rules, which `datapack` rebuilds from
-../datapack/ and ../reliable/, and a server folder's mods/, which `server` rebuilds
-from the instance.
+../datapack/ and ../reliable/, a server folder's mods/, which `server` rebuilds
+from the instance, and gtocore's resource cache (gtocore/cache and gtocore/hash),
+which `carry` and `datapack` clear so the next launch rebuilds it.
 """
 
 import argparse
@@ -80,6 +81,27 @@ def refuse_if_running(inst=None, prism_ok=False):
     what = running(inst)
     if what and not (prism_ok and what == "Prism Launcher"):
         sys.exit(f"{what} is running; close it first")
+
+
+def clear_gto_cache(gdir):
+    """Drop gtocore's resource cache (misc.cacheResources in config/gtocore.yaml).
+
+    It never notices a jar or datapack that changed under the same name, so a rebuilt
+    quarkblocks jar or a new datapack stays invisible until it's gone. Called by every
+    tool that changes an instance's jars or datapacks; the next launch rebuilds it.
+    """
+    cache, stamp = gdir / "gtocore" / "cache", gdir / "gtocore" / "hash"
+    if not cache.exists() and not stamp.exists():
+        return
+    what = running(gdir.parent)
+    if what and what != "Prism Launcher":
+        print(f"{what} is running; close it, then delete {cache} and {stamp}")
+        return
+    if cache.exists():
+        shutil.rmtree(cache)
+    stamp.unlink(missing_ok=True)
+    print(f"cleared gtocore's resource cache in {gdir.parent.name}; the next launch "
+          "rebuilds it")
 
 
 def read_cfg(inst):
@@ -298,6 +320,9 @@ def cmd_carry(a):
             if not a.dry_run:
                 shutil.copytree(world, dst, symlinks=True)
 
+    if not a.dry_run:
+        clear_gto_cache(ngame)
+
 #-- datapack
 
 def sync_tree(inst, src, dst, dry_run):
@@ -348,6 +373,7 @@ def cmd_datapack(a):
             print(f"skip {src.name}: the mod isn't in {inst.name}")
     changed = [sync_tree(inst, s, d, a.dry_run) for s, d in pairs]
     if any(changed) and not a.dry_run:
+        clear_gto_cache(gdir)
         print("reload with /reload or restart the world")
 
 #-- server
@@ -442,6 +468,14 @@ def cmd_server(a):
         if not a.dry_run:
             shutil.copytree(src, out / name, dirs_exist_ok=True)
 
+    # gtocore's resource cache misses jars rebuilt under the same name (clear_gto_cache)
+    cache, stamp = out / "gtocore" / "cache", out / "gtocore" / "hash"
+    if cache.exists() or stamp.exists():
+        act("clear gtocore's resource cache")
+        if not a.dry_run:
+            shutil.rmtree(cache, ignore_errors=True)
+            stamp.unlink(missing_ok=True)
+
     props = out / "server.properties"
     if not props.exists():
         act("write server.properties (port 25566, whitelist on)")
@@ -467,7 +501,8 @@ def cmd_server(a):
         if not a.dry_run:
             subprocess.run(["tar", "--zstd", "-cf", str(tar), "--exclude", "./world",
                             "--exclude", "./backups", "--exclude", "./logs",
-                            "--exclude", "./crash-reports", "-C", str(out), "."],
+                            "--exclude", "./crash-reports", "--exclude", "./gtocore/cache",
+                            "--exclude", "./gtocore/hash", "-C", str(out), "."],
                            check=True)
             print(f"{tar}: {gib(tar.stat().st_size)}")
 
@@ -502,6 +537,9 @@ def cmd_diff(a):
     for mid in sorted(om.keys() & nm.keys()):
         if om[mid][0] != nm[mid][0]:
             print(f"~ {mid} {om[mid][0]} -> {nm[mid][0]}")
+        # A jar rebuilt under the same version (quarkblocks) only shows by its contents
+        elif not same(ogame / "mods" / om[mid][1], ngame / "mods" / nm[mid][1]):
+            print(f"~ {mid} {nm[mid][0]} rebuilt: {nm[mid][1]} differs")
     yours = {m["modId"]: m["jar"] for m in overlay()["mods"]}
     for mid, jar in sorted(yours.items()):
         if mid in nm and nm[mid][1] != jar:

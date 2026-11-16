@@ -4,6 +4,8 @@
 
 Omni Server (`gaming.omniServer`) runs Minecraft servers from their own folders, with a QML window (Quickshell) and a Python backend. Omni Settings' parts are built into it (`shared` in `default.nix`), so a change to `Theme`, `Backend`, `Field` and the rest reaches both apps. Those files must not depend on `OmniView` or anything else this app doesn't install.
 
+The Preferences tab (`PrefsPage.qml`, the last tab, shown even with no server) holds the shared look (`AppearancePrefs.qml`) plus the console's text size, wrapping and timestamps and the tab names; all of it is `Prefs.qml`, kept in `~/.config/omni-server/appearance.json`. Animations take their length from `Theme.ms()`, so Motion Off stops them, and radii and padding in the shared surfaces go through `Theme.r()` and `Theme.pad()` (`omni-settings/qml/CLAUDE.md`). `ServerView.qml` takes Ctrl+1 to 9 (tabs), Ctrl+F (console search, through `searchWanted`), Ctrl+K (the command line, `commandWanted`) and Ctrl+, in its `Keys.onPressed`, as fields pass those up. `app.toast(text, tone)` shows `error` (`showError`), `success` or `info`.
+
 ## How a server runs
 
 Three user unit templates in `default.nix`, instanced by server id:
@@ -41,7 +43,8 @@ A `form` has `fields` (`{id, type, label, default}`; type `int` with `min`/`max`
 
 ## Gotchas
 
-- **The monitor runs old code until the server's next start.** Its unit is also `keep-old`, so after a rebuild a running server's monitor doesn't know a new request, and the window (new code) waits `QUERY_WAIT` for it, then says so.
+- **The monitor runs old code until the server's next start.** Its unit is also `keep-old`, so after a rebuild a running server's monitor doesn't know a new request, and the window (new code) waits `QUERY_WAIT` for it, then says so. A monitor whose hello lacks `acks` predates the `run`/`cancel` ack, so `monitor_ask` gives it 2 s to read the request and counts it done.
+- **A client of `<id>.sock` must read until its answer.** Closing with the monitor's hello unread resets the connection, and the monitor drops the request unread; quick commands were lost this way until 2026-11-15.
 - **`omni-server@.service` has no `Install` section.** With `WantedBy`, home-manager's switch tries to start the bare template and the rebuild fails with "missing the instance name". `systemctl add-wants` isn't the way around it either: it also links `default.target` to a store path in `~/.config/systemd/user/`.
 - **The monitor is ordered `Before` the server, not `After`.** A stop runs in reverse order, so `After` stops the monitor first and it misses the shutdown lines that name the dimensions.
 - **Never send two RCON packets at once.** 1.7.10 reads one packet per socket read and drops the connection otherwise; `src/rcon.py` only sends its closing request after a full-sized reply packet. Long replies come back split at 4096 bytes with nothing marking the end.
@@ -51,6 +54,7 @@ A `form` has `fields` (`{id, type, label, default}`; type `int` with `min`/`max`
 - A server can rewrite `server.properties` while running, so edits made then are held in `pending-properties.json` and applied by `ExecStartPre`. That file and `server.properties` hold the RCON password, so both are owner-only.
 - Anything sent to stdin is flattened to one line in `servers.send`, as a newline would start a second command, and player names must match `servers.PLAYER`. Console, chat and names render as `Text.PlainText`, since players write them.
 - A pack's own start script usually loops forever, which defeats Stop; the app launches the JVM itself from `servers.detect`'s target, and Custom command is the way around that.
+- The JVM presets are `servers.PRESETS`. ZGC adds `-XX:+ZGenerational` only on Java 21 and 22 (23 made generational the default, 24 removed the flag, JEP 474 and 490), takes no compact object headers (JDK 25 doesn't support them with ZGC), and Java 8 has none, so `startup_set` refuses ZGC there, including a switch to Java 8 while it's set.
 
 ## Testing
 

@@ -1,0 +1,12 @@
+{
+  "type": "forge:add_spawns",
+  "biomes": {
+    "type": "forge:any"
+  },
+  "spawners": {
+    "type": "born_in_chaos_v1:spirit_guide_assistant",
+    "weight": 3,
+    "minCount": 2,
+    "maxCount": 2
+  }
+}

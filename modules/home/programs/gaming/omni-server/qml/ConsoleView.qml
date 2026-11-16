@@ -1,4 +1,5 @@
-// The live console: follows the end unless scrolled up. Filters: all, warnings, chat
+// The live console: follows the end unless scrolled up. Filters: all, warnings, chat.
+// `query` highlights matches (case-insensitive); find() steps through them.
 import QtQuick
 import QtQuick.Layouts
 
@@ -6,12 +7,74 @@ Rectangle {
     id: root
     property var app
     property string filter: "all"
-    property int fontSize: 12
+    property int fontSize: Prefs.consoleSize
+    property string query: ""
+    property int current: -1  // the match find() last moved to
+    property int matches: 0
     Layout.fillWidth: true
     Layout.fillHeight: true
-    radius: 10
+    radius: Theme.r(10)
     color: Qt.darker(Theme.bg, 1.25)
     clip: true
+
+    function lineText(time, body) { return Prefs.timestamps && time ? `[${time}] ${body}` : body }
+    function hit(time, body) {
+        return query !== "" && lineText(time, body).toLowerCase().includes(query.toLowerCase())
+    }
+    //--- A matching line as rich text with each match marked; players write these
+    //--- lines, so everything else is escaped
+    function marked(text) {
+        const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        const lower = text.toLowerCase(), q = query.toLowerCase()
+        let out = "", at = 0, i
+        while ((i = lower.indexOf(q, at)) >= 0) {
+            out += esc(text.slice(at, i))
+                + `<span style="background-color:${Theme.caution}; color:${Theme.bg}">`
+                + esc(text.slice(i, i + q.length)) + "</span>"
+            at = i + q.length
+        }
+        return (out + esc(text.slice(at))).replace(/ {2}/g, " &nbsp;")
+    }
+    function recount() {
+        let n = 0
+        const m = app ? app.consoleModel : null
+        if (m && query)
+            for (let i = 0; i < m.count; i++) {
+                const e = m.get(i)
+                if (passes(e.level, e.kind) && hit(e.time, e.body))
+                    n++
+            }
+        matches = n
+    }
+    //--- Moves to the next match after `current` (dir 1) or before it (-1), wrapping
+    function find(dir) {
+        const m = app ? app.consoleModel : null
+        if (!m || !query || !m.count)
+            return
+        const start = current >= 0 ? current : dir > 0 ? -1 : m.count
+        for (let step = 1; step <= m.count; step++) {
+            const i = ((start + dir * step) % m.count + m.count) % m.count
+            const e = m.get(i)
+            if (passes(e.level, e.kind) && hit(e.time, e.body)) {
+                current = i
+                list.follow = false
+                list.positionViewAtIndex(i, ListView.Center)
+                return
+            }
+        }
+    }
+    onQueryChanged: {
+        current = -1
+        recount()
+        if (query)
+            find(-1)  // the latest match first
+    }
+    onFilterChanged: recount()
+    Timer { id: recountSoon; interval: 300; onTriggered: root.recount() }
+    Connections {
+        target: root.app
+        function onConsoleLine() { if (root.query) recountSoon.restart() }
+    }
 
     function passes(level, kind) {
         return filter === "all"
@@ -24,7 +87,7 @@ Rectangle {
         for (let i = 0; i < m.count; i++) {
             const e = m.get(i)
             if (passes(e.level, e.kind))
-                out.push(e.time ? `[${e.time}] ${e.body}` : e.body)
+                out.push(lineText(e.time, e.body))
         }
         return out.join("\n")
     }
@@ -41,36 +104,59 @@ Rectangle {
         onMovementEnded: follow = atYEnd
         onCountChanged: if (follow) Qt.callLater(positionViewAtEnd)
         Component.onCompleted: positionViewAtEnd()
-        delegate: Text {
+        delegate: Item {
             id: line
+            required property int index
             required property string time
             required property string level
             required property string body
             required property string kind
             readonly property bool shown: root.passes(level, kind)
+            readonly property bool hit: root.hit(time, body)
             width: list.width - 6
             visible: shown
-            height: shown ? implicitHeight : 0
-            text: time ? `[${time}] ${body}` : body
-            textFormat: Text.PlainText
-            wrapMode: Text.WrapAnywhere
-            font.family: "monospace"
-            font.pixelSize: root.fontSize
-            lineHeight: 1.1
-            color: level === "ERROR" || level === "FATAL" ? Theme.error
-                : level === "WARN" || kind === "lag" ? Theme.caution
-                : kind === "chat" ? Theme.primary
-                : kind === "join" || kind === "leave" || kind === "done" ? Theme.success
-                : Theme.text
+            height: shown ? lineLabel.implicitHeight : 0
+            //--- The match find() moved to
+            Rectangle {
+                anchors.fill: parent
+                anchors.leftMargin: -4
+                anchors.rightMargin: -2
+                visible: line.hit && line.index === root.current
+                radius: 4
+                color: Qt.alpha(Theme.caution, 0.16)
+                border.width: 1
+                border.color: Qt.alpha(Theme.caution, 0.5)
+            }
+            Text {
+                id: lineLabel
+                width: parent.width
+                readonly property string plain: root.lineText(line.time, line.body)
+                // Rich text only for a line that matches; every other line stays plain
+                text: line.hit ? root.marked(plain) : plain
+                textFormat: line.hit ? Text.RichText : Text.PlainText
+                wrapMode: Prefs.consoleWrap ? Text.WrapAnywhere : Text.NoWrap
+                elide: Prefs.consoleWrap ? Text.ElideNone : Text.ElideRight
+                font.family: "monospace"
+                font.pixelSize: root.fontSize
+                lineHeight: 1.1
+                color: line.level === "ERROR" || line.level === "FATAL" ? Theme.error
+                    : line.level === "WARN" || line.kind === "lag" ? Theme.caution
+                    : line.kind === "chat" ? Theme.primary
+                    : line.kind === "join" || line.kind === "leave" || line.kind === "done" ? Theme.success
+                    : Theme.text
+            }
         }
         Rectangle {
             visible: list.contentHeight > list.height
             anchors.right: parent.right
-            width: 3
-            radius: 2
-            color: Theme.rule
+            width: barHover.hovered || list.moving ? 6 : 3
+            radius: width / 2
+            color: barHover.hovered || list.moving ? Qt.alpha(Theme.primary, 0.6) : Theme.rule
             y: list.visibleArea.yPosition * list.height
             height: Math.max(20, list.visibleArea.heightRatio * list.height)
+            Behavior on width { NumberAnimation { duration: Theme.ms(140) } }
+            Behavior on color { ColorAnimation { duration: Theme.ms(200) } }
+            HoverHandler { id: barHover }
         }
     }
     OutlineButton {

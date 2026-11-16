@@ -23,9 +23,9 @@ Item {
     opacity: open ? 1 : 0
     Behavior on Layout.preferredHeight {
         enabled: reveal.armed
-        NumberAnimation { duration: 260; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Theme.ms(260); easing.type: Easing.OutCubic }
     }
-    Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutQuad } }
+    Behavior on opacity { NumberAnimation { duration: Theme.ms(220); easing.type: Easing.OutQuad } }
 
     ColumnLayout {
         id: column

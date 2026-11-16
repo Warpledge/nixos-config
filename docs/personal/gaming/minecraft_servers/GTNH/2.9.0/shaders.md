@@ -11,22 +11,25 @@ can't be redistributed, so the ChromaPatch mod builds it locally from the Eclips
 
 ### Versions
 
-Installed 2026-11-06. It needs GTNH 2.9.0 stable on Java 25 or newer; the instance runs
-Java 25.0.4.1 and ships Angelica 2.2.43.
+Installed 2026-11-06; ChromaPatch 1.0.3 and Eclipse `e89e6c6` replaced 1.0.2 and
+`3c18afc` on 2026-11-15. It needs GTNH 2.9.0 stable on Java 25 or newer; the instance runs
+Java 25.0.4.1 and Angelica 2.2.46.
 
 | Part | Version | File |
 | --- | --- | --- |
-| ChromaPatch | 1.0.2 | `mods/chromapatch-1.0.2-forge1710-1.7.10.jar` |
-| Eclipse source | `3c18afc` (2026-09-16) | `shaderpacks/Eclipse-Shader-3c18afc.zip` |
-| Patched pack | Eclipse patch 1.0.2 | `shaderpacks/Eclipse-Shader KuraEdit [OBS07-Chroma Patch].zip` |
+| ChromaPatch | 1.0.3 | `mods/chromapatch-1.0.3-forge1710-1.7.10.jar` |
+| Eclipse source | `e89e6c6` (2026-10-16) | `shaderpacks/Eclipse-Shader-e89e6c6.zip` |
+| Patched pack | Eclipse GTNH patch 1.0.3 | `shaderpacks/Eclipse-Shader KuraEdit [OBS07-Chroma Patch].zip` |
 | KuramA's config | 2026-11-05 | the patched pack's name plus `.txt` |
 
 Avoid ChromaPatch 1.0.1 on GTNH: its changelog says most lamps gave no light until 1.0.2.
 
-Eclipse is pinned because `3c18afc` is the commit ChromaPatch targets, and all 19 patched
-files match it. The `Unstable` head on 2026-11-06 (`e89e6c6`) also applied, with 14 of 19
-files matching and no fuzzy hunks, but wasn't installed. The `gtnh-mod-updates` skill reports
-new commits to Eclipse and to the Kura packs against the pins in
+Eclipse is pinned to the commit ChromaPatch's patch profile names as its base (`base=` in
+`data-forge1710/chromapatch/eclipse_gtnh.chroma` since 1.0.3, which gave the 1.7.10 jar its
+own GTNH patch). 1.0.3 also turned the OBS07 fog, godrays, dust and lamp beams off by
+default, raised the moonlight and lowered the fog; Warpledge Edit's settings pin the 1.0.2
+values (see [Settings](#settings)). The `gtnh-mod-updates` skill reports new commits to
+Eclipse and to the Kura packs against the pins in
 [mod-sources.json](./mod-sources.json); change a `pin` when you move to that commit.
 
 ### Install
@@ -38,7 +41,7 @@ Close the game first: it rewrites `options.txt` on exit.
    release's `SHA256SUMS`. It accepts any remote version, so a server without it still lets
    you join.
 2. Download Eclipse into `shaderpacks/` without unzipping it. The pinned commit is
-   <https://github.com/Merlin1809/Eclipse-Shader/archive/3c18afcfd89c3bbc4ddf1cf3ea9867731ecd4cc7.zip>.
+   <https://github.com/Merlin1809/Eclipse-Shader/archive/e89e6c6eda248ae946480bd131db1b2a0a0f5c9e.zip>.
 3. Copy these from <https://github.com/KuramA-777/GTNH-2.9.X-Shader-Edits-and-PBR-Packs>,
    which has no releases, so take them from `main`:
    - `KuraNeonGTNH`, `KuraReflectionsGTNH`, `KuraBetterCoilsGTNH` and `KuraNeonExtrasGTNH`
@@ -49,7 +52,7 @@ Close the game first: it rewrites `options.txt` on exit.
    reports the match count, and a failed patch writes a `.log` listing the failed parts.
 
    ```bash
-   java -cp mods/chromapatch-1.0.2-forge1710-1.7.10.jar obs07.chroma.Patcher
+   java -cp mods/chromapatch-1.0.3-forge1710-1.7.10.jar obs07.chroma.Patcher
    ```
 
 5. Select the patched pack under Video Settings, Shader Packs. The same setting is
@@ -70,8 +73,11 @@ Since 2026-11-07 there are two copies of the patched pack in `shaderpacks/`:
 - `Eclipse-Shader KuraEdit [OBS07-Chroma Patch].zip` is ChromaPatch's output with
   KuramA's settings file, downloaded fresh from the pinned commit and unedited. It's the
   reference; don't change settings on it.
-- `Eclipse-Shader Warpledge Edit.zip` is the one in use: the same pack with three edits
-  and its own settings.
+- `Eclipse-Shader Warpledge Edit.zip` is the one in use: the same pack with the edits
+  below and its own settings.
+
+GregTech Odyssey runs the same edits on ChromaPatch's 1.20.1 build
+([its shaders.md](../../GregTech-Odyssey/0.6.0/shaders.md)).
 
 #### The edits
 
@@ -87,8 +93,8 @@ spot by a short anchor and adds the lines below. The full diffs are local, in
    lights that don't exist, flickered as the averaging shifted, and showed up again as
    shimmering, jagged reflections. The edit samples the glow map again at full size
    (`textureLod(specular, ..., 0.0)`) and only lets a texel glow where both agree, as
-   Complementary's `customEmission.glsl` does. Official Eclipse `3c18afc` has the same
-   bug, so KuraEdit shows it too.
+   Complementary's `customEmission.glsl` does. Official Eclipse (`3c18afc` and `e89e6c6`)
+   has the same bug, so KuraEdit shows it too.
 2. **Distant Horizons shimmer** (`dimensions/composite6.fsh`; not tested on its own). On
    LOD pixels the anti-aliasing keeps 90% of the last frame, skips Eclipse's
    `difference / history` boost (which drops history on dark, high-contrast detail) and
@@ -96,6 +102,9 @@ spot by a short anchor and adds the lines below. The full diffs are local, in
 3. **Mod Support menu** (`shaders.properties`). ChromaPatch adds an `[Atmosphere]` row to
    the main shader menu; the edit drops the blank row under it so Misc Settings and Mod
    Support fit. Whether that row was really cut off is unconfirmed.
+4. **GTCEu bordered lamps** (`block.properties`; since 2026-11-15, for GTO). ChromaPatch's
+   1.20.1 list gives only the borderless GTCEu lamps their colour; the edit adds each
+   `gtceu:<colour>_lamp` beside its borderless one. GTNH ignores those ids.
 
 Tried and dropped on 2026-11-07: steadier anti-aliasing on distant real chunks (no
 change; the false lights were the cause), and Mipmap Levels 0 (only a test).
@@ -120,15 +129,22 @@ ChromaPatch never rebuilds Warpledge Edit, so after a ChromaPatch or Eclipse upd
    `shaderpacks/` as `Eclipse-Shader Warpledge Edit.zip.txt`.
 
 On 2026-11-07 the script's output from KuraEdit matched the hand-edited pack file for
-file.
+file. On 2026-11-15 all three anchors still matched ChromaPatch 1.0.3 on `e89e6c6`; the
+1.0.2 build is in `backups/replaced-mods/2026-11-15/`.
 
 #### Settings
 
 [eclipse-warpledge-edit/settings.txt](./eclipse-warpledge-edit/settings.txt) is the copy
-from 2026-11-07 03:12. Most values follow KuraEdit where they help GTNH (emission mode,
-brightness and curve, coloured light saturation, minimum light, sharpening off); clouds,
-fog, water and weather stay on Eclipse's defaults. Dated copies, KuramA's file as it was
-used before and the local diffs are in `.minecraft/eclipse-tuning/`.
+from 2026-11-10 15:50. Most values follow KuraEdit where they help GTNH (emission mode,
+curve, coloured light saturation, minimum light, sharpening off); clouds, fog, water and
+weather stay on Eclipse's defaults. Dated copies, KuramA's file as it was used before and
+the local diffs are in `.minecraft/eclipse-tuning/`.
+
+The file only keeps values that differ from the pack's defaults, so a ChromaPatch update
+that changes a default changes the look. On 2026-11-15 the file gained 1.0.2's values for
+the options 1.0.3 changed: `OBS07_LIGHT_FOG` 1.0, `OBS07_LIGHT_FOG_DAY` 0.1,
+`OBS07_FOG_DRIFT` on, `OBS07_GODRAYS` 0.6, `OBS07_DUST` 1.0, `OBS07_LAMP_BEAM` 5.0,
+`TOD_Fog_mult` 1.0 and `moon_illuminance` 600. `LPV_SIZE` was already set to 8.
 
 #### KuramA's settings file
 

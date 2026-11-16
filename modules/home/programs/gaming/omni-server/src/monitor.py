@@ -342,7 +342,10 @@ class Monitor:
                         pass
         if left <= TICK * 2 and (at, "restart") not in self.warned:
             self.warned.add((at, "restart"))
-            servers.restart(self.cfg)
+            try:
+                servers.restart(self.cfg)
+            except servers.ServerError:
+                pass  # systemd refused the job; the monitor keeps running
 
     def reload_cfg(self):
         now = time.time()
@@ -380,7 +383,9 @@ class Monitor:
         client.settimeout(1)
         self.clients[client] = b""
         self.selector.register(client, selectors.EVENT_READ)
-        self.publish({"type": "hello", "state": self.state, "lines": list(self.ring)[-HELLO_LINES:]}, [client])
+        #--- acks: this monitor answers run and cancel (monitor_ask in src/api.py)
+        self.publish({"type": "hello", "acks": True, "state": self.state,
+                      "lines": list(self.ring)[-HELLO_LINES:]}, [client])
 
     def request(self, client):
         try:
@@ -398,8 +403,11 @@ class Monitor:
                 continue
             if req.get("cmd") == "run":
                 self.start_run(req.get("name", ""), req.get("steps", []))
+                self.tick_runs()  # a step due now goes out before the ack
+                self.publish({"type": "ack"}, [client])
             elif req.get("cmd") == "cancel":
                 self.runs = [r for r in self.runs if r["id"] != req.get("id")]
+                self.publish({"type": "ack"}, [client])
             elif req.get("cmd") == "query":
                 self.publish(self.query(str(req.get("command", ""))), [client])
 

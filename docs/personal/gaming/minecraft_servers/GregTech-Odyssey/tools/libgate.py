@@ -28,8 +28,9 @@ structures, and Quark (which breaks GTO's EMI) is replaced by the quarkblocks ja
     plus the rest of Integrated Dungeons Arise's and Integrated Cataclysm's data
     (quarkmap.WHOLE_DATA says why), recipes excepted.
 
-It also patches those mods' jars in place so Quark is optional. `gto datapack`
-installs both packs. Rerun after updating any of these mods. 0.6.0/mods.md explains
+It also patches those mods' jars in place so Quark is optional, and clears gtocore's
+resource cache in the instance (gto.py's clear_gto_cache). `gto datapack` installs
+both packs. Rerun after updating any of these mods. 0.6.0/mods.md explains
 the choices.
 """
 
@@ -45,6 +46,7 @@ import zipfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import gto  # noqa: E402
 import nbt  # noqa: E402
 import quarkmap  # noqa: E402
 
@@ -417,6 +419,8 @@ def main():
         patch_requires_quark(a.mods)
     write(INTEGRATED / "pack.mcmeta", {"pack": {
         "pack_format": 15, "description": "warpledge GTO Integrated worldgen fixes"}})
+    # The jars patched above keep their names, which gtocore's cache keys on.
+    gto.clear_gto_cache(a.mods.resolve().parent)
 
 
 if __name__ == "__main__":

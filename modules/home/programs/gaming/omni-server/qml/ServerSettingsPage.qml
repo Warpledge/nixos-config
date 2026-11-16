@@ -18,12 +18,16 @@ Flickable {
     function setProperty(key, value) {
         const changes = {}
         changes[key] = value
-        app.call("properties_set", { changes }, refresh)
+        app.call("properties_set", { changes }, () => saved(app.running ? "Saved; applies at the next start" : "Saved"))
     }
     function setStartup(key, value) {
         const changes = {}
         changes[key] = value
-        app.call("startup_set", { changes }, refresh)
+        app.call("startup_set", { changes }, () => saved(app.running ? "Saved; applies at the next start" : "Saved"))
+    }
+    function saved(text) {
+        app.toast(text, "success")
+        refresh()
     }
 
     onAppChanged: refresh()
@@ -132,9 +136,12 @@ Flickable {
                     }
                     Row_ {
                         label: "JVM flags"
-                        info: "G1 is the garbage collector tuning modded servers commonly use."
+                        info: "G1 is the garbage collector tuning modded servers commonly use. ZGC keeps pauses short on a big heap but uses more CPU; Java 17 or newer."
                         Segmented {
-                            options: [{ value: "g1", label: "G1 tuned" }, { value: "none", label: "None" }]
+                            // Java 8 has no ZGC, and the backend refuses it there
+                            options: [{ value: "g1", label: "G1 tuned" }]
+                                .concat(page.startup.java === "8" ? [] : [{ value: "zgc", label: "ZGC" }])
+                                .concat([{ value: "none", label: "None" }])
                             current: page.startup.preset
                             onPicked: value => page.setStartup("preset", value)
                         }

@@ -12,7 +12,11 @@ Rectangle {
     property var buttons: []
     property bool cancel: true
     property var done: null
-    visible: false
+    //--- Fades in and its card grows into place; it stays visible until faded out
+    property bool showing: false
+    visible: opacity > 0
+    opacity: showing ? 1 : 0
+    Behavior on opacity { NumberAnimation { duration: Theme.ms(180); easing.type: Easing.OutQuad } }
     color: Qt.rgba(0, 0, 0, 0.5)
 
     function open(spec, callback) {
@@ -21,12 +25,12 @@ Rectangle {
         buttons = spec.buttons
         cancel = spec.cancel !== false
         done = callback
-        visible = true
+        showing = true
         forceActiveFocus()
     }
 
     function close(value) {
-        visible = false
+        showing = false
         const callback = done
         done = null
         // After the click that closed it has been handled
@@ -36,13 +40,15 @@ Rectangle {
 
     Keys.onEscapePressed: close()
     // Swallows clicks on the dimmed view; a click outside the card cancels
-    MouseArea { anchors.fill: parent; onClicked: dialog.close() }
+    MouseArea { anchors.fill: parent; enabled: dialog.showing; onClicked: dialog.close() }
 
     Rectangle {
         anchors.centerIn: parent
         width: Math.min(parent.width - 32, 440)
         implicitHeight: col.implicitHeight + 40
-        radius: 24
+        radius: Theme.r(24)
+        scale: dialog.showing ? 1 : 0.94
+        Behavior on scale { NumberAnimation { duration: Theme.ms(240); easing.type: Easing.OutCubic } }
         color: Theme.card
         border.width: 1
         border.color: Theme.line

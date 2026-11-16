@@ -28,18 +28,40 @@ import gto  # noqa: E402
 
 # Sets thinned by hand: (spacing, separation) in chunks. These win over the tiers.
 SPREAD = {
-    "ae2:meteorite": (55, 14),
-    "dungeoncrawl:dungeons": (55, 21),
-    # Vanilla's bastions: Incendium (16/8) and Jaden's (27/4) both override the set
+    # 6x rarer than their own 32/8 and 32/12, like the most common tier
+    "ae2:meteorite": (78, 20),
+    "dungeoncrawl:dungeons": (78, 29),
+    # Vanilla's bastions: Incendium overrides the set at 16/8; held at Jaden's old 27/4
     "minecraft:nether_complexes": (27, 4),
-    # Nullscape already thins End cities from vanilla's 20/11; the tier would add 3x
+    # Nullscape already thins End cities from vanilla's 20/11; the tier would add 6x
     "minecraft:end_cities": (26, 18),
 }
-# Tiers for every other set by its own spacing: (below this spacing, factor). Rarity
-# goes with spacing squared, so x1.73 is 3x rarer and x1.41 2x. 40 and up stay.
-TIERS = [(30, 3 ** 0.5), (40, 2 ** 0.5)]
+# How many times rarer a set gets than its own spread, by set id first, then by mod
+# namespace; 1 keeps it. These win over the tiers.
+RARITY = {
+    # Bosses and progression: findable at their own spread
+    "mowziesmobs": 1, "bosses_of_mass_destruction": 1, "cataclysm": 1,
+    "legendary_monsters": 1,
+    "dungeons_arise:major_structures": 1, "idas:idas_rare": 1,
+    # YUNG's replacements for vanilla's biome-locked structures: the temples hold End
+    # Remastered's Old and Rogue eyes
+    "betterdeserttemples:desert_temples": 1, "betterjungletemples:jungle_temples": 1,
+    "betterwitchhuts:witch_hut": 1,
+    # Villages
+    "integrated_villages:regular_villages": 5, "biomeswevegone:villages": 5,
+    "terralith:rare_village": 5,
+    # Filler that crowded biomes
+    "idas:idas_common": 6, "idas:idas_small": 6, "dungeons_arise:minor_structures": 6,
+    "apotheosis": 6, "illagerinvasion:firecaller_hut": 6,
+    "illagerinvasion:sorcerer_hut": 6, "terralith:regular": 6,
+}
+# Tiers for every unlisted set by its own spacing: (below this spacing, rarity). 40
+# and up stay.
+TIERS = [(30, 6), (40, 3)]
+# Chunks a structure must keep from another before overlap prevention drops it
+OVERLAP_PADDING = 1
 # Sets that keep their own spread: terrain decor (BWG, Terralith rubble and
-# underground rooms, Jaden's Nether fossils, MES pillars and spikes), small
+# underground rooms, MES pillars and spikes), small
 # dungeons, mineshafts, way signs, the Nether fortress
 # (blaze rods), and Ad Astra's planets (prefix).
 KEEP = {
@@ -51,7 +73,7 @@ KEEP = {
     "betterdungeons:small_dungeons", "betterdungeons:small_nether_dungeons",
     "bettermineshafts:mineshafts", "supplementaries:way_signs",
     "legendary_monsters:warped_fungussus_nest", "betterfortresses:fortress",
-    "netherexp:mega_fossils", "mes:ruined_pillar", "mes:enderpin_spikes",
+    "mes:ruined_pillar", "mes:enderpin_spikes",
 }
 KEEP_PREFIX = ("ad_astra:",)
 # Small or common structures left out of overlap prevention so they never cancel a
@@ -63,9 +85,9 @@ NO_OVERLAP = [
     "minecraft:buried_treasure", "minecraft:nether_fossil",
 ] + [f"minecraft:ruined_portal{s}" for s in
      ("", "_desert", "_jungle", "_swamp", "_mountain", "_ocean", "_nether")]
-# Mods whose structures never generate. Maid Spell's were here until Iron's Spells,
-# which its loot and mobs name, came in.
-DISABLED_NAMESPACES = []
+# Mods whose structures never generate. Maid Spell's loot and mobs name Iron's Spells
+# items, so they're off whenever Iron's isn't installed.
+DISABLED_NAMESPACES = ["touhou_little_maid_spell"]
 
 #-- Scan
 
@@ -117,6 +139,15 @@ def sets(mc):
 #-- Config
 
 
+def rarity(k, sp):
+    """How many times rarer set k gets: RARITY, else its spacing's tier, else 1."""
+    if k in RARITY:
+        return RARITY[k]
+    if k.split(":")[0] in RARITY:
+        return RARITY[k.split(":")[0]]
+    return next((r for below, r in TIERS if sp < below), 1)
+
+
 def spread(s):
     """(spacing, separation) Structurify should set for one set, or None to keep it."""
     k, sp, se = s["set"], s["spacing"], s["separation"]
@@ -124,16 +155,20 @@ def spread(s):
         return SPREAD[k]
     if k in KEEP or k.startswith(KEEP_PREFIX) or not sp or s["type"] == "concentric_rings":
         return None
-    for below, f in TIERS:
-        if sp < below:
-            new = round(sp * f)
-            return new, min(round(se * f), new - 1)
-    return None
+    r = rarity(k, sp)
+    if r == 1:
+        return None
+    # Rarity goes with spacing squared, so 6x rarer is x2.45 and 3x is x1.73.
+    f = r ** 0.5
+    new = round(sp * f)
+    return new, min(round(se * f), new - 1)
 
 
 def config(all_sets):
     by = {s["set"]: s for s in all_sets}
+    names = {k.split(":")[0] for k in by}
     missing = [k for k in list(SPREAD) + sorted(NO_OVERLAP_SETS) if k not in by]
+    missing += [k for k in RARITY if k not in by and k not in names]
     if missing:
         sys.exit(f"not in the pack any more, update the tables: {', '.join(missing)}")
     no_overlap = set(NO_OVERLAP)
@@ -142,7 +177,7 @@ def config(all_sets):
     spreads = [(s["set"], r) for s in all_sets
                if s["set"].split(":")[0] not in DISABLED_NAMESPACES and (r := spread(s))]
     return {
-        "general": {"prevent_structure_overlap": True, "overlap_padding": 0},
+        "general": {"prevent_structure_overlap": True, "overlap_padding": OVERLAP_PADDING},
         "structure_namespaces": [{"name": n, "is_disabled": True}
                                  for n in DISABLED_NAMESPACES],
         "structures": [{"name": n, "exclude_from_overlap_prevention": True}

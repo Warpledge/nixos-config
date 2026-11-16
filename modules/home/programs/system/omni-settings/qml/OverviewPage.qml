@@ -95,7 +95,7 @@ ColumnLayout {
         }, () => view.startJob("collect", {}))
         if (c.doomed.length)
             Backend.call("freed", {}, reply => {
-                if (view.dialog.visible && view.dialog.heading === "Clean up old versions?")
+                if (view.dialog.showing && view.dialog.heading === "Clean up old versions?")
                     view.dialog.body = body + (reply.ok && reply.data
                         ? `\n\nThe old system generations alone free about ${Fmt.size(reply.data)}, `
                           + "more with other unused store paths." : "")

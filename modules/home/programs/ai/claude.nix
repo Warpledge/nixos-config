@@ -85,7 +85,9 @@
         // lib.mapAttrs' (n: _: lib.nameValuePair (kebab n) "off") (lib.filterAttrs (_: v: !v) c.accountSkills);
       deniedMcpServers =
         lib.mapAttrsToList (n: _: {serverName = "claude.ai ${connectorNames.${n}}";})
-        (lib.filterAttrs (_: v: !v) c.connectors);
+        (lib.filterAttrs (_: v: !v) c.connectors)
+        #--- Claude Desktop's Code-tab checklist; it asks for a call on nearly every turn
+        ++ lib.optional (!c.desktopPlanList) {serverName = "ccd_turn";};
     }
     // lib.optionalAttrs (c.model != null) {inherit (c) model;}
     // lib.optionalAttrs (c.effort != null) {effortLevel = c.effort;}

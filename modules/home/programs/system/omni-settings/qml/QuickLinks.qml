@@ -34,7 +34,7 @@ ColumnLayout {
                 color: tileHover.hovered ? Theme.hover : Qt.alpha(Theme.bg, 0.55)
                 border.width: 1
                 border.color: Theme.rule
-                Behavior on color { ColorAnimation { duration: 120 } }
+                Behavior on color { ColorAnimation { duration: Theme.ms(120) } }
                 // Opens in DankMaterialShell's own window
                 Icon {
                     anchors.right: parent.right
