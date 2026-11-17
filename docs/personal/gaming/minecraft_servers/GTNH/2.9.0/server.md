@@ -68,6 +68,8 @@ From [mods.md](./mods.md), the **B** rows:
   Advanced Memory Card 1.2.0-1.7.10-GTNH, WTCT 1.0.63-rc1, Omni Tweaks 0.2.0,
   Effortless Building Gadgets 0.10.1
 - AE2Things `ae2thing-1.3.3.jar`, added to the client on 2026-11-17 and side B
+- DiskTerminal `disk_terminal-1.0.2.jar` and Functional Storage
+  `functionalstorage-1.2.3.jar`, added to the client on 2026-11-17, side B
 - The EZStorage script `scripts/simplestorage_gregified.zs` must be on the server too, or
   the recipes differ from the client.
 

@@ -345,6 +345,52 @@ legion needs the same jar before a world can be joined.
   adds a config for modern container interaction in the terminal.
 - Config: `config/ae2thing/ae2thing.cfg`, written on the first launch. Not launched yet.
 
+## DiskTerminal, added on 2026-11-17
+
+`disk_terminal-1.0.2.jar` (1.0.2, 2026-11-16) is on the client only so far. It is side B, so
+legion needs the same jar before a world can be joined.
+
+- Source: [GTNotLeisure/DiskTerminal-Unofficial](https://github.com/GTNotLeisure/DiskTerminal-Unofficial),
+  a 1.7.10 port of [Aedial's DiskTerminal](https://github.com/Aedial/DiskTerminal). The
+  jar's sha256 matches the digest GitHub lists.
+- A Cell Terminal part for an ME cable and a Wireless Cell Terminal, linked through the
+  Security Terminal. It lists every ME Drive, ME Chest and storage bus with used and total
+  bytes, ejects cells to the inventory, previews contents, edits partitions by drag and
+  drop, sets priorities, and highlights a block in the world and prints its coordinates.
+  It reads AE2FC fluid cells and buses, Thaumic Energistics essentia, NEI drag and drop,
+  and GregTech ME buses and hatches.
+- 1.0.2 only moves its dependencies to the pack's AE2 `rv3-beta-1095`, AE2FC `1.5.116`,
+  GT `5.09.54.265` and NEI 2.8.171; 1.0.1 wanted AE2 `rv3-beta-1080` and AE2FC `1.5.113`.
+  GTNHLib is 0.11.52 against the pack's 0.11.54.
+- Config: `config/disk_terminal_server.cfg` gates the tabs and the cell operations and has
+  to match on both sides; `config/disk_terminal_client.cfg` holds the client display
+  options. Both are written on the first launch. Not launched yet.
+
+## Functional Storage, added on 2026-11-17
+
+`functionalstorage-1.2.3.jar` (1.2.3, 2026-11-14) is on the client only so far, on trial.
+It is side B, so legion needs the same jar before a world can be joined. It is a 1.7.10
+backport of [Buuz135's Functional Storage](https://github.com/Buuz135/FunctionalStorage)
+with More Functional Storage merged in, from the maintainer of AE2Things and DiskTerminal.
+
+- Adds what the pack's StorageDrawers 2.2.31-GTNH lacks: 1/2/4 tank fluid drawers on
+  `IFluidHandler`, essentia drawers on Thaumcraft's aspect and tube interfaces, per-slot
+  counts beyond an `int`, and pulling, pushing, wireless, collector, breaker, placer,
+  refill and generator upgrades. Also ender drawers and an armory cabinet.
+- Duplicates the rest of Storage Drawers: 1/2/4 wood drawers, compacting drawers, a
+  framing table, a controller network, and the storage, void, redstone and lock upgrades.
+- **Balance:** every recipe it registers is a vanilla shaped or shapeless recipe. Wood
+  drawers cost planks and a chest, fluid drawers planks and buckets, and the resource
+  generators a blank upgrade plus stone, a cauldron and buckets. It has no GT assembler
+  recipes, unlike the pack's Storage Drawers, which registers them in its `gtnh` recipe
+  class. Its only GregTech code is client-side texture adapters for framed drawers. If it
+  is kept, its recipes need GT costs or the generators need disabling.
+- Built against GTNHLib 0.11.52 and GTNHExtLib 1.0.4; the pack has 0.11.54 and 1.0.5. It
+  was compiled against AE2 `rv3-beta-1080` and NEI 2.8.155, and no release names 2.9.0, so
+  it is unproven and a launch is the test.
+- Config: `config/functionalstorage/functionalstorage.cfg`, editable in game from the mod
+  list. Storage capacity changes need a world restart. Not launched yet.
+
 ## Left out until their author ships a 2.9 build
 
 - **BoxPlusPlus 2.1.2**: last release 2025-12-10, built against Galaxy Space 1.1.121.
