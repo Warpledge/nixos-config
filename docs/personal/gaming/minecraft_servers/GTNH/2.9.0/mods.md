@@ -155,9 +155,15 @@ Four client-side additions on 2026-11-02:
 
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
-| World Tooltips | 1.2.3-87 | C | floating tooltip over dropped items; shader-compatible continuation of GenuineSounds' mod; [source code](https://github.com/kotmatross28729/WorldTooltipsShadersFix) |
+| World Tooltips | 1.2.3-90 | C | floating tooltip over dropped items; shader-compatible continuation of GenuineSounds' mod; [source code](https://github.com/GTNotLeisure/WorldTooltipsContinuation) |
 | MyCTMLib | 1.4.6-290 | C | connected-texture support for resource packs; builds against GT 5.09.54.265, the GT in 2.9.0 |
 | OmniOcular Unofficial | 1.7.2 | B | WAILA add-on showing machine internals; client full jar, server `-server.jar`; see the scripts note below |
+
+World Tooltips moved from 1.2.3-87 to 1.2.3-90 on 2026-11-17. Builds 88 to 90 have no
+Java changes: they move the mod to GTNHLib 0.11.52, NEI 2.8.155, FalsePatternLib 1.12.2
+and the 2.9-era Gradle toolchain. The old jar is in `backups/replaced-mods/2026-11-17/`.
+The source moved from kotmatross28729's repo to GTNotLeisure, and Modrinth still lists
+1.2.3-87, so the update check reads GitHub now.
 
 Fancy Block Particles 2.4.1 was removed after its 3D block particles rendered as
 screen-filling shards under Angelica and the shader pack; its `config/FBP/` folder is gone
