@@ -316,12 +316,18 @@ def shell_categories(shell):
 
 def app_card(page, pid, groups):
     """One Apps page as a card on the Default Packages page; its template groups
-    become headings inside it (each setting's `sub`) when they all have a name."""
-    named = len(groups) > 1 and all(g["title"] for g in groups)
-    settings = [dict(s, sub=g["title"] if named else "") for g in groups for s in g["settings"]]
+    become headings inside it (each setting's `sub`) when they all have a name,
+    and a CHIPS group shows as chips under `chipTitle` instead of as rows."""
+    chips = [g for g in groups if g["chips"]]
+    rows = [g for g in groups if not g["chips"]]
+    named = len(rows) > 1 and all(g["title"] for g in rows)
+    settings = [dict(s, sub=g["title"] if named else "") for g in rows for s in g["settings"]]
     return {"title": page.title, "description": page.description, "collapsed": True,
             "locked": any(g["locked"] for g in groups), "icon": [page.icon, schema.FALLBACK_ICON],
-            "card": pid, "settings": settings, "links": [l for g in groups for l in g["links"]]}
+            "card": pid, "settings": settings,
+            "chipTitle": chips[0]["title"] if chips else "",
+            "chipSettings": [s for g in chips for s in g["settings"]],
+            "links": [l for g in groups for l in g["links"]]}
 
 
 def shows(key, wm, cfg=None):

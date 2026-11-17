@@ -863,6 +863,13 @@ Item {
                                    subtitle: `${g.collapsed ? g.title : pg.title} · ${s.subtitle}`,
                                    icon: s.icon, app: s.icon,
                                    card: g.collapsed ? (g.card || `${pid}|${g.title}`) : "" })
+            //--- An app card's chips (api.py's app_card) sit outside its rows
+            for (const g of pg.groups)
+                for (const s of g.chipSettings || [])
+                    if (s.title.toLowerCase().includes(q) || s.subtitle.toLowerCase().includes(q))
+                        out.push({ kind: "page", tab: item.tab, page: pid, title: s.title,
+                                   subtitle: `${g.chipTitle} · ${s.subtitle}`,
+                                   icon: s.icon, app: s.icon, card: g.card || "" })
         }
         for (const e of info.dmsSearch)
             if (e.label.toLowerCase().includes(q) || e.keywords.includes(q))

@@ -54,6 +54,8 @@ ColumnLayout {
             readonly property bool open: !!page.view.openCards[cardKey]
             readonly property bool collapsed: modelData.collapsed
             readonly property var bools: modelData.settings.filter(s => s.kind === "bool")
+            readonly property var chipList: modelData.chipSettings || []
+            readonly property string chipHeading: modelData.chipTitle || ""
             Layout.fillWidth: true
             spacing: 6
             SettingGroup {
@@ -179,6 +181,54 @@ ColumnLayout {
                             Layout.bottomMargin: 2
                             implicitHeight: 1
                             color: Qt.alpha(card.accent, 0.25)
+                        }
+                        //--- api.py's app_card: one template group as chips under its name
+                        ColumnLayout {
+                            visible: group.chipList.length > 0
+                            Layout.fillWidth: true
+                            Layout.margins: 6
+                            spacing: 8
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 10
+                                Text {
+                                    text: group.chipHeading
+                                    color: card.accent
+                                    font.pixelSize: 13
+                                    font.weight: Font.Bold
+                                }
+                                Item { Layout.fillWidth: true }
+                                Rectangle {
+                                    implicitWidth: chipCount.implicitWidth + 20
+                                    implicitHeight: 26
+                                    radius: 13
+                                    color: Qt.alpha(card.accent, 0.18)
+                                    Text {
+                                        id: chipCount
+                                        anchors.centerIn: parent
+                                        text: `${group.chipList.filter(s => page.view.valueOf(s)).length} of ${group.chipList.length} on`
+                                        color: card.accent
+                                        font.pixelSize: 13
+                                        font.weight: Font.DemiBold
+                                    }
+                                }
+                            }
+                            Flow {
+                                Layout.fillWidth: true
+                                spacing: 6
+                                Repeater {
+                                    model: group.open ? group.chipList : []
+                                    ToggleChip {
+                                        required property var modelData
+                                        text: modelData.title
+                                        tip: [modelData.description || modelData.subtitle,
+                                              `Default: ${modelData.defaultShown}`].filter(t => t).join("\n")
+                                        checked: !!page.view.valueOf(modelData)
+                                        enabled: !group.modelData.locked
+                                        onToggled: page.view.change(modelData, !checked)
+                                    }
+                                }
+                            }
                         }
                         //--- schema.py's CHIPS groups: each switch a chip, filled while on
                         Flow {

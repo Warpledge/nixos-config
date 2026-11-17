@@ -219,6 +219,29 @@
   # Shows the Steam or Proton game you're playing in GoofCord or Vesktop
   discord.arrpc.enable = false;
 
+  #--- Plugins
+  discord.plugins.biggerStreamPreview = false; # Enlarge stream previews
+  discord.plugins.fakeNitro = false; # Unlock emoji, stickers and themes without Nitro
+  discord.plugins.fixImagesQuality = false; # Images at their full quality
+  discord.plugins.fixSpotifyEmbeds = false; # Spotify embeds play at a sane volume
+  discord.plugins.fixYoutubeEmbeds = false; # Play YouTube embeds where blocked
+  discord.plugins.forceOwnerCrown = false; # Show the owner's crown
+  discord.plugins.fullSearchContext = false; # Search from a message's right-click menu
+  discord.plugins.imageZoom = false; # Zoom into images and avatars
+  discord.plugins.memberCount = false; # Member count in a server's tooltip
+  discord.plugins.noProfileThemes = false; # Remove others' Nitro profile themes
+  discord.plugins.noTypingAnimation = false; # No typing animation
+  discord.plugins.silentTyping = false; # Hide that you're typing
+  discord.plugins.spotifyCrack = false; # Listen Along, no auto-pause, no premium ads
+  discord.plugins.unlockedAvatarZoom = false; # Zoom further when cropping an avatar
+  discord.plugins.viewIcons = false; # View role and server icons full size
+  discord.plugins.volumeBooster = false; # Volume up to 1000%
+  discord.plugins.webRichPresence = false; # Show what you're playing, needs arRPC
+  discord.plugins.youtubeAdblock = false; # Block YouTube ads in embeds
+  discord.plugins.messageClickActions = false; # Reply, edit and delete by clicking
+  discord.plugins.superReactionTweaks = false; # Stop super reaction animations
+  discord.hideReactions = false; # Hide the reactions under messages
+
   #--- AI Tools
   claude.enable = false; # Claude Code (needs an Anthropic account)
   claude.mods.usageBand = false; # Band above Claude Code's prompt: usage, prompt cache

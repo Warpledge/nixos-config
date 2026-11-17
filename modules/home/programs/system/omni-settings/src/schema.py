@@ -242,8 +242,8 @@ COLLAPSED = {("Claude", "Mods"): "brush",
              ("Skills", "Repo Skills"): "construction",
              ("Skills", "Subagents"): "smart_toy",
              ("Skills", "Account Skills"): "cloud"}
-#--- COLLAPSED groups of switches shown as on/off chips instead of rows
-CHIPS = {("Claude", "Mods")}
+#--- Groups of switches shown as on/off chips instead of rows (an app card's too)
+CHIPS = {("Claude", "Mods"), ("Discord", "Plugins")}
 
 #--- Settings shown inside another's row, by path prefix: claude.skills.commit's row
 #--- also edits claude.skillModels.commit (pair_up)
