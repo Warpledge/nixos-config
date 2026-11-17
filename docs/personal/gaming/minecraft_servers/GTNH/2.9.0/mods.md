@@ -323,9 +323,9 @@ restyled. Three layouts are kept, switched with a key.
   Dashboard, Config, then Open HUD Editor.
 - Everything changed in the editor saves as you go, to `config/dashboard/editor.cfg`.
   PNGs put in `config/dashboard/images/` become movable elements after **F3 + T**.
-- InGameInfoXML 2.9.8 is installed, so its text areas can be moved and resized as well.
-  Watch the shaders (Eclipse through ChromaPatch) and Xaero's maps on the first launch,
-  since Dashboard draws over the same frame.
+- InGameInfoXML is disabled since InfoHUD replaced it on 2026-11-17, so Dashboard has no
+  IGI text areas to move. Watch the shaders (Eclipse through ChromaPatch) and Xaero's maps
+  on the first launch, since Dashboard draws over the same frame.
 - The jar came from the 1.0.22 release and its sha256 matches the one GitHub lists. The
   server needs nothing; side C.
 
@@ -484,6 +484,24 @@ the client. It is side C, client only.
   pack gets particle batching again, and set `fancyRain` and `fancySnow` back to `true`
   or delete `config/FBP/`. The folder survived the last removal.
 - Not launched yet, so the shader shards are unproven.
+
+## InfoHUD, added on 2026-11-17
+
+`infohud-0.0.25.jar` (0.0.25, 2026-10-22) is on the client. It is side C; the server needs
+nothing. The jar's sha256 matches the digest GitHub lists.
+
+- Replaces InGameInfoXML, whose jar is renamed to `InGameInfoXML-2.9.8.jar.disabled`. Its
+  old `config/InGameInfoXML.cfg` and `config/InGameInfoXML/` are left in place and are no
+  longer read.
+- A configurable HUD with a tag-based line editor on `J`: vanilla, item, target, server,
+  system, condition, GregTech, Thaumcraft, BloodMagic, Forestry and Nutrition tags, plus a
+  classic bar renderer and a light-level overlay toggled on `L`.
+- It ships no pack version and was built against GTNHLib 0.9.53, where the pack has
+  0.11.54. BloodMagic, Thaumcraft and Baubles Expanded are optional compile-time tags. The
+  release is from 2026-10-22, before 2.9.0 stable, so it is unproven. 0.0.25 fixes a crash
+  on the first multiplayer join and moves the CPU-load read off the client thread.
+- Config: `config/InfoHUD/Layout.json`, `GeneralConfig.cfg`, `LightOverlayConfig.cfg` and
+  `ClassicBarConfig.cfg`. Not launched yet.
 
 ## Left out until their author ships a 2.9 build
 
