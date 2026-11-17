@@ -41,7 +41,6 @@
     {"name": "OmniOcular Unofficial", "jar": "^OmniOcularUnofficial-", "side": "B", "source": "github:luomolhx/OmniOcular-Unofficial", "asset": "^OmniOcularUnofficial-[0-9.]+(-[0-9.]+)?\\.jar$", "note": "Client uses the full jar; the server uses OmniOcularUnofficial-<version>-server.jar. 1.7.x overwrites the English scripts from the upstream repo unless gtnhConfigAutoUpdate=false in its .cfg (set on both sides; see mods.md)."},
     {"name": "Omni Tweaks", "jar": "^omnitweaks-", "side": "B", "source": "local:~/Projects/omni-tweaks"},
     {"name": "World Preview NH", "jar": "^worldpreview-", "side": "C", "source": "modrinth:world-preview-nh"},
-    {"name": "Vintage Pick Up Notifier", "jar": "^vintagepickupnotifier-", "side": "C", "source": "modrinth:vpun"},
     {"name": "Vintage Resourcify", "jar": "^vintage-resourcify-", "side": "C", "source": "modrinth:vintage-resourcify"},
     {"name": "AngelLib", "jar": "^angellib-", "side": "C", "source": "modrinth:angellib"},
     {"name": "Better Search", "jar": "^bettersearch-", "side": "C", "source": "modrinth:bettersearch"},

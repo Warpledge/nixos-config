@@ -218,11 +218,13 @@ release; all of them passed in-game testing on 2026-11-05.
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
 | World Preview NH | 1.0.3 | C | biome and height preview on Create New World |
-| Vintage Pick Up Notifier | 1.0.0 | C | item pickup notices |
 | Vintage Resourcify, with AngelLib 1.0.2 | 1.0.6 | C | in-game resource and shader pack browser; 1.0.2 marks server list pings with port 0 rather than a hostname suffix, so e4mc worlds stop showing as "Unknown server" |
 | Better Search | 1.6.4 | C | typo-tolerant search, with NEI and AE2 hooks; 1.6.4 fixes its AE2 mixin errors and works with Language Reload |
 | Effortless Building Gadgets | 0.10.1 | B | shape building through a crafted gadget; `B:consumesEnergy=false` on both sides, so it needs no power |
 | Shoulder Surfing Reloaded | 2.4.1 | C | over-the-shoulder camera; a 2023 build that patches vanilla code, so suspect it first after a pack update |
+
+Vintage Pick Up Notifier 1.0.0 was removed on 2026-11-17; Dashboard's HUD editor covers
+pickup notices. Its jar and config are in `backups/removed-mods/2026-11-17/`.
 
 Vintage Resourcify lists `forgelin-legacy` as required. It has the same `forgelin` mod id
 as the pack's `forgelin-2.0.3-GTNH.jar`, so it was left out and runs on the pack's copy.
@@ -323,9 +325,9 @@ restyled. Three layouts are kept, switched with a key.
   Dashboard, Config, then Open HUD Editor.
 - Everything changed in the editor saves as you go, to `config/dashboard/editor.cfg`.
   PNGs put in `config/dashboard/images/` become movable elements after **F3 + T**.
-- InGameInfoXML is disabled since InfoHUD replaced it on 2026-11-17, so Dashboard has no
-  IGI text areas to move. Watch the shaders (Eclipse through ChromaPatch) and Xaero's maps
-  on the first launch, since Dashboard draws over the same frame.
+- InGameInfoXML was removed on 2026-11-17, so Dashboard has no IGI text areas to move.
+  Watch the shaders (Eclipse through ChromaPatch) and Xaero's maps on the first launch,
+  since Dashboard draws over the same frame.
 - The jar came from the 1.0.22 release and its sha256 matches the one GitHub lists. The
   server needs nothing; side C.
 
@@ -490,9 +492,8 @@ the client. It is side C, client only.
 `infohud-0.0.25.jar` (0.0.25, 2026-10-22) is on the client. It is side C; the server needs
 nothing. The jar's sha256 matches the digest GitHub lists.
 
-- Replaces InGameInfoXML, whose jar is renamed to `InGameInfoXML-2.9.8.jar.disabled`. Its
-  old `config/InGameInfoXML.cfg` and `config/InGameInfoXML/` are left in place and are no
-  longer read.
+- Replaces InGameInfoXML, which is dropped: its jar, `config/InGameInfoXML.cfg` and
+  `config/InGameInfoXML/` are in `backups/removed-mods/2026-11-17/`.
 - A configurable HUD with a tag-based line editor on `J`: vanilla, item, target, server,
   system, condition, GregTech, Thaumcraft, BloodMagic, Forestry and Nutrition tags, plus a
   classic bar renderer and a light-level overlay toggled on `L`.
