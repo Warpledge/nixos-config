@@ -165,9 +165,8 @@ and the 2.9-era Gradle toolchain. The old jar is in `backups/replaced-mods/2026-
 The source moved from kotmatross28729's repo to GTNotLeisure, and Modrinth still lists
 1.2.3-87, so the update check reads GitHub now.
 
-Fancy Block Particles 2.4.1 was removed for screen-filling shards under Angelica and the
-shader pack. It is back in the client with Particle Batching turned off; see
-[the section below](#fancy-block-particles-added-on-2026-11-17).
+Fancy Block Particles 2.4.1 was removed again on 2026-11-17; see
+[Dropped after testing](#dropped-after-testing).
 
 Both PICO-8 GTNH 0.4.1 and Fission-Evolved 0.1.1 are parked. With either installed
 alongside the other client mods the client fails before the main menu at GregTech's
@@ -383,31 +382,6 @@ legion needs the same jar before a world can be joined.
   to match on both sides; `config/disk_terminal_client.cfg` holds the client display
   options. Both are written on the first launch. Kept on 2026-11-17.
 
-## Functional Storage, added on 2026-11-17
-
-`functionalstorage-1.2.3.jar` (1.2.3, 2026-11-14) is on the client only so far; kept on
-2026-11-17. It is side B, so legion needs the same jar before a world can be joined. It is a 1.7.10
-backport of [Buuz135's Functional Storage](https://github.com/Buuz135/FunctionalStorage)
-with More Functional Storage merged in, from the maintainer of AE2Things and DiskTerminal.
-
-- Adds what the pack's StorageDrawers 2.2.31-GTNH lacks: 1/2/4 tank fluid drawers on
-  `IFluidHandler`, essentia drawers on Thaumcraft's aspect and tube interfaces, per-slot
-  counts beyond an `int`, and pulling, pushing, wireless, collector, breaker, placer,
-  refill and generator upgrades. Also ender drawers and an armory cabinet.
-- Duplicates the rest of Storage Drawers: 1/2/4 wood drawers, compacting drawers, a
-  framing table, a controller network, and the storage, void, redstone and lock upgrades.
-- **Balance:** every recipe it registers is a vanilla shaped or shapeless recipe. Wood
-  drawers cost planks and a chest, fluid drawers planks and buckets, and the resource
-  generators a blank upgrade plus stone, a cauldron and buckets. It has no GT assembler
-  recipes, unlike the pack's Storage Drawers, which registers them in its `gtnh` recipe
-  class. Its only GregTech code is client-side texture adapters for framed drawers. It is
-  kept, so its recipes need GT costs or the generators need disabling.
-- Built against GTNHLib 0.11.52 and GTNHExtLib 1.0.4; the pack has 0.11.54 and 1.0.5. It
-  was compiled against AE2 `rv3-beta-1080` and NEI 2.8.155, and no release names 2.9.0, so
-  it is unproven and a launch is the test.
-- Config: `config/functionalstorage/functionalstorage.cfg`, editable in game from the mod
-  list. Storage capacity changes need a world restart. Kept on 2026-11-17.
-
 ## NEI Guess, added on 2026-11-17
 
 `neiguess-1.0.jar` (1.0, 2026-11-10) is on the client only. It is side C; the server needs
@@ -472,29 +446,6 @@ It is side C. The jar's sha256 matches the digest GitHub lists.
   1.100, 1.5.35, 1.3.16, 1.5.13 and 1.8.53. It applies its mixins through GTNH Mixins'
   late loader, so a changed target shows as an error at launch instead of doing nothing.
 - No config of its own. Kept on 2026-11-17.
-
-## Fancy Block Particles, added on 2026-11-17
-
-`FancyBlockParticles-1.7.x-2.4.1.jar` (2.4.1, 2018-10-26, CurseForge file 2632103) is on
-the client. It is side C, client only.
-
-- Turns block-breaking and placing particles, torch, lava and weather into 3D particles,
-  with an in-game menu on `P` for density, scale, gravity and toggles.
-- 2.4.1 was removed before because its particles rendered as screen-filling shards under
-  Angelica and the shader pack. The particles-at-the-hand bug is
-  [Angelica#2237](https://github.com/GTNewHorizons/Angelica/issues/2237): FBP 2.4.1 plus
-  Angelica's Particle Batching puts particles at the hand instead of the ground. The issue
-  is still open on 2.2.46, and turning batching off fixes it.
-- Angelica: `enable_deferred_batching` is set to `false` in
-  `config/angelica-options.json`, the Particle Batching toggle in the video settings. It
-  costs some particle draw batching for every mod, not just FBP.
-- FBP: `fancyRain=false` and `fancySnow=false` in `config/FBP/Particle.properties`, since
-  its weather particles break in the Twilight Forest dimension. Vanilla rain and snow
-  remain, and the other FBP particles still work.
-- **If it is removed:** set `enable_deferred_batching` back to `true` so the rest of the
-  pack gets particle batching again, and set `fancyRain` and `fancySnow` back to `true`
-  or delete `config/FBP/`. The folder survived the last removal.
-- Kept on 2026-11-17, with batching and fancy weather off.
 
 ## InfoHUD, added on 2026-11-17
 
@@ -625,6 +576,17 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   longer has that class, the failed transform poisons the class cache, and Avaritia then
   aborts pre-init with `NoClassDefFoundError`. Removed; each mod's own config file is
   enough.
+
+- **Fancy Block Particles 2.4.1** (removed 2026-11-17): it needed Angelica's Particle
+  Batching disabled to stop particles rendering at the hand (Angelica#2237), which cost
+  particle batching for the whole pack, so it was not worth keeping. Its jar is in
+  `backups/removed-mods/2026-11-17/`; `enable_deferred_batching` is back to `true` and
+  `config/FBP/Particle.properties` is back to `fancyRain=true` and `fancySnow=true`.
+
+- **Functional Storage 1.2.3** (removed 2026-11-17): Storage Drawers already covers the
+  drawer and controller role, and its fluid and essentia drawers and generator upgrades
+  were not needed. Its jar and `config/functionalstorage/` are in
+  `backups/removed-mods/2026-11-17/`.
 
 ## Runtime notes from the first successful launch
 
