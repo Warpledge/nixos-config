@@ -9,7 +9,7 @@
   ],
   "mods": [
     {"name": "GTNHRates", "jar": "^gtnhrates-", "side": "B", "source": "github:Sladki/GTNHRates"},
-    {"name": "Twist Space Technology", "jar": "^TwistSpaceTechnology-", "side": "B", "source": "github:Nxer/Twist-Space-Technology-Mod", "note": "Reset GregTech.lang and TwistSpaceTechnology.cfg on update. 0.8.1 crashes world start on 2.9.0 (Bottled Chaos, thionyl chloride); skip it, see mods.md."},
+    {"name": "Twist Space Technology", "jar": "^TwistSpaceTechnology-", "side": "B", "source": "github:Nxer/Twist-Space-Technology-Mod", "note": "Reset GregTech.lang and TwistSpaceTechnology.cfg on update. 0.8.2 is installed; 0.8.1 crashed world start (Bottled Chaos, thionyl chloride) and 0.8.2's notes do not name the fix, so test with a world backup. See mods.md."},
     {"name": "123Technology", "jar": "^OTHTechnology-", "side": "B", "source": "github:CallmeSHaobe/123Technology", "note": "Releases before 2.2.1 crash on 2.9.0 stable, and 2.2.1 skips recipes with Twist loaded; its overpowered recipes are off in config-tweaks.md."},
     {"name": "EZMiner", "jar": "^EZMiner-", "side": "B", "source": "github:czqwq/EZMiner"},
     {"name": "EZNuclear", "jar": "^eznuclear-", "side": "B", "source": "github:czqwq/EZNuclear", "asset": "^eznuclear-.*\\+.*\\.jar$"},
@@ -26,7 +26,7 @@
     {"name": "Xaero's World Map", "jar": "^XaerosWorldMap_", "side": "C", "source": "modrinth:xaeros-world-map", "note": "Open Angelica#2092: crash with a lava-retexturing pack (Modernity) and the Witching Gadgets Thaumic Stone Extruder on screen."},
     {"name": "Trash Slot", "jar": "^trashslot-", "side": "B", "source": "curseforge:trashslot"},
     {"name": "Waystones-X", "jar": "^waystones-", "side": "B", "source": "modrinth:waystones-x"},
-    {"name": "MIAOKATZE Core", "jar": "^miaokatzecore-", "side": "B", "source": "github:MIAOKATZE/MIAOKATZE-Core", "note": "The three Miao mods bundle the core version they want in their release assets; keep it in step."},
+    {"name": "MIAOKATZE Core", "jar": "^miaokatzecore-", "side": "B", "source": "github:MIAOKATZE/MIAOKATZE-Core", "note": "The three Miao mods bundle the core version they want in their release assets and need 0.2.20 or newer; keep it in step."},
     {"name": "GT-Miao-Blueprint", "jar": "^gtmb-", "side": "B", "source": "github:MIAOKATZE/GT-Miao-Blueprint", "note": "Needs MIAOKATZE Core; see that entry."},
     {"name": "GT-Steam-Reborn", "jar": "^gtsr-", "side": "B", "source": "github:MIAOKATZE/GT-Steam-Reborn", "note": "Needs MIAOKATZE Core; see that entry."},
     {"name": "GT-Simple-Wireless-Network", "jar": "^gtswn-", "side": "B", "source": "github:MIAOKATZE/GT-Simple-Wireless-Network", "note": "Needs MIAOKATZE Core; see that entry."},

@@ -22,14 +22,14 @@ Do not add these: the pack carries its own copy.
 | Mod | 2.9 build | Side | Evidence |
 | --- | --- | --- | --- |
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
-| Twist Space Technology | 0.8.0 | B | release 2026-11-02 includes the 2.9 fix (PR #1386); 0.8.1 crashes world start, see below |
+| Twist Space Technology | 0.8.2 | B | 0.8.2 installed 2026-11-17; 0.8.1 crashes world start and the 0.8.2 notes do not name that fix, see below |
 | 123Technology | 2.2.1.3 | B | its README says 2.1.9+ supports GTNH 2.9.0; 2.2.1's release notes say it's adapted to 2.9.0 stable |
 | EZMiner | 6.6 | B | 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"` |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
 | EZStorage | 1.8.3 | B | builds against GTNHLib 0.11.52, NEI 2.8.158; 1.8.3 fixes NEI bookmark pull with large stacks |
 | Programmable Hatches | 0.2.1p7-beta | B | p7 notes: only 2.9.0 supported; builds against GT 5.09.54.264, GTNHLib 0.11.54, NEI 2.8.171 |
 | NH-Utilities | 1.7.0 | B | commit "Fit 29x" |
-| YesSteveModel Unofficial | 2.9 | B | [czqwq fork](https://github.com/czqwq/YesSteveModel-Unofficial); 2.9's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`; 2.9 adds the preview setting's entrance and fixes the math parser; 2.6 fixes the animation loop and 2.7 restores the animation storage system; 2.5 disabled the lighting map |
+| YesSteveModel Unofficial | 3.0 | B | [czqwq fork](https://github.com/czqwq/YesSteveModel-Unofficial); 3.0's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`, and its one commit says "Fix Amim system"; 2.9 added the preview setting's entrance and fixed the math parser, 2.6 fixed the animation loop and 2.7 restored the animation storage system, 2.5 disabled the lighting map |
 | MineMenu | 1.2.0.B44 | C | latest on Modrinth, 2025-12-07 |
 | Spark | 1.10.19 | C | latest 1.7.10 |
 | FPS Reducer | 1.10.3 | C | latest, 2023-09-06 |
@@ -82,6 +82,19 @@ table was re-keyed for two strings 123Technology moved between classes, and its 
 string is a log line, left untranslated. Old jars are in `backups/replaced-mods/2026-11-16/`.
 Not launched yet.
 
+**The 2026-11-17 update is on the client only, nine jars.** Side B, so legion needs the
+same nine: Twist 0.8.2, YesSteveModel Unofficial 3.0, MIAOKATZE Core 0.2.21,
+GT-Miao-Blueprint 0.3.34, GT-Steam-Reborn 2.1.52, GT-Simple-Wireless-Network 2.1.39,
+Neo ECO AE Extension 7.3.13, GTNH Modernization Upgrade 0.3.6-alpha and AE2Things 1.3.4.
+The three Miao mods require Core 0.2.20 or newer, and all four name 2.9.0 final.
+GT-Steam-Reborn adds dimension-bound stone making and retires the legacy natural
+singularity item. GT-Miao-Blueprint adds public library permissions, and its 103 new
+hard-coded Chinese strings were added to the translation table; GT-Steam-Reborn and
+GT-Simple-Wireless-Network only added version and log lines. Twist 0.8.2
+is the unproven one: the 0.8.1 world-start crash is not named in its notes. GTNH
+Modernization 0.3.6 is a pre-release. Old jars are in
+`backups/replaced-mods/2026-11-17/`. Not launched yet.
+
 **2026-11-10: GTNL and GTNLLib were removed; Better Questing API went with them.** BQ API
 was installed on 2026-11-01 for GTNL's quest lines, so it is unused now and its jar is gone
 from `mods/`; the pack's BetterQuesting stays. GTNL's Steam Revolution machines (Cactus
@@ -120,6 +133,11 @@ loading screen. Back on 0.8.0 with its own config and lang; the 0.8.1 jar and th
 generated are in `backups/replaced-mods/2026-11-09/twist-0.8.1/`. Skip 0.8.1 until a
 release fixes Bottled Chaos (PR #1361).
 
+0.8.2 (2026-11-17) is installed on the client. Its notes do not name the crash; the
+credential code was rewritten, so it may fix it. Test with a world backup. If the
+server-about-to-start crash returns, move `TwistSpaceTechnology-0.8.0.jar` back from
+`backups/replaced-mods/2026-11-17/`.
+
 ## Installed on 2.9.0 only
 
 These are not carried from 2.8.4; they went in on top of 2.9.0 on 2026-11-02, client and
@@ -128,10 +146,10 @@ server, and the server boots with all of them.
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
 | Waystones-X | 1.0.16 | B | [JackOfNoneTrades fork](https://github.com/JackOfNoneTrades/WaystonesFork) of BlayTheNinth's mod; `config/waystones.cfg` sets `xpBaseCost=-1` |
-| MIAOKATZE Core | 0.2.15 | B | required by the three Miao mods below, on both sides; the three bundle it in their release assets, all updated together on 2026-11-15 (Core's release says compatible with 2.9.0 final) |
-| GT-Miao-Blueprint | 0.3.30 | B | Neko Blueprint Hologram Projector: blueprint, cut and demolition modes |
-| GT-Steam-Reborn | 2.1.45 | B | steam industry, hubs and nodes, singularity tech, the Prosperity dimension, portable weapons, a BQ line |
-| GT-Simple-Wireless-Network | 2.1.34 | B | wireless EU link nodes, monitors, ME quantum terminal |
+| MIAOKATZE Core | 0.2.21 | B | required by the three Miao mods below, on both sides; the three bundle it in their release assets, all updated together on 2026-11-17 (Core's release says compatible with 2.9.0 final) |
+| GT-Miao-Blueprint | 0.3.34 | B | Neko Blueprint Hologram Projector: blueprint, cut and demolition modes; 0.3.34 adds public library permissions, a projector address and QR code, and selection fixes |
+| GT-Steam-Reborn | 2.1.52 | B | steam industry, hubs and nodes, singularity tech, the Prosperity dimension, portable weapons, a BQ line; 2.1.52 adds dimension-bound stone making and retires the legacy natural singularity item |
+| GT-Simple-Wireless-Network | 2.1.39 | B | wireless EU link nodes, monitors, ME quantum terminal; 2.1.39 groups terminal controls and adds a network information screen |
 
 All but Waystones come from [MIAOKATZE](https://github.com/MIAOKATZE) and are tagged
 "for GTNH 2.9.0 stable". Their `en_US.lang` files are complete, so the in-game text is
@@ -232,17 +250,22 @@ Right Proper GUI Scale 2.1.1 is also on the client. It keeps the scale as a deci
 `options.txt` (`guiScale:3.5`, between vanilla's 3 and 4) and applies a change when the
 settings screen closes, so it can look like nothing happened. `/guiscale` sets it in game.
 
-Neo ECO AE Extension 7.3.12 is on the client (2026-11-15), on trial since
+Neo ECO AE Extension 7.3.13 is on the client (2026-11-17), on trial since
 2026-11-05: three tiered AE2 multiblock systems for storage, crafting and computation, an
 optional upgrade path rather than a replacement for normal AE2. Both sides must match.
 Modrinth lags the official 1.7.10 repo
-([Yang120231/GTNH-ECO-1.7.10](https://github.com/Yang120231/GTNH-ECO-1.7.10), 7.3.12 on
-2026-11-15 against Modrinth's 7.3.7), so `mod-sources.json` checks GitHub. Its 7.3.11
-notes name GTNH 2.9.0-RC1 and later, and so do 7.3.12's. 7.3.12 adds extended resource
-keys with exact inventory accounting, CraftTweaker recipes for the single-block
-Integrated Workstation, processing status for TecTech multiblocks and the Space Elevator,
-and batched structure validation for the computation subsystems; it fixes a stuck 100%
-progress bar on completed materials, a stalled ME Fluid Auto-Filler, Assembly Matrix batch
+([Yang120231/GTNH-ECO-1.7.10](https://github.com/Yang120231/GTNH-ECO-1.7.10), 7.3.13 on
+2026-11-17 against Modrinth's 7.3.7), so `mod-sources.json` checks GitHub. Its 7.3.11
+notes name GTNH 2.9.0-RC1 and later, and so do 7.3.13's. 7.3.13 adds pattern upload
+filters, machine grouping and target statistics, voltage tier display and ranking, NEI
+recipe source restore, unified status cards, workstation priority and scroll slots with
+the old fifth slot refunded, a read-only NEI view of ECO storage cells, L4/L6/L9
+computation cell disassembly recipes, and processing monitor improvements. 7.3.12 added
+extended resource keys with exact inventory accounting, CraftTweaker recipes for the
+single-block Integrated Workstation, processing status for TecTech multiblocks and the
+Space Elevator, and batched structure validation for the computation subsystems; it fixed
+a stuck 100% progress bar on completed materials, a stalled ME Fluid Auto-Filler, Assembly
+Matrix batch
 inputs and container returns, and keeps running crafting CPUs through structure changes.
 7.3.11 batched processing patterns against remaining demand
 and fixed a scan cursor that left later recipes unscanned.
@@ -259,7 +282,7 @@ a launch is the proof.
 
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
-| GTNH Modernization Upgrade | 0.3.5-alpha | B | Structure terminal (project, build, replace and dismantle a GT multiblock from its StructureLib definition), ME packing tape, integrated 36-pattern item, AE order element, colour power budget for the Plasma Forge and fusion, and an ME storage vault. Alpha, one author, AI-written; the vault keeps inventory in `<world>/data/aestoragevault/`, and 0.3.0 changed that format without reading 0.2.x |
+| GTNH Modernization Upgrade | 0.3.6-alpha | B | Structure terminal (project, build, replace and dismantle a GT multiblock from its StructureLib definition), ME packing tape, integrated 36-pattern item, AE order element, colour power budget for the Plasma Forge and fusion, and an ME storage vault. 0.3.6 adds order diagnostics and a storage vault lighting fix under Angelica. Alpha, one author, AI-written; the vault keeps inventory in `<world>/data/aestoragevault/`, and 0.3.0 changed that format without reading 0.2.x |
 | AE2 Wireless Transceiver | 1.2.1 | B | [peco331](https://github.com/peco331/AE2WirelessTransceiver-GTNH) fork; each release ships a plain 2.9 asset and a separate `-gtnh2.8.4` one, and the plain one is installed |
 | Benzene Fuels | 0.5.1-alpha | B | Eight staged benzene fluids from LuV to UIV and the Resonance Fuel Generator; needs GoodGenerator and GT++ ([arturia-Xayah](https://github.com/arturia-Xayah/gtnh-benzene-fuels)) |
 | GT:NH Processing+ | 0.2.5.3-alpha | B | New processing chains built on materials chemistry, meant to fill progression gaps ([shusidefloof](https://github.com/shusidefloof/GTNH-ProcessingPlus)) |
@@ -341,7 +364,7 @@ restyled. Three layouts are kept, switched with a key.
 
 ## AE2Things, added on 2026-11-17
 
-`ae2thing-1.3.3.jar` (1.3.3, 2026-11-14) is on the client only so far. It is side B, so
+`ae2thing-1.3.4.jar` (1.3.4, 2026-11-17) is on the client only so far. It is side B, so
 legion needs the same jar before a world can be joined.
 
 - Source: [GTNotLeisure/AE2Things](https://github.com/GTNotLeisure/AE2Things), the
@@ -358,7 +381,9 @@ legion needs the same jar before a world can be joined.
 - 1.3.0 adds the Applied Botanics submodule: a fluix mana pool, mana cells from 1k to
   256k, and mana input and output buses. It needs Botania and extends its internals; the
   pack has Botania 1.13.42. 1.3.1 adds NEI auto craft to its crafting terminal, and 1.3.3
-  adds a config for modern container interaction in the terminal.
+  adds a config for modern container interaction in the terminal. 1.3.4 adds a Universal
+  Infinity Cell, optimizes infinity storage and its safety checks, reworks the pattern
+  modifier, and disables the 2-in-1 terminal when GT-Never-Reset is installed.
 - Config: `config/ae2thing/ae2thing.cfg`, written on the first launch. Kept on 2026-11-17.
 
 ## DiskTerminal, added on 2026-11-17

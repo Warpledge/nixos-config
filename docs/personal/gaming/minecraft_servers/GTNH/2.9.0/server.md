@@ -54,27 +54,28 @@ uses 12288 MB and already loads the translation agent.
 From [mods.md](./mods.md), the **B** rows:
 
 - GTNHRates 1.12.0-2.9,
-  Twist Space `TwistSpaceTechnology-0.8.0.jar` (release 2026-11-02),
+  Twist Space `TwistSpaceTechnology-0.8.2.jar` (2026-11-17; the 0.8.1 crash is unproven in 0.8.2),
   123Technology `OTHTechnology-2.2.1.3.jar`, EZMiner 6.4,
   EZNuclear 1.1.1, EZStorage 1.8.2, NH-Utilities 1.7.0, Programmable Hatches 0.2.1p7-beta
 - Trash Slot 1.0.31
-- YesSteveModel Unofficial 2.8, with its models in `config/ysmu/custom/`
+- YesSteveModel Unofficial 3.0, with its models in `config/ysmu/custom/`
 - Distant Horizons `upstream-preview8-rple-biomes`, so the server builds and syncs the
   LODs the client shows (see mods.md for the generation settings)
-- Waystones-X 1.0.16, MIAOKATZE Core 0.2.14, GT-Miao-Blueprint 0.3.26,
-  GT-Steam-Reborn 2.1.42, GT-Simple-Wireless-Network 2.1.28
+- Waystones-X 1.0.16, MIAOKATZE Core 0.2.21, GT-Miao-Blueprint 0.3.34,
+  GT-Steam-Reborn 2.1.52, GT-Simple-Wireless-Network 2.1.39
 - Realistic World Gen 2 `rwg2-2.1.1.jar` in place of the pack's 2.0.6
 - ThinkTech 0.3.2, OmniOcular Unofficial 1.7.2 (server jar), BetterSprinting 1.1.3,
   Advanced Memory Card 1.2.0-1.7.10-GTNH, WTCT 1.0.63-rc1, Omni Tweaks 0.2.0,
   Effortless Building Gadgets 0.10.1
-- AE2Things `ae2thing-1.3.3.jar`, added to the client on 2026-11-17 and side B
+- AE2Things `ae2thing-1.3.4.jar`, added to the client on 2026-11-17 and side B
 - DiskTerminal `disk_terminal-1.0.2.jar` and Functional Storage
   `functionalstorage-1.2.3.jar`, added to the client on 2026-11-17, side B
 - The EZStorage script `scripts/simplestorage_gregified.zs` must be on the server too, or
   the recipes differ from the client.
 
 BetterSprinting 2.3.0 and deconfigintegration are dropped (see mods.md). LagGoggles is
-still not installed. The server also needs Neo ECO AE Extension 7.3.12, on trial.
+still not installed. The server also needs Neo ECO AE Extension 7.3.13, on trial, and
+GTNH Modernization Upgrade 0.3.6-alpha.
 `JourneyMapServer1.0.5_MC1.7.10.jar` is in `mods/` too, server only.
 
 2.9.0 supplies its own lwjgl3ify, GTNHLib, FalsePatternLib and Extreme Sound Muffler
