@@ -291,24 +291,33 @@ EZStorage, built with GTNH's ExampleMod starter.
   coalesce the nine calls. It broke shift-click (one item instead of a stack) and made
   the grid refill consume the grid instead of pulling from storage.
 
-## Smooth Swapping, written for this setup on 2026-11-10
+## Smooth Swapping, ported for this setup on 2026-11-17
 
-`smoothswapping` 0.6.0 animates item stacks moving between slots, client only. It is a
-rewrite of the 1.20.1 mod's behaviour, not its code: upstream's licence is unset and its
-renderer is Fabric's `DrawContext`, neither of which transfers. Source is
-`~/Projects/smoothswapping`, built with GTNH's ExampleMod starter.
+`smoothswapping-1.0.0.jar` animates item stacks moving between slots, client only. It's a
+port of [Schauweg's Smooth Swapping](https://github.com/Schauweg/Smooth-Swapping) (branch
+`1.20.1/dev`), which is LGPL-3.0, so the port is LGPL-3.0 too and credits upstream in its
+`NOTICE`. Source is `~/Projects/smoothswapping` (own git repo, tag `1.0.0`), built with
+GTNH's ExampleMod starter. It replaces a 0.6.0 rewrite from 2026-11-10 that didn't work and
+was deleted; that one's settings are in `config/smoothswapping.cfg.old-2026-11-10`. Tested
+in game on 2026-11-17: every case below works, and all eight mixins apply with no warnings
+in `logs/fml-client-latest.log`.
 
-- Compares the open container at the top of every `GuiContainer.drawScreen`, pairs what
-  left a slot with what arrived in another, and draws the pair on a quadratic arc at the
-  end of that same frame. The destination slot is hidden while its copy travels, and
-  detecting before the slots are drawn is what stops the stack showing there first and
-  then flashing out.
-- Config screen behind the Mods list: speed from 50 to 1000 (default 300, which is 200 ms),
-  curve from 0 to 1 of the distance (default 0.35) and an on/off toggle. Settings save to
-  `config/smoothswapping.cfg` and apply to the next move.
-- Only `GuiContainer` screens animate. GT and AE ModularUI screens do not, and moving a
-  stack onto the cursor is not animated yet, because hiding the GUI's own cursor stack
-  needs its own hook.
+- Upstream's model: slots that lost items are paired with slots that gained the same item,
+  and a copy moves in a straight line from one to the other while the destination shows its
+  count minus what's still in flight. Pairs come from a diff around
+  `PlayerControllerMP.windowClick`, where the client applies a click, and from a diff before
+  each screen draw for moves the server makes (Bogosorter, hoppers). A gain left over after
+  a click is credited to the clicked slot, which covers shift-clicking a crafting output.
+- Covers vanilla `GuiContainer` screens, the cursor stack (picking up and putting down),
+  ModularUI 1 and 2 screens (GT machines, AE2), and the hotbar with no GUI open, where a
+  refill from the main inventory rises from below the bar. The ModularUI hooks are late
+  mixins loaded only when `modularui` or `modularui2` is present. The AE2 ME grid uses
+  virtual slots outside the container, so scrolling it doesn't animate. The creative
+  inventory is skipped.
+- Config screen behind the Mods list, saved to `config/smoothswapping.cfg`: on/off, speed
+  10 to 1000 (default 350, about 143 ms a move whatever the distance, as upstream), ease-out
+  0 to 1 (default 0), and toggles for server moves, the cursor, ModularUI and the hotbar.
+  Upstream's curve editor wasn't ported.
 
 ## Dashboard, added on 2026-11-15
 
