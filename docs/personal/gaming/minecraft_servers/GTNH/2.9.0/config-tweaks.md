@@ -271,7 +271,7 @@ Applied to the client and server copies.
 | --- | --- | --- |
 | 123Technology | `123Technology.cfg` | Overpowered integrated-factory recipes off, output multiplier 1.5 to 1.0, NHU egg-machine compat off. The file repeats each category under a pinyin and a Chinese name; both copies were changed. |
 | GTNHRates | `gtnhrates.cfg` | Every multiplier halved from the mod defaults: ores 2.0, coal 8.0, energy 2.0, tools 4.0, bees, crops, pump, resin and IC2 crops 2.0, sapling chance 1.0. `gtSimpleMinersEnergyDiscount` stays 1.0. |
-| EZMiner | `EZMiner/EZMiner_Server.cfg` | Server limits: chain 64 blocks at radius 8, block swap 64 at radius 8 (the same 64-block `max_blocks` as FTB Ultimine), tree felling 8 blocks and 256 blocks, preview 64 blocks. `addExhaustion=0.0` removes the hunger cost. Client preferences live in `config/EZMiner/EZMiner.cfg`. |
+| EZMiner | `EZMiner/EZMiner_Server.cfg` | Reset to the mod defaults on 2026-11-17: chain 1024 blocks at radius 8, block swap 1024, tree felling 1024 blocks and 16384, preview 1024, and `addExhaustion=0.025` (the vanilla hunger cost). The old personal values are in `EZMiner_Server.cfg.bak-2026-11-17`. The file sits at the instance root, not in `config/`; client preferences live in `config/EZMiner/EZMiner.cfg`. The laptop's server copy is separate. |
 | GTMB | `gtmb-stargate-rules.cfg` | `enabled=true`: blueprint demolition cannot mine ores, cut/paste cannot move or overwrite ores, and decoration vouchers are off. |
 | GTSWN | `gtswn/gtswn_network.cfg` | `UplinkLossEU=0.1`, so wireless power uploads lose 10 percent against the 15 percent downlink. |
 | GTSWN | `gtswn/gtswn.cfg` | `deviceTeleportXPCost=0`, so device info terminal teleports are free like the Waystones. |
