@@ -442,6 +442,26 @@ only; the server has no use for it. The jar's sha512 matches the one Modrinth li
   reimplemented yet, so those parts will not react to the PBR packs under Eclipse.
 - Not launched yet.
 
+## DEConfig Integration, added on 2026-11-17
+
+`deconfigintegration-1.0.3.D424.jar` (1.0.3.D424, 2026-03-17) is on the client, on trial.
+It is side C. The jar's sha256 matches the digest GitHub lists.
+
+- Moves the settings of GTNH's gear into Draconic Evolution's config GUI, so one keybind
+  replaces the mod-specific ones: IC2 night vision goggles, jetpacks, nano and quantum
+  armor and the mining laser; GraviSuite's chestplate, jetpacks, lappack, chainsaw, drill
+  and Vajra; GraviSuite Neo's chainsaw treecapitator; Thaumic Boots speed, jump and omni
+  modulation; EMT's electric, nano and quantum goggles and travelling boots; Avaritia's
+  infinity armor movement stats and node vision; and Witching Gadgets' primordial armor.
+- Adds NBT toggles for IC2 quantum sprint and EMT magic vision, and night vision on the
+  Avaritia helmet.
+- **The build predates 2.9.0.** 1.0.3.D424 is labelled for the March 2026 nightlies, not
+  2.9.0 stable, and was compiled against Avaritia 1.78, Draconic Evolution 1.5.19,
+  GraviSuite Neo 1.3.8, Thaumic Boots 1.5.5 and Witching Gadgets 1.8.14; the pack has
+  1.100, 1.5.35, 1.3.16, 1.5.13 and 1.8.53. It applies its mixins through GTNH Mixins'
+  late loader, so a changed target shows as an error at launch instead of doing nothing.
+- No config of its own. Not launched yet.
+
 ## Left out until their author ships a 2.9 build
 
 - **BoxPlusPlus 2.1.2**: last release 2025-12-10, built against Galaxy Space 1.1.121.
