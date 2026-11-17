@@ -397,6 +397,29 @@ with More Functional Storage merged in, from the maintainer of AE2Things and Dis
 - Config: `config/functionalstorage/functionalstorage.cfg`, editable in game from the mod
   list. Storage capacity changes need a world restart. Not launched yet.
 
+## NEI Guess, added on 2026-11-17
+
+`neiguess-1.0.jar` (1.0, 2026-11-10) is on the client only. It is side C; the server needs
+nothing. The jar's sha256 matches the digest GitHub lists.
+
+- A suggestion panel for the NEI search box, in the style of a browser address bar:
+  favorites, recent searches merged with NEI's own history, items needed by recently
+  viewed unfinished BetterQuesting quests, the most-used terms, recommendations, and the
+  item picked last time for the same search. Tab accepts a completion.
+- Clicking an item name in chat opens its recipe, Ctrl-click shows its uses and Alt-click
+  copies its item id. A `/neiguess` command set handles quest items, favorites, history
+  export and stats.
+- Chinese search conversion (mod names, ore dictionary names, `@` and `$` prefixes),
+  pinyin search through NotEnoughCharacters, and typo correction such as 钻石搞 to 钻石镐.
+  The UI is English or Chinese, but the pack has no NotEnoughCharacters, so pinyin search
+  does nothing, and the conversions only matter when searching Chinese names.
+- Built against NEI 2.8.155, GTNHLib 0.11.52, GTNHExtLib 1.0.5 and BetterQuesting
+  3.8.92-GTNH; the pack has NEI 2.8.171, GTNHLib 0.11.54, GTNHExtLib 1.0.5 and the same
+  BetterQuesting. The release is from after 2.9.0. Not launched yet, and not yet tried
+  alongside Better Search, which also changes NEI search.
+- Config: `config/neiguess/neiguess.cfg`, and history and favorites in
+  `config/neiguess/history.json`. Extra word lists go in `config/neiguess/lexicon/`.
+
 ## Left out until their author ships a 2.9 build
 
 - **BoxPlusPlus 2.1.2**: last release 2025-12-10, built against Galaxy Space 1.1.121.
