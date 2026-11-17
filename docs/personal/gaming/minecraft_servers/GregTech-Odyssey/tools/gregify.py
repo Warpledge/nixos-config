@@ -16,6 +16,9 @@ It also writes Ad Astra's entity tags that let modded mobs live in the airless N
 and End (AIRLESS_*), Born in Chaos's spawn weights cut (BIC_WEIGHT_DIVISOR), and for
 Iron's Spells its mithril ore off, two loot tables fixed for 1.20.1 and a Reliable
 Remover rule in ../reliable/ hiding its own mithril.
+
+The datapack also carries the hand-written Maid Spell structure gate in
+data/touhou_little_maid_spell/worldgen; gregify leaves that path alone.
 """
 
 import json
@@ -26,7 +29,7 @@ from pathlib import Path
 
 OUT = Path(__file__).resolve().parent.parent / "datapack" / "warpledge-gto"
 REMOVER = Path(__file__).resolve().parent.parent / "reliable" / "reliable_remover"
-PACK = {"pack": {"pack_format": 15, "description": "warpledge GTO recipe overrides"}}
+PACK = {"pack": {"pack_format": 15, "description": "warpledge GTO recipe and structure overrides"}}
 
 VACUUM_TUBE = {"item": "gtceu:vacuum_tube"}
 LV_CIRCUIT = {"item": "gtceu:basic_electronic_circuit"}
@@ -352,6 +355,7 @@ def main():
     stale = sorted(
         str(p.relative_to(OUT)) for p in OUT.glob("data/**/*.json")
         if str(p.relative_to(OUT)) not in written
+        and "worldgen/structure_set/" not in str(p)
     )
     print(f"wrote {len(written)} overrides to {OUT}")
     for p in stale:

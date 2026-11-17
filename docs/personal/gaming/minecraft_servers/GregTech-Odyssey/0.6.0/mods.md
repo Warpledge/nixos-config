@@ -407,13 +407,17 @@ Youkai's utensils cost iron ingots like Farmer's Delight's cooking pot.
 Tamable Fairy 1.2.0-beta.5 and Self-Talk 1.4.1 were removed on 2026-11-15 to trim the
 maid add-ons.
 
-**Maid Spell stays at 1.8.0.1.** From 1.9.0 it's a bootstrap jar that registers a
+**Maid Spell stays on a plain jar.** From 1.9.0 it's a bootstrap jar that registers a
 ModLauncher service (`maidspell_hurt_head`), and `gto_native` refuses unknown services,
-so the game stops before a crash report. 1.8.0.1 is the last plain jar. Its own
-`ArsNouveauProvider` and three Ars mixins let maids cast Ars Nouveau spells. Its 12
-structure sets are built for Iron's Spells (their loot names 49 Iron's items), so
-[structures.py](../tools/structures.py) keeps them off (`DISABLED_NAMESPACES`); they
-generated only while [Iron's Spells](#irons-spells-2026-11-12) was in.
+so the game stops before a crash report. dev27 pins 1.8.0.1; dev31 runs 1.8.2, also a
+plain jar and the newest one before the bootstrap. Its own `ArsNouveauProvider` and three
+Ars mixins let maids cast Ars Nouveau spells. Its 12 structure sets are built for Iron's
+Spells (their loot names 49 Iron's items), so
+[structures.py](../tools/structures.py) keeps them off in Structurify
+(`DISABLED_NAMESPACES`). Where Structurify isn't installed, the
+[warpledge-gto datapack](../datapack/warpledge-gto/) gates the six unconditional sets on
+`irons_spellbooks` with `forge:mod_loaded`, so they load only while
+[Iron's Spells](#irons-spells-2026-11-12) is in.
 
 **Two jars are patched** by [mixinpatch.py](../tools/mixinpatch.py), rerun after
 updating either: Maid Storage Manager's `JEIRecipeTransferHook` fails against the
@@ -446,7 +450,8 @@ log "task can not load" and "added for twice" lines at startup; both are harmles
 - `maid_storage_manager-common.toml`: crafting, collect and place speeds 1.0 (default
   0.5).
 
-Maid Spell's structures are off again since Iron's Spells went on 2026-11-15.
+Maid Spell's structures are off while Iron's Spells is out; the datapack gate above
+also covers instances without Structurify.
 
 ## Alex's Mobs Continued (2026-11-12)
 

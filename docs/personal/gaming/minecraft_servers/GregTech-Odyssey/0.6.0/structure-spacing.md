@@ -106,7 +106,10 @@ names can turn out to have been dropped when you get there.
    also leaves them out of overlap prevention. A mod whose structures shouldn't
    generate at all, such as one whose loot names a mod the pack lacks (Maid Spell's,
    built for Iron's Spells), goes in `DISABLED_NAMESPACES` (Structurify's
-   `is_disabled` on its namespace).
+   `is_disabled` on its namespace). Without Structurify, the
+   [warpledge-gto datapack](../datapack/warpledge-gto/) gates the sets on the mod that
+   supplies their loot with `forge:mod_loaded`; Maid Spell's six unconditional sets
+   are gated on `irons_spellbooks` there.
 4. Run `structures.py write` on staging, restart, and test in chunks nobody has
    generated (`/tp @s 30000 200 30000`): `/locate` its structures and fly over a few.
 5. Copy the jar to main, run `write` on main, and commit the tables with the mod.
