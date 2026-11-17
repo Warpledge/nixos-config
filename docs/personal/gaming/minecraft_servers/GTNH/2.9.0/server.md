@@ -54,7 +54,7 @@ uses 12288 MB and already loads the translation agent.
 From [mods.md](./mods.md), the **B** rows:
 
 - GTNHRates 1.12.0-2.9,
-  Twist Space `TwistSpaceTechnology-0.8.2.jar` (2026-11-17; the 0.8.1 crash is unproven in 0.8.2),
+  Twist Space `TwistSpaceTechnology-0.8.0.jar` (0.8.1 and 0.8.2 crash world start, see mods.md),
   123Technology `OTHTechnology-2.2.1.3.jar`, EZMiner 6.4,
   EZNuclear 1.1.1, EZStorage 1.8.2, NH-Utilities 1.7.0, Programmable Hatches 0.2.1p7-beta
 - Trash Slot 1.0.31

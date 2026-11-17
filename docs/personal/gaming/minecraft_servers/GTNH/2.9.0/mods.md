@@ -22,7 +22,7 @@ Do not add these: the pack carries its own copy.
 | Mod | 2.9 build | Side | Evidence |
 | --- | --- | --- | --- |
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
-| Twist Space Technology | 0.8.2 | B | 0.8.2 installed 2026-11-17; 0.8.1 crashes world start and the 0.8.2 notes do not name that fix, see below |
+| Twist Space Technology | 0.8.0 | B | 0.8.1 and 0.8.2 both crash world start on the Bottled Chaos null; 0.8.0 is installed, see below |
 | 123Technology | 2.2.1.3 | B | its README says 2.1.9+ supports GTNH 2.9.0; 2.2.1's release notes say it's adapted to 2.9.0 stable |
 | EZMiner | 6.6 | B | 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"` |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
@@ -82,18 +82,18 @@ table was re-keyed for two strings 123Technology moved between classes, and its 
 string is a log line, left untranslated. Old jars are in `backups/replaced-mods/2026-11-16/`.
 Not launched yet.
 
-**The 2026-11-17 update is on the client only, nine jars.** Side B, so legion needs the
-same nine: Twist 0.8.2, YesSteveModel Unofficial 3.0, MIAOKATZE Core 0.2.21,
-GT-Miao-Blueprint 0.3.34, GT-Steam-Reborn 2.1.52, GT-Simple-Wireless-Network 2.1.39,
-Neo ECO AE Extension 7.3.13, GTNH Modernization Upgrade 0.3.6-alpha and AE2Things 1.3.4.
-The three Miao mods require Core 0.2.20 or newer, and all four name 2.9.0 final.
-GT-Steam-Reborn adds dimension-bound stone making and retires the legacy natural
-singularity item. GT-Miao-Blueprint adds public library permissions, and its 103 new
-hard-coded Chinese strings were added to the translation table; GT-Steam-Reborn and
-GT-Simple-Wireless-Network only added version and log lines. Twist 0.8.2
-is the unproven one: the 0.8.1 world-start crash is not named in its notes. GTNH
-Modernization 0.3.6 is a pre-release. Old jars are in
-`backups/replaced-mods/2026-11-17/`. Not launched yet.
+**The 2026-11-17 update is on the client only, eight jars.** Side B, so legion needs the
+same eight: YesSteveModel Unofficial 3.0, MIAOKATZE Core 0.2.21, GT-Miao-Blueprint
+0.3.34, GT-Steam-Reborn 2.1.52, GT-Simple-Wireless-Network 2.1.39, Neo ECO AE Extension
+7.3.13, GTNH Modernization Upgrade 0.3.6-alpha and AE2Things 1.3.4. The three Miao mods
+require Core 0.2.20 or newer, and all four name 2.9.0 final. GT-Steam-Reborn adds
+dimension-bound stone making and retires the legacy natural singularity item.
+GT-Miao-Blueprint adds public library permissions, and its 103 new hard-coded Chinese
+strings were added to the translation table; GT-Steam-Reborn and GT-Simple-Wireless-Network
+only added version and log lines. **Twist 0.8.2 was tried and crashed world start with the
+same Bottled Chaos null as 0.8.1, so Twist stays 0.8.0.** GTNH Modernization 0.3.6 is a
+pre-release. Old jars are in `backups/replaced-mods/2026-11-17/`. The client reached the
+main menu with the eight; a world still needs a launch after the Twist rollback.
 
 **2026-11-10: GTNL and GTNLLib were removed; Better Questing API went with them.** BQ API
 was installed on 2026-11-01 for GTNL's quest lines, so it is unused now and its jar is gone
@@ -133,10 +133,10 @@ loading screen. Back on 0.8.0 with its own config and lang; the 0.8.1 jar and th
 generated are in `backups/replaced-mods/2026-11-09/twist-0.8.1/`. Skip 0.8.1 until a
 release fixes Bottled Chaos (PR #1361).
 
-0.8.2 (2026-11-17) is installed on the client. Its notes do not name the crash; the
-credential code was rewritten, so it may fix it. Test with a world backup. If the
-server-about-to-start crash returns, move `TwistSpaceTechnology-0.8.0.jar` back from
-`backups/replaced-mods/2026-11-17/`.
+0.8.2 (2026-11-17) was tried on the client the same day and hit the same
+`BottledChaosFakeRecipes.registerCredentialRecipes:203` null at world start, so it is
+rolled back to 0.8.0. The 0.8.2 jar is in `backups/replaced-mods/2026-11-17/`. Do not
+install 0.8.1 or 0.8.2 until Bottled Chaos is fixed.
 
 ## Installed on 2.9.0 only
 
