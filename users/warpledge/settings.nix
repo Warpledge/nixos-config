@@ -88,6 +88,7 @@
   #--- Audio Software Selection
   audio = {
     reaper = true;
+    easyeffects = false; # On for eclipse's speakers in its settings.nix
 
     # Guitar rig (Katana DI); any guitar toggle adds shared IR/tuner plugins
     guitarix = true; # Modular amp sim
