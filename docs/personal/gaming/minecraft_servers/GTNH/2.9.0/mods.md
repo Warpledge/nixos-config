@@ -23,7 +23,7 @@ Do not add these: the pack carries its own copy.
 | --- | --- | --- | --- |
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
 | Twist Space Technology | 0.8.0 | B | release 2026-11-02 includes the 2.9 fix (PR #1386); 0.8.1 crashes world start, see below |
-| 123Technology | 2.2.1.1 | B | 2.2.1's release notes say it's adapted to 2.9.0 stable |
+| 123Technology | 2.2.1.3 | B | its README says 2.1.9+ supports GTNH 2.9.0; 2.2.1's release notes say it's adapted to 2.9.0 stable |
 | EZMiner | 6.6 | B | 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"` |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
 | EZStorage | 1.8.3 | B | builds against GTNHLib 0.11.52, NEI 2.8.158; 1.8.3 fixes NEI bookmark pull with large stacks |
@@ -70,6 +70,17 @@ commit 1.0.3's patch targets, with the old Eclipse zip moved to the same backup 
 `backups/replaced-mods/2026-11-15/`. Neo ECO AE Extension then went to 7.3.12 the same
 day on the client; legion still needs 7.3.12 and the rest of the side B jars above. Not
 launched yet.
+
+**The 2026-11-16 update is on the client only:** 123Technology 2.2.1.3 and MyCTMLib
+1.4.6-290. 123Technology is side B, so legion needs 2.2.1.3 before a world can be joined.
+Its release adds a Positron_e+ artillery piece, AbstractSanctum and Steam9in1 fixes and a
+Fishtorio loot-table blacklist update, and its body says it contains WIP content.
+`123Technology.cfg` has the same 14 options, so the edits in
+[config-tweaks.md](./config-tweaks.md) stand. MyCTMLib adds JSON models for the redstone
+torch, repeater and comparator and renames a config node (`mc` to `minecraft`); the agent's
+table was re-keyed for two strings 123Technology moved between classes, and its one new
+string is a log line, left untranslated. Old jars are in `backups/replaced-mods/2026-11-16/`.
+Not launched yet.
 
 **2026-11-10: GTNL and GTNLLib were removed; Better Questing API went with them.** BQ API
 was installed on 2026-11-01 for GTNL's quest lines, so it is unused now and its jar is gone
@@ -145,7 +156,7 @@ Four client-side additions on 2026-11-02:
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
 | World Tooltips | 1.2.3-87 | C | floating tooltip over dropped items; shader-compatible continuation of GenuineSounds' mod; [source code](https://github.com/kotmatross28729/WorldTooltipsShadersFix) |
-| MyCTMLib | 1.4.4-290 | C | connected-texture support for resource packs |
+| MyCTMLib | 1.4.6-290 | C | connected-texture support for resource packs; builds against GT 5.09.54.265, the GT in 2.9.0 |
 | OmniOcular Unofficial | 1.7.2 | B | WAILA add-on showing machine internals; client full jar, server `-server.jar`; see the scripts note below |
 
 Fancy Block Particles 2.4.1 was removed after its 3D block particles rendered as
