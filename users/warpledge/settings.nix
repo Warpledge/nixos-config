@@ -169,6 +169,29 @@
   discord.goofcord = true;
   discord.arrpc.enable = true;
 
+  #--- Plugins
+  discord.plugins.biggerStreamPreview = true; # Enlarge stream previews
+  discord.plugins.fakeNitro = true; # Unlock emoji, stickers and themes without Nitro
+  discord.plugins.fixImagesQuality = true; # Images at their full quality
+  discord.plugins.fixSpotifyEmbeds = true; # Spotify embeds play at a sane volume
+  discord.plugins.fixYoutubeEmbeds = true; # Play YouTube embeds where blocked
+  discord.plugins.forceOwnerCrown = true; # Show the owner's crown
+  discord.plugins.fullSearchContext = true; # Search from a message's right-click menu
+  discord.plugins.imageZoom = true; # Zoom into images and avatars
+  discord.plugins.memberCount = true; # Member count in a server's tooltip
+  discord.plugins.noProfileThemes = true; # Remove others' Nitro profile themes
+  discord.plugins.noTypingAnimation = true; # No typing animation
+  discord.plugins.silentTyping = true; # Hide that you're typing
+  discord.plugins.spotifyCrack = true; # Listen Along, no auto-pause, no premium ads
+  discord.plugins.unlockedAvatarZoom = true; # Zoom further when cropping an avatar
+  discord.plugins.viewIcons = true; # View role and server icons full size
+  discord.plugins.volumeBooster = true; # Volume up to 1000%
+  discord.plugins.webRichPresence = true; # Show what you're playing, needs arRPC
+  discord.plugins.youtubeAdblock = true; # Block YouTube ads in embeds
+  discord.plugins.messageClickActions = true; # Reply, edit and delete by clicking
+  discord.plugins.superReactionTweaks = true; # Stop super reaction animations
+  discord.hideReactions = true; # Hide the reactions under messages
+
   #--- AI Tools
   claude = {
     enable = true;
