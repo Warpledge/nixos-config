@@ -1,5 +1,5 @@
 #=====================================================================#
-# EASYEFFECTS LOUDNESS LEVELLING
+# EASYEFFECTS OUTPUT LIMITER
 #=====================================================================#
 # dconf, which the daemon needs, is on in nixos/services/desktop.nix.
 {
@@ -15,20 +15,13 @@
     #--- GUI tweaks under a new preset name.
     extraPresets.loudness.output = {
       blocklist = [];
-      plugins_order = ["autogain#0" "limiter#0"];
+      plugins_order = ["limiter#0"];
 
-      #--- Pulls everything toward one loudness (LUFS), like Windows'
-      #--- Loudness Equalization
-      "autogain#0" = {
-        bypass = false;
-        target = -18.0;
-        maximum-history = 15;
-      };
-
-      #--- Hard ceiling for spikes Autogain is too slow to catch
+      #--- Ceiling for loud peaks. No Autogain: it sits after each app's own
+      #--- volume and turned a player set low back up.
       "limiter#0" = {
         bypass = false;
-        threshold = -1.0;
+        threshold = -6.0;
       };
     };
   };

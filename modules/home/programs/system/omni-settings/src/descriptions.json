@@ -94,7 +94,7 @@
   "artcraft.deckcraft": {"title": "DeckCraft", "summary": "Presentations", "icon": ["ai.storyteller.deckcraft"], "text": "**DeckCraft**, for presentations and slide shows."},
 
   "audio.reaper": {"summary": "Record and mix", "icon": ["cockos-reaper", "fm.reaper.Reaper"], "text": "**REAPER**, a program for recording and mixing (a DAW), with the **SWS** and **ReaPack** extensions."},
-  "audio.easyeffects": {"summary": "Even out loudness", "icon": ["com.github.wwmm.easyeffects", "easyeffects"], "text": "**EasyEffects** on the speakers: Autogain brings every app toward one loudness and a limiter caps sudden spikes, like Windows' Loudness Equalization."},
+  "audio.easyeffects": {"summary": "Cap loud peaks", "icon": ["com.github.wwmm.easyeffects", "easyeffects"], "text": "**EasyEffects** on the speakers, with a limiter that holds sudden loud peaks down to a set level."},
   "audio.guitarix": {"summary": "Guitar amp simulator", "icon": ["guitarix", "org.guitarix.Guitarix"], "text": "**Guitarix**, a guitar amp simulator built as a chain of effects. Any guitar app also adds shared cabinet IRs, a tuner and **qpwgraph** for routing audio."},
   "audio.tone3000": {"summary": "TONE3000 amp captures", "icon": ["tone3000.desktop", "guitar"], "text": "The official **NAM** player; browse and load amp captures and IRs from the **TONE3000** library inside the app."},
   "audio.katanaFloorboard": {"summary": "BOSS Katana patch editor", "note": "!!Needs its files in ~/.local/opt first!!", "icon": ["katana-fxfloorboard.desktop", "guitar"], "text": "Edit the patches on a **BOSS Katana MkII** amp from your computer. Setup: docs/personal/local/local-binary-installs.md."},

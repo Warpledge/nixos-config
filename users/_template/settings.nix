@@ -120,7 +120,7 @@
   #--- Audio Software Selection
   audio = {
     reaper = false;
-    easyeffects = false; # Loudness levelling and limiter on the speakers
+    easyeffects = false; # Limiter that caps loud peaks on the speakers
 
     # Guitar rig; any guitar toggle adds shared IR/tuner plugins
     guitarix = false; # Modular amp sim
