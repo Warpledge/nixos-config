@@ -323,15 +323,34 @@ restyled. Three layouts are kept, switched with a key.
 - The jar came from the 1.0.22 release and its sha256 matches the one GitHub lists. The
   server needs nothing; side C.
 
+## AE2Things, added on 2026-11-17
+
+`ae2thing-1.3.3.jar` (1.3.3, 2026-11-14) is on the client only so far. It is side B, so
+legion needs the same jar before a world can be joined.
+
+- Source: [GTNotLeisure/AE2Things](https://github.com/GTNotLeisure/AE2Things), the
+  maintained repo its README names for 2.9.0. It continues asdflj's repo, which stops at
+  v1.2.14, the build left out on 2.9.0. The jar's sha256 matches the digest GitHub
+  lists.
+- Built against the pack's own libraries: AE2 `rv3-beta-1095-GTNH`, AE2FluidCraft
+  `1.5.116-gtnh`, GTNHLib 0.11.54 and NEI 2.8.171. 1.2.14 wanted 2.8.4's
+  `rv3-beta-695` and `AE2FluidCraft 1.4.120`, which is why it was left out.
+- What it adds: DISK cells with no type limit, the Infinity Cell (link mode shares one
+  item pool across cells and networks), backpack, wireless and dual-interface terminals,
+  Thaumcraft infusion and thaumatorium interfaces, crafting completion notifications and
+  a fluid packet encoder.
+- 1.3.0 adds the Applied Botanics submodule: a fluix mana pool, mana cells from 1k to
+  256k, and mana input and output buses. It needs Botania and extends its internals; the
+  pack has Botania 1.13.42. 1.3.1 adds NEI auto craft to its crafting terminal, and 1.3.3
+  adds a config for modern container interaction in the terminal.
+- Config: `config/ae2thing/ae2thing.cfg`, written on the first launch. Not launched yet.
+
 ## Left out until their author ships a 2.9 build
 
-- **AE2Things 1.2.14**: built against 2.8.4's AE2 `rv3-beta-695`, `AE2FluidCraft 1.4.120`
-  and `ae2stuff`, which 2.9 removed. AE2 was unified for items, fluids, gasses and
-  essentia, so the mod's internals do not match the pack.
 - **BoxPlusPlus 2.1.2**: last release 2025-12-10, built against Galaxy Space 1.1.121.
   It sits on GT multiblock internals, which 2.9 rewrote across more than fifty machines.
 
-Check these again after their next release; none has a 2.9 build.
+Check it again after its next release; it has no 2.9 build.
 
 ## Installed, still unproven on 2.9
 

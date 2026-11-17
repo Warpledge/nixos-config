@@ -67,6 +67,7 @@ From [mods.md](./mods.md), the **B** rows:
 - ThinkTech 0.3.2, OmniOcular Unofficial 1.7.2 (server jar), BetterSprinting 1.1.3,
   Advanced Memory Card 1.2.0-1.7.10-GTNH, WTCT 1.0.63-rc1, Omni Tweaks 0.2.0,
   Effortless Building Gadgets 0.10.1
+- AE2Things `ae2thing-1.3.3.jar`, added to the client on 2026-11-17 and side B
 - The EZStorage script `scripts/simplestorage_gregified.zs` must be on the server too, or
   the recipes differ from the client.
 
