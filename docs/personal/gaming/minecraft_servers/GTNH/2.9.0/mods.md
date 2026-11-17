@@ -166,7 +166,7 @@ The source moved from kotmatross28729's repo to GTNotLeisure, and Modrinth still
 1.2.3-87, so the update check reads GitHub now.
 
 Fancy Block Particles 2.4.1 was removed for screen-filling shards under Angelica and the
-shader pack. It is back on trial with Particle Batching turned off; see
+shader pack. It is back in the client with Particle Batching turned off; see
 [the section below](#fancy-block-particles-added-on-2026-11-17).
 
 Both PICO-8 GTNH 0.4.1 and Fission-Evolved 0.1.1 are parked. With either installed
@@ -351,7 +351,7 @@ legion needs the same jar before a world can be joined.
   256k, and mana input and output buses. It needs Botania and extends its internals; the
   pack has Botania 1.13.42. 1.3.1 adds NEI auto craft to its crafting terminal, and 1.3.3
   adds a config for modern container interaction in the terminal.
-- Config: `config/ae2thing/ae2thing.cfg`, written on the first launch. Not launched yet.
+- Config: `config/ae2thing/ae2thing.cfg`, written on the first launch. Kept on 2026-11-17.
 
 ## DiskTerminal, added on 2026-11-17
 
@@ -372,12 +372,12 @@ legion needs the same jar before a world can be joined.
   GTNHLib is 0.11.52 against the pack's 0.11.54.
 - Config: `config/disk_terminal_server.cfg` gates the tabs and the cell operations and has
   to match on both sides; `config/disk_terminal_client.cfg` holds the client display
-  options. Both are written on the first launch. Not launched yet.
+  options. Both are written on the first launch. Kept on 2026-11-17.
 
 ## Functional Storage, added on 2026-11-17
 
-`functionalstorage-1.2.3.jar` (1.2.3, 2026-11-14) is on the client only so far, on trial.
-It is side B, so legion needs the same jar before a world can be joined. It is a 1.7.10
+`functionalstorage-1.2.3.jar` (1.2.3, 2026-11-14) is on the client only so far; kept on
+2026-11-17. It is side B, so legion needs the same jar before a world can be joined. It is a 1.7.10
 backport of [Buuz135's Functional Storage](https://github.com/Buuz135/FunctionalStorage)
 with More Functional Storage merged in, from the maintainer of AE2Things and DiskTerminal.
 
@@ -391,13 +391,13 @@ with More Functional Storage merged in, from the maintainer of AE2Things and Dis
   drawers cost planks and a chest, fluid drawers planks and buckets, and the resource
   generators a blank upgrade plus stone, a cauldron and buckets. It has no GT assembler
   recipes, unlike the pack's Storage Drawers, which registers them in its `gtnh` recipe
-  class. Its only GregTech code is client-side texture adapters for framed drawers. If it
-  is kept, its recipes need GT costs or the generators need disabling.
+  class. Its only GregTech code is client-side texture adapters for framed drawers. It is
+  kept, so its recipes need GT costs or the generators need disabling.
 - Built against GTNHLib 0.11.52 and GTNHExtLib 1.0.4; the pack has 0.11.54 and 1.0.5. It
   was compiled against AE2 `rv3-beta-1080` and NEI 2.8.155, and no release names 2.9.0, so
   it is unproven and a launch is the test.
 - Config: `config/functionalstorage/functionalstorage.cfg`, editable in game from the mod
-  list. Storage capacity changes need a world restart. Not launched yet.
+  list. Storage capacity changes need a world restart. Kept on 2026-11-17.
 
 ## NEI Guess, added on 2026-11-17
 
@@ -417,8 +417,8 @@ nothing. The jar's sha256 matches the digest GitHub lists.
   does nothing, and the conversions only matter when searching Chinese names.
 - Built against NEI 2.8.155, GTNHLib 0.11.52, GTNHExtLib 1.0.5 and BetterQuesting
   3.8.92-GTNH; the pack has NEI 2.8.171, GTNHLib 0.11.54, GTNHExtLib 1.0.5 and the same
-  BetterQuesting. The release is from after 2.9.0. Not launched yet, and not yet tried
-  alongside Better Search, which also changes NEI search.
+  BetterQuesting. The release is from after 2.9.0. Kept on 2026-11-17; it shares the NEI
+  search box with Better Search.
 - Config: `config/neiguess/neiguess.cfg`, and history and favorites in
   `config/neiguess/history.json`. Extra word lists go in `config/neiguess/lexicon/`.
 
@@ -442,11 +442,11 @@ only; the server has no use for it. The jar's sha512 matches the one Modrinth li
   new file.
 - Normal maps and specular textures for extra leaves and short grass are not
   reimplemented yet, so those parts will not react to the PBR packs under Eclipse.
-- Not launched yet.
+- Kept on 2026-11-17.
 
 ## DEConfig Integration, added on 2026-11-17
 
-`deconfigintegration-1.0.3.D424.jar` (1.0.3.D424, 2026-03-17) is on the client, on trial.
+`deconfigintegration-1.0.3.D424.jar` (1.0.3.D424, 2026-03-17) is on the client.
 It is side C. The jar's sha256 matches the digest GitHub lists.
 
 - Moves the settings of GTNH's gear into Draconic Evolution's config GUI, so one keybind
@@ -462,7 +462,7 @@ It is side C. The jar's sha256 matches the digest GitHub lists.
   GraviSuite Neo 1.3.8, Thaumic Boots 1.5.5 and Witching Gadgets 1.8.14; the pack has
   1.100, 1.5.35, 1.3.16, 1.5.13 and 1.8.53. It applies its mixins through GTNH Mixins'
   late loader, so a changed target shows as an error at launch instead of doing nothing.
-- No config of its own. Not launched yet.
+- No config of its own. Kept on 2026-11-17.
 
 ## Fancy Block Particles, added on 2026-11-17
 
@@ -485,7 +485,7 @@ the client. It is side C, client only.
 - **If it is removed:** set `enable_deferred_batching` back to `true` so the rest of the
   pack gets particle batching again, and set `fancyRain` and `fancySnow` back to `true`
   or delete `config/FBP/`. The folder survived the last removal.
-- Not launched yet, so the shader shards are unproven.
+- Kept on 2026-11-17, with batching and fancy weather off.
 
 ## InfoHUD, added on 2026-11-17
 
@@ -502,7 +502,7 @@ nothing. The jar's sha256 matches the digest GitHub lists.
   release is from 2026-10-22, before 2.9.0 stable, so it is unproven. 0.0.25 fixes a crash
   on the first multiplayer join and moves the CPU-load read off the client thread.
 - Config: `config/InfoHUD/Layout.json`, `GeneralConfig.cfg`, `LightOverlayConfig.cfg` and
-  `ClassicBarConfig.cfg`. Not launched yet.
+  `ClassicBarConfig.cfg`. Kept on 2026-11-17.
 
 ## Left out until their author ships a 2.9 build
 
