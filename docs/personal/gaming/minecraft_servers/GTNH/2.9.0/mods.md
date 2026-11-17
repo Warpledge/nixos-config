@@ -420,6 +420,28 @@ nothing. The jar's sha256 matches the digest GitHub lists.
 - Config: `config/neiguess/neiguess.cfg`, and history and favorites in
   `config/neiguess/history.json`. Extra word lists go in `config/neiguess/lexicon/`.
 
+## Better Foliage, added on 2026-11-17
+
+`BetterFoliage-LegacyEdition-2.0.0.jar` (2.0.0, 2026-11-16) is on the client. It is client
+only; the server has no use for it. The jar's sha512 matches the one Modrinth lists.
+
+- 2.0.0 is a rewrite from Kotlin to Java. It fixes the pitch-black rendering that older
+  builds showed under shaders with Angelica 2.0.0-alpha9 or later, plus black leaves from
+  extra-leaves ambient occlusion and several invisible-face bugs. That is the issue this
+  install is testing.
+- Features, each toggleable in its F8 menu: extra leaves, round logs, connected grass,
+  short grass and mycelium, falling leaves, algae, coral, reeds, netherrack vines, rising
+  souls, better cactus and better lilypads.
+- Needs UniMixins, which 2.9.0 ships as `+unimixins-all-1.7.10-0.3.1.jar`; 2.0.0 no longer
+  needs Forgelin.
+- Config: `config/BetterFoliage_LegacyEdition.cfg`. The old `config/BetterFoliage.cfg`
+  from the earlier install is still there and is not read. Its block and biome lists are
+  the old format, so any custom entries need redoing as block and biome filters in the
+  new file.
+- Normal maps and specular textures for extra leaves and short grass are not
+  reimplemented yet, so those parts will not react to the PBR packs under Eclipse.
+- Not launched yet.
+
 ## Left out until their author ships a 2.9 build
 
 - **BoxPlusPlus 2.1.2**: last release 2025-12-10, built against Galaxy Space 1.1.121.
