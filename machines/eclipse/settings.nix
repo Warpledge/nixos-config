@@ -44,7 +44,7 @@
       scrcpy.enable = true;
       audio.reaper = false;
       audio.guitarix = false;
-      audio.easyeffects = true;
+      audio.easyeffects = false;
       dev.go = false;
       dev.node = false;
       dev.rust = false;
