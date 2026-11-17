@@ -96,11 +96,25 @@ def lamp_ids(text):
     return re.sub(r"gtceu:([a-z_]+?)_borderless_lamp(?=\s)", add, text)
 
 
+def unlit_hives(text):
+    """block.properties: Forestry beehives join ChromaPatch's solid, unlit Lave id."""
+    lines = text.split("\n")
+    i = line_index(lines, "block.1=Ztones:tile.laveBlock")
+    # Forestry gives beehives vanilla light 12, which Eclipse turns into a lamp
+    lines[i:i] = ["# Warpledge: Forestry beehives are solid without light too"]
+    lines[i + 1] = lines[i + 1].rstrip() + " Forestry:beehives"
+    return "\n".join(lines)
+
+
+def block_ids(text):
+    return unlit_hives(lamp_ids(text))
+
+
 EDITS = {
     "shaders/dimensions/all_solid.fsh": emission_fix,
     "shaders/dimensions/composite6.fsh": lod_taa,
     "shaders/shaders.properties": menu_row,
-    "shaders/block.properties": lamp_ids,
+    "shaders/block.properties": block_ids,
 }
 
 
