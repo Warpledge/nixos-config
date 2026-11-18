@@ -95,12 +95,11 @@ same Bottled Chaos null as 0.8.1, so Twist stays 0.8.0.** GTNH Modernization 0.3
 pre-release. Old jars are in `backups/replaced-mods/2026-11-17/`. The client reached the
 main menu with the eight; a world still needs a launch after the Twist rollback.
 
-**2026-11-18: EZMiner is now Omni Miner, the local fork `6.6-balanced.7`, client only so
+**2026-11-18: EZMiner is now Omni Miner, the local fork `6.6-balanced.8`, client only so
 far.** The source is still `~/Projects/ezminer-balanced`; the jar is
-`mods/omniminer-6.6-balanced.7.jar`, and the old jars are disabled beside it
-(`EZMiner-6.6-balanced.jar.bak-2026-11-18.disabled`,
-`omniminer-6.6-balanced.5.jar.bak-2026-11-18.disabled` and
-`omniminer-6.6-balanced.6.jar.bak-2026-11-18.disabled`). The mod id is `omniminer`, so
+`mods/omniminer-6.6-balanced.8.jar`, and the old jars are disabled beside it
+(`EZMiner-6.6-balanced.jar.bak-2026-11-18.disabled` and
+`omniminer-6.6-balanced.{5,6,7}.jar.bak-2026-11-18.disabled`). The mod id is `omniminer`, so
 its configs moved to `config/omniminer/omniminer.cfg` and `omniminer/omniminer_server.cfg`,
 copied from the EZMiner files. Blast is gone, leaving Chain and Special; the mode key
 cycles those two and the packet carries three indices. Chains now pass only through a
@@ -114,7 +113,8 @@ trees through the tree founder. The founder now uses a 4-block horizontal radius
 forest, and it treats leaves as part of the tree, so a branch log behind leaf layers is
 still felled; leaves never trip `stopOnUnbreakable`. Shears use tier 1. Each family has an extra-blocks and a blocked-blocks
 list under `tools { }`; the OP server tab opens a NEI-style editor per family with icons,
-a search box, hover name and id, right-click removal and a list reset. The unbound
+a search box, hover name and id, right-click removal and a list reset. Every config row
+shows its full help text and action on hover, and a hovered `R` explains the reset. The unbound
 `Add Block to Tool List` key adds the block under the cursor or the NEI item under the
 mouse (Shift removes). The server allows that only for OPs, a cheats-enabled
 single-player world, or the server-owner list. The GUI cycles named options instead of
