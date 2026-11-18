@@ -189,6 +189,12 @@ Also in `resourcepacks/` since 2026-11-06, not enabled when added:
 KuramA's README warns of visual bugs on blocks that are both reflective and emissive, and
 calls the packs a work in progress.
 
+`DarkReimagined_290.3.zip` is the dark GUI pack. `DarkTrashSlot/` (2026-11-18, folder
+pack) sits above it and recolours TrashSlot 1.0.31's
+`assets/trashslot/textures/gui/slot.png` and trash-can icon to its slot palette, because
+the dark pack ships no `assets/trashslot` and the mod's sheet is vanilla grey. It is a
+separate folder, so a Dark Reimagined update leaves it in place.
+
 ### Updating
 
 - **ChromaPatch:** replace the jar in `mods/`. The patched pack is rebuilt on launch when
