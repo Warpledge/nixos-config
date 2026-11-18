@@ -95,30 +95,28 @@ same Bottled Chaos null as 0.8.1, so Twist stays 0.8.0.** GTNH Modernization 0.3
 pre-release. Old jars are in `backups/replaced-mods/2026-11-17/`. The client reached the
 main menu with the eight; a world still needs a launch after the Twist rollback.
 
-**2026-11-18: EZMiner is the local balanced fork `6.6-balanced.4`, client only so far.**
-The source is `~/Projects/ezminer-balanced`; the old `EZMiner-6.6.jar` is in
-`mods/EZMiner-6.6.jar.bak-2026-11-17`. The old global ranges are replaced by ten tiers
-named from Iguana Tweaks' `HarvestLevelNamesDefaults.cfg`: Stone 4/8, Copper 4/16,
-Iron 5/24, Bronze 5/32, Steel 6/48, Obsidian 6/64, Ardite 7/96, Cobalt 7/128,
-Manyullyn 8/192 and Manyullyn+ 8/256 (radius/blocks). Harvest level or GT quality picks
-the tier; a GT drill or jackhammer on ore, a chainsaw or buzzsaw on wood, or a Vajra adds
-one tier, and an electric GT tool adds its voltage tier, capped at 10. Bare hands, swords
-and non-tools cannot start a chain; `stopOnUnbreakable` and `fireBreakEvent` default true.
-Adjacency is `smallRadius=1`, so only touching blocks join the chain. Logging is gone as
-a mode: a Basic chain follows every log axis, and a held axe or GT saw automatically uses
-the tree founder at radius 32 and 1024 blocks, breaking logs and leaves so RWG2 trees do
-not leave floating canopies; the limits are the Advanced `Axe Tree Radius` and `Axe Tree
-Max Blocks` rows. The OP server tab is Features, Tiers and Advanced; labels show only their
-first line, the global mining and client range fields are gone, and the client preview uses
-the server tier table. Block Swap now drops the old block back to the player and only
-touches blocks a player placed, so it cannot farm ores or bypass a pickaxe; ordinary block
-metadata is passed through unchanged and only GT meta-blocks use the GT base metadata. The
-toggle is in Advanced. It is 256 blocks at radius 2. Defaults: Chain, the six Blast modes,
-Crop Harvest, Planting and Block Swap on; Minesweeper, Sudoku, Prospecting and Cached Chain
-off. Food cost is 0.01 per block and `breakPerTick=128`. The tier values live under
-`tiers { }` in `EZMiner/EZMiner_Server.cfg` and sync to clients; features stay under
-`features { }`. The old server and client configs are in the same folders as
-`.bak-2026-11-17-fork`. Side B, so legion needs the same jar before a world can be joined.
+**2026-11-18: EZMiner is now Omni Miner, the local fork `6.6-balanced.5`, client only so
+far.** The source is still `~/Projects/ezminer-balanced`; the jar is
+`mods/omniminer-6.6-balanced.5.jar` and the old one is disabled as
+`mods/EZMiner-6.6-balanced.jar.bak-2026-11-18.disabled`. The mod id is `omniminer`, so its
+configs moved to `config/omniminer/omniminer.cfg` and `omniminer/omniminer_server.cfg`,
+copied from the EZMiner files. Blast is gone, leaving Chain and Special; the mode key
+cycles those two and the packet carries three indices. Chains now pass only through a
+tool's own blocks: pickaxe for stone and ores, shovel for dirt and sand, axe for wood,
+scythe for grass, bushes and leaves, shears for leaves, wool, vines and webs. A mattock
+uses the shovel and axe lists together. Hammers, excavators and lumber axes start no
+chain; empty hands, swords and the wrong tool for the target block are refused with the
+no-tool message, while a held axe still fells trees through the tree founder. Scythes take
+their tier from the Tinkers harvest level and shears use tier 1, both from the same ten
+tiers. Each family has an extra-blocks and a blocked-blocks list under `tools { }`, using
+the drop blacklist syntax; the OP server tab edits them, and the unbound `Add Block to
+Tool List` key adds the block under the cursor or the NEI item under the mouse (Shift
+removes). The server allows that only for OPs, a cheats-enabled single-player world, or the
+server-owner list. The GUI cycles named options instead of numbered fields and every row
+has an `R` reset button. `stopOnUnbreakable` and `fireBreakEvent` stay true,
+`smallRadius=1`, `addExhaustion=0.01`, `breakPerTick=128`, and the tier table is unchanged.
+Side B, so legion needs the same jar and no `EZMiner` jar before a world can be joined: the
+mod id changed, so a client without it is rejected by a server that still has EZMiner.
 
 **2026-11-10: GTNL and GTNLLib were removed; Better Questing API went with them.** BQ API
 was installed on 2026-11-01 for GTNL's quest lines, so it is unused now and its jar is gone
