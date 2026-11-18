@@ -95,11 +95,11 @@ same Bottled Chaos null as 0.8.1, so Twist stays 0.8.0.** GTNH Modernization 0.3
 pre-release. Old jars are in `backups/replaced-mods/2026-11-17/`. The client reached the
 main menu with the eight; a world still needs a launch after the Twist rollback.
 
-**2026-11-18: EZMiner is now Omni Miner, the local fork `6.6-balanced.8`, client only so
+**2026-11-18: EZMiner is now Omni Miner, the local fork `6.6-balanced.9`, client only so
 far.** The source is still `~/Projects/ezminer-balanced`; the jar is
-`mods/omniminer-6.6-balanced.8.jar`, and the old jars are disabled beside it
+`mods/omniminer-6.6-balanced.9.jar`, and the old jars are disabled beside it
 (`EZMiner-6.6-balanced.jar.bak-2026-11-18.disabled` and
-`omniminer-6.6-balanced.{5,6,7}.jar.bak-2026-11-18.disabled`). The mod id is `omniminer`, so
+`omniminer-6.6-balanced.{5,6,7,8}.jar.bak-2026-11-18.disabled`). The mod id is `omniminer`, so
 its configs moved to `config/omniminer/omniminer.cfg` and `omniminer/omniminer_server.cfg`,
 copied from the EZMiner files. Blast is gone, leaving Chain and Special; the mode key
 cycles those two and the packet carries three indices. Chains now pass only through a
