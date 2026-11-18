@@ -414,6 +414,11 @@ legion needs the same jar before a world can be joined.
   adds a config for modern container interaction in the terminal. 1.3.4 adds a Universal
   Infinity Cell, optimizes infinity storage and its safety checks, reworks the pattern
   modifier, and disables the 2-in-1 terminal when GT-Never-Reset is installed.
+- The NEI usage handler in 1.3.4 and 1.3.5 is broken: `InfinityStorageCellUsageHandler` reads
+  `this.cell` before assigning it (`InfinityStorageCellUsageHandler.java:80`), so any
+  usage lookup can put "There was error during loading recipe" in chat. The handler is
+  hidden in `config/NEI/hiddenhandlers.cfg` and showed nothing anyway. Remove that line
+  once a release fixes it.
 - Config: `config/ae2thing/ae2thing.cfg`, written on the first launch. Kept on 2026-11-17.
 
 ## DiskTerminal, added on 2026-11-17

@@ -156,6 +156,14 @@ sections:
   `B:"Enable Overlay"=false` [true]. Leave the `tanks` section alone; that is the worn
   backpack overlay, not the potion HUD.
 
+## NEI
+
+- **Hidden handler**: `config/NEI/hiddenhandlers.cfg` →
+  `com.asdflj.ae2thing.nei.InfinityStorageCellUsageHandler`. AE2Things 1.3.4 and 1.3.5
+  throw a `NullPointerException` in `getUsageHandler`, which puts "There was error
+  during loading recipe" in chat on every usage lookup. The file is read at startup;
+  remove the line once a release fixes it.
+
 ## Bees
 
 ### Gendustry: `config/gendustry/overrides/tuning.cfg`
