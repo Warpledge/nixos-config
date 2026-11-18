@@ -95,28 +95,34 @@ same Bottled Chaos null as 0.8.1, so Twist stays 0.8.0.** GTNH Modernization 0.3
 pre-release. Old jars are in `backups/replaced-mods/2026-11-17/`. The client reached the
 main menu with the eight; a world still needs a launch after the Twist rollback.
 
-**2026-11-18: EZMiner is now Omni Miner, the local fork `6.6-balanced.5`, client only so
+**2026-11-18: EZMiner is now Omni Miner, the local fork `6.6-balanced.6`, client only so
 far.** The source is still `~/Projects/ezminer-balanced`; the jar is
-`mods/omniminer-6.6-balanced.5.jar` and the old one is disabled as
-`mods/EZMiner-6.6-balanced.jar.bak-2026-11-18.disabled`. The mod id is `omniminer`, so its
-configs moved to `config/omniminer/omniminer.cfg` and `omniminer/omniminer_server.cfg`,
+`mods/omniminer-6.6-balanced.6.jar`, and the old jars are disabled beside it
+(`EZMiner-6.6-balanced.jar.bak-2026-11-18.disabled` and
+`omniminer-6.6-balanced.5.jar.bak-2026-11-18.disabled`). The mod id is `omniminer`, so
+its configs moved to `config/omniminer/omniminer.cfg` and `omniminer/omniminer_server.cfg`,
 copied from the EZMiner files. Blast is gone, leaving Chain and Special; the mode key
 cycles those two and the packet carries three indices. Chains now pass only through a
 tool's own blocks: pickaxe for stone and ores, shovel for dirt and sand, axe for wood,
-scythe for grass, bushes and leaves, shears for leaves, wool, vines and webs. A mattock
-uses the shovel and axe lists together. Hammers, excavators and lumber axes start no
-chain; empty hands, swords and the wrong tool for the target block are refused with the
-no-tool message, while a held axe still fells trees through the tree founder. Scythes take
-their tier from the Tinkers harvest level and shears use tier 1, both from the same ten
-tiers. Each family has an extra-blocks and a blocked-blocks list under `tools { }`, using
-the drop blacklist syntax; the OP server tab edits them, and the unbound `Add Block to
-Tool List` key adds the block under the cursor or the NEI item under the mouse (Shift
-removes). The server allows that only for OPs, a cheats-enabled single-player world, or the
-server-owner list. The GUI cycles named options instead of numbered fields and every row
-has an `R` reset button. `stopOnUnbreakable` and `fireBreakEvent` stay true,
-`smallRadius=1`, `addExhaustion=0.01`, `breakPerTick=128`, and the tier table is unchanged.
-Side B, so legion needs the same jar and no `EZMiner` jar before a world can be joined: the
-mod id changed, so a client without it is rejected by a server that still has EZMiner.
+and shears for leaves, wool, vines and webs. A mattock uses the shovel and axe lists
+together. A scythe starts no chain because it already clears an area itself. Hammers,
+excavators and lumber axes start no chain; empty hands, swords and the wrong tool for
+the target block are refused with the no-tool message, while a held axe still fells
+trees through the tree founder. The founder now uses a 4-block horizontal radius (2..16,
+`Axe Tree Radius`) and up to 32 blocks vertically, so it fells one tree instead of the
+forest, and it treats leaves as part of the tree so a branch log behind leaf layers is
+still felled. Shears use tier 1. Each family has an extra-blocks and a blocked-blocks
+list under `tools { }`; the OP server tab opens a NEI-style editor per family with icons,
+a search box, hover name and id, right-click removal and a list reset. The unbound
+`Add Block to Tool List` key adds the block under the cursor or the NEI item under the
+mouse (Shift removes). The server allows that only for OPs, a cheats-enabled
+single-player world, or the server-owner list. The GUI cycles named options instead of
+numbered fields, every row has an `R` reset button, and Block Swap's preview now shows
+every matching block in the swap radius instead of a connected chain.
+`stopOnUnbreakable` and `fireBreakEvent` stay true, `smallRadius=1`,
+`addExhaustion=0.01`, `breakPerTick=128`, and the tier table is unchanged. Side B, so
+legion needs the same jar and no `EZMiner` jar before a world can be joined: the mod id
+changed, so a client without it is rejected by a server that still has EZMiner.
 
 **2026-11-10: GTNL and GTNLLib were removed; Better Questing API went with them.** BQ API
 was installed on 2026-11-01 for GTNL's quest lines, so it is unused now and its jar is gone
