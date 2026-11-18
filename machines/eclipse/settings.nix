@@ -172,7 +172,7 @@
 
   #--- Kernel Selection
   # Options: "zen" | "latest" | "xanmod" | "cachyos"
-  kernel = "latest";
+  kernel = "cachyos";
 
   #--- Mouse Cursor
   # Options: "bibata" | "catppuccin"
@@ -253,7 +253,7 @@
   blocklist.allow = [];
   maintenance.clean = "weekly";
   maintenance.keepDays = 5;
-  maintenance.keepGenerations = 5;
+  maintenance.keepGenerations = 10;
   maintenance.optimise = "daily";
   maintenance.updateReminderDays = 30;
   localModels.models = {
