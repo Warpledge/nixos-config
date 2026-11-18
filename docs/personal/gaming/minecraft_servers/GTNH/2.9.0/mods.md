@@ -24,7 +24,7 @@ Do not add these: the pack carries its own copy.
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
 | Twist Space Technology | 0.8.0 | B | 0.8.1 and 0.8.2 both crash world start on the Bottled Chaos null; 0.8.0 is installed, see below |
 | 123Technology | 2.2.1.3 | B | its README says 2.1.9+ supports GTNH 2.9.0; 2.2.1's release notes say it's adapted to 2.9.0 stable |
-| EZMiner | 6.6 | B | 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"` |
+| EZMiner | 6.6-balanced.1 | B | local fork of 6.6 at `~/Projects/ezminer-balanced`; GTO Ultimine block limits and per-mode feature switches, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"` |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
 | EZStorage | 1.8.3 | B | builds against GTNHLib 0.11.52, NEI 2.8.158; 1.8.3 fixes NEI bookmark pull with large stacks |
 | Programmable Hatches | 0.2.1p7-beta | B | p7 notes: only 2.9.0 supported; builds against GT 5.09.54.264, GTNHLib 0.11.54, NEI 2.8.171 |
@@ -94,6 +94,23 @@ only added version and log lines. **Twist 0.8.2 was tried and crashed world star
 same Bottled Chaos null as 0.8.1, so Twist stays 0.8.0.** GTNH Modernization 0.3.6 is a
 pre-release. Old jars are in `backups/replaced-mods/2026-11-17/`. The client reached the
 main menu with the eight; a world still needs a launch after the Twist rollback.
+
+**2026-11-17: EZMiner is replaced with the local balanced fork, client only so far.** The
+source is `~/Projects/ezminer-balanced`, built from 6.6 and tagged `6.6-balanced.1`; the old
+`EZMiner-6.6.jar` is in `mods/EZMiner-6.6.jar.bak-2026-11-17`. It copies GTO's FTB Ultimine
+block limits from `GTOCore-Main` (`ShapeContextMixin`, `GTORules.ULTIMINE_LIMIT`,
+`AreaShape`): base `ultimineBaseLimit=32`, non-GT diggers get half, GT tools the base, ore
+drills/jackhammers and wood chainsaws/buzzsaws four times the base, electric GT tools a
+further `2^tier` multiplier, and `blockLimit=1024` is the hard cap. Bare hands, swords and
+non-tools cannot start a chain; `stopOnUnbreakable` and `fireBreakEvent` default true.
+Adjacency is `smallRadius=3` (GTO's area-shape range) and `bigRadius=8` stays EZMiner's
+search bound. The OP server tab has a Features section: chain, all blast modes except
+Logging, Crop Harvest, Planting and Block Swap are on; Logging, Minesweeper, Sudoku,
+Prospecting and Cached Chain are off. Block Swap is 256 blocks at radius 2, food cost 0.01
+per block, and `breakPerTick=128`. The switches live under `features { }` in
+`EZMiner/EZMiner_Server.cfg` and sync to clients; the client config also gains `useHud`.
+The old server and client configs are in the same folders as `.bak-2026-11-17-fork`. Side B,
+so legion needs the same jar before a world can be joined.
 
 **2026-11-10: GTNL and GTNLLib were removed; Better Questing API went with them.** BQ API
 was installed on 2026-11-01 for GTNL's quest lines, so it is unused now and its jar is gone
