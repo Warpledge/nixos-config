@@ -48,6 +48,8 @@
     {"name": "Better Search", "jar": "^bettersearch-", "side": "C", "source": "modrinth:bettersearch"},
     {"name": "Effortless Building Gadgets", "jar": "^effortless-", "side": "B", "source": "modrinth:effortless-building-gadgets"},
     {"name": "Shoulder Surfing Reloaded", "jar": "^ShoulderSurfing-", "side": "C", "source": "modrinth:shoulder-surfing-reloaded"},
+    {"name": "Smooth Third-Person Camera", "jar": "^smooththirdpersoncamera-", "side": "C", "source": "modrinth:smooth-third-person-camera", "note": "Hooks the same camera as Shoulder Surfing Reloaded; check both together after a bump."},
+    {"name": "Cinematic Respawn", "jar": "^cinematic_respawn-", "side": "C", "source": "modrinth:cinematic-respawn"},
     {"name": "GTNH Planner", "jar": "^gtnhplanner-", "side": "C", "source": "github:jackwrichards/gtnh-planner-mod", "note": "Betas, though GitHub marks them stable. Plans live in gtnhplanner/plans.dat; back it up before a bump."},
     {"name": "Right Proper GUI Scale", "jar": "^RightProperGUIScale-", "side": "C", "source": "modrinth:rightproperguiscale"},
     {"name": "Dashboard", "jar": "^dashboard-", "side": "C", "source": "github:GTNewHorizons/Dashboard", "note": "GTNH's HUD editor, client only, not shipped by 2.9.0. Needs GTNHLib, which the pack carries. Settings in config/dashboard/editor.cfg; PNGs for the HUD go in config/dashboard/images/."},

@@ -322,6 +322,8 @@ release; all of them passed in-game testing on 2026-11-05.
 | Better Search | 1.6.4 | C | typo-tolerant search, with NEI and AE2 hooks; 1.6.4 fixes its AE2 mixin errors and works with Language Reload |
 | Effortless Building Gadgets | 0.10.1 | B | shape building through a crafted gadget; `B:consumesEnergy=false` on both sides, so it needs no power |
 | Shoulder Surfing Reloaded | 2.4.1 | C | over-the-shoulder camera; a 2023 build that patches vanilla code, so suspect it first after a pack update |
+| Smooth Third-Person Camera | 2.0.0+mc1.7.10-forge | C | smooths third-person camera movement; added 2026-11-19, hooks the same camera as Shoulder Surfing |
+| Cinematic Respawn | 1.7.10-forge-1.5.0 | C | camera transition in place of the death screen; added 2026-11-19 |
 
 Vintage Pick Up Notifier 1.0.0 was removed on 2026-11-17; Dashboard's HUD editor covers
 pickup notices. Its jar and config are in `backups/removed-mods/2026-11-17/`.
@@ -649,6 +651,11 @@ Check it again after its next release; it has no 2.9 build.
 ## Installed, still unproven on 2.9
 
 These are in the 2.9 instance but have no explicit 2.9 release, so a launch is the proof.
+
+- **Smooth Third-Person Camera 2.0.0 and Cinematic Respawn 1.5.0** (2026-11-19, client
+  only, from Modrinth; both sha512s match): neither names a pack and both are side C.
+  Cinematic Respawn auto-respawns after its animation. Check Smooth Third-Person Camera
+  together with Shoulder Surfing Reloaded, which drives the same camera.
 
 - **Xaero's Minimap 21.10.44 and World Map 1.14.1.33** (2026-11-07, client only): the
   last 1.7.10 Forge builds, from Modrinth, and the CurseForge files Navigator 1.1.10
