@@ -232,6 +232,7 @@
       backups.folder = "~/SyncBackups";
       backups.skip = [];
       opencode.plugins.sessionRail = false;
+      claude.desktopPlanList = true;
     };
   };
 
