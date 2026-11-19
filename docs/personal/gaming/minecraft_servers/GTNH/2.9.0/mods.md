@@ -31,7 +31,6 @@ Do not add these: the pack carries its own copy.
 | NH-Utilities | 1.7.0 | B | commit "Fit 29x" |
 | YesSteveModel Unofficial | 3.0 | B | [czqwq fork](https://github.com/czqwq/YesSteveModel-Unofficial); 3.0's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`, and its one commit says "Fix Amim system"; 2.9 added the preview setting's entrance and fixed the math parser, 2.6 fixed the animation loop and 2.7 restored the animation storage system, 2.5 disabled the lighting map |
 | MineMenu | 1.2.0.B44 | C | latest on Modrinth, 2025-12-07 |
-| Spark | 1.10.19 | C | latest 1.7.10 |
 | FPS Reducer | 1.10.3 | C | latest, 2023-09-06 |
 | Trash Slot | 1.0.31 | B | latest 1.7.10 on CurseForge |
 
@@ -97,9 +96,8 @@ main menu with the eight; a world still needs a launch after the Twist rollback.
 
 **2026-11-18: EZMiner is now Omni Miner, the local fork `6.6-balanced.12`, client only so
 far.** The source is still `~/Projects/ezminer-balanced`; the jar is
-`mods/omniminer-6.6-balanced.12.jar`, and the old jars are disabled beside it
-(`EZMiner-6.6-balanced.jar.bak-2026-11-18.disabled` and
-`omniminer-6.6-balanced.{5,6,7,8,9,10,11}.jar.bak-2026-11-18.disabled`). The mod id is `omniminer`, so
+`mods/omniminer-6.6-balanced.12.jar` (replaced by `.13` below), and upstream's jar is
+disabled beside it as `EZMiner-6.6.jar.bak-2026-11-17.disabled`. The mod id is `omniminer`, so
 its configs moved to `config/omniminer/omniminer.cfg` and `omniminer/omniminer_server.cfg`,
 copied from the EZMiner files. Blast is gone, leaving Chain and Special; the mode key
 cycles those two and the packet carries three indices. Chains now pass only through a
@@ -520,11 +518,17 @@ nothing. The jar's sha256 matches the digest GitHub lists.
 - Config: `config/neiguess/neiguess.cfg`, and history and favorites in
   `config/neiguess/history.json`. Extra word lists go in `config/neiguess/lexicon/`.
 
-## Better Foliage, added on 2026-11-17
+## Better Foliage, added on 2026-11-17, removed on 2026-11-18
 
-`BetterFoliage-LegacyEdition-2.0.1.jar` (2.0.1, 2026-11-17; 2.0.0 was added first) is on
-the client. It is client
-only; the server has no use for it. The jar's sha512 matches the one Modrinth lists.
+`BetterFoliage-LegacyEdition-2.0.1.jar` (2.0.1, 2026-11-17; 2.0.0 was added first) was on
+the client, side C. The jar's sha512 matches the one Modrinth lists.
+
+**Removed on 2026-11-18 for its FPS cost:** 190 FPS fell to 150-160 at the default
+features and to 120-140 with more on. 2.0.0 also crashed chunk meshing once on an oak
+leaf (`Only quads are supported, got: 66`, through its Angelica mixin). The jar and both
+configs are in `backups/removed-mods/2026-11-18/`, and `mod-sources.json` keeps it as a
+parked entry so a release that names performance can be retried. The notes below are
+for that retry.
 
 - 2.0.0 is a rewrite from Kotlin to Java. It fixes the pitch-black rendering that older
   builds showed under shaders with Angelica 2.0.0-alpha9 or later, plus black leaves from
@@ -541,7 +545,6 @@ only; the server has no use for it. The jar's sha512 matches the one Modrinth li
   new file.
 - Normal maps and specular textures for extra leaves and short grass are not
   reimplemented yet, so those parts will not react to the PBR packs under Eclipse.
-- Kept on 2026-11-17.
 
 ## DEConfig Integration, added on 2026-11-17
 
@@ -692,7 +695,8 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   Aggressive Chunk Loading under Video Settings, Performance, to stop transparent
   chunks. `config/DistantHorizons.toml` has (checked 2026-11-07)
   `lodChunkRenderDistanceRadius=256`, HIGH horizontal and vertical quality,
-  `numberOfThreads=6` (16 took every CPU thread from the game), `threadRunTimeRatio="1.0"`,
+  `numberOfThreads=6` (16 took every CPU thread from the game; it's raised to 16 only to
+  build LODs fast in a test world, then set back), `threadRunTimeRatio="1.0"`,
   `enableCaveCulling=false` with a height of 60 and `enableCloudRendering=false`; the
   client generator is
   `PRE_EXISTING_ONLY` because the server now builds the LODs. The server runs the same
@@ -759,6 +763,16 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   were not needed. Its jar and `config/functionalstorage/` are in
   `backups/removed-mods/2026-11-17/`.
 
+- **Spark 1.10.19** (removed 2026-11-18): its async profiler crashes the JVM on Java 25
+  (`SIGSEGV` in `VMThread::nativeThreadId`, 2026-11-10), and LagGoggles, Opis and JFR
+  cover profiling. The jar is in `backups/removed-mods/2026-11-18/`.
+
+- **Touhou Little Maid** (`touhou_little_maid-bc127db.jar`, a 1.7.10 port; tried and
+  dropped 2026-11-18): it crashed five times that day, on a creeper spawn
+  (`ClassCastException` in `CreeperJoinWorldEvent`), in two render handlers with an empty
+  hand and on using a model coupon. `config/touhou_little_maid/` and
+  `touhou-little-maid-server-pack/` are in `backups/removed-mods/2026-11-18/touhou_little_maid/`.
+
 ## Runtime notes from the first successful launch
 
 - **Programmable Hatches**: three optional compat mixins have no target in 2.9
@@ -780,8 +794,8 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   FalsePatternLib 1.10.7 would also shadow the 1.12.2 that LagGoggles and other
   FalsePattern mods load against.
 - **Functionally overlapped, not in conflict**: Waystones against the ServerUtilities
-  `/warp` commands this setup enables, and Spark against the pack's Opis. Keep or drop
-  by preference; neither fights the other.
+  `/warp` commands this setup enables. Keep or drop by preference; neither fights the
+  other.
 - **Retargeted, not broken**: GTNHRates' `ic2CropsYield` key now multiplies CropsNH
   drops through `mixins/late/CropsNH.java`. The setting name is stale; the value still
   does its job.

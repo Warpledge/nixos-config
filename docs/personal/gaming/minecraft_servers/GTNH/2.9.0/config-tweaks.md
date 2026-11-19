@@ -11,9 +11,9 @@ the rest were mod-version noise. Apply them in small groups and launch between g
 
 ### InGameInfoXML: `config/InGameInfoXML/InGameInfo.xml`
 
-2.9.0 ships InGameInfoXML 2.9.8 with its own default `InGameInfo.xml`, and the custom
-layout replaces it. This instance holds the only copy now that the 2.8.4 instance is
-gone; check that its Thaumcraft and Blood Magic sections still resolve against 2.9.
+**Removed on 2026-11-17 for InfoHUD** (see [mods.md](./mods.md#infohud-added-on-2026-11-17)).
+The custom layout and `InGameInfoXML.cfg` are in `backups/removed-mods/2026-11-17/`; the
+list below is what it showed, kept as a guide for rebuilding it in InfoHUD's editor.
 
 - **Removed:** dimension and chunks line, temperature, light levels, entity count, chunk
   coordinates, storm countdown, FPS, facing direction, X/Y/Z
@@ -86,7 +86,8 @@ Kept off, each default `true`:
 
 - `MM_Blastoff`, `MM_Gravity`, `MM_Choke`, `MM_Darkness`: fling you into the air, drag
   you around, drain your air through armor or blind you
-- `MM_Exhaust`: adds hunger exhaustion, working against the Hunger Overhaul change above
+- `MM_Exhaust`: adds hunger exhaustion (chosen when Hunger Overhaul slowed hunger, which
+  is vanilla again since 2026-11-18)
 - `MM_Poisonous`, `MM_Vengeance`: vengeance reflects half your damage with no cap
 
 Back on (turned off 2026-11-01, restored 2026-11-10): `MM_Storm`, `MM_Ghastly`,
@@ -213,8 +214,8 @@ instance's `config/` against the pack's own 2.8.4 tree; every key below still ex
 - **BetterQuesting**: `config/betterquesting.cfg` → `S:Theme=betterquesting:shadow_ui_2`
   [light], `B:"View mode"=true` [false]. `B:"Lock tray"=true` is already 2.9's default.
 - **Default Server List**: `config/defaultserverlist.cfg` → `B:useURL=false` [true].
-- **InGameInfoXML**: `config/InGameInfoXML.cfg` → `S:topleft=2 22` [2 50], which moves
-  the custom HUD up to match the layout.
+- **InGameInfoXML**: `config/InGameInfoXML.cfg` → `S:topleft=2 22` [2 50], which moved
+  the custom HUD up to match the layout. The mod was removed on 2026-11-17.
 
 The rest of the hash differences were mod-version noise: new keys added by updates
 during 2.8.4's life, configs rewritten by the game, and BetterQuesting's own quest-line
@@ -287,7 +288,7 @@ Applied to the client and server copies.
 | Mod | File | Change |
 | --- | --- | --- |
 | 123Technology | `123Technology.cfg` | Overpowered integrated-factory recipes off, output multiplier 1.5 to 1.0, NHU egg-machine compat off. The file repeats each category under a pinyin and a Chinese name; both copies were changed. |
-| GTNHRates | `gtnhrates.cfg` | Every multiplier halved from the mod defaults: ores 2.0, coal 8.0, energy 2.0, tools 4.0, bees, crops, pump, resin and IC2 crops 2.0, sapling chance 1.0. `gtSimpleMinersEnergyDiscount` stays 1.0. |
+| GTNHRates | `gtnhrates.cfg` | Every multiplier halved from the mod defaults: ores 2.0, coal 8.0, energy 2.0, tools 4.0, bees, crops, pump, resin, IC2 crops and GT++ Radium-226 decay rate 2.0, sapling chance 1.0. `gtSimpleMinersEnergyDiscount` stays 1.0. |
 | Omni Miner | `omniminer/omniminer_server.cfg` | Local `6.6-balanced.13` fork of EZMiner; its defaults are these settings. Ten tiers under `tiers { }`: Stone 4/8, Copper 4/16, Iron 5/24, Bronze 5/32, Steel 6/48, Obsidian 6/64, Ardite 7/96, Cobalt 7/128, Manyullyn 8/192, Manyullyn+ 8/256 (radius/blocks), capped by `bigRadius=8` and `blockLimit=1024`. Harvest level or GT quality picks the tier; a GT drill/jackhammer on ore, chainsaw/buzzsaw on wood or Vajra adds one, electric GT adds its voltage tier, capped at 10. `stopOnUnbreakable` and `fireBreakEvent` true, `smallRadius=1` (connected only). Main modes are Chain and Special. Chains follow a tool family: pickaxe, shovel, axe, shears, or hand (empty hand, 16 blocks of ground cover at radius 8); a mattock uses the shovel and axe lists, while scythes, hammers, excavators and lumber axes never chain. An axe fells one connected tree: `logBigRadius=4` (2..4) sideways, leaves walked but not broken, up to `logBlockLimit=1024` logs. Per-family `mod:name@damage` entries live under `tools { }` (all empty: the built-in lists are used); the OP server tab opens a NEI-style editor per family, and the `Add Block to Tool List` key adds the looked-at block or an NEI item (Shift removes). Only OPs, a cheats-enabled world or the server-owner list may edit them. Block Swap drops the old block and only touches player-placed blocks, 256 at radius 2. `addExhaustion=0.01`, `breakPerTick=128`. Features under `features { }`: Chain, Minesweeper, Crop Harvest, Sudoku, Planting and Block Swap on; Prospecting and Cached Chain off. Probe cooldowns 0.1 s, prospect probe 3600 s, under `general`. The client config `config/omniminer/omniminer.cfg` keeps the preview, `useHud=true`, `hudScale=75`, wave HUD animation and the full-inventory tool switch. `omniminer_server.cfg.bak-2026-11-18` keeps the test-time lists from before they were cleared. Old configs stay in `EZMiner_Server.cfg.bak-2026-11-17-fork` and `config/EZMiner/`; the server file sits at the instance root, not in `config/`. |
 | GTMB | `gtmb-stargate-rules.cfg` | `enabled=true`: blueprint demolition cannot mine ores, cut/paste cannot move or overwrite ores, and decoration vouchers are off. |
 | GTSWN | `gtswn/gtswn_network.cfg` | `UplinkLossEU=0.1`, so wireless power uploads lose 10 percent against the 15 percent downlink. |
