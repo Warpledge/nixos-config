@@ -70,6 +70,26 @@ in {
       limit.output = lib.mkForce 16384;
     });
 
+  #--- Test provider: the Halogen container (podman/docker run by hand, port 8731,
+  #--- see local-ai-models.md). It serves one model and no aliases, and its
+  #--- reasoning effort is fixed on the server (HALOGEN_REASONING_EFFORT).
+  programs.opencode.settings.provider.halogen = {
+    npm = "@ai-sdk/openai-compatible";
+    name = "Halogen (local test)";
+    options.baseURL = "http://127.0.0.1:8731/v1";
+    models."halogen-qwen3.8-flash-next" = {
+      name = "Qwen3.8 Flash Next (Halogen)";
+      limit = {
+        context = 262144;
+        output = 16384;
+      };
+      modalities = {
+        input = ["text" "image"];
+        output = ["text"];
+      };
+    };
+  };
+
   programs.opencode.settings = {
     #--- Two primary agents (Tab switches): `system` for this computer, the default,
     #--- and `gamedev` for the game projects under ~/Projects, which
@@ -133,6 +153,18 @@ in {
           // {
             description = "Answers questions about this computer and fixes its errors";
             # With this machine's and Ky's notes; AGENTS.md loads from the repo itself
+            system = lib.concatMapStringsSep "\n\n" builtins.readFile [
+              ./agents/system.md
+              ../CLAUDE.md
+              ../../../users/kylerj/CLAUDE.md
+            ];
+          };
+        halogen =
+          base
+          // {
+            #--- `system` on the Halogen engine, for the side-by-side test
+            description = "The system agent, on the Halogen container on 127.0.0.1:8731";
+            model = "halogen/halogen-qwen3.8-flash-next";
             system = lib.concatMapStringsSep "\n\n" builtins.readFile [
               ./agents/system.md
               ../CLAUDE.md
