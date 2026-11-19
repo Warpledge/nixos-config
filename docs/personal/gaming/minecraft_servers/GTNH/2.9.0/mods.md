@@ -145,6 +145,7 @@ was installed on 2026-11-01 for GTNL's quest lines, so it is unused now and its 
 from `mods/`; the pack's BetterQuesting stays. GTNL's Steam Revolution machines (Cactus
 Wonder, Steam Circuit Assembler, Steam Assembly Line) shortcut the steam age; the Cactus
 Wonder alone outputs up to 32M L/s. The GTNL jars are in `backups/removed-mods/2026-11-10/`.
+GTNL came back on 2026-11-18; see [GTNL, re-added](#gtnl-re-added-on-2026-11-18).
 
 **ElytraMining, SharedProspecting, BetterLineBreak and GTIT were removed on 2026-11-10;**
 their jars are in `backups/removed-mods/2026-11-10/`. VisualProspecting 1.5.42 in 2.9.0
@@ -541,6 +542,55 @@ nothing. The jar's sha256 matches the digest GitHub lists.
 - Config: `config/InfoHUD/Layout.json`, `GeneralConfig.cfg`, `LightOverlayConfig.cfg` and
   `ClassicBarConfig.cfg`. Kept on 2026-11-17.
 
+## GTNL, re-added on 2026-11-18
+
+`sciencenotleisure-0.2.7.jar` (GT: Not Leisure 0.2.7, 2026-11-16), `gtnllib-1.1.8.jar`
+and `bqapi-1.1.4.jar` are on the client only so far; all three are side B. The sha256 of
+each matches the digest GitHub lists. 0.2.7 merged "适配 GTNH 2.9.0 正式版" (#666) and
+builds against GT 5.09.54.265, the pack's own. It was removed on 2026-11-10 as too
+strong; it's back because the world is solo. Its steam machines (Cactus Wonder and the
+rest) have no config switch and stay as they are.
+
+Config edits in `config/GTNotLeisure/` (the rc2.1 files were kept and reused):
+
+- `recipe.cfg`: `enableChamberRecipesBuff=false` [true]; `enableSomethingRecipe=false`
+  [true], set before. `enableDeleteRecipe` stays true: it removes the assembly line
+  recipes GTNL replaces with its own.
+- `machine.cfg`: `enableRecipeOutputChance=false` [true], the bonus output chance per
+  voltage tier above the recipe's (2.5% a tier, like QFT).
+- `item.cfg`: `elaina_brooch { enabled=false }` [true], which turns off every brooch
+  effect (creative flight, death prevention, heals, potion effects). The section is new in
+  0.2.7, written by hand ahead of the first launch. `vein_miner_pickaxe { maxRange=-1 }`
+  [32]; `maxAmount=1` [327670] was set before.
+
+**The Vein Mining Pickaxe is disabled by `scripts/gtnl_disable_vein_pickaxe.zs`.** It
+chains up to 32767 blocks from an LV crafting or assembler recipe. The config caps only
+clamp values its GUI has written into the item's NBT, and a fresh pickaxe falls back to a
+3-block gap and 32767 blocks (`VeinMiningPickaxe.chainBreak` in 0.2.7), so the config
+alone can't stop it. The script removes both recipes and hides it in NEI. The assembler
+removal names GT item ids by hand; if `minetweaker.log` says "Could not find recipe to
+remove!", check them with `/mt hand`.
+
+GTNL hooks in the other added mods (none changed):
+
+- GT-Steam-Reborn, `config/gtsr/gtsr.cfg`: `gtnlEnhancement` [false] gives GTNL steam
+  machines 4x speed at 4x steam when fed real superheated steam, and enables GTSR's cooling
+  hatch; `gtnlPipelessSteam` [false] lets GTSR's steam machines draw from GTNL's pipeless
+  steam hatch tank. Both off; restart after a change.
+- Twist Space Technology: `Debug_remove_sciencenotleisure_CompressedStargateTier7_ExtremeRecipe`
+  [true] drops one Mega Crafting Center recipe that runs out of memory with GTNL loaded.
+  Keep it on.
+- Neo ECO AE Extension uploads patterns into GTNL's Super Crafting Input Hatch (ME) and
+  Assembler Matrix; Wildcard Pattern hooks GTNL's pattern slots in the same hatch;
+  AE2Things reads GTNL's Yog-Sothoth terminal and its Processing Pattern Terminal size
+  (`OtherConfig`). No switches.
+- GT:NH Processing+ reuses GTNL's BartWorks materials when GTNL defines the same one,
+  instead of registering a duplicate; 123Technology checks whether GTNL is loaded. No
+  switches.
+- GT-Miao-Blueprint recognises GTNL's steam tree farm hatches; Chromatic Tooltips Compat
+  has `scienceNotLeisureEnabled` [true]; NH-Utilities' lang manager lists
+  `ScienceNotLeisure`; ChromaPatch gives GTNL's glowing blocks light colours.
+
 ## Left out until their author ships a 2.9 build
 
 - **BoxPlusPlus 2.1.2**: last release 2025-12-10, built against Galaxy Space 1.1.121.
@@ -702,6 +752,9 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   (`storage_core`, `storage_box`, `condensed_storage_box`, `hyper_storage_box`,
   `crafting_box`, `input_port`, `portable_storage_terminal`) still exists in EZStorage
   1.8.3 (rechecked on the 2026-11-15 bump).
+- **`scripts/gtnl_disable_vein_pickaxe.zs`**: written 2026-11-18. It removes GTNL's Vein
+  Mining Pickaxe recipes and hides it in NEI; see
+  [GTNL, re-added](#gtnl-re-added-on-2026-11-18). The server needs it too.
 
 ## Quest data
 

@@ -9,6 +9,9 @@
   ],
   "mods": [
     {"name": "GTNHRates", "jar": "^gtnhrates-", "side": "B", "source": "github:Sladki/GTNHRates"},
+    {"name": "GT: Not Leisure", "jar": "^sciencenotleisure-", "side": "B", "source": "github:GTNotLeisure/GT-Not-Leisure", "asset": "^sciencenotleisure-[0-9.a-z-]+(?<!-dev)(?<!-sources)(?<!-predowngrade)\\.jar$", "note": "Re-added 2026-11-18. Needs matching GTNLLib and Better Questing API. Its Vein Mining Pickaxe is disabled by scripts/gtnl_disable_vein_pickaxe.zs; recheck its recipes and the config clamp on a bump. Config edits in mods.md."},
+    {"name": "GTNLLib", "jar": "^gtnllib-", "side": "B", "source": "github:GTNotLeisure/GTNLLib", "asset": "^gtnllib-[0-9.]+\\.jar$", "note": "1.1.1 failed at launch on Angelica 2.2.43; check the font mixin on a bump."},
+    {"name": "Better Questing API", "jar": "^bqapi-", "side": "B", "source": "github:GTNotLeisure/BetterQuestingAPI", "asset": "^bqapi-[0-9.]+\\.jar$", "note": "For GTNL's quest lines."},
     {"name": "Twist Space Technology", "jar": "^TwistSpaceTechnology-", "side": "B", "source": "github:Nxer/Twist-Space-Technology-Mod", "note": "Reset GregTech.lang and TwistSpaceTechnology.cfg on update. 0.8.1 and 0.8.2 crash world start on the Bottled Chaos thionyl chloride null; 0.8.0 is installed. Do not update until fixed; see mods.md."},
     {"name": "123Technology", "jar": "^OTHTechnology-", "side": "B", "source": "github:CallmeSHaobe/123Technology", "note": "Releases before 2.2.1 crash on 2.9.0 stable, and 2.2.1 skips recipes with Twist loaded; its overpowered recipes are off in config-tweaks.md."},
     {"name": "Omni Miner", "jar": "^omniminer-", "side": "B", "source": "local:~/Projects/ezminer-balanced", "note": "warpledge's own fork of EZMiner 6.6 (GTO Ultimine block limits, per-mode feature switches); see mods.md. Client only so far. Upstream is tracked by the parked EZMiner entry."},
