@@ -107,6 +107,8 @@ in {
     npm = "@ai-sdk/openai-compatible";
     name = "Halogen";
     options.baseURL = "http://127.0.0.1:8731/v1";
+    # The server demands HALOGEN_API_KEY; the key itself lives outside the repo
+    options.apiKey = "{file:${config.home.homeDirectory}/.config/halogen/key}";
     models."halogen-qwen3.8-flash-next" = {
       name = "Qwen3.8 Flash Next (Halogen)";
       limit = {
