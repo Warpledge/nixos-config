@@ -68,6 +68,8 @@ in {
     (section "KDE: Apps" {
       kde-task-manager =
         bind "Ctrl+Alt+Delete" "Task manager" {spawn = dms "processlist toggle";};
+      #--- Halogen holds ~95 GB while it runs; this frees it for games
+      halogen-toggle = bind "Mod+Shift+H" "Halogen AI server on / off" {spawn = ["halogen-toggle"];};
     })
 
     (section "KDE: Windows" {

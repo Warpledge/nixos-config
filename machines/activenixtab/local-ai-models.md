@@ -2,22 +2,27 @@
 
 What each model tested on this machine is like to use, the settings it ended on,
 and the raw measurements behind that, so the next model change starts from here
-instead of from scratch. `home/local-ai.nix` holds the live settings. Memory budget
-for models: 80 GB (Ky, 2026-10-27), possibly 90 GB, out of 128 GB.
+instead of from scratch. `home/local-ai.nix` holds the live settings. Halogen, the
+engine in use, commits about 95 GB while it runs (Ky accepted that on 2026-11-18
+for the quality and speed); the 80-90 GB budget below still applies to the
+llama.cpp models.
 
-## At a glance (2026-10-27)
+## At a glance (2026-11-18)
 
-**In use:** Nemotron 3.5 Super VL. It fits the 80 GB budget and never broke a
-coordinator rule, but it's the slowest to finish a coding task.
-**Best results:** Qwen3.8 Flash Next (UD-IQ3_XXS) at medium effort. It solved every
-coding task in one to two minutes and behaved well as a coordinator, but it needs
-about 86 GB, which only fits a 90 GB budget.
+**In use:** Qwen3.8 Flash Next on Halogen (the engine's own v2 checkpoint,
+4.16 bpw). Fastest and best-behaved here: 3/3 coding, 6/8 coordinator on a
+single turn, 3/4 multi-turn with no direct writes, and the most detailed image
+description. It holds about 95 GB whenever it runs, so `Mod+Shift+H`
+(`halogen-toggle`) stops it for games.
+**Second pick:** Nemotron 3.5 Super VL through llama-swap, still installed and
+pickable in `/model`, for when the memory has to stay lower.
 
 | Model | Pick it for | Waiting on it | RAM left for everything else | Watch out for |
 |---|---|---|---|---|
-| **Flash Next IQ3_XXS, medium** | Coordinator and workers | Small coding task: 1 to 2 min. Reads a 20K-token file in 47 s | ~20 GB | Over the 80 GB budget. Leave effort at `medium`: its default (`xhigh`) overthinks |
+| **Halogen, v2 checkpoint, medium** (in use) | Everything: coordinator and workers | Small coding task: 16 to 40 s. Reads a 20K-token file in ~13 s | ~18 GB | One model only. ~95 GB held while it runs. Update is `docker pull`, not Omni Settings |
+| **Flash Next IQ3_XXS, medium** (llama-swap) | Fallback in `/model` | Small coding task: 1 to 2 min. Reads a 20K-token file in 47 s | ~20 GB | Over the 80 GB budget. Leave effort at `medium`: its default (`xhigh`) overthinks |
 | Flash Next IQ3_XXS, solo (1 slot of 256K) | One session at a time, no compaction | Small coding task: 1 to 2 min. Reads a 20K-token file in about 1 min | 19 to 22 GB | One slot, so parallel requests queue. A 120K-token turn reads 10 min — keep sessions near 60K |
-| **Nemotron 3.5 Super VL** (in use) | Coordinator and workers within 80 GB | Small coding task: 3.5 to 6.5 min. Reads a 20K-token file in 63 s | ~40 GB | Slow at full reasoning. Tried `sudo` once |
+| **Nemotron 3.5 Super VL** | Coordinator and workers within 80 GB | Small coding task: 3.5 to 6.5 min. Reads a 20K-token file in 63 s | ~40 GB | Slow at full reasoning. Tried `sudo` once |
 | gpt-oss-120b + Qwen3.5-9B for images | Speed, if you can live without built-in vision | Small coding task: 1 to 2 min. Reads a 20K-token file in 23 s | not measured (77 GB loaded) | Vision comes from a small helper that made up details. Called `edit` directly once |
 | Qwen3.8-27B, medium | Lots of free memory | Small coding task: about 3 min. Reads a 20K-token file in 81 s | ~58 GB | Slowest writer: about 13 tokens a second |
 | Flash Next Q3_K_XL | Don't | n/a | ~10 GB | 93 GB: the file that ran out of memory |
@@ -28,6 +33,63 @@ about 86 GB, which only fits a 90 GB budget.
 is what was free with the model loaded and a test running.
 
 ## Each model in plain terms
+
+### Qwen3.8 Flash Next on Halogen (in use, 2026-11-18)
+
+The best setup tested on this machine. A dedicated engine for this one model,
+run as a container and wired in as opencode's provider `halogen`; Llama.cpp's
+GGUF build of the same model got three of three coding tasks right, and so does
+this, but it is three to seven times faster to answer and it follows the
+coordinator rules better (6/8 against 3/8 on a single turn).
+
+Measured here: writing code at 55 to 86 tokens a second depending on context
+depth (49.6 at 79K of context), reading at 940 to 1,644 tokens a second, and
+98 tokens a second total across four parallel requests. Its 47.7 GiB n-gram
+lookup table is read from disk through the page cache rather than held, which
+is why `free` shows far less "used" than llama.cpp did: the weights are mapped
+from the `.hgn` files (62 GiB pinned) and the table stays in cache. `MemFree`
+is the number to watch (~18 GB), not the percentage or `MemAvailable`.
+
+What it costs: about 95 GB is committed while it runs even when idle, it serves
+only this model family, and its updates are `docker pull` by hand. The engine's
+own README calls it a machine of its own; with the desktop also running, its
+docs expect some prefill slowdown from the table falling out of cache.
+
+Settings (`halogen-run` in `home/local-ai.nix`; starts with the session as the
+user unit `halogen.service`):
+
+- `HALOGEN_KV8=1` and `HALOGEN_KV_POOL_POSITIONS=262144`: an 8-bit KV cache,
+  4.5 GiB for one 256K conversation instead of 7.7 (decode ~1.7% slower, more
+  page cache left for the table).
+- `HALOGEN_REASONING_EFFORT=medium`: the template's own default is `xhigh`,
+  which overthinks.
+- `HALOGEN_VISION_TOWER=/models/qwen38-flash-next-vision.hgn`: images are off
+  without it (a 400 naming the flag).
+- `HALOGEN_CACHE_DIR=/cache`: prompt cache on disk, so a conversation survives
+  a restart instead of re-reading its history.
+- `-u $(id -u):$(id -g)`: without it the cache and its files land root-owned in
+  Ky's home; the engine runs fine unprivileged.
+- Weights live in `~/halogen-models` (110 GiB), not in the nix store.
+
+Raw numbers, 2026-11-18, v2 checkpoint, `medium`, KV8, one 256K pool:
+
+| Check | Result |
+|---|---|
+| Coding, three tasks with hidden tests | 3/3, 15.8 / 31.9 / 39.9 s, 1,163 / 2,260 / 2,738 tokens |
+| Coordinator, single turn | 6/8 (both misses read a file before delegating; same rule llama.cpp trips) |
+| Coordinator, multi-turn | 3/4, no direct writes in any sequence |
+| Vision, aisle frame | correct, 17.0 s |
+| Decode, 300-word prose (`think` off) | 54.9 tok/s |
+| Prefill, 21,447 tokens | 1,644 tok/s |
+| Four parallel streams | 98.2 tok/s total |
+| Two parallel thinking streams | 82.5 tok/s total |
+| Load | 28 s cold |
+
+GGUF mode was tried first and refused Ky's file: `blk.0.ffn_gate_exps.weight:
+IQ2_S is not read by this engine`. Its supported types are `IQ4_NL`, `IQ4_XS`,
+`IQ3_S`, `Q4_0`, `Q4_K`, `Q5_K`, `Q5_0`, `Q5_1`, `Q6_K`, `Q8_0` or wider, so
+unsloth's UD mix of IQ3_XXS does not load. Its own docs also put GGUF mode at
+~25 tok/s serial, no faster than llama.cpp.
 
 ### Qwen3.8 Flash Next, UD-IQ3_XXS (best results, not in use)
 

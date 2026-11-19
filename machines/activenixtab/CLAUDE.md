@@ -71,16 +71,22 @@ committed lock conflict. A fix to one of his shared files goes into
   llama-swap (`user.llamaSwap.enable`): ask-claude, ask-claude-auto,
   opencode-desktop, `Projects/opencode.json`, and `modalities`/`limit.output`
   overrides for the provider entries (upstream's provider block has neither).
-  The models themselves are machine settings: `settings.nix`'s `localModels`
-  block adds Qwen3.8 Flash Next UD-IQ3_XXS (opencode's default, one slot of
-  256K, `reasoning_effort` medium for the agents and their `-instruct` alias
-  alike) and Nemotron 3.5 Super VL (3 slots with MTP drafting, the pick if the
-  budget drops to 80 GB) to the config's catalog, both with vision through
-  `--mmproj`, loaded from LM Studio's folder on `127.0.0.1:8090`;
-  `localModels.profile = "strix-halo"` and `gpuSharedGB = 120` carry the GPU
-  tuning and the GTT kernelParams (llama.cpp 0.7.0 from nixpkgs). Models stay
-  within 90 GB (Ky, 2026-10-27) so other
-  work keeps memory; a Godot test needs 5 GB free to start. Every model tested or tuned here
+  **Halogen is the primary engine** (2026-11-18): the `halogen.service` user unit
+  runs the `ghcr.io/peonist-ai/halogen-flash-server` container (`halogen-run`)
+  on `127.0.0.1:8731`, and every agent, the default model and `small_model` use
+  `halogen/halogen-qwen3.8-flash-next`. It holds ~95 GB while running, so
+  `Mod+Shift+H` (`halogen-toggle`) stops it for games. Weights are in
+  `~/halogen-models` (110 GiB, not in git); updates are `docker pull`, not Omni
+  Settings; `followup.py`/`par2.py` in `local-ai-bench/` were fixed for it (no
+  `model` field and `medium_effort` both get a 400). The llama.cpp models are
+  machine settings and stay pickable in `/model`: `settings.nix`'s
+  `localModels` block adds Qwen3.8 Flash Next UD-IQ3_XXS (one slot of 256K,
+  `reasoning_effort` medium) and Nemotron 3.5 Super VL (3 slots with MTP
+  drafting, the pick when memory has to stay lower) to the config's catalog,
+  both with vision through `--mmproj`, loaded from LM Studio's folder on
+  `127.0.0.1:8090`; `localModels.profile = "strix-halo"` and
+  `gpuSharedGB = 96` carry the GPU tuning and the GTT kernelParams (llama.cpp
+  0.7.0 from nixpkgs). A Godot test needs 5 GB free to start. Every model tested or tuned here
   gets an entry in `local-ai-models.md`, measured with the scripts in
   `local-ai-bench/`: the at-a-glance table and a plain-language section first (what
   to pick it for, how long Ky waits, RAM left, what to watch out for), then its

@@ -9,10 +9,14 @@ sys.argv += [] ; BASE, MODEL, LABEL = sys.argv[1:4]
 sys.argv = [sys.argv[0], BASE, MODEL, LABEL]
 HERE = os.path.dirname(os.path.abspath(__file__))
 src = open(os.path.join(HERE, "bench.py")).read()
-# reuse chat(), TOOLS, SYSTEM, WRITE_RE without running the benchmark body
+# reuse chat(), TOOLS, SYSTEM, WRITE_RE without running the benchmark body;
+# the tools live inside bench.py's BENCH_SKIP_TOOLS block, so that slice is
+# dedented and exec'd on its own (the script's results dict comes earlier)
 ns = {"__file__": os.path.join(HERE, "bench.py")}
-exec(src.split("results = {")[0], ns)
-exec("TOOLS = " + src.split("TOOLS = ")[1].split("def judge")[0], ns)
+exec(src[:src.index("results = {")], ns)
+tools_block = src[src.index("    TOOLS = ["):src.index("    def judge")]
+tools_block = "\n".join(l[4:] if l.startswith("    ") else l for l in tools_block.splitlines())
+exec(tools_block, ns)
 chat, TOOLS, SYSTEM, WRITE_RE = ns["chat"], ns["TOOLS"], ns["SYSTEM"], ns["WRITE_RE"]
 REPO = "/home/kylerj/nixos-config"
 
