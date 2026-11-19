@@ -5,6 +5,7 @@
 #- Running `gtnh` attaches to an existing session or starts a new one.
 #- The server auto-restarts on crash with a 12 second countdown.
 #- Clean shutdown (exit 0) stops the restart loop.
+#- Each start sends `minetweaker reload` to the console once the log says Done.
 #-
 #- Commands:
 #-   gtnh        — Start server or attach to running session
@@ -18,8 +19,27 @@
   serverDir = "$HOME/Documents/Minecraft_Servers/GT_New_Horizons_2.9.0_Server_Modified";
   sessionName = "gtnh";
 
+  #--- Reruns MineTweaker once the server is up: GTNL adds the vein pickaxe's
+  #--- assembler recipe after the first script pass, so the startup removal misses
+  #--- (docs/personal/gaming/minecraft_servers/GTNH/2.9.0/mods.md, Scripts)
+  reloadWatcher = pkgs.writeShellScript "gtnh-mt-reload" ''
+    LOG=logs/fml-server-latest.log
+    START=$(${pkgs.coreutils}/bin/date +%s)
+    # Polls 30 minutes; the mtime check skips the last run's log until FML rotates it
+    for _ in $(${pkgs.coreutils}/bin/seq 900); do
+      if [ "$(${pkgs.coreutils}/bin/stat -c %Y "$LOG" 2>/dev/null || echo 0)" -ge "$START" ] \
+        && ${pkgs.gnugrep}/bin/grep -q 'Done (' "$LOG"; then
+        ${pkgs.tmux}/bin/tmux send-keys -t "${sessionName}" "minetweaker reload" Enter
+        exit 0
+      fi
+      ${pkgs.coreutils}/bin/sleep 2
+    done
+  '';
+
   startScript = pkgs.writeShellScript "gtnh-start" ''
       while true; do
+          ${reloadWatcher} &
+          WATCHER=$!
           ${pkgs.jdk25}/bin/java \
               -Xms12G \
               -Xmx12G \
@@ -48,6 +68,7 @@
               -jar lwjgl3ify-forgePatches.jar nogui
 
         EXIT_CODE=$?
+        kill "$WATCHER" 2>/dev/null
         echo ""
         echo "Server stopped with exit code: $EXIT_CODE"
         echo "$(date): Server stopped (exit code $EXIT_CODE)" >> server_crashes.log

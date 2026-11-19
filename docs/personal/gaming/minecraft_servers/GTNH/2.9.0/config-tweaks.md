@@ -274,8 +274,10 @@ These files appear once the mod is installed. Check a new version's file for add
   binary model`), 23 were byte-identical copies, and 5 collided with a zip folder of the
   same name, where the `.ysm` wins.
 
-  The kept set is 86 models (70 `.ysm`, 16 folder models), the ones starred in the model
-  GUI; the server's `custom/` mirrors it. Stars are stored in the player's NBT as
+  The kept set was 86 models (70 `.ysm`, 16 folder models), the ones starred in the model
+  GUI. By 2026-11-19 the client's `custom/` had shrunk to 45 `.ysm` files (105 MB), and
+  the server's `custom/` was mirrored from it that day; the server's older 271-file set is
+  in its `backups/pre-sync-2026-11-19/ysmu-custom/`. Stars are stored in the player's NBT as
   `ysmu_StarModels`, a hex-encoded path under `config/ysmu/custom`, not in a config file.
   `/ysm reload` on the kept set takes seconds and 320-390 s on the full one, blocking the
   server while it runs. The index keeps only the entries a run re-recorded, so a start

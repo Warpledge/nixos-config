@@ -701,7 +701,8 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   `enableCaveCulling=false` with a height of 60 and `enableCloudRendering=false`; the
   client generator is
   `PRE_EXISTING_ONLY` because the server now builds the LODs. The server runs the same
-  jar with `chunkGeneratorMode="INTERNAL_SERVER"`, `generatorPlan="SURFACE_THEN_CHUNKS"`,
+  jar with `chunkGeneratorMode="INTERNAL_SERVER"`, `generatorPlan="CHUNKS_ONLY"` (the only plan
+  the GTNH build's settings offer),
   `pauseIfMovingQuickly=false`, four threads at a 0.5 ratio, a 128 chunk generation
   distance and no bandwidth limit on the LAN. The 2.8.4 setup also picked Quality Preset
   High and CPU Load Balanced in the mod's settings. Known issues are unchanged: memory
@@ -816,8 +817,11 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   [GTNL, re-added](#gtnl-re-added-on-2026-11-18). The server needs it too. **On a
   dedicated server the assembler removal misses at startup** ("Could not find recipe to
   remove!", tested 2026-11-19): GTNL adds that recipe after MineTweaker's first script
-  pass. `minetweaker reload` in the console once the server is up removes it. Single
-  player isn't affected, and the crafting-table recipe and NEI hiding work either way.
+  pass. `minetweaker reload` in the console once the server is up removes it, and the
+  laptop's `gtnh` launcher sends that itself when the log says `Done`
+  (`machines/legion/minecraft-servers/gtnh-server.nix`). Omni Server and `start.sh` don't,
+  so run it by hand there. Single player isn't affected, and the crafting-table recipe
+  and NEI hiding work either way.
 
 ## Quest data
 

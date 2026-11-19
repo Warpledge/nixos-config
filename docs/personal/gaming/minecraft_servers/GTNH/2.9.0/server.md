@@ -36,9 +36,8 @@ The laptop gets the `gtnh` command from
 compared on 2026-11-05 and has the server-side edits from
 [config-tweaks.md](./config-tweaks.md) (mobs, GregTech, Gendustry and the like), with the
 old files in `~/Documents/Minecraft_Servers/config-before-server-tweaks-2026-11-05.tar.gz`.
-Since the 2026-11-19 sync below it still differs from this page on `level-name`
-(`World`), Distant Horizons' generator plan (`CHUNKS_ONLY`, where mods.md says
-`SURFACE_THEN_CHUNKS`) and the YSM models. Its Omni Server entry
+Since the 2026-11-19 sync below it differs from this page only on `level-name`
+(`World`). Its Omni Server entry
 uses 12288 MB and already loads the translation agent.
 
 ## server.properties
@@ -95,8 +94,9 @@ Configs copied from the client (side-B mods, plus every edit in
 - `betterquesting/DefaultQuests/`, which adds the Benzene Fuels and Processing Plus lines
 - `omniminer/omniminer_server.cfg` at the server root, not in `config/`
 - `scripts/gtnl_disable_vein_pickaxe.zs`, next to `simplestorage_gregified.zs`. Its
-  assembler removal only takes on `minetweaker reload` after start (see
-  [mods.md](./mods.md#scripts)).
+  assembler removal only takes on `minetweaker reload` after start, which the laptop's
+  `gtnh` launcher sends on its own (see [mods.md](./mods.md#scripts)).
+- `config/ysmu/custom/`, mirrored from the client (45 models)
 
 A test boot on 2026-11-19 (Java 25, 8G, world in a scratch folder) reached `Done` with
 the synced set and stopped cleanly. WTCT logs ten `PACKAGE_TRANSFORMER_EXCLUSION` mixin
