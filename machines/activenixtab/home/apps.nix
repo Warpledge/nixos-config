@@ -16,7 +16,12 @@
   #--------------------------------------------------------------------#
   #--- Vivaldi stays declared: the default browser below names its desktop
   #--- file, which a profile install only provides once it is installed
-  home.packages = with pkgs; [vivaldi];
+  home.packages = with pkgs; [
+    #--- .NET 8 SDK: `dotnet` must be there for builds, and the Apps window's
+    #--- profile install would not survive a profile reset
+    dotnet-sdk_8
+    vivaldi
+  ];
 
   #--- Easy Effects runs in the background from login
   services.easyeffects.enable = true;
