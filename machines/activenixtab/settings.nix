@@ -361,7 +361,7 @@
   docker.enable = true;
   localModels.backend = "vulkan";
   capsLockRemap = false;
-  firewall.openTCPPorts = [];
+  firewall.openTCPPorts = [8731]; # Halogen, for another machine on the LAN (HALOGEN_API_KEY)
   firewall.openUDPPorts = [];
   blocklist.enable = false;
   blocklist.extra = [];

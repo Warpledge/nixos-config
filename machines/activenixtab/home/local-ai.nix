@@ -30,11 +30,12 @@
     done
     exec ${pkgs.docker}/bin/docker run --rm --name halogen \
       -u "$(id -u):$(id -g)" \
-      -p 127.0.0.1:8731:8731 \
+      -p 8731:8731 \
       --device /dev/kfd --device /dev/dri \
       --group-add "$(${pkgs.coreutils}/bin/stat -c %g /dev/kfd)" \
       --group-add "$(${pkgs.coreutils}/bin/stat -c %g /dev/dri/renderD128)" \
       --ipc=host --ulimit memlock=-1:-1 \
+      --env-file "$HOME/.config/halogen/env" \
       -e HALOGEN_KV8=1 \
       -e HALOGEN_KV_POOL_POSITIONS=262144 \
       -e HALOGEN_REASONING_EFFORT=medium \

@@ -73,7 +73,9 @@ committed lock conflict. A fix to one of his shared files goes into
   overrides for the provider entries (upstream's provider block has neither).
   **Halogen is the primary engine** (2026-11-18): the `halogen.service` user unit
   runs the `ghcr.io/peonist-ai/halogen-flash-server` container (`halogen-run`)
-  on `127.0.0.1:8731`, and every agent, the default model and `small_model` use
+  on `8731`, bound to the LAN with `HALOGEN_API_KEY` from
+  `~/.config/halogen/env` (not in git) so another computer's opencode can use
+  it, and every agent, the default model and `small_model` use
   `halogen/halogen-qwen3.8-flash-next`. It holds ~95 GB while running, so
   `Mod+Shift+H` (`halogen-toggle`) stops it for games. Weights are in
   `~/halogen-models` (110 GiB, not in git); updates are `docker pull`, not Omni

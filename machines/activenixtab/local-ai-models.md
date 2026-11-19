@@ -69,6 +69,10 @@ user unit `halogen.service`):
   a restart instead of re-reading its history.
 - `-u $(id -u):$(id -g)`: without it the cache and its files land root-owned in
   Ky's home; the engine runs fine unprivileged.
+- Port 8731 is published on the LAN with `HALOGEN_API_KEY` read from
+  `~/.config/halogen/env` (mode 600, not in git) and the port opened in
+  `settings.nix`'s firewall list, so another computer's opencode can reach it;
+  requests need `Authorization: Bearer <key>`.
 - Weights live in `~/halogen-models` (110 GiB), not in the nix store.
 
 Raw numbers, 2026-11-18, v2 checkpoint, `medium`, KV8, one 256K pool:
