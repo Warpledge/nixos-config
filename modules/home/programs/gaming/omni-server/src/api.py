@@ -257,7 +257,8 @@ def quick_save(args):
         if not name or not steps:
             raise servers.ServerError("Each quick command needs a name and a command")
         quick.append({"name": name, "icon": item.get("icon") if item.get("icon") in QUICK_ICONS else "bolt",
-                      "pinned": bool(item.get("pinned")), "confirm": bool(item.get("confirm")), "steps": steps})
+                      "pinned": bool(item.get("pinned")), "confirm": bool(item.get("confirm")),
+                      "onStart": bool(item.get("onStart")), "steps": steps})
         if item.get("addon"):
             quick[-1]["addon"] = str(item["addon"])
     cfg["quick"] = quick

@@ -94,8 +94,9 @@ Configs copied from the client (side-B mods, plus every edit in
 - `betterquesting/DefaultQuests/`, which adds the Benzene Fuels and Processing Plus lines
 - `omniminer/omniminer_server.cfg` at the server root, not in `config/`
 - `scripts/gtnl_disable_vein_pickaxe.zs`, next to `simplestorage_gregified.zs`. Its
-  assembler removal only takes on `minetweaker reload` after start, which the laptop's
-  `gtnh` launcher sends on its own (see [mods.md](./mods.md#scripts)).
+  assembler removal only takes on `minetweaker reload` after start. Omni Server sends it
+  through the "MineTweaker reload" quick command with Run when the server has started on,
+  and the `gtnh` launcher on its own (see [mods.md](./mods.md#scripts)).
 - `config/ysmu/custom/`, mirrored from the client (45 models)
 
 A test boot on 2026-11-19 (Java 25, 8G, world in a scratch folder) reached `Done` with

@@ -817,10 +817,11 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   [GTNL, re-added](#gtnl-re-added-on-2026-11-18). The server needs it too. **On a
   dedicated server the assembler removal misses at startup** ("Could not find recipe to
   remove!", tested 2026-11-19): GTNL adds that recipe after MineTweaker's first script
-  pass. `minetweaker reload` in the console once the server is up removes it, and the
-  laptop's `gtnh` launcher sends that itself when the log says `Done`
-  (`machines/legion/minecraft-servers/gtnh-server.nix`). Omni Server and `start.sh` don't,
-  so run it by hand there. Single player isn't affected, and the crafting-table recipe
+  pass. `minetweaker reload` in the console once the server is up removes it. In Omni
+  Server, a quick command "MineTweaker reload" (`minetweaker reload`) with **Run when the
+  server has started** on sends it at each start; the laptop's `gtnh` launcher
+  (`machines/legion/minecraft-servers/gtnh-server.nix`) does the same. `start.sh`
+  doesn't. Single player isn't affected, and the crafting-table recipe
   and NEI hiding work either way.
 
 ## Quest data
