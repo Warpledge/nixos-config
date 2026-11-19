@@ -74,8 +74,9 @@ launched yet.
 1.4.6-290. 123Technology is side B, so legion needs 2.2.1.3 before a world can be joined.
 Its release adds a Positron_e+ artillery piece, AbstractSanctum and Steam9in1 fixes and a
 Fishtorio loot-table blacklist update, and its body says it contains WIP content.
-`123Technology.cfg` has the same 14 options, so the edits in
-[config-tweaks.md](./config-tweaks.md) stand. MyCTMLib adds JSON models for the redstone
+2.2.1.3 renamed its mod id to `123technology` and so reads a new `123technology.cfg`; the
+edits in the old `123Technology.cfg` were not applied until they were moved over on
+2026-11-19 (see [config-tweaks.md](./config-tweaks.md#balance-edits-2026-11-03)). MyCTMLib adds JSON models for the redstone
 torch, repeater and comparator and renames a config node (`mc` to `minecraft`); the agent's
 table was re-keyed for two strings 123Technology moved between classes, and its one new
 string is a log line, left untranslated. Old jars are in `backups/replaced-mods/2026-11-16/`.
@@ -812,7 +813,11 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   1.8.3 (rechecked on the 2026-11-15 bump).
 - **`scripts/gtnl_disable_vein_pickaxe.zs`**: written 2026-11-18. It removes GTNL's Vein
   Mining Pickaxe recipes and hides it in NEI; see
-  [GTNL, re-added](#gtnl-re-added-on-2026-11-18). The server needs it too.
+  [GTNL, re-added](#gtnl-re-added-on-2026-11-18). The server needs it too. **On a
+  dedicated server the assembler removal misses at startup** ("Could not find recipe to
+  remove!", tested 2026-11-19): GTNL adds that recipe after MineTweaker's first script
+  pass. `minetweaker reload` in the console once the server is up removes it. Single
+  player isn't affected, and the crafting-table recipe and NEI hiding work either way.
 
 ## Quest data
 

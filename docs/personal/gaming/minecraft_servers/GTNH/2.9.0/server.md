@@ -36,8 +36,9 @@ The laptop gets the `gtnh` command from
 compared on 2026-11-05 and has the server-side edits from
 [config-tweaks.md](./config-tweaks.md) (mobs, GregTech, Gendustry and the like), with the
 old files in `~/Documents/Minecraft_Servers/config-before-server-tweaks-2026-11-05.tar.gz`.
-It still differs from this page on `level-name` (`World`), the Neo ECO AE jar (7.3.7), the
-EZMiner limits, Distant Horizons' generator plan and the YSM models. Its Omni Server entry
+Since the 2026-11-19 sync below it still differs from this page on `level-name`
+(`World`), Distant Horizons' generator plan (`CHUNKS_ONLY`, where mods.md says
+`SURFACE_THEN_CHUNKS`) and the YSM models. Its Omni Server entry
 uses 12288 MB and already loads the translation agent.
 
 ## server.properties
@@ -51,49 +52,67 @@ uses 12288 MB and already loads the translation agent.
 
 ## Mods the server needs on top of the pack
 
-From [mods.md](./mods.md), the **B** rows:
+The list is every `"side": "B"` entry in [mod-sources.json](./mod-sources.json) with the
+same jar the client has; versions live there and in [mods.md](./mods.md), not here. A
+side-B mod missing on either side, or at a different version, gets the client rejected
+at login. Two jars differ on purpose:
 
-- GTNHRates 1.12.0-2.9,
-  Twist Space `TwistSpaceTechnology-0.8.0.jar` (0.8.1 and 0.8.2 crash world start, see mods.md),
-  123Technology `OTHTechnology-2.2.1.3.jar`, EZMiner 6.4,
-  EZNuclear 1.1.1, EZStorage 1.8.2, NH-Utilities 1.7.0, Programmable Hatches 0.2.1p7-beta
-- Trash Slot 1.0.31
-- YesSteveModel Unofficial 3.0, with its models in `config/ysmu/custom/`
-- Distant Horizons `upstream-preview8-rple-biomes`, so the server builds and syncs the
-  LODs the client shows (see mods.md for the generation settings)
-- Waystones-X 1.0.16, MIAOKATZE Core 0.2.21, GT-Miao-Blueprint 0.3.34,
-  GT-Steam-Reborn 2.1.52, GT-Simple-Wireless-Network 2.1.39
-- Realistic World Gen 2 `rwg2-2.1.1.jar` in place of the pack's 2.0.6
-- ThinkTech 0.3.2, OmniOcular Unofficial 1.7.2 (server jar), BetterSprinting 1.1.3,
-  Advanced Memory Card 1.2.0-1.7.10-GTNH, WTCT 1.0.63-rc1, Omni Tweaks 0.2.0,
-  Effortless Building Gadgets 0.10.1
-- AE2Things `ae2thing-1.3.4.jar`, added to the client on 2026-11-17 and side B
-- DiskTerminal `disk_terminal-1.0.2.jar` and Functional Storage
-  `functionalstorage-1.2.3.jar`, added to the client on 2026-11-17, side B
-- Updated on the client on 2026-11-18, side B, so the server needs them too: MIAOKATZE
-  Core `miaokatzecore-v0.2.22.jar`, GT-Miao-Blueprint `gtmb-v0.3.37.jar`, GT:NH
-  Processing+ `gtnhpp-v0.2.6.1-alpha.jar` and AE2Things `ae2thing-1.3.5.jar`
-- GTNL, re-added on the client on 2026-11-18, side B: `sciencenotleisure-0.2.7.jar`,
-  `gtnllib-1.1.8.jar` and `bqapi-1.1.4.jar`, plus `config/GTNotLeisure/{recipe,machine,item}.cfg`
-  and `scripts/gtnl_disable_vein_pickaxe.zs` from the client (see mods.md)
-- The EZStorage script `scripts/simplestorage_gregified.zs` must be on the server too, or
-  the recipes differ from the client.
+- OmniOcular Unofficial uses `OmniOcularUnofficial-<version>-server.jar` from the same
+  GitHub release as the client's full jar.
+- `JourneyMapServer1.0.5_MC1.7.10.jar` is server only and accepts any client.
 
-BetterSprinting 2.3.0 and deconfigintegration are dropped (see mods.md). LagGoggles is
-still not installed. The server also needs Neo ECO AE Extension 7.3.13, on trial, and
-GTNH Modernization Upgrade 0.3.6-alpha.
-`JourneyMapServer1.0.5_MC1.7.10.jar` is in `mods/` too, server only.
+`InGameInfoXML-2.9.8.jar` stays on the server from the pack's own server zip, though the
+client dropped it for InfoHUD; its network check lets a client without it in.
 
 2.9.0 supplies its own lwjgl3ify, GTNHLib, FalsePatternLib and Extreme Sound Muffler
 Legacy, so do not copy the 2.8.4 versions of those to the server.
 
-The configs copied with the mods are `123Technology.cfg`, `EZNuclear.cfg`,
-`ezstorage.cfg`,
-`gtnhrates.cfg`, `programmablehatches.cfg`, `proghatches.mixin.properties`,
-`TwistSpaceTechnology.cfg`, `visualprospecting.cfg`, `OmniOcular/`, `NHUtilities/`, `waystones.cfg`
-(`xpBaseCost=-1`) and the `gtmb/`, `gtsr/` and `gtswn/` folders. `Omni Ocular
-Unofficial.cfg` needs `gtnhConfigAutoUpdate=false`, or each start replaces the English
-`OmniOcular/` scripts with Chinese ones (see [mods.md](./mods.md)).
+### Synced from the client on 2026-11-19
+
+The desktop copy of the laptop's server folder was brought level with the client: 18
+stale or removed jars out (EZMiner 6.3, the 11-08 Miao set, GTNL rc2.1, GTIT, ElytraMining,
+SharedProspecting and the rest) and 26 in, including Omni Miner, Benzene Fuels, Patchee,
+Thaumic Duality Interface, Wildcard Pattern, AE2 Wireless Transceiver, EZStorage Craft
+Fix and LagGoggles. The old jars, the old `123Technology.cfg` and a tarball of `config/`
+and `scripts/` are in `backups/pre-sync-2026-11-19/` in the server folder. Copy that
+folder back to the laptop to apply it there.
+
+Configs copied from the client (side-B mods, plus every edit in
+[config-tweaks.md](./config-tweaks.md) the server enforces):
+
+- `123technology.cfg` (lowercase; see [config-tweaks.md](./config-tweaks.md#balance-edits-2026-11-03)),
+  `GregTech/GregTech.cfg`, `gtmb-stargate-rules.cfg`, `HungerOverhaul/HungerOverhaul.cfg`,
+  `SpecialMobs.cfg`, `InfernalMobs.cfg`, `Thaumcraft.cfg`, `tc4tweak.cfg`, `rwg2.cfg`,
+  `neoecoae.cfg`, `Omni Ocular Unofficial.cfg`
+- `GTNotLeisure/{general,item,machine,recipe,re_avaritia,gtnllib}.cfg`, and the `gtsr/`,
+  `gtswn/`, `gtmb/`, `ae2thing/`, `miaokatzecore/` and `ThaumcraftMobAspects/` folders.
+  `gtsr/industrial-material-ids.cfg` and the enchantment and potion ids in `gtsr.cfg` and
+  `GTNotLeisure/item.cfg` have to match the client. `GregTech.cfg` brings the client's
+  `explosionItemDrop=true` [false], moot while machine explosions are off.
+- New mods' files: `ae2wtx.cfg`, `benzenefuels.cfg`, `disk_terminal_server.cfg` (must
+  match), `gtnh-modernization.cfg`, `structureterminal.cfg`, `laggoggles.cfg`,
+  `patchee.cfg`, `thaumicdualityinterface.cfg`, `bqext.cfg`
+- `betterquesting/DefaultQuests/`, which adds the Benzene Fuels and Processing Plus lines
+- `omniminer/omniminer_server.cfg` at the server root, not in `config/`
+- `scripts/gtnl_disable_vein_pickaxe.zs`, next to `simplestorage_gregified.zs`. Its
+  assembler removal only takes on `minetweaker reload` after start (see
+  [mods.md](./mods.md#scripts)).
+
+A test boot on 2026-11-19 (Java 25, 8G, world in a scratch folder) reached `Done` with
+the synced set and stopped cleanly. WTCT logs ten `PACKAGE_TRANSFORMER_EXCLUSION` mixin
+errors on both sides; they predate the sync. `start.sh`'s `JAVA` path and translation
+agent path don't exist on eclipse; the laptop module sets its own.
+
+Already matching and left alone: `EZNuclear.cfg`,
+`ezstorage.cfg`, `gtnhrates.cfg`, `programmablehatches.cfg`, `NHUtilities/`,
+`waystones.cfg`, `effortless.cfg`, `omnitweaks.cfg`, `EnderStorage.cfg`,
+`structurelib.cfg`, `angermod.cfg`, `GregTech/{Pollution,WorldGeneration}.cfg`, Gendustry,
+Forestry, LootGames, Iguana Tinker Tweaks and `OmniOcular/`. `TwistSpaceTechnology.cfg`
+keeps the server's own 0.8.0 file: the client's carries leftover keys from the 0.8.2
+trial (Mega Digester, Bottled Chaos). `DistantHorizons.toml` and `serverutilities/` are
+server-specific and were not touched. `Omni Ocular Unofficial.cfg` needs
+`gtnhConfigAutoUpdate=false`, or each start replaces the English `OmniOcular/` scripts
+with Chinese ones (see [mods.md](./mods.md)).
 
 ## ServerUtilities
 

@@ -285,9 +285,17 @@ These files appear once the mod is installed. Check a new version's file for add
 
 Applied to the client and server copies.
 
+**123Technology reads `config/123technology.cfg` since 2.2.1.3.** Its mod id became
+`123technology`, so Forge's suggested config file is the lowercase name and the edited
+`123Technology.cfg` went unread from 2026-11-16: 2.2.1.3 wrote a fresh lowercase file with
+the overpowered recipes on and a 1.5 multiplier. The three edits below were moved into
+the lowercase file on 2026-11-19 (backup `123technology.cfg.bak-2026-11-19`), and the old
+file is renamed `123Technology.cfg.legacy-unread` on the client. On a 123Technology
+update, check which file its `getSuggestedConfigurationFile` resolves to.
+
 | Mod | File | Change |
 | --- | --- | --- |
-| 123Technology | `123Technology.cfg` | Overpowered integrated-factory recipes off, output multiplier 1.5 to 1.0, NHU egg-machine compat off. The file repeats each category under a pinyin and a Chinese name; both copies were changed. |
+| 123Technology | `123technology.cfg` | Overpowered integrated-factory recipes off, output multiplier 1.5 to 1.0, NHU egg-machine compat off. The pre-2.2.1.3 `123Technology.cfg` repeated each category under a pinyin and a Chinese name; the lowercase file has one copy. |
 | GTNHRates | `gtnhrates.cfg` | Every multiplier halved from the mod defaults: ores 2.0, coal 8.0, energy 2.0, tools 4.0, bees, crops, pump, resin, IC2 crops and GT++ Radium-226 decay rate 2.0, sapling chance 1.0. `gtSimpleMinersEnergyDiscount` stays 1.0. |
 | Omni Miner | `omniminer/omniminer_server.cfg` | Local `6.6-balanced.13` fork of EZMiner; its defaults are these settings. Ten tiers under `tiers { }`: Stone 4/8, Copper 4/16, Iron 5/24, Bronze 5/32, Steel 6/48, Obsidian 6/64, Ardite 7/96, Cobalt 7/128, Manyullyn 8/192, Manyullyn+ 8/256 (radius/blocks), capped by `bigRadius=8` and `blockLimit=1024`. Harvest level or GT quality picks the tier; a GT drill/jackhammer on ore, chainsaw/buzzsaw on wood or Vajra adds one, electric GT adds its voltage tier, capped at 10. `stopOnUnbreakable` and `fireBreakEvent` true, `smallRadius=1` (connected only). Main modes are Chain and Special. Chains follow a tool family: pickaxe, shovel, axe, shears, or hand (empty hand, 16 blocks of ground cover at radius 8); a mattock uses the shovel and axe lists, while scythes, hammers, excavators and lumber axes never chain. An axe fells one connected tree: `logBigRadius=4` (2..4) sideways, leaves walked but not broken, up to `logBlockLimit=1024` logs. Per-family `mod:name@damage` entries live under `tools { }` (all empty: the built-in lists are used); the OP server tab opens a NEI-style editor per family, and the `Add Block to Tool List` key adds the looked-at block or an NEI item (Shift removes). Only OPs, a cheats-enabled world or the server-owner list may edit them. Block Swap drops the old block and only touches player-placed blocks, 256 at radius 2. `addExhaustion=0.01`, `breakPerTick=128`. Features under `features { }`: Chain, Minesweeper, Crop Harvest, Sudoku, Planting and Block Swap on; Prospecting and Cached Chain off. Probe cooldowns 0.1 s, prospect probe 3600 s, under `general`. The client config `config/omniminer/omniminer.cfg` keeps the preview, `useHud=true`, `hudScale=75`, wave HUD animation and the full-inventory tool switch. `omniminer_server.cfg.bak-2026-11-18` keeps the test-time lists from before they were cleared. Old configs stay in `EZMiner_Server.cfg.bak-2026-11-17-fork` and `config/EZMiner/`; the server file sits at the instance root, not in `config/`. |
 | GTMB | `gtmb-stargate-rules.cfg` | `enabled=true`: blueprint demolition cannot mine ores, cut/paste cannot move or overwrite ores, and decoration vouchers are off. |
