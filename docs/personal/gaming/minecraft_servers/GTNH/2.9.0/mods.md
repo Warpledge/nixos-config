@@ -571,6 +571,12 @@ alone can't stop it. The script removes both recipes and hides it in NEI. The as
 removal names GT item ids by hand; if `minetweaker.log` says "Could not find recipe to
 remove!", check them with `/mt hand`.
 
+The other items were reviewed on 2026-11-18 and left alone. The Portal Gun (LV, cheap
+shimmer fuel, crosses dimensions) adds little over Waystones-X's free teleports, and
+Elaina's Broom (unlimited flight) is gated behind void-metal Thaumcraft. The Steam Rocket
+is tier 1 (Moon only), and the Time Stop Pocket Watch can't be crafted (its infusion asks
+`Integer.MAX_VALUE` of each aspect).
+
 GTNL hooks in the other added mods (none changed):
 
 - GT-Steam-Reborn, `config/gtsr/gtsr.cfg`: `gtnlEnhancement` [false] gives GTNL steam
