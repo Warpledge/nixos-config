@@ -54,6 +54,7 @@ A `form` has `fields` (`{id, type, label, default}`; type `int` with `min`/`max`
 - A server can rewrite `server.properties` while running, so edits made then are held in `pending-properties.json` and applied by `ExecStartPre`. That file and `server.properties` hold the RCON password, so both are owner-only.
 - Anything sent to stdin is flattened to one line in `servers.send`, as a newline would start a second command, and player names must match `servers.PLAYER`. Console, chat and names render as `Text.PlainText`, since players write them.
 - A pack's own start script usually loops forever, which defeats Stop; the app launches the JVM itself from `servers.detect`'s target, and Custom command is the way around that.
+- Heap comes from `jcmd <pid> GC.heap_info`, whose format is per collector: G1 and Parallel print `total ...K, used ...K` (`HEAP_LINE`), ZGC prints `ZHeap used ...M, ... max capacity ...M` (`ZGC_LINE`). A new preset needs its line parsed in `sample_heap`, or the heap tile goes blank.
 - The JVM presets are `servers.PRESETS`. ZGC adds `-XX:+ZGenerational` only on Java 21 and 22 (23 made generational the default, 24 removed the flag, JEP 474 and 490), takes no compact object headers (JDK 25 doesn't support them with ZGC), and Java 8 has none, so `startup_set` refuses ZGC there, including a switch to Java 8 while it's set.
 
 ## Testing

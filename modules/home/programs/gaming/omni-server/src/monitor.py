@@ -31,6 +31,8 @@ HELLO_LINES = 1000
 MAX_READ = 4 << 20
 PLACEHOLDER = re.compile(r"\{\w+\}")
 HEAP_LINE = re.compile(r"total(?: reserved)? (\d+)K,(?: committed \d+K,)? used (\d+)K")
+#--- ZGC prints its own line, in M: "ZHeap used 70M, capacity 500M, max capacity 6144M"
+ZGC_LINE = re.compile(r"ZHeap\s+used (\d+)M, capacity \d+M, max capacity (\d+)M")
 TICKS = os.sysconf("SC_CLK_TCK")
 CORES = os.cpu_count() or 1
 PAGE = os.sysconf("SC_PAGE_SIZE")
@@ -272,6 +274,8 @@ class Monitor:
         m = HEAP_LINE.search(res.stdout)
         if m:
             self.state.update(heapMax=int(m[1]) * 1024, heapUsed=int(m[2]) * 1024)
+        elif z := ZGC_LINE.search(res.stdout):
+            self.state.update(heapMax=int(z[2]) << 20, heapUsed=int(z[1]) << 20)
 
     #--------------------------------------------------------------------#
     #-- Quick commands and scheduled restarts
