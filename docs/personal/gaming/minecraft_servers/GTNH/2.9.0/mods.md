@@ -24,7 +24,7 @@ Do not add these: the pack carries its own copy.
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
 | Twist Space Technology | 0.8.0 | B | 0.8.1 and 0.8.2 both crash world start on the Bottled Chaos null; 0.8.0 is installed, see below |
 | 123Technology | 2.2.1.3 | B | its README says 2.1.9+ supports GTNH 2.9.0; 2.2.1's release notes say it's adapted to 2.9.0 stable |
-| EZMiner | 6.6-balanced.4 | B | local fork of 6.6 at `~/Projects/ezminer-balanced`; ten Tinkers tiers, axe tree felling, feature switches and a player-placed-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"` |
+| Omni Miner | 6.6-balanced.13-pre2 | B | warpledge's fork of EZMiner 6.6, renamed on 2026-11-18; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, axe tree felling, feature switches and a player-placed-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"` |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
 | EZStorage | 1.8.3 | B | builds against GTNHLib 0.11.52, NEI 2.8.158; 1.8.3 fixes NEI bookmark pull with large stacks |
 | Programmable Hatches | 0.2.1p7-beta | B | p7 notes: only 2.9.0 supported; builds against GT 5.09.54.264, GTNHLib 0.11.54, NEI 2.8.171 |
@@ -125,6 +125,20 @@ every matching block in the swap radius instead of a connected chain.
 `addExhaustion=0.01`, `breakPerTick=128`, and the tier table is unchanged. Side B, so
 legion needs the same jar and no `EZMiner` jar before a world can be joined: the mod id
 changed, so a client without it is rejected by a server that still has EZMiner.
+Omni Miner is warpledge's own fork and takes upstream EZMiner changes only when needed
+(crash, 2.9 or pack fixes). `mod-sources.json` tracks upstream as a parked `EZMiner`
+entry with `lastTried` 6.6, so a new EZMiner release shows up for review.
+
+**2026-11-18: five more updates, on the client only.** MIAOKATZE Core 0.2.22 (tooltip
+fix for unregistered items), GT-Miao-Blueprint 0.3.37 (immediate controller preview,
+decoration vouchers, AE orders from the controller review, Escape and reopen fixes),
+GT:NH Processing+ 0.2.6.1-alpha (Twist Space compat, textures on two machines, updated
+block requirements on every multi), AE2Things 1.3.5 (config rewritten with a GUI,
+universal baubles slots for the 2-in-1 and backpack terminals) and Better Foliage 2.0.1
+(FalseTweaks crash fix, short grass no longer clips modded blocks). Core, Blueprint and
+Processing+ name 2.9.0 in their releases; AE2Things and Better Foliage are proven only by
+a launch. The first four are side B, so legion needs the same jars. Blueprint's 10 new
+strings are in the translation table. Old jars are in `backups/replaced-mods/2026-11-18/`.
 
 **2026-11-10: GTNL and GTNLLib were removed; Better Questing API went with them.** BQ API
 was installed on 2026-11-01 for GTNL's quest lines, so it is unused now and its jar is gone
@@ -177,8 +191,8 @@ server, and the server boots with all of them.
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
 | Waystones-X | 1.0.16 | B | [JackOfNoneTrades fork](https://github.com/JackOfNoneTrades/WaystonesFork) of BlayTheNinth's mod; `config/waystones.cfg` sets `xpBaseCost=-1` |
-| MIAOKATZE Core | 0.2.21 | B | required by the three Miao mods below, on both sides; the three bundle it in their release assets, all updated together on 2026-11-17 (Core's release says compatible with 2.9.0 final) |
-| GT-Miao-Blueprint | 0.3.34 | B | Neko Blueprint Hologram Projector: blueprint, cut and demolition modes; 0.3.34 adds public library permissions, a projector address and QR code, and selection fixes |
+| MIAOKATZE Core | 0.2.22 | B | required by the three Miao mods below, on both sides; the three bundle it in their release assets; 0.2.22 updated with Blueprint 0.3.37 on 2026-11-18 (Core's release says compatible with 2.9.0 final) |
+| GT-Miao-Blueprint | 0.3.37 | B | Neko Blueprint Hologram Projector: blueprint, cut and demolition modes; 0.3.37 adds an immediate controller preview, decoration vouchers and AE orders from the material review |
 | GT-Steam-Reborn | 2.1.52 | B | steam industry, hubs and nodes, singularity tech, the Prosperity dimension, portable weapons, a BQ line; 2.1.52 adds dimension-bound stone making and retires the legacy natural singularity item |
 | GT-Simple-Wireless-Network | 2.1.39 | B | wireless EU link nodes, monitors, ME quantum terminal; 2.1.39 groups terminal controls and adds a network information screen |
 
@@ -316,7 +330,7 @@ a launch is the proof.
 | GTNH Modernization Upgrade | 0.3.6-alpha | B | Structure terminal (project, build, replace and dismantle a GT multiblock from its StructureLib definition), ME packing tape, integrated 36-pattern item, AE order element, colour power budget for the Plasma Forge and fusion, and an ME storage vault. 0.3.6 adds order diagnostics and a storage vault lighting fix under Angelica. Alpha, one author, AI-written; the vault keeps inventory in `<world>/data/aestoragevault/`, and 0.3.0 changed that format without reading 0.2.x |
 | AE2 Wireless Transceiver | 1.2.1 | B | [peco331](https://github.com/peco331/AE2WirelessTransceiver-GTNH) fork; each release ships a plain 2.9 asset and a separate `-gtnh2.8.4` one, and the plain one is installed |
 | Benzene Fuels | 0.5.1-alpha | B | Eight staged benzene fluids from LuV to UIV and the Resonance Fuel Generator; needs GoodGenerator and GT++ ([arturia-Xayah](https://github.com/arturia-Xayah/gtnh-benzene-fuels)) |
-| GT:NH Processing+ | 0.2.5.3-alpha | B | New processing chains built on materials chemistry, meant to fill progression gaps ([shusidefloof](https://github.com/shusidefloof/GTNH-ProcessingPlus)) |
+| GT:NH Processing+ | 0.2.6.1-alpha | B | New processing chains built on materials chemistry, meant to fill progression gaps ([shusidefloof](https://github.com/shusidefloof/GTNH-ProcessingPlus)) |
 | MouseSideButtonFix | 1.0 | C | Binds the mouse side buttons, which 1.7.10 ignores ([asdflj](https://github.com/asdflj/MouseSideButtonFix)) |
 | Patchee | 1.7.3 | B | Cross-mod fixes: JABBA Dolly carries single-block bee housings, Tinkers' Mattock digs sand and snow at shovel speed, a filled Super Tank or Super Chest stops applying its effects to the carrier, VeinMiner stays server-controlled, ServerUtilities team chunk limits read the best member's rank instead of summing, F7 marks only pitch-dark blocks, and the Twilight Forest aurora and arctic fur blocks break faster once earned. No public page, so update checks report it as no-source |
 | Thaumic Duality Interface | 1.0.2 | B | ME essentia dual interface as a block, item part and P2P tunnel ([CaelixOrbit](https://github.com/CaelixOrbit/ThaumicDualityInterface)) |
@@ -395,7 +409,8 @@ restyled. Three layouts are kept, switched with a key.
 
 ## AE2Things, added on 2026-11-17
 
-`ae2thing-1.3.4.jar` (1.3.4, 2026-11-17) is on the client only so far. It is side B, so
+`ae2thing-1.3.5.jar` (1.3.5, 2026-11-18; 1.3.4 was added on 2026-11-17) is on the client
+only so far. It is side B, so
 legion needs the same jar before a world can be joined.
 
 - Source: [GTNotLeisure/AE2Things](https://github.com/GTNotLeisure/AE2Things), the
@@ -468,7 +483,8 @@ nothing. The jar's sha256 matches the digest GitHub lists.
 
 ## Better Foliage, added on 2026-11-17
 
-`BetterFoliage-LegacyEdition-2.0.0.jar` (2.0.0, 2026-11-16) is on the client. It is client
+`BetterFoliage-LegacyEdition-2.0.1.jar` (2.0.1, 2026-11-17; 2.0.0 was added first) is on
+the client. It is client
 only; the server has no use for it. The jar's sha512 matches the one Modrinth lists.
 
 - 2.0.0 is a rewrite from Kotlin to Java. It fixes the pitch-black rendering that older
