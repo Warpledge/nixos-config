@@ -24,7 +24,7 @@ Do not add these: the pack carries its own copy.
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
 | Twist Space Technology | 0.8.0 | B | 0.8.1 and 0.8.2 both crash world start on the Bottled Chaos null; 0.8.0 is installed, see below |
 | 123Technology | 2.2.1.3 | B | its README says 2.1.9+ supports GTNH 2.9.0; 2.2.1's release notes say it's adapted to 2.9.0 stable |
-| Omni Miner | 6.6-balanced.13-pre2 | B | warpledge's fork of EZMiner 6.6, renamed on 2026-11-18; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, axe tree felling, feature switches and a player-placed-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"` |
+| Omni Miner | 6.6-balanced.13 | B | warpledge's fork of EZMiner 6.6, renamed on 2026-11-18; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a player-placed-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"` |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
 | EZStorage | 1.8.3 | B | builds against GTNHLib 0.11.52, NEI 2.8.158; 1.8.3 fixes NEI bookmark pull with large stacks |
 | Programmable Hatches | 0.2.1p7-beta | B | p7 notes: only 2.9.0 supported; builds against GT 5.09.54.264, GTNHLib 0.11.54, NEI 2.8.171 |
@@ -128,6 +128,44 @@ changed, so a client without it is rejected by a server that still has EZMiner.
 Omni Miner is warpledge's own fork and takes upstream EZMiner changes only when needed
 (crash, 2.9 or pack fixes). `mod-sources.json` tracks upstream as a parked `EZMiner`
 entry with `lastTried` 6.6, so a new EZMiner release shows up for review.
+
+**2026-11-18, later: Omni Miner `6.6-balanced.13` (fork commit `c83b3f5`), client only.**
+The jar is `mods/omniminer-6.6-balanced.13.jar`; the test builds sit beside it as
+`omniminer-6.6-balanced.13-pre{2,3,4}.jar.disabled`. What changed from `.12`, tested in game:
+
+- **Built-in lists:** each tool's defaults come from the ore dictionary and block types
+  instead of material, which had let GT machines, casings, chests and glass in. Pickaxe:
+  ores and natural stone (GT granites, basalt, marble, cobble, netherrack, end stone,
+  obsidian, sandstone, hardened clay). Shovel: dirt, grass, sand, gravel, clay, snow.
+  Axe: logs and huge mushrooms. Shears: leaves, vines, webs, wool. Blocks with a tile
+  entity (ores aside) and crafted shapes (bricks, slabs, stairs, storage blocks) never
+  chain. `/omniminer dumplists` writes every family's effective list to
+  `config/omniminer/default-lists.txt`.
+- **Exact variants:** an entry is `mod:name@damage`, one variant, so adding one GT casing
+  no longer adds all its siblings; a bare `mod:name` still covers every variant. The
+  editor shows one icon per variant and has a fifth tab, Hand.
+- **Trees:** the axe fills one connected tree up to 4 blocks sideways (2..4), walks up to
+  2 leaves in a row to reach branches but never breaks them, and takes up to
+  `logBlockLimit` (1024) logs of the clicked kind. Lumber axes don't fell, and the axe
+  blocked list applies.
+- **Empty hand:** clears up to 16 tall grass, ferns, flowers, double plants and dead bushes
+  within 8 blocks; anything else with an empty hand still refuses.
+- **Defaults** now match warpledge's settings: Minesweeper and Sudoku on, wave HUD
+  animation, full-inventory smart tool switch, 0.1 s probe cooldowns, prospect probe 3600 s.
+  The probe settings had been saved with category and key swapped; they now sit in
+  `general` and the old sections are migrated away.
+- **Settings screen:** client tab Preview, HUD, Controls, Smart Tool Switch; server tab
+  Modes, Tool Tiers, Tool Block Lists, Mining, Tree Felling, Block Swap, Item Collection,
+  Performance, Stability. New HUD Text Size (50 to 150%, default 75%).
+- **Fixes:** block variants use `getDamageValue`, so a dedicated server matches blocks the
+  way clients do; a world reloads its own server config, so a remote server's lists and
+  tiers no longer leak into single player; tier limits are capped by `bigRadius` and
+  `blockLimit`; list edits reach every player and stop at 32000 characters; a mouse-bound
+  tool list key no longer crashes the client; GT electric snips count as shears.
+
+Still open in the fork: cached chain mode (off) skips the tool gate, the GT toolbox is
+resolved by reflection per block off the main thread, and Witchery vampires lost
+bare-hand chaining.
 
 **2026-11-18: five more updates, on the client only.** MIAOKATZE Core 0.2.22 (tooltip
 fix for unregistered items), GT-Miao-Blueprint 0.3.37 (immediate controller preview,

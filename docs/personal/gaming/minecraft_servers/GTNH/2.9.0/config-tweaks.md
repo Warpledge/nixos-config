@@ -126,16 +126,25 @@ sections:
 
 ### Hunger Overhaul: `config/HungerOverhaul/HungerOverhaul.cfg`
 
-- `S:hungerLossRatePercentage=25` (2.9 default: `100`)
-- `S:foodHungerDivider=2.0` is already the default, nothing to change
-- `B:useHOFoodValues=false` [true]
-- Low-stat debuffs, all `true` by default, set to `false`: `B:addLowHealthNausea`,
-  `B:addLowHealthSlowness`, `B:addLowHungerNausea`, `B:addLowHungerSlowness`
+Since 2026-11-18 hunger, healing and low-stat effects are vanilla, to match GregTech
+Odyssey (1.20.1, no Hunger Overhaul; vanilla hunger plus Farmer's Delight). Every option
+in the `difficulty scaling`, `food`, `health`, `hunger` and `low stats` sections was set
+to the `[vanilla: ...]` value the file lists, except `difficultyScaling` and
+`difficultyScalingBoneMeal` (farming) and `addFoodTooltips`. The farming sections
+(growth delays, seeds, harvesting, HarvestCraft) stay as GTNH ships them. Backup:
+`HungerOverhaul.cfg.bak-2026-11-18`. The changed keys [previous value]:
 
-2.9 adds options that 2.8.4 did not have, all default `true`: `B:addLowHealthWeakness`,
-  `B:addLowHungerWeakness`, `B:addLowHealthMiningSlowdown`,
-  `B:addLowHungerMiningSlowdown`, plus `B:modifyRegenRateOnLowHealth`. Decide these
-  before the first fight; they were never part of the old setup.
+- `S:hungerLossRatePercentage=100.0` [25], `I:minHungerToHeal=18` [8],
+  `B:disableHealingHungerDrain=false` [true], `B:modifyRegenRateOnLowHealth=false` [true]
+- `B:modifyFoodValues=false` [true], `B:addWellFedEffect=false` [true]; the food
+  dividers stay `2.0` and `20.0`, unused while food values are unmodified
+- `difficultyScalingEffects`, `difficultyScalingHealing`, `difficultyScalingHunger`,
+  `difficultyScalingRespawnHunger` all `false` [true]
+- `B:addLowStatEffects=false` and `B:addGuiText=false` [true], plus the weakness and
+  mining-slowdown debuffs `false` [true]; nausea and slowness were already off
+
+Spice of Life was compared with GTO's (Carrot: +1 heart per 10 different foods up to +10;
+Classic: decay over the last 5 meals) and left as GTNH has it, by choice.
 
 ### Spice of Life: `config/SpiceOfLife.cfg`
 
@@ -279,7 +288,7 @@ Applied to the client and server copies.
 | --- | --- | --- |
 | 123Technology | `123Technology.cfg` | Overpowered integrated-factory recipes off, output multiplier 1.5 to 1.0, NHU egg-machine compat off. The file repeats each category under a pinyin and a Chinese name; both copies were changed. |
 | GTNHRates | `gtnhrates.cfg` | Every multiplier halved from the mod defaults: ores 2.0, coal 8.0, energy 2.0, tools 4.0, bees, crops, pump, resin and IC2 crops 2.0, sapling chance 1.0. `gtSimpleMinersEnergyDiscount` stays 1.0. |
-| Omni Miner | `omniminer/omniminer_server.cfg` | Local `6.6-balanced.12` fork of EZMiner. Ten tiers under `tiers { }`: Stone 4/8, Copper 4/16, Iron 5/24, Bronze 5/32, Steel 6/48, Obsidian 6/64, Ardite 7/96, Cobalt 7/128, Manyullyn 8/192, Manyullyn+ 8/256 (radius/blocks). Harvest level or GT quality picks the tier; a GT drill/jackhammer on ore, chainsaw/buzzsaw on wood or Vajra adds one, electric GT adds its voltage tier, capped at 10. `stopOnUnbreakable` and `fireBreakEvent` true, `smallRadius=1` (connected only). Blast is gone; main modes are Chain and Special. Chains follow a tool family: pickaxe, shovel, axe or shears; a mattock uses the shovel and axe lists, while scythes, hammers, excavators and lumber axes never chain. An axe fells one tree: a 4-block horizontal radius (2..16 via Advanced `Axe Tree Radius`, `logBigRadius=4`) and up to 32 blocks vertically, with leaves treated as part of the tree so branch logs behind them are felled. Shears use tier 1. Per-family registry-name entries live under `tools { }` and cover every metadata variant; the OP server tab opens a NEI-style editor with icons, search, hover info, right-click removal and a reset, and the `Add Block to Tool List` key adds the looked-at block or an NEI item (Shift removes). Only OPs, a cheats-enabled world or the server-owner list may edit them. Block Swap drops the old block and only touches player-placed blocks (Advanced toggle), 256 at radius 2; non-GT metadata passes through unchanged, only GT meta-blocks use the GT base metadata. `addExhaustion=0.01`, `breakPerTick=128`. Features under `features { }`: Chain, Crop Harvest, Planting and Block Swap on; Minesweeper, Sudoku, Prospecting and Cached Chain off. The client config `config/omniminer/omniminer.cfg` keeps the preview and sets `useHud=true`. Old configs stay in `EZMiner_Server.cfg.bak-2026-11-17-fork` and `config/EZMiner/`; the server file sits at the instance root, not in `config/`. |
+| Omni Miner | `omniminer/omniminer_server.cfg` | Local `6.6-balanced.13` fork of EZMiner; its defaults are these settings. Ten tiers under `tiers { }`: Stone 4/8, Copper 4/16, Iron 5/24, Bronze 5/32, Steel 6/48, Obsidian 6/64, Ardite 7/96, Cobalt 7/128, Manyullyn 8/192, Manyullyn+ 8/256 (radius/blocks), capped by `bigRadius=8` and `blockLimit=1024`. Harvest level or GT quality picks the tier; a GT drill/jackhammer on ore, chainsaw/buzzsaw on wood or Vajra adds one, electric GT adds its voltage tier, capped at 10. `stopOnUnbreakable` and `fireBreakEvent` true, `smallRadius=1` (connected only). Main modes are Chain and Special. Chains follow a tool family: pickaxe, shovel, axe, shears, or hand (empty hand, 16 blocks of ground cover at radius 8); a mattock uses the shovel and axe lists, while scythes, hammers, excavators and lumber axes never chain. An axe fells one connected tree: `logBigRadius=4` (2..4) sideways, leaves walked but not broken, up to `logBlockLimit=1024` logs. Per-family `mod:name@damage` entries live under `tools { }` (all empty: the built-in lists are used); the OP server tab opens a NEI-style editor per family, and the `Add Block to Tool List` key adds the looked-at block or an NEI item (Shift removes). Only OPs, a cheats-enabled world or the server-owner list may edit them. Block Swap drops the old block and only touches player-placed blocks, 256 at radius 2. `addExhaustion=0.01`, `breakPerTick=128`. Features under `features { }`: Chain, Minesweeper, Crop Harvest, Sudoku, Planting and Block Swap on; Prospecting and Cached Chain off. Probe cooldowns 0.1 s, prospect probe 3600 s, under `general`. The client config `config/omniminer/omniminer.cfg` keeps the preview, `useHud=true`, `hudScale=75`, wave HUD animation and the full-inventory tool switch. `omniminer_server.cfg.bak-2026-11-18` keeps the test-time lists from before they were cleared. Old configs stay in `EZMiner_Server.cfg.bak-2026-11-17-fork` and `config/EZMiner/`; the server file sits at the instance root, not in `config/`. |
 | GTMB | `gtmb-stargate-rules.cfg` | `enabled=true`: blueprint demolition cannot mine ores, cut/paste cannot move or overwrite ores, and decoration vouchers are off. |
 | GTSWN | `gtswn/gtswn_network.cfg` | `UplinkLossEU=0.1`, so wireless power uploads lose 10 percent against the 15 percent downlink. |
 | GTSWN | `gtswn/gtswn.cfg` | `deviceTeleportXPCost=0`, so device info terminal teleports are free like the Waystones. |
