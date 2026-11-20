@@ -9,14 +9,14 @@ and 26 and recommends 25. Prism's Java compatibility check is skipped for the in
 
 ## JVM args
 
-`OverrideJavaArgs=true` with `-XX:+UseZGC -XX:SoftMaxHeapSize=7g
--XX:+UseCompactObjectHeaders`. These replace Prism's global args instead of adding to
-them.
+`OverrideJavaArgs=true` with `-XX:+UseZGC -XX:SoftMaxHeapSize=10g
+-XX:+UseCompactObjectHeaders` (10g in dev27 and dev33's `instance.cfg`, checked
+2026-11-20). These replace Prism's global args instead of adding to them.
 
-Staging overrides memory (`OverrideMemory=true`) with 4096 MB min and 10240 MB max, set
-on 2026-11-14. Prism's global 12288 MB for both meant ZGC committed all 12 GB at launch
-and never gave it back, so RSS sat at 16-17 GB. Measured that day in staging, with
-`jcmd` histograms after a full GC: about 2.6 GB live heap at the title screen and
+The instance overrides memory (`OverrideMemory=true`) with 4096 MB min and 10240 MB max:
+staging since 2026-11-14, Dev 33 since 2026-11-20 (dev27's main never got it).
+Prism's global 12288 MB for both meant ZGC committed all 12 GB at launch and never gave
+it back, so RSS sat at 16-17 GB. Measured that day in staging, with `jcmd` histograms after a full GC: about 2.6 GB live heap at the title screen and
 4.8 GB in a world, plus about 3 GB native (direct buffers, GPU driver, metaspace). Yes
 Steve Model loads every model in `config/yes_steve_model/custom/` into the heap, about
 800 MB for 80 models. Main and staging now keep only the 45 starred ones; copies of
