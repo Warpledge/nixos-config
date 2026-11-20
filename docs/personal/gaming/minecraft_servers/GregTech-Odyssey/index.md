@@ -4,7 +4,7 @@ Notes for GregTech Odyssey (GTO), a Forge 1.20.1 GregTech pack, kept per pack ve
 
 | Version | Status | Instance |
 | --- | --- | --- |
-| [0.6.0](./0.6.0/index.md) | Current, dev builds, new world | `GregTech.Odyssey-0.6.0-dev27` |
+| [0.6.0](./0.6.0/index.md) | Current, dev builds, new world | `GregTech.Odyssey-0.6.0-dev33` (dev27's world: `GregTech.Odyssey-0.6.0-dev27-old`) |
 
 The 0.5.6 instance (`GregTech.Odyssey-0.5.6-beta`) is retired and has no notes here; its
 world was never carried over.

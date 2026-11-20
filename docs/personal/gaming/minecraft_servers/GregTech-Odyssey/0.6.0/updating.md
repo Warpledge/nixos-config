@@ -1,7 +1,8 @@
 # GTO 0.6.0 Updating, Trials and Debugging
 
 Dev builds come out often and can corrupt saves, so nothing new reaches the real world
-(the laptop server's, built from `GregTech.Odyssey-0.6.0-dev27`) before it has passed in a copy. The
+(main is `GregTech.Odyssey-0.6.0-dev33` since 2026-11-20; the commands below still show
+dev27's staging name, so swap in the current one) before it has passed in a copy. The
 copy is a staging instance, and [tools/gto.py](../tools/gto.py) does the copying,
 carrying and checking. Run it with the game closed:
 
@@ -44,6 +45,9 @@ Every writing command takes `-n` to print what it would do. `<inst>` is a folder
 under Prism's `instances/` or a path.
 
 ## Integrated structures and Create
+
+**dev27 only.** The Dev 33 remake dropped all of these mods, and the repo's `reliable/`
+rules went with them (git history has them). The steps stay for bringing them back.
 
 The Integrated mods, Create and Supplementaries come with generated files
 ([mods.md](./mods.md#integrated-structures-2026-11-12)): the quarkblocks jar, the

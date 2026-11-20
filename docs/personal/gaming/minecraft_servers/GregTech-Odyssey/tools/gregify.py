@@ -264,9 +264,11 @@ def main():
             if new != r:
                 write(path, new, written)
 
-    for path, rid, r in recipes(find(mods, "IllagerInvasion-*.jar"), "illagerinvasion"):
-        if rid == "imbuing_table":
-            write(path, imbuing_table(r), written)
+    if any(mods.glob("IllagerInvasion-*.jar")):
+        jar = find(mods, "IllagerInvasion-*.jar")
+        for path, rid, r in recipes(jar, "illagerinvasion"):
+            if rid == "imbuing_table":
+                write(path, imbuing_table(r), written)
 
     if any(mods.glob("L_Enders_Cataclysm-*.jar")):
         cat = {rid: (path, r) for path, rid, r in

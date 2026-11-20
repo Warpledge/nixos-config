@@ -1,7 +1,101 @@
 # GTO 0.6.0 Added Mods
 
-The jars added by hand to dev27, on top of the pack's 157. Descriptions come from each
-jar's `META-INF/mods.toml`.
+The jars added by hand, on top of the pack. Descriptions come from each jar's
+`META-INF/mods.toml`. The sections from 2026-11-07 to 2026-11-15 were written for dev27;
+[Dev 33 remake](#dev-33-remake-2026-11-20) says what was dropped and added when the pack
+was rebuilt on dev33, and each older section names its jars that went.
+
+## Dev 33 remake (2026-11-20)
+
+`GregTech.Odyssey-0.6.0-dev33` (Forge 47.4.29, 148 CurseForge files) was rebuilt by
+hand in Prism instead of carried from dev27: the Integrated structures and everything
+they needed, most of the combat and exploration structure mods, and the worldgen
+speed-ups are out. It starts a new world. dev27's own copy is kept as
+`GregTech.Odyssey-0.6.0-dev27-old`.
+
+**The pack itself changed:** dev33 drops Oh The Biomes We've Gone, TerraBlender, Oh The
+Trees You'll Grow, CorgiLib, GuideMe and CreativeCore, ships Terralith and Botania GTO
+Edition, and disables Terralith's cheap redstone recipes itself (in its own Open Loader
+pack). Effortless Building and MoreMoreLang are off by hand (`removed` in
+[overlay.json](../tools/overlay.json)); AdvancementNoMore is back on, since Born in Chaos
+was the mod that needed it off.
+
+**Removed:**
+
+| Group | Mods |
+| --- | --- |
+| Integrated structures and their libraries | Integrated API, Integrated Patches, IDAS, Integrated Dungeons Arise, Integrated Seven Seas, Integrated Villages, Integrated Cataclysm, Integrated Simply Swords, Integrated Mowzie's Mobs, Integrated BOMD, Create, Moonlight, Supplementaries, Amendments, quarkblocks, Reliable Recipes, Reliable Remover, Structurify |
+| Combat and exploration | L_Ender's Cataclysm, Lionfish API, Cataclysm & BetterCombat compat, Mowzie's Mobs, Mowzie's Cataclysm, Bosses of Mass Destruction, Cerbon's API, Legendary Monsters, Moog's End Structures and Structure Lib, Illager Invasion, Apothic Combat, In Control, Alex's Mobs Continued, CodxLib, Alex's Mobs Continued Delight, Domestication Innovation, Citadel, Born in Chaos, Born In Configuration |
+| Worldgen | Tectonic, Lithostitched, FastChunkGen |
+| Maid add-ons | RPG Task, Attribute Display, Touhou Maid: Affection |
+| Other | Particular Reforged, YACL |
+
+**Added:**
+
+| Jar | Mod | What it does |
+| --- | --- | --- |
+| `YungsBetterCaves-1.20.1-Forge-2.0.7.jar` | YUNG's Better Caves | Reworked cave carvers; GT's ore veins are placed separately |
+| `YungsBetterEndIsland-1.20-Forge-2.0.6.jar` | YUNG's Better End Island | Reworked main End island and dragon fight |
+| `YungsBridges-1.20-Forge-4.0.3.jar` | YUNG's Bridges | Bridges across rivers |
+| `dungeons_enhanced-1.20.1-5.4.3.jar` | Dungeons Enhanced | Overworld structures, with its own spacing config |
+| `structure_gel-1.20.1-2.16.2.jar` | Structure Gel API | Library Dungeons Enhanced requires |
+| `PlayerRevive_FORGE_v2.0.31_mc1.20.1.jar` | PlayerRevive | Bleeding out instead of dying, so a maid or player can revive you; Maid Useful Task's revive task uses it |
+| `CreativeCore_FORGE_v2.12.42_mc1.20.1.jar` | CreativeCore | Library for PlayerRevive and AmbientSounds; the pack shipped it until dev33 |
+| `sophisticatedbuilding-forge-1.20.1-5.1.2.jar` | Sophisticated Building | Mirror, array and shape placement, in place of Effortless Building |
+| `EffortlessBuilding-PlacementFix-1.0.jar` | Effortless Building - Placement Fix | Places at the crosshair with Shoulder Surfing's offset camera |
+| `trashslotblacklist-forge-1.20.1-1.1.0.jar` | TrashSlot Blacklist | Items TrashSlot won't delete |
+| `AmbientSounds_FORGE_v6.3.11_mc1.20.1.jar` | AmbientSounds | Biome and weather ambience; client only |
+| `Drip Sounds-0.6.3+1.20.1-Forge.jar` | Drip Sounds | Water and lava drip sounds; client only |
+| `cavedust-2.0.4-1.20.1-forge.jar` | Cave Dust | Dust particles underground; client only |
+| `fusion-1.3.16-forge-mc1.20.1.jar` | Fusion | Connected textures for resource packs |
+| `PresenceFootsteps-1.20.1-1.9.1-beta.1.jar` | Presence Footsteps | Replaces the 1.0.0 Forge port; client only |
+| `StreamsReflowing-1.20.1-forge-2.17.5.jar` | Streams Reflowing | Flowing rivers; was already in dev27 without an overlay entry |
+
+**Maid add-ons**, picked to cover different jobs without overlapping (checked against
+every 1.20.1 Forge add-on on Modrinth, 2026-11-20):
+
+| Jar | Mod | What it does |
+| --- | --- | --- |
+| `1.20.1-maid_storage_manager_extension-1.4.5.jar` | Maid Storage Manager Extension | A maid logistics network: warehouse, courier and driver maids, cross-area delivery and player pickup |
+| `tlm_maid_manager-1.0.3-beta2-forge1.20.1.jar` | Maid Manager | Tablet and work block to manage, summon and dispatch maids anywhere, other dimensions included |
+| `maid-always-follow-1.20.1-1.0.2.jar` | Maid Always Follow | Chunk-loads owned maids and recalls following maids across distance and dimensions |
+| `Touhou-Little-maid-senju1.4.0-1.20.1Forge.jar` | Senju | Several tasks per maid, switching to combat when enemies are near |
+| `maidbuilder-release_1.2.0_forge1.20.1.jar` | Maid Builder | Maids build from `.litematic` blueprints |
+| `Touhou-Little-Maid-Sophisticated-1.3.0.jar` | Maid Sophisticated | Maids wear Sophisticated Backpacks |
+| `tlmforae-1.2.jar` | TLM for AE2 | An AE2 autocraft task that keeps an item above a stock limit; the pack's ME Requester does the same from a block |
+
+**Maid Spell is back on 1.8.0.1.** The 1.9.3.2 bootstrap jar picked for the remake has a
+ModLauncher service, which `gto_native` refuses
+([below](#maid-addons-and-youkais-homecoming-2026-11-12)). It's left as `.jar.disabled`;
+don't let Prism's update put it back.
+
+**Maid configs for GT-size bases** (multiblocks put storage and work far apart):
+
+| File | Setting | Why |
+| --- | --- | --- |
+| `touhou_little_maid-common.toml` | `MaidWorkRange` 64 (its max; was 32), `MaidNonHomeRange` 32 (max; was 16) | A farming maid scans every block in range, so give farm maids their own home point next to the field |
+| `maid_storage_manager-common.toml` | `fast_path_schedule` true, `try_go_center_when_fail_pathfinding` true, Create compat off; speeds stay 1.0, solver `DFS_THREADED`, `max_layer_limit` 10000 | Faster pathing across big floors; a maid stuck behind a multiblock walks back to the work center instead of giving up |
+| `defaultconfigs/maid_always_follow-server.toml` | `keepLoadedWhenOwnerOffline` false, `teleportDistance` 48, `checkIntervalTicks` 40 | It force-loads every owned maid's chunk; on the laptop server that ticked them all while you were offline. 48 blocks stops following maids blinking across a base you walk through |
+
+The other new add-ons' configs are written on first launch.
+
+**GTNH-style client QoL.** GTO already has multiblock auto-build, travel anchors and
+staff, wireless energy, item magnets, GT ore veins on Xaero's map, the Ender Fluid Link
+cover and quest-guided OPAC chunk loading, so only these were added, all client only:
+
+| Jar | Mod | What it does |
+| --- | --- | --- |
+| `moreoverlays-1.22.7-mc1.20.2.jar` | More Overlays Updated | Light level and chunk border overlays (NEI's F7 and F9); copied back from dev27 |
+| `ok_zoomer-forge-5.4.0-beta.9.jar` | Ok Zoomer | Scroll-adjustable zoom on C, like GTNH's; Modern UI's simpler zoom (Z) is unbound in `options.txt` |
+| `entityculling-forge-1.12.1-mc1.20.1.jar` | Entity Culling | Skips rendering entities and block entities behind walls. Embeddium only culls outside the view frustum, and no GTO jar culls |
+| `durabilitytooltip-1.2.0-forge-mc1.20.jar` | Durability Tooltip | Durability numbers in tooltips |
+| `supermartijn642configlib-1.1.8-forge-mc1.20.jar` | SuperMartijn642's Config Lib | Library Durability Tooltip requires |
+| `Highlighter-1.20.1-forge-1.1.9.jar` | Highlighter | Marks newly picked-up items in inventories |
+| `Iceberg-1.20.1-forge-1.1.25.jar` | Iceberg | Library Highlighter requires |
+
+`gto map --mod` found only class-level overlaps with GTO for all of them (2026-11-20).
+Watch Entity Culling with GT's large multiblock renderers; one that pops out at the
+edge of view goes in its `blockEntityWhitelist`.
 
 ## Before the staging setup
 
@@ -25,6 +119,9 @@ Distant Horizons, Touhou Little Maid and Yes Steve Model were also in the 0.5.6
 instance at the same versions. dev27 ships Embeddium, Oculus and Xaero's maps itself.
 
 ## From Cosmic Frontiers (2026-11-07)
+
+**Removed 2026-11-20** ([Dev 33 remake](#dev-33-remake-2026-11-20)): YACL. Presence
+Footsteps is now the 1.9.1 build from CurseForge.
 
 Passed a staging trial in a new world on 2026-11-07, then copied to main. The Diagonal
 mods from the same batch crashed on tag reload and were dropped
@@ -64,6 +161,8 @@ settings and the generated `Warpledge GT PBR.zip` resource pack
 
 ## Storage and weapons (2026-11-07)
 
+**Removed 2026-11-20** ([Dev 33 remake](#dev-33-remake-2026-11-20)): Illager Invasion.
+
 Passed a staging trial on 2026-11-07, then copied to main.
 
 | Jar | Mod | What it does |
@@ -78,6 +177,11 @@ Simply Swords Overhaul was dropped: it only works with Simply Swords 1.56.0
 ([candidates.md](./candidates.md#skip)).
 
 ### Recipe overrides
+
+Since 2026-11-20 only Tom's, Simply Swords and Terralith get overrides; the Illager
+Invasion, Cataclysm and Integrated Simply Swords rows are kept for history, and
+gregify.py skips a mod whose jar is missing. dev33 also switches Terralith's five
+recipes off in its own Open Loader pack.
 
 The [warpledge-gto datapack](../datapack/warpledge-gto/) replaces these recipes;
 [updating.md](./updating.md#recipe-overrides) has how it's built and installed.
@@ -102,6 +206,9 @@ instance's `defaultconfigs/` copy sets them for new worlds:
 | `wirelessTermBeaconLvl` | 1 | 0 | Infinite range for the advanced terminal with any beacon block near the storage terminal |
 
 ## Worldgen and combat (2026-11-08)
+
+**Removed 2026-11-20** ([Dev 33 remake](#dev-33-remake-2026-11-20)): Tectonic,
+Lithostitched and Apothic Combat. dev33 ships Terralith itself.
 
 Passed a staging trial on 2026-11-08, then copied to main. **Worldgen changes need a
 new world.** Alex's Mobs (EMI's reload failed; back on 2026-11-12 as
@@ -140,6 +247,8 @@ All of these are carried by `gto carry`, along with these configs:
 | `config/DistantHorizons.toml` | `chunkGeneratorMode` `INTERNAL_SERVER`, `generatorPlan` `SURFACE_THEN_CHUNKS`, `lodChunkRenderDistanceRadius` 256, `numberOfThreads` 4, `horizontalQuality`/`verticalQuality` `HIGH`, `enableCaveCulling` true, `playerBandwidthLimit` 0, `enableAdaptiveTransferSpeed` true (2026-11-08) | DH saves real chunks as it pregenerates, as on the GTNH server. The same file goes to the laptop server, which does the generating, so 4 threads leave its other 12 for ticks; the desktop only builds LODs from what the server sends. HIGH instead of EXTREME and cave culling cut LOD build work and VRAM. `INTERNAL_SERVER` tops out near 8 chunks/s on the laptop whatever the thread count, since each chunk goes through the server's own generation; `SURFACE_THEN_CHUNKS` draws a rough surface first so the horizon fills in sooner. No bandwidth cap on the LAN, with adaptive speed against lag. FastChunkGen (below) is the C2ME-style speedup |
 
 ## FastChunkGen (2026-11-08)
+
+**Removed 2026-11-20** ([Dev 33 remake](#dev-33-remake-2026-11-20)): FastChunkGen.
 
 An unofficial Forge 1.20.1 port of C2ME: threaded world generation, async chunk IO and
 threaded lighting. No GTO or GregTech test has been published, and a threading bug can
@@ -185,6 +294,10 @@ doesn't list it. Nothing to set; check again if ModernFix is updated.
 worldgen mixin that does exist (`perf.worldgen_allocation`).
 
 ## Integrated structures (2026-11-12)
+
+**Removed 2026-11-20** ([Dev 33 remake](#dev-33-remake-2026-11-20)): every jar in this
+section, Create, Supplementaries and their libraries. libgate.py, quarkblocks and the
+Reliable rules are dev27-only.
 
 Passed a staging trial one layer at a time on 2026-11-11 and 2026-11-12 (each layer a new
 world, EMI search, `gto check`), then copied to main. **The structures only generate in
@@ -274,6 +387,9 @@ to it in the integrated pack.
 
 ## Advancements and QoL (2026-11-12)
 
+**Removed 2026-11-20** ([Dev 33 remake](#dev-33-remake-2026-11-20)): Particular
+Reforged. AdvancementNoMore is on again, since Born in Chaos is gone.
+
 Passed a staging trial in a new world on 2026-11-12.
 
 | Jar | Mod | What it does |
@@ -296,6 +412,9 @@ in this batch, showed an empty screen and was removed on 2026-11-12.
 
 ## Structure spacing (2026-11-12)
 
+**Removed 2026-11-20** ([Dev 33 remake](#dev-33-remake-2026-11-20)): Structurify;
+nothing in dev33 stops structures overlapping.
+
 | Jar | Mod | What it does |
 | --- | --- | --- |
 | `structurify-forge-2.0.43+mc1.20.1.jar` | Structurify | Stops structures overlapping and thins the common structure sets; YACL ships in dev27 |
@@ -306,6 +425,9 @@ Its `config/structurify.json` is written by
 when a structure mod is added.
 
 ## Nether and End (2026-11-12)
+
+**Removed 2026-11-20** ([Dev 33 remake](#dev-33-remake-2026-11-20)): MES and Moog's
+Structure Lib; Incendium and Nullscape stay.
 
 Passed a staging trial in a new world on 2026-11-12. GTO gates both dimensions itself
 (gtocore 26.11.1 source): Nether portals never light, the Nether opens at HV through
@@ -364,6 +486,9 @@ item whose repair material is empty, so EMI skips its anvil recipe. It's harmles
 
 ## Born In Configuration (2026-11-12)
 
+**Removed 2026-11-20** ([Dev 33 remake](#dev-33-remake-2026-11-20)): Born in Chaos and
+Born In Configuration, and with them the spawn weight cut.
+
 Passed a staging trial on 2026-11-12.
 
 | Jar | Mod | What it does |
@@ -386,6 +511,9 @@ Chaotic Spring (Easter) and Chilling Horror (Christmas) stay date-based; forcing
 on makes their mobs carry and drop event gear all year.
 
 ## Maid addons and Youkai's Homecoming (2026-11-12)
+
+**Removed 2026-11-20** ([Dev 33 remake](#dev-33-remake-2026-11-20)): RPG Task, Attribute
+Display and Touhou Maid: Affection. The patches and configs below still apply.
 
 Passed a staging trial in a new world on 2026-11-12. None get recipe overrides: the
 maid items are made at TLM's altar for power points or from cheap vanilla items, and
@@ -455,6 +583,9 @@ also covers instances without Structurify.
 
 ## Alex's Mobs Continued (2026-11-12)
 
+**Removed 2026-11-20** ([Dev 33 remake](#dev-33-remake-2026-11-20)): every jar in this
+section. The classpatch source stays for a return.
+
 Passed a staging trial on 2026-11-12. None get recipe overrides: the Delight foods
 follow Farmer's Delight, and no structures are added (only a structure tag).
 
@@ -483,6 +614,11 @@ its JEI plugin stays off ([EMI and JEI plugins](#emi-and-jei-plugins-2026-11-12)
 GTO's own potions come from GT's Brewery as fluids.
 
 ## EMI and JEI plugins (2026-11-12)
+
+Since 2026-11-20 the list is Tom's Simple Storage, Touhou Little Maid, Maid Storage
+Manager, Maidsoul Kitchen, TrashSlot, and the new Maid Storage Manager Extension
+(`BusinessLicenseJeiPlugin`) and TLM for AE2 (`TlmforaeJeiPlugin`) JEI plugins; Create,
+Supplementaries, Cataclysm and the Reliable plugins went with their mods.
 
 GTO loads only its own list of EMI and JEI plugins
 ([internals/mixins.md](./internals/mixins.md#emi-and-jei)), so 13 of the added mods'
@@ -563,6 +699,9 @@ EB Wizardry and Put Mana In mixins skip, since the pack has none of those classe
 conversion rates are the 1.0 defaults in `config/manaunification-common.toml`.
 
 ## Mob tuning (2026-11-15)
+
+**Removed 2026-11-20** ([Dev 33 remake](#dev-33-remake-2026-11-20)): In Control,
+Cataclysm & BetterCombat, and the boss mods these configs tuned.
 
 In staging since 2026-11-15, trial pending. Modelled on Integrated MC 1.6.9's configs,
 with boss buffs halved because GTO already boosts mobs. All of it stays clear of GTO's
