@@ -64,10 +64,12 @@ every 1.20.1 Forge add-on on Modrinth, 2026-11-20):
 | `Touhou-Little-Maid-Sophisticated-1.3.0.jar` | Maid Sophisticated | Maids wear Sophisticated Backpacks |
 | `tlmforae-1.2.jar` | TLM for AE2 | An AE2 autocraft task that keeps an item above a stock limit; the pack's ME Requester does the same from a block |
 
-**Maid Spell is back on 1.8.0.1.** The 1.9.3.2 bootstrap jar picked for the remake has a
-ModLauncher service, which `gto_native` refuses
-([below](#maid-addons-and-youkais-homecoming-2026-11-12)). It's left as `.jar.disabled`;
-don't let Prism's update put it back.
+**Maid Spell is on 1.8.2** (`touhou_little_maid_spell-1.8.2-forge+mc1.20.1-all.jar`,
+Modrinth). The 1.9.3.2 bootstrap jar picked for the remake has a ModLauncher service,
+which `gto_native` refuses ([below](#maid-addons-and-youkais-homecoming-2026-11-12)), and
+1.8.0.1 is too old for Maid Storage Manager Extension, which requires 1.8.2 to below
+1.10 (the game stopped at the mod loading screen, 2026-11-20). Both are left as
+`.jar.disabled`; don't let Prism's update put 1.9 back.
 
 **Maid configs for GT-size bases** (multiblocks put storage and work far apart):
 
@@ -537,9 +539,10 @@ maid add-ons.
 
 **Maid Spell stays on a plain jar.** From 1.9.0 it's a bootstrap jar that registers a
 ModLauncher service (`maidspell_hurt_head`), and `gto_native` refuses unknown services,
-so the game stops before a crash report. dev27 pins 1.8.0.1; dev31 runs 1.8.2, also a
-plain jar and the newest one before the bootstrap. Its own `ArsNouveauProvider` and three
-Ars mixins let maids cast Ars Nouveau spells. Its 12 structure sets are built for Iron's
+so the game stops before a crash report. dev27 pins 1.8.0.1; dev31 and dev33 run 1.8.2,
+also a plain jar and the newest one before the bootstrap. Its own `ArsNouveauProvider`
+and three Ars mixins let maids cast Ars Nouveau spells. 1.8.2 has 12 structure sets, six
+of which gate themselves on Iron's Spells or Goety. The sets are built for Iron's
 Spells (their loot names 49 Iron's items), so
 [structures.py](../tools/structures.py) keeps them off in Structurify
 (`DISABLED_NAMESPACES`). Where Structurify isn't installed, the
