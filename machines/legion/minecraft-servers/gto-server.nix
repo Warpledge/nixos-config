@@ -12,16 +12,16 @@
 #-   gtoserver stop   — Send /stop to the running server
 #-   gtoserver status — Show whether the server session is running
 #-
-#- Server path: ~/Documents/Minecraft_Servers/GregTech.Odyssey-0.6.0-dev27-server
+#- Server path: ~/Documents/Minecraft_Servers/GregTech.Odyssey-0.6.0-dev33-server
 #- Session name: gregtech-odyssey
-#- Forge: 1.20.1-47.4.20
+#- Forge: 1.20.1-47.4.29
 #-
 #- The folder, Forge included, is built on the desktop with `gto server`
 #- (docs/personal/gaming/minecraft_servers/GregTech-Odyssey/0.6.0/server.md).
 #- One-time setup in it:
 #-   echo "eula=true" > eula.txt
 {pkgs, ...}: let
-  serverDir = "$HOME/Documents/Minecraft_Servers/GregTech.Odyssey-0.6.0-dev27-server";
+  serverDir = "$HOME/Documents/Minecraft_Servers/GregTech.Odyssey-0.6.0-dev33-server";
   sessionName = "gregtech-odyssey";
 
   startScript =
@@ -38,7 +38,7 @@
               -XX:+UseCompactObjectHeaders \
               -XX:+AlwaysPreTouch \
               -XX:+PerfDisableSharedMem \
-              @libraries/net/minecraftforge/forge/1.20.1-47.4.20/unix_args.txt \
+              @libraries/net/minecraftforge/forge/1.20.1-47.4.29/unix_args.txt \
               nogui
 
           EXIT_CODE=$?

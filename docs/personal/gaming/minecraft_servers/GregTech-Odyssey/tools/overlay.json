@@ -929,6 +929,7 @@
     "entity_model_features",
     "entity_texture_features",
     "entityculling",
+    "fusion",
     "highlighter",
     "iceberg",
     "keep_stepping",

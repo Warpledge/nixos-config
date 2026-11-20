@@ -1,20 +1,24 @@
 # GTO 0.6.0 Server
 
-A dedicated server on the laptop (legion), LAN only, with its own world created there
-(2026-11-08). The desktop instance stays the source of mods and configs.
+A dedicated server on the laptop (legion), LAN only, with its own world created there.
+The desktop instance stays the source of mods and configs.
 
-- **Folder:** `~/Documents/Minecraft_Servers/GregTech.Odyssey-0.6.0-dev27-server/` on
-  the laptop
+- **Folder:** `~/Documents/Minecraft_Servers/GregTech.Odyssey-0.6.0-dev33-server/` on
+  the laptop, built 2026-11-20 for the Dev 33 remake; its world is created on the first
+  start there. The dev27 folder and world (2026-11-08) stay beside it, no longer launched
+  by `gtoserver`
 - **Runs in:** Omni Server as `gregtech-odyssey-0-6-0-dev27`
   (`~/.config/omni-server/servers/gregtech-odyssey-0-6-0-dev27.json`, added 2026-11-08):
   Java 25, 12288 MB heap, JVM flags preset None with the client's ZGC flags as extra
-  flags, restart on crash
+  flags, restart on crash. It still points at the dev27 folder; add a dev33 entry in
+  Omni Server on the laptop to run the new one from there
 - **Command:** `gtoserver` (`log`, `stop`, `status`), from
   `machines/legion/minecraft-servers/gto-server.nix`; also in the `mcservers` picker. It
   only sees its own tmux session, so it won't report a server started from Omni Server
 - **Port:** 25566, already open in `machines/legion/default.nix`. One server runs at a
   time, since the GTNH and TFG servers use it too
-- **Loader:** Forge 1.20.1-47.4.20, read from the instance's `mmc-pack.json`
+- **Loader:** Forge 1.20.1-47.4.29 (dev27: 47.4.20), read from the instance's
+  `mmc-pack.json`
 - **Java:** `pkgs.jdk25`, 12 GB heap, ZGC with compact object headers like the client
   ([java-and-launch.md](./java-and-launch.md))
 
@@ -30,7 +34,7 @@ DataSyncLib, Botania), and `gto-installer/tools/` has the Forge installer. Its o
 On the desktop, with the game closed:
 
 ```bash
-gto server GregTech.Odyssey-0.6.0-dev27 --zip ~/Downloads/GregTech-Odyssey-server.zip --tar
+gto server GregTech.Odyssey-0.6.0-dev33 --zip ~/Downloads/gto-dev33-server/GregTech-Odyssey-server.zip --tar
 ```
 
 It writes `~/Documents/Minecraft_Servers/GregTech.Odyssey-0.6.0-dev27-server/` and a
@@ -95,10 +99,15 @@ about 262,000 chunks per area explored, so expect hours of background generation
 of GB of region files; `limitIfServerUnhealthy` pauses it when ticks fall behind. Copy
 the file again after changing it on the client.
 
-The laptop's copy differs from the client's in two values, set 2026-11-08 to match the
-GTNH server: `threadRunTimeRatio` 0.5, so its 4 threads run half the time and leave
-more for ticks, and `pauseIfMovingQuickly` false, so generation keeps up while flying.
-Set both again after copying the client's file over.
+The laptop's copy differs from the client's in three values, set 2026-11-08 to match the
+GTNH server: `numberOfThreads` 4 (the desktop client runs 16), `threadRunTimeRatio` 0.5,
+so those threads run half the time and leave more for ticks, and `pauseIfMovingQuickly`
+false, so generation keeps up while flying. `gto server` copies the client's file, so
+set all three in the built folder and repack the archive (done for the Dev 33 folder on
+2026-11-20).
+
+The Dev 33 folder (2026-11-20) has no FastChunkGen, Tectonic or Lithostitched; the
+paragraph below is about dev27's.
 
 FastChunkGen, Tectonic and Lithostitched are in `overlay.json`, so a rebuilt folder has
 them with `config/fastchunkgen.toml` and `config/tectonic.json`. Tectonic only shapes
@@ -109,8 +118,11 @@ old terrain, so start the server's world with it in place.
 
 The zip decides which of the pack's own mods run on a server, so `clientOnly` only
 covers hand-added ones: EMF, ETF, Presence Footsteps (they crashed Cosmic Frontiers'
-server), Sound Physics Remastered, Smooth Swapping, Keep Stepping, Resourcify, Particular,
-Better Controls, Shoulder Surfing Reloaded and More Overlays Updated. Cool Rain runs on
+server), Sound Physics Remastered, Smooth Swapping, Keep Stepping, Resourcify,
+Better Controls, Shoulder Surfing Reloaded and More Overlays Updated, and since Dev 33
+AmbientSounds, Drip Sounds, Cave Dust, Fusion (all its mixins are client ones), Ok
+Zoomer, Entity Culling, Durability Tooltip, Highlighter and their two libraries. The
+Dev 33 server has 175 jars. Cool Rain runs on
 the server too (added 2026-11-08). A hand-added mod that crashes the server names a client class
 (`net.minecraft.client...`) in the crash report; add its modId and rebuild the folder.
 The client keeps every jar, so the list only changes the server.
