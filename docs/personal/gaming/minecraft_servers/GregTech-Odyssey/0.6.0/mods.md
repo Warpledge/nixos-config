@@ -87,6 +87,13 @@ After the first launch (2026-11-20), from the configs the new add-ons wrote:
 | `tlm_senju/task_filter.json` | `forge:ores` and `minecraft:logs` added beside its `c:` tags | On Forge 1.20.1 vanilla and GT ores are tagged `forge:ores`, logs `minecraft:logs`; the `c:` tags alone matched nothing |
 | `defaultconfigs/maidbuilder-server.toml` | `maxScanPerSearch` 2048 (was 512), `ownerRangeWithoutHome` 32, `materialSourceRange` 128 (was 48), `maxScaffoldHeight` 96 (was 32) | Multiblock blueprints are large and tall, and the material chests sit far from the build site |
 
+**Key bind search** (Controlling's search box) showed an empty list for any search
+since dev27. The pack's Just Enough Characters 4.6.12 rewrites Searchables'
+`StringUtils.containsIgnoreCase` into its own pinyin match, which is case-sensitive, so
+no key name matched. JECh reads its targets only from `targets.json` inside its jar,
+so [mixinpatch.py](../tools/mixinpatch.py) drops that one target (2026-11-20); pinyin
+search in JEI and EMI is unchanged. Rerun it after each new pack build.
+
 **First-launch log** (`gto check --against` dev27, 2026-11-20): EMI reloaded in 7.9 s.
 The new signatures are harmless: hanging entities and sculk sensors from structure
 templates, Terralith's thermal dripstone placing into a neighbour chunk, Maid Storage

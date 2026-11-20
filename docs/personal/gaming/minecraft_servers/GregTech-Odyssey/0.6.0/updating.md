@@ -80,8 +80,10 @@ jar.
 ## Patched jars
 
 [tools/mixinpatch.py](../tools/mixinpatch.py) removes mixins that break against the
-pack from Maid Storage Manager and Youkai's Homecoming ([mods.md](./mods.md)). A fresh
-download of either crashes or breaks JEI until it has run:
+pack from Maid Storage Manager and Youkai's Homecoming, and one search target from the
+pack's own Just Enough Characters ([mods.md](./mods.md)). A fresh download of either mod
+crashes or breaks JEI, and every new pack build brings JECh's key bind search bug
+back, until it has run:
 
 ```bash
 python3 -I /etc/nixos-config/docs/personal/gaming/minecraft_servers/GregTech-Odyssey/tools/mixinpatch.py ~/.local/share/PrismLauncher/instances/GregTech.Odyssey-0.6.0-dev27-staging/minecraft/mods
