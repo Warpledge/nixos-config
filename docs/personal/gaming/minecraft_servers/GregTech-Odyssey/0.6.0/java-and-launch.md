@@ -17,12 +17,12 @@ The instance overrides memory (`OverrideMemory=true`) with 4096 MB min and 10240
 staging since 2026-11-14, Dev 33 since 2026-11-20 (dev27's main never got it).
 Prism's global 12288 MB for both meant ZGC committed all 12 GB at launch and never gave
 it back, so RSS sat at 16-17 GB. Measured that day in staging, with `jcmd` histograms
-after a full GC: about 2.6 GB live heap at the title screen and 4.8 GB in a world, plus about 3 GB native (direct buffers, GPU driver, metaspace). Yes
-Steve Model loads every model in `config/yes_steve_model/custom/` into the heap, about
-800 MB for 80 models. Main and staging now keep only the 45 starred ones; copies of
-those and the star list (`starred.txt`) are in the gitignored
-`minecraft_servers/ysm-backup/`. To check the heap size, log GC in the running client with the
-instance's JDK:
+after a full GC: about 2.6 GB live heap at the title screen and 4.8 GB in a world, plus
+about 3 GB native (direct buffers, GPU driver, metaspace). Yes Steve Model loads every
+model in `config/yes_steve_model/custom/` into the heap, about 800 MB for 80 models.
+Main and staging now keep only the 45 starred ones; copies of those and the star list
+(`starred.txt`) are in the gitignored `minecraft_servers/ysm-backup/`. To check the
+heap size, log GC in the running client with the instance's JDK:
 
 ```bash
 jcmd <pid> VM.log output=file=<path> what=gc,gc+heap=info decorators=uptime,level,tags
