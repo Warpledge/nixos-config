@@ -293,7 +293,12 @@ default): on 2026-11-10 it overwrote eight English scripts with Chinese ones, ad
 there, `gtnhConfigAutoUpdate=false`, and `forceUseClientXml=true` so a server's copy can't
 override them; the upstream files are in `config/OmniOcular.upstream-zh-2026-11-10/`. The
 server needs the same. 1.7.2 still stalls on the config merge for
-10+ seconds at startup; the fix is in a commit after the release.
+10+ seconds at startup; the fix is in a commit after the release. The English scripts
+came from the CCYF78 pack, which wrote line breaks as `"\\n"`; 1.7.x prints that
+literally, so multi-line fields overlapped the next column. On 2026-11-20 every `"\\n"` in
+`GregTech5U.xml`, `Avaritia.xml` and `AWWayofTime.xml` became `"\n"` (what the upstream
+1.7.x scripts use) on both sides; the old files are in
+`config/OmniOcular-before-newline-fix-2026-11-20.tar.gz`.
 
 One mod written for this setup on 2026-11-04, client and server:
 
