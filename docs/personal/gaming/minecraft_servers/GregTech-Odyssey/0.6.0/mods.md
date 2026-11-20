@@ -79,7 +79,21 @@ which `gto_native` refuses ([below](#maid-addons-and-youkais-homecoming-2026-11-
 | `maid_storage_manager-common.toml` | `fast_path_schedule` true, `try_go_center_when_fail_pathfinding` true, Create compat off; speeds stay 1.0, solver `DFS_THREADED`, `max_layer_limit` 10000 | Faster pathing across big floors; a maid stuck behind a multiblock walks back to the work center instead of giving up |
 | `defaultconfigs/maid_always_follow-server.toml` | `keepLoadedWhenOwnerOffline` false, `teleportDistance` 48, `checkIntervalTicks` 40 | It force-loads every owned maid's chunk; on the laptop server that ticked them all while you were offline. 48 blocks stops following maids blinking across a base you walk through |
 
-The other new add-ons' configs are written on first launch.
+After the first launch (2026-11-20), from the configs the new add-ons wrote:
+
+| File | Setting | Why |
+| --- | --- | --- |
+| `tlm_maid_manager-common.toml` | `crossDimension` true, `maxRegisteredMaids` 64 (was 16), `listShowDimension` true | GTO spreads a base over planets and orbits; summon maids from any of them |
+| `tlm_senju/task_filter.json` | `forge:ores` and `minecraft:logs` added beside its `c:` tags | On Forge 1.20.1 vanilla and GT ores are tagged `forge:ores`, logs `minecraft:logs`; the `c:` tags alone matched nothing |
+| `defaultconfigs/maidbuilder-server.toml` | `maxScanPerSearch` 2048 (was 512), `ownerRangeWithoutHome` 32, `materialSourceRange` 128 (was 48), `maxScaffoldHeight` 96 (was 32) | Multiblock blueprints are large and tall, and the material chests sit far from the build site |
+
+**First-launch log** (`gto check --against` dev27, 2026-11-20): EMI reloaded in 7.9 s.
+The new signatures are harmless: hanging entities and sculk sensors from structure
+templates, Terralith's thermal dripstone placing into a neighbour chunk, Maid Storage
+Manager's Create tag, Curios' `feet` and `spellbook` slots that no mod registers, and
+Distant Horizons' own `mapTest = "{}"` test value. Maidsoul Kitchen's Youkai kettle
+mixin fails as before (its kettle task is off). The crash report was the Maid Spell
+version stop.
 
 **GTNH-style client QoL.** GTO already has multiblock auto-build, travel anchors and
 staff, wireless energy, item magnets, GT ore veins on Xaero's map, the Ender Fluid Link
