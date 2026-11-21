@@ -492,7 +492,8 @@ That fixed the table, but the inventory still made nothing: GTNH's inventory gri
 (63, 20), so it found no slot to fill (NEI's own 2x2 fill is broken in the pack too).
 `3ea863f` logs NEI's view of each step when a Craft makes nothing, which showed it;
 `24b6e8d` replaces the 2x2 handler with one that reads the grid's real slots.
-`craftchain-24b6e8d.jar` is installed, not yet tested; `00a8fa4`, `e8fb9a2`, `4fdceaf`
+`craftchain-24b6e8d.jar` is installed; tested in game on 2026-11-21, crafting works in
+both the inventory and a crafting table. `00a8fa4`, `e8fb9a2`, `4fdceaf`
 and `3ea863f` are kept as `.jar.disabled` (the older disabled jars were gone by then).
 
 - Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
