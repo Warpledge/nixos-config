@@ -352,7 +352,8 @@ sidebar sat on top of them) and centres the close key's x. 0.3.3 draws the card,
 and popup in Craft Chain's dark see-through style and drops NEI drag onto the filter,
 which never fired in the pack; items are dropped in from the inventory. 0.3.4 keeps the
 trash panels closed while Craft Chain's overlay is open, since both sit left of the
-inventory (looked up by reflection, so Craft Chain stays optional). Every older jar,
+inventory (looked up by reflection, so Craft Chain stays optional). 0.3.4 passed in-game
+testing on the client on 2026-11-21. Every older jar,
 Trash Slot's jar and `trashslot.cfg` are in the client's
 `mods.bak-2026-11-21-omnitweaks-0.3.0/` and the server copy's
 `backups/pre-omnitweaks-0.3.0-2026-11-21/`. Copy the server folder to the laptop to apply
