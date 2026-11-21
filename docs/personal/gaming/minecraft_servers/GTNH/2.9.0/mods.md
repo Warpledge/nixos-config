@@ -458,8 +458,11 @@ a missing-items bookmark group, NEI search in the recipe picker and a refresh bu
 fixes the planner crafting tools you don't hold. Testing it turned up a diamond planned
 from a diamond and quick-craft picking a Bismutite saw from iron and wood; `924f0f8`
 fixes both (can-make now counts tools you could craft first, and a chain never uses up
-what it makes) and makes the scrollbars draggable. `craftchain-924f0f8.jar` is installed,
-not yet tested, with `bd59523` kept as `.jar.disabled`.
+what it makes) and makes the scrollbars draggable. Counting craftable tools made the old
+search time out before reaching GT tools ("search cut short", no hammers listed from iron
+and logs); `ac7551d` replaces it with one round-by-round pass per stock change.
+`craftchain-ac7551d.jar` is installed, not yet tested; `924f0f8` and `bd59523` are kept
+as `.jar.disabled`.
 
 - Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
   bottom-left row, on any GUI where NEI has a `crafting` overlay: crafting tables, the AE2
