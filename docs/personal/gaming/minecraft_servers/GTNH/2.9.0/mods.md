@@ -469,8 +469,10 @@ the first crafting GUI, and a 2 to 5 s wait on each GUI switch. `6a71826` starts
 index at world join, converts NEI's shaped and shapeless recipes in parallel, and reuses
 the craftable search when only counts change or a GUI is revisited; the log now gives
 each handler's read and convert times (`Recipe index: ... read in ... ms, converted in
-... ms`). `craftchain-6a71826.jar` is installed, not yet tested; the earlier jars are
-kept as `.jar.disabled`.
+... ms`). On 2026-11-21 a batch from `5d3e2ba` to `5f679de` (eight commits) redesigned
+the dock and added the features listed below. `craftchain-5f679de.jar` is installed, not
+yet tested in game; `6a71826` is kept as `.jar.disabled` (the older disabled jars were no
+longer in the folder by then).
 
 - Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
   bottom-left row, on any GUI where NEI has a `crafting` overlay: crafting tables, the AE2
@@ -482,11 +484,15 @@ kept as `.jar.disabled`.
   GUI's NEI bookmark container handler reports, filtered All, Now or Sub-crafts (depth and
   time budget in `config/craftchain.cfg`).
 - The Chain tab builds the grid-recipe chain for an item, stock first. An ore-dictionary
-  slot (any planks) is one step offering every variant's recipes. A step's recipes pop out
-  beside it (or show as a strip, a setting), listed "Can make" (tools on hand, materials
+  slot (any planks) is one step offering every variant's recipes. Docked, the tab is the
+  overview column: target, amount (with *Max*, the most that plans in full), TAKES,
+  MISSING, LEFTOVERS and STEPS (a Steps | Tree pill shows the full tree), with the status
+  line above Craft. A step's recipes pop out beside the dock, listed "Can make" (tools on hand, materials
   on hand or craftable) or "All", best yield first. Craft pulls through NEI's
   `BookmarkPanel.pullBookmarkItems` and runs `AutoCraftingManager`, the path a
-  crafting-mode bookmark group takes. Machine-made ingredients show as missing.
+  crafting-mode bookmark group takes. Machine-made ingredients show as missing; clicking
+  one lists NEI's other handlers for it (`GuiCraftingRecipe.getCraftingHandlers`), with
+  EU/t and time read from GT's `mRecipe` by reflection.
 - It draws through NEI's container hooks rather than as its own screen, because
   `AutoCraftingManager` stops when the open screen changes. Two mixins: one on NEI's
   `LayoutManager.updateWidgetVisiblities` adds the C button (NEI rebuilds its widgets every
@@ -499,16 +505,30 @@ kept as `.jar.disabled`.
   gets 1. NEI's `RecipeChainMath` reads a multiplier above 1 on any step as extra output
   asked for, which is what made the surplus plates.
 - The look is GTNH Planner's palette (MIT, credited in the mod's `NOTICE`); panel opacity,
-  UI scale, picker style, default list, reopen-with-next-GUI and batch mode are in its
-  settings popover.
+  UI scale, default list and every on/off behaviour are in its settings popover, each
+  with a tooltip.
 - Held tools are always used and never crafted by the plan; a tool you don't hold shows
   as *no tool*; *Craft missing tool* lists only the tools you can make from what you have
-  and opens a sub-chain that returns to the chain once the tool is crafted. GT tool wear is read from GT's `MetaGeneratedTool` API by reflection,
+  and opens a sub-chain that returns to the chain once the tool is crafted. *Tools ›*
+  queues every missing tool after the tools needed to make it (hammer, file, saw); each
+  opens in turn and you press Craft. With several of one tool held, NEI's grid filler
+  (`DefaultOverlayHandler.getSourceSlots`) already takes the most worn first. GT tool wear is read from GT's `MetaGeneratedTool` API by reflection,
   so there's no compile dependency on GT.
 - On the server it stays client-only (the server needs no jar). Waits for pulled items and
   crafted results settle on the inventory; `pullSettleTicks` (8) and `pullTimeoutTicks`
   (100) are in the config's `server` section if the server lags. Picks are saved in
   `config/craftchain-picks.json` under registry-name item keys, so they carry across worlds.
+- The open key over an item (NEI's list, the inventory, a recipe card, NEI's recipe
+  screen) opens its chain. The Craftable tab has favourite and recent targets
+  (`config/craftchain-targets.json`), a sort key (NEI, amount, name, mod) and category
+  icons (building, machines, parts, materials, tools, weapons, armour, food, rest). Each
+  kind of crafting GUI keeps its own chain and list across switches.
+- The recipe index is saved to `.minecraft/craftchain/recipe-index.bin` and reused at
+  world join while a SHA-256 fingerprint (mods and versions, handlers, every crafting
+  recipe, ore dictionary, NEI hidden items) matches; Shift+↻ re-reads NEI.
+- AE2 requests (off by default, untested): an *ME* button on a missing item with a
+  pattern opens AE2's crafting amount screen with the amount filled in, through
+  reflection into `GuiMEMonitorable.sendAction`.
 
 ## Dashboard, added on 2026-11-15
 
