@@ -477,8 +477,14 @@ list and AE2 requests weren't tried. `8a622f8` fixes both, keeps recents per GUI
 groups the settings under labelled sections and gives the C button NEI's own background
 with a centred gold C. `829b1e8` raises the search depth's ceiling from 8 to 16 (Shift-click
 steps by 5; its tooltip warns in yellow that deeper results are less exact).
-`craftchain-829b1e8.jar` is installed, not yet tested; `8a622f8`, `5f679de` and `6a71826`
-are kept as `.jar.disabled` (the older disabled jars were gone by then).
+`e8fb9a2` (2026-11-21) opens it over the player's inventory too, through NEI's
+`crafting2x2` overlay (`DefaultOverlayHandler(63, 20)` on `GuiInventory`, which NEI's
+shaped and shapeless handlers fall back to for recipes passing `isRecipe2x2`): there it
+plans, lists and crafts only recipes with every slot in the top-left 2x2, a step needing
+3x3 shows as missing ("needs a crafting table"), and worn armour isn't counted as stock.
+It's the *Open in the inventory (2x2)* setting under Opening, on by default.
+`craftchain-e8fb9a2.jar` is installed, not yet tested; `829b1e8`, `8a622f8`, `5f679de`
+and `6a71826` are kept as `.jar.disabled` (the older disabled jars were gone by then).
 
 - Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
   bottom-left row, on any GUI where NEI has a `crafting` overlay: crafting tables, the AE2
