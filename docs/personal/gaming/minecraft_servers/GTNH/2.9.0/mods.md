@@ -447,8 +447,8 @@ in `logs/fml-client-latest.log`.
 
 `craftchain` is a crafting overlay in the spirit of Magic Storage's crafting interface,
 client only. Source is `~/Projects/craftchain` (own git repo, MIT), built with GTNH's
-ExampleMod starter against NEI 2.8.171. Built and unit-tested on 2026-11-20; not yet in
-the instance's `mods/` or tested in game.
+ExampleMod starter against NEI 2.8.171. Built and unit-tested on 2026-11-20 and copied to
+the client instance's `mods/` as `craftchain-fae8311.jar`; not yet tested in game.
 
 - Opens with `C` (rebindable) or a small button above any GUI where NEI has a `crafting`
   overlay: crafting tables, the AE2 crafting terminal, the EZStorage crafting box.
