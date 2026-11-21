@@ -487,8 +487,13 @@ Tried in game the same day: Craft made nothing once the inventory already held a
 of the target as asked for (planks crafted once, then never), at a table too. NEI's chain
 maths counts the inventory as supply, the target included (`RecipeChainIterator`
 `.refreshInitialItems`); `00a8fa4` adds what's held to the target step's multiplier.
-`craftchain-00a8fa4.jar` is installed, not yet tested; `e8fb9a2` is kept as
-`.jar.disabled` (the older disabled jars were gone by then).
+That fixed the table, but the inventory still made nothing: GTNH's inventory grid sits at
+(90, 22), vanilla's at (88, 26), and NEI registers its 2x2 overlay at the fixed offset
+(63, 20), so it found no slot to fill (NEI's own 2x2 fill is broken in the pack too).
+`3ea863f` logs NEI's view of each step when a Craft makes nothing, which showed it;
+`24b6e8d` replaces the 2x2 handler with one that reads the grid's real slots.
+`craftchain-24b6e8d.jar` is installed, not yet tested; `00a8fa4`, `e8fb9a2`, `4fdceaf`
+and `3ea863f` are kept as `.jar.disabled` (the older disabled jars were gone by then).
 
 - Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
   bottom-left row, on any GUI where NEI has a `crafting` overlay: crafting tables, the AE2
