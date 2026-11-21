@@ -461,8 +461,11 @@ fixes both (can-make now counts tools you could craft first, and a chain never u
 what it makes) and makes the scrollbars draggable. Counting craftable tools made the old
 search time out before reaching GT tools ("search cut short", no hammers listed from iron
 and logs); `ac7551d` replaces it with one round-by-round pass per stock change.
-`craftchain-ac7551d.jar` is installed, not yet tested; `924f0f8` and `bd59523` are kept
-as `.jar.disabled`.
+`9311454` adds a search depth control (− N +) to the top bar and raises the default
+from 4 to 6, the depth a GT saw from logs and ingots needs; this instance's
+`config/craftchain.cfg` was set to 6 by hand, since an existing config keeps its value.
+`craftchain-9311454.jar` is installed, not yet tested; the earlier jars are kept as
+`.jar.disabled`.
 
 - Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
   bottom-left row, on any GUI where NEI has a `crafting` overlay: crafting tables, the AE2
