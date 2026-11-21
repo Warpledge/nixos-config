@@ -27,9 +27,9 @@ Do not add these: the pack carries its own copy.
 | Omni Miner | 6.6-balanced.13 | B | warpledge's fork of EZMiner 6.6, renamed on 2026-11-18; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a player-placed-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"` |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
 | EZStorage | 1.8.3 | B | builds against GTNHLib 0.11.52, NEI 2.8.158; 1.8.3 fixes NEI bookmark pull with large stacks |
-| Programmable Hatches | 0.2.1p7-beta | B | p7 notes: only 2.9.0 supported; builds against GT 5.09.54.264, GTNHLib 0.11.54, NEI 2.8.171 |
+| Programmable Hatches | 0.2.1p9-beta | B | p9 (2026-11-20) fixes a Crafting Dumper stall on item-and-essentia patterns; p8 fixes a startup crash with GT-Never-Reset; p7 notes: only 2.9.0 supported; builds against GT 5.09.54.264, GTNHLib 0.11.54, NEI 2.8.171 |
 | NH-Utilities | 1.7.0 | B | commit "Fit 29x" |
-| YesSteveModel Unofficial | 3.0 | B | [czqwq fork](https://github.com/czqwq/YesSteveModel-Unofficial); 3.0's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`, and its one commit says "Fix Amim system"; 2.9 added the preview setting's entrance and fixed the math parser, 2.6 fixed the animation loop and 2.7 restored the animation storage system, 2.5 disabled the lighting map |
+| YesSteveModel Unofficial | 3.1 | B | [czqwq fork](https://github.com/czqwq/YesSteveModel-Unofficial); 3.1 (2026-11-20) fixes the settings menu; 3.0's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`, and its one commit says "Fix Amim system"; 2.9 added the preview setting's entrance and fixed the math parser, 2.6 fixed the animation loop and 2.7 restored the animation storage system, 2.5 disabled the lighting map |
 | MineMenu | 1.2.0.B44 | C | latest on Modrinth, 2025-12-07 |
 | FPS Reducer | 1.10.3 | C | latest, 2023-09-06 |
 | Trash Slot | 1.0.31 | B | latest 1.7.10 on CurseForge |
@@ -166,6 +166,20 @@ Still open in the fork: cached chain mode (off) skips the tool gate, the GT tool
 resolved by reflection per block off the main thread, and Witchery vampires lost
 bare-hand chaining.
 
+**2026-11-20: eleven updates, on the client and eclipse's debug server.** MIAOKATZE
+Core 0.2.29 (faster NEI structure previews, inline tooltip pin and tier controls),
+GT-Steam-Reborn 2.1.67 and GT-Simple-Wireless-Network 2.1.44 (both need Core 0.2.29),
+GT-Miao-Blueprint 0.3.39, Programmable Hatches 0.2.1p9-beta (Crafting Dumper stall with
+essentia patterns, GT-Never-Reset startup crash), AE2Things 1.3.7 (cell content display),
+ThinkTech 0.3.4 (catalyst detection), YesSteveModel Unofficial 3.1 (settings fix), GTNH
+Modernization Upgrade 0.3.8-alpha (Portal Projector, BuildCraft work ranges), MyCTMLib
+1.4.7-290 and Dashboard 1.0.23 (elements avoid overlapping). The four Miao mods name 2.9.0
+final in their releases and Modernization's jar names 2.9.0; the rest are proven only by a
+launch. All but MyCTMLib and Dashboard are side B, so legion needs the same jars.
+GT-Steam-Reborn's two new Cluster Performance page strings are in the translation table;
+its and Wireless's other new strings are version and log lines. Old jars are in
+`backups/replaced-mods/2026-11-20/`.
+
 **2026-11-18: five more updates, on the client only.** MIAOKATZE Core 0.2.22 (tooltip
 fix for unregistered items), GT-Miao-Blueprint 0.3.37 (immediate controller preview,
 decoration vouchers, AE orders from the controller review, Escape and reopen fixes),
@@ -229,10 +243,10 @@ server, and the server boots with all of them.
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
 | Waystones-X | 1.0.16 | B | [JackOfNoneTrades fork](https://github.com/JackOfNoneTrades/WaystonesFork) of BlayTheNinth's mod; `config/waystones.cfg` sets `xpBaseCost=-1` |
-| MIAOKATZE Core | 0.2.22 | B | required by the three Miao mods below, on both sides; the three bundle it in their release assets; 0.2.22 updated with Blueprint 0.3.37 on 2026-11-18 (Core's release says compatible with 2.9.0 final) |
-| GT-Miao-Blueprint | 0.3.37 | B | Neko Blueprint Hologram Projector: blueprint, cut and demolition modes; 0.3.37 adds an immediate controller preview, decoration vouchers and AE orders from the material review |
-| GT-Steam-Reborn | 2.1.52 | B | steam industry, hubs and nodes, singularity tech, the Prosperity dimension, portable weapons, a BQ line; 2.1.52 adds dimension-bound stone making and retires the legacy natural singularity item |
-| GT-Simple-Wireless-Network | 2.1.39 | B | wireless EU link nodes, monitors, ME quantum terminal; 2.1.39 groups terminal controls and adds a network information screen |
+| MIAOKATZE Core | 0.2.29 | B | required by the three Miao mods below, on both sides; the three bundle it in their release assets; 0.2.29 (2026-11-20) is the minimum for Steam-Reborn 2.1.67 and Wireless 2.1.44, and adds faster NEI structure previews and tooltip pin controls (release says compatible with 2.9.0 final) |
+| GT-Miao-Blueprint | 0.3.39 | B | Neko Blueprint Hologram Projector: blueprint, cut and demolition modes; 0.3.39 opens the workspace straight from a controller and fixes Escape during a scan; 0.3.37 added an immediate controller preview, decoration vouchers and AE orders from the material review |
+| GT-Steam-Reborn | 2.1.67 | B | steam industry, hubs and nodes, singularity tech, the Prosperity dimension, portable weapons, a BQ line; 2.1.67 lets non-owners reopen permitted machines from Machine Terminal history; 2.1.52 added dimension-bound stone making and retired the legacy natural singularity item |
+| GT-Simple-Wireless-Network | 2.1.44 | B | wireless EU link nodes, monitors, ME quantum terminal; 2.1.44 refuses quantum bus swaps that lose parts and links mirrored matrix layouts; 2.1.42 fixes Assembly Line matrix research; 2.1.39 grouped terminal controls |
 
 All but Waystones come from [MIAOKATZE](https://github.com/MIAOKATZE) and are tagged
 "for GTNH 2.9.0 stable". Their `en_US.lang` files are complete, so the in-game text is
@@ -245,7 +259,7 @@ One more joined them later on 2026-11-02, client and server:
 
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
-| ThinkTech | 0.3.3 | B | chemistry and materials: briquettes, methane clathrate, catalysts, computing chips, explosives (PETN, HMX, HNIW), separation control cores; 0.3.3 fixes the implosion generator's power display and structure and the crucible recipes for Nichrome and Platinum |
+| ThinkTech | 0.3.4 | B | chemistry and materials: briquettes, methane clathrate, catalysts, computing chips, explosives (PETN, HMX, HNIW), separation control cores; 0.3.4 fixes the general chemical factory missing catalysts; 0.3.3 fixes the implosion generator's power display and structure and the crucible recipes for Nichrome and Platinum |
 
 TenkeiTech 1.1.0 was installed with it and removed the same day: it hands you an
 "Useless Tools" staff on spawn with force kill, spawn eggs, area damage, bedrock mining
@@ -257,7 +271,7 @@ Four client-side additions on 2026-11-02:
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
 | World Tooltips | 1.2.3-90 | C | floating tooltip over dropped items; shader-compatible continuation of GenuineSounds' mod; [source code](https://github.com/GTNotLeisure/WorldTooltipsContinuation) |
-| MyCTMLib | 1.4.6-290 | C | connected-texture support for resource packs; builds against GT 5.09.54.265, the GT in 2.9.0 |
+| MyCTMLib | 1.4.7-290 | C | connected-texture support for resource packs; 1.4.7 adds ProjectRed and Automagy torch models; builds against GT 5.09.54.265, the GT in 2.9.0 |
 | OmniOcular Unofficial | 1.7.2 | B | WAILA add-on showing machine internals; client full jar, server `-server.jar`; see the scripts note below |
 
 World Tooltips moved from 1.2.3-87 to 1.2.3-90 on 2026-11-17. Builds 88 to 90 have no
@@ -327,8 +341,6 @@ release; all of them passed in-game testing on 2026-11-05.
 | Better Search | 1.6.4 | C | typo-tolerant search, with NEI and AE2 hooks; 1.6.4 fixes its AE2 mixin errors and works with Language Reload |
 | Effortless Building Gadgets | 0.10.1 | B | shape building through a crafted gadget; `B:consumesEnergy=false` on both sides, so it needs no power |
 | Shoulder Surfing Reloaded | 2.4.1 | C | over-the-shoulder camera; a 2023 build that patches vanilla code, so suspect it first after a pack update |
-| Smooth Third-Person Camera | 2.0.0+mc1.7.10-forge | C | smooths third-person camera movement; added 2026-11-19, hooks the same camera as Shoulder Surfing |
-| Cinematic Respawn | 1.7.10-forge-1.5.0 | C | camera transition in place of the death screen; added 2026-11-19 |
 
 Vintage Pick Up Notifier 1.0.0 was removed on 2026-11-17; Dashboard's HUD editor covers
 pickup notices. Its jar and config are in `backups/removed-mods/2026-11-17/`.
@@ -372,7 +384,7 @@ a launch is the proof.
 
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
-| GTNH Modernization Upgrade | 0.3.6-alpha | B | Structure terminal (project, build, replace and dismantle a GT multiblock from its StructureLib definition), ME packing tape, integrated 36-pattern item, AE order element, colour power budget for the Plasma Forge and fusion, and an ME storage vault. 0.3.6 adds order diagnostics and a storage vault lighting fix under Angelica. Alpha, one author, AI-written; the vault keeps inventory in `<world>/data/aestoragevault/`, and 0.3.0 changed that format without reading 0.2.x |
+| GTNH Modernization Upgrade | 0.3.8-alpha | B | Structure terminal (project, build, replace and dismantle a GT multiblock from its StructureLib definition), ME packing tape, integrated 36-pattern item, AE order element, colour power budget for the Plasma Forge and fusion, and an ME storage vault. 0.3.8 adds the Portal Projector (paired gates between dimensions, optional destination view) and 0.3.7 BuildCraft work ranges and a main menu update button fix; 0.3.6 added order diagnostics and a storage vault lighting fix under Angelica. Alpha, one author, AI-written; the vault keeps inventory in `<world>/data/aestoragevault/`, and 0.3.0 changed that format without reading 0.2.x |
 | AE2 Wireless Transceiver | 1.2.1 | B | [peco331](https://github.com/peco331/AE2WirelessTransceiver-GTNH) fork; each release ships a plain 2.9 asset and a separate `-gtnh2.8.4` one, and the plain one is installed |
 | Benzene Fuels | 0.5.1-alpha | B | Eight staged benzene fluids from LuV to UIV and the Resonance Fuel Generator; needs GoodGenerator and GT++ ([arturia-Xayah](https://github.com/arturia-Xayah/gtnh-benzene-fuels)) |
 | GT:NH Processing+ | 0.2.6.1-alpha | B | New processing chains built on materials chemistry, meant to fill progression gaps ([shusidefloof](https://github.com/shusidefloof/GTNH-ProcessingPlus)) |
@@ -433,7 +445,8 @@ in `logs/fml-client-latest.log`.
 
 ## Dashboard, added on 2026-11-15
 
-`dashboard-1.0.22.jar` (1.0.22, 2026-11-11) is on the client only. It is GTNH's own HUD
+`dashboard-1.0.23.jar` (1.0.23, 2026-11-20; 1.0.22 was added on 2026-11-15) is on the
+client only. 1.0.23 makes elements move aside instead of overlapping. It is GTNH's own HUD
 editor: every HUD element, from Minecraft and from the mods it supports, gets a box you
 drag, resize or hide, and bars, the crosshair, the hotbar and the screen overlays can be
 restyled. Three layouts are kept, switched with a key.
@@ -454,8 +467,8 @@ restyled. Three layouts are kept, switched with a key.
 
 ## AE2Things, added on 2026-11-17
 
-`ae2thing-1.3.5.jar` (1.3.5, 2026-11-18; 1.3.4 was added on 2026-11-17) is on the client
-only so far. It is side B, so
+`ae2thing-1.3.7.jar` (1.3.7, 2026-11-20; 1.3.4 was added on 2026-11-17) is on the client
+and eclipse's debug server so far. It is side B, so
 legion needs the same jar before a world can be joined.
 
 - Source: [GTNotLeisure/AE2Things](https://github.com/GTNotLeisure/AE2Things), the
@@ -657,11 +670,6 @@ Check it again after its next release; it has no 2.9 build.
 
 These are in the 2.9 instance but have no explicit 2.9 release, so a launch is the proof.
 
-- **Smooth Third-Person Camera 2.0.0 and Cinematic Respawn 1.5.0** (2026-11-19, client
-  only, from Modrinth; both sha512s match): neither names a pack and both are side C.
-  Cinematic Respawn auto-respawns after its animation. Check Smooth Third-Person Camera
-  together with Shoulder Surfing Reloaded, which drives the same camera.
-
 - **Xaero's Minimap 21.10.44 and World Map 1.14.1.33** (2026-11-07, client only): the
   last 1.7.10 Forge builds, from Modrinth, and the CurseForge files Navigator 1.1.10
   compiles against (`dependencies.gradle`). They replace JourneyMap, which is disabled.
@@ -755,6 +763,12 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   updates and its bug key sends crash reports there.
 
 ## Dropped after testing
+
+- **Smooth Third-Person Camera 2.0.0 and Cinematic Respawn 1.5.0** (added 2026-11-19,
+  removed by 2026-11-20): both had issues in game and were taken out by hand. They are
+  parked in `mod-sources.json`; on a retry, test Smooth Third-Person Camera together with
+  Shoulder Surfing Reloaded, which drives the same camera. Their configs are still in
+  `config/` (`smooththirdpersoncamera.json`, `cinematic_respawn.properties`).
 
 - **BetterSprinting 2.3.0**: its coremod cannot find its `EntityPlayerSP.onLivingUpdate`
   insertion point under 2.9 and aborts the launch with "Could not find insertion point".
