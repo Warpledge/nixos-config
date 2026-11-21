@@ -452,8 +452,11 @@ Simple Storage on 2026-11-20. The docked redesign (`f5d9f99`) was tested the sam
 C button, clicks and the wheel went through to AE2 and Simple Storage, and GT tools on
 hand were planned as crafts. `de4c074` fixed those (tested in game) but left surplus
 intermediates, five extra iron plates after a helmet. `80be471` fixes that, and
-`craftchain-184bdbc.jar` on top of it swaps the grey and white slots for dark ones; it is
-installed, not yet tested, and the older jars are kept as `.jar.disabled`.
+`184bdbc` on top of it swaps the grey and white slots for dark ones. `craftchain-bd59523.jar`
+(2026-11-20, after a code review) is installed and not yet tested; `184bdbc` is kept as
+`.jar.disabled`. It adds quick-craft sub-chains, tool wear, batch rounds, saved picks,
+a missing-items bookmark group, NEI search in the recipe picker and a refresh button, and
+fixes the planner crafting tools you don't hold.
 
 - Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
   bottom-left row, on any GUI where NEI has a `crafting` overlay: crafting tables, the AE2
@@ -482,8 +485,16 @@ installed, not yet tested, and the older jars are kept as `.jar.disabled`.
   gets 1. NEI's `RecipeChainMath` reads a multiplier above 1 on any step as extra output
   asked for, which is what made the surplus plates.
 - The look is GTNH Planner's palette (MIT, credited in the mod's `NOTICE`); panel opacity,
-  UI scale, picker style, default list and reopen-with-next-GUI are in its settings
-  popover.
+  UI scale, picker style, default list, reopen-with-next-GUI and batch mode are in its
+  settings popover.
+- Held tools are always used and never crafted by the plan; a tool you don't hold shows
+  as *no tool*, with *Craft 1 now* opening a sub-chain that returns to the chain once the
+  tool is crafted. GT tool wear is read from GT's `MetaGeneratedTool` API by reflection,
+  so there's no compile dependency on GT.
+- On the server it stays client-only (the server needs no jar). Waits for pulled items and
+  crafted results settle on the inventory; `pullSettleTicks` (8) and `pullTimeoutTicks`
+  (100) are in the config's `server` section if the server lags. Picks are saved in
+  `config/craftchain-picks.json` under registry-name item keys, so they carry across worlds.
 
 ## Dashboard, added on 2026-11-15
 
