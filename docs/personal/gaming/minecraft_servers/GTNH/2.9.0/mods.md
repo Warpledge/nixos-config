@@ -470,9 +470,13 @@ index at world join, converts NEI's shaped and shapeless recipes in parallel, an
 the craftable search when only counts change or a GUI is revisited; the log now gives
 each handler's read and convert times (`Recipe index: ... read in ... ms, converted in
 ... ms`). On 2026-11-21 a batch from `5d3e2ba` to `5f679de` (eight commits) redesigned
-the dock and added the features listed below. `craftchain-5f679de.jar` is installed, not
-yet tested in game; `6a71826` is kept as `.jar.disabled` (the older disabled jars were no
-longer in the folder by then).
+the dock and added the features listed below. Tested in game the same day: all worked
+except that the GUI underneath still showed its tooltips through the panels and some
+recent targets (GT tools, after a restart) couldn't be right-clicked away; the machine
+list and AE2 requests weren't tried. `8a622f8` fixes both, keeps recents per GUI kind,
+groups the settings under labelled sections and gives the C button NEI's own background
+with a centred gold C. `craftchain-8a622f8.jar` is installed, not yet tested; `5f679de`
+and `6a71826` are kept as `.jar.disabled` (the older disabled jars were gone by then).
 
 - Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
   bottom-left row, on any GUI where NEI has a `crafting` overlay: crafting tables, the AE2
@@ -520,7 +524,7 @@ longer in the folder by then).
   `config/craftchain-picks.json` under registry-name item keys, so they carry across worlds.
 - The open key over an item (NEI's list, the inventory, a recipe card, NEI's recipe
   screen) opens its chain. The Craftable tab has favourite and recent targets
-  (`config/craftchain-targets.json`), a sort key (NEI, amount, name, mod) and category
+  (`config/craftchain-targets.json`, recents per GUI kind), a sort key (NEI, amount, name, mod) and category
   icons (building, machines, parts, materials, tools, weapons, armour, food, rest). Each
   kind of crafting GUI keeps its own chain and list across switches.
 - The recipe index is saved to `.minecraft/craftchain/recipe-index.bin` and reused at
