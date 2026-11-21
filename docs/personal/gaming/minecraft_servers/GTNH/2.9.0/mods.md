@@ -448,8 +448,10 @@ in `logs/fml-client-latest.log`.
 `craftchain` is a crafting overlay in the spirit of Magic Storage's crafting interface,
 client only. Source is `~/Projects/craftchain` (own git repo, MIT), built with GTNH's
 ExampleMod starter against NEI 2.8.171. The first build (`fae8311`) worked in game with
-Simple Storage on 2026-11-20 and is now `craftchain-fae8311.jar.disabled`; the docked
-redesign, `craftchain-f5d9f99.jar`, is installed but not yet tested in game.
+Simple Storage on 2026-11-20. The docked redesign (`f5d9f99`) was tested the same day: no
+C button, clicks and the wheel went through to AE2 and Simple Storage, and GT tools on
+hand were planned as crafts. `craftchain-de4c074.jar` fixes those and is installed, not
+yet tested; the two older jars are kept as `.jar.disabled`.
 
 - Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
   bottom-left row, on any GUI where NEI has a `crafting` overlay: crafting tables, the AE2
@@ -467,11 +469,16 @@ redesign, `craftchain-f5d9f99.jar`, is installed but not yet tested in game.
   `BookmarkPanel.pullBookmarkItems` and runs `AutoCraftingManager`, the path a
   crafting-mode bookmark group takes. Machine-made ingredients show as missing.
 - It draws through NEI's container hooks rather than as its own screen, because
-  `AutoCraftingManager` stops when the open screen changes. The C button is added through
-  NEI's `LayoutManager.addWidget` once per layout pass, since NEI's widget ordering never
-  treats two widgets as equal and re-adding each tick would stack copies.
+  `AutoCraftingManager` stops when the open screen changes. Two mixins: one on NEI's
+  `LayoutManager.updateWidgetVisiblities` adds the C button (NEI rebuilds its widgets every
+  frame, as GTNH Planner's P is added), and one on vanilla `GuiScreen.handleInput` stops
+  mouse events over its panels, because AE2 and Simple Storage read clicks and the wheel
+  before NEI's input hooks.
+- Recipe slots match stock by item and damage, ignoring NBT, as crafting does: NEI's
+  recipe permutations for GT tools are dummy stacks whose NBT never matches a real tool.
 - The look is GTNH Planner's palette (MIT, credited in the mod's `NOTICE`); panel opacity,
-  picker style, default list and reopen-with-next-GUI are in its settings popover.
+  UI scale, picker style, default list and reopen-with-next-GUI are in its settings
+  popover.
 
 ## Dashboard, added on 2026-11-15
 
