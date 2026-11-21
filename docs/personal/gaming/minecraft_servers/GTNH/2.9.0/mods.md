@@ -483,8 +483,12 @@ shaped and shapeless handlers fall back to for recipes passing `isRecipe2x2`): t
 plans, lists and crafts only recipes with every slot in the top-left 2x2, a step needing
 3x3 shows as missing ("needs a crafting table"), and worn armour isn't counted as stock.
 It's the *Open in the inventory (2x2)* setting under Opening, on by default.
-`craftchain-e8fb9a2.jar` is installed, not yet tested; `829b1e8`, `8a622f8`, `5f679de`
-and `6a71826` are kept as `.jar.disabled` (the older disabled jars were gone by then).
+Tried in game the same day: Craft made nothing once the inventory already held as many
+of the target as asked for (planks crafted once, then never), at a table too. NEI's chain
+maths counts the inventory as supply, the target included (`RecipeChainIterator`
+`.refreshInitialItems`); `00a8fa4` adds what's held to the target step's multiplier.
+`craftchain-00a8fa4.jar` is installed, not yet tested; `e8fb9a2` is kept as
+`.jar.disabled` (the older disabled jars were gone by then).
 
 - Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
   bottom-left row, on any GUI where NEI has a `crafting` overlay: crafting tables, the AE2
