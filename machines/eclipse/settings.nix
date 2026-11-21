@@ -191,6 +191,7 @@
   #--- Firewall: ports other devices may connect to
   firewall.openTCPPorts = [
     7777 # Terraria server
+    25566 # GTNH Minecraft server (Omni Server)
   ];
   firewall.openUDPPorts = [];
 
@@ -215,6 +216,7 @@
     "omni-settings"
     "protonplus"
     "nix-daemon"
+    "omni-server"
   ];
 
   #--- SSH Server

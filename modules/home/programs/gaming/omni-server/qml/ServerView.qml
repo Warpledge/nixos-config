@@ -267,11 +267,14 @@ Item {
     }
     function showError(text) { toast(text, "error") }
 
-    //--- The server's join address on the clipboard
-    function copyAddress() {
-        call("join_address", {}, reply => {
+    //--- The server's join address on the clipboard: public, or this network's with lan
+    function copyAddress(lan) {
+        call("join_address", { lan: !!lan }, reply => {
             Quickshell.clipboardText = reply.address
-            toast(`Copied ${reply.address}`, "success")
+            if (reply.fallback)
+                toast(`Couldn't find the public address; copied the LAN one, ${reply.address}`, "info")
+            else
+                toast(`Copied ${reply.address}`, "success")
         })
     }
     function openFolder() {
@@ -594,7 +597,8 @@ Item {
                         }
                     }
                     Item { Layout.fillWidth: true }
-                    IconButton { icon: "link"; tip: "Copy the join address"; onClicked: app.copyAddress() }
+                    IconButton { icon: "public"; tip: "Copy the address players online join at"; onClicked: app.copyAddress(false) }
+                    IconButton { icon: "lan"; tip: "Copy the address players on this network join at"; onClicked: app.copyAddress(true) }
                     IconButton { icon: "folder_open"; tip: "Open the server's folder"; onClicked: app.openFolder() }
                     Rectangle { implicitWidth: 1; implicitHeight: 22; color: Theme.rule }
                     OutlineButton {
