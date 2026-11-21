@@ -10,7 +10,7 @@ Nothing; the projects live outside this repo. Their state on 2026-11-21 (`git re
 
 | Project | Remote | Branches | LICENSE / NOTICE |
 | --- | --- | --- | --- |
-| `craftchain` | none | `main` | both (NOTICE credits GTNH Planner, MIT) |
+| `craftchain` | done 2026-11-21: private `Warpledge/craftchain`, votex09 has write | `main` | both (NOTICE credits GTNH Planner, MIT) |
 | `ezminer-balanced` | `origin` = upstream `czqwq/EZMiner` | `balanced`, `master` | LICENSE |
 | `ezstorage-craftfix` | none | `main` | LICENSE |
 | `gtnh-translation-agent` | none | `main` | none |
