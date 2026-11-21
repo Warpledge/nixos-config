@@ -443,6 +443,26 @@ in `logs/fml-client-latest.log`.
   0 to 1 (default 0), and toggles for server moves, the cursor, ModularUI and the hotbar.
   Upstream's curve editor wasn't ported.
 
+## Craft Chain, written for this setup on 2026-11-20
+
+`craftchain` is a crafting overlay in the spirit of Magic Storage's crafting interface,
+client only. Source is `~/Projects/craftchain` (own git repo, MIT), built with GTNH's
+ExampleMod starter against NEI 2.8.171. Built and unit-tested on 2026-11-20; not yet in
+the instance's `mods/` or tested in game.
+
+- Opens with `C` (rebindable) or a small button above any GUI where NEI has a `crafting`
+  overlay: crafting tables, the AE2 crafting terminal, the EZStorage crafting box.
+- The Craftable tab lists what grid recipes make from the inventory plus the storage the
+  GUI's NEI bookmark container handler reports, with counts; a toggle adds items reachable
+  through sub-crafts (depth and time budget in `config/craftchain.cfg`).
+- The Chain tab builds the grid-recipe chain for an item, stock first, with a recipe
+  choice and a stock-only mark per item. Craft pulls through NEI's
+  `BookmarkPanel.pullBookmarkItems` and runs `AutoCraftingManager`, the path a
+  crafting-mode bookmark group takes. Machine-made ingredients show as missing.
+- It draws through NEI's container hooks rather than as its own screen, because
+  `AutoCraftingManager` stops when the open screen changes.
+- The look is GTNH Planner's palette (MIT, credited in the mod's `NOTICE`).
+
 ## Dashboard, added on 2026-11-15
 
 `dashboard-1.0.23.jar` (1.0.23, 2026-11-20; 1.0.22 was added on 2026-11-15) is on the
