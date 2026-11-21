@@ -319,7 +319,7 @@ One mod written for this setup on 2026-11-04, client and server:
 
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
-| Omni Tweaks | 0.3.0 | B | Step height 1.0 (0.5 while sneaking), better ladder and vine climbing, and since 0.3.0 a trash slot with an auto-trash filter, recovery and a valuables check |
+| Omni Tweaks | 0.3.1 | B | Step height 1.0 (0.5 while sneaking), better ladder and vine climbing, and since 0.3.0 a trash slot with an auto-trash filter, recovery and a valuables check |
 
 It reimplements the wanted features of Keep Stepping and Better Climbing, neither of which
 has a 1.7.10 build; no code comes from them. Its climbing mixin hooks
@@ -336,14 +336,20 @@ Delete trashes the hovered stack and Shift+Delete every exact match in the main 
 The card under the slot has a funnel key for the auto-trash filter and an arrow key for
 recovery, both panels left of the window. The filter holds 27 exact matches (item, damage
 and NBT) per player, each switched on or off without leaving the list, and deletes them on
-pickup. Recovery keeps the last 54 hand-trashed stacks and 27 merged auto-trashed ones, in
-the persisted player tag. Enchanted, renamed, rare or NBT-carrying items, plus
+pickup. The server keeps the last 54 hand-trashed stacks and 27 merged auto-trashed ones in
+the persisted player tag. Ops can restore from both; everyone else sees and restores only
+their newest 5 hand-trashed stacks (`backup.playerRestoreCount`), so the backup can't be
+used as extra storage. Enchanted, renamed, rare or NBT-carrying items, plus
 `valuables.extra`, need a confirm popup and are never auto-trashed. Settings are in the
-`trash`, `autotrash`, `backup` and `valuables` sections of `config/omnitweaks.cfg`. The
-0.2.0 jar, Trash Slot's jar and `trashslot.cfg` are in the client's
+`trash`, `autotrash`, `backup` and `valuables` sections of `config/omnitweaks.cfg`.
+
+0.3.1 (same day, tag `0.3.1`) fixes the first in-game test: dropping a stack on a full
+trash slot handed the old one back, the side panels drew over items dragged from NEI, and
+hovered keys showed almost no change. It also adds the 5-stack limit above. The 0.2.0 and
+0.3.0 jars, Trash Slot's jar and `trashslot.cfg` are in the client's
 `mods.bak-2026-11-21-omnitweaks-0.3.0/` and the server copy's
-`backups/pre-omnitweaks-0.3.0-2026-11-21/`. Not tested in game yet; copy the server folder
-to the laptop to apply it there.
+`backups/pre-omnitweaks-0.3.0-2026-11-21/`. Copy the server folder to the laptop to apply
+it there.
 
 ## Added on 2026-11-05
 
