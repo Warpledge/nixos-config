@@ -54,8 +54,8 @@ against 2.9.0. Neo ECO's notes say 2.9.0-RC1 and later. GTNH Modernization says 
 requires 2.9.0, but its testing stopped at a headless server, and 0.3.5 is a
 pre-release. All three are side B, so the laptop needs the same jars.
 
-**The 2026-11-15 update is on the client only, thirteen jars.** Side B, so legion needs
-the same ten before a world can be joined: EZMiner 6.6, EZStorage 1.8.3, YesSteveModel
+**The 2026-11-15 update is on the client only, thirteen jars.** Side B, and legion got
+the same ten later: EZMiner 6.6, EZStorage 1.8.3, YesSteveModel
 Unofficial 2.9, Realistic World Gen 2 2.1.2, MIAOKATZE Core 0.2.15, GT-Miao-Blueprint
 0.3.30, GT-Steam-Reborn 2.1.45, GT-Simple-Wireless-Network 2.1.34, ThinkTech 0.3.3 and
 Neo ECO AE Extension 7.3.11. The three Miao mods name Core 0.2.15 as their prerequisite,
@@ -68,11 +68,11 @@ Search 1.6.4. Later that day ChromaPatch went to 1.0.3 and Eclipse to `e89e6c6`,
 commit 1.0.3's patch targets, with the old Eclipse zip moved to the same backup folder
 (see [shaders.md](./shaders.md#eclipse-with-chromapatch)). Old jars are in
 `backups/replaced-mods/2026-11-15/`. Neo ECO AE Extension then went to 7.3.12 the same
-day on the client; legion still needs 7.3.12 and the rest of the side B jars above. Not
-launched yet.
+day on the client. Legion has the side B jars above too, with Neo ECO at 7.3.13 (checked
+2026-11-21).
 
 **The 2026-11-16 update is on the client only:** 123Technology 2.2.1.3 and MyCTMLib
-1.4.6-290. 123Technology is side B, so legion needs 2.2.1.3 before a world can be joined.
+1.4.6-290. 123Technology is side B; legion has 2.2.1.3 too.
 Its release adds a Positron_e+ artillery piece, AbstractSanctum and Steam9in1 fixes and a
 Fishtorio loot-table blacklist update, and its body says it contains WIP content.
 2.2.1.3 renamed its mod id to `123technology` and so reads a new `123technology.cfg`; the
@@ -83,8 +83,8 @@ table was re-keyed for two strings 123Technology moved between classes, and its 
 string is a log line, left untranslated. Old jars are in `backups/replaced-mods/2026-11-16/`.
 Not launched yet.
 
-**The 2026-11-17 update is on the client only, eight jars.** Side B, so legion needs the
-same eight: YesSteveModel Unofficial 3.0, MIAOKATZE Core 0.2.21, GT-Miao-Blueprint
+**The 2026-11-17 update is on the client only, eight jars.** Side B, and legion got the
+same eight later: YesSteveModel Unofficial 3.0, MIAOKATZE Core 0.2.21, GT-Miao-Blueprint
 0.3.34, GT-Steam-Reborn 2.1.52, GT-Simple-Wireless-Network 2.1.39, Neo ECO AE Extension
 7.3.13, GTNH Modernization Upgrade 0.3.6-alpha and AE2Things 1.3.4. The three Miao mods
 require Core 0.2.20 or newer, and all four name 2.9.0 final. GT-Steam-Reborn adds
@@ -123,7 +123,7 @@ numbered fields, every row has an `R` reset button, and Block Swap's preview now
 every matching block in the swap radius instead of a connected chain.
 `stopOnUnbreakable` and `fireBreakEvent` stay true, `smallRadius=1`,
 `addExhaustion=0.01`, `breakPerTick=128`, and the tier table is unchanged. Side B, so
-legion needs the same jar and no `EZMiner` jar before a world can be joined: the mod id
+legion has the same jar and no `EZMiner` jar: the mod id
 changed, so a client without it is rejected by a server that still has EZMiner.
 Omni Miner is warpledge's own fork and takes upstream EZMiner changes only when needed
 (crash, 2.9 or pack fixes). `mod-sources.json` tracks upstream as a parked `EZMiner`
@@ -189,7 +189,7 @@ block requirements on every multi), AE2Things 1.3.5 (config rewritten with a GUI
 universal baubles slots for the 2-in-1 and backpack terminals) and Better Foliage 2.0.1
 (FalseTweaks crash fix, short grass no longer clips modded blocks). Core, Blueprint and
 Processing+ name 2.9.0 in their releases; AE2Things and Better Foliage are proven only by
-a launch. The first four are side B, so legion needs the same jars. Blueprint's 10 new
+a launch. The first four are side B; legion got them later. Blueprint's 10 new
 strings are in the translation table. Old jars are in `backups/replaced-mods/2026-11-18/`.
 
 **2026-11-20: nine updates, on the legion server.** The same nine side B jars eclipse got
@@ -439,9 +439,8 @@ a launch is the proof.
 
 ## EZStorage craft fix, written for this setup on 2026-11-10
 
-`ezstoragecraftfix` 0.4.0 patches Simple Storage (`ezstorage`) crafting, client only so
-far; the laptop's server `mods/` needs the same jar before the server benefits, and there
-is no persistent server world yet. Source is `~/Projects/ezstorage-craftfix`, MIT like
+`ezstoragecraftfix` 0.4.0 patches Simple Storage (`ezstorage`) crafting, on the client
+and the laptop's server `mods/` (there since 2026-11-10). Source is `~/Projects/ezstorage-craftfix`, MIT like
 EZStorage, built with GTNH's ExampleMod starter.
 
 - The crafting box recomputes its result on every grid slot change, and setting a recipe
@@ -536,7 +535,8 @@ That fixed the table, but the inventory still made nothing: GTNH's inventory gri
 `3ea863f` logs NEI's view of each step when a Craft makes nothing, which showed it;
 `24b6e8d` replaces the 2x2 handler with one that reads the grid's real slots.
 `craftchain-24b6e8d.jar` is installed; tested in game on 2026-11-21, crafting works in
-both the inventory and a crafting table. `00a8fa4`, `e8fb9a2`, `4fdceaf`
+both the inventory and a crafting table. It is client only (GUI mixins, no packets); a
+copy put on legion's server was moved to its `backups/removed-mods/2026-11-21/`. `00a8fa4`, `e8fb9a2`, `4fdceaf`
 and `3ea863f` are kept as `.jar.disabled` (the older disabled jars were gone by then).
 
 - Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
@@ -648,8 +648,7 @@ eclipse's debug server and legion. It is side B, so every side needs the same ja
 
 ## DiskTerminal, added on 2026-11-17
 
-`disk_terminal-1.0.2.jar` (1.0.2, 2026-11-16) is on the client only so far. It is side B, so
-legion needs the same jar before a world can be joined.
+`disk_terminal-1.0.2.jar` (1.0.2, 2026-11-16) is on the client and legion. It is side B, so both need the same jar.
 
 - Source: [GTNotLeisure/DiskTerminal-Unofficial](https://github.com/GTNotLeisure/DiskTerminal-Unofficial),
   a 1.7.10 port of [Aedial's DiskTerminal](https://github.com/Aedial/DiskTerminal). The
@@ -758,7 +757,7 @@ nothing. The jar's sha256 matches the digest GitHub lists.
 ## GTNL, re-added on 2026-11-18
 
 `sciencenotleisure-0.2.7.jar` (GT: Not Leisure 0.2.7, 2026-11-16), `gtnllib-1.1.8.jar`
-and `bqapi-1.1.4.jar` are on the client only so far; all three are side B. The sha256 of
+and `bqapi-1.1.4.jar` are on the client and legion; all three are side B. The sha256 of
 each matches the digest GitHub lists. 0.2.7 merged "适配 GTNH 2.9.0 正式版" (#666) and
 builds against GT 5.09.54.265, the pack's own. It was removed on 2026-11-10 as too
 strong; it's back because the world is solo. Its steam machines (Cactus Wonder and the
@@ -850,7 +849,7 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   the Xaero workaround above still applies. Check ChromaPatch and the shaders, Distant
   Horizons and Xaero's maps at launch.
 
-- **Realistic World Gen 2 2.1.2** (2026-11-14, client only so far): keeps one landmark per
+- **Realistic World Gen 2 2.1.2** (2026-11-14, client and legion): keeps one landmark per
   river junction, improves `runPreview`, and renames `rwg_data.dat` so it stops clashing
   with the RWG 1.5.3 jar in the same `mods/`. `rwg2.cfg` is unchanged, so `Biome Size
   Multiplier` stays at 1.7.
