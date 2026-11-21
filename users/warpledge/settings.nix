@@ -174,7 +174,7 @@
   discord.plugins.fakeNitro = true; # Unlock emoji, stickers and themes without Nitro
   discord.plugins.fixImagesQuality = true; # Images at their full quality
   discord.plugins.fixSpotifyEmbeds = true; # Spotify embeds play at a sane volume
-  discord.plugins.fixYoutubeEmbeds = true; # Play YouTube embeds where blocked
+  discord.plugins.fixYoutubeEmbeds = false; # Unblock YouTube embeds (Equicord-only)
   discord.plugins.forceOwnerCrown = true; # Show the owner's crown
   discord.plugins.fullSearchContext = true; # Search from a message's right-click menu
   discord.plugins.imageZoom = true; # Zoom into images and avatars
@@ -187,7 +187,7 @@
   discord.plugins.viewIcons = true; # View role and server icons full size
   discord.plugins.volumeBooster = true; # Volume up to 1000%
   discord.plugins.webRichPresence = true; # Show what you're playing, needs arRPC
-  discord.plugins.youtubeAdblock = true; # Block YouTube ads in embeds
+  discord.plugins.youtubeAdblock = false; # Block YouTube ads in embeds (Equicord-only)
   discord.plugins.messageClickActions = true; # Reply, edit and delete by clicking
   discord.plugins.superReactionTweaks = true; # Stop super reaction animations
   discord.hideReactions = true; # Hide the reactions under messages
