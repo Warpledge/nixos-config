@@ -319,7 +319,7 @@ One mod written for this setup on 2026-11-04, client and server:
 
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
-| Omni Tweaks | 0.3.3 | B | Step height 1.0 (0.5 while sneaking), better ladder and vine climbing, and since 0.3.0 a trash slot with an auto-trash filter, recovery and a valuables check |
+| Omni Tweaks | 0.3.4 | B | Step height 1.0 (0.5 while sneaking), better ladder and vine climbing, and since 0.3.0 a trash slot with an auto-trash filter, recovery and a valuables check |
 
 It reimplements the wanted features of Keep Stepping and Better Climbing, neither of which
 has a 1.7.10 build; no code comes from them. Its climbing mixin hooks
@@ -350,7 +350,9 @@ hovered keys showed almost no change. It also adds the 5-stack limit above. 0.3.
 growing filter, moves the panels left of any button beside the window (ServerUtilities'
 sidebar sat on top of them) and centres the close key's x. 0.3.3 draws the card, panels
 and popup in Craft Chain's dark see-through style and drops NEI drag onto the filter,
-which never fired in the pack; items are dropped in from the inventory. Every older jar,
+which never fired in the pack; items are dropped in from the inventory. 0.3.4 keeps the
+trash panels closed while Craft Chain's overlay is open, since both sit left of the
+inventory (looked up by reflection, so Craft Chain stays optional). Every older jar,
 Trash Slot's jar and `trashslot.cfg` are in the client's
 `mods.bak-2026-11-21-omnitweaks-0.3.0/` and the server copy's
 `backups/pre-omnitweaks-0.3.0-2026-11-21/`. Copy the server folder to the laptop to apply
