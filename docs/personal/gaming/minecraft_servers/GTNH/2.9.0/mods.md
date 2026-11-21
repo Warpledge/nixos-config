@@ -447,21 +447,31 @@ in `logs/fml-client-latest.log`.
 
 `craftchain` is a crafting overlay in the spirit of Magic Storage's crafting interface,
 client only. Source is `~/Projects/craftchain` (own git repo, MIT), built with GTNH's
-ExampleMod starter against NEI 2.8.171. Built and unit-tested on 2026-11-20 and copied to
-the client instance's `mods/` as `craftchain-fae8311.jar`; not yet tested in game.
+ExampleMod starter against NEI 2.8.171. The first build (`fae8311`) worked in game with
+Simple Storage on 2026-11-20 and is now `craftchain-fae8311.jar.disabled`; the docked
+redesign, `craftchain-f5d9f99.jar`, is installed but not yet tested in game.
 
-- Opens with `C` (rebindable) or a small button above any GUI where NEI has a `crafting`
-  overlay: crafting tables, the AE2 crafting terminal, the EZStorage crafting box.
+- Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
+  bottom-left row, on any GUI where NEI has a `crafting` overlay: crafting tables, the AE2
+  crafting terminal, the EZStorage crafting box. Shift opens it expanded.
+- Docked, it takes the place of NEI's bookmark panel (hidden through an
+  `INEIGuiHandler` while it's open) and takes input only over its own panels, so the GUI,
+  the inventory and NEI's item list stay usable. Expanded, it reaches to NEI's item list.
 - The Craftable tab lists what grid recipes make from the inventory plus the storage the
-  GUI's NEI bookmark container handler reports, with counts; a toggle adds items reachable
-  through sub-crafts (depth and time budget in `config/craftchain.cfg`).
-- The Chain tab builds the grid-recipe chain for an item, stock first, with a recipe
-  choice and a stock-only mark per item. Craft pulls through NEI's
+  GUI's NEI bookmark container handler reports, filtered All, Now or Sub-crafts (depth and
+  time budget in `config/craftchain.cfg`).
+- The Chain tab builds the grid-recipe chain for an item, stock first. An ore-dictionary
+  slot (any planks) is one step offering every variant's recipes. A step's recipes pop out
+  beside it (or show as a strip, a setting), listed "Can make" (tools on hand, materials
+  on hand or craftable) or "All", best yield first. Craft pulls through NEI's
   `BookmarkPanel.pullBookmarkItems` and runs `AutoCraftingManager`, the path a
   crafting-mode bookmark group takes. Machine-made ingredients show as missing.
 - It draws through NEI's container hooks rather than as its own screen, because
-  `AutoCraftingManager` stops when the open screen changes.
-- The look is GTNH Planner's palette (MIT, credited in the mod's `NOTICE`).
+  `AutoCraftingManager` stops when the open screen changes. The C button is added through
+  NEI's `LayoutManager.addWidget` once per layout pass, since NEI's widget ordering never
+  treats two widgets as equal and re-adding each tick would stack copies.
+- The look is GTNH Planner's palette (MIT, credited in the mod's `NOTICE`); panel opacity,
+  picker style, default list and reopen-with-next-GUI are in its settings popover.
 
 ## Dashboard, added on 2026-11-15
 
