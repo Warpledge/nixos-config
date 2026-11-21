@@ -464,8 +464,13 @@ and logs); `ac7551d` replaces it with one round-by-round pass per stock change.
 `9311454` adds a search depth control (− N +) to the top bar and raises the default
 from 4 to 6, the depth a GT saw from logs and ingots needs; this instance's
 `config/craftchain.cfg` was set to 6 by hand, since an existing config keeps its value.
-`craftchain-9311454.jar` is installed, not yet tested; the earlier jars are kept as
-`.jar.disabled`.
+The 9311454 log showed the recipe index taking 32 s for 62,340 recipes, started only on
+the first crafting GUI, and a 2 to 5 s wait on each GUI switch. `6a71826` starts the
+index at world join, converts NEI's shaped and shapeless recipes in parallel, and reuses
+the craftable search when only counts change or a GUI is revisited; the log now gives
+each handler's read and convert times (`Recipe index: ... read in ... ms, converted in
+... ms`). `craftchain-6a71826.jar` is installed, not yet tested; the earlier jars are
+kept as `.jar.disabled`.
 
 - Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
   bottom-left row, on any GUI where NEI has a `crafting` overlay: crafting tables, the AE2
