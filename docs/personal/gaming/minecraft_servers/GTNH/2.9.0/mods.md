@@ -176,7 +176,7 @@ ThinkTech 0.3.4 (catalyst detection), YesSteveModel Unofficial 3.1 (settings fix
 Modernization Upgrade 0.3.8-alpha (Portal Projector, BuildCraft work ranges), MyCTMLib
 1.4.7-290 and Dashboard 1.0.23 (elements avoid overlapping). The four Miao mods name 2.9.0
 final in their releases and Modernization's jar names 2.9.0; the rest are proven only by a
-launch. All but MyCTMLib and Dashboard are side B, so legion needs the same jars.
+launch. All but MyCTMLib and Dashboard are side B; legion got them the same day (entry below).
 GT-Steam-Reborn's two new Cluster Performance page strings are in the translation table;
 its and Wireless's other new strings are version and log lines. Old jars are in
 `backups/replaced-mods/2026-11-20/`.
@@ -191,6 +191,19 @@ universal baubles slots for the 2-in-1 and backpack terminals) and Better Foliag
 Processing+ name 2.9.0 in their releases; AE2Things and Better Foliage are proven only by
 a launch. The first four are side B, so legion needs the same jars. Blueprint's 10 new
 strings are in the translation table. Old jars are in `backups/replaced-mods/2026-11-18/`.
+
+**2026-11-20: nine updates, on the legion server.** The same nine side B jars eclipse got
+that day (entry above), so legion matches it: MIAOKATZE Core 0.2.29, GT-Miao-Blueprint 0.3.39,
+GT-Steam-Reborn 2.1.67, GT-Simple-Wireless-Network 2.1.44, Programmable Hatches
+0.2.1p9-beta, AE2Things 1.3.7, ThinkTech 0.3.4, YesSteveModel Unofficial 3.1 and GTNH
+Modernization Upgrade 0.3.8-alpha. GTSWN 2.1.44 needs Core 0.2.29 or newer, and all four
+Miao mods name 2.9.0 final. Programmable Hatches p8 fixes a server start crash with
+GT-Never-Reset; p9 fixes Crafting Dumper orders stalling on mixed item and essentia
+patterns. GTNH Modernization 0.3.7 and 0.3.8 are pre-releases (Portal Projector,
+BuildCraft work ranges). The other five are proven only by a launch. Twist stays 0.8.0:
+0.8.2's notes don't mention the Bottled Chaos null. Realistic World Gen 2 stays 2.1.2:
+GTNewHorizons' 2.0.9 release is numbered below it. Old jars are in the server folder's
+`backups/replaced-mods/2026-11-20/`. Not launched yet.
 
 **2026-11-10: GTNL and GTNLLib were removed; Better Questing API went with them.** BQ API
 was installed on 2026-11-01 for GTNL's quest lines, so it is unused now and its jar is gone
@@ -606,9 +619,8 @@ restyled. Three layouts are kept, switched with a key.
 
 ## AE2Things, added on 2026-11-17
 
-`ae2thing-1.3.7.jar` (1.3.7, 2026-11-20; 1.3.4 was added on 2026-11-17) is on the client
-and eclipse's debug server so far. It is side B, so
-legion needs the same jar before a world can be joined.
+`ae2thing-1.3.7.jar` (1.3.7, 2026-11-20; 1.3.4 was added on 2026-11-17) is on the client,
+eclipse's debug server and legion. It is side B, so every side needs the same jar.
 
 - Source: [GTNotLeisure/AE2Things](https://github.com/GTNotLeisure/AE2Things), the
   maintained repo its README names for 2.9.0. It continues asdflj's repo, which stops at
