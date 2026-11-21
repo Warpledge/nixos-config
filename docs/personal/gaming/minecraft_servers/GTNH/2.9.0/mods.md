@@ -475,8 +475,10 @@ except that the GUI underneath still showed its tooltips through the panels and 
 recent targets (GT tools, after a restart) couldn't be right-clicked away; the machine
 list and AE2 requests weren't tried. `8a622f8` fixes both, keeps recents per GUI kind,
 groups the settings under labelled sections and gives the C button NEI's own background
-with a centred gold C. `craftchain-8a622f8.jar` is installed, not yet tested; `5f679de`
-and `6a71826` are kept as `.jar.disabled` (the older disabled jars were gone by then).
+with a centred gold C. `829b1e8` raises the search depth's ceiling from 8 to 16 (Shift-click
+steps by 5; its tooltip warns in yellow that deeper results are less exact).
+`craftchain-829b1e8.jar` is installed, not yet tested; `8a622f8`, `5f679de` and `6a71826`
+are kept as `.jar.disabled` (the older disabled jars were gone by then).
 
 - Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
   bottom-left row, on any GUI where NEI has a `crafting` overlay: crafting tables, the AE2
