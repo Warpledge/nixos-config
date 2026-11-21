@@ -193,7 +193,9 @@ calls the packs a work in progress.
 pack) sits above it and recolours TrashSlot 1.0.31's
 `assets/trashslot/textures/gui/slot.png` and trash-can icon to its slot palette, because
 the dark pack ships no `assets/trashslot` and the mod's sheet is vanilla grey. It is a
-separate folder, so a Dark Reimagined update leaves it in place.
+separate folder, so a Dark Reimagined update leaves it in place. Since 2026-11-21 Trash Slot
+is gone (Omni Tweaks 0.3.0 draws its own dark slot card), so `DarkTrashSlot/` does nothing
+and can be removed.
 
 ### Updating
 

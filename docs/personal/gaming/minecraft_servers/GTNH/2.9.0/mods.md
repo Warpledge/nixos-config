@@ -32,7 +32,8 @@ Do not add these: the pack carries its own copy.
 | YesSteveModel Unofficial | 3.1 | B | [czqwq fork](https://github.com/czqwq/YesSteveModel-Unofficial); 3.1 (2026-11-20) fixes the settings menu; 3.0's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`, and its one commit says "Fix Amim system"; 2.9 added the preview setting's entrance and fixed the math parser, 2.6 fixed the animation loop and 2.7 restored the animation storage system, 2.5 disabled the lighting map |
 | MineMenu | 1.2.0.B44 | C | latest on Modrinth, 2025-12-07 |
 | FPS Reducer | 1.10.3 | C | latest, 2023-09-06 |
-| Trash Slot | 1.0.31 | B | latest 1.7.10 on CurseForge |
+
+Trash Slot 1.0.31 was removed on 2026-11-21: Omni Tweaks 0.3.0 replaces it (see below).
 
 **The 2026-11-08 update is on the client and the laptop server:** GTNLLib
 1.1.5, YesSteveModel Unofficial 2.3, MIAOKATZE Core 0.2.6, GT-Steam-Reborn 2.1.28,
@@ -318,7 +319,7 @@ One mod written for this setup on 2026-11-04, client and server:
 
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
-| Omni Tweaks | 0.2.0 | B | QoL backports from modern Minecraft, so far step height 1.0 (0.5 while sneaking) and better ladder and vine climbing |
+| Omni Tweaks | 0.3.0 | B | Step height 1.0 (0.5 while sneaking), better ladder and vine climbing, and since 0.3.0 a trash slot with an auto-trash filter, recovery and a valuables check |
 
 It reimplements the wanted features of Keep Stepping and Better Climbing, neither of which
 has a 1.7.10 build; no code comes from them. Its climbing mixin hooks
@@ -327,7 +328,22 @@ jump in a climbable climbs up, and looking down 45° or more descends instead of
 when walking into a ladder. Toggles and speeds are in `config/omnitweaks.cfg`. These
 features passed in-game testing on 2026-11-04, under the mod's first name, Footwork. The
 source is in `~/Projects/omni-tweaks`, a local git repo built with GTNH's ExampleMod
-starter; the jar is `build/libs/omnitweaks-0.2.0.jar`.
+starter; the jar is `build/libs/omnitweaks-<version>.jar`.
+
+0.3.0 (2026-11-21, tag `0.3.0`) adds a trash slot that replaces Trash Slot 1.0.31,
+reimplementing its behaviour with no code from it: drop a stack in, take the last one back,
+Delete trashes the hovered stack and Shift+Delete every exact match in the main inventory.
+The card under the slot has a funnel key for the auto-trash filter and an arrow key for
+recovery, both panels left of the window. The filter holds 27 exact matches (item, damage
+and NBT) per player, each switched on or off without leaving the list, and deletes them on
+pickup. Recovery keeps the last 54 hand-trashed stacks and 27 merged auto-trashed ones, in
+the persisted player tag. Enchanted, renamed, rare or NBT-carrying items, plus
+`valuables.extra`, need a confirm popup and are never auto-trashed. Settings are in the
+`trash`, `autotrash`, `backup` and `valuables` sections of `config/omnitweaks.cfg`. The
+0.2.0 jar, Trash Slot's jar and `trashslot.cfg` are in the client's
+`mods.bak-2026-11-21-omnitweaks-0.3.0/` and the server copy's
+`backups/pre-omnitweaks-0.3.0-2026-11-21/`. Not tested in game yet; copy the server folder
+to the laptop to apply it there.
 
 ## Added on 2026-11-05
 
