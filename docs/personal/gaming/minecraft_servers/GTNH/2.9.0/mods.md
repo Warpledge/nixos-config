@@ -452,11 +452,14 @@ Simple Storage on 2026-11-20. The docked redesign (`f5d9f99`) was tested the sam
 C button, clicks and the wheel went through to AE2 and Simple Storage, and GT tools on
 hand were planned as crafts. `de4c074` fixed those (tested in game) but left surplus
 intermediates, five extra iron plates after a helmet. `80be471` fixes that, and
-`184bdbc` on top of it swaps the grey and white slots for dark ones. `craftchain-bd59523.jar`
-(2026-11-20, after a code review) is installed and not yet tested; `184bdbc` is kept as
-`.jar.disabled`. It adds quick-craft sub-chains, tool wear, batch rounds, saved picks,
+`184bdbc` on top of it swaps the grey and white slots for dark ones. `bd59523` (2026-11-20,
+after a code review) adds quick-craft sub-chains, tool wear, batch rounds, saved picks,
 a missing-items bookmark group, NEI search in the recipe picker and a refresh button, and
-fixes the planner crafting tools you don't hold.
+fixes the planner crafting tools you don't hold. Testing it turned up a diamond planned
+from a diamond and quick-craft picking a Bismutite saw from iron and wood; `924f0f8`
+fixes both (can-make now counts tools you could craft first, and a chain never uses up
+what it makes) and makes the scrollbars draggable. `craftchain-924f0f8.jar` is installed,
+not yet tested, with `bd59523` kept as `.jar.disabled`.
 
 - Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
   bottom-left row, on any GUI where NEI has a `crafting` overlay: crafting tables, the AE2
@@ -488,8 +491,8 @@ fixes the planner crafting tools you don't hold.
   UI scale, picker style, default list, reopen-with-next-GUI and batch mode are in its
   settings popover.
 - Held tools are always used and never crafted by the plan; a tool you don't hold shows
-  as *no tool*, with *Craft 1 now* opening a sub-chain that returns to the chain once the
-  tool is crafted. GT tool wear is read from GT's `MetaGeneratedTool` API by reflection,
+  as *no tool*; *Craft missing tool* lists only the tools you can make from what you have
+  and opens a sub-chain that returns to the chain once the tool is crafted. GT tool wear is read from GT's `MetaGeneratedTool` API by reflection,
   so there's no compile dependency on GT.
 - On the server it stays client-only (the server needs no jar). Waits for pulled items and
   crafted results settle on the inventory; `pullSettleTicks` (8) and `pullTimeoutTicks`
