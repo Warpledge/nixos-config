@@ -450,8 +450,9 @@ client only. Source is `~/Projects/craftchain` (own git repo, MIT), built with G
 ExampleMod starter against NEI 2.8.171. The first build (`fae8311`) worked in game with
 Simple Storage on 2026-11-20. The docked redesign (`f5d9f99`) was tested the same day: no
 C button, clicks and the wheel went through to AE2 and Simple Storage, and GT tools on
-hand were planned as crafts. `craftchain-de4c074.jar` fixes those and is installed, not
-yet tested; the two older jars are kept as `.jar.disabled`.
+hand were planned as crafts. `de4c074` fixed those (tested in game) but left surplus
+intermediates, five extra iron plates after a helmet. `craftchain-80be471.jar` fixes that
+and is installed, not yet tested; the older jars are kept as `.jar.disabled`.
 
 - Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
   bottom-left row, on any GUI where NEI has a `crafting` overlay: crafting tables, the AE2
@@ -476,6 +477,9 @@ yet tested; the two older jars are kept as `.jar.disabled`.
   before NEI's input hooks.
 - Recipe slots match stock by item and damage, ignoring NBT, as crafting does: NEI's
   recipe permutations for GT tools are dummy stacks whose NBT never matches a real tool.
+- Only the target's step goes to NEI with the amount as its multiplier; every other step
+  gets 1. NEI's `RecipeChainMath` reads a multiplier above 1 on any step as extra output
+  asked for, which is what made the surplus plates.
 - The look is GTNH Planner's palette (MIT, credited in the mod's `NOTICE`); panel opacity,
   UI scale, picker style, default list and reopen-with-next-GUI are in its settings
   popover.
