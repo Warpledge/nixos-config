@@ -451,8 +451,9 @@ ExampleMod starter against NEI 2.8.171. The first build (`fae8311`) worked in ga
 Simple Storage on 2026-11-20. The docked redesign (`f5d9f99`) was tested the same day: no
 C button, clicks and the wheel went through to AE2 and Simple Storage, and GT tools on
 hand were planned as crafts. `de4c074` fixed those (tested in game) but left surplus
-intermediates, five extra iron plates after a helmet. `craftchain-80be471.jar` fixes that
-and is installed, not yet tested; the older jars are kept as `.jar.disabled`.
+intermediates, five extra iron plates after a helmet. `80be471` fixes that, and
+`craftchain-184bdbc.jar` on top of it swaps the grey and white slots for dark ones; it is
+installed, not yet tested, and the older jars are kept as `.jar.disabled`.
 
 - Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
   bottom-left row, on any GUI where NEI has a `crafting` overlay: crafting tables, the AE2
