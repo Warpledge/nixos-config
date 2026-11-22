@@ -545,8 +545,8 @@ Tooltips (so the mod name shows), and the full-screen Tree/Stages diagram with t
 inventory tray and craft log (Craft Chain's README has the details). `24b6e8d` stays as
 `.jar.disabled`.
 
-`craftchain-tooltracker.jar` (built on 2026-11-22 from uncommitted work on top of
-`1539c7b`) replaced it. It adds the GT tool tracker and Craft Chain's own runner (below),
+`craftchain-tooltracker.jar` (built on 2026-11-22 from the tree committed as `69dd311`)
+replaced it. It adds the GT tool tracker and Craft Chain's own runner (below),
 and recipe lookup now matches a GT tool's material, so an ardite hammer target no longer
 takes another material's recipe. Tested in game on 2026-11-22: a screwdriver chain in the
 Simple Storage box crafted exactly 2 rods and the screwdriver in one Craft. Tool picks,
