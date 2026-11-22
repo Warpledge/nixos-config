@@ -545,12 +545,14 @@ Tooltips (so the mod name shows), and the full-screen Tree/Stages diagram with t
 inventory tray and craft log (Craft Chain's README has the details). `24b6e8d` stays as
 `.jar.disabled`.
 
-`craftchain-tooltracker.jar` (built on 2026-11-22 from the tree committed as `69dd311`)
+`craftchain-tooltracker.jar` (built on 2026-11-22 from the tree committed as `3406b64`)
 replaced it. It adds the GT tool tracker and Craft Chain's own runner (below),
 and recipe lookup now matches a GT tool's material, so an ardite hammer target no longer
 takes another material's recipe. Tested in game on 2026-11-22: a screwdriver chain in the
-Simple Storage box crafted exactly 2 rods and the screwdriver in one Craft. Tool picks,
-the AE2 terminal and quest counting through the runner are still to try.
+Simple Storage box crafted exactly 2 rods and the screwdriver in one Craft, and the
+material list no longer crashes the AE2 terminal. In AE2's terminal the output slot refuses
+plain clicks, so the runner sends AE2's `CRAFT_ITEM` inventory action per craft. Tool
+picks being remembered and quest counting through the runner are still to confirm.
 `craftchain-gttoolfix.jar` and `craftchain-bookmarks-test.jar` are kept as `.jar.disabled`.
 
 - Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
