@@ -26,6 +26,8 @@ java.lang.NoSuchMethodError: 'net.minecraft.util.MovingObjectPosition net.minecr
 
 ## Steps
 
+**2026-11-21: steps 1 to 3 done, step 5 done on eclipse.** Fork commit `8ee2dec`, tag `6.6-balanced.14`: a private `rayTraceServer` in `Manager` replaces the call; no other code raytraced. A scan of every vanilla member the compiled jar references against Minecraft's `@SideOnly(CLIENT)` list found only `rayTrace` on a server path (it also flags `Item.getSubItems`/`getCreativeTab` in `command/ToolListDump`, which already catches the `LinkageError` and falls back to metas 0-15). `omniminer-6.6-balanced.14.jar` is in the client instance and eclipse's server copy, with `.13` beside it as `.jar.disabled`. Left: test (step 4), copy the jar to legion (step 5) and step 6.
+
 1. In `~/Projects/ezminer-balanced` on eclipse, replace the `rayTrace` call in `Manager.onBlockSwapRightClick` with a raytrace both sides have: eye at `player.posY + player.getEyeHeight()`, direction `player.getLook(1.0F)`, reach from `((EntityPlayerMP) player).theItemInWorldManager.getBlockReachDistance()`, then `world.rayTraceBlocks(eye, end, false)`. Put it in a shared helper if other code raytraces too. Block Swap's behaviour stays the same otherwise.
 2. Search the fork for other client-only use reachable from server-side code (event handlers, packet handlers, common code): `rayTrace(`, `func_70614_a`, `Minecraft.getMinecraft`, `net.minecraft.client.*`, and `@SideOnly(Side.CLIENT)` methods or fields on `Entity`, `World`, `Item` and `Block`. Fix the ones on a server path.
 3. Bump to `6.6-balanced.14` and build.
