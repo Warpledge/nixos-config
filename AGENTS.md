@@ -171,6 +171,11 @@ list at the start, and don't write your summary before step 4.
   first.
 - If something an approved option assumed turns out false, say so and ask again
   before acting.
+- Choosing between visual designs (a UI, layout or screen with several
+  directions): make an interactive HTML picks page instead of asking in prose.
+  Mockups in the app's own colours, a radio per option (clicking the mockup
+  picks it), checkboxes for extras, and a Copy picks button that gives one line
+  to paste back.
 
 **Long tasks**
 
