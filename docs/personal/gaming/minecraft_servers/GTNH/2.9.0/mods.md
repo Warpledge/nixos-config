@@ -563,8 +563,10 @@ while a step fills, a red row with Retry step / Skip / Stop on a failure, sounds
 target card with a typeable amount and ±1/16/32/64 keys, have/need counts, roomier rows,
 tooltip details behind Left Ctrl, a tab row (or rail) with sub-chain and bookmark-group
 tabs, the Tree tab, and the diagram's tiles or slot cards, bus lines and side panel
-(Craft Chain's README has the details). Unit tests and the build pass; not yet tried in
-game.
+(Craft Chain's README has the details). It looked right in game on 2026-11-22, with some
+minor issues still to list. The same day it was rebuilt from `3b1a8eb` (effect toggles,
+a compact Chain view, Max with its count, the Tree tab's tool tracker, Settings beside the
+dock; `docs/todo/craftchain-overhaul-followups.md`), not yet tried in game.
 
 - Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
   bottom-left row, on any GUI where NEI has a `crafting` overlay: crafting tables, the AE2
