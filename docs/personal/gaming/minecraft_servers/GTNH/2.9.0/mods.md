@@ -539,6 +539,12 @@ both the inventory and a crafting table. It is client only (GUI mixins, no packe
 copy put on legion's server was moved to its `backups/removed-mods/2026-11-21/`. `00a8fa4`, `e8fb9a2`, `4fdceaf`
 and `3ea863f` are kept as `.jar.disabled` (the older disabled jars were gone by then).
 
+`craftchain-2534e5e.jar` replaced it on 2026-11-21 and looked right in game the same day:
+the card layout, the Craftable category rail and grouped grid, tooltips through Chromatic
+Tooltips (so the mod name shows), and the full-screen Tree/Stages diagram with the
+inventory tray and craft log (Craft Chain's README has the details). `24b6e8d` stays as
+`.jar.disabled`.
+
 - Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
   bottom-left row, on any GUI where NEI has a `crafting` overlay: crafting tables, the AE2
   crafting terminal, the EZStorage crafting box. Shift opens it expanded.
