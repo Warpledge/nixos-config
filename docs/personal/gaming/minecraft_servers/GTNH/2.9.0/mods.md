@@ -555,6 +555,17 @@ plain clicks, so the runner sends AE2's `CRAFT_ITEM` inventory action per craft.
 picks being remembered and quest counting through the runner are still to confirm.
 `craftchain-gttoolfix.jar` and `craftchain-bookmarks-test.jar` are kept as `.jar.disabled`.
 
+`craftchain-overhaul.jar` (built on 2026-11-22 from `473ac75`, three commits on
+`3406b64`) replaced it; `craftchain-tooltracker.jar` is kept as `.jar.disabled`. It is the
+visual overhaul picked on the Craft Chain Overhaul Options and Craft Chain Tree Options
+pages: live STEPS rows, crafted items flying to the target, the GUI's grid outlined
+while a step fills, a red row with Retry step / Skip / Stop on a failure, sounds, a
+target card with a typeable amount and ±1/16/32/64 keys, have/need counts, roomier rows,
+tooltip details behind Left Ctrl, a tab row (or rail) with sub-chain and bookmark-group
+tabs, the Tree tab, and the diagram's tiles or slot cards, bus lines and side panel
+(Craft Chain's README has the details). Unit tests and the build pass; not yet tried in
+game.
+
 - Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
   bottom-left row, on any GUI where NEI has a `crafting` overlay: crafting tables, the AE2
   crafting terminal, the EZStorage crafting box. Shift opens it expanded.
