@@ -459,14 +459,21 @@ EZStorage, built with GTNH's ExampleMod starter.
 
 ## Smooth Swapping, ported for this setup on 2026-11-17
 
-`smoothswapping-1.0.0.jar` animates item stacks moving between slots, client only. It's a
+`smoothswapping-1.0.1.jar` animates item stacks moving between slots, client only. It's a
 port of [Schauweg's Smooth Swapping](https://github.com/Schauweg/Smooth-Swapping) (branch
 `1.20.1/dev`), which is LGPL-3.0, so the port is LGPL-3.0 too and credits upstream in its
-`NOTICE`. Source is `~/Projects/smoothswapping` (own git repo, tag `1.0.0`), built with
+`NOTICE`. Source is `~/Projects/smoothswapping` (own git repo, tag `1.0.1`), built with
 GTNH's ExampleMod starter. It replaces a 0.6.0 rewrite from 2026-11-10 that didn't work and
 was deleted; that one's settings are in `config/smoothswapping.cfg.old-2026-11-10`. Tested
 in game on 2026-11-17: every case below works, and all eight mixins apply with no warnings
 in `logs/fml-client-latest.log`.
+
+1.0.1 (2026-11-22) fixes a client crash in ModularUI 2 screens. MUI2's
+`drawContainer` null-checks the real cursor stack, but a swap can hide the whole stack
+while it flies, so `drawItemStack` received null and threw an NPE on a wood click into a
+coke oven. The mixin now cancels `drawItemStack` for a null stack. The old jar is in
+`backups/replaced-mods/2026-11-22/`; installed, in-game test pending. Crash report:
+`crash-reports/crash-2026-11-22_04.26.35-client.txt`.
 
 - Upstream's model: slots that lost items are paired with slots that gained the same item,
   and a copy moves in a straight line from one to the other while the destination shows its
