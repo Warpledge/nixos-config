@@ -545,6 +545,14 @@ Tooltips (so the mod name shows), and the full-screen Tree/Stages diagram with t
 inventory tray and craft log (Craft Chain's README has the details). `24b6e8d` stays as
 `.jar.disabled`.
 
+`craftchain-tooltracker.jar` (built on 2026-11-22 from uncommitted work on top of
+`1539c7b`) replaced it. It adds the GT tool tracker and Craft Chain's own runner (below),
+and recipe lookup now matches a GT tool's material, so an ardite hammer target no longer
+takes another material's recipe. Tested in game on 2026-11-22: a screwdriver chain in the
+Simple Storage box crafted exactly 2 rods and the screwdriver in one Craft. Tool picks,
+the AE2 terminal and quest counting through the runner are still to try.
+`craftchain-gttoolfix.jar` and `craftchain-bookmarks-test.jar` are kept as `.jar.disabled`.
+
 - Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
   bottom-left row, on any GUI where NEI has a `crafting` overlay: crafting tables, the AE2
   crafting terminal, the EZStorage crafting box. Shift opens it expanded.
@@ -559,8 +567,16 @@ inventory tray and craft log (Craft Chain's README has the details). `24b6e8d` s
   overview column: target, amount (with *Max*, the most that plans in full), TAKES,
   MISSING, LEFTOVERS and STEPS (a Steps | Tree pill shows the full tree), with the status
   line above Craft. A step's recipes pop out beside the dock, listed "Can make" (tools on hand, materials
-  on hand or craftable) or "All", best yield first. Craft pulls through NEI's
-  `BookmarkPanel.pullBookmarkItems` and runs `AutoCraftingManager`, the path a
+  on hand or craftable) or "All", best yield first. Craft runs each step itself
+  (`GridRunner`): the GUI's own NEI overlay handler fills the grid (vanilla grids,
+  EZStorage's `NeiCraftingOverlay`, NotEnoughEnergistics' terminal handler), the picked
+  tool is swapped in, and each craft is clicked out one at a time. It never shift-clicks,
+  because EZStorage's box refills the grid from storage after every shift-clicked craft
+  up to a full stack. Results leave through the output slot, so the questbook's crafting
+  tasks count them (EZStorage's own NEI craft packet, which `AutoCraftingManager` uses in
+  that box, crafts server-side without the crafted event BetterQuesting listens for).
+  `ownRunner=false` (config `server` section) or a GUI without a known handler falls back to
+  NEI's `BookmarkPanel.pullBookmarkItems` and `AutoCraftingManager`, the path a
   crafting-mode bookmark group takes. Machine-made ingredients show as missing; clicking
   one lists NEI's other handlers for it (`GuiCraftingRecipe.getCraftingHandlers`), with
   EU/t and time read from GT's `mRecipe` by reflection.
@@ -572,19 +588,22 @@ inventory tray and craft log (Craft Chain's README has the details). `24b6e8d` s
   before NEI's input hooks.
 - Recipe slots match stock by item and damage, ignoring NBT, as crafting does: NEI's
   recipe permutations for GT tools are dummy stacks whose NBT never matches a real tool.
-- Only the target's step goes to NEI with the amount as its multiplier; every other step
-  gets 1. NEI's `RecipeChainMath` reads a multiplier above 1 on any step as extra output
-  asked for, which is what made the surplus plates.
+- On the NEI fallback, only the target's step goes to NEI with the amount as its
+  multiplier; every other step gets 1. NEI's `RecipeChainMath` reads a multiplier above 1
+  on any step as extra output asked for, which is what made the surplus plates. It also
+  treats every GT tool of a kind as one item, any material, which is why the runner exists.
 - The look is GTNH Planner's palette (MIT, credited in the mod's `NOTICE`); panel opacity,
   UI scale, default list and every on/off behaviour are in its settings popover, each
   with a tooltip.
-- Held tools are always used and never crafted by the plan; a tool you don't hold shows
-  as *no tool*; *Craft missing tool* lists only the tools you can make from what you have
-  and opens a sub-chain that returns to the chain once the tool is crafted. *Tools ›*
-  queues every missing tool after the tools needed to make it (hammer, file, saw); each
-  opens in turn and you press Craft. With several of one tool held, NEI's grid filler
-  (`DefaultOverlayHandler.getSourceSlots`) already takes the most worn first. GT tool wear is read from GT's `MetaGeneratedTool` API by reflection,
-  so there's no compile dependency on GT.
+- Tools are never crafted by the plan. The MAKING card has a tool tracker: a slot per
+  tool kind (its `craftingTool…` ore-dictionary name, or the item for other mods' tools)
+  with a durability bar and the uses the chain needs, green, amber (wears out first) or
+  red (none held). Clicking a slot picks the tool from inventory or storage; picks are
+  kept per GUI class in `config/craftchain-tools.json` by item and GT material, and with
+  none the most worn tool that lasts the chain is used. A red slot lists the tool's
+  recipes per material, and the chosen one is crafted as a sub-chain. The TOOLS card and
+  *Tools ›* queue are gone. GT tool wear is read from GT's `MetaGeneratedTool` API by
+  reflection, so there's no compile dependency on GT.
 - On the server it stays client-only (the server needs no jar). Waits for pulled items and
   crafted results settle on the inventory; `pullSettleTicks` (8) and `pullTimeoutTicks`
   (100) are in the config's `server` section if the server lags. Picks are saved in
