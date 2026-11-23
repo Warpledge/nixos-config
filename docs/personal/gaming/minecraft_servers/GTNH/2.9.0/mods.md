@@ -575,6 +575,16 @@ minor issues still to list. The same day it was rebuilt from `3b1a8eb` (effect t
 a compact Chain view, Max with its count, the Tree tab's tool tracker, Settings beside the
 dock; `docs/todo/craftchain-overhaul-followups.md`), not yet tried in game.
 
+`craftchain-96fa3ba.jar` replaced it on 2026-11-23, built from `96fa3ba`, the three merged
+pull requests: bookmark tabs with an amount (right-click → *Set amount…*; Shift+wheel
+steps 1, Ctrl 16), the amount field taking sums (`9*18`, `3x5`, `(2+1)*64`), a Tree tool
+display setting (Target slots or the old Strip), the Tree tab's amount field on the
+wheel, and TAKES/MISSING rows showing one number each, the plan's count and the
+shortfall, with have/need left to the tooltip. The same merge adds the live-reload tools:
+`tools/deploy.sh` builds and drops the jar into the instance's mods folder, and
+`tools/hotswap.sh` redefines changed method bodies in the running game over JDWP
+(`tools/CLAUDE.md`), not yet tried in game.
+
 - Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
   bottom-left row, on any GUI where NEI has a `crafting` overlay: crafting tables, the AE2
   crafting terminal, the EZStorage crafting box. Shift opens it expanded.

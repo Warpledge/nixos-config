@@ -4,6 +4,9 @@
 
 Added 2026-11-22.
 
+**Status (2026-11-23):** the deployed jar is `96fa3ba`, built from three merged pull
+requests (bookmark amounts, amount sums and Tree tools, live-reload tooling).
+
 ## What's already in the repo
 
 - Craft Chain's source is `~/Projects/craftchain`; the overhaul is its commits `0d5ca51`, `9d5d222` and `473ac75`. The Craft Chain section of `personal/gaming/minecraft_servers/GTNH/2.9.0/mods.md` records the jar.
@@ -13,5 +16,5 @@ Done in Craft Chain `3b1a8eb` (2026-11-22, built and unit-tested, not yet tried 
 
 ## Steps left
 
-1. Try `3b1a8eb` in game: a fast many-stack craft (flyers stay few), the compact view on a long chain, crafting a tool from the Tree tab, Max's count, Settings beside the dock.
+1. Try `96fa3ba` in game: a fast many-stack craft (flyers stay few), the compact view on a long chain, crafting a tool from the Tree tab, Max's count, Settings beside the dock, a bookmark tab's *Set amount…* and Shift+wheel, sums in the amount field, the Tree tool display setting and the Tree tab's amount wheel.
 2. Some other minor issues were seen in game with `473ac75`; ask which before closing this.
