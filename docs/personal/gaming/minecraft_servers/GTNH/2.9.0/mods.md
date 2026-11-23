@@ -585,15 +585,31 @@ shortfall, with have/need left to the tooltip. The same merge adds the live-relo
 `tools/hotswap.sh` redefines changed method bodies in the running game over JDWP
 (`tools/CLAUDE.md`), not yet tried in game.
 
+`craftchain-e4e53a2.jar` replaced it on 2026-11-23, the Browse tab rework. The tab is
+renamed **Browse** and splits into **Craftable** and **Short mats**: every sub-craft
+entry is planned once against the actual stock on a background worker, reused across
+storage changes, and rechecked only on R, a finished craft or a new GUI. Items missing an
+ingredient outright are left out, and only the bookmarks show them red. Short mats gets
+an amber corner triangle, counts of 1 are hidden, slots use the hairline chrome, the
+group header has a rule, the tab row is 13 units, the strip under the rail shows recents
+only, the bookmark chips are no chip / amber `!` / red `✕`, and the category icons are
+vanilla again with an iron gear for machine parts and an iron ingot for materials. Tested
+in game on 2026-11-23 on a large automated storage: the list and states no longer reset
+as items move, though the counts can still settle while stock changes.
+
 - Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
   bottom-left row, on any GUI where NEI has a `crafting` overlay: crafting tables, the AE2
   crafting terminal, the EZStorage crafting box. Shift opens it expanded.
 - Docked, it takes the place of NEI's bookmark panel (hidden through an
   `INEIGuiHandler` while it's open) and takes input only over its own panels, so the GUI,
   the inventory and NEI's item list stay usable. Expanded, it reaches to NEI's item list.
-- The Craftable tab lists what grid recipes make from the inventory plus the storage the
-  GUI's NEI bookmark container handler reports, filtered All, Now or Sub-crafts (depth and
-  time budget in `config/craftchain.cfg`).
+- The Browse tab lists what grid recipes make from the inventory plus the storage the
+  GUI's NEI bookmark container handler reports, in two views: Craftable (the plan
+  completes, sub-crafts included) and Short mats (only short on items already held).
+  Items missing an ingredient outright are left out; the bookmarks show them red. The
+  state of each sub-craft entry is planned once in the background and reused across
+  storage changes (R, a finished craft or a new GUI rechecks). Depth and time budget are
+  in `config/craftchain.cfg`.
 - The Chain tab builds the grid-recipe chain for an item, stock first. An ore-dictionary
   slot (any planks) is one step offering every variant's recipes. Docked, the tab is the
   overview column: target, amount (with *Max*, the most that plans in full), TAKES,
@@ -641,9 +657,10 @@ shortfall, with have/need left to the tooltip. The same merge adds the live-relo
   (100) are in the config's `server` section if the server lags. Picks are saved in
   `config/craftchain-picks.json` under registry-name item keys, so they carry across worlds.
 - The open key over an item (NEI's list, the inventory, a recipe card, NEI's recipe
-  screen) opens its chain. The Craftable tab has favourite and recent targets
-  (`config/craftchain-targets.json`, recents per GUI kind), a sort key (NEI, amount, name, mod) and category
-  icons (building, machines, parts, materials, tools, weapons, armour, food, rest). Each
+  screen) opens its chain. The Browse tab has a recent-targets row
+  (`config/craftchain-targets.json`, recents per GUI kind); favourites are the pinned
+  bookmark tabs. A sort key (NEI, amount, name, mod) and category icons (building,
+  machines, parts, materials, tools, weapons, armour, food, rest) filter the list. Each
   kind of crafting GUI keeps its own chain and list across switches.
 - The recipe index is saved to `.minecraft/craftchain/recipe-index.bin` and reused at
   world join while a SHA-256 fingerprint (mods and versions, handlers, every crafting
