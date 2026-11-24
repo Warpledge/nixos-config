@@ -585,6 +585,16 @@ shortfall, with have/need left to the tooltip. The same merge adds the live-relo
 `tools/hotswap.sh` redefines changed method bodies in the running game over JDWP
 (`tools/CLAUDE.md`), not yet tried in game.
 
+`craftchain-5fb9896.jar` replaced it on 2026-11-23, the repo after the Browse revert and the
+logic review. The Browse tab rework (`e4e53a2`) is gone (PR #6, after the local revert
+`2603e92`), so the tab is the old Craftable with All, Now and Sub-crafts. PR #7 fixes the
+planner: steps now run after the steps making their ingredients (an item could run before
+what its second use needed), recipes with a slot no item can fill are dropped from the
+recipe index and its saved format is bumped, the grid runner clicks partial stacks and
+says "Inventory full", a GUI closing mid-run clears the step like Stop, the most worn
+tool that lasts the chain is picked, and a zero result count is guarded. Unit tests pass;
+the jar is deployed, not yet tried in game.
+
 - Opens with `C` (rebindable) or the C button after GTNH Planner's P in NEI's
   bottom-left row, on any GUI where NEI has a `crafting` overlay: crafting tables, the AE2
   crafting terminal, the EZStorage crafting box. Shift opens it expanded.

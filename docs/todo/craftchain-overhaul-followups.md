@@ -4,8 +4,8 @@
 
 Added 2026-11-22.
 
-**Status (2026-11-23):** the deployed jar is `96fa3ba`, built from three merged pull
-requests (bookmark amounts, amount sums and Tree tools, live-reload tooling).
+**Status (2026-11-23):** the deployed jar is `5fb9896`, the repo after the
+Browse revert (PR #6) and the logic review (PR #7); it follows `96fa3ba`.
 
 ## What's already in the repo
 
@@ -16,5 +16,5 @@ Done in Craft Chain `3b1a8eb` (2026-11-22, built and unit-tested, not yet tried 
 
 ## Steps left
 
-1. Try `96fa3ba` in game: a fast many-stack craft (flyers stay few), the compact view on a long chain, crafting a tool from the Tree tab, Max's count, Settings beside the dock, a bookmark tab's *Set amount…* and Shift+wheel, sums in the amount field, the Tree tool display setting and the Tree tab's amount wheel.
+1. Try the current jar (`5fb9896`) in game: a fast many-stack craft (flyers stay few), the compact view on a long chain, crafting a tool from the Tree tab, Max's count, Settings beside the dock, a bookmark tab's *Set amount…* and Shift+wheel, sums in the amount field, the Tree tool display setting and the Tree tab's amount wheel.
 2. Some other minor issues were seen in game with `473ac75`; ask which before closing this.
