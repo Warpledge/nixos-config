@@ -35,6 +35,18 @@ Do not add these: the pack carries its own copy.
 
 Trash Slot 1.0.31 was removed on 2026-11-21: Omni Tweaks 0.3.0 replaces it (see below).
 
+**2026-11-24: four client-only updates and Better Foliage back, on the 2.9.0 client.**
+Angelica 2.2.46 → 2.2.47 (translucency sorting, early TESR draws, layer and terrain split,
+glow depth and depth peeling, and flowing water through LiquidLogged blocks), AngelLib
+1.0.2 → 1.0.3 (the Java4Shell Base64 fix), Dashboard 1.0.23 → 1.0.25 (Extra Utilities TPS
+line, redone bar atlas and Customize screen, new themes) and MyCTMLib 1.4.7-290 → 1.4.9-291
+(1.4.8 moves to GTNHLib 0.11.58 and NEI 2.8.175, the 2.9.1 pair; 1.4.9 adds Forestry
+machine and escritoire models). MyCTMLib is unproven on 2.9.0, which has GTNHLib 0.11.54
+and NEI 2.8.171. Better Foliage 2.0.1 is back with both configs restored; its notes still
+name no performance fix, so watch the FPS. Angelica#2092 is still open, so check
+ChromaPatch and the shaders, Distant Horizons and Xaero's maps at launch. The four old
+jars are in `backups/replaced-mods/2026-11-24/`.
+
 **The 2026-11-08 update is on the client and the laptop server:** GTNLLib
 1.1.5, YesSteveModel Unofficial 2.3, MIAOKATZE Core 0.2.6, GT-Steam-Reborn 2.1.28,
 GT-Interesting-Thing 2.1.6, GT-Simple-Wireless-Network 2.1.19 and Realistic World Gen 2
@@ -285,7 +297,7 @@ Four client-side additions on 2026-11-02:
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
 | World Tooltips | 1.2.3-90 | C | floating tooltip over dropped items; shader-compatible continuation of GenuineSounds' mod; [source code](https://github.com/GTNotLeisure/WorldTooltipsContinuation) |
-| MyCTMLib | 1.4.7-290 | C | connected-texture support for resource packs; 1.4.7 adds ProjectRed and Automagy torch models; builds against GT 5.09.54.265, the GT in 2.9.0 |
+| MyCTMLib | 1.4.9-291 | C | connected-texture support for resource packs; 1.4.8 moves to GTNHLib 0.11.58 and NEI 2.8.175, the 2.9.1 pair, and 1.4.9 adds Forestry machine and escritoire JSON models; 1.4.7 added ProjectRed and Automagy torch models. Unproven on 2.9.0's 0.11.54 and 2.8.171 |
 | OmniOcular Unofficial | 1.7.2 | B | WAILA add-on showing machine internals; client full jar, server `-server.jar`; see the scripts note below |
 
 World Tooltips moved from 1.2.3-87 to 1.2.3-90 on 2026-11-17. Builds 88 to 90 have no
@@ -380,7 +392,7 @@ release; all of them passed in-game testing on 2026-11-05.
 | Mod | Build | Side | Note |
 | --- | --- | --- | --- |
 | World Preview NH | 1.0.3 | C | biome and height preview on Create New World |
-| Vintage Resourcify, with AngelLib 1.0.2 | 1.0.6 | C | in-game resource and shader pack browser; 1.0.2 marks server list pings with port 0 rather than a hostname suffix, so e4mc worlds stop showing as "Unknown server" |
+| Vintage Resourcify, with AngelLib 1.0.3 | 1.0.6 | C | in-game resource and shader pack browser; 1.0.2 marks server list pings with port 0 rather than a hostname suffix, so e4mc worlds stop showing as "Unknown server"; 1.0.3 decodes animated server icons in plain Java to avoid Java's Base64 intrinsics on AVX-512 VBMI (CVE-2026-114938), and Java itself still needs updating |
 | Better Search | 1.6.4 | C | typo-tolerant search, with NEI and AE2 hooks; 1.6.4 fixes its AE2 mixin errors and works with Language Reload |
 | Effortless Building Gadgets | 0.10.1 | B | shape building through a crafted gadget; `B:consumesEnergy=false` on both sides, so it needs no power |
 | Shoulder Surfing Reloaded | 2.4.1 | C | over-the-shoulder camera; a 2023 build that patches vanilla code, so suspect it first after a pack update |
@@ -664,8 +676,10 @@ the jar is deployed, not yet tried in game.
 
 ## Dashboard, added on 2026-11-15
 
-`dashboard-1.0.23.jar` (1.0.23, 2026-11-20; 1.0.22 was added on 2026-11-15) is on the
-client only. 1.0.23 makes elements move aside instead of overlapping. It is GTNH's own HUD
+`dashboard-1.0.25.jar` (1.0.25, 2026-11-23; 1.0.22 was added on 2026-11-15, 1.0.23 on
+2026-11-20) is on the client only. 1.0.23 makes elements move aside instead of
+overlapping; 1.0.24 adds an Extra Utilities TPS line, and 1.0.25 redoes the bar texture
+atlas and Customize screen and adds themes. It is GTNH's own HUD
 editor: every HUD element, from Minecraft and from the mods it supports, gets a box you
 drag, resize or hide, and bars, the crosshair, the hotbar and the screen overlays can be
 restyled. Three layouts are kept, switched with a key.
@@ -756,17 +770,17 @@ nothing. The jar's sha256 matches the digest GitHub lists.
 - Config: `config/neiguess/neiguess.cfg`, and history and favorites in
   `config/neiguess/history.json`. Extra word lists go in `config/neiguess/lexicon/`.
 
-## Better Foliage, added on 2026-11-17, removed on 2026-11-18
+## Better Foliage, added on 2026-11-17, removed on 2026-11-18, re-added on 2026-11-24
 
-`BetterFoliage-LegacyEdition-2.0.1.jar` (2.0.1, 2026-11-17; 2.0.0 was added first) was on
+`BetterFoliage-LegacyEdition-2.0.1.jar` (2.0.1, 2026-11-17; 2.0.0 was added first) is on
 the client, side C. The jar's sha512 matches the one Modrinth lists.
 
 **Removed on 2026-11-18 for its FPS cost:** 190 FPS fell to 150-160 at the default
 features and to 120-140 with more on. 2.0.0 also crashed chunk meshing once on an oak
-leaf (`Only quads are supported, got: 66`, through its Angelica mixin). The jar and both
-configs are in `backups/removed-mods/2026-11-18/`, and `mod-sources.json` keeps it as a
-parked entry so a release that names performance can be retried. The notes below are
-for that retry.
+leaf (`Only quads are supported, got: 66`, through its Angelica mixin). **Re-added on
+2026-11-24** with both configs restored from `backups/removed-mods/2026-11-18/`; 2.0.1's
+notes still name no performance fix, so the cost may return. `mod-sources.json` is an
+added entry again.
 
 - 2.0.0 is a rewrite from Kotlin to Java. It fixes the pitch-black rendering that older
   builds showed under shaders with Angelica 2.0.0-alpha9 or later, plus black leaves from
@@ -915,6 +929,11 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   for mods, and tags profiler captures with its version. Angelica#2092 is still open, so
   the Xaero workaround above still applies. Check ChromaPatch and the shaders, Distant
   Horizons and Xaero's maps at launch.
+
+- **Angelica 2.2.47** (2026-11-23, client only): translucency sorting improvements, early
+  TESR draws, layer and terrain split, glow depth and depth peeling, and flowing water
+  through LiquidLogged blocks. Angelica#2092 is still open. Check ChromaPatch and the
+  shaders, Distant Horizons and Xaero's maps at launch.
 
 - **Realistic World Gen 2 2.1.2** (2026-11-14, client and legion): keeps one landmark per
   river junction, improves `runPreview`, and renames `rwg_data.dat` so it stops clashing
