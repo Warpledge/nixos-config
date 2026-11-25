@@ -44,6 +44,7 @@
       scrcpy.enable = true;
       audio.reaper = false;
       audio.guitarix = false;
+      audio.easyeffects = false;
       dev.go = false;
       dev.node = false;
       dev.rust = false;
@@ -171,7 +172,7 @@
 
   #--- Kernel Selection
   # Options: "zen" | "latest" | "xanmod" | "cachyos"
-  kernel = "latest";
+  kernel = "cachyos";
 
   #--- Mouse Cursor
   # Options: "bibata" | "catppuccin"
@@ -190,6 +191,7 @@
   #--- Firewall: ports other devices may connect to
   firewall.openTCPPorts = [
     7777 # Terraria server
+    25566 # GTNH Minecraft server (Omni Server)
   ];
   firewall.openUDPPorts = [];
 
@@ -214,6 +216,7 @@
     "omni-settings"
     "protonplus"
     "nix-daemon"
+    "omni-server"
   ];
 
   #--- SSH Server
@@ -252,7 +255,7 @@
   blocklist.allow = [];
   maintenance.clean = "weekly";
   maintenance.keepDays = 5;
-  maintenance.keepGenerations = 5;
+  maintenance.keepGenerations = 10;
   maintenance.optimise = "daily";
   maintenance.updateReminderDays = 30;
   localModels.models = {

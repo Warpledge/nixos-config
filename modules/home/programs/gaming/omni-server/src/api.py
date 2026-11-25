@@ -257,7 +257,8 @@ def quick_save(args):
         if not name or not steps:
             raise servers.ServerError("Each quick command needs a name and a command")
         quick.append({"name": name, "icon": item.get("icon") if item.get("icon") in QUICK_ICONS else "bolt",
-                      "pinned": bool(item.get("pinned")), "confirm": bool(item.get("confirm")), "steps": steps})
+                      "pinned": bool(item.get("pinned")), "confirm": bool(item.get("confirm")),
+                      "onStart": bool(item.get("onStart")), "steps": steps})
         if item.get("addon"):
             quick[-1]["addon"] = str(item["addon"])
     cfg["quick"] = quick
@@ -456,12 +457,36 @@ def set_aside_delete(args):
     return {}
 
 
+#--- Prints this connection's public IPv4; run off the VPN where Mullvad is installed,
+#--- since the window's backend stays on it (servers skip it through the split tunnel)
+PUBLIC_IP_URL = "https://ipv4.icanhazip.com"
+PUBLIC_IP_SCRIPT = ("import sys, urllib.request; sys.stdout.write(urllib.request.urlopen("
+                    f"{PUBLIC_IP_URL!r}, timeout=5).read().decode().strip())")
+
+
+def public_ip():
+    cmd = [sys.executable, "-I", "-c", PUBLIC_IP_SCRIPT]
+    if os.access("/run/wrappers/bin/mullvad-exclude", os.X_OK):
+        cmd.insert(0, "/run/wrappers/bin/mullvad-exclude")
+    try:
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=8, check=False)
+        socket.inet_aton(res.stdout)
+        return res.stdout
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
 @command
 def join_address(args):
-    """The address players on this network join at: the first non-loopback IPv4 address
-    and the server's port."""
+    """The address players join at with the server's port: the public IPv4 address by
+    default, or with `lan` the first non-loopback one on this network. A failed public
+    lookup falls back to the LAN address and says so in `fallback`."""
     cfg = require(args)
     port = properties.read(servers.props_file(cfg)).get("server-port", "25565")
+    if not args.get("lan"):
+        host = public_ip()
+        if host:
+            return {"address": f"{host}:{port}"}
     host = "localhost"
     try:
         res = subprocess.run(["ip", "-j", "-4", "addr", "show", "scope", "global", "up"],
@@ -473,7 +498,7 @@ def join_address(args):
                 break
     except (OSError, ValueError, subprocess.SubprocessError):
         pass
-    return {"address": f"{host}:{port}"}
+    return {"address": f"{host}:{port}", "fallback": not args.get("lan")}
 
 
 @command

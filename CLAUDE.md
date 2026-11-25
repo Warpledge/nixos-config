@@ -135,6 +135,7 @@ Most tasks have a skill whose description says when to use it (`add-app`, `freet
 - **Add an app:** `add-app`. An app not in nixpkgs is an AppImage wrap or a patched `.deb`/tarball before a Flatpak, the last resort.
 - **Add a system service:** the toggle goes in `machines/_template/settings.nix` (off) and the machine's `settings.nix`, the module in `modules/nixos/services/<category>/<name>.nix`, the import (`lib.optionals machine.<name>.enable [...]`) in `modules/nixos/default.nix`, and an entry in `setup.sh`'s `services` list.
 - **A QML, plugin or app change:** run it before committing. A passing build proves it packages, not that the page renders or the button fires.
+- **Choosing between visual designs** (a UI, layout or screen with several directions): publish an interactive picks page instead of asking in prose. Mockups in the app's own colours, a radio per option (clicking the mockup picks it), checkboxes for extras, and a **Copy picks** button that gives one line to paste back. The "Craft Chain UI Options" artifact is the model.
 - **Update flake inputs:** point the user at the user-only `/flake-update [input…]` skill (`nixm upgrade` minus the rebuild).
 - **New computer, reinstall or person:** `./setup.sh` / `./setup.sh add-user`, run by the person; never here (sudo, `nixos-rebuild`).
 - **Bring Hyprland back:** restore from the `hyprland-backup` branch, re-add `"hyprland"` to `windowManager` in `lib/settings.nix`, set it in the machine's `settings.nix`.

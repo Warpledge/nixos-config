@@ -77,36 +77,48 @@ in {
       splashBackground = "rgb(${base00-rgb-r}, ${base00-rgb-g}, ${base00-rgb-b})";
       spellCheckLanguages = ["en-US" "en"];
     };
+    #--- QuickCSS hides the reaction pills; superReactionTweaks stops their bursts
+    quickCss = lib.mkIf user.discord.hideReactions ''
+      [class^="reactions_"], [class*=" reactions_"] {
+        display: none !important;
+      }
+    '';
     config = {
       frameless = true; # set some Vencord options
       enabledThemes = lib.optionals user.discord.vesktop ["dank-discord.css"];
+      useQuickCss = user.discord.hideReactions;
       plugins = {
-        biggerStreamPreview.enable = true;
-        fakeNitro.enable = true;
-        fixImagesQuality.enable = true;
-        fixSpotifyEmbeds.enable = true;
-        fixYoutubeEmbeds.enable = true;
-        forceOwnerCrown.enable = true;
-        fullSearchContext.enable = true;
-        imageZoom.enable = true;
-        memberCount.enable = true;
-        noProfileThemes.enable = true;
-        noTypingAnimation.enable = true;
-        silentTyping.enable = true;
-        spotifyCrack.enable = true;
-        unlockedAvatarZoom.enable = true;
-        viewIcons.enable = true;
-        volumeBooster.enable = true;
-        # WebRichPresence (arRPC): read game presence from standalone arRPC service
-        webRichPresence.enable = true;
-        youtubeAdblock.enable = true;
+        biggerStreamPreview.enable = user.discord.plugins.biggerStreamPreview;
+        fakeNitro.enable = user.discord.plugins.fakeNitro;
+        fixImagesQuality.enable = user.discord.plugins.fixImagesQuality;
+        fixSpotifyEmbeds.enable = user.discord.plugins.fixSpotifyEmbeds;
+        fixYoutubeEmbeds.enable = user.discord.plugins.fixYoutubeEmbeds;
+        forceOwnerCrown.enable = user.discord.plugins.forceOwnerCrown;
+        fullSearchContext.enable = user.discord.plugins.fullSearchContext;
+        imageZoom.enable = user.discord.plugins.imageZoom;
+        memberCount.enable = user.discord.plugins.memberCount;
         messageClickActions = {
-          enable = true;
+          enable = user.discord.plugins.messageClickActions;
           enableDeleteOnClick = true; # Hold Backspace + click to delete (default: true)
           enableDoubleClickToEdit = true; # Double-click to edit (default: true)
           enableDoubleClickToReply = true; # Double-click to reply (default: true)
           requireModifier = false; # Double-click without Shift/Ctrl (default)
         };
+        noProfileThemes.enable = user.discord.plugins.noProfileThemes;
+        noTypingAnimation.enable = user.discord.plugins.noTypingAnimation;
+        silentTyping.enable = user.discord.plugins.silentTyping;
+        spotifyCrack.enable = user.discord.plugins.spotifyCrack;
+        superReactionTweaks = {
+          enable = user.discord.plugins.superReactionTweaks;
+          superReactionPlayingLimit = 0.0; # No super reaction animations
+          superReactByDefault = false;
+        };
+        unlockedAvatarZoom.enable = user.discord.plugins.unlockedAvatarZoom;
+        viewIcons.enable = user.discord.plugins.viewIcons;
+        volumeBooster.enable = user.discord.plugins.volumeBooster;
+        # WebRichPresence (arRPC): read game presence from standalone arRPC service
+        webRichPresence.enable = user.discord.plugins.webRichPresence;
+        youtubeAdblock.enable = user.discord.plugins.youtubeAdblock;
       };
     };
   };

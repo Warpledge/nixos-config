@@ -11,9 +11,9 @@ the rest were mod-version noise. Apply them in small groups and launch between g
 
 ### InGameInfoXML: `config/InGameInfoXML/InGameInfo.xml`
 
-2.9.0 ships InGameInfoXML 2.9.8 with its own default `InGameInfo.xml`, and the custom
-layout replaces it. This instance holds the only copy now that the 2.8.4 instance is
-gone; check that its Thaumcraft and Blood Magic sections still resolve against 2.9.
+**Removed on 2026-11-17 for InfoHUD** (see [mods.md](./mods.md#infohud-added-on-2026-11-17)).
+The custom layout and `InGameInfoXML.cfg` are in `backups/removed-mods/2026-11-17/`; the
+list below is what it showed, kept as a guide for rebuilding it in InfoHUD's editor.
 
 - **Removed:** dimension and chunks line, temperature, light levels, entity count, chunk
   coordinates, storm countdown, FPS, facing direction, X/Y/Z
@@ -86,7 +86,8 @@ Kept off, each default `true`:
 
 - `MM_Blastoff`, `MM_Gravity`, `MM_Choke`, `MM_Darkness`: fling you into the air, drag
   you around, drain your air through armor or blind you
-- `MM_Exhaust`: adds hunger exhaustion, working against the Hunger Overhaul change above
+- `MM_Exhaust`: adds hunger exhaustion (chosen when Hunger Overhaul slowed hunger, which
+  is vanilla again since 2026-11-18)
 - `MM_Poisonous`, `MM_Vengeance`: vengeance reflects half your damage with no cap
 
 Back on (turned off 2026-11-01, restored 2026-11-10): `MM_Storm`, `MM_Ghastly`,
@@ -126,16 +127,25 @@ sections:
 
 ### Hunger Overhaul: `config/HungerOverhaul/HungerOverhaul.cfg`
 
-- `S:hungerLossRatePercentage=25` (2.9 default: `100`)
-- `S:foodHungerDivider=2.0` is already the default, nothing to change
-- `B:useHOFoodValues=false` [true]
-- Low-stat debuffs, all `true` by default, set to `false`: `B:addLowHealthNausea`,
-  `B:addLowHealthSlowness`, `B:addLowHungerNausea`, `B:addLowHungerSlowness`
+Since 2026-11-18 hunger, healing and low-stat effects are vanilla, to match GregTech
+Odyssey (1.20.1, no Hunger Overhaul; vanilla hunger plus Farmer's Delight). Every option
+in the `difficulty scaling`, `food`, `health`, `hunger` and `low stats` sections was set
+to the `[vanilla: ...]` value the file lists, except `difficultyScaling` and
+`difficultyScalingBoneMeal` (farming) and `addFoodTooltips`. The farming sections
+(growth delays, seeds, harvesting, HarvestCraft) stay as GTNH ships them. Backup:
+`HungerOverhaul.cfg.bak-2026-11-18`. The changed keys [previous value]:
 
-2.9 adds options that 2.8.4 did not have, all default `true`: `B:addLowHealthWeakness`,
-  `B:addLowHungerWeakness`, `B:addLowHealthMiningSlowdown`,
-  `B:addLowHungerMiningSlowdown`, plus `B:modifyRegenRateOnLowHealth`. Decide these
-  before the first fight; they were never part of the old setup.
+- `S:hungerLossRatePercentage=100.0` [25], `I:minHungerToHeal=18` [8],
+  `B:disableHealingHungerDrain=false` [true], `B:modifyRegenRateOnLowHealth=false` [true]
+- `B:modifyFoodValues=false` [true], `B:addWellFedEffect=false` [true]; the food
+  dividers stay `2.0` and `20.0`, unused while food values are unmodified
+- `difficultyScalingEffects`, `difficultyScalingHealing`, `difficultyScalingHunger`,
+  `difficultyScalingRespawnHunger` all `false` [true]
+- `B:addLowStatEffects=false` and `B:addGuiText=false` [true], plus the weakness and
+  mining-slowdown debuffs `false` [true]; nausea and slowness were already off
+
+Spice of Life was compared with GTO's (Carrot: +1 heart per 10 different foods up to +10;
+Classic: decay over the last 5 meals) and left as GTNH has it, by choice.
 
 ### Spice of Life: `config/SpiceOfLife.cfg`
 
@@ -155,6 +165,14 @@ sections:
 - **Adventure Backpacks**: `config/adventurebackpack.cfg` → in the `status` section,
   `B:"Enable Overlay"=false` [true]. Leave the `tanks` section alone; that is the worn
   backpack overlay, not the potion HUD.
+
+## NEI
+
+- **Hidden handler**: `config/NEI/hiddenhandlers.cfg` →
+  `com.asdflj.ae2thing.nei.InfinityStorageCellUsageHandler`. AE2Things 1.3.4 and 1.3.5
+  throw a `NullPointerException` in `getUsageHandler`, which puts "There was error
+  during loading recipe" in chat on every usage lookup. The file is read at startup;
+  remove the line once a release fixes it.
 
 ## Bees
 
@@ -196,8 +214,8 @@ instance's `config/` against the pack's own 2.8.4 tree; every key below still ex
 - **BetterQuesting**: `config/betterquesting.cfg` → `S:Theme=betterquesting:shadow_ui_2`
   [light], `B:"View mode"=true` [false]. `B:"Lock tray"=true` is already 2.9's default.
 - **Default Server List**: `config/defaultserverlist.cfg` → `B:useURL=false` [true].
-- **InGameInfoXML**: `config/InGameInfoXML.cfg` → `S:topleft=2 22` [2 50], which moves
-  the custom HUD up to match the layout.
+- **InGameInfoXML**: `config/InGameInfoXML.cfg` → `S:topleft=2 22` [2 50], which moved
+  the custom HUD up to match the layout. The mod was removed on 2026-11-17.
 
 The rest of the hash differences were mod-version noise: new keys added by updates
 during 2.8.4's life, configs rewritten by the game, and BetterQuesting's own quest-line
@@ -256,8 +274,10 @@ These files appear once the mod is installed. Check a new version's file for add
   binary model`), 23 were byte-identical copies, and 5 collided with a zip folder of the
   same name, where the `.ysm` wins.
 
-  The kept set is 86 models (70 `.ysm`, 16 folder models), the ones starred in the model
-  GUI; the server's `custom/` mirrors it. Stars are stored in the player's NBT as
+  The kept set was 86 models (70 `.ysm`, 16 folder models), the ones starred in the model
+  GUI. By 2026-11-19 the client's `custom/` had shrunk to 45 `.ysm` files (105 MB), and
+  the server's `custom/` was mirrored from it that day; the server's older 271-file set is
+  in its `backups/pre-sync-2026-11-19/ysmu-custom/`. Stars are stored in the player's NBT as
   `ysmu_StarModels`, a hex-encoded path under `config/ysmu/custom`, not in a config file.
   `/ysm reload` on the kept set takes seconds and 320-390 s on the full one, blocking the
   server while it runs. The index keeps only the entries a run re-recorded, so a start
@@ -267,11 +287,19 @@ These files appear once the mod is installed. Check a new version's file for add
 
 Applied to the client and server copies.
 
+**123Technology reads `config/123technology.cfg` since 2.2.1.3.** Its mod id became
+`123technology`, so Forge's suggested config file is the lowercase name and the edited
+`123Technology.cfg` went unread from 2026-11-16: 2.2.1.3 wrote a fresh lowercase file with
+the overpowered recipes on and a 1.5 multiplier. The three edits below were moved into
+the lowercase file on 2026-11-19 (backup `123technology.cfg.bak-2026-11-19`), and the old
+file is renamed `123Technology.cfg.legacy-unread` on the client. On a 123Technology
+update, check which file its `getSuggestedConfigurationFile` resolves to.
+
 | Mod | File | Change |
 | --- | --- | --- |
-| 123Technology | `123Technology.cfg` | Overpowered integrated-factory recipes off, output multiplier 1.5 to 1.0, NHU egg-machine compat off. The file repeats each category under a pinyin and a Chinese name; both copies were changed. |
-| GTNHRates | `gtnhrates.cfg` | Every multiplier halved from the mod defaults: ores 2.0, coal 8.0, energy 2.0, tools 4.0, bees, crops, pump, resin and IC2 crops 2.0, sapling chance 1.0. `gtSimpleMinersEnergyDiscount` stays 1.0. |
-| EZMiner | `EZMiner/EZMiner_Server.cfg` | Server limits: chain 64 blocks at radius 8, block swap 64 at radius 8 (the same 64-block `max_blocks` as FTB Ultimine), tree felling 8 blocks and 256 blocks, preview 64 blocks. `addExhaustion=0.0` removes the hunger cost. Client preferences live in `config/EZMiner/EZMiner.cfg`. |
+| 123Technology | `123technology.cfg` | Overpowered integrated-factory recipes off, output multiplier 1.5 to 1.0, NHU egg-machine compat off. The pre-2.2.1.3 `123Technology.cfg` repeated each category under a pinyin and a Chinese name; the lowercase file has one copy. |
+| GTNHRates | `gtnhrates.cfg` | Every multiplier halved from the mod defaults: ores 2.0, coal 8.0, energy 2.0, tools 4.0, bees, crops, pump, resin, IC2 crops and GT++ Radium-226 decay rate 2.0, sapling chance 1.0. `gtSimpleMinersEnergyDiscount` stays 1.0. |
+| Omni Miner | `omniminer/omniminer_server.cfg` | Local `6.6-balanced.13` fork of EZMiner; its defaults are these settings. Ten tiers under `tiers { }`: Stone 4/8, Copper 4/16, Iron 5/24, Bronze 5/32, Steel 6/48, Obsidian 6/64, Ardite 7/96, Cobalt 7/128, Manyullyn 8/192, Manyullyn+ 8/256 (radius/blocks), capped by `bigRadius=8` and `blockLimit=1024`. Harvest level or GT quality picks the tier; a GT drill/jackhammer on ore, chainsaw/buzzsaw on wood or Vajra adds one, electric GT adds its voltage tier, capped at 10. `stopOnUnbreakable` and `fireBreakEvent` true, `smallRadius=1` (connected only). Main modes are Chain and Special. Chains follow a tool family: pickaxe, shovel, axe, shears, or hand (empty hand, 16 blocks of ground cover at radius 8); a mattock uses the shovel and axe lists, while scythes, hammers, excavators and lumber axes never chain. An axe fells one connected tree: `logBigRadius=4` (2..4) sideways, leaves walked but not broken, up to `logBlockLimit=1024` logs. Per-family `mod:name@damage` entries live under `tools { }` (all empty: the built-in lists are used); the OP server tab opens a NEI-style editor per family, and the `Add Block to Tool List` key adds the looked-at block or an NEI item (Shift removes). Only OPs, a cheats-enabled world or the server-owner list may edit them. Block Swap drops the old block and only touches player-placed blocks, 256 at radius 2. `addExhaustion=0.01`, `breakPerTick=128`. Features under `features { }`: Chain, Minesweeper, Crop Harvest, Sudoku, Planting and Block Swap on; Prospecting and Cached Chain off. Probe cooldowns 0.1 s, prospect probe 3600 s, under `general`. The client config `config/omniminer/omniminer.cfg` keeps the preview, `useHud=true`, `hudScale=75`, wave HUD animation and the full-inventory tool switch. `omniminer_server.cfg.bak-2026-11-18` keeps the test-time lists from before they were cleared. Old configs stay in `EZMiner_Server.cfg.bak-2026-11-17-fork` and `config/EZMiner/`; the server file sits at the instance root, not in `config/`. |
 | GTMB | `gtmb-stargate-rules.cfg` | `enabled=true`: blueprint demolition cannot mine ores, cut/paste cannot move or overwrite ores, and decoration vouchers are off. |
 | GTSWN | `gtswn/gtswn_network.cfg` | `UplinkLossEU=0.1`, so wireless power uploads lose 10 percent against the 15 percent downlink. |
 | GTSWN | `gtswn/gtswn.cfg` | `deviceTeleportXPCost=0`, so device info terminal teleports are free like the Waystones. |

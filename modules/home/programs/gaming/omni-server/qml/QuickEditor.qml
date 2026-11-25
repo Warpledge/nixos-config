@@ -8,10 +8,10 @@ Sheet {
     property var app
     property var all: []
     property int index: -1
-    property var item: ({ name: "", icon: "bolt", pinned: false, confirm: false, steps: [{ command: "", delay: 0 }] })
+    property var item: ({ name: "", icon: "bolt", pinned: false, confirm: false, onStart: false, steps: [{ command: "", delay: 0 }] })
     property var icons: []
     title: index < 0 ? "New quick command" : "Quick commands"
-    info: "A {word} in a command is asked for when you run it. A delay waits that many seconds before the step. @restart and @stop restart or stop the server, saving first."
+    info: "A {word} in a command is asked for when you run it. A delay waits that many seconds before the step. @restart and @stop restart or stop the server, saving first. Run when the server has started skips a command with a {word}."
     onBack: app.closeSheet()
 
     function begin(start) {
@@ -36,7 +36,7 @@ Sheet {
             keep()
         index = i
         item = i >= 0 ? JSON.parse(JSON.stringify(all[i]))
-                      : { name: "", icon: "bolt", pinned: false, confirm: false, steps: [{ command: "", delay: 0 }] }
+                      : { name: "", icon: "bolt", pinned: false, confirm: false, onStart: false, steps: [{ command: "", delay: 0 }] }
         nameField.text = item.name
     }
     function changed(fn) {
@@ -141,6 +141,12 @@ Sheet {
         Layout.fillWidth: true
         Text { text: "Ask before running"; color: Theme.text; font.pixelSize: 14; Layout.fillWidth: true }
         Toggle { checked: sheet.item.confirm; onToggled: on => sheet.changed(c => c.confirm = on) }
+    }
+    //--- The monitor runs it at each start's Done line; one with a {word} is skipped
+    RowLayout {
+        Layout.fillWidth: true
+        Text { text: "Run when the server has started"; color: Theme.text; font.pixelSize: 14; Layout.fillWidth: true }
+        Toggle { checked: !!sheet.item.onStart; onToggled: on => sheet.changed(c => c.onStart = on) }
     }
 
     actions: [

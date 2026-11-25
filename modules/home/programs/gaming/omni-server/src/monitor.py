@@ -29,7 +29,10 @@ RING = 2000
 LAG_KEPT = 50
 HELLO_LINES = 1000
 MAX_READ = 4 << 20
+PLACEHOLDER = re.compile(r"\{\w+\}")
 HEAP_LINE = re.compile(r"total(?: reserved)? (\d+)K,(?: committed \d+K,)? used (\d+)K")
+#--- ZGC prints its own line, in M: "ZHeap used 70M, capacity 500M, max capacity 6144M"
+ZGC_LINE = re.compile(r"ZHeap\s+used (\d+)M, capacity \d+M, max capacity (\d+)M")
 TICKS = os.sysconf("SC_CLK_TCK")
 CORES = os.cpu_count() or 1
 PAGE = os.sysconf("SC_PAGE_SIZE")
@@ -97,6 +100,8 @@ class Monitor:
         event = logparse.parse_line(raw)
         kind, text = event["kind"], event["text"]
         if kind == "done":
+            if not self.state["ready"]:
+                self.run_on_start()
             self.state.update(ready=True, status="running")
         elif kind == "stopping":
             self.state["status"] = "stopping"
@@ -269,6 +274,8 @@ class Monitor:
         m = HEAP_LINE.search(res.stdout)
         if m:
             self.state.update(heapMax=int(m[1]) * 1024, heapUsed=int(m[2]) * 1024)
+        elif z := ZGC_LINE.search(res.stdout):
+            self.state.update(heapMax=int(z[2]) << 20, heapUsed=int(z[1]) << 20)
 
     #--------------------------------------------------------------------#
     #-- Quick commands and scheduled restarts
@@ -281,6 +288,15 @@ class Monitor:
             due += max(0, float(step.get("delay") or 0))
             queue.append({"command": str(step.get("command", "")), "due": due})
         self.runs.append({"id": int(now * 1000), "name": name, "queue": queue})
+
+    def run_on_start(self):
+        """Quick commands marked onStart, once per start, when the server says Done."""
+        for quick in self.cfg.get("quick", []):
+            steps = quick.get("steps") or []
+            #--- A {word} is asked for when a person runs it; nobody's there to answer here
+            if quick.get("onStart") and steps and not any(PLACEHOLDER.search(str(s.get("command", "")))
+                                                         for s in steps):
+                self.start_run(str(quick.get("name", "")), steps)
 
     def do_step(self, command):
         if command == "@restart":

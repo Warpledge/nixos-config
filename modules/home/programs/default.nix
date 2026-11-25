@@ -95,6 +95,7 @@ user: {lib, ...}: {
     ++ lib.optionals user.artcraft.deckcraft [./artcraft/deckcraft.nix]
     #--- Audio (controlled by user settings)
     ++ lib.optionals user.audio.reaper [./audio/reaper.nix]
+    ++ lib.optionals user.audio.easyeffects [./audio/easyeffects.nix]
     ++ lib.optionals (with user.audio; guitarix || tone3000 || katanaFloorboard) [(import ./audio/guitar user)]
     #--- Office (controlled by user settings)
     ++ lib.optionals user.office.thunderbird [./office/thunderbird.nix]

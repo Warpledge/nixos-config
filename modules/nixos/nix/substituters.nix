@@ -15,8 +15,7 @@
       "https://claude-code.cachix.org" # Claude Code CLI
       "https://moku.cachix.org" # Moku manga/anime reader + Tsunagu backend
       # "https://cache.garnix.io" # Garnix cache for affinity-nix
-      # CachyOS kernel cache; off since 2026-10-07 (server refuses connections)
-      # "https://attic.xuyh0120.win/lantian"
+      "https://cache.lantian.pub/lantian" # CachyOS kernel (needs the pinned overlay)
     ];
     trusted-public-keys = [
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
@@ -26,8 +25,7 @@
       "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
       "moku.cachix.org-1:EnMXp6/uQVI6IRbKW0xEQylSYoV2N4vszOsoW6/Pq1s="
       # "garnix.io:CTFPyKSLcx5PfjUjecm6qvvJC7ccXistiQ15g14FJh8="
-      # Re-enable with the lantian substituter above
-      # "lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc="
+      "lantian:WVGO7vsRMSEN+h7Lp7kv6SAmrkEXgUGbbXm7jMDjBuQ="
     ];
   };
 }

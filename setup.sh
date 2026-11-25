@@ -813,6 +813,7 @@ apps=(
   "ArtCraft|artcraft.gridcraft|GridCraft spreadsheet"
   "ArtCraft|artcraft.deckcraft|DeckCraft presentations"
   "Audio|audio.reaper|REAPER"
+  "Audio|audio.easyeffects|EasyEffects output limiter"
   "Audio|audio.guitarix|Guitarix amp simulator"
   "Audio|audio.tone3000|TONE3000 NAM player"
   "Office|office.thunderbird|Thunderbird mail"

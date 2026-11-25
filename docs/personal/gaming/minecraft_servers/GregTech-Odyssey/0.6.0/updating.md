@@ -1,7 +1,8 @@
 # GTO 0.6.0 Updating, Trials and Debugging
 
 Dev builds come out often and can corrupt saves, so nothing new reaches the real world
-(the laptop server's, built from `GregTech.Odyssey-0.6.0-dev27`) before it has passed in a copy. The
+(main is `GregTech.Odyssey-0.6.0-dev33` since 2026-11-20; the commands below still show
+dev27's staging name, so swap in the current one) before it has passed in a copy. The
 copy is a staging instance, and [tools/gto.py](../tools/gto.py) does the copying,
 carrying and checking. Run it with the game closed:
 
@@ -45,6 +46,9 @@ under Prism's `instances/` or a path.
 
 ## Integrated structures and Create
 
+**dev27 only.** The Dev 33 remake dropped all of these mods, and the repo's `reliable/`
+rules went with them (git history has them). The steps stay for bringing them back.
+
 The Integrated mods, Create and Supplementaries come with generated files
 ([mods.md](./mods.md#integrated-structures-2026-11-12)): the quarkblocks jar, the
 Reliable Remover/Recipes rules, the `warpledge-gto-integrated` pack, and a patched
@@ -76,8 +80,10 @@ jar.
 ## Patched jars
 
 [tools/mixinpatch.py](../tools/mixinpatch.py) removes mixins that break against the
-pack from Maid Storage Manager and Youkai's Homecoming ([mods.md](./mods.md)). A fresh
-download of either crashes or breaks JEI until it has run:
+pack from Maid Storage Manager and Youkai's Homecoming, and one search target from the
+pack's own Just Enough Characters ([mods.md](./mods.md)). A fresh download of either mod
+crashes or breaks JEI, and every new pack build brings JECh's key bind search bug
+back, until it has run:
 
 ```bash
 python3 -I /etc/nixos-config/docs/personal/gaming/minecraft_servers/GregTech-Odyssey/tools/mixinpatch.py ~/.local/share/PrismLauncher/instances/GregTech.Odyssey-0.6.0-dev27-staging/minecraft/mods

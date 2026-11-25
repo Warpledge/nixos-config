@@ -45,7 +45,7 @@
 
   #--- Kernel Selection
   # Options: "zen" | "latest" | "xanmod" | "cachyos"
-  # "cachyos" compiles on this computer (slow) and needs an x86-64-v3 CPU (AVX2)
+  # "cachyos" needs an x86-64-v3 CPU (AVX2)
   kernel = "zen";
 
   #--- Mouse Cursor

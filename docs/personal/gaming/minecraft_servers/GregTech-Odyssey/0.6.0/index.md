@@ -1,12 +1,14 @@
 # GTO 0.6.0
 
-Client instance: `GregTech.Odyssey-0.6.0-dev27` (Prism Launcher, CurseForge import)
-Path: `~/.local/share/PrismLauncher/instances/GregTech.Odyssey-0.6.0-dev27/minecraft/`
-World: the laptop server's ([server.md](./server.md)), with the Custom preset. The
-client's `New Worldaa` and the later test worlds were deleted by 2026-11-08
+Client instance: `GregTech.Odyssey-0.6.0-dev33` (Prism Launcher, CurseForge import,
+rebuilt by hand on 2026-11-20, [mods.md](./mods.md#dev-33-remake-2026-11-20))
+Path: `~/.local/share/PrismLauncher/instances/GregTech.Odyssey-0.6.0-dev33/minecraft/`
+World: a new one, not yet created (2026-11-20). The dev27 world stays on the laptop
+server ([server.md](./server.md)), built from `GregTech.Odyssey-0.6.0-dev27-old`
 
-Minecraft 1.20.1, Forge 47.4.20. The dev27 manifest lists 153 CurseForge files, and the
-zip's overrides add 4 more jars (GTOCore, ExtendedAE, DataSyncLib and Botania).
+Minecraft 1.20.1, Forge 47.4.29. The dev33 manifest lists 148 CurseForge files, and the
+zip's overrides add 4 more jars (GTOCore, gto-seal-runtime, ExtendedAE and DataSyncLib).
+dev27 had 153 files on Forge 47.4.20.
 
 0.6.0 is a development build. The dev27 release notes (read 2026-11-07) warn of
 crashes, corrupted saves and progress blockers, and give no changelog. A world started on

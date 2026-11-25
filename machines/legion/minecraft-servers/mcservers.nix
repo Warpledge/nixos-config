@@ -12,7 +12,7 @@
     ''
       choice=$(printf "%s\n" \
         "󰮯  GregTech: New Horizons 2.9.0" \
-        "󰮯  GregTech Odyssey 0.6.0-dev27" \
+        "󰮯  GregTech Odyssey 0.6.0-dev33" \
         "󰮯  TerraFirmaGreg Modern 0.12.5" \
       | ${pkgs.fzf}/bin/fzf \
           --prompt="  Select Server > " \

@@ -511,7 +511,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 | **Animated Wallpaper** | [linux-wallpaperengine][linux-wallpaperengine] plays Wallpaper Engine scenes and videos from the Steam Workshop, in place of DMS's wallpaper; the [Linux Wallpaper Engine][dms-wallpaperengine] DMS plugin picks them (Niri, `wallpaper = "engine"`; needs Wallpaper Engine bought on Steam) |
 | **Graphics** | [Blender][blender], [Krita][krita], [Affinity Suite v3][affinity-nix] (via Wine), all off by default |
 | **ArtCraft** | The [ArtCraft][artcraft] apps, each its own toggle and off by default: PhotoCraft, LightCraft, VectorCraft, DesignCraft, FigCraft, EffectCraft, FilmCraft, SoundCraft, CADCraft, PdfCraft, WordCraft, GridCraft and DeckCraft; wrapped from the upstream AppImages with `appimageTools`, since they are not in nixpkgs |
-| **Audio** | [Reaper][reaper] (DAW, with [SWS][sws] and [ReaPack][reapack]) |
+| **Audio** | [Reaper][reaper] (DAW, with [SWS][sws] and [ReaPack][reapack]), [EasyEffects][easyeffects] (a limiter on the output) |
 | **Guitar** | [TONE3000][tone3000] (official NAM player, browses its capture and IR library in-app), [Guitarix][guitarix] (modular amp rig), [qpwgraph][qpwgraph] for patching, plus [FxFloorBoard][katana-fxfloorboard] to edit patches on the Boss Katana itself |
 | **Rhythm Games** | [feedBack][feedback] plays Guitar Pro tabs through its own audio engine, with VST hosting and amp modeling, so the Katana DI feed doubles as the game input; wrapped from the upstream AppImage with `appimageTools`, since it is not in nixpkgs. [Rocksmith 2014][rocksmith] runs on Proton and reads the same DI through [PipeASIO][pipeasio] and [RS_ASIO][rs-asio]; the module writes their config, and the hand-done install steps live in `docs/personal/gaming/rocksmith-2014.md` |
 | **Chat / Productivity** | [GoofCord][goofcord] or [Vesktop][vesktop] (follows the shell's theme live) via [nixcord][nixcord] (Vencord, with [arRPC][arrpc] running alongside it so Steam and Proton games show up as rich presence), [Ferdium][ferdium] (all your web messengers in one window), [Thunderbird][thunderbird], [Obsidian][obsidian] |
@@ -634,6 +634,7 @@ Most of what's below is optional: apps are switched on per person in `users/<nam
 [affinity-nix]: https://github.com/mrshmllow/affinity-nix
 [artcraft]: https://github.com/storytold
 [reaper]: https://www.reaper.fm
+[easyeffects]: https://github.com/wwmm/easyeffects
 [sws]: https://www.sws-extension.org
 [reapack]: https://reapack.com
 [tone3000]: https://www.tone3000.com/plugin

@@ -85,13 +85,6 @@
       "added": "2026-11-07"
     },
     {
-      "jar": "Presence Footsteps [FORGE] 1.0.0.jar",
-      "modId": "presencefootsteps",
-      "name": "Presence Footsteps",
-      "source": "https://modrinth.com/mod/presence-footsteps-forge",
-      "added": "2026-11-07"
-    },
-    {
       "jar": "smoothswapping-0.9.3.2-1.20.1-forge.jar",
       "modId": "smoothswapping",
       "name": "Smooth Swapping",
@@ -110,13 +103,6 @@
       "modId": "trashslot",
       "name": "TrashSlot",
       "source": "https://modrinth.com/mod/trashslot",
-      "added": "2026-11-07"
-    },
-    {
-      "jar": "yet_another_config_lib_v3-3.6.6+1.20.1-forge.jar",
-      "modId": "yet_another_config_lib_v3",
-      "name": "YetAnotherConfigLib (YACL)",
-      "source": "https://modrinth.com/mod/yacl",
       "added": "2026-11-07"
     },
     {
@@ -145,13 +131,6 @@
       "modId": "simplytooltips",
       "name": "Simply Tooltips",
       "source": "https://modrinth.com/mod/simply-tooltips",
-      "added": "2026-11-07"
-    },
-    {
-      "jar": "IllagerInvasion-v8.0.7-1.20.1-Forge.jar",
-      "modId": "illagerinvasion",
-      "name": "Illager Invasion",
-      "source": "https://modrinth.com/mod/illager-invasion",
       "added": "2026-11-07"
     },
     {
@@ -232,209 +211,6 @@
       "added": "2026-11-08"
     },
     {
-      "jar": "ApothicCombat-1.20.1-1.1.0.jar",
-      "modId": "apothiccombat",
-      "name": "Apothic Combat",
-      "source": "https://modrinth.com/mod/apothic-combat",
-      "added": "2026-11-08"
-    },
-    {
-      "jar": "fastchunkgen-0.43-all.jar",
-      "modId": "fastchunkgen",
-      "name": "FastChunkGen",
-      "source": "https://github.com/shuttheirprayer/FastChunkGen (built from 18bbfe4)",
-      "added": "2026-11-08"
-    },
-    {
-      "jar": "tectonic-3.0.17-forge-1.20.1.jar",
-      "modId": "tectonic",
-      "name": "Tectonic",
-      "source": "https://modrinth.com/mod/tectonic",
-      "added": "2026-11-08"
-    },
-    {
-      "jar": "lithostitched-forge-1.20.1-1.4.12.jar",
-      "modId": "lithostitched",
-      "name": "Lithostitched",
-      "source": "https://modrinth.com/mod/lithostitched",
-      "added": "2026-11-08"
-    },
-    {
-      "jar": "reliable_recipes-3.9.0+1.20.1-forge.jar",
-      "modId": "reliable_recipes",
-      "name": "Reliable Recipes",
-      "source": "https://modrinth.com/mod/reliable-recipes",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "reliable_remover-3.9.0+1.20.1-forge.jar",
-      "modId": "reliable_remover",
-      "name": "Reliable Remover",
-      "source": "https://modrinth.com/mod/reliable-remover",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "create-1.20.1-6.0.8.jar",
-      "modId": "create",
-      "name": "Create",
-      "source": "https://modrinth.com/mod/create",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "moonlight-1.20-2.16.39-forge.jar",
-      "modId": "moonlight",
-      "name": "Moonlight Lib",
-      "source": "https://modrinth.com/mod/moonlight",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "supplementaries-1.20-3.1.44-forge.jar",
-      "modId": "supplementaries",
-      "name": "Supplementaries",
-      "source": "https://modrinth.com/mod/supplementaries",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "amendments-1.20-2.2.6.jar",
-      "modId": "amendments",
-      "name": "Amendments",
-      "source": "https://modrinth.com/mod/amendments",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "quarkblocks-1.0.0.jar",
-      "modId": "quarkblocks",
-      "name": "Quark Blocks",
-      "source": "built by tools/quarkblocks/build.py from Quark 4.0-462",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "integrated_api-forge-1.20.1-1.9.2.jar",
-      "modId": "integrated_api",
-      "name": "Integrated API",
-      "source": "https://modrinth.com/mod/integrated-api",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "integrated_patches v1.2.0-1.20.1.jar",
-      "modId": "integratedpatches",
-      "name": "Integrated Patches",
-      "source": "https://modrinth.com/mod/integrated-patches",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "idas_forge-1.13.0+1.20.1.jar",
-      "modId": "idas",
-      "name": "Integrated Dungeons and Structures",
-      "source": "https://modrinth.com/mod/idas (mods.toml patched by libgate.py)",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "IDA_v2.1.3-1.20.1.jar",
-      "modId": "integrated_dungeons_arise",
-      "name": "Integrated Dungeons Arise",
-      "source": "https://modrinth.com/mod/integrated-dungeons-arise (mods.toml patched by libgate.py)",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "ISS-1.20.1.jar",
-      "modId": "integrated_seven_seas",
-      "name": "Integrated Seven Seas",
-      "source": "https://modrinth.com/mod/integrated-seven-seas (mods.toml patched by libgate.py)",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "integrated_villages-1.3.2+1.20.1-forge.jar",
-      "modId": "integrated_villages",
-      "name": "Integrated Villages",
-      "source": "https://modrinth.com/mod/integrated-villages",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "integrated_cataclysm_forge-1.0.5+1.20.1.jar",
-      "modId": "integrated_cataclysm",
-      "name": "Integrated Cataclysm",
-      "source": "https://modrinth.com/mod/integrated-catalcysm (mods.toml patched by libgate.py)",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "L_Enders_Cataclysm-3.31.jar",
-      "modId": "cataclysm",
-      "name": "L_Ender's Cataclysm",
-      "source": "https://modrinth.com/mod/l_enders-cataclysm",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "lionfishapi-3.0.jar",
-      "modId": "lionfishapi",
-      "name": "Lionfish API",
-      "source": "https://modrinth.com/mod/lionfish-api",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "integrated_simply_swords-forge-1.3.1+1.20.1.jar",
-      "modId": "integrated_simply_swords",
-      "name": "Integrated Simply Swords",
-      "source": "https://modrinth.com/mod/integrated-simply-swords",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "IMM v1.3.2-1.20.1.jar",
-      "modId": "integrated_mowzies_mobs",
-      "name": "Integrated Mowzie's Mobs",
-      "source": "https://modrinth.com/mod/integrated-mowzies-mobs (mods.toml patched by libgate.py)",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "mowziesmobs-1.8.2.jar",
-      "modId": "mowziesmobs",
-      "name": "Mowzie's Mobs",
-      "source": "https://modrinth.com/mod/mowzies-mobs",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "mowzies_cataclysm-1.2.1.jar",
-      "modId": "mowzies_cataclysm",
-      "name": "Mowzie's Cataclysm",
-      "source": "https://modrinth.com/mod/mowzies-cataclysm",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "IBOMD v1.0.0-1.20.1.jar",
-      "modId": "integrated_bosses_of_mass_destruction",
-      "name": "Integrated Bosses of Mass Destruction",
-      "source": "https://modrinth.com/mod/integrated-bosses-of-mass-destruction (mods.toml patched by libgate.py)",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "BOMD-Forge-1.20.1-1.1.2.jar",
-      "modId": "bosses_of_mass_destruction",
-      "name": "Bosses of Mass Destruction",
-      "source": "https://modrinth.com/mod/bosses-of-mass-destruction-forge",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "CerbonsAPI-Forge-1.20.1-1.1.0.jar",
-      "modId": "cerbons_api",
-      "name": "Cerbon's API",
-      "source": "https://modrinth.com/mod/cerbons-api",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "legendarymonsters-2.2.4 MC 1.20.1.jar",
-      "modId": "legendary_monsters",
-      "name": "Legendary Monsters",
-      "source": "https://modrinth.com/mod/legendary-monsters",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "structurify-forge-2.0.43+mc1.20.1.jar",
-      "modId": "structurify",
-      "name": "Structurify",
-      "source": "https://modrinth.com/mod/structurify (config written by structures.py)",
-      "added": "2026-11-12"
-    },
-    {
       "jar": "LeavesBeGone-v8.0.0-1.20.1-Forge.jar",
       "modId": "leavesbegone",
       "name": "Leaves Be Gone",
@@ -442,31 +218,10 @@
       "added": "2026-11-12"
     },
     {
-      "jar": "particular-1.20.1-Forge-1.5.7.jar",
-      "modId": "particular",
-      "name": "Particular Reforged",
-      "source": "https://modrinth.com/mod/particular-reforged",
-      "added": "2026-11-12"
-    },
-    {
       "jar": "Incendium_1.20.x_v5.3.5.jar",
       "modId": "incendium",
       "name": "Incendium",
       "source": "https://modrinth.com/mod/incendium",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "MoogsEndStructures-universal-1.20-2.1.0.jar",
-      "modId": "mes",
-      "name": "MES - Moog's End Structures",
-      "source": "https://modrinth.com/mod/mes-moogs-end-structures",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "MoogsStructureLib-forge-1.20-3.1.2.jar",
-      "modId": "moogs_structures",
-      "name": "Moog's Structure Lib",
-      "source": "https://modrinth.com/mod/moogs-structure-lib",
       "added": "2026-11-12"
     },
     {
@@ -481,20 +236,6 @@
       "modId": "delightful",
       "name": "Delightful",
       "source": "https://modrinth.com/mod/delightful",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "born_in_chaos_[Forge]1.20.1_1.7.5.jar",
-      "modId": "born_in_chaos_v1",
-      "name": "Born in Chaos",
-      "source": "https://modrinth.com/mod/borninchaos",
-      "added": "2026-11-11"
-    },
-    {
-      "jar": "borninconfig-FORGE.jar",
-      "modId": "borninconfiguration",
-      "name": "Born In Configuration",
-      "source": "https://modrinth.com/mod/born-in-configuration",
       "added": "2026-11-12"
     },
     {
@@ -519,25 +260,11 @@
       "added": "2026-11-12"
     },
     {
-      "jar": "touhou_little_maid_spell-1.8.0.1-forge+mc1.20.1.jar",
+      "jar": "touhou_little_maid_spell-1.8.2-forge+mc1.20.1-all.jar",
       "modId": "touhou_little_maid_spell",
       "name": "Touhou Little Maid: Spell",
-      "source": "https://modrinth.com/mod/touhou-little-maid-spell (held at 1.8.0.1)",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "maid_rpg_task-release.jar",
-      "modId": "maid_rpg_task",
-      "name": "Touhou Little Maid RPG Task",
-      "source": "https://modrinth.com/mod/touhou-little-maid-rpg-task",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "tlm_atrribute_display-1.0.2-forge+mc1.20.1.jar",
-      "modId": "tlm_atrribute_display",
-      "name": "Touhou Little Maid: Attribute Display",
-      "source": "https://modrinth.com/mod/tlm-attributedisplay",
-      "added": "2026-11-12"
+      "source": "https://modrinth.com/mod/touhou-little-maid-spell (held at 1.8.2)",
+      "added": "2026-11-20"
     },
     {
       "jar": "solmaid-1.0.1.jar",
@@ -554,52 +281,10 @@
       "added": "2026-11-12"
     },
     {
-      "jar": "touhou-maid-affection-1.7.5.2.jar",
-      "modId": "touhou_maid_affection",
-      "name": "Touhou Maid: Affection",
-      "source": "https://modrinth.com/mod/touhou-maid-affection",
-      "added": "2026-11-12"
-    },
-    {
       "jar": "youkaishomecoming-2.7.2.jar",
       "modId": "youkaishomecoming",
       "name": "Youkai's Homecoming",
       "source": "https://modrinth.com/mod/youkaishomecoming (patched by mixinpatch.py)",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "alexsmobs-2.3.0-forge+1.20.1.jar",
-      "modId": "alexsmobs",
-      "name": "Alex's Mobs Continued",
-      "source": "https://modrinth.com/mod/alexs-mobs-continued (patched by classpatch.py)",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "codxlib-1.6.1-forge+1.20.1.jar",
-      "modId": "codxlib",
-      "name": "CodxLib",
-      "source": "https://modrinth.com/mod/codxlib",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "amcdelight-1.0.1-forge+1.20.1.jar",
-      "modId": "amcdelight",
-      "name": "Alex's Mobs Continued Delight",
-      "source": "https://modrinth.com/mod/alexs-mobs-continued-delight",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "domesticationinnovation-1.7.1-1.20.1.jar",
-      "modId": "domesticationinnovation",
-      "name": "Domestication Innovation",
-      "source": "https://modrinth.com/mod/domestication-innovation",
-      "added": "2026-11-12"
-    },
-    {
-      "jar": "citadel-2.6.3-1.20.1.jar",
-      "modId": "citadel",
-      "name": "Citadel",
-      "source": "https://modrinth.com/mod/citadel",
       "added": "2026-11-12"
     },
     {
@@ -608,20 +293,6 @@
       "name": "Clumps",
       "source": "https://www.curseforge.com/minecraft/mc-mods/clumps",
       "added": "2026-11-12"
-    },
-    {
-      "jar": "incontrol-1.20-9.5.1.jar",
-      "modId": "incontrol",
-      "name": "In Control!",
-      "source": "https://modrinth.com/mod/in-control",
-      "added": "2026-11-15"
-    },
-    {
-      "jar": "cataclysm_compat_1.20.1-1.0.2.jar",
-      "modId": "cataclysm_compat",
-      "name": "Cataclysm & BetterCombat - Compatibility",
-      "source": "https://modrinth.com/mod/cataclysm-x-bettercombat-compat",
-      "added": "2026-11-15"
     },
     {
       "jar": "BetterControls-Forge-1.20+v1.3.0.jar",
@@ -638,6 +309,174 @@
       "added": "2026-11-10"
     },
     {
+      "jar": "chromapatch-1.0.3-forge1201-1.20.1.jar",
+      "modId": "chromapatch",
+      "name": "Chroma Patch",
+      "source": "https://github.com/Summxx/ChromaPatch/releases",
+      "added": "2026-11-15"
+    },
+    {
+      "jar": "1.20.1-maid_storage_manager_extension-1.4.5.jar",
+      "modId": "maid_storage_manager_extension",
+      "name": "女仆仓管扩展",
+      "source": "https://www.curseforge.com/minecraft/mc-mods/maid-logistics-network",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "AmbientSounds_FORGE_v6.3.11_mc1.20.1.jar",
+      "modId": "ambientsounds",
+      "name": "AmbientSounds",
+      "source": "https://modrinth.com/mod/ambientsounds",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "CreativeCore_FORGE_v2.12.42_mc1.20.1.jar",
+      "modId": "creativecore",
+      "name": "CreativeCore",
+      "source": "https://www.curseforge.com/minecraft/mc-mods/creativecore",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "Drip Sounds-0.6.3+1.20.1-Forge.jar",
+      "modId": "waterdripsound",
+      "name": "Drip Sounds",
+      "source": "https://www.curseforge.com/minecraft/mc-mods/dripsounds",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "EffortlessBuilding-PlacementFix-1.0.jar",
+      "modId": "effortless_building_placement_fix",
+      "name": "Effortless Building - Placement Fix",
+      "source": "https://www.curseforge.com/minecraft/mc-mods/effortless-building-placement-fix",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "PlayerRevive_FORGE_v2.0.31_mc1.20.1.jar",
+      "modId": "playerrevive",
+      "name": "PlayerRevive",
+      "source": "https://www.curseforge.com/minecraft/mc-mods/playerrevive",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "PresenceFootsteps-1.20.1-1.9.1-beta.1.jar",
+      "modId": "presencefootsteps",
+      "name": "Presence Footsteps (Forge)",
+      "source": "https://www.curseforge.com/minecraft/mc-mods/presence-footsteps-forge",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "StreamsReflowing-1.20.1-forge-2.17.5.jar",
+      "modId": "streamsreflowing",
+      "name": "StreamsReflowing",
+      "source": "https://www.curseforge.com/minecraft/mc-mods/streams-reflowing",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "Touhou-Little-Maid-Sophisticated-1.3.0.jar",
+      "modId": "maid_sophisticated",
+      "name": "车万女仆：这很精妙",
+      "source": "https://www.curseforge.com/minecraft/mc-mods/touhou-little-maid-sophisticated",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "Touhou-Little-maid-senju1.4.0-1.20.1Forge.jar",
+      "modId": "tlm_senju",
+      "name": "Touhou Little Maid: Senju 千手女仆",
+      "source": "https://www.curseforge.com/minecraft/mc-mods/touhou-little-maid-senju",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "YungsBetterCaves-1.20.1-Forge-2.0.7.jar",
+      "modId": "bettercaves",
+      "name": "YUNG's Better Caves",
+      "source": "https://www.curseforge.com/minecraft/mc-mods/yungs-better-caves",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "YungsBetterEndIsland-1.20-Forge-2.0.6.jar",
+      "modId": "betterendisland",
+      "name": "YUNG's Better End Island",
+      "source": "https://www.curseforge.com/minecraft/mc-mods/yungs-better-end-island",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "YungsBridges-1.20-Forge-4.0.3.jar",
+      "modId": "yungsbridges",
+      "name": "YUNG's Bridges",
+      "source": "https://www.curseforge.com/minecraft/mc-mods/yungs-bridges",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "cavedust-2.0.4-1.20.1-forge.jar",
+      "modId": "cavedust",
+      "name": "Cave Dust",
+      "source": "https://www.curseforge.com/minecraft/mc-mods/cave-dust",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "dungeons_enhanced-1.20.1-5.4.3.jar",
+      "modId": "dungeons_enhanced",
+      "name": "Dungeons Enhanced",
+      "source": "https://www.curseforge.com/minecraft/mc-mods/dungeonsenhanced",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "fusion-1.3.16-forge-mc1.20.1.jar",
+      "modId": "fusion",
+      "name": "Fusion",
+      "source": "https://www.curseforge.com/minecraft/mc-mods/fusion-connected-textures",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "maid-always-follow-1.20.1-1.0.2.jar",
+      "modId": "maid_always_follow",
+      "name": "Maid Always Follow / 女仆常伴",
+      "source": "https://www.curseforge.com/minecraft/mc-mods/maid-always-follow",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "maidbuilder-release_1.2.0_forge1.20.1.jar",
+      "modId": "maidbuilder",
+      "name": "Maid Builder",
+      "source": "https://www.curseforge.com/minecraft/mc-mods/maid-builder",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "sophisticatedbuilding-forge-1.20.1-5.1.2.jar",
+      "modId": "sophisticatedbuilding",
+      "name": "Sophisticated Building",
+      "source": "https://www.curseforge.com/minecraft/mc-mods/effortlessbuilding-sophisticated",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "structure_gel-1.20.1-2.16.2.jar",
+      "modId": "structure_gel",
+      "name": "Structure Gel API",
+      "source": "https://www.curseforge.com/minecraft/mc-mods/structure-gel-api",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "tlm_maid_manager-1.0.3-beta2-forge1.20.1.jar",
+      "modId": "tlm_maid_manager",
+      "name": "Touhou Little Maid:Manager",
+      "source": "https://www.curseforge.com/minecraft/mc-mods/touhou-little-maid-maid-manager",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "tlmforae-1.2.jar",
+      "modId": "tlmforae",
+      "name": "TLMforAE",
+      "source": "https://www.curseforge.com/minecraft/mc-mods/touhou-little-maid-for-ae2",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "trashslotblacklist-forge-1.20.1-1.1.0.jar",
+      "modId": "trashslotblacklist",
+      "name": "Trashslotblacklist",
+      "source": "https://www.curseforge.com/minecraft/mc-mods/trashslot-blacklist-addon",
+      "added": "2026-11-20"
+    },
+    {
       "jar": "moreoverlays-1.22.7-mc1.20.2.jar",
       "modId": "moreoverlays",
       "name": "More Overlays Updated",
@@ -645,20 +484,49 @@
       "added": "2026-11-11"
     },
     {
-      "jar": "chromapatch-1.0.3-forge1201-1.20.1.jar",
-      "modId": "chromapatch",
-      "name": "Chroma Patch",
-      "source": "https://github.com/Summxx/ChromaPatch/releases",
-      "added": "2026-11-15"
+      "jar": "ok_zoomer-forge-5.4.0-beta.9.jar",
+      "modId": "ok_zoomer",
+      "name": "Ok Zoomer",
+      "source": "https://modrinth.com/mod/ok-zoomer",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "entityculling-forge-1.12.1-mc1.20.1.jar",
+      "modId": "entityculling",
+      "name": "Entity Culling",
+      "source": "https://modrinth.com/mod/entityculling",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "durabilitytooltip-1.2.0-forge-mc1.20.jar",
+      "modId": "durabilitytooltip",
+      "name": "Durability Tooltip",
+      "source": "https://modrinth.com/mod/durability-tooltip",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "supermartijn642configlib-1.1.8-forge-mc1.20.jar",
+      "modId": "supermartijn642configlib",
+      "name": "SuperMartijn642's Config Lib",
+      "source": "https://modrinth.com/mod/supermartijn642s-config-lib",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "Highlighter-1.20.1-forge-1.1.9.jar",
+      "modId": "highlighter",
+      "name": "Highlighter",
+      "source": "https://modrinth.com/mod/item-highlighter",
+      "added": "2026-11-20"
+    },
+    {
+      "jar": "Iceberg-1.20.1-forge-1.1.25.jar",
+      "modId": "iceberg",
+      "name": "Iceberg",
+      "source": "https://modrinth.com/mod/iceberg",
+      "added": "2026-11-20"
     }
   ],
   "removed": [
-    {
-      "modId": "advancementnomore",
-      "name": "AdvancementNoMore",
-      "reason": "Born in Chaos and Nether Remastered read advancements it removes",
-      "removed": "2026-11-12"
-    },
     {
       "modId": "knavesneeds",
       "name": "Knaves' Needs",
@@ -730,35 +598,311 @@
       "name": "Elysium API",
       "reason": "Removed with Jaden's Nether Expansion",
       "removed": "2026-11-15"
+    },
+    {
+      "modId": "yet_another_config_lib_v3",
+      "name": "YetAnotherConfigLib (YACL)",
+      "reason": "Dropped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "illagerinvasion",
+      "name": "Illager Invasion",
+      "reason": "Combat and exploration mods trimmed in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "apothiccombat",
+      "name": "Apothic Combat",
+      "reason": "Combat and exploration mods trimmed in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "fastchunkgen",
+      "name": "FastChunkGen",
+      "reason": "Worldgen speed-ups and Tectonic dropped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "tectonic",
+      "name": "Tectonic",
+      "reason": "Worldgen speed-ups and Tectonic dropped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "lithostitched",
+      "name": "Lithostitched",
+      "reason": "Worldgen speed-ups and Tectonic dropped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "reliable_recipes",
+      "name": "Reliable Recipes",
+      "reason": "Integrated structures and their dependencies dropped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "reliable_remover",
+      "name": "Reliable Remover",
+      "reason": "Integrated structures and their dependencies dropped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "create",
+      "name": "Create",
+      "reason": "Integrated structures and their dependencies dropped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "moonlight",
+      "name": "Moonlight Lib",
+      "reason": "Integrated structures and their dependencies dropped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "supplementaries",
+      "name": "Supplementaries",
+      "reason": "Integrated structures and their dependencies dropped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "amendments",
+      "name": "Amendments",
+      "reason": "Integrated structures and their dependencies dropped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "quarkblocks",
+      "name": "Quark Blocks",
+      "reason": "Integrated structures and their dependencies dropped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "integrated_api",
+      "name": "Integrated API",
+      "reason": "Integrated structures and their dependencies dropped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "integratedpatches",
+      "name": "Integrated Patches",
+      "reason": "Integrated structures and their dependencies dropped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "idas",
+      "name": "Integrated Dungeons and Structures",
+      "reason": "Integrated structures and their dependencies dropped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "integrated_dungeons_arise",
+      "name": "Integrated Dungeons Arise",
+      "reason": "Integrated structures and their dependencies dropped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "integrated_seven_seas",
+      "name": "Integrated Seven Seas",
+      "reason": "Integrated structures and their dependencies dropped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "integrated_villages",
+      "name": "Integrated Villages",
+      "reason": "Integrated structures and their dependencies dropped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "integrated_cataclysm",
+      "name": "Integrated Cataclysm",
+      "reason": "Integrated structures and their dependencies dropped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "cataclysm",
+      "name": "L_Ender's Cataclysm",
+      "reason": "Combat and exploration mods trimmed in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "lionfishapi",
+      "name": "Lionfish API",
+      "reason": "Combat and exploration mods trimmed in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "integrated_simply_swords",
+      "name": "Integrated Simply Swords",
+      "reason": "Integrated structures and their dependencies dropped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "integrated_mowzies_mobs",
+      "name": "Integrated Mowzie's Mobs",
+      "reason": "Integrated structures and their dependencies dropped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "mowziesmobs",
+      "name": "Mowzie's Mobs",
+      "reason": "Combat and exploration mods trimmed in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "mowzies_cataclysm",
+      "name": "Mowzie's Cataclysm",
+      "reason": "Combat and exploration mods trimmed in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "integrated_bosses_of_mass_destruction",
+      "name": "Integrated Bosses of Mass Destruction",
+      "reason": "Integrated structures and their dependencies dropped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "bosses_of_mass_destruction",
+      "name": "Bosses of Mass Destruction",
+      "reason": "Combat and exploration mods trimmed in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "cerbons_api",
+      "name": "Cerbon's API",
+      "reason": "Combat and exploration mods trimmed in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "legendary_monsters",
+      "name": "Legendary Monsters",
+      "reason": "Combat and exploration mods trimmed in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "structurify",
+      "name": "Structurify",
+      "reason": "Integrated structures and their dependencies dropped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "particular",
+      "name": "Particular Reforged",
+      "reason": "Dropped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "mes",
+      "name": "MES - Moog's End Structures",
+      "reason": "Combat and exploration mods trimmed in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "moogs_structures",
+      "name": "Moog's Structure Lib",
+      "reason": "Combat and exploration mods trimmed in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "born_in_chaos_v1",
+      "name": "Born in Chaos",
+      "reason": "Combat and exploration mods trimmed in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "borninconfiguration",
+      "name": "Born In Configuration",
+      "reason": "Combat and exploration mods trimmed in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "maid_rpg_task",
+      "name": "Touhou Little Maid RPG Task",
+      "reason": "Maid add-ons swapped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "tlm_atrribute_display",
+      "name": "Touhou Little Maid: Attribute Display",
+      "reason": "Maid add-ons swapped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "touhou_maid_affection",
+      "name": "Touhou Maid: Affection",
+      "reason": "Maid add-ons swapped in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "alexsmobs",
+      "name": "Alex's Mobs Continued",
+      "reason": "Combat and exploration mods trimmed in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "codxlib",
+      "name": "CodxLib",
+      "reason": "Combat and exploration mods trimmed in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "amcdelight",
+      "name": "Alex's Mobs Continued Delight",
+      "reason": "Combat and exploration mods trimmed in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "domesticationinnovation",
+      "name": "Domestication Innovation",
+      "reason": "Combat and exploration mods trimmed in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "citadel",
+      "name": "Citadel",
+      "reason": "Combat and exploration mods trimmed in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "incontrol",
+      "name": "In Control!",
+      "reason": "Combat and exploration mods trimmed in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "cataclysm_compat",
+      "name": "Cataclysm & BetterCombat - Compatibility",
+      "reason": "Combat and exploration mods trimmed in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "effortlessbuilding",
+      "name": "Effortless Building",
+      "reason": "Pack mod, replaced by Sophisticated Building in the Dev 33 remake",
+      "removed": "2026-11-20"
+    },
+    {
+      "modId": "moremorelang",
+      "name": "MoreMoreLang",
+      "reason": "Pack mod, disabled in the Dev 33 remake",
+      "removed": "2026-11-20"
     }
   ],
   "carry": [
     "config/DistantHorizons.toml",
     "config/bettermineshafts-forge-1_20.toml",
-    "config/borninconfiguration-general.toml",
-    "config/bosses_of_mass_destruction.json5",
-    "config/citadel-common.toml",
-    "config/incontrol/phases.json",
-    "config/incontrol/spawn.json",
-    "config/legendary_monsters-common.toml",
-    "config/mowziesmobs-common.toml",
-    "config/biomeswevegone/world_generation.json",
-    "config/fastchunkgen.toml",
     "config/maid_storage_manager-common.toml",
     "config/maidsoulkitchen-common.toml",
-    "config/structurify.json",
-    "config/tectonic.json",
-    "config/terrablender.toml",
     "config/touhou_little_maid-common.toml",
     "config/touhou_little_maid/sites/llm.json",
     "config/gtocore-rules.txt",
     "config/gtocore.yaml",
-    "config/integrated_simply_swords/silver.json5",
     "config/openloader/data/warpledge-gto",
-    "config/openloader/data/warpledge-gto-integrated",
-    "config/reliable_recipes",
-    "config/reliable_remover",
     "defaultconfigs/toms_storage-server.toml",
+    "defaultconfigs/maid_always_follow-server.toml",
+    "config/tlm_senju/task_filter.json",
+    "config/tlm_maid_manager-common.toml",
+    "defaultconfigs/maidbuilder-server.toml",
     "options.txt",
     "resourcepacks/Warpledge GT PBR.zip",
     "shaderpacks/Eclipse-Shader-e89e6c6.zip",
@@ -777,17 +921,26 @@
     "OverrideMemory"
   ],
   "clientOnly": [
+    "ambientsounds",
     "bettercontrols",
+    "cavedust",
     "chromapatch",
+    "durabilitytooltip",
     "entity_model_features",
     "entity_texture_features",
+    "entityculling",
+    "fusion",
+    "highlighter",
+    "iceberg",
     "keep_stepping",
     "moreoverlays",
-    "particular",
+    "ok_zoomer",
     "presencefootsteps",
     "resourcify",
     "shouldersurfing",
     "smoothswapping",
-    "sound_physics_remastered"
+    "sound_physics_remastered",
+    "supermartijn642configlib",
+    "waterdripsound"
   ]
 }

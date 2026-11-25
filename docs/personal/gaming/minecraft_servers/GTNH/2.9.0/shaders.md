@@ -105,6 +105,12 @@ spot by a short anchor and adds the lines below. The full diffs are local, in
 4. **GTCEu bordered lamps** (`block.properties`; since 2026-11-15, for GTO). ChromaPatch's
    1.20.1 list gives only the borderless GTCEu lamps their colour; the edit adds each
    `gtceu:<colour>_lamp` beside its borderless one. GTNH ignores those ids.
+5. **Glowing beehives** (`block.properties`; since 2026-11-17). Forestry 4.11.40 gives
+   `Forestry:beehives` vanilla light 12 in code (`BlockBeehives`), so Eclipse lit them
+   like lamps; their Neon Horizons maps have no glow. The edit adds them to `block.1`,
+   which ChromaPatch uses for Ztones Lave as a solid block without light. If the ground
+   around a hive still lights up, that's 1.0.3's `OBS07_VANILLA_LIGHT_FALLBACK`
+   (Atmosphere page), which brings back vanilla light the shader's own lighting misses.
 
 Tried and dropped on 2026-11-07: steadier anti-aliasing on distant real chunks (no
 change; the false lights were the cause), and Mipmap Levels 0 (only a test).
@@ -130,7 +136,8 @@ ChromaPatch never rebuilds Warpledge Edit, so after a ChromaPatch or Eclipse upd
 
 On 2026-11-07 the script's output from KuraEdit matched the hand-edited pack file for
 file. On 2026-11-15 all three anchors still matched ChromaPatch 1.0.3 on `e89e6c6`; the
-1.0.2 build is in `backups/replaced-mods/2026-11-15/`.
+1.0.2 build is in `backups/replaced-mods/2026-11-15/`. On 2026-11-17 the beehive edit's
+anchor matched too, and the other three files came out identical to the 2026-11-15 build.
 
 #### Settings
 
@@ -170,7 +177,9 @@ Faithful x32 base instead, so:
   maps. KuramA's README says to install "3-4 zip files" without naming the optional one.
 - `Neon.Horizons.v1.2` stays below the Kura packs because it covers far more blocks.
   `KuraNeonGTNH` replaces 837 of its 871 files where they overlap. KuramA's README
-  doesn't name this combination, so try removing it if a block looks wrong.
+  doesn't name this combination, so try removing it if a block looks wrong. Without it,
+  Ztones Lave stops reflecting: only Neon Horizons has `_s` maps for most variants,
+  `KuraReflectionsGTNH` only for (8) and (12) (off 2026-11-06 to 2026-11-17).
 
 Also in `resourcepacks/` since 2026-11-06, not enabled when added:
 `Modernity-2.9.x-fa35a3d` (Modernity-GTNH weekly 2026-10-26),
@@ -179,6 +188,14 @@ Also in `resourcepacks/` since 2026-11-06, not enabled when added:
 
 KuramA's README warns of visual bugs on blocks that are both reflective and emissive, and
 calls the packs a work in progress.
+
+`DarkReimagined_290.3.zip` is the dark GUI pack. `DarkTrashSlot/` (2026-11-18, folder
+pack) sits above it and recolours TrashSlot 1.0.31's
+`assets/trashslot/textures/gui/slot.png` and trash-can icon to its slot palette, because
+the dark pack ships no `assets/trashslot` and the mod's sheet is vanilla grey. It is a
+separate folder, so a Dark Reimagined update leaves it in place. Since 2026-11-21 Trash Slot
+is gone (Omni Tweaks 0.3.0 draws its own dark slot card), so `DarkTrashSlot/` does nothing
+and can be removed.
 
 ### Updating
 

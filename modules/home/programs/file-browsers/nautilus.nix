@@ -29,6 +29,17 @@
   ];
 
   #--------------------------------------------------------------------#
+  #-- Desktop Entry
+  #--------------------------------------------------------------------#
+
+  #--- Folders opened from other apps (Prism, xdg-open) get a new window, not a tab:
+  #--- D-Bus activation skips Exec's --new-window, so launch through Exec instead
+  xdg.dataFile."applications/org.gnome.Nautilus.desktop".source = pkgs.runCommand "org.gnome.Nautilus.desktop" {} ''
+    sed 's/^DBusActivatable=true$/DBusActivatable=false/' \
+      ${pkgs.nautilus}/share/applications/org.gnome.Nautilus.desktop > $out
+  '';
+
+  #--------------------------------------------------------------------#
   #-- Preferences
   #--------------------------------------------------------------------#
   dconf.settings = {
