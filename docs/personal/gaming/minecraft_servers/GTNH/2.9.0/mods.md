@@ -32,6 +32,7 @@ Do not add these: the pack carries its own copy.
 | YesSteveModel Unofficial | 3.1 | B | [czqwq fork](https://github.com/czqwq/YesSteveModel-Unofficial); 3.1 (2026-11-20) fixes the settings menu; 3.0's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`, and its one commit says "Fix Amim system"; 2.9 added the preview setting's entrance and fixed the math parser, 2.6 fixed the animation loop and 2.7 restored the animation storage system, 2.5 disabled the lighting map |
 | MineMenu | 1.2.0.B44 | C | latest on Modrinth, 2025-12-07 |
 | FPS Reducer | 1.10.3 | C | latest, 2023-09-06 |
+| GT-Interesting-Thing | 2.1.31 | B | release says compatible with 2.9.0 final; Neko shop; see below |
 
 Trash Slot 1.0.31 was removed on 2026-11-21: Omni Tweaks 0.3.0 replaces it (see below).
 
@@ -46,6 +47,16 @@ and NEI 2.8.171. Better Foliage 2.0.1 is back with both configs restored; its no
 name no performance fix, so watch the FPS. Angelica#2092 is still open, so check
 ChromaPatch and the shaders, Distant Horizons and Xaero's maps at launch. The four old
 jars are in `backups/replaced-mods/2026-11-24/`.
+
+**2026-11-24: GT-Interesting-Thing is back, with a storage-only AE shop.** `gtit-v2.1.31.jar`
+on the 2.9.0 client and eclipse's debug server; side B, so legion needs it too. It needs
+MIAOKATZE Core 0.2.29, already installed. The Neko shop preset `ae-storage-only` keeps the
+AE basic pages for cables, terminals, network/power, drives/cells and panels/buses, drops
+the auto-crafting/interface page, and removes the Creative Energy Controller, security
+terminal, pattern/interface terminals and crafting/acceleration cards. Apply it once with
+`/gtit presets`; the old `gtit-base` preset is deselected by the preset's exclusion list.
+The mod was removed on 2026-11-10; the old 2.1.6 jar stays in
+`backups/removed-mods/2026-11-10/`.
 
 **The 2026-11-08 update is on the client and the laptop server:** GTNLLib
 1.1.5, YesSteveModel Unofficial 2.3, MIAOKATZE Core 0.2.6, GT-Steam-Reborn 2.1.28,
@@ -224,10 +235,12 @@ Wonder, Steam Circuit Assembler, Steam Assembly Line) shortcut the steam age; th
 Wonder alone outputs up to 32M L/s. The GTNL jars are in `backups/removed-mods/2026-11-10/`.
 GTNL came back on 2026-11-18; see [GTNL, re-added](#gtnl-re-added-on-2026-11-18).
 
-**ElytraMining, SharedProspecting, BetterLineBreak and GTIT were removed on 2026-11-10;**
+**ElytraMining, SharedProspecting and BetterLineBreak were removed on 2026-11-10;**
 their jars are in `backups/removed-mods/2026-11-10/`. VisualProspecting 1.5.42 in 2.9.0
 already shares within GTNHLib teams; SharedProspecting only bridged ServerUtilities teams.
-BetterLineBreak only changes line breaks for non-alphabetic languages.
+BetterLineBreak only changes line breaks for non-alphabetic languages. GTIT was removed
+with them and came back on 2026-11-24; see
+[GT-Interesting-Thing, re-added](#gt-interesting-thing-re-added-on-2026-11-24).
 
 **The 2026-11-06 update is on the client and the laptop server, and both sides must match to
 join:** GTNLLib 1.1.4, 123Technology 2.2.1.1, EZMiner 6.3, Programmable Hatches 0.2.1p7-beta
@@ -889,6 +902,20 @@ GTNL hooks in the other added mods (none changed):
 - GT-Miao-Blueprint recognises GTNL's steam tree farm hatches; Chromatic Tooltips Compat
   has `scienceNotLeisureEnabled` [true]; NH-Utilities' lang manager lists
   `ScienceNotLeisure`; ChromaPatch gives GTNL's glowing blocks light colours.
+
+## GT-Interesting-Thing, re-added on 2026-11-24
+
+`gtit-v2.1.31.jar` (2.1.31, 2026-11-24; 2.1.6 was the old build) is on the client and
+eclipse's debug server, side B. It needs MIAOKATZE Core 0.2.29, already installed. The mod
+adds the Neko Vending Machine shop, Neko Coins, a BQ quest line, rings, flight cores, the
+ore scanner, the Infinity Cell and the dimensional pocket.
+
+The shop is set to the `ae-storage-only` preset in `MiaoTrade/ae-storage-only.json`:
+cables, terminals, network/power, drives and cells, and panels/buses, with the
+auto-crafting/interface page dropped and the Creative Energy Controller, security
+terminal, pattern/interface terminals and crafting/acceleration cards removed. Apply it
+with `/gtit presets`; the preset's exclusion list deselects `gtit-base`. The preset is on
+the client and the debug server; copy it to legion if you use the shop there.
 
 ## Left out until their author ships a 2.9 build
 

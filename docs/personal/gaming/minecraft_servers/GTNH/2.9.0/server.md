@@ -74,7 +74,8 @@ SharedProspecting and the rest) and 26 in, including Omni Miner, Benzene Fuels, 
 Thaumic Duality Interface, Wildcard Pattern, AE2 Wireless Transceiver, EZStorage Craft
 Fix and LagGoggles. The old jars, the old `123Technology.cfg` and a tarball of `config/`
 and `scripts/` are in `backups/pre-sync-2026-11-19/` in the server folder. Copy that
-folder back to the laptop to apply it there.
+folder back to the laptop to apply it there. GTIT came back on 2026-11-24 at 2.1.31; see
+[mods.md](./mods.md#gt-interesting-thing-re-added-on-2026-11-24).
 
 Configs copied from the client (side-B mods, plus every edit in
 [config-tweaks.md](./config-tweaks.md) the server enforces):
@@ -84,7 +85,8 @@ Configs copied from the client (side-B mods, plus every edit in
   `SpecialMobs.cfg`, `InfernalMobs.cfg`, `Thaumcraft.cfg`, `tc4tweak.cfg`, `rwg2.cfg`,
   `neoecoae.cfg`, `Omni Ocular Unofficial.cfg`
 - `GTNotLeisure/{general,item,machine,recipe,re_avaritia,gtnllib}.cfg`, and the `gtsr/`,
-  `gtswn/`, `gtmb/`, `ae2thing/`, `miaokatzecore/` and `ThaumcraftMobAspects/` folders.
+  `gtswn/`, `gtmb/`, `ae2thing/`, `gtit/`, `miaokatzecore/` and `ThaumcraftMobAspects/`
+  folders.
   `gtsr/industrial-material-ids.cfg` and the enchantment and potion ids in `gtsr.cfg` and
   `GTNotLeisure/item.cfg` have to match the client. `GregTech.cfg` brings the client's
   `explosionItemDrop=true` [false], moot while machine explosions are off.
@@ -93,6 +95,8 @@ Configs copied from the client (side-B mods, plus every edit in
   `patchee.cfg`, `thaumicdualityinterface.cfg`, `bqext.cfg`
 - `betterquesting/DefaultQuests/`, which adds the Benzene Fuels and Processing Plus lines
 - `omniminer/omniminer_server.cfg` at the server root, not in `config/`
+- `MiaoTrade/ae-storage-only.json` at the server root, the GTIT shop preset; see
+  [mods.md](./mods.md#gt-interesting-thing-re-added-on-2026-11-24).
 - `scripts/gtnl_disable_vein_pickaxe.zs`, next to `simplestorage_gregified.zs`. Its
   assembler removal only takes on `minetweaker reload` after start. Omni Server sends it
   through the "MineTweaker reload" quick command with Run when the server has started on,
