@@ -22,6 +22,10 @@
   "nightly": [
     {"name": "fee[dB]ack", "repo": "got-feedBack/feedBack-desktop", "file": "modules/home/programs/gaming/games/feedback.nix", "tag": "nightly"}
   ],
+  "input": [
+    {"name": "moku", "repo": "moku-project/Moku", "file": "modules/home/programs/media/moku/default.nix"},
+    {"name": "tsunagu", "repo": "moku-project/Tsunagu", "file": "modules/home/programs/media/moku/default.nix"}
+  ],
   "commit": [
     {"name": "ArtCNN shader", "repo": "Artoriuz/ArtCNN", "file": "modules/home/programs/media/mpv.nix"}
   ],
