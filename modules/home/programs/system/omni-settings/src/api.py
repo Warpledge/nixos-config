@@ -934,7 +934,7 @@ def cmd_git_summary(cfg, _args):
 def cmd_summaries(cfg, _args):
     """What collapsed custom pages say under their title, from cached or quick reads only."""
     up = updatestate.run(cfg, cached_only=True)
-    rows = up["rows"]
+    rows = updatestate.counted(cfg, up["rows"])
     state = loaded(cfg)
     user = state.resolved["users"][cfg.user]
     # Days old once past the machine's maintenance.updateReminderDays, else 0
