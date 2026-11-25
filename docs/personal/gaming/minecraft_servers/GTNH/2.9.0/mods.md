@@ -32,7 +32,6 @@ Do not add these: the pack carries its own copy.
 | YesSteveModel Unofficial | 3.1 | B | [czqwq fork](https://github.com/czqwq/YesSteveModel-Unofficial); 3.1 (2026-11-20) fixes the settings menu; 3.0's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`, and its one commit says "Fix Amim system"; 2.9 added the preview setting's entrance and fixed the math parser, 2.6 fixed the animation loop and 2.7 restored the animation storage system, 2.5 disabled the lighting map |
 | MineMenu | 1.2.0.B44 | C | latest on Modrinth, 2025-12-07 |
 | FPS Reducer | 1.10.3 | C | latest, 2023-09-06 |
-| GT-Interesting-Thing | 2.1.31 | B | release says compatible with 2.9.0 final; Neko shop; see below |
 
 Trash Slot 1.0.31 was removed on 2026-11-21: Omni Tweaks 0.3.0 replaces it (see below).
 
@@ -48,15 +47,12 @@ name no performance fix, so watch the FPS. Angelica#2092 is still open, so check
 ChromaPatch and the shaders, Distant Horizons and Xaero's maps at launch. The four old
 jars are in `backups/replaced-mods/2026-11-24/`.
 
-**2026-11-24: GT-Interesting-Thing is back, with a storage-only AE shop.** `gtit-v2.1.31.jar`
-on the 2.9.0 client and eclipse's debug server; side B, so legion needs it too. It needs
-MIAOKATZE Core 0.2.29, already installed. The Neko shop preset `ae-storage-only` keeps the
-AE basic pages for cables, terminals, network/power, drives/cells and panels/buses, drops
-the auto-crafting/interface page, and removes the Creative Energy Controller, security
-terminal, pattern/interface terminals and crafting/acceleration cards. Apply it once with
-`/gtit presets`; the old `gtit-base` preset is deselected by the preset's exclusion list.
-The mod was removed on 2026-11-10; the old 2.1.6 jar stays in
-`backups/removed-mods/2026-11-10/`.
+**2026-11-24: GT-Interesting-Thing was tried and removed the same day as too cheaty.**
+`gtit-v2.1.31.jar` went onto the 2.9.0 client and eclipse's debug server and came straight
+back out: the base shop's rings, pocket, Infinity Unit, loot bags, TConstruct smeltery and
+EnderIO travel anchor skip progression, and only the AE storage-only shop preset was
+reasonable. The jars and the `MiaoTrade/ae-storage-only.json` preset are in
+`backups/removed-mods/2026-11-24/`; the old 2.1.6 jar stays in `2026-11-10/`.
 
 **The 2026-11-08 update is on the client and the laptop server:** GTNLLib
 1.1.5, YesSteveModel Unofficial 2.3, MIAOKATZE Core 0.2.6, GT-Steam-Reborn 2.1.28,
@@ -239,8 +235,8 @@ GTNL came back on 2026-11-18; see [GTNL, re-added](#gtnl-re-added-on-2026-11-18)
 their jars are in `backups/removed-mods/2026-11-10/`. VisualProspecting 1.5.42 in 2.9.0
 already shares within GTNHLib teams; SharedProspecting only bridged ServerUtilities teams.
 BetterLineBreak only changes line breaks for non-alphabetic languages. GTIT was removed
-with them and came back on 2026-11-24; see
-[GT-Interesting-Thing, re-added](#gt-interesting-thing-re-added-on-2026-11-24).
+with them, tried again on 2026-11-24, and removed the same day as too cheaty; see
+[GT-Interesting-Thing, tried and removed](#gt-interesting-thing-tried-and-removed-on-2026-11-24).
 
 **The 2026-11-06 update is on the client and the laptop server, and both sides must match to
 join:** GTNLLib 1.1.4, 123Technology 2.2.1.1, EZMiner 6.3, Programmable Hatches 0.2.1p7-beta
@@ -903,19 +899,22 @@ GTNL hooks in the other added mods (none changed):
   has `scienceNotLeisureEnabled` [true]; NH-Utilities' lang manager lists
   `ScienceNotLeisure`; ChromaPatch gives GTNL's glowing blocks light colours.
 
-## GT-Interesting-Thing, re-added on 2026-11-24
+## GT-Interesting-Thing, tried and removed on 2026-11-24
 
-`gtit-v2.1.31.jar` (2.1.31, 2026-11-24; 2.1.6 was the old build) is on the client and
-eclipse's debug server, side B. It needs MIAOKATZE Core 0.2.29, already installed. The mod
-adds the Neko Vending Machine shop, Neko Coins, a BQ quest line, rings, flight cores, the
-ore scanner, the Infinity Cell and the dimensional pocket.
+`gtit-v2.1.31.jar` was on the client and eclipse's debug server for part of 2026-11-24 and
+removed the same day. The mod adds the Neko Vending Machine shop, Neko Coins, a BQ quest
+line, rings, flight cores, the ore scanner, the Infinity Cell and the dimensional pocket.
 
-The shop is set to the `ae-storage-only` preset in `MiaoTrade/ae-storage-only.json`:
-cables, terminals, network/power, drives and cells, and panels/buses, with the
-auto-crafting/interface page dropped and the Creative Energy Controller, security
-terminal, pattern/interface terminals and crafting/acceleration cards removed. Apply it
-with `/gtit presets`; the preset's exclusion list deselects `gtit-base`. The preset is on
-the client and the debug server; copy it to legion if you use the shop there.
+The base shop was the problem: the rings (Windrider's free creative flight, stackable
+Ironheart and Distant Grasp), the dimensional pocket and its 65,536-per-slot upgrades, the
+Infinity Unit's infinite AE storage, the loot bags, the TConstruct smeltery and the EnderIO
+travel anchor all skip real progression. Only the `ae-storage-only` shop preset, the AE
+storage/network tabs with auto-crafting and the creative controller removed, was
+reasonable, and that is not worth the rest.
+
+The 2.1.31 jar and the `MiaoTrade/ae-storage-only.json` preset are in
+`backups/removed-mods/2026-11-24/`; the old 2.1.6 jar is in `2026-11-10/`. The old
+`config/gtit/` stays as it was before the trial.
 
 ## Left out until their author ships a 2.9 build
 
