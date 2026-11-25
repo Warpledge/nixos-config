@@ -233,6 +233,28 @@
       backups.skip = [];
       opencode.plugins.sessionRail = false;
       claude.desktopPlanList = true;
+      audio.easyeffects = false;
+      discord.plugins.biggerStreamPreview = false;
+      discord.plugins.fakeNitro = false;
+      discord.plugins.fixImagesQuality = false;
+      discord.plugins.fixSpotifyEmbeds = false;
+      discord.plugins.fixYoutubeEmbeds = false;
+      discord.plugins.forceOwnerCrown = false;
+      discord.plugins.fullSearchContext = false;
+      discord.plugins.imageZoom = false;
+      discord.plugins.memberCount = false;
+      discord.plugins.noProfileThemes = false;
+      discord.plugins.noTypingAnimation = false;
+      discord.plugins.silentTyping = false;
+      discord.plugins.spotifyCrack = false;
+      discord.plugins.unlockedAvatarZoom = false;
+      discord.plugins.viewIcons = false;
+      discord.plugins.volumeBooster = false;
+      discord.plugins.webRichPresence = false;
+      discord.plugins.youtubeAdblock = false;
+      discord.plugins.messageClickActions = false;
+      discord.plugins.superReactionTweaks = false;
+      discord.hideReactions = false;
     };
   };
 
