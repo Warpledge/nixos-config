@@ -18,8 +18,11 @@
       #--- cursor. VS Code has no live template here, so it keeps the palette.
       stylix = lib.mkMerge [
         {
+          #--- Stylix's removed targets are invisible options that assert if set
           targets = lib.mapAttrs (name: t:
-            lib.optionalAttrs (t ? colors && !(lib.elem name ["vscode" "vscodium"])) {
+            lib.optionalAttrs (t ? colors
+              && !(lib.elem name ["vscode" "vscodium"])
+              && (t.colors.enable.visible or true)) {
               colors.enable = lib.mkDefault false;
             })
           options.stylix.targets;
