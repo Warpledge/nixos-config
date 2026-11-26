@@ -1162,7 +1162,14 @@ at priority 900 into the world search, while Et Futurum 2.6.66's `MixinGuiSelect
 rewrites the same method at priority 1000, so the class cannot be transformed (upstream
 issue GTNotLeisure/NEI-Guess#7). The 1.1 jar is in `backups/removed-mods/2026-11-26/`;
 `neiguess-1.0.jar` from `backups/replaced-mods/2026-11-26/` is installed instead, and
-is untested on 2.9.2.
+the next launch got past it to preInit.
+
+That second launch then crashed on Neo ECO AE 7.3.15: `DriveChunkUnloadMixin` aliases
+the non-private `ChunkProviderServer.field_73248_b`, which Mixin rejects (upstream
+issue Yang120231/GTNH-ECO-1.7.10#30; the fix on `main` has no release yet). The 7.3.15
+jar is in `backups/removed-mods/2026-11-26/`; `neoecoae-7.3.14.jar` from the 2.9.1
+instance is installed instead. It has no storage mixins and supports 2.9.0-RC1 and
+later, so 7.3.15's storage wiring change stays out of the test.
 
 ## Left out until their author ships a 2.9 build
 
