@@ -171,11 +171,13 @@ list at the start, and don't write your summary before step 4.
   first.
 - If something an approved option assumed turns out false, say so and ask again
   before acting.
-- Choosing between visual designs (a UI, layout or screen with several
-  directions): make an interactive HTML picks page instead of asking in prose.
-  Mockups in the app's own colours, a radio per option (clicking the mockup
-  picks it), checkboxes for extras, and a Copy picks button that gives one line
-  to paste back.
+- Any visual or design choice (a UI, HUD, menu, layout, theme, desktop look,
+  in-game effect; in this repo, a mod or any other project): make an
+  interactive HTML picks page instead of asking in prose. A live preview in the
+  subject's own colours redraws on every pick, and you can use it (hover,
+  click, toggle). Each option is a radio (clicking its mockup picks it), extras
+  are checkboxes, the person's earlier picks are the defaults, and a Copy picks
+  button gives one line to paste back. Remake it with each round of picks.
 
 **Long tasks**
 
