@@ -1135,9 +1135,11 @@ How it was built:
   generated lang and GuideNH files.
 - `TwistSpaceTechnology.cfg` and `GregTech.lang` were left to regenerate. The old Twist
   config is in `backups/reset-configs/2026-11-26/`.
-- `config/gtsr/industrial-material-ids.cfg` lost `native_acid_cut=705`: GT 2.9.1 and later
-  give 705 to `ic2distilledwater`, which crashed an earlier 2.9.1 test at GT preinit. If
-  the launch names another collision, drop that entry the same way.
+- `config/gtsr/industrial-material-ids.cfg` moved `native_acid_cut` from 705 to 420:
+  GT 2.9.1 and later give 705 to `ic2distilledwater`, and dropping the entry instead
+  crashes GT preinit with `Missing persistent industrial material ID`, since existing
+  materials need a saved ID. It is now 420, the highest free ID after the file's other
+  entries; reassign a collision the same way, never drop the key.
 - mods: 2.9.2's jars, plus every added and local jar from 2.9.0. Angelica 2.2.47 and RWG2
   replace the pack's 2.2.46 and 2.0.9 (in `backups/replaced-mods/2026-11-26-pack/`).
   JourneyMap and InGameInfoXML are `.jar.disabled`, as on 2.9.0. TaskNH 0.14.4 is new in
