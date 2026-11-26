@@ -24,7 +24,7 @@ Do not add these: the pack carries its own copy.
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
 | Twist Space Technology | 0.8.0 | B | 0.8.1 and 0.8.2 both crash world start on the Bottled Chaos null; 0.8.0 is installed, see below |
 | 123Technology | 2.2.1.3 | B | its README says 2.1.9+ supports GTNH 2.9.0; 2.2.1's release notes say it's adapted to 2.9.0 stable |
-| Omni Hand | 6.6-balanced.15-pre8 | B | warpledge's fork of EZMiner 6.6, renamed Omni Miner on 2026-11-18 and Omni Hand on 2026-11-26; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a player-placed-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre8 is the current test build with the mode-group work and Logistics |
+| Omni Hand | 6.6-balanced.15-pre9 | B | warpledge's fork of EZMiner 6.6, renamed Omni Miner on 2026-11-18 and Omni Hand on 2026-11-26; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a building-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre9 is the current test build with the mode-group work, Logistics and the Block Swap sub-modes |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
 | EZStorage | 1.8.3 | B | builds against GTNHLib 0.11.52, NEI 2.8.158; 1.8.3 fixes NEI bookmark pull with large stacks |
 | Programmable Hatches | 0.2.1p9-beta | B | p9 (2026-11-20) fixes a Crafting Dumper stall on item-and-essentia patterns; p8 fixes a startup crash with GT-Never-Reset; p7 notes: only 2.9.0 supported; builds against GT 5.09.54.264, GTNHLib 0.11.54, NEI 2.8.171 |
@@ -285,6 +285,31 @@ records are unchanged. Not yet tested in game:
 - **Sounds:** a positional pop per machine as the result arrives, one after another, rising
   for Insert and falling for Extract, a thud for a machine that took nothing. New client
   setting: Logistics Sounds.
+
+**2026-11-26, later: test build `6.6-balanced.15-pre9`, client only.** The jar is
+`mods/omnihand-6.6-balanced.15-pre9.jar`; pre8 sits beside it as `.disabled`. pre8 worked in
+game. Not yet tested in game:
+
+- **Block Swap is a building tool now.** The player-placed rule is gone (its tracking and
+  setting removed; the old `EZMiner_PlayerPlacedBlocks` world data is left unused). Instead
+  it never swaps ores, unbreakable blocks, fluids, blocks harder than the new server setting
+  Block Swap Max Hardness (10: stone, bricks and iron blocks yes, obsidian no) or blocks with
+  a tile entity, except GT cables and pipes. The old block comes back as itself.
+- **Five sub-modes** on chain key + Shift + scroll: **Area** (as before), **Surface** (the
+  connected same block on the clicked face's plane whose face is open, so a floor stays a
+  floor), **Paint** (drag across blocks; Alt brush 1×1/3×3/5×5, Ctrl same block only),
+  **Line** (two points; Alt spacing 0-9 for lights every few blocks, Ctrl snap to axis) and
+  **Shape** (a rectangle or circle on a face; Ctrl pattern Fill/Border/Grid/Checker/Ring/
+  Disc, Alt spacing). Paint, Line and Shape swap on release.
+- **Visuals:** ghosts of the held block over what will swap, dotted outlines on cells the
+  spacing skips, red on refused ones, a guide line or rectangle or circle, in-world length,
+  size, radius, gap and shortfall labels, and a ring wave on every swap (old block crumbles,
+  new one pops in).
+- **HUD:** every mode and every sub-mode of the current one as chips in the mode's colour
+  (Mining gold, Farming green, Games pink, Building aqua, Logistics orange), and small key
+  tags (`scroll`, `⇧ scroll`, `Ctrl`, `Alt`) beside what they change.
+- **Sounds:** one sound per Logistics drag and per Block Swap instead of one per machine or
+  block; the setting is now called Result Sounds.
 
 **2026-11-20: eleven updates, on the client and eclipse's debug server.** MIAOKATZE
 Core 0.2.29 (faster NEI structure previews, inline tooltip pin and tier controls),
