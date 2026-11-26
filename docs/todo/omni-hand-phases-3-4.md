@@ -24,21 +24,13 @@ The menu and Building parts are built. Later decisions override three of those p
 - Chain key + scroll was removed in pre14.
 - The offhand replace filter can't be built, since 1.7.10 has no offhand.
 
-## Phase 3 steps left
+## Phase 3: done
 
-All five are built into test build 15-pre15 (2026-11-26, installed, recorded in `mods.md`), waiting for the in-game test before the fork commit. Decisions taken while building: backpacks carried and worn, then AE2 last; the preview asks the server for the reachable total; breaking skips what the tool can't harvest; the modifiers' plane and centre go through the first point or a "Set here" block; visual picks on https://claude.ai/artifact/Nj4p8Y5ivMz6my8tPeTYrG.
-
-1. Add the Mirror, Array and Radial mirror modifiers:
-   - Mirror copies the shape across X, Y or Z planes, and stairs flip.
-   - Array repeats it at an offset, up to 100 times.
-   - Radial mirror makes rotated copies around a point, 3 or more slices.
-   - Their buttons go in the menu's action column.
-2. Take blocks from backpacks in the player's inventory, and through an AE2 wireless terminal the player carries.
-3. Break in shapes: left-click points break the same shape with the player's tools.
-4. Merge slabs: a slab placed onto a slab makes a double slab.
-5. Protect machines: never replace tile entities (GT machines, chests).
+Built as 15-pre15, tested in game and committed in the fork with pre14 as `6352784` (2026-11-26). `mods.md` describes it.
 
 ## Phase 4 steps left (Guides)
+
+All six are built into test build 15-pre16 (2026-11-26, installed, recorded in `mods.md`), waiting for the in-game test before the fork commit; delete this note once it passes. Decisions taken: the whole team edits any guide, presets are saved per team on the server, placement mode snaps to the aimed open cell on the current layer, 64 guides per team. Left out: renaming guides (no text box in the menu).
 
 1. Add the sub-modes New, Move, Guides and Presets:
    - New: pick a shape, then set its points like a build.

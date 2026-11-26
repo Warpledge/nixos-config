@@ -24,7 +24,7 @@ Do not add these: the pack carries its own copy.
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
 | Twist Space Technology | 0.8.0 | B | 0.8.1 and 0.8.2 both crash world start on the Bottled Chaos null; 0.8.0 is installed, see below |
 | 123Technology | 2.2.1.3 | B | its README says 2.1.9+ supports GTNH 2.9.0; 2.2.1's release notes say it's adapted to 2.9.0 stable |
-| Omni Hand | 6.6-balanced.15-pre15 | B | warpledge's fork of EZMiner 6.6, renamed Omni Miner on 2026-11-18 and Omni Hand on 2026-11-26; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a building-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre10 (tagged in the fork) has the mode-group work, Logistics and the Block Swap sub-modes; pre11 adds the hold-Alt mode menu and Swap on right-click, pre12 the menu-style HUD and settings, and 15-pre13 Building (placement shapes, undo, Reach Upgrades), 15-pre14 click-to-place, sliders, HUD cards, bigger limits, Pulse Wave preview, crumble and item pull, and 15-pre15 is the current test build (Mirror, Array and Radial modifiers, blocks from backpacks and AE2, breaking in shapes, slab merging) |
+| Omni Hand | 6.6-balanced.15-pre16 | B | warpledge's fork of EZMiner 6.6, renamed Omni Miner on 2026-11-18 and Omni Hand on 2026-11-26; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a building-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre10 (tagged in the fork) has the mode-group work, Logistics and the Block Swap sub-modes; pre11 adds the hold-Alt mode menu and Swap on right-click, pre12 the menu-style HUD and settings, and 15-pre13 Building (placement shapes, undo, Reach Upgrades), 15-pre14 click-to-place, sliders, HUD cards, bigger limits, Pulse Wave preview, crumble and item pull, 15-pre15 Mirror, Array and Radial modifiers, blocks from backpacks and AE2, breaking in shapes and slab merging (committed with pre14 as `6352784`), and 15-pre16 is the current test build (Guides) |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
 | EZStorage | 1.8.3 | B | builds against GTNHLib 0.11.52, NEI 2.8.158; 1.8.3 fixes NEI bookmark pull with large stacks |
 | Programmable Hatches | 0.2.1p9-beta | B | p9 (2026-11-20) fixes a Crafting Dumper stall on item-and-essentia patterns; p8 fixes a startup crash with GT-Never-Reset; p7 notes: only 2.9.0 supported; builds against GT 5.09.54.264, GTNHLib 0.11.54, NEI 2.8.171 |
@@ -454,6 +454,44 @@ picks are on the "Omni Hand Modifier Picks" page, https://claude.ai/artifact/Nj4
 - **Machines:** placing and Swap already refused tile entities (GT cables and pipes aside);
   breaking refuses all of them.
 - Two packets added at the end, so client and server still need the same jar.
+
+pre15 worked in game; pre14 and pre15 are committed together in the fork as `6352784`.
+
+**2026-11-26, later: test build `6.6-balanced.15-pre16`, client only, Guides (phase 4).** The
+jar is `mods/omnihand-6.6-balanced.15-pre16.jar`; pre15 sits beside it as `.disabled`. Not
+committed in the fork, not yet tested in game. The look follows the "Omni Hand Menu Picks"
+page.
+
+- **Guide mode** is now in the Alt menu (violet), with four sub-modes. **New:** pick a shape
+  (any but Single), its options and a colour, then set its points with an empty hand like a
+  build. **Move:** nudge the selected guide by 1, 4 or 16, turn it 90°, flip it across X or
+  Z, re-anchor it at the block you look at, lock it. **Guides:** every team guide in this
+  dimension, nearest first, to select or hide (hiding is only on your screen); the selected
+  one's colour, placement mode, "Build it with held block" and Delete; then the look
+  settings. **Presets:** save the selected guide's shape, drop a preset where you look, or
+  delete one.
+- **Saved on the server** in the overworld's `data/omnihand_guides.dat`, per ServerUtilities
+  team (or per player without one). Anyone on the team can change any guide; a locked one
+  can't be moved, turned, flipped, re-anchored or deleted. At most 64 per team (server
+  setting Guide Max Per Team); each one within the Building caps and your reach when set.
+  The whole list goes to every member online after each change, and on login.
+- **Look** (client settings in the Guides panel): outer edges with a faint tint on the
+  faces, lines behind blocks dimmed, the layer being built bright and the rest faint, a
+  cell's outline gone once a block is in it, each guide in its own colour (violet, aqua,
+  gold, green, white). Alternatives: edges only or a box per cell; x-ray or hidden behind
+  blocks; up to the current layer or all layers; placed cells green or not tracked; render
+  distance 16 to 512 (default 128).
+- **Extras:** an anchor box and short beam on each guide's first point (white when
+  selected); red outlines where a block differs from the one most of the guide is built
+  from; the HUD shows the selected (or nearest) guide's layer, placed of total and wrong
+  blocks, then up to three more guides near you with their distance.
+- **Placement mode** (per guide, off by default): with a block in hand in Guide mode near
+  such a guide, right-click places into the open cell you aim at on the layer being built
+  (vanilla placing is off there), and Shift+right-click fills the guide's open cells with
+  the build animation. "Build it with held block" does the same fill from the menu.
+- Not in this build: renaming guides (no text box in the menu; new guides take their
+  shape's name). Guides carry no Mirror/Array/Radial copies.
+- Two packets added at the end, so client and server need the same jar.
 
 **2026-11-20: eleven updates, on the client and eclipse's debug server.** MIAOKATZE
 Core 0.2.29 (faster NEI structure previews, inline tooltip pin and tier controls),
