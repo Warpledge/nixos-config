@@ -1112,6 +1112,52 @@ The 2.1.31 jar and the `MiaoTrade/ae-storage-only.json` preset are in
 `backups/removed-mods/2026-11-24/`; the old 2.1.6 jar is in `2026-11-10/`. The old
 `config/gtit/` stays as it was before the trial.
 
+## 2.9.2 test instance, built on 2026-11-26
+
+`GT_New_Horizons_2.9.2_TEST` is a copy of this setup on the 2.9.2 pack, for singleplayer
+testing with a new world. The 2.9.0 instance, eclipse's debug server and legion are
+unchanged, and the test instance can't join either server. It keeps the 2.9.0 JVM args,
+`jdwp` port 5005 included, so only one of the two can run at a time.
+
+How it was built:
+
+- Unpacked from `GT_New_Horizons_2.9.2_Java_17-26.zip` (lwjgl3ify 3.1.0, GT 5.09.54.277).
+- From 2.9.0: `options.txt`, `optionsnf.txt`, `localconfig.cfg`, `servers.dat`, the
+  shader and resource packs, `scripts/`, the mod data folders (`angelica/`,
+  `eclipse-tuning/`, `craftchain/`, `omniminer/`, `MiaoBlueprints/` and the like) and the
+  Wayfarer multiplayer map. Not copied: `saves/`, `backups/`, the Xaero folders,
+  `visualprospecting/` and `coretweaks/`.
+- `config/` is a three-way merge against the modpack repo's `2.9.0` and `2.9.2` tags.
+  Files you never changed took the 2.9.2 copy, and `lwjgl3ify.cfg` kept borderless and
+  the desktop entry off while gaining 2.9.2's HRTF default. Your own `rwg2.cfg` beats the
+  one 2.9.2 adds for RWG2 2.0.9. `vendingmachine/tradeDatabase.json` and `txloader/` are
+  2.9.2's, since the only differences from 2.9.0 were runtime rewrites and the pack's
+  generated lang and GuideNH files.
+- `TwistSpaceTechnology.cfg` and `GregTech.lang` were left to regenerate. The old Twist
+  config is in `backups/reset-configs/2026-11-26/`.
+- `config/gtsr/industrial-material-ids.cfg` lost `native_acid_cut=705`: GT 2.9.1 and later
+  give 705 to `ic2distilledwater`, which crashed an earlier 2.9.1 test at GT preinit. If
+  the launch names another collision, drop that entry the same way.
+- mods: 2.9.2's jars, plus every added and local jar from 2.9.0. Angelica 2.2.47 and RWG2
+  replace the pack's 2.2.46 and 2.0.9 (in `backups/replaced-mods/2026-11-26-pack/`).
+  JourneyMap and InGameInfoXML are `.jar.disabled`, as on 2.9.0. TaskNH 0.14.4 is new in
+  2.9.2.
+- Updated with the `gtnh-mod-updates` skill: MIAOKATZE Core 0.2.31, GT-Miao-Blueprint
+  0.3.62, GT-Steam-Reborn 2.1.73, GT-Simple-Wireless-Network 2.1.54, Neo ECO 7.3.15,
+  AE2Things 1.4.2, Thaumic Duality Interface 1.0.3, EZStorage 1.8.4, RWG2 2.1.3, ThinkTech
+  0.3.5, Wayfarer's Map 0.0.26, Dashboard 1.0.26, AngelLib 1.0.4, Twist 0.8.5, gtnh-hn
+  0.4.3, Programmable Hatches 0.2.1p11, GTNLLib 1.1.10, NEI Guess 1.1 and the YSMU
+  pre-release `pre-3.2-rust`. Old jars are in `backups/replaced-mods/2026-11-26/`.
+- Translation agent diff: GT-Miao-Blueprint 0.3.62 has 20 moved, 310 reworded and 1,038
+  new strings, so most of its new text shows in Chinese until the table is redone. The
+  other mods added two or fewer lines each, all log text.
+
+Run the skill against it with `check.py --instance` and set `serverDir` to null in the
+report before `install.py`, or side B installs also land on the 2.9.0 debug server.
+Without `--instance`, `check.py` picks whichever GTNH instance changed last.
+
+Not launched yet.
+
 ## Left out until their author ships a 2.9 build
 
 - **BoxPlusPlus 2.1.2**: last release 2025-12-10, built against Galaxy Space 1.1.121.
