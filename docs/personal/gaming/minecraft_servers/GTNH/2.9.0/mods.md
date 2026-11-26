@@ -24,7 +24,7 @@ Do not add these: the pack carries its own copy.
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
 | Twist Space Technology | 0.8.0 | B | 0.8.1 and 0.8.2 both crash world start on the Bottled Chaos null; 0.8.0 is installed, see below |
 | 123Technology | 2.2.1.3 | B | its README says 2.1.9+ supports GTNH 2.9.0; 2.2.1's release notes say it's adapted to 2.9.0 stable |
-| Omni Hand | 6.6-balanced.15-pre9 | B | warpledge's fork of EZMiner 6.6, renamed Omni Miner on 2026-11-18 and Omni Hand on 2026-11-26; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a building-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre9 is the current test build with the mode-group work, Logistics and the Block Swap sub-modes |
+| Omni Hand | 6.6-balanced.15-pre10 | B | warpledge's fork of EZMiner 6.6, renamed Omni Miner on 2026-11-18 and Omni Hand on 2026-11-26; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a building-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre10 is the current test build with the mode-group work, Logistics and the Block Swap sub-modes |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
 | EZStorage | 1.8.3 | B | builds against GTNHLib 0.11.52, NEI 2.8.158; 1.8.3 fixes NEI bookmark pull with large stacks |
 | Programmable Hatches | 0.2.1p9-beta | B | p9 (2026-11-20) fixes a Crafting Dumper stall on item-and-essentia patterns; p8 fixes a startup crash with GT-Never-Reset; p7 notes: only 2.9.0 supported; builds against GT 5.09.54.264, GTNHLib 0.11.54, NEI 2.8.171 |
@@ -310,6 +310,20 @@ game. Not yet tested in game:
   tags (`scroll`, `⇧ scroll`, `Ctrl`, `Alt`) beside what they change.
 - **Sounds:** one sound per Logistics drag and per Block Swap instead of one per machine or
   block; the setting is now called Result Sounds.
+
+**2026-11-26, later: `6.6-balanced.15-pre10`, a crash fix.** pre9 let Paint place a ring
+of GT machines; wrenching one off crashed the game (server crash report
+`crash-2026-11-26_07.29.35-server.txt`): Block Swap placed them without an owner, and GT's
+`GTPowerfailTracker.getMachineOwner` throws a NullPointerException in
+`MTEMultiBlockBase.onRemoval` when a multiblock has none. Reloading the world in the same
+game session then hung on "loading world": the crashed server left GT's server-tick lock
+(`GTProxy.onServerTickEvent`) held, so a full game restart is needed after such a crash.
+pre10 (jar `mods/omnihand-6.6-balanced.15-pre10.jar`, pre9 `.disabled`):
+
+- Block Swap refuses a held block with a tile entity (machines, chests); GT cables and pipes
+  still swap, and the GT blocks it places now get the player as owner.
+- Breaking an ownerless GT machine first gives it the breaking player as owner, so the
+  machines pre9 placed can be wrenched or mined off without the crash.
 
 **2026-11-20: eleven updates, on the client and eclipse's debug server.** MIAOKATZE
 Core 0.2.29 (faster NEI structure previews, inline tooltip pin and tier controls),
