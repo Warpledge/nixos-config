@@ -1156,7 +1156,13 @@ Run the skill against it with `check.py --instance` and set `serverDir` to null 
 report before `install.py`, or side B installs also land on the 2.9.0 debug server.
 Without `--instance`, `check.py` picks whichever GTNH instance changed last.
 
-Not launched yet.
+The first launch, on 2026-11-26, crashed during initialization with
+`NoClassDefFoundError: GuiSelectWorld`. NEI Guess 1.1's new `MixinWorldSearch` injects
+at priority 900 into the world search, while Et Futurum 2.6.66's `MixinGuiSelectWorld`
+rewrites the same method at priority 1000, so the class cannot be transformed (upstream
+issue GTNotLeisure/NEI-Guess#7). The 1.1 jar is in `backups/removed-mods/2026-11-26/`;
+`neiguess-1.0.jar` from `backups/replaced-mods/2026-11-26/` is installed instead, and
+is untested on 2.9.2.
 
 ## Left out until their author ships a 2.9 build
 
