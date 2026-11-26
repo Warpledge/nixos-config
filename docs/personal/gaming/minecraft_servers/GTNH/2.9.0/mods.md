@@ -414,7 +414,10 @@ committed in the fork until it's tested. Not yet tested in game:
   default (existing configs move to it once): the vein's outer edges in the mode colour, a
   ring rippling from the aimed block, corner brackets and the block count. Broken blocks
   crumble (shrink and sink over 150 ms, at most 512 a frame). Item pull (client setting, on):
-  icons streak from each broken block to you, with a running "+N" above the hotbar.
+  icons streak from each broken block to you, with a running "+N" above the hotbar. The
+  server sends what each chain tick broke (new packet), so every chain plays them while the
+  key stays held; cubes and icons take the world's light, so they aren't full bright in caves
+  or under shaders (fixed in a rebuild of the same jar after the first test).
 - **Drops** now reach the player once a tick while the chain runs, instead of waiting for the
   chain key to be let go; XP still comes at the chain's end.
 - Packet IDs shifted (the cached-chain packet went), so client and server need the same jar.
