@@ -24,7 +24,7 @@ Do not add these: the pack carries its own copy.
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
 | Twist Space Technology | 0.8.0 | B | 0.8.1 and 0.8.2 both crash world start on the Bottled Chaos null; 0.8.0 is installed, see below |
 | 123Technology | 2.2.1.3 | B | its README says 2.1.9+ supports GTNH 2.9.0; 2.2.1's release notes say it's adapted to 2.9.0 stable |
-| Omni Miner | 6.6-balanced.15-pre6 | B | warpledge's fork of EZMiner 6.6, renamed on 2026-11-18; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a player-placed-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre6 is the current test build with the mode-group work |
+| Omni Miner | 6.6-balanced.15-pre7 | B | warpledge's fork of EZMiner 6.6, renamed on 2026-11-18; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a player-placed-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre7 is the current test build with the mode-group work and Logistics |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
 | EZStorage | 1.8.3 | B | builds against GTNHLib 0.11.52, NEI 2.8.158; 1.8.3 fixes NEI bookmark pull with large stacks |
 | Programmable Hatches | 0.2.1p9-beta | B | p9 (2026-11-20) fixes a Crafting Dumper stall on item-and-essentia patterns; p8 fixes a startup crash with GT-Never-Reset; p7 notes: only 2.9.0 supported; builds against GT 5.09.54.264, GTNHLib 0.11.54, NEI 2.8.171 |
@@ -233,6 +233,34 @@ pre5 (the chain key here is V, the separate mode key was Page Down):
   it (IC2 and CropsNH crops spawn theirs directly). It rises over the block the chain started
   from instead of the middle of the vein, which could be off screen.
 - **The item stream is removed**; the floating summary and the toast already show the loot.
+
+**2026-11-26, later: test build `6.6-balanced.15-pre7`, client only.** The jar is
+`mods/omniminer-6.6-balanced.15-pre7.jar`; pre6 sits beside it as `.disabled`. Not yet tested
+in game. It adds a fifth mode, **Logistics**, for refuelling early machines without opening
+their GUIs:
+
+- Hold the chain key, sweep the crosshair over machines, let go. **Insert** spreads every
+  stack in the inventory matching the held item evenly over them (a machine that's full or
+  refuses passes its share to the others); **Extract** takes their outputs into the
+  inventory, as far as it has room. Chain key + Shift + scroll switches Insert and Extract,
+  and in Mining Basic and Fuzzy again; the Mining Match setting is gone, and both
+  sub-modes are saved in the client config.
+- **Machines it touches:** the GT coke oven (logs and other recipe inputs into slot 0,
+  charcoal from slot 1), GT small boilers (valid fuel in, ash and empty containers out), GT
+  single-block machines and vanilla furnaces (their own automation rules). Walls, casings,
+  storage (chests, drawers, AE2 interfaces) and every other GT machine can't be picked.
+  The coke oven needs a map because its automation rules accept any item into both slots
+  from "no side" and let automation pull from both; small boilers because GT's config turns
+  their automation off by default (checked in GT 5.09.54.265).
+- **Safety:** the server re-checks reach (18 blocks), land claims and the machine for each
+  pick, counts a multiblock once, takes items from the player before offering them, and
+  returns or drops whatever a machine doesn't accept. A count mismatch is logged.
+- **Visuals:** a white outline on the machine under the crosshair, a snap-in pulsing box per
+  pick (cyan Insert, amber Extract, or the preview's rainbow and gradient styles) with a
+  rising click and particles, a line through the picks in order, a numbered label with each
+  machine's share, and a HUD count. On release each machine flashes green with `+N`/`−N` or
+  red with why, then the summary (`[icon] 640 → 10 machines`, or the outputs taken) and the
+  HUD toast.
 
 **2026-11-20: eleven updates, on the client and eclipse's debug server.** MIAOKATZE
 Core 0.2.29 (faster NEI structure previews, inline tooltip pin and tier controls),
