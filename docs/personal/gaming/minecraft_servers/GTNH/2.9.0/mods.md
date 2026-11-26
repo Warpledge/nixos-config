@@ -24,7 +24,7 @@ Do not add these: the pack carries its own copy.
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
 | Twist Space Technology | 0.8.0 | B | 0.8.1 and 0.8.2 both crash world start on the Bottled Chaos null; 0.8.0 is installed, see below |
 | 123Technology | 2.2.1.3 | B | its README says 2.1.9+ supports GTNH 2.9.0; 2.2.1's release notes say it's adapted to 2.9.0 stable |
-| Omni Hand | 6.6-balanced.15-pre10 | B | warpledge's fork of EZMiner 6.6, renamed Omni Miner on 2026-11-18 and Omni Hand on 2026-11-26; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a building-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre10 is the current test build with the mode-group work, Logistics and the Block Swap sub-modes |
+| Omni Hand | 6.6-balanced.15-pre10 | B | warpledge's fork of EZMiner 6.6, renamed Omni Miner on 2026-11-18 and Omni Hand on 2026-11-26; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a building-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre10 (tagged in the fork) has the mode-group work, Logistics and the Block Swap sub-modes; 15-pre11 is the current test build with the hold-Alt mode menu and Swap on right-click |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
 | EZStorage | 1.8.3 | B | builds against GTNHLib 0.11.52, NEI 2.8.158; 1.8.3 fixes NEI bookmark pull with large stacks |
 | Programmable Hatches | 0.2.1p9-beta | B | p9 (2026-11-20) fixes a Crafting Dumper stall on item-and-essentia patterns; p8 fixes a startup crash with GT-Never-Reset; p7 notes: only 2.9.0 supported; builds against GT 5.09.54.264, GTNHLib 0.11.54, NEI 2.8.171 |
@@ -324,6 +324,28 @@ pre10 (jar `mods/omnihand-6.6-balanced.15-pre10.jar`, pre9 `.disabled`):
   still swap, and the GT blocks it places now get the player as owner.
 - Breaking an ownerless GT machine first gives it the breaking player as owner, so the
   machines pre9 placed can be wrenched or mined off without the crash.
+
+**2026-11-26, later: test build `6.6-balanced.15-pre11`, client only.** The jar is
+`mods/omnihand-6.6-balanced.15-pre11.jar`; pre10 sits beside it as `.disabled`. pre10 is
+committed and tagged `6.6-balanced.15-pre10` in the fork. This is phase 1 of the menu, Build
+mode and Guides plan (design picks: the "Omni Hand Menu Picks" artifact). Not yet tested in
+game:
+
+- **Mode menu:** hold Left Alt (new keybind Mode Menu) for a ring of modes, the hovered mode's
+  sub-modes fanning out beside it, its settings on the left (block count and radius, brush,
+  spacing, snap, pattern, Logistics amount and top-up) and Settings on the right. Clicking
+  applies and keeps the menu open; letting go applies what's under the cursor; 1 to 7 pick a
+  mode; Esc closes. A soft click plays on hover (client setting Menu Hover Sounds). IC2's
+  "ALT Key" is also Left Alt, so its Alt combos open the menu too; rebind one of them if
+  that gets in the way.
+- **Swap is its own mode** (periwinkle), split from Building, and runs on **right-click with a
+  block in hand** instead of the chain key: Area and Surface on a click, Paint, Line and Shape
+  while right-click is held, swapping on release. The Area and Surface preview shows whenever
+  Swap is ready. Clicking the menu's centre (or "Block modes on/off") turns block modes off
+  so a held block places normally.
+- Building (aqua) and Guide (violet) are in the mode list but hidden until their phases land.
+- Chain key + scroll still changes modes and settings as before.
+- Fix: non-block items in hand no longer count as placeable for Block Swap.
 
 **2026-11-20: eleven updates, on the client and eclipse's debug server.** MIAOKATZE
 Core 0.2.29 (faster NEI structure previews, inline tooltip pin and tier controls),
