@@ -24,7 +24,7 @@ Do not add these: the pack carries its own copy.
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
 | Twist Space Technology | 0.8.0 | B | 0.8.1 and 0.8.2 both crash world start on the Bottled Chaos null; 0.8.0 is installed, see below |
 | 123Technology | 2.2.1.3 | B | its README says 2.1.9+ supports GTNH 2.9.0; 2.2.1's release notes say it's adapted to 2.9.0 stable |
-| Omni Miner | 6.6-balanced.13 | B | warpledge's fork of EZMiner 6.6, renamed on 2026-11-18; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a player-placed-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"` |
+| Omni Miner | 6.6-balanced.15-pre3 | B | warpledge's fork of EZMiner 6.6, renamed on 2026-11-18; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a player-placed-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre3 is the current test build with the mode-group work |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
 | EZStorage | 1.8.3 | B | builds against GTNHLib 0.11.52, NEI 2.8.158; 1.8.3 fixes NEI bookmark pull with large stacks |
 | Programmable Hatches | 0.2.1p9-beta | B | p9 (2026-11-20) fixes a Crafting Dumper stall on item-and-essentia patterns; p8 fixes a startup crash with GT-Never-Reset; p7 notes: only 2.9.0 supported; builds against GT 5.09.54.264, GTNHLib 0.11.54, NEI 2.8.171 |
@@ -185,6 +185,15 @@ The jar is `mods/omniminer-6.6-balanced.13.jar`; the test builds sit beside it a
 Still open in the fork: cached chain mode (off) skips the tool gate, the GT toolbox is
 resolved by reflection per block off the main thread, and Witchery vampires lost
 bare-hand chaining.
+
+**2026-11-26: test build `6.6-balanced.15-pre3`, client only.** The jar is
+`mods/omniminer-6.6-balanced.15-pre3.jar`; pre2 sits beside it as `.disabled`. It carries the
+in-progress mode groups (Mining, Farming, Games, Building), chain effects and per-mode
+ranges. The chain key now reads the keyboard and mouse directly instead of its key binding:
+GTNH's Controlling treats the Shift+V `Next Mode` binding as replacing the plain V chain
+binding while Shift is held, which stopped the chain, hid the HUD and let the wheel scroll
+the hotbar instead of switching modes. With V held, Shift+scroll now steps the four groups,
+Alt changes the radius and Ctrl the block count.
 
 **2026-11-20: eleven updates, on the client and eclipse's debug server.** MIAOKATZE
 Core 0.2.29 (faster NEI structure previews, inline tooltip pin and tier controls),
