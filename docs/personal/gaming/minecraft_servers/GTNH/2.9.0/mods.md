@@ -24,7 +24,7 @@ Do not add these: the pack carries its own copy.
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
 | Twist Space Technology | 0.8.0 | B | 0.8.1 and 0.8.2 both crash world start on the Bottled Chaos null; 0.8.0 is installed, see below |
 | 123Technology | 2.2.1.3 | B | its README says 2.1.9+ supports GTNH 2.9.0; 2.2.1's release notes say it's adapted to 2.9.0 stable |
-| Omni Miner | 6.6-balanced.15-pre4 | B | warpledge's fork of EZMiner 6.6, renamed on 2026-11-18; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a player-placed-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre4 is the current test build with the mode-group work |
+| Omni Miner | 6.6-balanced.15-pre5 | B | warpledge's fork of EZMiner 6.6, renamed on 2026-11-18; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a player-placed-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre5 is the current test build with the mode-group work |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
 | EZStorage | 1.8.3 | B | builds against GTNHLib 0.11.52, NEI 2.8.158; 1.8.3 fixes NEI bookmark pull with large stacks |
 | Programmable Hatches | 0.2.1p9-beta | B | p9 (2026-11-20) fixes a Crafting Dumper stall on item-and-essentia patterns; p8 fixes a startup crash with GT-Never-Reset; p7 notes: only 2.9.0 supported; builds against GT 5.09.54.264, GTNHLib 0.11.54, NEI 2.8.171 |
@@ -195,13 +195,29 @@ binding while Shift is held, which stopped the chain, hid the HUD and let the wh
 the hotbar instead of switching modes. With V held, Shift+scroll now steps the four groups,
 Alt changes the radius and Ctrl the block count.
 
-**2026-11-26, later: test build `6.6-balanced.15-pre4`, client only.** The jar is
-`mods/omniminer-6.6-balanced.15-pre4.jar`; pre3 sits beside it as `.disabled`. Mining and
-Block Swap now end with the in-world summary Farming had: each line shows the block's icon,
-the count and its name, rising over the vein or swap area. Farming lines get their crop icon
-too. Block Swap counts the old block returned to you and starts the effect from the live
-preview, so it works without a chain operation. The HUD toast stays for Mining and Block
-Swap.
+**2026-11-26, later: test build `6.6-balanced.15-pre5`, client only.** The jar is
+`mods/omniminer-6.6-balanced.15-pre5.jar`; pre4 (a local-model attempt at the summaries,
+replaced) sits beside it as `.disabled`. Changes, not yet tested in game:
+
+- **Loot summaries are counted on the server.** Every mode ends with item icons and counts
+  rising over the area: Mining and Farming `[icon] +N Name` (up to three lines), planting
+  `+N` seeds, and Block Swap `[icon] N placed ⇄ [icon] N taken`. pre4 counted on the client
+  by watching blocks change, which missed IC2 and CropsNH crops (harvested through their tile
+  entity) and dropped a summary when the next harvest started. The HUD toast shows for Mining
+  and Block Swap. New client switch: Floating Summary.
+- **The item stream reaches you on long veins.** Its sprites were particles, and the game
+  keeps 4000 per layer and drops the oldest, so the break wave pushed them out mid-flight.
+  They're drawn on their own now.
+- **Keys move to the mode key (V)**, read physically so Controlling's modifier bindings can't
+  hide it: tap for the next mode, V+scroll for the mode, Shift+V+scroll for Basic/Fuzzy,
+  Ctrl+V+scroll for the block count, Alt+V+scroll for the radius (1 to 16 in every mode with
+  an area). Chain key + scroll does nothing. Tool tiers now cap only Mining's block count;
+  the tier table lost its radius column.
+- **Removed:** the Virtual Prospecting mode (mining an ore still adds its vein to
+  VisualProspecting's map) and Smart Tool Switch. Tool Break Handoff stays and now picks the
+  replacement tool itself. Crop Harvest and Planting share one Farming switch.
+- **Settings:** Controls come first on the client tab; the server's Modes list follows the
+  mode order with plain names, and the effect and range tooltips name the V combos.
 
 **2026-11-20: eleven updates, on the client and eclipse's debug server.** MIAOKATZE
 Core 0.2.29 (faster NEI structure previews, inline tooltip pin and tier controls),
