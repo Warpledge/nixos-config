@@ -24,7 +24,7 @@ Do not add these: the pack carries its own copy.
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
 | Twist Space Technology | 0.8.0 | B | 0.8.1 and 0.8.2 both crash world start on the Bottled Chaos null; 0.8.0 is installed, see below |
 | 123Technology | 2.2.1.3 | B | its README says 2.1.9+ supports GTNH 2.9.0; 2.2.1's release notes say it's adapted to 2.9.0 stable |
-| Omni Hand | 6.6-balanced.15-pre13 | B | warpledge's fork of EZMiner 6.6, renamed Omni Miner on 2026-11-18 and Omni Hand on 2026-11-26; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a building-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre10 (tagged in the fork) has the mode-group work, Logistics and the Block Swap sub-modes; pre11 adds the hold-Alt mode menu and Swap on right-click, pre12 the menu-style HUD and settings, and 15-pre13 is the current test build with Building (placement shapes, undo, Reach Upgrades) |
+| Omni Hand | 6.6-balanced.15-pre14 | B | warpledge's fork of EZMiner 6.6, renamed Omni Miner on 2026-11-18 and Omni Hand on 2026-11-26; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a building-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre10 (tagged in the fork) has the mode-group work, Logistics and the Block Swap sub-modes; pre11 adds the hold-Alt mode menu and Swap on right-click, pre12 the menu-style HUD and settings, and 15-pre13 Building (placement shapes, undo, Reach Upgrades), and 15-pre14 is the current test build (click-to-place, sliders, HUD cards, bigger limits, Pulse Wave preview, crumble and item pull) |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
 | EZStorage | 1.8.3 | B | builds against GTNHLib 0.11.52, NEI 2.8.158; 1.8.3 fixes NEI bookmark pull with large stacks |
 | Programmable Hatches | 0.2.1p9-beta | B | p9 (2026-11-20) fixes a Crafting Dumper stall on item-and-essentia patterns; p8 fixes a startup crash with GT-Never-Reset; p7 notes: only 2.9.0 supported; builds against GT 5.09.54.264, GTNHLib 0.11.54, NEI 2.8.171 |
@@ -381,6 +381,43 @@ the plan, not committed in the fork until it's tested. Not yet tested in game:
 - Not in this build: slab merging and the offhand replace filter (1.7.10 has no offhand);
   modifiers, backpack and AE2 sources and breaking in shapes are phase 3. Effortless
   Building Gadgets stays installed until Building is tested.
+
+pre13 worked in game (undo, upgrades and every check passed) and is committed in the fork as
+`420db91`.
+
+**2026-11-26, later: test build `6.6-balanced.15-pre14`, client only, a usability batch.** The
+jar is `mods/omnihand-6.6-balanced.15-pre14.jar`; pre13 sits beside it as `.disabled`. Not
+committed in the fork until it's tested. Not yet tested in game:
+
+- **Click to place:** Building goes click, click (and a third click for the height); Swap
+  Paint, Line and Shape go click to start, click to swap. Left-click or another item in hand
+  cancels.
+- **Wheel:** a mode or sub-mode takes focus after resting on it 0.3 s, so crossing the wheel
+  to the panel changes nothing; letting go of Alt applies only a rested-on one. Chain key +
+  scroll is gone (the wheel is the hotbar again); the chain key itself stays for Mining.
+- **Limits:** Building flat at 32768 blocks and 256 per side (server settings Build Max Blocks
+  and Build Max Per Side); Reach Upgrades set only reach: 8, 24, 48 and 96. Previews past
+  4096 cells outline the outer edges only, with ghosts on the nearest 1024. Swap up to 2048
+  blocks. Fresh configs double vein mining's block counts (menu 1024, server 2048, tiers 32 to
+  1024; radius stays 16), axe radius 16 and 8192 blocks, Farming radius up to 32 and 128
+  plants. Food cost 0.
+- **Sliders:** the menu's ranges and spacing are notched sliders (Shift drags freely); the
+  settings screen's tier, Swap, farming and axe numbers too (Shift-click types a value).
+- **HUD cards** under the HUD panel replace feature chat messages (red for refusals; the idle
+  countdown updates one card); summaries for mining, farming, planting, Swap, Logistics and
+  Build. Commands still answer in chat.
+- **Removed:** Show Completion Message, Hide IGI HUD, and the cached chain sub-modes (a saved
+  Cached or Cached Fuzzy loads as Basic or Fuzzy).
+- **HUD position screen** shows the real panel with sample lines; drag it anywhere.
+- **Effects** (picked on the Omni Hand Effect Picks page,
+  https://claude.ai/artifact/TEg5qSSuSQ694vn1nZp2Zr): render style 5 Pulse Wave, the new
+  default (existing configs move to it once): the vein's outer edges in the mode colour, a
+  ring rippling from the aimed block, corner brackets and the block count. Broken blocks
+  crumble (shrink and sink over 150 ms, at most 512 a frame). Item pull (client setting, on):
+  icons streak from each broken block to you, with a running "+N" above the hotbar.
+- **Drops** now reach the player once a tick while the chain runs, instead of waiting for the
+  chain key to be let go; XP still comes at the chain's end.
+- Packet IDs shifted (the cached-chain packet went), so client and server need the same jar.
 
 **2026-11-20: eleven updates, on the client and eclipse's debug server.** MIAOKATZE
 Core 0.2.29 (faster NEI structure previews, inline tooltip pin and tier controls),
