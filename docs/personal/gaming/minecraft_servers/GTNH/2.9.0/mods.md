@@ -24,7 +24,7 @@ Do not add these: the pack carries its own copy.
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
 | Twist Space Technology | 0.8.0 | B | 0.8.1 and 0.8.2 both crash world start on the Bottled Chaos null; 0.8.0 is installed, see below |
 | 123Technology | 2.2.1.3 | B | its README says 2.1.9+ supports GTNH 2.9.0; 2.2.1's release notes say it's adapted to 2.9.0 stable |
-| Omni Hand | 6.6-balanced.15-pre10 | B | warpledge's fork of EZMiner 6.6, renamed Omni Miner on 2026-11-18 and Omni Hand on 2026-11-26; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a building-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre10 (tagged in the fork) has the mode-group work, Logistics and the Block Swap sub-modes; 15-pre11 is the current test build with the hold-Alt mode menu and Swap on right-click |
+| Omni Hand | 6.6-balanced.15-pre13 | B | warpledge's fork of EZMiner 6.6, renamed Omni Miner on 2026-11-18 and Omni Hand on 2026-11-26; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a building-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre10 (tagged in the fork) has the mode-group work, Logistics and the Block Swap sub-modes; pre11 adds the hold-Alt mode menu and Swap on right-click, pre12 the menu-style HUD and settings, and 15-pre13 is the current test build with Building (placement shapes, undo, Reach Upgrades) |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
 | EZStorage | 1.8.3 | B | builds against GTNHLib 0.11.52, NEI 2.8.158; 1.8.3 fixes NEI bookmark pull with large stacks |
 | Programmable Hatches | 0.2.1p9-beta | B | p9 (2026-11-20) fixes a Crafting Dumper stall on item-and-essentia patterns; p8 fixes a startup crash with GT-Never-Reset; p7 notes: only 2.9.0 supported; builds against GT 5.09.54.264, GTNHLib 0.11.54, NEI 2.8.171 |
@@ -346,6 +346,41 @@ game:
 - Building (aqua) and Guide (violet) are in the mode list but hidden until their phases land.
 - Chain key + scroll still changes modes and settings as before.
 - Fix: non-block items in hand no longer count as placeable for Block Swap.
+
+pre11's menu worked in game. **pre12** (jar `omnihand-6.6-balanced.15-pre12.jar`, committed in
+the fork as `c14c564`) swaps the menu's item icons for the line-drawn ones from the design
+mockup, rebuilds the HUD as a panel in the menu's look (mode and sub-mode, the menu's
+settings, live figures and the limit, no key tags or brand animation; new client setting HUD
+Shows: while in use or always), restyles the settings and tool block list screens to match,
+and removes the inventory settings button (the menu's Settings opens the same screen). Not
+yet tested in game.
+
+**2026-11-26, later: test build `6.6-balanced.15-pre13`, client only, with Building.** The jar
+is `mods/omnihand-6.6-balanced.15-pre13.jar`; pre12 sits beside it as `.disabled`. Phase 2 of
+the plan, not committed in the fork until it's tested. Not yet tested in game:
+
+- **Building** (aqua) is a mode: hold a block, right-click and drag the base, let go; shapes
+  with a height then follow the cursor up or down until the next right-click. Left-click
+  cancels. Fourteen shapes: Single, Line, Wall, Floor, Cube, Diagonal Line, Diagonal Wall,
+  Slope, Circle, Cylinder, Sphere, Pyramid, Cone and Terrain, each with its options in the
+  menu (filling, thickness, start point, raised edge, terrain type and edges), plus Hotbar
+  palette (on/off) and Replace (air only, air and blocks, blocks only).
+- **Preview:** ghosts of the held block, aqua outlines, dotted red cells it will skip, solid
+  red past what the inventory holds, and size, count and shortfall floating above. The HUD
+  shows the step, the count against the blocks carried, and a placing bar.
+- **Placing:** the server rebuilds the shape from the points, places 64 blocks a tick (server
+  setting Build Blocks Per Tick), through each block's own item placement and Forge's place
+  event, so claims can block it. Replaced blocks come back to the inventory. A pop per block
+  with rising pitch as it lands.
+- **Undo and redo:** Ctrl+Z and Ctrl+Y (rebindable) or the menu's buttons, 50 steps per player
+  (server setting Build Undo Steps), for Building and Swap. Survival undo gives blocks back.
+- **Reach Upgrades I to III:** assembler recipes with LV, MV and HV sensors, emitters,
+  circuits and plates (each needs the one before); right-click to learn. Caps per tier: 32,
+  128, 512 and 2048 blocks (server setting Build Max Blocks), 8, 16, 32 and 64 per side,
+  reach 5, 16, 32 and 48. Creative gets the top tier.
+- Not in this build: slab merging and the offhand replace filter (1.7.10 has no offhand);
+  modifiers, backpack and AE2 sources and breaking in shapes are phase 3. Effortless
+  Building Gadgets stays installed until Building is tested.
 
 **2026-11-20: eleven updates, on the client and eclipse's debug server.** MIAOKATZE
 Core 0.2.29 (faster NEI structure previews, inline tooltip pin and tier controls),
