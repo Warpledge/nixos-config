@@ -24,7 +24,7 @@ Do not add these: the pack carries its own copy.
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
 | Twist Space Technology | 0.8.0 | B | 0.8.1 and 0.8.2 both crash world start on the Bottled Chaos null; 0.8.0 is installed, see below |
 | 123Technology | 2.2.1.3 | B | its README says 2.1.9+ supports GTNH 2.9.0; 2.2.1's release notes say it's adapted to 2.9.0 stable |
-| Omni Miner | 6.6-balanced.15-pre7 | B | warpledge's fork of EZMiner 6.6, renamed on 2026-11-18; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a player-placed-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre7 is the current test build with the mode-group work and Logistics |
+| Omni Hand | 6.6-balanced.15-pre8 | B | warpledge's fork of EZMiner 6.6, renamed Omni Miner on 2026-11-18 and Omni Hand on 2026-11-26; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a player-placed-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre8 is the current test build with the mode-group work and Logistics |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
 | EZStorage | 1.8.3 | B | builds against GTNHLib 0.11.52, NEI 2.8.158; 1.8.3 fixes NEI bookmark pull with large stacks |
 | Programmable Hatches | 0.2.1p9-beta | B | p9 (2026-11-20) fixes a Crafting Dumper stall on item-and-essentia patterns; p8 fixes a startup crash with GT-Never-Reset; p7 notes: only 2.9.0 supported; builds against GT 5.09.54.264, GTNHLib 0.11.54, NEI 2.8.171 |
@@ -261,6 +261,30 @@ their GUIs:
   machine's share, and a HUD count. On release each machine flashes green with `+N`/`−N` or
   red with why, then the summary (`[icon] 640 → 10 machines`, or the outputs taken) and the
   HUD toast.
+
+**2026-11-26, later: test build `6.6-balanced.15-pre8`, renamed Omni Hand, client only.** The
+jar is `mods/omnihand-6.6-balanced.15-pre8.jar` (the build still names it `omniminer-…`);
+pre7 sits beside it as `.disabled`. pre7 worked on coke ovens, small boilers and furnaces
+(fuel into the bottom slot). The mod is now called **Omni Hand**, since it farms, builds and
+moves items too; the mod id `omniminer`, config file, keybinds and Block Swap's placed-block
+records are unchanged. Not yet tested in game:
+
+- **Furnace:** surplus fuel no longer spills into the smelting slot. Fuel goes only to the
+  fuel slot and smeltables only to the input; logs (both) follow the face, top smelts.
+- **GT small boilers:** water cells and buckets go into the water slot as well as fuel.
+- **GT buses:** input buses (steam and compressed too) take Insert, output buses give
+  Extract, through their own rules, so every bus-fed multiblock works, large boilers
+  included. ME and debug buses can't be picked, and a bus can only be picked in the
+  direction it works.
+- **EnderIO:** Stirling Generator, Alloy Smelter and SAG Mill, through their own rules
+  (input slots in, output slots out, faces disabled in their IO config respected; checked
+  in EnderIO 2.10.51). Buffers and other EnderIO storage can't be picked.
+- **Amounts:** in Logistics, chain key + Ctrl + scroll sets the most per machine (8 to 256
+  or all of it), chain key + Alt + scroll switches add and top up (fill each machine to the
+  amount, counting what's inside). The share labels and the HUD show it; it's saved.
+- **Sounds:** a positional pop per machine as the result arrives, one after another, rising
+  for Insert and falling for Extract, a thud for a machine that took nothing. New client
+  setting: Logistics Sounds.
 
 **2026-11-20: eleven updates, on the client and eclipse's debug server.** MIAOKATZE
 Core 0.2.29 (faster NEI structure previews, inline tooltip pin and tier controls),
