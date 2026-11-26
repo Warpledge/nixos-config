@@ -30,7 +30,7 @@ Built as 15-pre15, tested in game and committed in the fork with pre14 as `63527
 
 ## Phase 4 steps left (Guides)
 
-All six are built into test build 15-pre16 (2026-11-26, installed, recorded in `mods.md`), waiting for the in-game test before the fork commit; delete this note once it passes. Decisions taken: the whole team edits any guide, presets are saved per team on the server, placement mode snaps to the aimed open cell on the current layer, 64 guides per team. Left out: renaming guides (no text box in the menu).
+All six are built into test build 15-pre16, and 15-pre17 moves Guide's controls into buttons beside Undo and Redo (2026-11-26, installed, recorded in `mods.md`), waiting for the in-game test before the fork commit; delete this note once it passes. Decisions taken: the whole team edits any guide, presets are saved per team on the server, placement mode snaps to the aimed open cell on the current layer, 64 guides per team. Left out: renaming guides (no text box in the menu).
 
 1. Add the sub-modes New, Move, Guides and Presets:
    - New: pick a shape, then set its points like a build.
