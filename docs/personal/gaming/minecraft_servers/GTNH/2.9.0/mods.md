@@ -24,7 +24,7 @@ Do not add these: the pack carries its own copy.
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
 | Twist Space Technology | 0.8.0 | B | 0.8.1 and 0.8.2 both crash world start on the Bottled Chaos null; 0.8.0 is installed, see below |
 | 123Technology | 2.2.1.3 | B | its README says 2.1.9+ supports GTNH 2.9.0; 2.2.1's release notes say it's adapted to 2.9.0 stable |
-| Omni Hand | 6.6-balanced.15-pre17 | B | warpledge's fork of EZMiner 6.6, renamed Omni Miner on 2026-11-18 and Omni Hand on 2026-11-26; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a building-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre10 (tagged in the fork) has the mode-group work, Logistics and the Block Swap sub-modes; pre11 adds the hold-Alt mode menu and Swap on right-click, pre12 the menu-style HUD and settings, and 15-pre13 Building (placement shapes, undo, Reach Upgrades), 15-pre14 click-to-place, sliders, HUD cards, bigger limits, Pulse Wave preview, crumble and item pull, 15-pre15 Mirror, Array and Radial modifiers, blocks from backpacks and AE2, breaking in shapes and slab merging (committed with pre14 as `6352784`), 15-pre16 Guides, and 15-pre17 is the current test build (Guide's controls as buttons beside Undo and Redo) |
+| Omni Hand | 6.6-balanced.15-pre17 | B | warpledge's fork of EZMiner 6.6, renamed Omni Miner on 2026-11-18 and Omni Hand on 2026-11-26; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a building-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre10 (tagged in the fork) has the mode-group work, Logistics and the Block Swap sub-modes; pre11 adds the hold-Alt mode menu and Swap on right-click, pre12 the menu-style HUD and settings, and 15-pre13 Building (placement shapes, undo, Reach Upgrades), 15-pre14 click-to-place, sliders, HUD cards, bigger limits, Pulse Wave preview, crumble and item pull, 15-pre15 Mirror, Array and Radial modifiers, blocks from backpacks and AE2, breaking in shapes and slab merging (committed with pre14 as `6352784`), 15-pre16 Guides and 15-pre17 Guide's controls as buttons beside Undo and Redo (both tested and committed as `a464936`) |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
 | EZStorage | 1.8.3 | B | builds against GTNHLib 0.11.52, NEI 2.8.158; 1.8.3 fixes NEI bookmark pull with large stacks |
 | Programmable Hatches | 0.2.1p9-beta | B | p9 (2026-11-20) fixes a Crafting Dumper stall on item-and-essentia patterns; p8 fixes a startup crash with GT-Never-Reset; p7 notes: only 2.9.0 supported; builds against GT 5.09.54.264, GTNHLib 0.11.54, NEI 2.8.171 |
@@ -507,6 +507,9 @@ select=both, step=chips, extras=[placeBtns,turn,lock,anchor]`.
   the selected guide dim while none is selected.
 - The Move panel keeps only the selected guide's name and colour; the Guides panel keeps
   select and show/hide per guide, the colour, Delete and the look settings.
+
+pre16 and pre17 worked in game; they're committed together in the fork as `a464936`. That
+finishes Building's phases 3 and 4.
 
 **2026-11-20: eleven updates, on the client and eclipse's debug server.** MIAOKATZE
 Core 0.2.29 (faster NEI structure previews, inline tooltip pin and tier controls),
