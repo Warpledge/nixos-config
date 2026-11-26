@@ -140,8 +140,11 @@ differently from a local one.
 
 `server/ranks.txt` needs the full `serverutilities.claims.max_chunks` key form. `[player]`
 has `homes.warmup: 5s`, `homes.cooldown: 5s` and `homes.cross_dim: true` (`[admin]` has
-cross-dimension homes too); claims 100, chunkloaders 50 and homes 1 match the built-in
-player defaults. Every rank has a 5 s cooldown on `homes`, `warps`, `tpa`, `spawn`, `back`
+cross-dimension homes too); homes 1 matches the built-in player default. Since 2026-11-25
+every rank has 1000 claims and 1000 chunkloaded chunks (`claims.max_chunks` and
+`chunkloader.max_chunks`; `[player]` was 100/50, `[vip]` 500/100), set on eclipse's copy
+in `~/Documents/Minecraft_Servers/GT_New_Horizons_2.9.0_Server_Modified/` with the old
+file beside it as `ranks.txt.bak-2026-11-25`; the client copy already had 1000. Every rank has a 5 s cooldown on `homes`, `warps`, `tpa`, `spawn`, `back`
 and `rtp`; warmups other than `/home`'s keep the built-in values. These edits are on the
 laptop's server copy; the old files are in `~/Documents/Minecraft_Servers/serverutilities-before-ranks-2026-11-05.tar.gz`.
 
