@@ -26,6 +26,8 @@ The menu and Building parts are built. Later decisions override three of those p
 
 ## Phase 3 steps left
 
+All five are built into test build 15-pre15 (2026-11-26, installed, recorded in `mods.md`), waiting for the in-game test before the fork commit. Decisions taken while building: backpacks carried and worn, then AE2 last; the preview asks the server for the reachable total; breaking skips what the tool can't harvest; the modifiers' plane and centre go through the first point or a "Set here" block; visual picks on https://claude.ai/artifact/Nj4p8Y5ivMz6my8tPeTYrG.
+
 1. Add the Mirror, Array and Radial mirror modifiers:
    - Mirror copies the shape across X, Y or Z planes, and stairs flip.
    - Array repeats it at an offset, up to 100 times.

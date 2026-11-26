@@ -24,7 +24,7 @@ Do not add these: the pack carries its own copy.
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
 | Twist Space Technology | 0.8.0 | B | 0.8.1 and 0.8.2 both crash world start on the Bottled Chaos null; 0.8.0 is installed, see below |
 | 123Technology | 2.2.1.3 | B | its README says 2.1.9+ supports GTNH 2.9.0; 2.2.1's release notes say it's adapted to 2.9.0 stable |
-| Omni Hand | 6.6-balanced.15-pre14 | B | warpledge's fork of EZMiner 6.6, renamed Omni Miner on 2026-11-18 and Omni Hand on 2026-11-26; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a building-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre10 (tagged in the fork) has the mode-group work, Logistics and the Block Swap sub-modes; pre11 adds the hold-Alt mode menu and Swap on right-click, pre12 the menu-style HUD and settings, and 15-pre13 Building (placement shapes, undo, Reach Upgrades), and 15-pre14 is the current test build (click-to-place, sliders, HUD cards, bigger limits, Pulse Wave preview, crumble and item pull) |
+| Omni Hand | 6.6-balanced.15-pre15 | B | warpledge's fork of EZMiner 6.6, renamed Omni Miner on 2026-11-18 and Omni Hand on 2026-11-26; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a building-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre10 (tagged in the fork) has the mode-group work, Logistics and the Block Swap sub-modes; pre11 adds the hold-Alt mode menu and Swap on right-click, pre12 the menu-style HUD and settings, and 15-pre13 Building (placement shapes, undo, Reach Upgrades), 15-pre14 click-to-place, sliders, HUD cards, bigger limits, Pulse Wave preview, crumble and item pull, and 15-pre15 is the current test build (Mirror, Array and Radial modifiers, blocks from backpacks and AE2, breaking in shapes, slab merging) |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
 | EZStorage | 1.8.3 | B | builds against GTNHLib 0.11.52, NEI 2.8.158; 1.8.3 fixes NEI bookmark pull with large stacks |
 | Programmable Hatches | 0.2.1p9-beta | B | p9 (2026-11-20) fixes a Crafting Dumper stall on item-and-essentia patterns; p8 fixes a startup crash with GT-Never-Reset; p7 notes: only 2.9.0 supported; builds against GT 5.09.54.264, GTNHLib 0.11.54, NEI 2.8.171 |
@@ -421,6 +421,39 @@ committed in the fork until it's tested. Not yet tested in game:
 - **Drops** now reach the player once a tick while the chain runs, instead of waiting for the
   chain key to be let go; XP still comes at the chain's end.
 - Packet IDs shifted (the cached-chain packet went), so client and server need the same jar.
+
+**2026-11-26, later: test build `6.6-balanced.15-pre15`, client only, phase 3 of Building.**
+Built on the untested pre14 code. The jar is `mods/omnihand-6.6-balanced.15-pre15.jar`;
+pre14 sits beside it as `.disabled`. Not committed in the fork, not yet tested in game. Visual
+picks are on the "Omni Hand Modifier Picks" page, https://claude.ai/artifact/Nj4p8Y5ivMz6my8tPeTYrG.
+
+- **Modifiers:** Mirror, Array and Radial buttons in the menu's action column while Building
+  has focus; each one's rows sit under the shape's settings (the panel scrolls with the
+  wheel when it's taller than the screen). Mirror copies across any of X, Y and Z; the plane
+  sits on the point's edge (copies meet) or through its middle (they share a row). Radial
+  makes 3 to 16 turned copies around Y, X or Z, with no holes at odd angles. Array repeats
+  the result at an X/Y/Z offset (-64 to 64) up to 100 times. All three combine, in that
+  order. Planes and the radial centre go through the shape's first point, or the block under
+  the crosshair after "Set here". Stairs, slabs and logs flip and turn with their copy.
+  Copies stay within twice the per-side cap of that point. The preview draws the plane as a
+  faint gridded sheet, the radial centre as a three-axis cross with slice lines, and the
+  label counts copies.
+- **Block sources:** Building and Swap take from the inventory, then backpacks carried or
+  worn (Eydamos, Adventure, Forestry), then an AE2 wireless terminal in the inventory or a
+  Baubles slot (in range, powered, 1 AE per block). The preview asks the server for that
+  total every 2 s (new packets), so backpack and AE2 blocks count toward "needed".
+- **Break in shapes:** a tool in hand in Building mode sets the shape's points with
+  left-clicks (right-click cancels) and breaks the cells with the tool: durability per
+  block, drops at the player each tick with the crumble and item pull, undo puts blocks
+  back (survival undo costs the block itself, as for placing). Skipped: blocks the tool
+  can't harvest, every tile entity, ores, fluids. Preview: red outline and tint, skipped
+  cells dotted grey. While a tool is in hand in Building mode, left-click never mines
+  normally.
+- **Merge slabs:** a slab placed on the same single slab makes the double slab, in any
+  replace mode.
+- **Machines:** placing and Swap already refused tile entities (GT cables and pipes aside);
+  breaking refuses all of them.
+- Two packets added at the end, so client and server still need the same jar.
 
 **2026-11-20: eleven updates, on the client and eclipse's debug server.** MIAOKATZE
 Core 0.2.29 (faster NEI structure previews, inline tooltip pin and tier controls),
