@@ -927,13 +927,24 @@ Check it again after its next release; it has no 2.9 build.
 
 These are in the 2.9 instance but have no explicit 2.9 release, so a launch is the proof.
 
-- **Xaero's Minimap 21.10.44 and World Map 1.14.1.33** (2026-11-07, client only): the
-  last 1.7.10 Forge builds, from Modrinth, and the CurseForge files Navigator 1.1.10
-  compiles against (`dependencies.gradle`). They replace JourneyMap, which is disabled.
-  Angelica#1851, a crash on opening NEI, was closed 2026-06-11.
-- **Angelica#2092** (open, checked 2026-11-07): Xaero's World Map crashes the game with
-  an `OpenGLException` when Witching Gadgets' Thaumic Stone Extruder is on screen and a
-  resource pack retextures lava. The Extruder's model uses the active lava texture. Both
+- **Wayfarer's Map 0.0.25** (2026-11-18, client only; optional on the server): replaces
+  Xaero's Minimap 21.10.44 and World Map 1.14.1.33, whose jars are in
+  `backups/removed-mods/2026-11-25/`. The README says built for GTNH on 1.7.10 Forge; it has
+  no 2.9.0 version pin, so the client launch is the test. The 3D view is the world map's
+  **Modes → 3D map** (`M`, then the modes button; `Q`/`E` rotate, quality 8 to 64 px per
+  block). **Settings → 3D map → Record blocks** must be on; chunks explored before it was on
+  show as flat-colour pillars until revisited. With the same jar on the server and OP,
+  `/wf chunkload 3d <radius>` records a radius; otherwise walk the area. It is surface only;
+  caves and biomes stay on the 2D map (`K`). The server install is optional and unlocks the
+  shared team map with ServerUtilities, live teammate positions and `/wf chunkload`; the
+  friend needs the client jar. The server's update check skips it (side C), so copy the
+  client jar to the server on a bump. Navigator 1.1.10 is left in place but is now unused;
+  it has no hard dependency on Xaero's.
+- **Angelica#2092** (open, checked 2026-11-07): the Xaero's World Map crash with an
+  `OpenGLException` when Witching Gadgets' Thaumic Stone Extruder is on screen and a
+  resource pack retextures lava. Xaero's is removed now, replaced by Wayfarer's Map, so this
+  no longer applies; the notes below are for re-enabling it. The Extruder's model uses the
+  active lava texture. Both
   Modernity packs ship `assets/minecraft/textures/blocks/lava_still.png` and
   `lava_flow.png`, each with a `.png.mcmeta`. Rather than editing the Modernity zips,
   which an update replaces, the folder pack `resourcepacks/VanillaLava/` (2026-11-07)
@@ -941,25 +952,26 @@ These are in the 2.9 instance but have no explicit 2.9 release, so a launch is t
   `~/.local/share/PrismLauncher/libraries/com/mojang/minecraft/1.7.10/minecraft-1.7.10-client.jar`.
   It sits right after both Modernity packs in `options.txt`'s `resourcePacks`, where
   later entries override earlier ones, so it shows above them in game. Keep it above
-  any new pack that retextures lava. Untested against the crash itself; if it still
-  happens, remove `XaerosWorldMap_*.jar` until the issue is fixed.
+  any new pack that retextures lava. Untested against the crash itself; Xaero's is removed
+  now, so this only matters if you re-enable it.
 
 - **Angelica 2.2.45** (2026-11-08, client only): replaces the pack's 2.2.43 for the shader
   fix for flat item icons on drawers and barrels, and 2.2.44's fix for black patches over
-  the world. Angelica#2092 (the Xaero crash) is still open. Mods that patch Angelica can break
-  on a bump: check ChromaPatch and the shaders, Distant Horizons and
-  Xaero's maps at launch.
+  the world. Angelica#2092 (the Xaero crash) is still open; it only affects Xaero's, which is
+  removed. Mods that patch Angelica can break on a bump: check ChromaPatch and the shaders,
+  Distant Horizons and Wayfarer's Map at launch.
 
 - **Angelica 2.2.46** (2026-11-13, client only): restores FluidLogged and LiquidLogged
   fluid rendering, fixes LOTR compatibility and a world client leak, adds a weather API
-  for mods, and tags profiler captures with its version. Angelica#2092 is still open, so
-  the Xaero workaround above still applies. Check ChromaPatch and the shaders, Distant
-  Horizons and Xaero's maps at launch.
+  for mods, and tags profiler captures with its version. Angelica#2092 is still open; the
+  Xaero workaround above only matters if Xaero's is re-enabled. Check ChromaPatch and the
+  shaders, Distant Horizons and Wayfarer's Map at launch.
 
 - **Angelica 2.2.47** (2026-11-23, client only): translucency sorting improvements, early
   TESR draws, layer and terrain split, glow depth and depth peeling, and flowing water
-  through LiquidLogged blocks. Angelica#2092 is still open. Check ChromaPatch and the
-  shaders, Distant Horizons and Xaero's maps at launch.
+  through LiquidLogged blocks. Angelica#2092 is still open; it only affects Xaero's, which
+  is removed. Check ChromaPatch and the shaders, Distant Horizons and Wayfarer's Map at
+  launch.
 
 - **Realistic World Gen 2 2.1.2** (2026-11-14, client and legion): keeps one landmark per
   river junction, improves `runPreview`, and renames `rwg_data.dat` so it stops clashing

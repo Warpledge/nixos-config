@@ -63,6 +63,12 @@ at login. Two jars differ on purpose:
 `InGameInfoXML-2.9.8.jar` stays on the server from the pack's own server zip, though the
 client dropped it for InfoHUD; its network check lets a client without it in.
 
+Wayfarer's Map 0.0.25 is client-side; the server does not need it for the map, waypoints or
+3D view. It is installed on the server for the shared team map with ServerUtilities, live
+teammate positions and `/wf chunkload` (OP). Clients without it keep their own map; the
+friend needs the client jar for the team map. The server's update check skips it (side C),
+so copy the client jar to the server on a bump. The server's `JourneyMapServer` stays.
+
 2.9.0 supplies its own lwjgl3ify, GTNHLib, FalsePatternLib and Extreme Sound Muffler
 Legacy, so do not copy the 2.8.4 versions of those to the server.
 
