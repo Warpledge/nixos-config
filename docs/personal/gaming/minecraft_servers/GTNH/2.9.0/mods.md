@@ -24,7 +24,7 @@ Do not add these: the pack carries its own copy.
 | GTNHRates | 1.12.0-2.9 | B | release tag, 2026-11-01 |
 | Twist Space Technology | 0.8.0 | B | 0.8.1 and 0.8.2 both crash world start on the Bottled Chaos null; 0.8.0 is installed, see below |
 | 123Technology | 2.2.1.3 | B | its README says 2.1.9+ supports GTNH 2.9.0; 2.2.1's release notes say it's adapted to 2.9.0 stable |
-| Omni Miner | 6.6-balanced.15-pre5 | B | warpledge's fork of EZMiner 6.6, renamed on 2026-11-18; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a player-placed-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre5 is the current test build with the mode-group work |
+| Omni Miner | 6.6-balanced.15-pre6 | B | warpledge's fork of EZMiner 6.6, renamed on 2026-11-18; local fork at `~/Projects/ezminer-balanced`; ten Tinkers tiers, per-tool block lists, one-tree felling, empty-hand ground clearing, feature switches and a player-placed-only Block Swap, see below. 6.4 fixed a toolbox crash; 6.5 and 6.6 add a config validation tooltip and fix its message system, and 6.6's `dependencies.gradle` sets `gtnhVersion = "2.9.0"`. 15-pre6 is the current test build with the mode-group work |
 | EZNuclear | 1.1.1 | B | README table: 2.9+ uses 1.0.8 to 1.1.1 |
 | EZStorage | 1.8.3 | B | builds against GTNHLib 0.11.52, NEI 2.8.158; 1.8.3 fixes NEI bookmark pull with large stacks |
 | Programmable Hatches | 0.2.1p9-beta | B | p9 (2026-11-20) fixes a Crafting Dumper stall on item-and-essentia patterns; p8 fixes a startup crash with GT-Never-Reset; p7 notes: only 2.9.0 supported; builds against GT 5.09.54.264, GTNHLib 0.11.54, NEI 2.8.171 |
@@ -218,6 +218,21 @@ replaced) sits beside it as `.disabled`. Changes, not yet tested in game:
   replacement tool itself. Crop Harvest and Planting share one Farming switch.
 - **Settings:** Controls come first on the client tab; the server's Modes list follows the
   mode order with plain names, and the effect and range tooltips name the V combos.
+
+**2026-11-26, later: test build `6.6-balanced.15-pre6`, client only.** The jar is
+`mods/omniminer-6.6-balanced.15-pre6.jar`; pre5 sits beside it as `.disabled`. From testing
+pre5 (the chain key here is V, the separate mode key was Page Down):
+
+- **Controls live on the chain key.** While chaining, scroll changes the mode, Ctrl+scroll
+  the block count and Alt+scroll the radius. The mode key and its tap are gone: the tap
+  stepped the mode on release and got in the way. Basic/Fuzzy is the client setting Mining
+  Match, default Fuzzy. The Lock Hotbar setting went too, since the wheel always belongs to
+  the mode controls while chaining.
+- **The floating summary shows what reached the inventory**, counted from the drop event
+  (crushed ore, seeds and so on), falling back to the block or crop when no drop came through
+  it (IC2 and CropsNH crops spawn theirs directly). It rises over the block the chain started
+  from instead of the middle of the vein, which could be off screen.
+- **The item stream is removed**; the floating summary and the toast already show the loot.
 
 **2026-11-20: eleven updates, on the client and eclipse's debug server.** MIAOKATZE
 Core 0.2.29 (faster NEI structure previews, inline tooltip pin and tier controls),
