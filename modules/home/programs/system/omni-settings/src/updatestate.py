@@ -311,3 +311,27 @@ def run(cfg, force=False, cached_only=False):
     with open(_cache_path(), "w") as f:
         json.dump(result, f)
     return result
+
+
+def counted(cfg, rows):
+    """The rows that wait on this machine, for the Overview's dot and its counts:
+    a tag-pinned input only while the app that builds it is on here (its `input`
+    manifest entry names the toggle), and a disabled package only when the doc's
+    switch belongs to this machine or this user (a package dropped from a shared
+    module has none, so nothing here can turn it back on). The page still lists
+    every row, so the ones another machine owns stay readable."""
+    raw = manifest(cfg.flake, cfg.machine)
+    on = {e["name"] for e in wanted(cfg, raw).get("input", [])}
+    off = {e["name"] for e in raw.get("input", [])} - on
+    toggles = {r["name"]: r["toggle"] for r in disabled_rows(cfg.flake)}
+    out = []
+    for r in rows:
+        if r["kind"] == "input" and r["name"] in off:
+            continue
+        t = toggles.get(r["name"])
+        if t and t["owner"] != (cfg.user if t["domain"] == "user" else cfg.machine):
+            continue
+        if r["kind"] == "disabled" and not t:
+            continue  # dropped from a shared module: no switch here can turn it back on
+        out.append(r)
+    return out
